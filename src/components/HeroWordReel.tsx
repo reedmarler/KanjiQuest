@@ -11,6 +11,7 @@ import {
   heroPostSwapMs,
   heroPreSwapMs,
   heroSlotStyleVars,
+  type HeroResizeTiming,
 } from '../lib/heroTimings'
 import type { HeroHighlightTone } from '../lib/heroHighlightTone'
 import {
@@ -42,6 +43,7 @@ interface HeroWordReelProps {
   quickSwap?: boolean
   /** Size to rendered text, not char-count × em — for full-sentence reels */
   naturalWidth?: boolean
+  resizeTiming?: HeroResizeTiming
   /** Skip slow unhighlight when the same slot swaps again next */
   skipUnhighlight?: boolean
   /** Slot is still highlighted from the previous consecutive swap */
@@ -87,6 +89,7 @@ export function HeroWordReel({
   delayedFuriganaMs,
   quickSwap = false,
   naturalWidth = false,
+  resizeTiming,
   skipUnhighlight = false,
   alreadyHighlighted = false,
   holdBeforeCycleMs = 0,
@@ -95,7 +98,6 @@ export function HeroWordReel({
   onSettled,
 }: HeroWordReelProps) {
   const animIdRef = useRef(0)
-  const growAnimRef = useRef(0)
   const shrinkAnimRef = useRef(0)
   const settledKeyRef = useRef('')
   const cycleToneRef = useRef(highlightTone)
@@ -114,9 +116,18 @@ export function HeroWordReel({
   const isSettled = !needsChange || settledKey === stepKey
   const inHold = phase === 'hold'
   const inCycle = needsChange && settledKey !== stepKey && !inHold
-  const allowResize = !skipPreSwapSpacing && heroSlotNeedsResize(prevSlotChars, targetSlotChars)
-  const growing = allowResize && targetSlotChars > prevSlotChars
-  const shrinking = allowResize && targetSlotChars < prevSlotChars
+  const charResize = heroSlotNeedsResize(prevSlotChars, targetSlotChars)
+  const allowResize = !skipPreSwapSpacing && (
+    resizeTiming
+      ? resizeTiming.needsPreGrow || resizeTiming.needsPostShrink
+      : charResize
+  )
+  const growing = !skipPreSwapSpacing && (
+    resizeTiming ? resizeTiming.needsPreGrow : charResize && targetSlotChars > prevSlotChars
+  )
+  const shrinking = !skipPreSwapSpacing && (
+    resizeTiming ? resizeTiming.needsPostShrink : charResize && targetSlotChars < prevSlotChars
+  )
   const swapBlockChars = heroSwapBlockChars(prevSlotChars, targetSlotChars)
   const inHighlight = phase === 'highlight'
   const inExpand = phase === 'expand'
@@ -234,7 +245,7 @@ export function HeroWordReel({
       window.setTimeout(() => {
         if (animId !== animIdRef.current) return
         setPhase('swap')
-        if (allowResize && shrinking) {
+        if (allowResize && (growing || shrinking)) {
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               if (animId !== animIdRef.current) return
@@ -291,6 +302,9 @@ export function HeroWordReel({
     prevSlotChars,
     targetSlotChars,
     quickSwap,
+    naturalWidth,
+    resizeTiming?.needsPreGrow,
+    resizeTiming?.needsPostShrink,
     skipUnhighlight,
     alreadyHighlighted,
     holdBeforeCycleMs,
@@ -310,23 +324,7 @@ export function HeroWordReel({
     return () => cancelAnimationFrame(frame)
   }, [inSwap, stepKey])
 
-  /** Grow slot width during highlight — not at swap snap */
-  useLayoutEffect(() => {
-    if (!needsChange || isSettled || !allowResize || !growing) return
-    if (phase !== 'highlight' && phase !== 'hold') return
-
-    const animId = ++growAnimRef.current
-    const frame = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (animId !== growAnimRef.current) return
-        setWidthChars(targetSlotChars)
-      })
-    })
-
-    return () => cancelAnimationFrame(frame)
-  }, [phase, needsChange, isSettled, allowResize, growing, targetSlotChars, stepKey])
-
-  /** Shrink width after swap lands */
+  /** Width changes happen with the swap, never during the pre-swap highlight. */
   useLayoutEffect(() => {
     if (!needsChange || isSettled || !allowResize || !shrinking) return
     if (phase !== 'shrink' && phase !== 'postSwap') return
@@ -378,10 +376,10 @@ export function HeroWordReel({
       ? text
       : inSwap && swapRollStarted
         ? text
-        : allowResize && inCycle
-          ? widerKanjiText(prevText, text)
-          : showPrevious
-            ? prevText
+        : showPrevious
+          ? prevText
+          : allowResize && inCycle
+            ? widerKanjiText(prevText, text)
             : text
   const spacerReading =
     !needsChange || isSettled
@@ -401,26 +399,18 @@ export function HeroWordReel({
           ? prevSlotChars
           : widthChars
 
-  const resizeGrowing =
-    allowResize && growing && (inHold || inHighlight || inExpand)
+  const resizeGrowing = allowResize && growing && inSwap
   const resizeShrinking =
     allowResize && shrinking && (inShrink || phase === 'postSwap')
-  const resizeDuringSwap = allowResize && shrinking && inSwap
+  const resizeDuringSwap = allowResize && (growing || shrinking) && inSwap
 
-  const slotStyle = naturalWidth
-    ? ({
-        ...heroSlotStyleVars(),
-        ...(quickSwap
-          ? { '--hero-swap-duration': `${HERO_WORD_DRILL_SWAP_MS}ms` }
-          : {}),
-      } as CSSProperties)
-    : ({
-        width: slotWidthEm(displayWidthChars, englishWidth),
-        ...heroSlotStyleVars(),
-        ...(quickSwap
-          ? { '--hero-swap-duration': `${HERO_WORD_DRILL_SWAP_MS}ms` }
-          : {}),
-      } as CSSProperties)
+  const slotStyle = {
+    width: slotWidthEm(displayWidthChars, englishWidth),
+    ...heroSlotStyleVars(),
+    ...(quickSwap
+      ? { '--hero-swap-duration': `${HERO_WORD_DRILL_SWAP_MS}ms` }
+      : {}),
+  } as CSSProperties
 
   const resizeDuringSwapLegacy = allowResize && (growing || shrinking) && inSwap
 

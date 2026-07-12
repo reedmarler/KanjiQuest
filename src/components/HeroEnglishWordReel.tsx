@@ -26,6 +26,7 @@ export function HeroEnglishWordReel({
   prevSlotChars,
   targetSlotChars,
   alsoSwap = false,
+  resizeTiming,
   highlightTone = 'rayquaza',
   skipUnhighlight = false,
   alreadyHighlighted = false,
@@ -45,6 +46,7 @@ export function HeroEnglishWordReel({
         targetSlotChars={targetSlotChars}
         stepKey={stepKey}
         skipPreSwapSpacing={skipPreSwapSpacing}
+        resizeTiming={resizeTiming}
         skipUnhighlight={skipUnhighlight}
         alreadyHighlighted={alreadyHighlighted}
         holdBeforeCycleMs={holdBeforeCycleMs}

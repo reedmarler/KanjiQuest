@@ -1,7 +1,7 @@
 /** Single source of truth — JS timeouts and CSS variables must match */
 export const HERO_HIGHLIGHT_MS = 1600
-export const HERO_WIDTH_EXPAND_MS = 3600
-export const HERO_WIDTH_SHRINK_MS = 3600
+export const HERO_WIDTH_EXPAND_MS = 7200
+export const HERO_WIDTH_SHRINK_MS = 7200
 export const HERO_SWAP_MS = 4200
 /** Brief unhighlight — keep under 1s of non-accent text per full cycle */
 export const HERO_UNHIGHLIGHT_MS = 750

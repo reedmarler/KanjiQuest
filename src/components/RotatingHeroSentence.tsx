@@ -159,8 +159,8 @@ export function RotatingHeroSentence({
     return changingSlots[0]!
   }, [useFullSentenceReel, changingSlots])
 
-  /** Skip slow unhighlight — next highlight starts almost immediately after the roll */
-  const skipCycleUnhighlight = !isLevelTransition
+  /** Keep a visible rhythm: highlight, swap, unhighlight, then the next highlight. */
+  const skipCycleUnhighlight = false
 
   /** Only level transitions skip per-slot spacing — every slot still reels */
   const fullLineSkipSpacing = isLevelTransition

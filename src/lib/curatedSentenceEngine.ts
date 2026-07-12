@@ -3,7 +3,7 @@ import {
   CURATED_HERO_SENTENCES,
   type CuratedHeroSentence,
 } from '../data/curatedHeroSentences'
-import type { HeroSentenceFrame } from '../data/heroSentences'
+import { charLength, type HeroSentenceFrame } from '../data/heroSentences'
 import { sanitizeHeroEnglishGloss } from './heroEnglishNormalize'
 import {
   getChangedSegmentKeys,
@@ -58,6 +58,21 @@ function diffSlotForIds(aId: number, bId: number): string | null {
   return diff
 }
 
+function slotLengthDelta(aId: number, bId: number): number {
+  const a = CURATED_BY_ID.get(aId)
+  const b = CURATED_BY_ID.get(bId)
+  const slot = diffSlotForIds(aId, bId)
+  if (!a || !b || !slot) return Number.MAX_SAFE_INTEGER
+  return Math.abs(charLength(a.slots[slot] ?? '') - charLength(b.slots[slot] ?? ''))
+}
+
+function closestLengthNeighbors(currentId: number, ids: readonly number[]): number[] {
+  if (ids.length <= 1) return [...ids]
+  const scored = ids.map((id) => ({ id, delta: slotLengthDelta(currentId, id) }))
+  const bestDelta = Math.min(...scored.map((s) => s.delta))
+  return scored.filter((s) => s.delta === bestDelta).map((s) => s.id)
+}
+
 /** Pick a 1-slot neighbor; prefer ids not used in the current 5-step cycle */
 function pickNeighbor(
   currentId: number,
@@ -71,18 +86,20 @@ function pickNeighbor(
   const unused = current.neighbors.filter((id) => !cycleUsed.has(id))
   const pool = unused.length > 0 ? unused : [...current.neighbors]
 
-  if (avoidSlot && pool.length > 1) {
-    const altSlot = pool.filter((id) => diffSlotForIds(currentId, id) !== avoidSlot)
+  const closest = closestLengthNeighbors(currentId, pool)
+
+  if (avoidSlot && closest.length > 1) {
+    const altSlot = closest.filter((id) => diffSlotForIds(currentId, id) !== avoidSlot)
     if (altSlot.length > 0) {
       const picked = pickFrom(altSlot, seed)
       if (picked !== null) return picked
     }
   }
 
-  const fresh = pickFrom(pool, seed)
+  const fresh = pickFrom(closest, seed)
   if (fresh !== null) return fresh
 
-  const any = pickFrom(current.neighbors, seed + 1)
+  const any = pickFrom(closestLengthNeighbors(currentId, current.neighbors), seed + 1)
   if (any !== null) return any
 
   for (const s of CURATED_HERO_SENTENCES) {
