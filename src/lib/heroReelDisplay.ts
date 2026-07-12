@@ -29,7 +29,7 @@ export function heroReelShowsPreviousText(options: {
   return false
 }
 
-/** Track position: outgoing cell visible until the roll begins */
+/** Track position: outgoing cell stays visible through the roll so it can exit. */
 export function heroReelTrackShowsOutgoing(options: {
   needsChange: boolean
   isSettled: boolean
@@ -53,14 +53,13 @@ export function heroReelTrackShowsOutgoing(options: {
     inShrink,
     inUnhighlight,
     pendingCycle,
-    swapRollStarted = true,
   } = options
 
   if (!needsChange || isSettled) return false
 
   if (pendingCycle || inHold || inHighlight) return true
   if (inCycle && !inSwap) return true
-  if (inSwap && !swapRollStarted) return true
+  if (inSwap) return true
   if (inShrink || inUnhighlight) return false
 
   return false

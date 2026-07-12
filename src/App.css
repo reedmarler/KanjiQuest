@@ -532,7 +532,11 @@ body {
 }
 
 .hero-reel-track.is-rolling .hero-reel-cell-out {
-  animation: hero-slot-fade-out var(--hero-fade-out-duration, 3.4s) var(--hero-ease, cubic-bezier(0.33, 1, 0.68, 1)) forwards;
+  animation: hero-slot-fade-out var(--hero-swap-duration, 4.4s) var(--hero-ease, cubic-bezier(0.22, 1, 0.36, 1)) forwards;
+}
+
+.hero-reel-track.is-rolling .hero-reel-cell-out .hero-text {
+  animation: hero-slot-fade-out var(--hero-swap-duration, 4.4s) var(--hero-ease, cubic-bezier(0.22, 1, 0.36, 1)) forwards;
 }
 
 @keyframes hero-slot-fade-in {
