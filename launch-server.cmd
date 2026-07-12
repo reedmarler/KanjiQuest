@@ -5,7 +5,7 @@ cd /d "%~dp0"
 
 echo Starting Kanji Quest...
 echo.
-echo When Vite says "Local: http://127.0.0.1:5173/", open that address in your browser.
+echo When Vite says "Local: http://127.0.0.1:5174/", open that address in your browser.
 echo To stop the server later, come back to this window and press Ctrl+C.
 echo.
 

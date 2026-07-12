@@ -12,6 +12,9 @@ dist
 dist-ssr
 _restore_extract
 *.local
+backend/sentence_generator/*.sqlite3
+__pycache__/
+*.py[cod]
 
 # Editor directories and files
 .vscode/*

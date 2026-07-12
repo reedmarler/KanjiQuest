@@ -16,6 +16,7 @@ interface DashboardProps {
   onSelectDeck: (type: string) => void
   onOpenKanjiLab: () => void
   onOpenSentencePractice: () => void
+  onOpenSentenceGeneratorPreview: () => void
   onOpenVocabList: () => void
   onStartMistakeReview: () => void
   mistakeCount: number
@@ -32,6 +33,7 @@ export function Dashboard({
   onSelectDeck,
   onOpenKanjiLab,
   onOpenSentencePractice,
+  onOpenSentenceGeneratorPreview,
   onOpenVocabList,
   onStartMistakeReview,
   mistakeCount,
@@ -156,6 +158,10 @@ export function Dashboard({
         <button type="button" className="practice-card" onClick={onOpenSentencePractice}>
           <span className="practice-emoji">文</span>
           <span className="practice-label">Sentence Practice</span>
+        </button>
+        <button type="button" className="practice-card practice-card-generator" onClick={onOpenSentenceGeneratorPreview}>
+          <span className="practice-emoji">回</span>
+          <span className="practice-label">Generator Preview</span>
         </button>
         <button type="button" className="practice-card practice-card-kanji" onClick={onOpenKanjiLab}>
           <span className="practice-emoji">漢</span>

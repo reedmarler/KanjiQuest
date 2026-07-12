@@ -39,13 +39,21 @@ import { KanjiLearnView } from './components/KanjiLearnView'
 import { KanjiQuizView } from './components/KanjiQuizView'
 import { ReadingView } from './components/ReadingView'
 import { SentenceBuilderView } from './components/SentenceBuilderView'
+import { SentenceGeneratorPreview } from './components/SentenceGeneratorPreview'
 import { SentencePractice } from './components/SentencePractice'
 import { SessionComplete } from './components/SessionComplete'
 import { StudyView } from './components/StudyView'
 import { VocabList } from './components/VocabList'
 import './App.css'
 
-type View = 'dashboard' | 'kanji-lab' | 'sentence-practice' | 'vocab-list' | 'study' | 'complete'
+type View =
+  | 'dashboard'
+  | 'kanji-lab'
+  | 'sentence-practice'
+  | 'sentence-generator-preview'
+  | 'vocab-list'
+  | 'study'
+  | 'complete'
 
 type SessionItem =
   | { kind: 'card'; card: StudyCard; kanjiMode?: KanjiLabMode }
@@ -282,6 +290,14 @@ function App() {
     )
   }
 
+  if (view === 'sentence-generator-preview') {
+    return (
+      <div className="app">
+        <SentenceGeneratorPreview onBack={() => setView('dashboard')} />
+      </div>
+    )
+  }
+
   if (view === 'complete') {
     return (
       <div className="app">
@@ -407,6 +423,7 @@ function App() {
         onSelectDeck={(type) => startSession(getCardsByType(type as CardType))}
         onOpenKanjiLab={() => setView('kanji-lab')}
         onOpenSentencePractice={() => setView('sentence-practice')}
+        onOpenSentenceGeneratorPreview={() => setView('sentence-generator-preview')}
         onOpenVocabList={() => setView('vocab-list')}
         onStartMistakeReview={startMistakeReview}
         deckInfo={deckInfo}

@@ -1,0 +1,333 @@
+[
+  {
+    "id": "n5-topic-object-verb",
+    "label": "[subject] は [object] を [verb-masu]",
+    "jlpt": "N5",
+    "theme_tags": ["daily_life", "food", "study"],
+    "politeness": "polite",
+    "slots": {
+      "subject": {
+        "pos": "pronoun",
+        "semantic_tags": ["person"],
+        "english_role": "subject"
+      },
+      "object": {
+        "pos": "noun",
+        "semantic_tags": ["edible", "readable", "drinkable", "watchable"],
+        "case_particle": "を",
+        "english_role": "object"
+      },
+      "verb": {
+        "pos": "verb",
+        "transitivity": "transitive",
+        "conjugation": "masu",
+        "english_role": "verb"
+      }
+    },
+    "tokens": [
+      { "type": "slot", "slot": "subject" },
+      { "type": "literal", "text": "は" },
+      { "type": "slot", "slot": "object" },
+      { "type": "literal", "text": "を" },
+      { "type": "slot", "slot": "verb" }
+    ],
+    "english_template": "{subject} {verb} {object}.",
+    "grammar_points": [
+      { "pattern": "は", "jlpt": "N5", "meaning": "topic marker" },
+      { "pattern": "を", "jlpt": "N5", "meaning": "direct object marker" },
+      { "pattern": "ます", "jlpt": "N5", "meaning": "polite non-past verb ending" }
+    ],
+    "naturalness_rules": ["object_must_match_verb_object_tags"]
+  },
+  {
+    "id": "n5-place-action",
+    "label": "[subject] は [place] で [object] を [verb-masu]",
+    "jlpt": "N5",
+    "theme_tags": ["daily_life", "school", "home"],
+    "politeness": "polite",
+    "slots": {
+      "subject": {
+        "pos": "pronoun",
+        "semantic_tags": ["person"],
+        "english_role": "subject"
+      },
+      "place": {
+        "pos": "place_expression",
+        "semantic_tags": ["place"],
+        "case_particle": "で",
+        "english_role": "place"
+      },
+      "object": {
+        "pos": "noun",
+        "semantic_tags": ["edible", "readable", "watchable", "study_item"],
+        "case_particle": "を",
+        "english_role": "object"
+      },
+      "verb": {
+        "pos": "verb",
+        "transitivity": "transitive",
+        "conjugation": "masu",
+        "english_role": "verb"
+      }
+    },
+    "tokens": [
+      { "type": "slot", "slot": "subject" },
+      { "type": "literal", "text": "は" },
+      { "type": "slot", "slot": "place" },
+      { "type": "literal", "text": "で" },
+      { "type": "slot", "slot": "object" },
+      { "type": "literal", "text": "を" },
+      { "type": "slot", "slot": "verb" }
+    ],
+    "english_template": "{subject} {verb} {object} at {place}.",
+    "grammar_points": [
+      { "pattern": "で", "jlpt": "N5", "meaning": "place where an action happens" },
+      { "pattern": "を", "jlpt": "N5", "meaning": "direct object marker" }
+    ],
+    "naturalness_rules": ["place_must_allow_action", "object_must_match_verb_object_tags"]
+  },
+  {
+    "id": "n5-time-movement",
+    "label": "[subject] は [time] [place] に [verb-masu]",
+    "jlpt": "N5",
+    "theme_tags": ["daily_life", "movement"],
+    "politeness": "polite",
+    "slots": {
+      "subject": {
+        "pos": "pronoun",
+        "semantic_tags": ["person"],
+        "english_role": "subject"
+      },
+      "time": {
+        "pos": "time_expression",
+        "semantic_tags": ["time"],
+        "english_role": "time"
+      },
+      "place": {
+        "pos": "place_expression",
+        "semantic_tags": ["destination"],
+        "case_particle": "に",
+        "english_role": "place"
+      },
+      "verb": {
+        "pos": "verb",
+        "semantic_tags": ["movement"],
+        "transitivity": "intransitive",
+        "conjugation": "masu",
+        "english_role": "verb"
+      }
+    },
+    "tokens": [
+      { "type": "slot", "slot": "subject" },
+      { "type": "literal", "text": "は" },
+      { "type": "slot", "slot": "time" },
+      { "type": "slot", "slot": "place" },
+      { "type": "literal", "text": "に" },
+      { "type": "slot", "slot": "verb" }
+    ],
+    "english_template": "{subject} {verb} to {place} {time}.",
+    "grammar_points": [
+      { "pattern": "に", "jlpt": "N5", "meaning": "destination/time marker" },
+      { "pattern": "ます", "jlpt": "N5", "meaning": "polite non-past verb ending" }
+    ],
+    "naturalness_rules": ["verb_must_be_movement", "place_must_be_destination"]
+  },
+  {
+    "id": "n5-i-adj-noun",
+    "label": "[subject] は [i-adjective] [noun] が 好きです",
+    "jlpt": "N5",
+    "theme_tags": ["preference", "daily_life"],
+    "politeness": "polite",
+    "slots": {
+      "subject": {
+        "pos": "pronoun",
+        "semantic_tags": ["person"],
+        "english_role": "subject"
+      },
+      "adjective": {
+        "pos": "i_adjective",
+        "conjugation": "dictionary",
+        "english_role": "adjective"
+      },
+      "noun": {
+        "pos": "noun",
+        "semantic_tags": ["thing", "food", "media", "place"],
+        "english_role": "noun"
+      }
+    },
+    "tokens": [
+      { "type": "slot", "slot": "subject" },
+      { "type": "literal", "text": "は" },
+      { "type": "slot", "slot": "adjective" },
+      { "type": "slot", "slot": "noun" },
+      { "type": "literal", "text": "が好きです" }
+    ],
+    "english_template": "{subject} likes {adjective} {noun}.",
+    "grammar_points": [
+      { "pattern": "い-adjective + noun", "jlpt": "N5", "meaning": "i-adjective modifying a noun" },
+      { "pattern": "が好きです", "jlpt": "N5", "meaning": "likes / is fond of" }
+    ],
+    "naturalness_rules": ["adjective_must_sensibly_modify_noun"]
+  },
+  {
+    "id": "n4-before-after",
+    "label": "[subject] は [verb-dictionary] 前に [object] を [verb-masu]",
+    "jlpt": "N4",
+    "theme_tags": ["routine", "daily_life"],
+    "politeness": "polite",
+    "slots": {
+      "subject": {
+        "pos": "pronoun",
+        "semantic_tags": ["person"],
+        "english_role": "subject"
+      },
+      "before_action": {
+        "pos": "verb",
+        "conjugation": "dictionary",
+        "english_role": "before_action"
+      },
+      "object": {
+        "pos": "noun",
+        "semantic_tags": ["edible", "drinkable", "readable", "study_item"],
+        "case_particle": "を",
+        "english_role": "object"
+      },
+      "main_verb": {
+        "pos": "verb",
+        "transitivity": "transitive",
+        "conjugation": "masu",
+        "english_role": "main_verb"
+      }
+    },
+    "tokens": [
+      { "type": "slot", "slot": "subject" },
+      { "type": "literal", "text": "は" },
+      { "type": "slot", "slot": "before_action" },
+      { "type": "literal", "text": "前に" },
+      { "type": "slot", "slot": "object" },
+      { "type": "literal", "text": "を" },
+      { "type": "slot", "slot": "main_verb" }
+    ],
+    "english_template": "{subject} {main_verb} {object} before {before_action}.",
+    "grammar_points": [
+      { "pattern": "dictionary verb + 前に", "jlpt": "N4", "meaning": "before doing something" }
+    ],
+    "naturalness_rules": ["main_object_must_match_main_verb"]
+  },
+  {
+    "id": "n4-te-kudasai",
+    "label": "[object] を [verb-te] ください",
+    "jlpt": "N4",
+    "theme_tags": ["request", "daily_life"],
+    "politeness": "polite",
+    "slots": {
+      "object": {
+        "pos": "noun",
+        "semantic_tags": ["readable", "drinkable", "edible", "study_item"],
+        "case_particle": "を",
+        "english_role": "object"
+      },
+      "verb": {
+        "pos": "verb",
+        "transitivity": "transitive",
+        "conjugation": "te",
+        "english_role": "verb"
+      }
+    },
+    "tokens": [
+      { "type": "slot", "slot": "object" },
+      { "type": "literal", "text": "を" },
+      { "type": "slot", "slot": "verb" },
+      { "type": "literal", "text": "ください" }
+    ],
+    "english_template": "Please {verb} {object}.",
+    "grammar_points": [
+      { "pattern": "てください", "jlpt": "N4", "meaning": "please do" }
+    ],
+    "naturalness_rules": ["object_must_match_verb_object_tags"]
+  },
+  {
+    "id": "n4-past-experience",
+    "label": "[subject] は [object] を [verb-ta] ことがあります",
+    "jlpt": "N4",
+    "theme_tags": ["experience", "daily_life"],
+    "politeness": "polite",
+    "slots": {
+      "subject": {
+        "pos": "pronoun",
+        "semantic_tags": ["person"],
+        "english_role": "subject"
+      },
+      "object": {
+        "pos": "noun",
+        "semantic_tags": ["edible", "readable", "watchable", "place"],
+        "case_particle": "を",
+        "english_role": "object"
+      },
+      "verb": {
+        "pos": "verb",
+        "transitivity": "transitive",
+        "conjugation": "ta",
+        "english_role": "verb"
+      }
+    },
+    "tokens": [
+      { "type": "slot", "slot": "subject" },
+      { "type": "literal", "text": "は" },
+      { "type": "slot", "slot": "object" },
+      { "type": "literal", "text": "を" },
+      { "type": "slot", "slot": "verb" },
+      { "type": "literal", "text": "ことがあります" }
+    ],
+    "english_template": "{subject} has {verb} {object} before.",
+    "grammar_points": [
+      { "pattern": "たことがあります", "jlpt": "N4", "meaning": "has done before / has experience doing" }
+    ],
+    "naturalness_rules": ["object_must_match_verb_object_tags"]
+  },
+  {
+    "id": "n4-intention",
+    "label": "[subject] は [time] [object] を [verb-dictionary] つもりです",
+    "jlpt": "N4",
+    "theme_tags": ["plan", "daily_life"],
+    "politeness": "polite",
+    "slots": {
+      "subject": {
+        "pos": "pronoun",
+        "semantic_tags": ["person"],
+        "english_role": "subject"
+      },
+      "time": {
+        "pos": "time_expression",
+        "semantic_tags": ["future_time"],
+        "english_role": "time"
+      },
+      "object": {
+        "pos": "noun",
+        "semantic_tags": ["edible", "readable", "watchable", "study_item"],
+        "case_particle": "を",
+        "english_role": "object"
+      },
+      "verb": {
+        "pos": "verb",
+        "transitivity": "transitive",
+        "conjugation": "dictionary",
+        "english_role": "verb"
+      }
+    },
+    "tokens": [
+      { "type": "slot", "slot": "subject" },
+      { "type": "literal", "text": "は" },
+      { "type": "slot", "slot": "time" },
+      { "type": "slot", "slot": "object" },
+      { "type": "literal", "text": "を" },
+      { "type": "slot", "slot": "verb" },
+      { "type": "literal", "text": "つもりです" }
+    ],
+    "english_template": "{subject} intends to {verb} {object} {time}.",
+    "grammar_points": [
+      { "pattern": "dictionary verb + つもりです", "jlpt": "N4", "meaning": "intends to do" }
+    ],
+    "naturalness_rules": ["time_should_be_future", "object_must_match_verb_object_tags"]
+  }
+]

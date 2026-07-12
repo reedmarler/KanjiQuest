@@ -106,7 +106,12 @@ body {
 
 .hero-sentence-block {
   width: 100%;
-  min-height: 4rem;
+  --hero-japanese-row-height: 5.05rem;
+  --hero-rotater-height: calc(var(--hero-japanese-row-height) + var(--hero-english-row-height) + 0.55rem);
+  height: var(--hero-rotater-height);
+  min-height: var(--hero-rotater-height);
+  max-height: var(--hero-rotater-height);
+  flex: 0 0 var(--hero-rotater-height);
   margin: 0.85rem auto 0;
   display: flex;
   flex-direction: column;
@@ -132,9 +137,12 @@ body {
   line-height: 1.15;
   margin: 0 auto;
   padding: 0.2rem 0.5rem;
+  height: var(--hero-japanese-row-height);
+  min-height: var(--hero-japanese-row-height);
+  max-height: var(--hero-japanese-row-height);
   opacity: 0.8;
   overflow: visible;
-  flex-shrink: 0;
+  flex: 0 0 var(--hero-japanese-row-height);
   display: inline-flex;
   align-items: flex-end;
   justify-content: center;
@@ -1765,6 +1773,14 @@ body {
   border-color: var(--kyogre-light);
 }
 
+.practice-card-generator .practice-emoji {
+  color: var(--pikachu);
+}
+
+.practice-card-generator:hover {
+  border-color: var(--pikachu);
+}
+
 .practice-emoji {
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 1.75rem;
@@ -1798,6 +1814,178 @@ body {
 
 .practice-label {
   font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.sentence-generator-preview {
+  width: min(960px, 100%);
+  margin: 0 auto;
+  padding: 1rem 0 2rem;
+}
+
+.generator-preview-card {
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--rayquaza) 18%, transparent), transparent 32rem),
+    var(--surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 8px);
+  padding: clamp(1rem, 3vw, 1.75rem);
+  box-shadow: var(--shadow);
+}
+
+.generator-preview-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.generator-preview-kicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rayquaza) 14%, transparent);
+  color: var(--rayquaza-light);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.generator-preview-header h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 6vw, 3rem);
+}
+
+.generator-preview-header p {
+  max-width: 42rem;
+  margin: 0.65rem auto 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.generator-preview-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1rem 0;
+}
+
+.generator-sentence-card,
+.generator-detail-panel {
+  background: color-mix(in srgb, var(--surface-2) 84%, black);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.generator-sentence-card {
+  padding: clamp(1rem, 4vw, 2rem);
+  text-align: center;
+}
+
+.generator-frame-id {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+
+.generator-japanese {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: clamp(2rem, 7vw, 3.65rem);
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.generator-japanese ruby {
+  ruby-align: center;
+}
+
+.generator-japanese rt {
+  color: var(--rayquaza-light);
+  font-size: 0.34em;
+  font-weight: 500;
+}
+
+.generator-reading {
+  margin-top: 0.85rem;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text-muted);
+}
+
+.generator-english {
+  margin-top: 0.5rem;
+  color: var(--pikachu);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.generator-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.generator-detail-panel {
+  padding: 1rem;
+}
+
+.generator-detail-panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.generator-detail-panel ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.generator-slot-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.generator-slot-row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.6rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+}
+
+.generator-slot-name {
+  color: var(--rayquaza-light);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.generator-slot-main {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 800;
+}
+
+.generator-slot-main small {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.generator-slot-english {
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 

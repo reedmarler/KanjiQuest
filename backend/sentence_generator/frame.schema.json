@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kanjiquest.local/sentence-frame.schema.json",
+  "title": "Kanji Quest Japanese sentence frame",
+  "type": "object",
+  "required": [
+    "id",
+    "jlpt",
+    "theme_tags",
+    "politeness",
+    "slots",
+    "tokens",
+    "english_template",
+    "grammar_points"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^(n5|n4|n3|n2|n1)-[a-z0-9-]+$"
+    },
+    "label": {
+      "type": "string"
+    },
+    "jlpt": {
+      "enum": ["N5", "N4", "N3", "N2", "N1"]
+    },
+    "theme_tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "politeness": {
+      "enum": ["plain", "polite"]
+    },
+    "slots": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["pos"],
+        "additionalProperties": false,
+        "properties": {
+          "pos": {
+            "enum": [
+              "noun",
+              "pronoun",
+              "verb",
+              "i_adjective",
+              "na_adjective",
+              "adverb",
+              "time_expression",
+              "place_expression",
+              "particle"
+            ]
+          },
+          "semantic_tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
+          "required_tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
+          "blocked_tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
+          "transitivity": {
+            "enum": ["transitive", "intransitive", "either"]
+          },
+          "case_particle": {
+            "type": "string"
+          },
+          "conjugation": {
+            "enum": [
+              "dictionary",
+              "masu",
+              "masen",
+              "mashita",
+              "te",
+              "ta",
+              "nai",
+              "tai",
+              "i_present",
+              "i_past",
+              "i_negative",
+              "na_predicate",
+              "noun_predicate"
+            ]
+          },
+          "english_role": {
+            "type": "string"
+          },
+          "prefer_user_vocab": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
+    "tokens": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["type", "text"],
+            "additionalProperties": false,
+            "properties": {
+              "type": { "const": "literal" },
+              "text": { "type": "string" }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "slot"],
+            "additionalProperties": false,
+            "properties": {
+              "type": { "const": "slot" },
+              "slot": { "type": "string" }
+            }
+          }
+        ]
+      }
+    },
+    "english_template": {
+      "type": "string",
+      "description": "Python format string using slot names, e.g. '{subject} eats {object}.'"
+    },
+    "grammar_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pattern", "jlpt", "meaning"],
+        "additionalProperties": false,
+        "properties": {
+          "pattern": { "type": "string" },
+          "jlpt": { "enum": ["N5", "N4", "N3", "N2", "N1"] },
+          "meaning": { "type": "string" }
+        }
+      }
+    },
+    "naturalness_rules": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    }
+  }
+}
