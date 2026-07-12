@@ -63,7 +63,7 @@ export function Dashboard({
   return (
     <div className="dashboard">
       <header className="hero hero-compact">
-        <h1>Kanji Quest #3</h1>
+        <h1>Kanji Quest</h1>
         <RotatingHeroSentence
           wrongPool={wrongPool}
           progress={progress}
