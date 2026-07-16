@@ -18,6 +18,7 @@ interface DashboardProps {
   onOpenSentencePractice: () => void
   onOpenSentenceGeneratorPreview: () => void
   onOpenVocabList: () => void
+  onOpenContentStudio: () => void
   onStartMistakeReview: () => void
   mistakeCount: number
   deckInfo: { type: string; label: string; count: number; emoji: string }[]
@@ -35,6 +36,7 @@ export function Dashboard({
   onOpenSentencePractice,
   onOpenSentenceGeneratorPreview,
   onOpenVocabList,
+  onOpenContentStudio,
   onStartMistakeReview,
   mistakeCount,
   deckInfo,
@@ -155,6 +157,9 @@ export function Dashboard({
       </div>
 
       <section className="practice-grid">
+        <button type="button" className="practice-card practice-card-studio" onClick={onOpenContentStudio}>
+          <span className="practice-emoji">編</span><span className="practice-label">Content Studio</span><span className="practice-card-badge">INTERNAL</span>
+        </button>
         <button type="button" className="practice-card" onClick={onOpenSentencePractice}>
           <span className="practice-emoji">文</span>
           <span className="practice-label">Sentence Practice</span>

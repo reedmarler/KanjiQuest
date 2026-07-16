@@ -1,0 +1,6278 @@
+[
+  {
+    "name": "Vocab",
+    "address": "A1:C1036",
+    "rows": 1036,
+    "cols": 3,
+    "values": [
+      [
+        "Word",
+        "Current",
+        "I'd Use"
+      ],
+      [
+        "遊園地",
+        "Park",
+        "Park, Entertainment, Family, Outdoor, Attraction, Recreation"
+      ],
+      [
+        "辺",
+        "Concrete",
+        "Area, Region, Direction, Location, Common"
+      ],
+      [
+        "地域",
+        "Concrete",
+        "Region, Area, Geography, Administrative"
+      ],
+      [
+        "美術館",
+        "Building",
+        "Museum, Art, Culture, Tourism, Indoor, Public"
+      ],
+      [
+        "銀行",
+        "Building",
+        "Bank, Finance, Money, Public, Service"
+      ],
+      [
+        "建物",
+        "Building",
+        "Building, Structure, Architecture"
+      ],
+      [
+        "教室",
+        "Room",
+        "Classroom, Education, School, Indoor"
+      ],
+      [
+        "会社",
+        "Building, Office",
+        "Company, Office, Business, Workplace"
+      ],
+      [
+        "国",
+        "Country",
+        "Country, Geography, Government"
+      ],
+      [
+        "外国",
+        "Country",
+        "Country, Foreign, Travel, Geography"
+      ],
+      [
+        "庭",
+        "Concrete",
+        "Garden, Outdoor, Nature, Home"
+      ],
+      [
+        "高校",
+        "Building",
+        "School, HighSchool, Education"
+      ],
+      [
+        "家 (home)",
+        "Home",
+        "Home, Residence, Family"
+      ],
+      [
+        "病院",
+        "Building",
+        "Hospital, Medical, Health, Emergency"
+      ],
+      [
+        "ホテル",
+        "Hotel",
+        "Hotel, Travel, Accommodation"
+      ],
+      [
+        "家 (house)",
+        "Building",
+        "House, Residence, Home"
+      ],
+      [
+        "通り",
+        "Concrete",
+        "Street, Road, Transportation, City"
+      ],
+      [
+        "日本",
+        "Country",
+        "Country, Japan, Geography"
+      ],
+      [
+        "マンション",
+        "Building",
+        "Apartment, Residence, Housing, Urban"
+      ],
+      [
+        "図書館",
+        "Building",
+        "Library, Books, Study, Education, Public"
+      ],
+      [
+        "山",
+        "Mountain",
+        "Mountain, Nature, Outdoor"
+      ],
+      [
+        "映画館",
+        "Building",
+        "MovieTheater, Entertainment, Indoor"
+      ],
+      [
+        "博物館",
+        "Building",
+        "Museum, History, Culture, Tourism"
+      ],
+      [
+        "実家",
+        "Building",
+        "FamilyHome, Residence, Family"
+      ],
+      [
+        "外",
+        "Concrete",
+        "Outside, Outdoor"
+      ],
+      [
+        "公園",
+        "Park",
+        "Park, Nature, Recreation, Outdoor"
+      ],
+      [
+        "所",
+        "Concrete",
+        "Place, Location"
+      ],
+      [
+        "場",
+        "Concrete",
+        "Place, Location, Event"
+      ],
+      [
+        "郵便局",
+        "Office",
+        "PostOffice, Mail, Government, Service"
+      ],
+      [
+        "レストラン",
+        "Restaurant",
+        "Restaurant, Food, Dining, Service"
+      ],
+      [
+        "川",
+        "River",
+        "River, Nature, Water"
+      ],
+      [
+        "道",
+        "Road",
+        "Road, Transportation, Outdoor"
+      ],
+      [
+        "道路",
+        "Road",
+        "Road, Highway, Transportation"
+      ],
+      [
+        "部屋",
+        "Room",
+        "Room, Indoor, Residence"
+      ],
+      [
+        "学校",
+        "School",
+        "School, Education"
+      ],
+      [
+        "海",
+        "Concrete",
+        "Ocean, Sea, Nature, Water"
+      ],
+      [
+        "店",
+        "Building",
+        "Store, Shopping, Business"
+      ],
+      [
+        "神社",
+        "Building",
+        "Shrine, Religion, Culture, Tourism"
+      ],
+      [
+        "世の中",
+        "Concrete",
+        "Society, World, Abstract"
+      ],
+      [
+        "駅",
+        "Station",
+        "Station, Transportation, Travel"
+      ],
+      [
+        "劇場",
+        "Building",
+        "Theater, Performance, Entertainment"
+      ],
+      [
+        "東京",
+        "Concrete",
+        "City, Capital, Japan"
+      ],
+      [
+        "町",
+        "Town",
+        "Town, Municipality"
+      ],
+      [
+        "村",
+        "Village",
+        "Village, Rural"
+      ],
+      [
+        "世界",
+        "Concrete",
+        "World, Geography"
+      ],
+      [
+        "時間",
+        "Time & Numbers",
+        "Time, Duration, Common, Abstract"
+      ],
+      [
+        "新しい",
+        "Descriptors",
+        "New, Age, Positive, iAdjective"
+      ],
+      [
+        "高い",
+        "Descriptors",
+        "High, Expensive, Size, Value, iAdjective"
+      ],
+      [
+        "早い",
+        "Descriptors",
+        "Early, Fast, Time, Speed, iAdjective"
+      ],
+      [
+        "重い",
+        "Descriptors",
+        "Heavy, Weight, Physical, iAdjective"
+      ],
+      [
+        "軽い",
+        "Descriptors",
+        "LightWeight, Weight, Physical, iAdjective"
+      ],
+      [
+        "勉強する",
+        "Actions",
+        "Study, Education, Learning, SuruVerb, Transitive"
+      ],
+      [
+        "好き",
+        "Descriptors",
+        "Preference, Positive, Emotion, naAdjective"
+      ],
+      [
+        "嫌い",
+        "Descriptors",
+        "Preference, Negative, Emotion, naAdjective"
+      ],
+      [
+        "美味しい",
+        "Descriptors",
+        "Taste, Food, Positive, iAdjective"
+      ],
+      [
+        "元気",
+        "Descriptors",
+        "Health, Energy, Positive, naAdjective"
+      ],
+      [
+        "暇",
+        "Descriptors",
+        "FreeTime, Time, State, naAdjective"
+      ],
+      [
+        "一緒に",
+        "Descriptors",
+        "Together, Companion, Adverb"
+      ],
+      [
+        "駅",
+        "Places",
+        "Station, Transportation, Public, Travel"
+      ],
+      [
+        "電車",
+        "Objects",
+        "Vehicle, Transportation, PublicTransport"
+      ],
+      [
+        "食べる",
+        "Actions",
+        "Eat, Food, Consumption, Ichidan, Transitive"
+      ],
+      [
+        "飲む",
+        "Actions",
+        "Drink, Consumption, Godan, Transitive"
+      ],
+      [
+        "見る",
+        "Actions",
+        "See, Watch, Perception, Ichidan, Transitive"
+      ],
+      [
+        "聞く",
+        "Actions",
+        "Listen, Hear, Communication, Perception, Godan, Transitive"
+      ],
+      [
+        "話す",
+        "Actions",
+        "Speak, Communication, Conversation, Godan, Transitive"
+      ],
+      [
+        "分かる",
+        "Actions",
+        "Understand, Mental, Knowledge, Intransitive, Godan"
+      ],
+      [
+        "会う",
+        "Actions",
+        "Meet, Social, Person, Godan, Intransitive"
+      ],
+      [
+        "待つ",
+        "Actions",
+        "Wait, Time, Godan, Transitive"
+      ],
+      [
+        "彼女",
+        "People",
+        "Person, Female, Pronoun, Human"
+      ],
+      [
+        "彼",
+        "People",
+        "Person, Male, Pronoun, Human"
+      ],
+      [
+        "暑い",
+        "Descriptors",
+        "Weather, Hot, Temperature, iAdjective"
+      ],
+      [
+        "寒い",
+        "Descriptors",
+        "Weather, Cold, Temperature, iAdjective"
+      ],
+      [
+        "疲れた",
+        "Descriptors",
+        "Tired, Health, State"
+      ],
+      [
+        "今朝",
+        "Time & Numbers",
+        "Morning, Today, Time"
+      ],
+      [
+        "今晩",
+        "Time & Numbers",
+        "Evening, Tonight, Time"
+      ],
+      [
+        "今",
+        "Time & Numbers",
+        "Present, Time, Common"
+      ],
+      [
+        "どこ",
+        "Function Words",
+        "Question, Location, Interrogative"
+      ],
+      [
+        "何",
+        "Function Words",
+        "Question, Object, Interrogative"
+      ],
+      [
+        "どうして",
+        "Function Words",
+        "Question, Reason, Interrogative"
+      ],
+      [
+        "ちょっと",
+        "Descriptors",
+        "Degree, Quantity, Adverb"
+      ],
+      [
+        "もう",
+        "Descriptors",
+        "Time, Degree, Adverb"
+      ],
+      [
+        "関係",
+        "Objects",
+        "Relationship, Abstract, Social"
+      ],
+      [
+        "状況",
+        "Objects",
+        "Situation, State, Abstract"
+      ],
+      [
+        "理由",
+        "Objects",
+        "Reason, Abstract, Logic"
+      ],
+      [
+        "結果",
+        "Objects",
+        "Result, Outcome, Abstract"
+      ],
+      [
+        "方法",
+        "Objects",
+        "Method, Process, Abstract"
+      ],
+      [
+        "可能",
+        "Descriptors",
+        "Ability, Possibility, naAdjective"
+      ],
+      [
+        "必要",
+        "Descriptors",
+        "Necessity, Requirement, naAdjective"
+      ],
+      [
+        "心配",
+        "Descriptors",
+        "Worry, Emotion, State, SuruNoun"
+      ],
+      [
+        "尊敬",
+        "Actions",
+        "Respect, Social, Emotion, SuruVerb"
+      ],
+      [
+        "希望",
+        "Objects",
+        "Hope, Desire, Abstract"
+      ],
+      [
+        "予定",
+        "Objects",
+        "Schedule, Plan, Time"
+      ],
+      [
+        "約束",
+        "Objects",
+        "Promise, Agreement, Social"
+      ],
+      [
+        "気持ち",
+        "Objects",
+        "Feeling, Emotion, Abstract"
+      ],
+      [
+        "素敵",
+        "Descriptors",
+        "Beautiful, Attractive, Positive, naAdjective"
+      ],
+      [
+        "忙しい",
+        "Descriptors",
+        "Busy, Time, State, iAdjective"
+      ],
+      [
+        "大丈夫",
+        "Descriptors",
+        "Safe, Fine, Positive, naAdjective"
+      ],
+      [
+        "残念",
+        "Descriptors",
+        "Regret, Negative, Emotion, naAdjective"
+      ],
+      [
+        "寂しい",
+        "Descriptors",
+        "Lonely, Emotion, iAdjective"
+      ],
+      [
+        "連絡",
+        "Actions",
+        "Contact, Communication, SuruVerb"
+      ],
+      [
+        "付き合う",
+        "Actions",
+        "Date, Associate, Relationship, Social, Godan"
+      ],
+      [
+        "出かける",
+        "Actions",
+        "GoOut, Travel, Movement, Ichidan"
+      ],
+      [
+        "帰る",
+        "Actions",
+        "Return, Movement, Home, Godan"
+      ],
+      [
+        "送る",
+        "Actions",
+        "Send, Transfer, Communication, Godan, Transitive"
+      ],
+      [
+        "優しい",
+        "Descriptors",
+        "Kind, Personality, Positive, iAdjective"
+      ],
+      [
+        "怒る",
+        "Actions",
+        "BecomeAngry, Emotion, Godan, Intransitive"
+      ],
+      [
+        "恥ずかしい",
+        "Descriptors",
+        "Embarrassed, Emotion, iAdjective"
+      ],
+      [
+        "喧嘩",
+        "Actions",
+        "Fight, Conflict, Social, SuruVerb"
+      ],
+      [
+        "仲直り",
+        "Actions",
+        "Reconcile, Relationship, Social, SuruVerb"
+      ],
+      [
+        "気を付けて",
+        "Function Words",
+        "Expression, Warning, Common"
+      ],
+      [
+        "頼む",
+        "Actions",
+        "Request, Communication, Godan, Transitive"
+      ],
+      [
+        "思わず",
+        "Descriptors",
+        "Unintentionally, Adverb"
+      ],
+      [
+        "気付く",
+        "Actions",
+        "Notice, Awareness, Mental, Godan, Intransitive"
+      ],
+      [
+        "教える",
+        "Actions",
+        "Teach, Education, Communication, Ichidan, Transitive"
+      ],
+      [
+        "習う",
+        "Actions",
+        "Learn, Education, Godan, Transitive"
+      ],
+      [
+        "影響",
+        "Objects",
+        "Influence, Abstract, Cause"
+      ],
+      [
+        "改善",
+        "Actions",
+        "Improve, Change, SuruVerb"
+      ],
+      [
+        "経験",
+        "Objects",
+        "Experience, Memory, Abstract"
+      ],
+      [
+        "内容",
+        "Objects",
+        "Content, Information, Abstract"
+      ],
+      [
+        "場合",
+        "Objects",
+        "Case, Situation, Abstract"
+      ],
+      [
+        "実際",
+        "Descriptors",
+        "Actual, Reality, Adverb, naAdjective"
+      ],
+      [
+        "参加",
+        "Actions",
+        "Participate, Group, SuruVerb"
+      ],
+      [
+        "説明",
+        "Actions",
+        "Explain, Communication, Education, SuruVerb"
+      ],
+      [
+        "準備",
+        "Actions",
+        "Prepare, Planning, SuruVerb"
+      ],
+      [
+        "努力",
+        "Actions",
+        "Effort, Work, SuruVerb"
+      ],
+      [
+        "慎重",
+        "Descriptors",
+        "Careful, Personality, naAdjective"
+      ],
+      [
+        "環境",
+        "Objects",
+        "Environment, Nature, Surroundings"
+      ],
+      [
+        "確認",
+        "Actions",
+        "Confirm, Check, SuruVerb"
+      ],
+      [
+        "一体",
+        "Descriptors",
+        "Emphasis, Adverb"
+      ],
+      [
+        "対応",
+        "Actions",
+        "Respond, Handle, Communication, SuruVerb"
+      ],
+      [
+        "許可",
+        "Objects",
+        "Permission, Authority, Abstract"
+      ],
+      [
+        "協力",
+        "Actions",
+        "Cooperate, Teamwork, Social, SuruVerb"
+      ],
+      [
+        "不安",
+        "Descriptors",
+        "Anxiety, Emotion, Negative, naAdjective"
+      ],
+      [
+        "確信",
+        "Objects",
+        "Confidence, Belief, Abstract"
+      ],
+      [
+        "損失",
+        "Objects",
+        "Loss, Finance, Abstract"
+      ],
+      [
+        "妥協",
+        "Actions",
+        "Compromise, Negotiation, SuruVerb"
+      ],
+      [
+        "傾向",
+        "Objects",
+        "Trend, Pattern, Abstract"
+      ],
+      [
+        "矛盾",
+        "Objects",
+        "Contradiction, Logic, Abstract"
+      ],
+      [
+        "概念",
+        "Objects",
+        "Concept, Abstract, Philosophy"
+      ],
+      [
+        "本質",
+        "Objects",
+        "Essence, Abstract"
+      ],
+      [
+        "維持",
+        "Actions",
+        "Maintain, Management, SuruVerb"
+      ],
+      [
+        "拡大",
+        "Actions",
+        "Expand, Growth, SuruVerb"
+      ],
+      [
+        "削減",
+        "Actions",
+        "Reduce, Change, SuruVerb"
+      ],
+      [
+        "把握",
+        "Actions",
+        "Grasp, Understand, Knowledge, SuruVerb"
+      ],
+      [
+        "導入",
+        "Actions",
+        "Introduce, Implementation, Business, SuruVerb"
+      ],
+      [
+        "責任",
+        "Objects",
+        "Responsibility, Duty, Work, Abstract"
+      ],
+      [
+        "感情",
+        "Objects",
+        "Emotion, Feeling, Psychology, Abstract"
+      ],
+      [
+        "比較",
+        "Actions",
+        "Compare, Analysis, SuruVerb"
+      ],
+      [
+        "集中",
+        "Actions",
+        "Focus, Attention, Mental, SuruVerb"
+      ],
+      [
+        "失敗",
+        "Objects",
+        "Failure, Mistake, Negative, Abstract"
+      ],
+      [
+        "競争",
+        "Actions",
+        "Competition, Sports, Business, SuruVerb"
+      ],
+      [
+        "急速",
+        "Descriptors",
+        "Fast, Speed, Degree, naAdjective"
+      ],
+      [
+        "客観",
+        "Descriptors",
+        "Objective, Logic, naAdjective"
+      ],
+      [
+        "協議",
+        "Actions",
+        "Discuss, Meeting, Business, SuruVerb"
+      ],
+      [
+        "条件",
+        "Objects",
+        "Condition, Requirement, Abstract"
+      ],
+      [
+        "趣旨",
+        "Objects",
+        "Purpose, Intent, Abstract"
+      ],
+      [
+        "端的",
+        "Descriptors",
+        "Direct, Concise, naAdjective"
+      ],
+      [
+        "著しい",
+        "Descriptors",
+        "Remarkable, Significant, Degree, iAdjective"
+      ],
+      [
+        "未曾有",
+        "Descriptors",
+        "Unprecedented, Rare, naAdjective"
+      ],
+      [
+        "斟酌",
+        "Actions",
+        "Consideration, Judgment, SuruVerb"
+      ],
+      [
+        "憂慮",
+        "Actions",
+        "Concern, Worry, Government, SuruVerb"
+      ],
+      [
+        "葛藤",
+        "Objects",
+        "Conflict, Emotion, Psychology, Abstract"
+      ],
+      [
+        "凌駕",
+        "Actions",
+        "Surpass, Competition, Achievement, SuruVerb"
+      ],
+      [
+        "拒絶",
+        "Actions",
+        "Reject, Refuse, Social, SuruVerb"
+      ],
+      [
+        "極端",
+        "Descriptors",
+        "Extreme, Degree, naAdjective"
+      ],
+      [
+        "旅行",
+        "Actions",
+        "Travel, Vacation, SuruVerb"
+      ],
+      [
+        "空港",
+        "Places",
+        "Airport, Transportation, Travel"
+      ],
+      [
+        "ホテル",
+        "Places",
+        "Hotel, Accommodation, Travel"
+      ],
+      [
+        "地図",
+        "Objects",
+        "Map, Navigation, Travel"
+      ],
+      [
+        "写真",
+        "Objects",
+        "Photo, Media, Memory"
+      ],
+      [
+        "プレゼント",
+        "Objects",
+        "Gift, Celebration, Shopping"
+      ],
+      [
+        "誕生日",
+        "Time & Numbers",
+        "Birthday, Celebration, Event"
+      ],
+      [
+        "友達",
+        "People",
+        "Friend, Person, Relationship"
+      ],
+      [
+        "家族",
+        "People",
+        "Family, Person, Relationship"
+      ],
+      [
+        "結婚",
+        "Actions",
+        "Marriage, Relationship, SuruVerb"
+      ],
+      [
+        "楽しい",
+        "Descriptors",
+        "Fun, Positive, Emotion, iAdjective"
+      ],
+      [
+        "嬉しい",
+        "Descriptors",
+        "Happy, Positive, Emotion, iAdjective"
+      ],
+      [
+        "悲しい",
+        "Descriptors",
+        "Sad, Negative, Emotion, iAdjective"
+      ],
+      [
+        "怖い",
+        "Descriptors",
+        "Scary, Fear, Emotion, iAdjective"
+      ],
+      [
+        "泳ぐ",
+        "Actions",
+        "Swim, Movement, Sport, Godan"
+      ],
+      [
+        "好きです",
+        "Descriptors",
+        "Preference, Positive, Emotion"
+      ],
+      [
+        "デート",
+        "Actions",
+        "Date, Romance, Social, SuruVerb"
+      ],
+      [
+        "映画",
+        "Objects",
+        "Movie, Entertainment, Media"
+      ],
+      [
+        "レストラン",
+        "Places",
+        "Restaurant, Dining, Food"
+      ],
+      [
+        "買い物",
+        "Actions",
+        "Shopping, Commerce, SuruVerb"
+      ],
+      [
+        "散歩",
+        "Actions",
+        "Walk, Movement, Leisure, SuruVerb"
+      ],
+      [
+        "電話",
+        "Objects",
+        "Phone, Communication, Electronics"
+      ],
+      [
+        "メッセージ",
+        "Objects",
+        "Message, Communication, Information"
+      ],
+      [
+        "お願い",
+        "Objects",
+        "Request, Communication, Social"
+      ],
+      [
+        "ありがとう",
+        "Function Words",
+        "Gratitude, Expression, Common"
+      ],
+      [
+        "恋人",
+        "People",
+        "Partner, Romance, Person"
+      ],
+      [
+        "別れる",
+        "Actions",
+        "BreakUp, Separation, Relationship, Ichidan"
+      ],
+      [
+        "告白する",
+        "Actions",
+        "Confess, Romance, Communication, SuruVerb"
+      ],
+      [
+        "付き合って",
+        "Actions",
+        "Date, Relationship, Imperative"
+      ],
+      [
+        "両親",
+        "People",
+        "Parents, Family"
+      ],
+      [
+        "結婚式",
+        "Event",
+        "Wedding, Ceremony, Celebration"
+      ],
+      [
+        "記念日",
+        "Time & Numbers",
+        "Anniversary, Celebration, Event"
+      ],
+      [
+        "思い出",
+        "Objects",
+        "Memory, Past, Emotion"
+      ],
+      [
+        "寂しがり",
+        "People",
+        "Personality, Lonely, Trait"
+      ],
+      [
+        "嫉妬",
+        "Objects",
+        "Jealousy, Emotion, Abstract"
+      ],
+      [
+        "安心",
+        "Descriptors",
+        "Relief, Positive, Emotion, SuruNoun"
+      ],
+      [
+        "緊張",
+        "Descriptors",
+        "Nervous, Emotion, State, SuruNoun"
+      ],
+      [
+        "感動",
+        "Objects",
+        "Inspiration, Emotion, Abstract"
+      ],
+      [
+        "後悔",
+        "Actions",
+        "Regret, Emotion, SuruVerb"
+      ],
+      [
+        "迷う",
+        "Actions",
+        "Hesitate, Decision, Mental, Godan"
+      ],
+      [
+        "相談",
+        "Actions",
+        "Consult, Communication, SuruVerb"
+      ],
+      [
+        "切符",
+        "Objects",
+        "Ticket, Transportation, Travel"
+      ],
+      [
+        "観光",
+        "Actions",
+        "Sightseeing, Travel, SuruVerb"
+      ],
+      [
+        "予約",
+        "Actions",
+        "Reserve, Planning, Travel, SuruVerb"
+      ],
+      [
+        "荷物",
+        "Objects",
+        "Luggage, Travel, Belongings"
+      ],
+      [
+        "乗り換え",
+        "Actions",
+        "Transfer, Transportation, SuruVerb"
+      ],
+      [
+        "遅刻",
+        "Actions",
+        "BeLate, School, Work, SuruVerb"
+      ],
+      [
+        "迎えに行く",
+        "Actions",
+        "PickUp, Transportation, Movement"
+      ],
+      [
+        "久しぶり",
+        "Descriptors",
+        "LongTime, Time, Expression"
+      ],
+      [
+        "会いたい",
+        "Descriptors",
+        "Desire, Relationship, Emotion"
+      ],
+      [
+        "距離感",
+        "Objects",
+        "PersonalSpace, Relationship, Abstract"
+      ],
+      [
+        "価値観",
+        "Objects",
+        "Values, Belief, Personality, Abstract"
+      ],
+      [
+        "本音",
+        "Objects",
+        "TrueFeelings, Communication, Abstract"
+      ],
+      [
+        "建前",
+        "Objects",
+        "PublicFace, Society, Communication, Abstract"
+      ],
+      [
+        "信頼",
+        "Objects",
+        "Trust, Relationship, Abstract"
+      ],
+      [
+        "裏切る",
+        "Actions",
+        "Betray, Relationship, Godan, Transitive"
+      ],
+      [
+        "許す",
+        "Actions",
+        "Forgive, Relationship, Emotion, Godan"
+      ],
+      [
+        "我慢",
+        "Actions",
+        "Endure, SelfControl, SuruVerb"
+      ],
+      [
+        "落ち込む",
+        "Actions",
+        "FeelDown, Emotion, Godan"
+      ],
+      [
+        "励ます",
+        "Actions",
+        "Encourage, Support, Transitive, Godan"
+      ],
+      [
+        "共感",
+        "Actions",
+        "Empathize, Emotion, Communication, SuruVerb"
+      ],
+      [
+        "悩む",
+        "Actions",
+        "Worry, Mental, Emotion, Godan"
+      ],
+      [
+        "人生",
+        "Objects",
+        "Life, Philosophy, Abstract"
+      ],
+      [
+        "将来",
+        "Time & Numbers",
+        "Future, Time, Life"
+      ],
+      [
+        "引っ越し",
+        "Actions",
+        "MoveHouse, Housing, SuruVerb"
+      ],
+      [
+        "別居",
+        "Actions",
+        "LiveApart, Family, SuruVerb"
+      ],
+      [
+        "同棲",
+        "Actions",
+        "Cohabitation, Relationship, SuruVerb"
+      ],
+      [
+        "帰国",
+        "Actions",
+        "ReturnHome, Travel, SuruVerb"
+      ],
+      [
+        "渡航",
+        "Actions",
+        "OverseasTravel, Travel, SuruVerb"
+      ],
+      [
+        "時差ボケ",
+        "Objects",
+        "JetLag, Health, Travel"
+      ],
+      [
+        "相思相愛",
+        "Descriptors",
+        "MutualLove, Romance, Positive"
+      ],
+      [
+        "駆け引き",
+        "Objects",
+        "Strategy, Negotiation, Relationship"
+      ],
+      [
+        "依存",
+        "Actions",
+        "Dependence, Psychology, SuruVerb"
+      ],
+      [
+        "束縛",
+        "Actions",
+        "Control, Relationship, SuruVerb"
+      ],
+      [
+        "寛容",
+        "Descriptors",
+        "Tolerant, Personality, Positive, naAdjective"
+      ],
+      [
+        "共鳴",
+        "Actions",
+        "Resonance, Agreement, SuruVerb"
+      ],
+      [
+        "郷愁",
+        "Objects",
+        "Nostalgia, Emotion, Abstract"
+      ],
+      [
+        "郷里",
+        "Places",
+        "Hometown, Residence, Origin"
+      ],
+      [
+        "異文化",
+        "Objects",
+        "Culture, Society, International, Abstract"
+      ],
+      [
+        "適応",
+        "Actions",
+        "Adapt, Change, Environment, SuruVerb"
+      ],
+      [
+        "愛着",
+        "Objects",
+        "Attachment, Affection, Emotion, Relationship"
+      ],
+      [
+        "倦怠",
+        "Objects",
+        "Fatigue, Boredom, Health, Abstract"
+      ],
+      [
+        "邂逅",
+        "Actions",
+        "Encounter, Meeting, Rare, SuruVerb"
+      ],
+      [
+        "憧憬",
+        "Objects",
+        "Admiration, Aspiration, Emotion, Abstract"
+      ],
+      [
+        "諦念",
+        "Objects",
+        "Resignation, Acceptance, Emotion, Philosophy"
+      ],
+      [
+        "教室",
+        "Places",
+        "Classroom, Education, School, Indoor"
+      ],
+      [
+        "銀行",
+        "Places",
+        "Bank, Finance, Business, Public"
+      ],
+      [
+        "病院",
+        "Places",
+        "Hospital, Medical, Health, Public"
+      ],
+      [
+        "魚",
+        "Food & Drink",
+        "Fish, Seafood, Animal, Edible"
+      ],
+      [
+        "肉",
+        "Food & Drink",
+        "Meat, Protein, Edible"
+      ],
+      [
+        "米",
+        "Food & Drink",
+        "Rice, Grain, StapleFood, Edible"
+      ],
+      [
+        "卵",
+        "Food & Drink",
+        "Egg, Ingredient, Protein, Edible"
+      ],
+      [
+        "野菜",
+        "Food & Drink",
+        "Vegetable, Healthy, Ingredient, Edible"
+      ],
+      [
+        "果物",
+        "Food & Drink",
+        "Fruit, Healthy, Sweet, Edible"
+      ],
+      [
+        "花",
+        "People & Living Things",
+        "Flower, Plant, Nature"
+      ],
+      [
+        "鳥",
+        "People & Living Things",
+        "Bird, Animal, Living"
+      ],
+      [
+        "バス",
+        "Objects",
+        "Bus, Vehicle, Transportation, PublicTransport"
+      ],
+      [
+        "道",
+        "Places",
+        "Road, Transportation, Outdoor"
+      ],
+      [
+        "橋",
+        "Places",
+        "Bridge, Structure, Transportation"
+      ],
+      [
+        "川",
+        "Places",
+        "River, Nature, Water"
+      ],
+      [
+        "山",
+        "Places",
+        "Mountain, Nature, Outdoor"
+      ],
+      [
+        "春",
+        "Time & Numbers",
+        "Spring, Season, Time"
+      ],
+      [
+        "夏",
+        "Time & Numbers",
+        "Summer, Season, Time"
+      ],
+      [
+        "秋",
+        "Time & Numbers",
+        "Autumn, Season, Time"
+      ],
+      [
+        "冬",
+        "Time & Numbers",
+        "Winter, Season, Time"
+      ],
+      [
+        "朝",
+        "Time & Numbers",
+        "Morning, Time"
+      ],
+      [
+        "夜",
+        "Time & Numbers",
+        "Night, Time"
+      ],
+      [
+        "仕事",
+        "Actions",
+        "Work, Job, Business, SuruVerb"
+      ],
+      [
+        "天気",
+        "Objects",
+        "Weather, Nature"
+      ],
+      [
+        "服",
+        "Objects",
+        "Clothing, Wearable"
+      ],
+      [
+        "靴",
+        "Objects",
+        "Shoes, Clothing, Wearable"
+      ],
+      [
+        "帽子",
+        "Objects",
+        "Hat, Clothing, Wearable"
+      ],
+      [
+        "辞書",
+        "Objects",
+        "Dictionary, Book, Education, Reference"
+      ],
+      [
+        "歌",
+        "Objects",
+        "Song, Music, Entertainment"
+      ],
+      [
+        "財布",
+        "Objects",
+        "Wallet, Money, PersonalItem"
+      ],
+      [
+        "図書館",
+        "Places",
+        "Library, Education, Books, Public"
+      ],
+      [
+        "美術館",
+        "Places",
+        "Museum, Art, Culture, Tourism"
+      ],
+      [
+        "動物園",
+        "Places",
+        "Zoo, Animals, Family, Tourism"
+      ],
+      [
+        "温泉",
+        "Places",
+        "HotSpring, Nature, Relaxation, Tourism"
+      ],
+      [
+        "神社",
+        "Places",
+        "Shrine, Religion, Culture, Tourism"
+      ],
+      [
+        "市場",
+        "Places",
+        "Market, Shopping, Business"
+      ],
+      [
+        "港",
+        "Places",
+        "Port, Transportation, Water"
+      ],
+      [
+        "島",
+        "Places",
+        "Island, Nature, Geography"
+      ],
+      [
+        "村",
+        "Places",
+        "Village, Rural"
+      ],
+      [
+        "町",
+        "Places",
+        "Town, Urban"
+      ],
+      [
+        "世界",
+        "Places",
+        "World, Geography"
+      ],
+      [
+        "外国",
+        "Places",
+        "Country, Foreign, Travel"
+      ],
+      [
+        "試験",
+        "Objects",
+        "Exam, Education, Assessment"
+      ],
+      [
+        "宿題",
+        "Objects",
+        "Homework, Education, School"
+      ],
+      [
+        "手紙",
+        "Objects",
+        "Letter, Communication, Document"
+      ],
+      [
+        "鍵",
+        "Objects",
+        "Key, Tool, PersonalItem"
+      ],
+      [
+        "傘",
+        "Objects",
+        "Umbrella, Weather, PersonalItem"
+      ],
+      [
+        "眼鏡",
+        "Objects",
+        "Glasses, Wearable, Accessory"
+      ],
+      [
+        "時計",
+        "Objects",
+        "Clock, Watch, Time, PersonalItem"
+      ],
+      [
+        "庭",
+        "Places",
+        "Garden, Nature, Residence"
+      ],
+      [
+        "試合",
+        "Objects",
+        "Match, Sports, Competition"
+      ],
+      [
+        "練習",
+        "Actions",
+        "Practice, Learning, Sports, SuruVerb"
+      ],
+      [
+        "数学",
+        "Objects",
+        "Mathematics, Education, Science"
+      ],
+      [
+        "科学",
+        "Objects",
+        "Science, Education, Research"
+      ],
+      [
+        "歴史",
+        "Objects",
+        "History, Education, Culture"
+      ],
+      [
+        "博物館",
+        "Places",
+        "Museum, History, Culture, Tourism"
+      ],
+      [
+        "遊園地",
+        "Places",
+        "AmusementPark, Entertainment, Family, Tourism"
+      ],
+      [
+        "水族館",
+        "Places",
+        "Aquarium, Animals, Tourism, Family"
+      ],
+      [
+        "劇場",
+        "Places",
+        "Theater, Performance, Entertainment"
+      ],
+      [
+        "伝統",
+        "Objects",
+        "Tradition, Culture, Society"
+      ],
+      [
+        "習慣",
+        "Objects",
+        "Habit, DailyLife, Behavior"
+      ],
+      [
+        "趣味",
+        "Objects",
+        "Hobby, Leisure, Recreation"
+      ],
+      [
+        "才能",
+        "Objects",
+        "Talent, Ability, PersonalQuality"
+      ],
+      [
+        "自然",
+        "Objects",
+        "Nature, Environment"
+      ],
+      [
+        "景色",
+        "Objects",
+        "Scenery, Nature, Beauty"
+      ],
+      [
+        "故郷",
+        "Places",
+        "Hometown, Residence, Origin"
+      ],
+      [
+        "留学",
+        "Actions",
+        "StudyAbroad, Education, Travel, SuruVerb"
+      ],
+      [
+        "会話",
+        "Actions",
+        "Conversation, Communication, Language, SuruVerb"
+      ],
+      [
+        "発音",
+        "Objects",
+        "Pronunciation, Language, Education"
+      ],
+      [
+        "文法",
+        "Objects",
+        "Grammar, Language, Education"
+      ],
+      [
+        "単語",
+        "Objects",
+        "Vocabulary, Language, Education"
+      ],
+      [
+        "文章",
+        "Objects",
+        "Sentence, Writing, Language"
+      ],
+      [
+        "小説",
+        "Objects",
+        "Novel, Literature, Book"
+      ],
+      [
+        "文学",
+        "Objects",
+        "Literature, Culture, Education"
+      ],
+      [
+        "哲学",
+        "Objects",
+        "Philosophy, Thought, Education"
+      ],
+      [
+        "政治",
+        "Objects",
+        "Politics, Government, Society"
+      ],
+      [
+        "経済",
+        "Objects",
+        "Economy, Finance, Society"
+      ],
+      [
+        "社会",
+        "Objects",
+        "Society, Culture"
+      ],
+      [
+        "文化",
+        "Objects",
+        "Culture, Society, Tradition"
+      ],
+      [
+        "芸術",
+        "Objects",
+        "Art, Creativity, Culture"
+      ],
+      [
+        "宗教",
+        "Objects",
+        "Religion, Belief, Culture"
+      ],
+      [
+        "建築",
+        "Objects",
+        "Architecture, Building, Design"
+      ],
+      [
+        "産業",
+        "Objects",
+        "Industry, Business, Economy"
+      ],
+      [
+        "技術",
+        "Objects",
+        "Technology, Engineering, Science"
+      ],
+      [
+        "研究",
+        "Actions",
+        "Research, Science, Education, SuruVerb"
+      ],
+      [
+        "教育",
+        "Objects",
+        "Education, Learning, School"
+      ],
+      [
+        "国際",
+        "Descriptors",
+        "International, Global, naAdjective"
+      ],
+      [
+        "交流",
+        "Actions",
+        "Exchange, Communication, International, SuruVerb"
+      ],
+      [
+        "文明",
+        "Objects",
+        "Civilization, History, Culture"
+      ],
+      [
+        "思想",
+        "Objects",
+        "Ideology, Thought, Philosophy"
+      ],
+      [
+        "現象",
+        "Objects",
+        "Phenomenon, Science, Observation"
+      ],
+      [
+        "構造",
+        "Objects",
+        "Structure, Design, Organization"
+      ],
+      [
+        "理論",
+        "Objects",
+        "Theory, Science, Logic"
+      ],
+      [
+        "洞察",
+        "Objects",
+        "Insight, Understanding, Knowledge"
+      ],
+      [
+        "精神",
+        "Objects",
+        "Mind, Spirit, Psychology, Philosophy"
+      ],
+      [
+        "人間",
+        "People",
+        "Person, Human, Living"
+      ],
+      [
+        "学校",
+        "Places",
+        "School, Education, Public, Building"
+      ],
+      [
+        "会社",
+        "Places",
+        "Company, Office, Business, Workplace"
+      ],
+      [
+        "郵便局",
+        "Places",
+        "PostOffice, Mail, Government, Public"
+      ],
+      [
+        "映画館",
+        "Places",
+        "MovieTheater, Entertainment, Building"
+      ],
+      [
+        "公園",
+        "Places",
+        "Park, Nature, Recreation, Outdoor"
+      ],
+      [
+        "料理",
+        "Actions",
+        "Cooking, Food, SuruVerb"
+      ],
+      [
+        "意見",
+        "Objects",
+        "Opinion, Communication, Abstract"
+      ],
+      [
+        "夢",
+        "Objects",
+        "Dream, Goal, Abstract"
+      ],
+      [
+        "目標",
+        "Objects",
+        "Goal, Achievement, Planning, Abstract"
+      ],
+      [
+        "成功",
+        "Objects",
+        "Success, Achievement, Positive"
+      ],
+      [
+        "発展",
+        "Actions",
+        "Development, Growth, Change, SuruVerb"
+      ],
+      [
+        "問題",
+        "Objects",
+        "Problem, Issue, Abstract"
+      ],
+      [
+        "解決",
+        "Actions",
+        "Solve, ProblemSolving, SuruVerb"
+      ],
+      [
+        "議論",
+        "Actions",
+        "Discussion, Communication, Debate, SuruVerb"
+      ],
+      [
+        "意識",
+        "Objects",
+        "Awareness, Mind, Psychology"
+      ],
+      [
+        "価値",
+        "Objects",
+        "Value, Philosophy, Abstract"
+      ],
+      [
+        "制度",
+        "Objects",
+        "System, Government, Society"
+      ],
+      [
+        "分析",
+        "Actions",
+        "Analysis, Research, Science, SuruVerb"
+      ],
+      [
+        "評価",
+        "Actions",
+        "Evaluation, Judgment, SuruVerb"
+      ],
+      [
+        "主張",
+        "Actions",
+        "Claim, Opinion, Communication, SuruVerb"
+      ],
+      [
+        "根拠",
+        "Objects",
+        "Evidence, Logic, Abstract"
+      ],
+      [
+        "普遍",
+        "Descriptors",
+        "Universal, Philosophy, naAdjective"
+      ],
+      [
+        "抽象",
+        "Descriptors",
+        "Abstract, Philosophy, naAdjective"
+      ],
+      [
+        "具体",
+        "Descriptors",
+        "Concrete, Specific, naAdjective"
+      ],
+      [
+        "認識",
+        "Actions",
+        "Recognize, Understanding, SuruVerb"
+      ],
+      [
+        "存在",
+        "Actions",
+        "Existence, Philosophy, SuruVerb"
+      ],
+      [
+        "現実",
+        "Objects",
+        "Reality, Philosophy"
+      ],
+      [
+        "理想",
+        "Objects",
+        "Ideal, Philosophy"
+      ],
+      [
+        "規範",
+        "Objects",
+        "Standard, Ethics, Society"
+      ],
+      [
+        "倫理",
+        "Objects",
+        "Ethics, Philosophy"
+      ],
+      [
+        "体系",
+        "Objects",
+        "System, Organization"
+      ],
+      [
+        "介入",
+        "Actions",
+        "Intervention, Politics, SuruVerb"
+      ],
+      [
+        "転換",
+        "Actions",
+        "Change, Transition, SuruVerb"
+      ],
+      [
+        "革新",
+        "Actions",
+        "Innovation, Technology, SuruVerb"
+      ],
+      [
+        "相対",
+        "Descriptors",
+        "Relative, Comparison, naAdjective"
+      ],
+      [
+        "絶対",
+        "Descriptors",
+        "Absolute, Degree, naAdjective"
+      ],
+      [
+        "妥当",
+        "Descriptors",
+        "Appropriate, Reasonable, naAdjective"
+      ],
+      [
+        "精緻",
+        "Descriptors",
+        "Precise, Detailed, naAdjective"
+      ],
+      [
+        "淵源",
+        "Objects",
+        "Origin, Source, Philosophy"
+      ],
+      [
+        "やる",
+        "Actions",
+        "Do, Perform, Give, Casual, Godan, Transitive"
+      ],
+      [
+        "中",
+        "Objects",
+        "Middle, Inside, Time, Position"
+      ],
+      [
+        "いる",
+        "Actions",
+        "Exist, Living, Ichidan, Intransitive"
+      ],
+      [
+        "できる",
+        "Actions",
+        "Ability, Possible, Achievement, Ichidan, Intransitive"
+      ],
+      [
+        "後",
+        "Time & Numbers",
+        "After, Later, Time"
+      ],
+      [
+        "方",
+        "Objects",
+        "Direction, Method, Person, Abstract"
+      ],
+      [
+        "訳",
+        "Objects",
+        "Reason, Meaning, Explanation, Abstract"
+      ],
+      [
+        "本当",
+        "Descriptors",
+        "Truth, Real, Positive, naAdjective"
+      ],
+      [
+        "持つ",
+        "Actions",
+        "Hold, Possess, Carry, Godan, Transitive"
+      ],
+      [
+        "出る",
+        "Actions",
+        "Exit, Leave, Appear, Movement, Ichidan, Intransitive"
+      ],
+      [
+        "すごい",
+        "Descriptors",
+        "Amazing, Great, Degree, Positive, iAdjective"
+      ],
+      [
+        "考える",
+        "Actions",
+        "Think, Mental, Decision, Ichidan, Transitive"
+      ],
+      [
+        "入る",
+        "Actions",
+        "Enter, Movement, Godan, Intransitive"
+      ],
+      [
+        "作る",
+        "Actions",
+        "Create, Make, Build, Godan, Transitive"
+      ],
+      [
+        "聞く／聴く",
+        "Actions",
+        "Listen, Hear, Communication, Perception, Godan, Transitive"
+      ],
+      [
+        "話",
+        "Objects",
+        "Story, Conversation, Communication"
+      ],
+      [
+        "使う",
+        "Actions",
+        "Use, Employ, Godan, Transitive"
+      ],
+      [
+        "日本",
+        "Places",
+        "Country, Japan, Geography, Travel"
+      ],
+      [
+        "風",
+        "Objects",
+        "Wind, Nature, Weather"
+      ],
+      [
+        "前",
+        "Time & Numbers",
+        "Before, Front, Time, Position"
+      ],
+      [
+        "多い",
+        "Descriptors",
+        "Many, Quantity, iAdjective"
+      ],
+      [
+        "子供",
+        "People",
+        "Child, Person, Human"
+      ],
+      [
+        "非常",
+        "Descriptors",
+        "Very, Degree, Adverb"
+      ],
+      [
+        "気",
+        "Objects",
+        "Mind, Spirit, Emotion, Abstract"
+      ],
+      [
+        "取る",
+        "Actions",
+        "Take, Obtain, Receive, Godan, Transitive"
+      ],
+      [
+        "うち",
+        "Places",
+        "Home, Residence, Family"
+      ],
+      [
+        "知る",
+        "Actions",
+        "Know, Learn, Mental, Godan, Transitive"
+      ],
+      [
+        "感じ",
+        "Objects",
+        "Feeling, Sense, Emotion"
+      ],
+      [
+        "いろいろ",
+        "Descriptors",
+        "Various, Variety, Quantity, naAdjective"
+      ],
+      [
+        "一",
+        "Time & Numbers",
+        "Number, One"
+      ],
+      [
+        "行なう",
+        "Actions",
+        "Perform, Conduct, Business, Godan, Transitive"
+      ],
+      [
+        "一番",
+        "Descriptors",
+        "First, Best, Superlative, Degree"
+      ],
+      [
+        "二",
+        "Time & Numbers",
+        "Number, Two"
+      ],
+      [
+        "同じ",
+        "Descriptors",
+        "Same, Equal, Comparison, naAdjective"
+      ],
+      [
+        "書く",
+        "Actions",
+        "Write, Communication, Godan, Transitive"
+      ],
+      [
+        "入れる",
+        "Actions",
+        "Insert, PutIn, Ichidan, Transitive"
+      ],
+      [
+        "次",
+        "Time & Numbers",
+        "Next, Sequence, Time"
+      ],
+      [
+        "結構",
+        "Descriptors",
+        "Enough, Quite, Degree, naAdjective"
+      ],
+      [
+        "目／眼",
+        "People & Living Things",
+        "Eye, BodyPart, Human"
+      ],
+      [
+        "頃",
+        "Time & Numbers",
+        "ApproximateTime, Time"
+      ],
+      [
+        "上",
+        "Places",
+        "Above, Top, Position"
+      ],
+      [
+        "家",
+        "Places",
+        "Home, House, Residence"
+      ],
+      [
+        "付く",
+        "Actions",
+        "Attach, Arrive, BecomeAttached, Godan, Intransitive"
+      ],
+      [
+        "日／陽",
+        "Time & Numbers",
+        "Day, Sun, Time"
+      ],
+      [
+        "出す",
+        "Actions",
+        "TakeOut, Produce, Submit, Godan, Transitive"
+      ],
+      [
+        "一人",
+        "Time & Numbers",
+        "Counter, PersonCount, OnePerson"
+      ],
+      [
+        "違う",
+        "Actions",
+        "Differ, Comparison, Godan, Intransitive"
+      ],
+      [
+        "受ける",
+        "Actions",
+        "Receive, Accept, TakeExam, Ichidan, Transitive"
+      ],
+      [
+        "言葉",
+        "Objects",
+        "Word, Language, Communication"
+      ],
+      [
+        "少し",
+        "Descriptors",
+        "SmallAmount, Quantity, Adverb"
+      ],
+      [
+        "買う",
+        "Actions",
+        "Buy, Shopping, Commerce, Godan, Transitive"
+      ],
+      [
+        "手",
+        "People & Living Things",
+        "Hand, BodyPart, Human"
+      ],
+      [
+        "返る",
+        "Actions",
+        "Return, Revert, Godan, Intransitive"
+      ],
+      [
+        "終わる",
+        "Actions",
+        "Finish, End, Completion, Godan, Intransitive"
+      ],
+      [
+        "いろんな",
+        "Descriptors",
+        "Various, Variety, Quantity, naAdjective"
+      ],
+      [
+        "付ける",
+        "Actions",
+        "Attach, Add, Wear, Ichidan, Transitive"
+      ],
+      [
+        "形",
+        "Objects",
+        "Shape, Form, Structure"
+      ],
+      [
+        "かなり",
+        "Descriptors",
+        "Degree, Quite, Adverb"
+      ],
+      [
+        "三",
+        "Time & Numbers",
+        "Number, Three"
+      ],
+      [
+        "最初",
+        "Time & Numbers",
+        "First, Beginning, Sequence"
+      ],
+      [
+        "間",
+        "Time & Numbers",
+        "Interval, Duration, Time"
+      ],
+      [
+        "感じる",
+        "Actions",
+        "Feel, Perception, Emotion, Ichidan, Transitive"
+      ],
+      [
+        "かかる",
+        "Actions",
+        "Cost, TakeTime, Require, Godan, Intransitive"
+      ],
+      [
+        "大きな",
+        "Descriptors",
+        "Large, Size, Attributive"
+      ],
+      [
+        "住む",
+        "Actions",
+        "Live, Residence, Godan, Intransitive"
+      ],
+      [
+        "最近",
+        "Time & Numbers",
+        "Recent, Time"
+      ],
+      [
+        "特に",
+        "Descriptors",
+        "Especially, Degree, Adverb"
+      ],
+      [
+        "誰",
+        "People",
+        "Person, Question, Interrogative"
+      ],
+      [
+        "大きい",
+        "Descriptors",
+        "Large, Size, iAdjective"
+      ],
+      [
+        "すぐ",
+        "Descriptors",
+        "Immediately, Time, Adverb"
+      ],
+      [
+        "一緒",
+        "Descriptors",
+        "Together, Companion, naAdjective"
+      ],
+      [
+        "国",
+        "Places",
+        "Country, Geography"
+      ],
+      [
+        "あげる",
+        "Actions",
+        "Give, Transfer, Ichidan, Transitive"
+      ],
+      [
+        "あなた",
+        "People",
+        "Person, Pronoun, SecondPerson"
+      ],
+      [
+        "現在",
+        "Time & Numbers",
+        "Present, Current, Time"
+      ],
+      [
+        "悪い",
+        "Descriptors",
+        "Bad, Negative, iAdjective"
+      ],
+      [
+        "乗る",
+        "Actions",
+        "Ride, Transportation, Godan, Intransitive"
+      ],
+      [
+        "見える",
+        "Actions",
+        "BeVisible, Perception, Ichidan, Intransitive"
+      ],
+      [
+        "変わる",
+        "Actions",
+        "Change, Transformation, Godan, Intransitive"
+      ],
+      [
+        "大変",
+        "Descriptors",
+        "Difficult, Serious, Degree, naAdjective"
+      ],
+      [
+        "先生",
+        "People",
+        "Teacher, Occupation, Education, Human"
+      ],
+      [
+        "二人",
+        "Time & Numbers",
+        "Counter, PersonCount, TwoPeople"
+      ],
+      [
+        "心",
+        "Objects",
+        "Heart, Mind, Emotion, Abstract"
+      ],
+      [
+        "金",
+        "Objects",
+        "Money, Finance"
+      ],
+      [
+        "顔",
+        "People & Living Things",
+        "Face, BodyPart, Human"
+      ],
+      [
+        "ずっと",
+        "Descriptors",
+        "Continuously, Time, Adverb"
+      ],
+      [
+        "町／街",
+        "Places",
+        "Town, City, Urban"
+      ],
+      [
+        "たくさん",
+        "Descriptors",
+        "Many, Quantity, Adverb"
+      ],
+      [
+        "大体",
+        "Descriptors",
+        "Approximately, Degree, Adverb"
+      ],
+      [
+        "読む",
+        "Actions",
+        "Read, Books, Communication, Godan, Transitive"
+      ],
+      [
+        "今日",
+        "Time & Numbers",
+        "Today, Time"
+      ],
+      [
+        "昔",
+        "Time & Numbers",
+        "Past, LongAgo, Time"
+      ],
+      [
+        "うん",
+        "Function Words",
+        "Response, Informal"
+      ],
+      [
+        "すべて",
+        "Descriptors",
+        "All, Quantity"
+      ],
+      [
+        "子",
+        "People",
+        "Child, Person"
+      ],
+      [
+        "水",
+        "Food & Drink",
+        "Water, Drink"
+      ],
+      [
+        "当時",
+        "Time & Numbers",
+        "AtThatTime, Past, Time"
+      ],
+      [
+        "場所",
+        "Places",
+        "Place, Location"
+      ],
+      [
+        "置く",
+        "Actions",
+        "Place, Put, Godan, Transitive"
+      ],
+      [
+        "声",
+        "Objects",
+        "Voice, Communication, Sound"
+      ],
+      [
+        "普通",
+        "Descriptors",
+        "Normal, Common, naAdjective"
+      ],
+      [
+        "残る",
+        "Actions",
+        "Remain, Stay, Godan, Intransitive"
+      ],
+      [
+        "最後",
+        "Time & Numbers",
+        "Last, End, Sequence"
+      ],
+      [
+        "車",
+        "Objects",
+        "Car, Vehicle, Transportation"
+      ],
+      [
+        "初めて",
+        "Descriptors",
+        "FirstTime, Time, Adverb"
+      ],
+      [
+        "今度",
+        "Time & Numbers",
+        "NextTime, ThisTime, Time"
+      ],
+      [
+        "体",
+        "People & Living Things",
+        "Body, Human, Health"
+      ],
+      [
+        "強い",
+        "Descriptors",
+        "Strong, Strength, iAdjective"
+      ],
+      [
+        "呼ぶ",
+        "Actions",
+        "Call, Invite, Communication, Godan, Transitive"
+      ],
+      [
+        "結局",
+        "Descriptors",
+        "Finally, Result, Adverb"
+      ],
+      [
+        "歩く",
+        "Actions",
+        "Walk, Movement, Godan, Intransitive"
+      ],
+      [
+        "男",
+        "People",
+        "Man, Male, Human"
+      ],
+      [
+        "女性",
+        "People",
+        "Woman, Female, Human"
+      ],
+      [
+        "生きる",
+        "Actions",
+        "Live, Life, Ichidan, Intransitive"
+      ],
+      [
+        "先",
+        "Time & Numbers",
+        "Ahead, Previous, Future, Position"
+      ],
+      [
+        "テーマ",
+        "Objects",
+        "Topic, Subject, Discussion"
+      ],
+      [
+        "状態",
+        "Objects",
+        "State, Condition, Abstract"
+      ],
+      [
+        "アメリカ",
+        "Places",
+        "Country, UnitedStates, Geography"
+      ],
+      [
+        "小さい",
+        "Descriptors",
+        "Small, Size, iAdjective"
+      ],
+      [
+        "相手",
+        "People",
+        "Partner, Opponent, Person, Relationship"
+      ],
+      [
+        "母",
+        "People",
+        "Mother, Family, Female"
+      ],
+      [
+        "以上",
+        "Time & Numbers",
+        "Minimum, Comparison, Quantity"
+      ],
+      [
+        "四",
+        "Time & Numbers",
+        "Number, Four"
+      ],
+      [
+        "たぶん",
+        "Descriptors",
+        "Probably, Probability, Adverb"
+      ],
+      [
+        "店",
+        "Places",
+        "Store, Shop, Shopping, Business"
+      ],
+      [
+        "頭",
+        "People & Living Things",
+        "Head, BodyPart, Human"
+      ],
+      [
+        "長い",
+        "Descriptors",
+        "Long, Length, Duration, iAdjective"
+      ],
+      [
+        "本",
+        "Objects",
+        "Book, Reading, Education, Media"
+      ],
+      [
+        "こちら",
+        "Function Words",
+        "Demonstrative, Direction, PolitePronoun"
+      ],
+      [
+        "別",
+        "Descriptors",
+        "Separate, Different, Other, naAdjective"
+      ],
+      [
+        "者",
+        "People",
+        "Person, Human, Formal"
+      ],
+      [
+        "タイトル",
+        "Objects",
+        "Title, Media, Writing, Loanword"
+      ],
+      [
+        "親",
+        "People",
+        "Parent, Family, Human"
+      ],
+      [
+        "名前",
+        "Objects",
+        "Name, Identity, PersonalInformation"
+      ],
+      [
+        "全部",
+        "Descriptors",
+        "All, Entirety, Quantity, Adverb"
+      ],
+      [
+        "きれい",
+        "Descriptors",
+        "Beautiful, Clean, Positive, naAdjective"
+      ],
+      [
+        "立つ",
+        "Actions",
+        "Stand, Rise, Position, Godan, Intransitive"
+      ],
+      [
+        "毎日",
+        "Time & Numbers",
+        "EveryDay, Frequency, Time"
+      ],
+      [
+        "おいしい",
+        "Descriptors",
+        "Delicious, Taste, Food, Positive, iAdjective"
+      ],
+      [
+        "部分",
+        "Objects",
+        "Part, Section, Structure, Abstract"
+      ],
+      [
+        "一度",
+        "Time & Numbers",
+        "Once, Frequency, Number"
+      ],
+      [
+        "時代",
+        "Time & Numbers",
+        "Era, Period, History"
+      ],
+      [
+        "少ない",
+        "Descriptors",
+        "Few, SmallAmount, Quantity, iAdjective"
+      ],
+      [
+        "うまい",
+        "Descriptors",
+        "Skillful, Delicious, Positive, Casual, iAdjective"
+      ],
+      [
+        "覚える",
+        "Actions",
+        "Remember, Memorize, Learning, Mental, Ichidan, Transitive"
+      ],
+      [
+        "東京",
+        "Places",
+        "Tokyo, City, Capital, Japan, Urban"
+      ],
+      [
+        "続く",
+        "Actions",
+        "Continue, Last, Duration, Godan, Intransitive"
+      ],
+      [
+        "俺",
+        "People",
+        "FirstPerson, Pronoun, Male, Casual"
+      ],
+      [
+        "生まれる",
+        "Actions",
+        "BeBorn, LifeEvent, Ichidan, Intransitive"
+      ],
+      [
+        "父",
+        "People",
+        "Father, Family, Male, Human"
+      ],
+      [
+        "確か",
+        "Descriptors",
+        "Certain, Reliable, Memory, naAdjective, Adverb"
+      ],
+      [
+        "それぞれ",
+        "Descriptors",
+        "Each, Individual, Distribution, Adverb"
+      ],
+      [
+        "部屋",
+        "Places",
+        "Room, Indoor, Residence"
+      ],
+      [
+        "ちょうど",
+        "Descriptors",
+        "Exactly, JustRight, Time, Degree, Adverb"
+      ],
+      [
+        "当然",
+        "Descriptors",
+        "Natural, Expected, Certainty, naAdjective, Adverb"
+      ],
+      [
+        "大学",
+        "Places",
+        "University, Education, School, Building"
+      ],
+      [
+        "実",
+        "Objects",
+        "Truth, Reality, Content, Abstract"
+      ],
+      [
+        "どんどん",
+        "Descriptors",
+        "Rapidly, Progressively, Degree, Adverb"
+      ],
+      [
+        "得る",
+        "Actions",
+        "Obtain, Gain, Achievement, Ichidan, Transitive"
+      ],
+      [
+        "とにかく",
+        "Descriptors",
+        "Anyway, Priority, DiscourseAdverb"
+      ],
+      [
+        "選ぶ",
+        "Actions",
+        "Choose, Decision, Godan, Transitive"
+      ],
+      [
+        "面白い",
+        "Descriptors",
+        "Interesting, Fun, Positive, iAdjective"
+      ],
+      [
+        "戻る",
+        "Actions",
+        "Return, Movement, Godan, Intransitive"
+      ],
+      [
+        "やめる",
+        "Actions",
+        "Stop, Quit, Ichidan, Transitive"
+      ],
+      [
+        "下",
+        "Places",
+        "Below, Under, Position"
+      ],
+      [
+        "始める",
+        "Actions",
+        "Begin, Start, Ichidan, Transitive"
+      ],
+      [
+        "まわり",
+        "Places",
+        "Surroundings, Nearby, Position, Area"
+      ],
+      [
+        "犬",
+        "People & Living Things",
+        "Dog, Animal, Pet, Mammal, Living"
+      ],
+      [
+        "必ず",
+        "Descriptors",
+        "Certainly, Always, Frequency, Adverb"
+      ],
+      [
+        "残す",
+        "Actions",
+        "LeaveBehind, Preserve, Godan, Transitive"
+      ],
+      [
+        "大事",
+        "Descriptors",
+        "Important, Valuable, Necessary, naAdjective"
+      ],
+      [
+        "力",
+        "Objects",
+        "Strength, Power, Ability, Abstract"
+      ],
+      [
+        "遊ぶ",
+        "Actions",
+        "Play, Recreation, Leisure, Godan, Intransitive"
+      ],
+      [
+        "若い",
+        "Descriptors",
+        "Young, Age, iAdjective"
+      ],
+      [
+        "女",
+        "People",
+        "Woman, Female, Human"
+      ],
+      [
+        "簡単",
+        "Descriptors",
+        "Easy, Simple, Difficulty, naAdjective"
+      ],
+      [
+        "始まる",
+        "Actions",
+        "Begin, Start, Godan, Intransitive"
+      ],
+      [
+        "死ぬ",
+        "Actions",
+        "Die, LifeEvent, Godan, Intransitive"
+      ],
+      [
+        "今回",
+        "Time & Numbers",
+        "ThisTime, CurrentOccasion, Time"
+      ],
+      [
+        "通り",
+        "Places",
+        "Street, Road, Route, Urban"
+      ],
+      [
+        "テレビ",
+        "Objects",
+        "Television, Electronics, Media, Entertainment"
+      ],
+      [
+        "木",
+        "People & Living Things",
+        "Tree, Plant, Nature, Living"
+      ],
+      [
+        "点",
+        "Objects",
+        "Point, Score, Mark, Location, Abstract"
+      ],
+      [
+        "音",
+        "Objects",
+        "Sound, Audio, Perception"
+      ],
+      [
+        "海",
+        "Places",
+        "Sea, Ocean, Nature, Water, Outdoor"
+      ],
+      [
+        "一応",
+        "Descriptors",
+        "ForNow, Tentatively, Qualification, Adverb"
+      ],
+      [
+        "与える",
+        "Actions",
+        "Give, Provide, Influence, Ichidan, Transitive"
+      ],
+      [
+        "働く",
+        "Actions",
+        "Work, Employment, Godan, Intransitive"
+      ],
+      [
+        "一杯",
+        "Time & Numbers",
+        "OneCup, FullAmount, Counter, Quantity"
+      ],
+      [
+        "近く",
+        "Places",
+        "Nearby, Vicinity, Position"
+      ],
+      [
+        "共",
+        "People",
+        "Together, Companion, Group"
+      ],
+      [
+        "大切",
+        "Descriptors",
+        "Important, Precious, Positive, naAdjective"
+      ],
+      [
+        "足",
+        "People & Living Things",
+        "Foot, Leg, BodyPart, Human"
+      ],
+      [
+        "切る",
+        "Actions",
+        "Cut, End, Godan, Transitive"
+      ],
+      [
+        "走る",
+        "Actions",
+        "Run, Movement, Exercise, Godan, Intransitive"
+      ],
+      [
+        "だんだん",
+        "Descriptors",
+        "Gradually, Change, Sequence, Adverb"
+      ],
+      [
+        "楽しむ",
+        "Actions",
+        "Enjoy, Emotion, Recreation, Godan, Transitive"
+      ],
+      [
+        "五",
+        "Time & Numbers",
+        "Number, Five"
+      ],
+      [
+        "多く",
+        "Descriptors",
+        "Many, Quantity, FormalAdverb"
+      ],
+      [
+        "寝る",
+        "Actions",
+        "Sleep, DailyRoutine, Ichidan, Intransitive"
+      ],
+      [
+        "英語",
+        "Objects",
+        "English, Language, Education, Communication"
+      ],
+      [
+        "決める",
+        "Actions",
+        "Decide, Decision, Planning, Ichidan, Transitive"
+      ],
+      [
+        "忘れる",
+        "Actions",
+        "Forget, Memory, Mental, Ichidan, Transitive"
+      ],
+      [
+        "口",
+        "People & Living Things",
+        "Mouth, BodyPart, Human"
+      ],
+      [
+        "姿",
+        "Objects",
+        "Appearance, Figure, Body, Visual"
+      ],
+      [
+        "なくなる",
+        "Actions",
+        "Disappear, Cease, BecomeAbsent, Godan, Intransitive"
+      ],
+      [
+        "時期",
+        "Time & Numbers",
+        "Period, Season, Timing"
+      ],
+      [
+        "逆",
+        "Descriptors",
+        "Opposite, Reverse, Contrast, naAdjective"
+      ],
+      [
+        "頑張る",
+        "Actions",
+        "TryHard, Effort, Motivation, Godan, Intransitive"
+      ],
+      [
+        "示す",
+        "Actions",
+        "Show, Indicate, Demonstrate, Godan, Transitive"
+      ],
+      [
+        "人々",
+        "People",
+        "People, Group, Human"
+      ],
+      [
+        "有名",
+        "Descriptors",
+        "Famous, Reputation, Positive, naAdjective"
+      ],
+      [
+        "思い",
+        "Objects",
+        "Thought, Feeling, Emotion, Abstract"
+      ],
+      [
+        "難しい",
+        "Descriptors",
+        "Difficult, Hard, Difficulty, iAdjective"
+      ],
+      [
+        "程度",
+        "Objects",
+        "Degree, Level, Amount, Abstract"
+      ],
+      [
+        "願う",
+        "Actions",
+        "Wish, Hope, Desire, Godan, Transitive"
+      ],
+      [
+        "昭和",
+        "Time & Numbers",
+        "Era, History, Japan"
+      ],
+      [
+        "向かう",
+        "Actions",
+        "HeadToward, Movement, Godan, Intransitive"
+      ],
+      [
+        "連れる",
+        "Actions",
+        "BringAlong, Companion, Ichidan, Transitive"
+      ],
+      [
+        "変える",
+        "Actions",
+        "Change, Modify, Ichidan, Transitive"
+      ],
+      [
+        "年",
+        "Time & Numbers",
+        "Year, Age, Time"
+      ],
+      [
+        "求める",
+        "Actions",
+        "Seek, Request, Demand, Ichidan, Transitive"
+      ],
+      [
+        "情報",
+        "Objects",
+        "Information, Data, Communication, Abstract"
+      ],
+      [
+        "もらう",
+        "Actions",
+        "Receive, Gift, Transfer, Godan, Transitive"
+      ],
+      [
+        "友人",
+        "People",
+        "Friend, Relationship, Human"
+      ],
+      [
+        "だめ",
+        "Descriptors",
+        "Impossible, Bad, Prohibited, naAdjective"
+      ],
+      [
+        "経つ",
+        "Actions",
+        "PassTime, Time, Godan, Intransitive"
+      ],
+      [
+        "先程",
+        "Time & Numbers",
+        "Earlier, RecentPast, Time"
+      ],
+      [
+        "一回",
+        "Time & Numbers",
+        "Once, Counter, Frequency"
+      ],
+      [
+        "十分",
+        "Descriptors",
+        "Enough, Sufficient, Quantity, naAdjective"
+      ],
+      [
+        "小さな",
+        "Descriptors",
+        "Small, Size, Attributive"
+      ],
+      [
+        "開く",
+        "Actions",
+        "Open, Begin, Godan, Intransitive"
+      ],
+      [
+        "続ける",
+        "Actions",
+        "Continue, Persist, Ichidan, Transitive"
+      ],
+      [
+        "重要",
+        "Descriptors",
+        "Important, Significant, naAdjective"
+      ],
+      [
+        "当たる",
+        "Actions",
+        "Hit, Apply, BeCorrect, Godan, Intransitive"
+      ],
+      [
+        "近い",
+        "Descriptors",
+        "Near, Distance, iAdjective"
+      ],
+      [
+        "認める",
+        "Actions",
+        "Recognize, Approve, Accept, Ichidan, Transitive"
+      ],
+      [
+        "増える",
+        "Actions",
+        "Increase, Growth, Ichidan, Intransitive"
+      ],
+      [
+        "音楽",
+        "Objects",
+        "Music, Entertainment, Art"
+      ],
+      [
+        "外",
+        "Places",
+        "Outside, Exterior, Outdoor"
+      ],
+      [
+        "進む",
+        "Actions",
+        "Advance, Progress, Godan, Intransitive"
+      ],
+      [
+        "起きる",
+        "Actions",
+        "WakeUp, Happen, Ichidan, Intransitive"
+      ],
+      [
+        "嫌",
+        "Descriptors",
+        "Dislike, Unpleasant, Emotion, naAdjective"
+      ],
+      [
+        "いや",
+        "Function Words",
+        "Interjection, Refusal"
+      ],
+      [
+        "はい",
+        "Function Words",
+        "Response, Agreement, Polite"
+      ],
+      [
+        "身",
+        "People & Living Things",
+        "Body, Self, Human"
+      ],
+      [
+        "客",
+        "People",
+        "Customer, Guest, Person"
+      ],
+      [
+        "含む",
+        "Actions",
+        "Include, Contain, Godan, Transitive"
+      ],
+      [
+        "地域",
+        "Places",
+        "Region, Area, Geography"
+      ],
+      [
+        "娘",
+        "People",
+        "Daughter, Family, Female"
+      ],
+      [
+        "見せる",
+        "Actions",
+        "Show, Display, Ichidan, Transitive"
+      ],
+      [
+        "一日",
+        "Time & Numbers",
+        "OneDay, Day, Time"
+      ],
+      [
+        "今年",
+        "Time & Numbers",
+        "ThisYear, Time"
+      ],
+      [
+        "平成",
+        "Time & Numbers",
+        "Era, History, Japan"
+      ],
+      [
+        "図",
+        "Objects",
+        "Diagram, Figure, Illustration"
+      ],
+      [
+        "合わせる",
+        "Actions",
+        "Combine, Match, Adjust, Ichidan, Transitive"
+      ],
+      [
+        "安い",
+        "Descriptors",
+        "Cheap, Price, iAdjective"
+      ],
+      [
+        "つらい",
+        "Descriptors",
+        "Painful, Difficult, Emotion, iAdjective"
+      ],
+      [
+        "中心",
+        "Objects",
+        "Center, Core, Abstract"
+      ],
+      [
+        "起こる",
+        "Actions",
+        "Occur, Happen, Godan, Intransitive"
+      ],
+      [
+        "我々",
+        "People",
+        "We, Pronoun, Group"
+      ],
+      [
+        "立てる",
+        "Actions",
+        "StandUp, Build, Plan, Ichidan, Transitive"
+      ],
+      [
+        "最も",
+        "Descriptors",
+        "Most, Superlative, Adverb"
+      ],
+      [
+        "色",
+        "Objects",
+        "Color, Appearance"
+      ],
+      [
+        "探す",
+        "Actions",
+        "Search, LookFor, Godan, Transitive"
+      ],
+      [
+        "興味",
+        "Objects",
+        "Interest, Curiosity, Emotion, Abstract"
+      ],
+      [
+        "売る",
+        "Actions",
+        "Sell, Commerce, Godan, Transitive"
+      ],
+      [
+        "印象",
+        "Objects",
+        "Impression, Perception, Abstract"
+      ],
+      [
+        "作品",
+        "Objects",
+        "Work, Creation, Art"
+      ],
+      [
+        "事件",
+        "Objects",
+        "Incident, Crime, Event"
+      ],
+      [
+        "中国",
+        "Places",
+        "China, Country, Geography"
+      ],
+      [
+        "母親",
+        "People",
+        "Mother, Family, Female"
+      ],
+      [
+        "目的",
+        "Objects",
+        "Purpose, Goal, Abstract"
+      ],
+      [
+        "様々",
+        "Descriptors",
+        "Various, Variety, naAdjective"
+      ],
+      [
+        "答える",
+        "Actions",
+        "Answer, Respond, Communication, Ichidan, Transitive"
+      ],
+      [
+        "過ごす",
+        "Actions",
+        "SpendTime, Live, Godan, Transitive"
+      ],
+      [
+        "上がる",
+        "Actions",
+        "Rise, Increase, Godan, Intransitive"
+      ],
+      [
+        "一方",
+        "Objects",
+        "OneSide, Contrast, Abstract"
+      ],
+      [
+        "病気",
+        "Objects",
+        "Illness, Health, Medical"
+      ],
+      [
+        "笑い",
+        "Objects",
+        "Laughter, Emotion, Expression"
+      ],
+      [
+        "午後",
+        "Time & Numbers",
+        "Afternoon, Time"
+      ],
+      [
+        "動く",
+        "Actions",
+        "Move, Motion, Godan, Intransitive"
+      ],
+      [
+        "主人",
+        "People",
+        "Husband, Master, Adult, Male"
+      ],
+      [
+        "加える",
+        "Actions",
+        "Add, Include, Ichidan, Transitive"
+      ],
+      [
+        "困る",
+        "Actions",
+        "BeTroubled, Difficulty, Godan, Intransitive"
+      ],
+      [
+        "取れる",
+        "Actions",
+        "ComeOff, BeObtained, Ichidan, Intransitive"
+      ],
+      [
+        "比べる",
+        "Actions",
+        "Compare, Analysis, Ichidan, Transitive"
+      ],
+      [
+        "高校",
+        "Places",
+        "HighSchool, Education, School"
+      ],
+      [
+        "引く",
+        "Actions",
+        "Pull, Draw, Reduce, Godan, Transitive"
+      ],
+      [
+        "辺",
+        "Places",
+        "Area, Vicinity, Location"
+      ],
+      [
+        "火",
+        "Objects",
+        "Fire, Nature, Element"
+      ],
+      [
+        "今後",
+        "Time & Numbers",
+        "FromNowOn, Future, Time"
+      ],
+      [
+        "越える",
+        "Actions",
+        "Cross, Exceed, Ichidan, Transitive"
+      ],
+      [
+        "図る",
+        "Actions",
+        "Plan, Attempt, Measure, Godan, Transitive"
+      ],
+      [
+        "企業",
+        "Objects",
+        "Company, Business, Organization"
+      ],
+      [
+        "奴",
+        "People",
+        "Person, Informal, Casual"
+      ],
+      [
+        "はっきり",
+        "Descriptors",
+        "Clearly, Certainty, Adverb"
+      ],
+      [
+        "例",
+        "Objects",
+        "Example, Illustration, Abstract"
+      ],
+      [
+        "絵",
+        "Objects",
+        "Picture, Art, Drawing"
+      ],
+      [
+        "思い出す",
+        "Actions",
+        "Remember, Memory, Mental, Godan, Transitive"
+      ],
+      [
+        "酒",
+        "Food & Drink",
+        "Alcohol, Beverage, Drink"
+      ],
+      [
+        "お前",
+        "People",
+        "SecondPerson, Pronoun, Casual"
+      ],
+      [
+        "守る",
+        "Actions",
+        "Protect, Keep, Godan, Transitive"
+      ],
+      [
+        "回る",
+        "Actions",
+        "Turn, GoAround, Movement, Godan, Intransitive"
+      ],
+      [
+        "広い",
+        "Descriptors",
+        "Wide, Spacious, Size, iAdjective"
+      ],
+      [
+        "猫",
+        "People & Living Things",
+        "Cat, Animal, Pet, Mammal"
+      ],
+      [
+        "向こう",
+        "Places",
+        "OppositeSide, Direction, Location"
+      ],
+      [
+        "同時",
+        "Time & Numbers",
+        "Simultaneous, Time"
+      ],
+      [
+        "調べる",
+        "Actions",
+        "Investigate, Check, Research, Ichidan, Transitive"
+      ],
+      [
+        "のぼる",
+        "Actions",
+        "Climb, Rise, Movement, Godan, Intransitive"
+      ],
+      [
+        "六",
+        "Time & Numbers",
+        "Number, Six"
+      ],
+      [
+        "向ける",
+        "Actions",
+        "Direct, Aim, TurnToward, Ichidan, Transitive"
+      ],
+      [
+        "落ちる",
+        "Actions",
+        "Fall, Drop, Godan, Intransitive"
+      ],
+      [
+        "決まる",
+        "Actions",
+        "BeDecided, Decision, Godan, Intransitive"
+      ],
+      [
+        "起こす",
+        "Actions",
+        "Wake, Cause, Create, Godan, Transitive"
+      ],
+      [
+        "場",
+        "Places",
+        "Place, Location, Situation"
+      ],
+      [
+        "対象",
+        "Objects",
+        "Target, Subject, ObjectOfAction, Abstract"
+      ],
+      [
+        "打つ",
+        "Actions",
+        "Hit, Strike, Type, Godan, Transitive"
+      ],
+      [
+        "以前",
+        "Time & Numbers",
+        "Before, Previous, Time"
+      ],
+      [
+        "夫",
+        "People",
+        "Husband, Family, Male"
+      ],
+      [
+        "数",
+        "Time & Numbers",
+        "Number, Quantity, Amount"
+      ],
+      [
+        "割と",
+        "Descriptors",
+        "Fairly, Relatively, Degree, Adverb"
+      ],
+      [
+        "通う",
+        "Actions",
+        "Commute, Attend, Travel, Godan, Intransitive"
+      ],
+      [
+        "述べる",
+        "Actions",
+        "State, Express, Communication, Ichidan, Transitive"
+      ],
+      [
+        "一部",
+        "Objects",
+        "Part, Portion, Section"
+      ],
+      [
+        "きっと",
+        "Descriptors",
+        "Surely, Probability, Adverb"
+      ],
+      [
+        "歌う",
+        "Actions",
+        "Sing, Music, Entertainment, Godan, Intransitive"
+      ],
+      [
+        "新聞",
+        "Objects",
+        "Newspaper, Media, Reading"
+      ],
+      [
+        "開ける",
+        "Actions",
+        "Open, Unlock, Ichidan, Transitive"
+      ],
+      [
+        "互い",
+        "People",
+        "EachOther, Relationship, Group"
+      ],
+      [
+        "着る",
+        "Actions",
+        "Wear, Clothing, Ichidan, Transitive"
+      ],
+      [
+        "違い",
+        "Objects",
+        "Difference, Comparison, Abstract"
+      ],
+      [
+        "しっかり",
+        "Descriptors",
+        "Firmly, Properly, Degree, Adverb"
+      ],
+      [
+        "過ぎる",
+        "Actions",
+        "Pass, Exceed, Ichidan, Intransitive"
+      ],
+      [
+        "しばらく",
+        "Time & Numbers",
+        "ShortWhile, Duration, Time"
+      ],
+      [
+        "君",
+        "People",
+        "SecondPerson, Pronoun, Casual"
+      ],
+      [
+        "笑う",
+        "Actions",
+        "Laugh, Emotion, Godan, Intransitive"
+      ],
+      [
+        "父親",
+        "People",
+        "Father, Family, Male"
+      ],
+      [
+        "見付ける",
+        "Actions",
+        "Find, Discover, Ichidan, Transitive"
+      ],
+      [
+        "関わる",
+        "Actions",
+        "Relate, Involve, Relationship, Godan, Intransitive"
+      ],
+      [
+        "無理",
+        "Descriptors",
+        "Impossible, Unreasonable, naAdjective"
+      ],
+      [
+        "健康",
+        "Descriptors",
+        "Healthy, Health, Positive, naAdjective"
+      ],
+      [
+        "味",
+        "Objects",
+        "Taste, Flavor, Food"
+      ],
+      [
+        "深い",
+        "Descriptors",
+        "Deep, Depth, iAdjective"
+      ],
+      [
+        "伝える",
+        "Actions",
+        "Tell, Convey, Communication, Ichidan, Transitive"
+      ],
+      [
+        "自由",
+        "Descriptors",
+        "Freedom, Free, naAdjective"
+      ],
+      [
+        "集まる",
+        "Actions",
+        "Gather, Assemble, Godan, Intransitive"
+      ],
+      [
+        "戦争",
+        "Objects",
+        "War, History, Conflict"
+      ],
+      [
+        "流れる",
+        "Actions",
+        "Flow, Move, Ichidan, Intransitive"
+      ],
+      [
+        "男性",
+        "People",
+        "Man, Male, Adult"
+      ],
+      [
+        "進める",
+        "Actions",
+        "Advance, Proceed, Promote, Ichidan, Transitive"
+      ],
+      [
+        "含める",
+        "Actions",
+        "Include, Contain, Ichidan, Transitive"
+      ],
+      [
+        "着く",
+        "Actions",
+        "Arrive, Reach, Godan, Intransitive"
+      ],
+      [
+        "厳しい",
+        "Descriptors",
+        "Strict, Severe, iAdjective"
+      ],
+      [
+        "女の子",
+        "People",
+        "Girl, Female, Child"
+      ],
+      [
+        "パソコン",
+        "Objects",
+        "Computer, Electronics, Technology"
+      ],
+      [
+        "可愛い",
+        "Descriptors",
+        "Cute, Attractive, Positive, iAdjective"
+      ],
+      [
+        "際",
+        "Time & Numbers",
+        "Occasion, Time, Situation"
+      ],
+      [
+        "途中",
+        "Time & Numbers",
+        "Middle, During, Time"
+      ],
+      [
+        "様子",
+        "Objects",
+        "Appearance, Situation, Condition"
+      ],
+      [
+        "ものすごい",
+        "Descriptors",
+        "Extremely, Amazing, Degree, iAdjective"
+      ],
+      [
+        "合う",
+        "Actions",
+        "Match, Fit, Meet, Godan, Intransitive"
+      ],
+      [
+        "済む",
+        "Actions",
+        "Finish, Complete, Godan, Intransitive"
+      ],
+      [
+        "通る",
+        "Actions",
+        "PassThrough, GoBy, Movement, Godan, Intransitive"
+      ],
+      [
+        "大人",
+        "People",
+        "Adult, Person"
+      ],
+      [
+        "事実",
+        "Objects",
+        "Fact, Truth, Abstract"
+      ],
+      [
+        "一年",
+        "Time & Numbers",
+        "OneYear, Year, Time"
+      ],
+      [
+        "描く",
+        "Actions",
+        "Draw, Paint, Create, Godan, Transitive"
+      ],
+      [
+        "驚く",
+        "Actions",
+        "BeSurprised, Emotion, Godan, Intransitive"
+      ],
+      [
+        "動物",
+        "People & Living Things",
+        "Animal, Living"
+      ],
+      [
+        "何度",
+        "Time & Numbers",
+        "HowManyTimes, Frequency, Question"
+      ],
+      [
+        "元々",
+        "Descriptors",
+        "Originally, Time, Adverb"
+      ],
+      [
+        "素晴らしい",
+        "Descriptors",
+        "Wonderful, Excellent, Positive, iAdjective"
+      ],
+      [
+        "座る",
+        "Actions",
+        "Sit, Position, Godan, Intransitive"
+      ],
+      [
+        "定める",
+        "Actions",
+        "Establish, Determine, Decide, Ichidan, Transitive"
+      ],
+      [
+        "機会",
+        "Objects",
+        "Opportunity, Chance, Occasion, Abstract"
+      ],
+      [
+        "楽しみ",
+        "Objects",
+        "Enjoyment, Anticipation, Emotion"
+      ],
+      [
+        "考え",
+        "Objects",
+        "Thought, Idea, Opinion, Abstract"
+      ],
+      [
+        "信じる",
+        "Actions",
+        "Believe, Trust, Mental, Ichidan, Transitive"
+      ],
+      [
+        "たまたま",
+        "Descriptors",
+        "ByChance, Coincidence, Adverb"
+      ],
+      [
+        "古い",
+        "Descriptors",
+        "Old, Age, iAdjective"
+      ],
+      [
+        "面",
+        "Objects",
+        "Surface, Face, Aspect"
+      ],
+      [
+        "三月",
+        "Time & Numbers",
+        "March, Month, Time"
+      ],
+      [
+        "常",
+        "Descriptors",
+        "Constant, Ordinary, Always, naAdjective"
+      ],
+      [
+        "ニュース",
+        "Objects",
+        "News, Media, Information"
+      ],
+      [
+        "元",
+        "Objects",
+        "Origin, Source, FormerState"
+      ],
+      [
+        "低い",
+        "Descriptors",
+        "Low, Height, Degree, iAdjective"
+      ],
+      [
+        "現われる",
+        "Actions",
+        "Appear, Emerge, Ichidan, Intransitive"
+      ],
+      [
+        "聞こえる",
+        "Actions",
+        "BeHeard, Hear, Perception, Ichidan, Intransitive"
+      ],
+      [
+        "曲",
+        "Objects",
+        "Song, Music, Composition"
+      ],
+      [
+        "過去",
+        "Time & Numbers",
+        "Past, History, Time"
+      ],
+      [
+        "思える",
+        "Actions",
+        "Seem, Appear, Mental, Ichidan, Intransitive"
+      ],
+      [
+        "明らか",
+        "Descriptors",
+        "Clear, Obvious, naAdjective"
+      ],
+      [
+        "土地",
+        "Places",
+        "Land, Area, Property"
+      ],
+      [
+        "振り返る",
+        "Actions",
+        "LookBack, Reflect, Godan, Transitive"
+      ],
+      [
+        "初め",
+        "Time & Numbers",
+        "Beginning, Start, Time"
+      ],
+      [
+        "息子",
+        "People",
+        "Son, Family, Male"
+      ],
+      [
+        "似る",
+        "Actions",
+        "Resemble, Comparison, Ichidan, Intransitive"
+      ],
+      [
+        "雨",
+        "Objects",
+        "Rain, Weather, Nature"
+      ],
+      [
+        "詳しい",
+        "Descriptors",
+        "Detailed, Knowledgeable, iAdjective"
+      ],
+      [
+        "ひどい",
+        "Descriptors",
+        "Terrible, Severe, Negative, iAdjective"
+      ],
+      [
+        "昨日",
+        "Time & Numbers",
+        "Yesterday, Time"
+      ],
+      [
+        "下りる",
+        "Actions",
+        "Descend, GetOff, Ichidan, Intransitive"
+      ],
+      [
+        "メール",
+        "Objects",
+        "Email, Communication, Technology"
+      ],
+      [
+        "喜ぶ",
+        "Actions",
+        "Rejoice, BeHappy, Emotion, Godan, Intransitive"
+      ],
+      [
+        "便利",
+        "Descriptors",
+        "Convenient, Useful, Positive, naAdjective"
+      ],
+      [
+        "迎える",
+        "Actions",
+        "Welcome, Meet, Receive, Ichidan, Transitive"
+      ],
+      [
+        "耳",
+        "People & Living Things",
+        "Ear, BodyPart, Human"
+      ],
+      [
+        "動き",
+        "Objects",
+        "Movement, Motion, Activity"
+      ],
+      [
+        "立場",
+        "Objects",
+        "Position, Standpoint, Role"
+      ],
+      [
+        "痛い",
+        "Descriptors",
+        "Painful, Health, iAdjective"
+      ],
+      [
+        "辺り",
+        "Places",
+        "Area, Around, Vicinity"
+      ],
+      [
+        "乗せる",
+        "Actions",
+        "PutOn, Carry, Ichidan, Transitive"
+      ],
+      [
+        "白い",
+        "Descriptors",
+        "White, Color, iAdjective"
+      ],
+      [
+        "用いる",
+        "Actions",
+        "Use, Employ, Formal, Ichidan, Transitive"
+      ],
+      [
+        "隣り",
+        "Places",
+        "NextTo, Neighbor, Location"
+      ],
+      [
+        "普段",
+        "Time & Numbers",
+        "Usually, Everyday, Time"
+      ],
+      [
+        "法律",
+        "Objects",
+        "Law, Government, Society"
+      ],
+      [
+        "妻",
+        "People",
+        "Wife, Family, Female"
+      ],
+      [
+        "繰り返す",
+        "Actions",
+        "Repeat, RepeatAction, Godan, Transitive"
+      ],
+      [
+        "泣く",
+        "Actions",
+        "Cry, Emotion, Godan, Intransitive"
+      ],
+      [
+        "七",
+        "Time & Numbers",
+        "Number, Seven"
+      ],
+      [
+        "おそらく",
+        "Descriptors",
+        "Probably, Probability, Adverb"
+      ],
+      [
+        "家庭",
+        "Places",
+        "Home, Household, Family"
+      ],
+      [
+        "払う",
+        "Actions",
+        "Pay, Remove, Godan, Transitive"
+      ],
+      [
+        "つながる",
+        "Actions",
+        "Connect, Relationship, Godan, Intransitive"
+      ],
+      [
+        "船",
+        "Objects",
+        "Ship, Boat, Vehicle, Transportation"
+      ],
+      [
+        "九月",
+        "Time & Numbers",
+        "September, Month, Time"
+      ],
+      [
+        "きっかけ",
+        "Objects",
+        "Trigger, Opportunity, Cause"
+      ],
+      [
+        "授業",
+        "Objects",
+        "Class, Lesson, Education"
+      ],
+      [
+        "亡くなる",
+        "Actions",
+        "PassAway, Death, Honorific, Godan, Intransitive"
+      ],
+      [
+        "止める",
+        "Actions",
+        "Stop, Halt, Ichidan, Transitive"
+      ],
+      [
+        "不思議",
+        "Descriptors",
+        "Strange, Mysterious, naAdjective"
+      ],
+      [
+        "茶",
+        "Food & Drink",
+        "Tea, Beverage, Drink"
+      ],
+      [
+        "直接",
+        "Descriptors",
+        "Directly, Direct, Adverb"
+      ],
+      [
+        "効果",
+        "Objects",
+        "Effect, Result, Abstract"
+      ],
+      [
+        "触れる",
+        "Actions",
+        "Touch, Mention, Ichidan, Transitive"
+      ],
+      [
+        "飼う",
+        "Actions",
+        "KeepPet, RaiseAnimal, Godan, Transitive"
+      ],
+      [
+        "しゃべる",
+        "Actions",
+        "Chat, Speak, Communication, Godan, Intransitive"
+      ],
+      [
+        "国民",
+        "People",
+        "Citizen, Population, Society"
+      ],
+      [
+        "さす",
+        "Actions",
+        "Point, StretchOut, OpenUmbrella, Godan, Transitive"
+      ],
+      [
+        "ずいぶん",
+        "Descriptors",
+        "Quite, Considerably, Degree, Adverb"
+      ],
+      [
+        "日本語",
+        "Objects",
+        "JapaneseLanguage, Language, Communication"
+      ],
+      [
+        "十月",
+        "Time & Numbers",
+        "October, Month, Time"
+      ],
+      [
+        "気分",
+        "Objects",
+        "Mood, Feeling, Emotion"
+      ],
+      [
+        "殺す",
+        "Actions",
+        "Kill, Destroy, Godan, Transitive"
+      ],
+      [
+        "特徴",
+        "Objects",
+        "Characteristic, Feature, Property"
+      ],
+      [
+        "神",
+        "People & Living Things",
+        "God, Deity, Religion"
+      ],
+      [
+        "暮らす",
+        "Actions",
+        "Live, Lifestyle, Godan, Intransitive"
+      ],
+      [
+        "飛ぶ",
+        "Actions",
+        "Fly, Jump, Movement, Godan, Intransitive"
+      ],
+      [
+        "終わり",
+        "Objects",
+        "End, Conclusion, Completion"
+      ],
+      [
+        "雑誌",
+        "Objects",
+        "Magazine, Reading, Media"
+      ],
+      [
+        "建物",
+        "Places",
+        "Building, Structure, Architecture, Location"
+      ],
+      [
+        "止まる",
+        "Actions",
+        "Stop, Halt, Godan, Intransitive"
+      ],
+      [
+        "一生懸命",
+        "Descriptors",
+        "HardWorking, Earnestly, Effort, Adverb, naAdjective"
+      ],
+      [
+        "変",
+        "Descriptors",
+        "Strange, Unusual, Negative, naAdjective"
+      ],
+      [
+        "十二月",
+        "Time & Numbers",
+        "December, Month, Time"
+      ],
+      [
+        "学ぶ",
+        "Actions",
+        "Learn, Study, Education, Godan, Transitive"
+      ],
+      [
+        "突然",
+        "Descriptors",
+        "Suddenly, Unexpected, Time, Adverb, naAdjective"
+      ],
+      [
+        "首",
+        "People & Living Things",
+        "Neck, BodyPart, Human"
+      ],
+      [
+        "ゆっくり",
+        "Descriptors",
+        "Slowly, Leisurely, Speed, Manner, Adverb"
+      ],
+      [
+        "目指す",
+        "Actions",
+        "AimFor, Pursue, Goal, Godan, Transitive"
+      ],
+      [
+        "一月",
+        "Time & Numbers",
+        "January, Month, Time"
+      ],
+      [
+        "成す",
+        "Actions",
+        "Accomplish, Achieve, Create, Godan, Transitive, Formal"
+      ],
+      [
+        "集める",
+        "Actions",
+        "Gather, Collect, Ichidan, Transitive"
+      ],
+      [
+        "失う",
+        "Actions",
+        "Lose, Loss, Godan, Transitive"
+      ],
+      [
+        "光",
+        "Objects",
+        "Light, Nature, Visual, Energy"
+      ],
+      [
+        "並ぶ",
+        "Actions",
+        "LineUp, StandInLine, Godan, Intransitive"
+      ],
+      [
+        "八月",
+        "Time & Numbers",
+        "August, Month, Time"
+      ],
+      [
+        "七月",
+        "Time & Numbers",
+        "July, Month, Time"
+      ],
+      [
+        "美しい",
+        "Descriptors",
+        "Beautiful, Appearance, Positive, iAdjective"
+      ],
+      [
+        "五月",
+        "Time & Numbers",
+        "May, Month, Time"
+      ],
+      [
+        "タバコ",
+        "Objects",
+        "Cigarette, Tobacco, Smoking, PersonalItem, Loanword"
+      ],
+      [
+        "後ろ",
+        "Places",
+        "Behind, Back, Position, Direction"
+      ],
+      [
+        "六月",
+        "Time & Numbers",
+        "June, Month, Time"
+      ],
+      [
+        "異なる",
+        "Actions",
+        "Differ, Vary, Comparison, Godan, Intransitive"
+      ],
+      [
+        "十一月",
+        "Time & Numbers",
+        "November, Month, Time"
+      ],
+      [
+        "新た",
+        "Descriptors",
+        "New, Fresh, Change, naAdjective"
+      ],
+      [
+        "飛行機",
+        "Objects",
+        "Airplane, Aircraft, Vehicle, Transportation, Travel"
+      ],
+      [
+        "至る",
+        "Actions",
+        "Reach, ArriveAt, Result, Godan, Intransitive, Formal"
+      ],
+      [
+        "午前",
+        "Time & Numbers",
+        "Morning, AM, Time"
+      ],
+      [
+        "育てる",
+        "Actions",
+        "Raise, Grow, Educate, Ichidan, Transitive"
+      ],
+      [
+        "種類",
+        "Objects",
+        "Type, Kind, Category, Classification"
+      ],
+      [
+        "商品",
+        "Objects",
+        "Product, Goods, Shopping, Business"
+      ],
+      [
+        "生じる",
+        "Actions",
+        "Occur, Arise, Result, Ichidan, Intransitive, Formal"
+      ],
+      [
+        "イギリス",
+        "Places",
+        "UnitedKingdom, Country, Europe, Geography, Travel"
+      ],
+      [
+        "大好き",
+        "Descriptors",
+        "Love, StrongPreference, Positive, Emotion, naAdjective"
+      ],
+      [
+        "語る",
+        "Actions",
+        "Tell, Narrate, Discuss, Communication, Godan, Transitive"
+      ],
+      [
+        "胸",
+        "People & Living Things",
+        "Chest, Breast, BodyPart, Human"
+      ],
+      [
+        "材料",
+        "Objects",
+        "Material, Ingredient, Resource, Manufacturing"
+      ],
+      [
+        "広がる",
+        "Actions",
+        "Spread, Expand, Growth, Godan, Intransitive"
+      ],
+      [
+        "きちんと",
+        "Descriptors",
+        "Properly, Neatly, Correctly, Manner, Adverb"
+      ],
+      [
+        "そちら",
+        "Function Words",
+        "Demonstrative, Direction, PolitePronoun"
+      ],
+      [
+        "勝つ",
+        "Actions",
+        "Win, Competition, Sports, Godan, Intransitive"
+      ],
+      [
+        "捨てる",
+        "Actions",
+        "ThrowAway, Discard, Ichidan, Transitive"
+      ],
+      [
+        "幸せ",
+        "Descriptors",
+        "Happy, Happiness, Positive, Emotion, naAdjective"
+      ],
+      [
+        "通す",
+        "Actions",
+        "PassThrough, LetThrough, Continue, Godan, Transitive"
+      ],
+      [
+        "横",
+        "Places",
+        "Side, Beside, Horizontal, Position"
+      ],
+      [
+        "伴う",
+        "Actions",
+        "Accompany, Involve, Association, Godan, Transitive"
+      ],
+      [
+        "命",
+        "Objects",
+        "Life, Existence, Health, Abstract"
+      ],
+      [
+        "流れ",
+        "Objects",
+        "Flow, Current, Sequence, Movement"
+      ],
+      [
+        "育つ",
+        "Actions",
+        "Grow, Develop, Godan, Intransitive"
+      ],
+      [
+        "馬",
+        "People & Living Things",
+        "Horse, Animal, Mammal, FarmAnimal, Rideable"
+      ],
+      [
+        "完全",
+        "Descriptors",
+        "Complete, Perfect, Degree, naAdjective"
+      ],
+      [
+        "学生",
+        "People",
+        "Student, Education, School, Human"
+      ],
+      [
+        "性格",
+        "Objects",
+        "Personality, Character, Psychology, Abstract"
+      ],
+      [
+        "死",
+        "Objects",
+        "Death, LifeEvent, Abstract"
+      ],
+      [
+        "おかしい",
+        "Descriptors",
+        "Strange, Funny, Incorrect, iAdjective"
+      ],
+      [
+        "近所",
+        "Places",
+        "Neighborhood, LocalArea, Residence, Nearby"
+      ],
+      [
+        "張る",
+        "Actions",
+        "Stretch, PutUp, Stick, Godan, Transitive"
+      ],
+      [
+        "ご飯",
+        "Food & Drink",
+        "Rice, Meal, StapleFood, Edible"
+      ],
+      [
+        "危険",
+        "Descriptors",
+        "Dangerous, Risk, Negative, naAdjective"
+      ],
+      [
+        "海外",
+        "Places",
+        "Overseas, Foreign, Travel, Geography"
+      ],
+      [
+        "表",
+        "Objects",
+        "Surface, Front, Table, Chart, Document"
+      ],
+      [
+        "八",
+        "Time & Numbers",
+        "Number, Eight"
+      ],
+      [
+        "食べ物",
+        "Food & Drink",
+        "Food, Meal, Edible, GeneralFood"
+      ],
+      [
+        "借りる",
+        "Actions",
+        "Borrow, Rent, Ichidan, Transitive"
+      ],
+      [
+        "二月",
+        "Time & Numbers",
+        "February, Month, Time"
+      ],
+      [
+        "月",
+        "Time & Numbers",
+        "Month, Moon, Time"
+      ],
+      [
+        "世の中",
+        "Objects",
+        "Society, World, SocialLife, Abstract"
+      ],
+      [
+        "インターネット",
+        "Objects",
+        "Internet, Technology, Communication, Information, Loanword"
+      ],
+      [
+        "旅",
+        "Actions",
+        "Travel, Journey, Leisure"
+      ],
+      [
+        "二年",
+        "Time & Numbers",
+        "TwoYears, Duration, Year"
+      ],
+      [
+        "同様",
+        "Descriptors",
+        "Similar, Same, Comparison, naAdjective"
+      ],
+      [
+        "一般",
+        "Descriptors",
+        "General, Ordinary, Society, naAdjective"
+      ],
+      [
+        "三年",
+        "Time & Numbers",
+        "ThreeYears, Duration, Year"
+      ],
+      [
+        "押す",
+        "Actions",
+        "Push, Press, Godan, Transitive"
+      ],
+      [
+        "負ける",
+        "Actions",
+        "Lose, Competition, Sports, Ichidan, Intransitive"
+      ],
+      [
+        "そば",
+        "Places",
+        "Nearby, Beside, Location"
+      ],
+      [
+        "減る",
+        "Actions",
+        "Decrease, Decline, Godan, Intransitive"
+      ],
+      [
+        "記事",
+        "Objects",
+        "Article, News, Media, Writing"
+      ],
+      [
+        "本人",
+        "People",
+        "PersonThemself, Identity, Human"
+      ],
+      [
+        "焼く",
+        "Actions",
+        "Bake, Grill, Burn, Cooking, Godan, Transitive"
+      ],
+      [
+        "たまに",
+        "Descriptors",
+        "Occasionally, Frequency, Adverb"
+      ],
+      [
+        "慣れる",
+        "Actions",
+        "GetUsedTo, Adapt, Experience, Ichidan, Intransitive"
+      ],
+      [
+        "出会う",
+        "Actions",
+        "Meet, Encounter, Relationship, Godan, Intransitive"
+      ],
+      [
+        "自ら",
+        "People",
+        "Oneself, Self, Reflexive, Formal"
+      ],
+      [
+        "私自身",
+        "People",
+        "Myself, FirstPerson, Reflexive, Pronoun"
+      ],
+      [
+        "半分",
+        "Time & Numbers",
+        "Half, Fraction, Quantity"
+      ],
+      [
+        "医者",
+        "People",
+        "Doctor, Occupation, Medical, Human"
+      ],
+      [
+        "振る",
+        "Actions",
+        "Shake, Wave, Swing, Godan, Transitive"
+      ],
+      [
+        "関心",
+        "Objects",
+        "Interest, Attention, Curiosity, Abstract"
+      ],
+      [
+        "明るい",
+        "Descriptors",
+        "Bright, Cheerful, Positive, iAdjective"
+      ],
+      [
+        "生徒",
+        "People",
+        "Pupil, Student, Education, Human"
+      ],
+      [
+        "従う",
+        "Actions",
+        "Follow, Obey, Comply, Godan, Intransitive"
+      ],
+      [
+        "占める",
+        "Actions",
+        "Occupy, AccountFor, Ichidan, Transitive"
+      ],
+      [
+        "選手",
+        "People",
+        "Athlete, Player, Sports, Occupation"
+      ],
+      [
+        "分",
+        "Time & Numbers",
+        "Minute, Portion, Amount, Counter"
+      ],
+      [
+        "実家",
+        "Places",
+        "ParentsHome, FamilyHome, Residence, Origin"
+      ],
+      [
+        "名",
+        "Objects",
+        "Name, Title, Counter, Identity"
+      ],
+      [
+        "運ぶ",
+        "Actions",
+        "Carry, Transport, Move, Godan, Transitive"
+      ],
+      [
+        "正しい",
+        "Descriptors",
+        "Correct, Right, Accurate, iAdjective"
+      ],
+      [
+        "表わす",
+        "Actions",
+        "Express, Represent, Show, Godan, Transitive"
+      ],
+      [
+        "毎年",
+        "Time & Numbers",
+        "EveryYear, Frequency, Time"
+      ],
+      [
+        "文字",
+        "Objects",
+        "Character, Letter, Writing, Language"
+      ],
+      [
+        "空",
+        "Places",
+        "Sky, Nature, Outdoor"
+      ],
+      [
+        "明日",
+        "Time & Numbers",
+        "Tomorrow, Future, Time"
+      ],
+      [
+        "役割",
+        "Objects",
+        "Role, Responsibility, Function, Abstract"
+      ],
+      [
+        "地球",
+        "Places",
+        "Earth, Planet, Geography"
+      ],
+      [
+        "個人",
+        "People",
+        "Individual, Person, Human"
+      ],
+      [
+        "消える",
+        "Actions",
+        "Disappear, Vanish, Ichidan, Intransitive"
+      ],
+      [
+        "激しい",
+        "Descriptors",
+        "Intense, Violent, Strong, iAdjective"
+      ],
+      [
+        "短い",
+        "Descriptors",
+        "Short, Length, Duration, iAdjective"
+      ],
+      [
+        "薬",
+        "Food & Drink",
+        "Medicine, Health, Medical"
+      ],
+      [
+        "おなか",
+        "People & Living Things",
+        "Stomach, BodyPart, Human"
+      ],
+      [
+        "ボール",
+        "Objects",
+        "Ball, Sports, Equipment"
+      ],
+      [
+        "少年",
+        "People",
+        "Boy, Child, Male"
+      ],
+      [
+        "方向",
+        "Objects",
+        "Direction, Orientation, Abstract"
+      ],
+      [
+        "遅い",
+        "Descriptors",
+        "Slow, Late, Time, iAdjective"
+      ],
+      [
+        "資料",
+        "Objects",
+        "Material, Document, Reference, Information"
+      ],
+      [
+        "扱う",
+        "Actions",
+        "Handle, DealWith, Godan, Transitive"
+      ],
+      [
+        "ヨーロッパ",
+        "Places",
+        "Europe, Continent, Geography"
+      ],
+      [
+        "意外",
+        "Descriptors",
+        "Unexpected, Surprising, naAdjective"
+      ],
+      [
+        "何回",
+        "Time & Numbers",
+        "HowManyTimes, Frequency, Question"
+      ],
+      [
+        "政府",
+        "Objects",
+        "Government, Politics, Organization"
+      ],
+      [
+        "分ける",
+        "Actions",
+        "Divide, Separate, Ichidan, Transitive"
+      ],
+      [
+        "段階",
+        "Objects",
+        "Stage, Step, Level, Abstract"
+      ],
+      [
+        "量",
+        "Objects",
+        "Quantity, Amount, Measurement"
+      ],
+      [
+        "田舎",
+        "Places",
+        "Countryside, Rural, Nature"
+      ],
+      [
+        "スポーツ",
+        "Actions",
+        "Sports, Exercise, Recreation"
+      ],
+      [
+        "感覚",
+        "Objects",
+        "Sense, Feeling, Perception"
+      ],
+      [
+        "地元",
+        "Places",
+        "LocalArea, Hometown, Region"
+      ],
+      [
+        "勝手",
+        "Descriptors",
+        "Selfish, Convenient, naAdjective"
+      ],
+      [
+        "利く",
+        "Actions",
+        "BeEffective, Work, Function, Godan, Intransitive"
+      ],
+      [
+        "勤める",
+        "Actions",
+        "Work, Employment, Ichidan, Intransitive"
+      ],
+      [
+        "吸う",
+        "Actions",
+        "Inhale, Smoke, Godan, Transitive"
+      ],
+      [
+        "流す",
+        "Actions",
+        "Flow, LetFlow, Godan, Transitive"
+      ],
+      [
+        "急",
+        "Descriptors",
+        "Sudden, Urgent, naAdjective"
+      ],
+      [
+        "勧める",
+        "Actions",
+        "Recommend, Suggest, Ichidan, Transitive"
+      ],
+      [
+        "年齢",
+        "Objects",
+        "Age, PersonalInformation"
+      ],
+      [
+        "フランス",
+        "Places",
+        "France, Country, Europe"
+      ],
+      [
+        "仕方",
+        "Objects",
+        "Method, Way, Abstract"
+      ],
+      [
+        "疲れる",
+        "Actions",
+        "BecomeTired, Health, Ichidan, Intransitive"
+      ],
+      [
+        "落とす",
+        "Actions",
+        "Drop, Lose, Ichidan, Transitive"
+      ],
+      [
+        "人気",
+        "Objects",
+        "Popularity, Reputation, Abstract"
+      ],
+      [
+        "弱い",
+        "Descriptors",
+        "Weak, Strength, iAdjective"
+      ],
+      [
+        "まとめる",
+        "Actions",
+        "Organize, Summarize, Ichidan, Transitive"
+      ],
+      [
+        "格好",
+        "Objects",
+        "Appearance, Style, Shape"
+      ],
+      [
+        "渡る",
+        "Actions",
+        "Cross, Traverse, Godan, Intransitive"
+      ],
+      [
+        "患者",
+        "People",
+        "Patient, Medical, Human"
+      ],
+      [
+        "壁",
+        "Objects",
+        "Wall, Building, Structure"
+      ],
+      [
+        "道路",
+        "Places",
+        "Road, Transportation, Infrastructure"
+      ],
+      [
+        "他人",
+        "People",
+        "Stranger, OtherPerson, Human"
+      ],
+      [
+        "空気",
+        "Objects",
+        "Air, Atmosphere, Nature"
+      ],
+      [
+        "去年",
+        "Time & Numbers",
+        "LastYear, Past, Time"
+      ],
+      [
+        "肩",
+        "People & Living Things",
+        "Shoulder, BodyPart, Human"
+      ],
+      [
+        "知れる",
+        "Actions",
+        "BecomeKnown, Ichidan, Intransitive"
+      ],
+      [
+        "匂い",
+        "Objects",
+        "Smell, Odor, Sense"
+      ],
+      [
+        "十年",
+        "Time & Numbers",
+        "TenYears, Duration, Time"
+      ],
+      [
+        "右",
+        "Places",
+        "RightSide, Direction, Position"
+      ],
+      [
+        "全体",
+        "Objects",
+        "Whole, Entirety, Abstract"
+      ],
+      [
+        "話題",
+        "Objects",
+        "Topic, Conversation, Communication"
+      ],
+      [
+        "雪",
+        "Objects",
+        "Snow, Weather, Nature"
+      ],
+      [
+        "ポイント",
+        "Objects",
+        "Point, KeyPoint, Score"
+      ],
+      [
+        "十",
+        "Time & Numbers",
+        "Number, Ten"
+      ],
+      [
+        "仲間",
+        "People",
+        "Companion, Friend, Group"
+      ],
+      [
+        "知識",
+        "Objects",
+        "Knowledge, Information, Learning"
+      ],
+      [
+        "緑",
+        "Objects",
+        "Green, Color"
+      ],
+      [
+        "狭い",
+        "Descriptors",
+        "Narrow, Small, iAdjective"
+      ],
+      [
+        "一時間",
+        "Time & Numbers",
+        "OneHour, Duration, Time"
+      ],
+      [
+        "マンション",
+        "Places",
+        "Apartment, Residence, Housing"
+      ],
+      [
+        "伯父",
+        "People",
+        "Uncle, Family, Male"
+      ],
+      [
+        "時々",
+        "Time & Numbers",
+        "Sometimes, Frequency, Time"
+      ],
+      [
+        "産む／生む",
+        "Actions",
+        "GiveBirth, Produce, Create, Godan, Transitive"
+      ],
+      [
+        "降る",
+        "Actions",
+        "Fall, Rain, Snow, Godan, Intransitive"
+      ],
+      [
+        "落ち着く",
+        "Actions",
+        "CalmDown, Settle, Godan, Intransitive"
+      ],
+      [
+        "割合",
+        "Objects",
+        "Ratio, Percentage, Measurement"
+      ],
+      [
+        "血",
+        "People & Living Things",
+        "Blood, BodyPart, Human"
+      ],
+      [
+        "応ずる／応じる",
+        "Actions",
+        "Respond, Answer, Ichidan, Transitive"
+      ],
+      [
+        "涙",
+        "Objects",
+        "Tears, Emotion, Body"
+      ],
+      [
+        "表情",
+        "Objects",
+        "FacialExpression, Emotion, Appearance"
+      ],
+      [
+        "逃げる",
+        "Actions",
+        "Escape, RunAway, Ichidan, Intransitive"
+      ],
+      [
+        "楽",
+        "Descriptors",
+        "Easy, Comfortable, naAdjective"
+      ],
+      [
+        "ごみ",
+        "Objects",
+        "Trash, Waste"
+      ],
+      [
+        "警察",
+        "Objects",
+        "Police, Government, PublicService"
+      ],
+      [
+        "兄",
+        "People",
+        "OlderBrother, Family, Male"
+      ],
+      [
+        "代わり",
+        "Objects",
+        "Substitute, Replacement, Abstract"
+      ],
+      [
+        "細かい",
+        "Descriptors",
+        "Fine, Detailed, Small, iAdjective"
+      ],
+      [
+        "静か",
+        "Descriptors",
+        "Quiet, Calm, naAdjective"
+      ],
+      [
+        "腰",
+        "People & Living Things",
+        "Waist, Hip, BodyPart, Human"
+      ],
+      [
+        "瞬間",
+        "Time & Numbers",
+        "Moment, Instant, Time"
+      ],
+      [
+        "近付く",
+        "Actions",
+        "Approach, BecomeNear, Godan, Intransitive"
+      ],
+      [
+        "わずか",
+        "Descriptors",
+        "Slight, SmallAmount, naAdjective"
+      ],
+      [
+        "暗い",
+        "Descriptors",
+        "Dark, Gloomy, iAdjective"
+      ],
+      [
+        "届く",
+        "Actions",
+        "Arrive, Reach, Deliver, Godan, Intransitive"
+      ],
+      [
+        "窓",
+        "Objects",
+        "Window, Building, Structure"
+      ],
+      [
+        "ストレス",
+        "Objects",
+        "Stress, Health, Emotion"
+      ],
+      [
+        "伸ばす",
+        "Actions",
+        "Stretch, Extend, Grow, Godan, Transitive"
+      ],
+      [
+        "ドア",
+        "Objects",
+        "Door, Building, Structure"
+      ],
+      [
+        "森",
+        "Places",
+        "Forest, Nature, Outdoor"
+      ]
+    ]
+  },
+  {
+    "name": "Function Words",
+    "address": "A1:C216",
+    "rows": 216,
+    "cols": 3,
+    "values": [
+      [
+        "Word",
+        "Category",
+        "Tags"
+      ],
+      [
+        "人間",
+        "People",
+        "Person, Human, Living"
+      ],
+      [
+        "学校",
+        "Places",
+        "School, Education, Public, Building"
+      ],
+      [
+        "会社",
+        "Places",
+        "Company, Office, Business, Workplace"
+      ],
+      [
+        "郵便局",
+        "Places",
+        "PostOffice, Mail, Government, Public"
+      ],
+      [
+        "映画館",
+        "Places",
+        "MovieTheater, Entertainment, Building"
+      ],
+      [
+        "公園",
+        "Places",
+        "Park, Nature, Recreation, Outdoor"
+      ],
+      [
+        "料理",
+        "Actions",
+        "Cooking, Food, SuruVerb"
+      ],
+      [
+        "意見",
+        "Objects",
+        "Opinion, Communication, Abstract"
+      ],
+      [
+        "夢",
+        "Objects",
+        "Dream, Goal, Abstract"
+      ],
+      [
+        "目標",
+        "Objects",
+        "Goal, Achievement, Planning, Abstract"
+      ],
+      [
+        "成功",
+        "Objects",
+        "Success, Achievement, Positive"
+      ],
+      [
+        "発展",
+        "Actions",
+        "Development, Growth, Change, SuruVerb"
+      ],
+      [
+        "問題",
+        "Objects",
+        "Problem, Issue, Abstract"
+      ],
+      [
+        "解決",
+        "Actions",
+        "Solve, ProblemSolving, SuruVerb"
+      ],
+      [
+        "議論",
+        "Actions",
+        "Discussion, Communication, Debate, SuruVerb"
+      ],
+      [
+        "意識",
+        "Objects",
+        "Awareness, Mind, Psychology"
+      ],
+      [
+        "価値",
+        "Objects",
+        "Value, Philosophy, Abstract"
+      ],
+      [
+        "制度",
+        "Objects",
+        "System, Government, Society"
+      ],
+      [
+        "分析",
+        "Actions",
+        "Analysis, Research, Science, SuruVerb"
+      ],
+      [
+        "評価",
+        "Actions",
+        "Evaluation, Judgment, SuruVerb"
+      ],
+      [
+        "主張",
+        "Actions",
+        "Claim, Opinion, Communication, SuruVerb"
+      ],
+      [
+        "根拠",
+        "Objects",
+        "Evidence, Logic, Abstract"
+      ],
+      [
+        "普遍",
+        "Descriptors",
+        "Universal, Philosophy, naAdjective"
+      ],
+      [
+        "抽象",
+        "Descriptors",
+        "Abstract, Philosophy, naAdjective"
+      ],
+      [
+        "具体",
+        "Descriptors",
+        "Concrete, Specific, naAdjective"
+      ],
+      [
+        "認識",
+        "Actions",
+        "Recognize, Understanding, SuruVerb"
+      ],
+      [
+        "存在",
+        "Actions",
+        "Existence, Philosophy, SuruVerb"
+      ],
+      [
+        "現実",
+        "Objects",
+        "Reality, Philosophy"
+      ],
+      [
+        "理想",
+        "Objects",
+        "Ideal, Philosophy"
+      ],
+      [
+        "規範",
+        "Objects",
+        "Standard, Ethics, Society"
+      ],
+      [
+        "倫理",
+        "Objects",
+        "Ethics, Philosophy"
+      ],
+      [
+        "体系",
+        "Objects",
+        "System, Organization"
+      ],
+      [
+        "介入",
+        "Actions",
+        "Intervention, Politics, SuruVerb"
+      ],
+      [
+        "転換",
+        "Actions",
+        "Change, Transition, SuruVerb"
+      ],
+      [
+        "革新",
+        "Actions",
+        "Innovation, Technology, SuruVerb"
+      ],
+      [
+        "相対",
+        "Descriptors",
+        "Relative, Comparison, naAdjective"
+      ],
+      [
+        "絶対",
+        "Descriptors",
+        "Absolute, Degree, naAdjective"
+      ],
+      [
+        "妥当",
+        "Descriptors",
+        "Appropriate, Reasonable, naAdjective"
+      ],
+      [
+        "精緻",
+        "Descriptors",
+        "Precise, Detailed, naAdjective"
+      ],
+      [
+        "淵源",
+        "Objects",
+        "Origin, Source, Philosophy"
+      ],
+      [
+        "やる",
+        "Actions",
+        "Do, Perform, Give, Casual, Godan, Transitive"
+      ],
+      [
+        "中",
+        "Objects",
+        "Middle, Inside, Time, Position"
+      ],
+      [
+        "いる",
+        "Actions",
+        "Exist, Living, Ichidan, Intransitive"
+      ],
+      [
+        "できる",
+        "Actions",
+        "Ability, Possible, Achievement, Ichidan, Intransitive"
+      ],
+      [
+        "後",
+        "Time & Numbers",
+        "After, Later, Time"
+      ],
+      [
+        "方",
+        "Objects",
+        "Direction, Method, Person, Abstract"
+      ],
+      [
+        "訳",
+        "Objects",
+        "Reason, Meaning, Explanation, Abstract"
+      ],
+      [
+        "本当",
+        "Descriptors",
+        "Truth, Real, Positive, naAdjective"
+      ],
+      [
+        "持つ",
+        "Actions",
+        "Hold, Possess, Carry, Godan, Transitive"
+      ],
+      [
+        "出る",
+        "Actions",
+        "Exit, Leave, Appear, Movement, Ichidan, Intransitive"
+      ],
+      [
+        "すごい",
+        "Descriptors",
+        "Amazing, Great, Degree, Positive, iAdjective"
+      ],
+      [
+        "考える",
+        "Actions",
+        "Think, Mental, Decision, Ichidan, Transitive"
+      ],
+      [
+        "入る",
+        "Actions",
+        "Enter, Movement, Godan, Intransitive"
+      ],
+      [
+        "作る",
+        "Actions",
+        "Create, Make, Build, Godan, Transitive"
+      ],
+      [
+        "聞く／聴く",
+        "Actions",
+        "Listen, Hear, Communication, Perception, Godan, Transitive"
+      ],
+      [
+        "話",
+        "Objects",
+        "Story, Conversation, Communication"
+      ],
+      [
+        "使う",
+        "Actions",
+        "Use, Employ, Godan, Transitive"
+      ],
+      [
+        "日本",
+        "Places",
+        "Country, Japan, Geography, Travel"
+      ],
+      [
+        "風",
+        "Objects",
+        "Wind, Nature, Weather"
+      ],
+      [
+        "前",
+        "Time & Numbers",
+        "Before, Front, Time, Position"
+      ],
+      [
+        "多い",
+        "Descriptors",
+        "Many, Quantity, iAdjective"
+      ],
+      [
+        "子供",
+        "People",
+        "Child, Person, Human"
+      ],
+      [
+        "非常",
+        "Descriptors",
+        "Very, Degree, Adverb"
+      ],
+      [
+        "気",
+        "Objects",
+        "Mind, Spirit, Emotion, Abstract"
+      ],
+      [
+        "取る",
+        "Actions",
+        "Take, Obtain, Receive, Godan, Transitive"
+      ],
+      [
+        "うち",
+        "Places",
+        "Home, Residence, Family"
+      ],
+      [
+        "知る",
+        "Actions",
+        "Know, Learn, Mental, Godan, Transitive"
+      ],
+      [
+        "感じ",
+        "Objects",
+        "Feeling, Sense, Emotion"
+      ],
+      [
+        "いろいろ",
+        "Descriptors",
+        "Various, Variety, Quantity, naAdjective"
+      ],
+      [
+        "一",
+        "Time & Numbers",
+        "Number, One"
+      ],
+      [
+        "行なう",
+        "Actions",
+        "Perform, Conduct, Business, Godan, Transitive"
+      ],
+      [
+        "一番",
+        "Descriptors",
+        "First, Best, Superlative, Degree"
+      ],
+      [
+        "二",
+        "Time & Numbers",
+        "Number, Two"
+      ],
+      [
+        "同じ",
+        "Descriptors",
+        "Same, Equal, Comparison, naAdjective"
+      ],
+      [
+        "書く",
+        "Actions",
+        "Write, Communication, Godan, Transitive"
+      ],
+      [
+        "入れる",
+        "Actions",
+        "Insert, PutIn, Ichidan, Transitive"
+      ],
+      [
+        "次",
+        "Time & Numbers",
+        "Next, Sequence, Time"
+      ],
+      [
+        "結構",
+        "Descriptors",
+        "Enough, Quite, Degree, naAdjective"
+      ],
+      [
+        "目／眼",
+        "People & Living Things",
+        "Eye, BodyPart, Human"
+      ],
+      [
+        "頃",
+        "Time & Numbers",
+        "ApproximateTime, Time"
+      ],
+      [
+        "上",
+        "Places",
+        "Above, Top, Position"
+      ],
+      [
+        "家",
+        "Places",
+        "Home, House, Residence"
+      ],
+      [
+        "付く",
+        "Actions",
+        "Attach, Arrive, BecomeAttached, Godan, Intransitive"
+      ],
+      [
+        "日／陽",
+        "Time & Numbers",
+        "Day, Sun, Time"
+      ],
+      [
+        "出す",
+        "Actions",
+        "TakeOut, Produce, Submit, Godan, Transitive"
+      ],
+      [
+        "一人",
+        "Time & Numbers",
+        "Counter, PersonCount, OnePerson"
+      ],
+      [
+        "違う",
+        "Actions",
+        "Differ, Comparison, Godan, Intransitive"
+      ],
+      [
+        "受ける",
+        "Actions",
+        "Receive, Accept, TakeExam, Ichidan, Transitive"
+      ],
+      [
+        "言葉",
+        "Objects",
+        "Word, Language, Communication"
+      ],
+      [
+        "少し",
+        "Descriptors",
+        "SmallAmount, Quantity, Adverb"
+      ],
+      [
+        "買う",
+        "Actions",
+        "Buy, Shopping, Commerce, Godan, Transitive"
+      ],
+      [
+        "手",
+        "People & Living Things",
+        "Hand, BodyPart, Human"
+      ],
+      [
+        "返る",
+        "Actions",
+        "Return, Revert, Godan, Intransitive"
+      ],
+      [
+        "のである",
+        "Explanation, Formal",
+        null
+      ],
+      [
+        "しか",
+        "Limitation, NegativePolarity",
+        null
+      ],
+      [
+        "こんな",
+        "Demonstrative",
+        null
+      ],
+      [
+        "なんて",
+        "Emphasis, Example",
+        null
+      ],
+      [
+        "において",
+        "Location, Context, Formal",
+        null
+      ],
+      [
+        "べし",
+        "Obligation, Classical",
+        null
+      ],
+      [
+        "による",
+        "Cause, Means",
+        null
+      ],
+      [
+        "ほとんど",
+        "Quantity, Almost",
+        null
+      ],
+      [
+        "らしい",
+        "Appearance, Hearsay, Typical",
+        null
+      ],
+      [
+        "ていただく",
+        "ReceivingFavor, Honorific, Auxiliary",
+        null
+      ],
+      [
+        "さらに",
+        "Addition, Degree",
+        null
+      ],
+      [
+        "及び",
+        "And, Formal, Conjunction",
+        null
+      ],
+      [
+        "もちろん",
+        "Agreement, Certainly",
+        null
+      ],
+      [
+        "ておく",
+        "Preparation, Auxiliary",
+        null
+      ],
+      [
+        "に対して",
+        "Target, Contrast",
+        null
+      ],
+      [
+        "ばかり",
+        "Only, Approximation",
+        null
+      ],
+      [
+        "なぜ",
+        "Question, Reason",
+        null
+      ],
+      [
+        "全く",
+        "Degree, Completely, Adverb",
+        null
+      ],
+      [
+        "なかなか",
+        "Degree, Difficulty, Adverb",
+        null
+      ],
+      [
+        "もっと",
+        "Comparison, More",
+        null
+      ],
+      [
+        "ことができる",
+        "Ability, GrammarPattern",
+        null
+      ],
+      [
+        "もし",
+        "Conditional",
+        null
+      ],
+      [
+        "全然",
+        "NegativeEmphasis, Degree",
+        null
+      ],
+      [
+        "あれ",
+        "Demonstrative",
+        null
+      ],
+      [
+        "どんな",
+        "Interrogative, Description, NounModifier",
+        null
+      ],
+      [
+        "ことになる",
+        "Result, DecisionByCircumstance, GrammarPattern",
+        null
+      ],
+      [
+        "どの",
+        "Interrogative, Demonstrative, NounModifier",
+        null
+      ],
+      [
+        "いわゆる",
+        "SoCalled, Definition, NounModifier",
+        null
+      ],
+      [
+        "わ",
+        "SentenceEnding, Emphasis, FeminineSpeech",
+        null
+      ],
+      [
+        "により",
+        "Cause, Means, Agent, Formal",
+        null
+      ],
+      [
+        "ために",
+        "Purpose, Reason, GrammarPattern",
+        null
+      ],
+      [
+        "に対する",
+        "Target, Relation, NounModifier",
+        null
+      ],
+      [
+        "じゃ",
+        "Copula, Casual, Contraction",
+        null
+      ],
+      [
+        "てある",
+        "ResultingState, Preparation, Auxiliary",
+        null
+      ],
+      [
+        "における",
+        "Context, Location, Formal, NounModifier",
+        null
+      ],
+      [
+        "はず",
+        "Expectation, Supposition, GrammarPattern",
+        null
+      ],
+      [
+        "なければいけない",
+        "Obligation, Necessity, NegativeConditional",
+        null
+      ],
+      [
+        "ですから",
+        "Reason, Therefore, Polite",
+        null
+      ],
+      [
+        "に関する",
+        "About, Relation, NounModifier",
+        null
+      ],
+      [
+        "一応",
+        "Qualification, Tentative, DiscourseAdverb",
+        null
+      ],
+      [
+        "つまり",
+        "Summary, InOtherWords, Conjunction",
+        null
+      ],
+      [
+        "以上",
+        "Minimum, Limit, Comparison, Formal",
+        null
+      ],
+      [
+        "こそ",
+        "Emphasis, FocusParticle",
+        null
+      ],
+      [
+        "てもいい",
+        "Permission, GrammarPattern",
+        null
+      ],
+      [
+        "しかも",
+        "Addition, Furthermore, Conjunction",
+        null
+      ],
+      [
+        "でない",
+        "Negation, Copula",
+        null
+      ],
+      [
+        "なければならない",
+        "Obligation, Necessity, GrammarPattern",
+        null
+      ],
+      [
+        "どうしても",
+        "Emphasis, Inevitability, Adverb",
+        null
+      ],
+      [
+        "のに",
+        "Contrast, UnexpectedResult, Conjunction",
+        null
+      ],
+      [
+        "どちら",
+        "Interrogative, Choice, Demonstrative",
+        null
+      ],
+      [
+        "ちゃんと",
+        "Degree, Properly, Adverb",
+        null
+      ],
+      [
+        "てほしい",
+        "DesireForOthers, GrammarPattern",
+        null
+      ],
+      [
+        "いただく",
+        "HonorificReceive, Auxiliary",
+        null
+      ],
+      [
+        "でございます",
+        "FormalCopula, Honorific",
+        null
+      ],
+      [
+        "よる",
+        "Means, Cause, GrammarUsage",
+        null
+      ],
+      [
+        "ずつ",
+        "Distribution, Quantity",
+        null
+      ],
+      [
+        "取り敢えず",
+        "Sequence, ForNow, Adverb",
+        null
+      ],
+      [
+        "ところが",
+        "Contrast, UnexpectedResult, Conjunction",
+        null
+      ],
+      [
+        "それでも",
+        "Concession, Nevertheless, Conjunction",
+        null
+      ],
+      [
+        "要するに",
+        "Summary, InOtherWords, Conjunction",
+        null
+      ],
+      [
+        "に関して",
+        "About, Relation, Formal",
+        null
+      ],
+      [
+        "のみ",
+        "Only, Limitation, Formal",
+        null
+      ],
+      [
+        "だが",
+        "Contrast, Conjunction",
+        null
+      ],
+      [
+        "いずれ",
+        "Eventually, Either, Indefinite",
+        null
+      ],
+      [
+        "申し上げる",
+        "HumbleSpeech, Say, HonorificVerb",
+        null
+      ],
+      [
+        "是非",
+        "Certainly, StrongRequest, Adverb",
+        null
+      ],
+      [
+        "さえ",
+        "Even, Emphasis, Particle",
+        null
+      ],
+      [
+        "なお",
+        "Furthermore, Additional, Conjunction",
+        null
+      ],
+      [
+        "ぞ",
+        "SentenceEnding, Emphasis, MasculineSpeech",
+        null
+      ],
+      [
+        "ほしい",
+        "Desire, Want, GrammarPattern",
+        null
+      ],
+      [
+        "いくら",
+        "Question, Amount, Degree",
+        null
+      ],
+      [
+        "どれ",
+        "Interrogative, Choice, Pronoun",
+        null
+      ],
+      [
+        "致す",
+        "HumbleSpeech, Do, HonorificVerb",
+        null
+      ],
+      [
+        "おる",
+        "HumbleExistence, HonorificVerb",
+        null
+      ],
+      [
+        "限り",
+        "Limit, Extent, GrammarPattern",
+        null
+      ],
+      [
+        "いらっしゃる",
+        "HonorificExistence, HonorificVerb",
+        null
+      ],
+      [
+        "せい",
+        "Cause, Blame, GrammarPattern",
+        null
+      ],
+      [
+        "さ",
+        "SentenceEnding, Emphasis, Informal",
+        null
+      ],
+      [
+        "ただし",
+        "Exception, However, Conjunction",
+        null
+      ],
+      [
+        "つもり",
+        "Intention, GrammarPattern",
+        null
+      ],
+      [
+        "やっと",
+        "Finally, AfterDifficulty, Adverb",
+        null
+      ],
+      [
+        "つつ",
+        "SimultaneousAction, Formal, GrammarPattern",
+        null
+      ],
+      [
+        "限る",
+        "Restriction, Only, GrammarPattern",
+        null
+      ],
+      [
+        "まあ",
+        "Hesitation, Softening, Interjection",
+        null
+      ],
+      [
+        "てあげる",
+        "GivingFavor, Auxiliary",
+        null
+      ],
+      [
+        "基づく",
+        "BasedOn, GrammarPattern, Formal",
+        null
+      ],
+      [
+        "ことがある",
+        "Experience, OccasionalAction, GrammarPattern",
+        null
+      ],
+      [
+        "てやる",
+        "GivingFavor, Casual, Auxiliary",
+        null
+      ],
+      [
+        "もと",
+        "Under, BasedOn, GrammarPattern",
+        null
+      ],
+      [
+        "んと",
+        "Contraction, Quotation, Informal, ContextDependent",
+        null
+      ],
+      [
+        "とく",
+        "AuxiliaryContraction, Preparation, Casual, ContractionOfTeOku",
+        null
+      ],
+      [
+        "ちなみに",
+        "AdditionalInformation, TopicShift, Conjunction",
+        null
+      ],
+      [
+        "決して",
+        "StrongNegation, Emphasis, NegativePolarity, Adverb",
+        null
+      ],
+      [
+        "かしら",
+        "Question, Uncertainty, SentenceEnding, Informal",
+        null
+      ],
+      [
+        "すなわち",
+        "Restatement, InOtherWords, Conjunction, Formal",
+        null
+      ],
+      [
+        "実は",
+        "Disclosure, Actually, DiscourseMarker",
+        null
+      ],
+      [
+        "だけれど",
+        "Contrast, Conjunction, Casual",
+        null
+      ],
+      [
+        "申す",
+        "HumbleSpeech, Say, HonorificVerb",
+        null
+      ],
+      [
+        "たび",
+        "Repetition, Whenever, GrammarPattern",
+        null
+      ],
+      [
+        "まさに",
+        "Emphasis, Exactly, Truly, Adverb",
+        null
+      ],
+      [
+        "以下",
+        "Maximum, Limit, Comparison, Formal",
+        null
+      ],
+      [
+        "むしろ",
+        "Contrast, Rather, Preference, Adverb",
+        null
+      ],
+      [
+        "まるで",
+        "Similarity, Emphasis, AsIf, Adverb",
+        null
+      ],
+      [
+        "こともある",
+        "OccasionalAction, Possibility, GrammarPattern",
+        null
+      ],
+      [
+        "ほぼ",
+        "Approximately, Degree, Adverb",
+        null
+      ],
+      [
+        "に対し",
+        "Contrast, Target, Formal",
+        null
+      ],
+      [
+        "やら",
+        "Listing, Uncertainty, Informal",
+        null
+      ],
+      [
+        "除く",
+        "Except, Exclusion, GrammarUsage",
+        null
+      ],
+      [
+        "さすが",
+        "AsExpected, Admiration, Adverb",
+        null
+      ],
+      [
+        "再び",
+        "Again, Repetition, Adverb",
+        null
+      ],
+      [
+        "なし",
+        "Without, Absence, GrammarUsage",
+        null
+      ],
+      [
+        "さて",
+        "TopicShift, Transition, Conjunction",
+        null
+      ],
+      [
+        "どうしても",
+        "Inevitability, Emphasis, Adverb",
+        null
+      ],
+      [
+        "かつ",
+        "AndAlso, Formal, Conjunction",
+        null
+      ],
+      [
+        "多少",
+        "Somewhat, Quantity, Adverb",
+        null
+      ],
+      [
+        "いきなり",
+        "Suddenly, Abruptly, Adverb",
+        null
+      ],
+      [
+        "いまだ",
+        "Still, Yet, FormalAdverb",
+        null
+      ],
+      [
+        "ああ",
+        "Interjection, Realization, Response",
+        null
+      ],
+      [
+        "次第",
+        "DependingOn, AsSoonAs, GrammarPattern",
+        null
+      ],
+      [
+        "やがて",
+        "Eventually, Future, Adverb",
+        null
+      ],
+      [
+        "かつて",
+        "Formerly, Past, Adverb",
+        null
+      ],
+      [
+        "くれる",
+        "GivingFavor, Auxiliary",
+        null
+      ]
+    ]
+  }
+]

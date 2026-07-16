@@ -44,6 +44,7 @@ import { SentencePractice } from './components/SentencePractice'
 import { SessionComplete } from './components/SessionComplete'
 import { StudyView } from './components/StudyView'
 import { VocabList } from './components/VocabList'
+import { ContentStudio } from './components/ContentStudio'
 import './App.css'
 
 type View =
@@ -54,6 +55,7 @@ type View =
   | 'vocab-list'
   | 'study'
   | 'complete'
+  | 'content-studio'
 
 type SessionItem =
   | { kind: 'card'; card: StudyCard; kanjiMode?: KanjiLabMode }
@@ -265,6 +267,8 @@ function App() {
     )
   }
 
+  if (view === 'content-studio') return <ContentStudio onBack={() => setView('dashboard')} />
+
   if (view === 'kanji-lab') {
     return (
       <div className="app">
@@ -425,6 +429,7 @@ function App() {
         onOpenSentencePractice={() => setView('sentence-practice')}
         onOpenSentenceGeneratorPreview={() => setView('sentence-generator-preview')}
         onOpenVocabList={() => setView('vocab-list')}
+        onOpenContentStudio={() => setView('content-studio')}
         onStartMistakeReview={startMistakeReview}
         deckInfo={deckInfo}
         deckProgress={deckProgress}

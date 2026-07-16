@@ -1,0 +1,671 @@
+{
+  "workbookRows": 1250,
+  "explicitThreeColumnRows": 93,
+  "twoColumnFunctionRows": 122,
+  "uniqueImportedWords": 1110,
+  "uniqueImportedTags": 1456,
+  "matchedWorkbookRows": 1250,
+  "unmatchedWorkbookRows": [],
+  "appVocabularyRecords": 1283,
+  "coveredAppRecords": 1175,
+  "uncoveredAppRecords": [
+    {
+      "id": "vocab-freq-0001",
+      "word": "の",
+      "reading": "no",
+      "english": "case of; in; at; for;"
+    },
+    {
+      "id": "vocab-freq-0002",
+      "word": "に",
+      "reading": "ni",
+      "english": "case at; on; in; to;"
+    },
+    {
+      "id": "vocab-freq-0003",
+      "word": "た",
+      "reading": "ta",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0004",
+      "word": "だ",
+      "reading": "da",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0005",
+      "word": "が",
+      "reading": "ga",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0006",
+      "word": "て",
+      "reading": "te",
+      "english": "conj."
+    },
+    {
+      "id": "vocab-freq-0007",
+      "word": "と",
+      "reading": "to",
+      "english": "case and; or; with;"
+    },
+    {
+      "id": "vocab-freq-0008",
+      "word": "ます",
+      "reading": "masu",
+      "english": "POLITE (after verb)"
+    },
+    {
+      "id": "vocab-freq-0009",
+      "word": "も",
+      "reading": "mo",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0010",
+      "word": "で",
+      "reading": "de",
+      "english": "case in; at; from;"
+    },
+    {
+      "id": "vocab-freq-0011",
+      "word": "ている",
+      "reading": "teiru",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0012",
+      "word": "です",
+      "reading": "desu",
+      "english": "COPULA (polite)"
+    },
+    {
+      "id": "vocab-freq-0013",
+      "word": "れる",
+      "reading": "reru",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0014",
+      "word": "という",
+      "reading": "toiu",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0015",
+      "word": "事",
+      "reading": "koto",
+      "english": "thing; matter; fact; circumstances"
+    },
+    {
+      "id": "vocab-freq-0016",
+      "word": "言う",
+      "reading": "iu",
+      "english": "to say"
+    },
+    {
+      "id": "vocab-freq-0017",
+      "word": "のです",
+      "reading": "nodesu",
+      "english": "ASSERTION (polite)"
+    },
+    {
+      "id": "vocab-freq-0018",
+      "word": "あの",
+      "reading": "ano",
+      "english": "that over there"
+    },
+    {
+      "id": "vocab-freq-0019",
+      "word": "する",
+      "reading": "suru",
+      "english": "to do"
+    },
+    {
+      "id": "vocab-freq-0020",
+      "word": "ある",
+      "reading": "aru",
+      "english": "to be; to have (used for inanimate objects)"
+    },
+    {
+      "id": "vocab-freq-0021",
+      "word": "ね",
+      "reading": "ne",
+      "english": "disc. isn’t it?, don’t you?"
+    },
+    {
+      "id": "vocab-freq-0022",
+      "word": "ない",
+      "reading": "nai",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0023",
+      "word": "なる",
+      "reading": "naru",
+      "english": "to become"
+    },
+    {
+      "id": "vocab-freq-0024",
+      "word": "か",
+      "reading": "ka",
+      "english": "disc."
+    },
+    {
+      "id": "vocab-freq-0025",
+      "word": "その",
+      "reading": "sono",
+      "english": "that"
+    },
+    {
+      "id": "vocab-freq-0026",
+      "word": "けれど",
+      "reading": "keredo",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0027",
+      "word": "から",
+      "reading": "kara",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0028",
+      "word": "よう",
+      "reading": "you",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0029",
+      "word": "思う",
+      "reading": "omou",
+      "english": "to think; to feel"
+    },
+    {
+      "id": "vocab-freq-0030",
+      "word": "物",
+      "reading": "mono",
+      "english": "thing"
+    },
+    {
+      "id": "vocab-freq-0031",
+      "word": "そう",
+      "reading": "sou",
+      "english": "really"
+    },
+    {
+      "id": "vocab-freq-0032",
+      "word": "私",
+      "reading": "watakushi",
+      "english": "(humble) I; myself"
+    },
+    {
+      "id": "vocab-freq-0033",
+      "word": "てしまう",
+      "reading": "teshimau",
+      "english": "end up doing …"
+    },
+    {
+      "id": "vocab-freq-0034",
+      "word": "それ",
+      "reading": "sore",
+      "english": "that"
+    },
+    {
+      "id": "vocab-freq-0035",
+      "word": "とか",
+      "reading": "toka",
+      "english": "and;"
+    },
+    {
+      "id": "vocab-freq-0036",
+      "word": "この",
+      "reading": "kono",
+      "english": "this"
+    },
+    {
+      "id": "vocab-freq-0037",
+      "word": "無い",
+      "reading": "nai",
+      "english": "There is no …, no …"
+    },
+    {
+      "id": "vocab-freq-0038",
+      "word": "行く",
+      "reading": "iku",
+      "english": "to go"
+    },
+    {
+      "id": "vocab-freq-0039",
+      "word": "のだ",
+      "reading": "noda",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0040",
+      "word": "せる",
+      "reading": "seru",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0041",
+      "word": "これ",
+      "reading": "kore",
+      "english": "this"
+    },
+    {
+      "id": "vocab-freq-0042",
+      "word": "である",
+      "reading": "dearu",
+      "english": "COPULA (formal)"
+    },
+    {
+      "id": "vocab-freq-0043",
+      "word": "時",
+      "reading": "toki",
+      "english": "(1) time; hour; (2) occasion; moment"
+    },
+    {
+      "id": "vocab-freq-0044",
+      "word": "な",
+      "reading": "na",
+      "english": "disc."
+    },
+    {
+      "id": "vocab-freq-0045",
+      "word": "ず",
+      "reading": "zu",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0046",
+      "word": "ので",
+      "reading": "node",
+      "english": "conj."
+    },
+    {
+      "id": "vocab-freq-0047",
+      "word": "人",
+      "reading": "hito",
+      "english": "person"
+    },
+    {
+      "id": "vocab-freq-0048",
+      "word": "よ",
+      "reading": "yo",
+      "english": "disc. ASSERTION, REMINDING (informal)"
+    },
+    {
+      "id": "vocab-freq-0049",
+      "word": "ば",
+      "reading": "ba",
+      "english": "conj."
+    },
+    {
+      "id": "vocab-freq-0050",
+      "word": "や",
+      "reading": "ya",
+      "english": "and;"
+    },
+    {
+      "id": "vocab-freq-0051",
+      "word": "来る",
+      "reading": "kuru",
+      "english": "to come"
+    },
+    {
+      "id": "vocab-freq-0052",
+      "word": "まで",
+      "reading": "made",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0053",
+      "word": "たり",
+      "reading": "tari",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0054",
+      "word": "良い/いい",
+      "reading": "yoi",
+      "english": "good"
+    },
+    {
+      "id": "vocab-freq-0056",
+      "word": "自分",
+      "reading": "jibun",
+      "english": "oneself"
+    },
+    {
+      "id": "vocab-freq-0057",
+      "word": "ん",
+      "reading": "n",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0058",
+      "word": "やはり",
+      "reading": "yahari",
+      "english": "also; as I thought; still; in spite of; absolutely; of course"
+    },
+    {
+      "id": "vocab-freq-0059",
+      "word": "たい",
+      "reading": "tai",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0064",
+      "word": "など",
+      "reading": "nado",
+      "english": "et cetera"
+    },
+    {
+      "id": "vocab-freq-0065",
+      "word": "として",
+      "reading": "toshite",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0067",
+      "word": "また",
+      "reading": "mata",
+      "english": "again; and"
+    },
+    {
+      "id": "vocab-freq-0068",
+      "word": "てくる",
+      "reading": "tekuru",
+      "english": "go and …"
+    },
+    {
+      "id": "vocab-freq-0069",
+      "word": "だけ",
+      "reading": "dake",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0070",
+      "word": "くらい",
+      "reading": "kurai",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0072",
+      "word": "ていく",
+      "reading": "teiku",
+      "english": "go and …"
+    },
+    {
+      "id": "vocab-freq-0074",
+      "word": "どう",
+      "reading": "dou",
+      "english": "how; in what way"
+    },
+    {
+      "id": "vocab-freq-0075",
+      "word": "し",
+      "reading": "shi",
+      "english": "conj."
+    },
+    {
+      "id": "vocab-freq-0079",
+      "word": "ため",
+      "reading": "tame",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0082",
+      "word": "そこ",
+      "reading": "soko",
+      "english": "that place"
+    },
+    {
+      "id": "vocab-freq-0083",
+      "word": "う",
+      "reading": "u",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0084",
+      "word": "ておる",
+      "reading": "teoru",
+      "english": "CONTINUATION (polite)"
+    },
+    {
+      "id": "vocab-freq-0085",
+      "word": "について",
+      "reading": "nitsuite",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0086",
+      "word": "それで",
+      "reading": "sorede",
+      "english": "because of that"
+    },
+    {
+      "id": "vocab-freq-0089",
+      "word": "てみる",
+      "reading": "temiru",
+      "english": "try …ing"
+    },
+    {
+      "id": "vocab-freq-0091",
+      "word": "そして",
+      "reading": "soshite",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0092",
+      "word": "てくれる",
+      "reading": "tekureru",
+      "english": "[do something as a favor]"
+    },
+    {
+      "id": "vocab-freq-0094",
+      "word": "ながら",
+      "reading": "nagara",
+      "english": "conj."
+    },
+    {
+      "id": "vocab-freq-0095",
+      "word": "そんな",
+      "reading": "sonna",
+      "english": "that sort of"
+    },
+    {
+      "id": "vocab-freq-0101",
+      "word": "よく",
+      "reading": "yoku",
+      "english": "often; well"
+    },
+    {
+      "id": "vocab-freq-0105",
+      "word": "ても",
+      "reading": "temo",
+      "english": "conj."
+    },
+    {
+      "id": "vocab-freq-0109",
+      "word": "より",
+      "reading": "yori",
+      "english": "case than;"
+    },
+    {
+      "id": "vocab-freq-0110",
+      "word": "それから",
+      "reading": "sorekara",
+      "english": "after that"
+    },
+    {
+      "id": "vocab-freq-0112",
+      "word": "みたい",
+      "reading": "mitai",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0113",
+      "word": "でも",
+      "reading": "demo",
+      "english": "but"
+    },
+    {
+      "id": "vocab-freq-0114",
+      "word": "ここ",
+      "reading": "koko",
+      "english": "here"
+    },
+    {
+      "id": "vocab-freq-0115",
+      "word": "とても",
+      "reading": "totemo",
+      "english": "very"
+    },
+    {
+      "id": "vocab-freq-0122",
+      "word": "まず",
+      "reading": "mazu",
+      "english": "first of all"
+    },
+    {
+      "id": "vocab-freq-0123",
+      "word": "余り",
+      "reading": "amari",
+      "english": "not very (used as adverb); not much"
+    },
+    {
+      "id": "vocab-freq-0124",
+      "word": "かもしれない",
+      "reading": "kamoshirenai",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0125",
+      "word": "僕",
+      "reading": "boku",
+      "english": "I (used by males)"
+    },
+    {
+      "id": "vocab-freq-0126",
+      "word": "皆",
+      "reading": "mina",
+      "english": "everybody"
+    },
+    {
+      "id": "vocab-freq-0127",
+      "word": "ほど",
+      "reading": "hodo",
+      "english": "extent"
+    },
+    {
+      "id": "vocab-freq-0128",
+      "word": "しかし",
+      "reading": "shikashi",
+      "english": "however"
+    },
+    {
+      "id": "vocab-freq-0133",
+      "word": "例えば",
+      "reading": "tatoeba",
+      "english": "for example"
+    },
+    {
+      "id": "vocab-freq-0137",
+      "word": "てくださる",
+      "reading": "tekudasaru",
+      "english": "[do something as a favor (honorific)]"
+    },
+    {
+      "id": "vocab-freq-0138",
+      "word": "他",
+      "reading": "ta",
+      "english": "other (esp. places and things)"
+    },
+    {
+      "id": "vocab-freq-0139",
+      "word": "いつ",
+      "reading": "itsu",
+      "english": "when"
+    },
+    {
+      "id": "vocab-freq-0145",
+      "word": "ございます",
+      "reading": "gozaimasu",
+      "english": "[very polite form of “de aru”]"
+    },
+    {
+      "id": "vocab-freq-0146",
+      "word": "ただ",
+      "reading": "tada",
+      "english": "just adv."
+    },
+    {
+      "id": "vocab-freq-0147",
+      "word": "だから",
+      "reading": "dakara",
+      "english": "so; therefore"
+    },
+    {
+      "id": "vocab-freq-0151",
+      "word": "なんか",
+      "reading": "nanka",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0153",
+      "word": "まま",
+      "reading": "mama",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0155",
+      "word": "まだ",
+      "reading": "mada",
+      "english": "yet; still"
+    },
+    {
+      "id": "vocab-freq-0158",
+      "word": "てもらう",
+      "reading": "temorau",
+      "english": "[receive a favor]"
+    },
+    {
+      "id": "vocab-freq-0159",
+      "word": "掛ける",
+      "reading": "kakeru",
+      "english": "to hang something"
+    },
+    {
+      "id": "vocab-freq-0367",
+      "word": "すでに",
+      "reading": "sudeni",
+      "english": ""
+    },
+    {
+      "id": "vocab-freq-0456",
+      "word": "離れる",
+      "reading": "hanareru",
+      "english": "to be separated from; to leave; to go away; to be a long way off"
+    },
+    {
+      "id": "vocab-freq-0821",
+      "word": "参る",
+      "reading": "mairu",
+      "english": "(humble) to go; to come"
+    }
+  ],
+  "categoryCounts": {
+    "People & Living Things": 79,
+    "Places": 82,
+    "Objects": 240,
+    "Food & Drink": 12,
+    "Actions": 299,
+    "Descriptors": 177,
+    "Time & Numbers": 91,
+    "Function Words": 130
+  }
+}

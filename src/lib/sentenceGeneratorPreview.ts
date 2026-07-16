@@ -1,11 +1,16 @@
 import type { JlptLevel } from './types'
+import { getApprovedContentRecords } from './contentDatabase'
+import { loadActiveSentencePatternIds, sentencePatternCatalog } from '../data/sentencePatternCatalog'
+import { generateCategorySentence } from './categorySentenceEngine'
+import { inferPreferredTranslation } from '../data/preferredVocabularyTranslations'
 
-type PreviewLevel = Extract<JlptLevel, 'N5' | 'N4'>
+type PreviewLevel = JlptLevel
 type Pos =
   | 'pronoun'
   | 'noun'
   | 'verb'
   | 'i_adjective'
+  | 'adverb'
   | 'time_expression'
   | 'place_expression'
 
@@ -17,7 +22,7 @@ interface PreviewVocabItem {
   pos: Pos
   jlpt: PreviewLevel
   tags: string[]
-  conjugationClass?: 'ichidan' | 'godan_u' | 'godan_ku_iku' | 'godan_mu' | 'godan_ru' | 'suru'
+  conjugationClass?: 'ichidan' | 'godan_u' | 'godan_ku_iku' | 'godan_mu' | 'godan_ru' | 'godan_su' | 'suru'
   transitivity?: 'transitive' | 'intransitive'
   objectTags?: string[]
   userVocab?: boolean
@@ -68,11 +73,11 @@ export interface GeneratedPreviewSentence {
   validation: string[]
 }
 
-const rank: Record<PreviewLevel, number> = { N5: 1, N4: 2 }
+const rank: Record<PreviewLevel, number> = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 }
 
 const frames: PreviewFrame[] = [
   {
-    id: 'n5-topic-object-verb',
+    id: 'n5-01',
     jlpt: 'N5',
     label: '[subject] は [object] を [verb-masu]',
     slots: {
@@ -94,7 +99,7 @@ const frames: PreviewFrame[] = [
     ],
   },
   {
-    id: 'n5-place-action',
+    id: 'n5-03',
     jlpt: 'N5',
     label: '[subject] は [place] で [object] を [verb-masu]',
     slots: {
@@ -118,19 +123,17 @@ const frames: PreviewFrame[] = [
     ],
   },
   {
-    id: 'n5-time-movement',
+    id: 'n5-02',
     jlpt: 'N5',
-    label: '[subject] は [time] [place] に [verb-masu]',
+    label: '[subject] は [place] に [verb-masu]',
     slots: {
       subject: { pos: 'pronoun', tags: ['person'] },
-      time: { pos: 'time_expression', tags: ['time'] },
       place: { pos: 'place_expression', tags: ['destination'] },
       verb: { pos: 'verb', tags: ['movement'], transitivity: 'intransitive', conjugation: 'masu' },
     },
     tokens: [
       { type: 'slot', slot: 'subject' },
       { type: 'literal', text: 'は' },
-      { type: 'slot', slot: 'time' },
       { type: 'slot', slot: 'place' },
       { type: 'literal', text: 'に' },
       { type: 'slot', slot: 'verb' },
@@ -139,6 +142,48 @@ const frames: PreviewFrame[] = [
       { pattern: 'に', meaning: 'destination/time marker', jlpt: 'N5' },
       { pattern: 'ます', meaning: 'polite non-past verb ending', jlpt: 'N5' },
     ],
+  },
+  {
+    id: 'n5-04', jlpt: 'N5', label: '[subject] は [companion] と [verb-masu]',
+    slots: { subject: { pos: 'pronoun', tags: ['person'] }, companion: { pos: 'pronoun', tags: ['person'] }, verb: { pos: 'verb', tags: ['conversation'], transitivity: 'intransitive', conjugation: 'masu' } },
+    tokens: [{ type: 'slot', slot: 'subject' }, { type: 'literal', text: 'は' }, { type: 'slot', slot: 'companion' }, { type: 'literal', text: 'と' }, { type: 'slot', slot: 'verb' }],
+    grammar: [{ pattern: 'と', meaning: 'with / together with', jlpt: 'N5' }],
+  },
+  {
+    id: 'n5-05', jlpt: 'N5', label: '[subject] は [time] に [verb-masu]',
+    slots: { subject: { pos: 'pronoun', tags: ['person'] }, time: { pos: 'time_expression', tags: ['clock_time'] }, verb: { pos: 'verb', tags: ['routine'], transitivity: 'intransitive', conjugation: 'masu' } },
+    tokens: [{ type: 'slot', slot: 'subject' }, { type: 'literal', text: 'は' }, { type: 'slot', slot: 'time' }, { type: 'literal', text: 'に' }, { type: 'slot', slot: 'verb' }],
+    grammar: [{ pattern: 'に', meaning: 'specific time marker', jlpt: 'N5' }],
+  },
+  {
+    id: 'n5-06', jlpt: 'N5', label: '[subject] は [object] が 好きです',
+    slots: { subject: { pos: 'pronoun', tags: ['person'] }, object: { pos: 'noun', tags: ['likable'] } },
+    tokens: [{ type: 'slot', slot: 'subject' }, { type: 'literal', text: 'は' }, { type: 'slot', slot: 'object' }, { type: 'literal', text: 'が好きです' }],
+    grammar: [{ pattern: 'が好きです', meaning: 'likes / is fond of', jlpt: 'N5' }],
+  },
+  {
+    id: 'n5-07', jlpt: 'N5', label: '[subject] は [adjective]',
+    slots: { subject: { pos: 'time_expression', tags: ['today'] }, adjective: { pos: 'i_adjective', tags: ['weather'] } },
+    tokens: [{ type: 'slot', slot: 'subject' }, { type: 'literal', text: 'は' }, { type: 'slot', slot: 'adjective' }, { type: 'literal', text: 'です' }],
+    grammar: [{ pattern: 'い-adjective です', meaning: 'polite adjective predicate', jlpt: 'N5' }],
+  },
+  {
+    id: 'n5-08', jlpt: 'N5', label: '[subject] は [noun] です',
+    slots: { subject: { pos: 'pronoun', tags: ['person'] }, noun: { pos: 'noun', tags: ['identity'] } },
+    tokens: [{ type: 'slot', slot: 'subject' }, { type: 'literal', text: 'は' }, { type: 'slot', slot: 'noun' }, { type: 'literal', text: 'です' }],
+    grammar: [{ pattern: 'です', meaning: 'polite copula', jlpt: 'N5' }],
+  },
+  {
+    id: 'n5-09', jlpt: 'N5', label: '[subject] は [object] を [adverb] [verb-masu]',
+    slots: { subject: { pos: 'pronoun', tags: ['person'] }, object: { pos: 'noun', tags: ['readable'] }, adverb: { pos: 'adverb', tags: ['manner'] }, verb: { pos: 'verb', tags: ['study'], transitivity: 'transitive', conjugation: 'masu' } },
+    tokens: [{ type: 'slot', slot: 'subject' }, { type: 'literal', text: 'は' }, { type: 'slot', slot: 'object' }, { type: 'literal', text: 'を' }, { type: 'slot', slot: 'adverb' }, { type: 'slot', slot: 'verb' }],
+    grammar: [{ pattern: '副詞 + 動詞', meaning: 'adverb modifies the action', jlpt: 'N5' }],
+  },
+  {
+    id: 'n5-10', jlpt: 'N5', label: '[subject] は [place] へ [verb-masu]',
+    slots: { subject: { pos: 'pronoun', tags: ['person'] }, place: { pos: 'place_expression', tags: ['destination'] }, verb: { pos: 'verb', tags: ['movement'], transitivity: 'intransitive', conjugation: 'masu' } },
+    tokens: [{ type: 'slot', slot: 'subject' }, { type: 'literal', text: 'は' }, { type: 'slot', slot: 'place' }, { type: 'literal', text: 'へ' }, { type: 'slot', slot: 'verb' }],
+    grammar: [{ pattern: 'へ', meaning: 'direction marker', jlpt: 'N5' }],
   },
   {
     id: 'n4-te-kudasai',
@@ -197,6 +242,16 @@ const vocab: PreviewVocabItem[] = [
   { id: 'ashita', surface: '明日', reading: 'あした', english: 'tomorrow', pos: 'time_expression', jlpt: 'N5', tags: ['time', 'future_time'], userVocab: true },
   { id: 'mainichi', surface: '毎日', reading: 'まいにち', english: 'every day', pos: 'time_expression', jlpt: 'N5', tags: ['time', 'routine_time'], userVocab: true },
   { id: 'raishuu', surface: '来週', reading: 'らいしゅう', english: 'next week', pos: 'time_expression', jlpt: 'N5', tags: ['time', 'future_time'] },
+  { id: 'kyou', surface: '今日', reading: 'きょう', english: 'today', pos: 'time_expression', jlpt: 'N5', tags: ['time', 'today'] },
+  { id: 'shichiji', surface: '七時', reading: 'しちじ', english: 'at seven', pos: 'time_expression', jlpt: 'N5', tags: ['time', 'clock_time'] },
+  { id: 'hachiji', surface: '八時', reading: 'はちじ', english: 'at eight', pos: 'time_expression', jlpt: 'N5', tags: ['time', 'clock_time'] },
+  { id: 'ongaku', surface: '音楽', reading: 'おんがく', english: 'music', pos: 'noun', jlpt: 'N5', tags: ['thing', 'likable'] },
+  { id: 'nihongo', surface: '日本語', reading: 'にほんご', english: 'Japanese', pos: 'noun', jlpt: 'N5', tags: ['thing', 'likable', 'study_item'] },
+  { id: 'gakusei', surface: '学生', reading: 'がくせい', english: 'a student', pos: 'noun', jlpt: 'N5', tags: ['identity', 'person'] },
+  { id: 'kaishain', surface: '会社員', reading: 'かいしゃいん', english: 'an office worker', pos: 'noun', jlpt: 'N5', tags: ['identity', 'person'] },
+  { id: 'atsui', surface: '暑い', reading: 'あつい', english: 'hot', pos: 'i_adjective', jlpt: 'N5', tags: ['weather'] },
+  { id: 'samui', surface: '寒い', reading: 'さむい', english: 'cold', pos: 'i_adjective', jlpt: 'N5', tags: ['weather'] },
+  { id: 'yukkuri', surface: 'ゆっくり', reading: 'ゆっくり', english: 'slowly', pos: 'adverb', jlpt: 'N5', tags: ['manner'] },
   { id: 'taberu', surface: '食べる', reading: 'たべる', english: 'eat', pos: 'verb', jlpt: 'N5', tags: ['action'], conjugationClass: 'ichidan', transitivity: 'transitive', objectTags: ['edible'], userVocab: true },
   { id: 'nomu', surface: '飲む', reading: 'のむ', english: 'drink', pos: 'verb', jlpt: 'N5', tags: ['action'], conjugationClass: 'godan_mu', transitivity: 'transitive', objectTags: ['drinkable'], userVocab: true },
   { id: 'yomu', surface: '読む', reading: 'よむ', english: 'read', pos: 'verb', jlpt: 'N5', tags: ['action', 'study'], conjugationClass: 'godan_mu', transitivity: 'transitive', objectTags: ['readable'], userVocab: true },
@@ -204,11 +259,13 @@ const vocab: PreviewVocabItem[] = [
   { id: 'benkyou_suru', surface: '勉強する', reading: 'べんきょうする', english: 'study', pos: 'verb', jlpt: 'N5', tags: ['action', 'study'], conjugationClass: 'suru', transitivity: 'transitive', objectTags: ['study_item', 'readable'], userVocab: true },
   { id: 'iku', surface: '行く', reading: 'いく', english: 'go', pos: 'verb', jlpt: 'N5', tags: ['movement'], conjugationClass: 'godan_ku_iku', transitivity: 'intransitive', userVocab: true },
   { id: 'kaeru', surface: '帰る', reading: 'かえる', english: 'return', pos: 'verb', jlpt: 'N5', tags: ['movement'], conjugationClass: 'godan_ru', transitivity: 'intransitive' },
+  { id: 'hanasu', surface: '話す', reading: 'はなす', english: 'talk', pos: 'verb', jlpt: 'N5', tags: ['conversation'], conjugationClass: 'godan_su', transitivity: 'intransitive' },
+  { id: 'okiru', surface: '起きる', reading: 'おきる', english: 'wake up', pos: 'verb', jlpt: 'N5', tags: ['routine'], conjugationClass: 'ichidan', transitivity: 'intransitive' },
   { id: 'tsukuru', surface: '作る', reading: 'つくる', english: 'make', pos: 'verb', jlpt: 'N4', tags: ['action'], conjugationClass: 'godan_ru', transitivity: 'transitive', objectTags: ['food', 'thing'] },
 ]
 
 function seeded(seed: number) {
-  let value = seed || 1
+  let value = ((Math.imul(seed || 1, 0x9e3779b1) >>> 0) % 0x7fffffff) || 1
   return () => {
     value = (value * 48271) % 0x7fffffff
     return value / 0x7fffffff
@@ -227,8 +284,16 @@ function hasAny(itemTags: string[], wanted?: string[]) {
   return !wanted?.length || wanted.some((tag) => itemTags.includes(tag))
 }
 
+const nonHumanSubjectTags = new Set(['animal','pet','dog','cat','bird','fish','insect','plant','tree','flower','grass','bush','crop','body','body-part','bodypart','anatomy'])
+const politeSubjectIncompatibleWords = new Set(['お前','あんた','貴様','てめえ','奴'])
+
+function isHumanSlotItem(item: PreviewVocabItem) {
+  const tags = item.tags.map(tag => tag.trim().replace(/([a-z0-9])([A-Z])/g,'$1-$2').toLowerCase().replace(/[_\s]+/g,'-'))
+  return !politeSubjectIncompatibleWords.has(item.surface) && !tags.some(tag => nonHumanSubjectTags.has(tag))
+}
+
 function candidates(spec: PreviewSlotSpec, target: PreviewLevel, previousId?: string) {
-  return vocab
+  return [...vocab, ...approvedPreviewVocabulary()]
     .filter((item) => item.pos === spec.pos)
     .filter((item) => allowsLevel(item, target))
     .filter((item) => item.id !== previousId)
@@ -237,11 +302,41 @@ function candidates(spec: PreviewSlotSpec, target: PreviewLevel, previousId?: st
     .sort((a, b) => Number(Boolean(b.userVocab)) - Number(Boolean(a.userVocab)))
 }
 
+function approvedPreviewVocabulary(): PreviewVocabItem[] {
+  return getApprovedContentRecords().flatMap((record) => {
+    if (record.jlpt !== 'N5' && record.jlpt !== 'N4') return []
+    const category = record.category.toLowerCase()
+    const isVerb = record.kind === 'verb'
+    const pos: Pos = isVerb ? 'verb' : category === 'person' ? 'pronoun' : category === 'place' || category === 'destination' ? 'place_expression' : category === 'time' ? 'time_expression' : category === 'adverb' ? 'adverb' : category === 'adjective' ? 'i_adjective' : 'noun'
+    const meaning = record.english.toLowerCase()
+    const tags = [...new Set([
+      ...record.tags,
+      category,
+      category === 'food' ? 'edible' : '',
+      category === 'place' ? 'action_place' : '',
+      category === 'destination' ? 'destination' : '',
+      category === 'object' ? 'thing' : '',
+      /book|letter|newspaper|magazine|kanji|text/.test(meaning) ? 'readable' : '',
+      /movie|film|television|video|anime/.test(meaning) ? 'watchable' : '',
+      /tea|coffee|water|juice|milk|drink/.test(meaning) ? 'drinkable' : '',
+      /food|rice|bread|meat|fish|fruit|meal/.test(meaning) ? 'edible' : '',
+      /book|kanji|homework|lesson|text/.test(meaning) ? 'study_item' : '',
+    ].filter(Boolean))]
+    const verbClass = record.verbClass?.toLowerCase()
+    const conjugationClass: PreviewVocabItem['conjugationClass'] = verbClass?.includes('ichidan') ? 'ichidan' : verbClass?.includes('suru') || verbClass?.includes('irregular') ? 'suru' : verbClass?.includes('-mu') ? 'godan_mu' : verbClass?.includes('-ru') ? 'godan_ru' : verbClass?.includes('-ku') ? 'godan_ku_iku' : verbClass?.includes('-su') ? 'godan_su' : verbClass?.includes('-u') ? 'godan_u' : undefined
+    const generatorEnglish = record.kind === 'vocabulary'
+      ? record.preferredTranslation ?? inferPreferredTranslation(record.japanese,record.english)
+      : record.english.replace(/^to\s+/i, '')
+    return [{ id: `approved-${record.id}`, surface: record.japanese, reading: record.reading, english: generatorEnglish, pos, jlpt: record.jlpt, tags: tags.length ? tags : ['thing'], conjugationClass, transitivity: record.transitivity ?? (isVerb ? 'transitive' : undefined), objectTags: isVerb ? ['thing', 'edible', 'drinkable', 'readable', 'watchable', 'study_item'] : undefined, userVocab: true }]
+  })
+}
+
 const godan: Record<string, { masu: string; te: string; ta: string }> = {
   godan_u: { masu: 'います', te: 'って', ta: 'った' },
   godan_ku_iku: { masu: 'きます', te: 'って', ta: 'った' },
   godan_mu: { masu: 'みます', te: 'んで', ta: 'んだ' },
   godan_ru: { masu: 'ります', te: 'って', ta: 'った' },
+  godan_su: { masu: 'します', te: 'して', ta: 'した' },
 }
 
 function conjugate(item: PreviewVocabItem, form?: PreviewSlotSpec['conjugation']) {
@@ -292,16 +387,22 @@ const participle: Record<string, string> = {
 
 function english(frame: PreviewFrame, slots: Record<string, FilledSlot>) {
   const subject = slots.subject?.item.english ?? ''
-  if (frame.id === 'n5-topic-object-verb') {
+  if (frame.id === 'n5-01') {
     return `${subject} ${verb3(slots.verb!.item.english, subject)} ${slots.object!.item.english}.`
   }
-  if (frame.id === 'n5-place-action') {
+  if (frame.id === 'n5-03') {
     return `${subject} ${verb3(slots.verb!.item.english, subject)} ${slots.object!.item.english} at ${slots.place!.item.english}.`
   }
-  if (frame.id === 'n5-time-movement') {
+  if (frame.id === 'n5-02' || frame.id === 'n5-10') {
     const place = slots.place!.item.english === 'home' ? 'home' : `to ${slots.place!.item.english}`
-    return `${subject} ${verb3(slots.verb!.item.english, subject)} ${place} ${slots.time!.item.english}.`
+    return `${subject} ${verb3(slots.verb!.item.english, subject)} ${place}.`
   }
+  if (frame.id === 'n5-04') return `${subject} ${verb3(slots.verb!.item.english, subject)} with ${slots.companion!.item.english}.`
+  if (frame.id === 'n5-05') return `${subject} ${verb3(slots.verb!.item.english, subject)} ${slots.time!.item.english}.`
+  if (frame.id === 'n5-06') return `${subject} ${subject === 'I' ? 'like' : 'likes'} ${slots.object!.item.english}.`
+  if (frame.id === 'n5-07') return `${slots.subject!.item.english} is ${slots.adjective!.item.english}.`
+  if (frame.id === 'n5-08') return `${subject} ${subject === 'I' ? 'am' : 'is'} ${slots.noun!.item.english}.`
+  if (frame.id === 'n5-09') return `${subject} ${slots.adverb!.item.english} ${verb3(slots.verb!.item.english, subject)} ${slots.object!.item.english}.`
   if (frame.id === 'n4-te-kudasai') {
     return `Please ${slots.verb!.item.english} ${slots.object!.item.english}.`
   }
@@ -313,19 +414,64 @@ function english(frame: PreviewFrame, slots: Record<string, FilledSlot>) {
   return 'Generated sentence.'
 }
 
+const catalogEnglish: Record<string, string> = {
+  'n4-01': 'I want to read a book.', 'n4-02': 'I am reading a book.', 'n4-03': 'I read a book.', 'n4-04': 'I do not read a book.', 'n4-05': 'I have to study.', 'n4-06': 'You may eat.', 'n4-07': 'You must not enter.', 'n4-08': 'I have been to Japan.', 'n4-09': 'I study while listening to music.', 'n4-10': 'I begin studying.',
+  'n3-01': 'I make a point of studying every day.', 'n3-02': 'I have decided to go to Japan.', 'n3-03': 'I become able to read kanji.', 'n3-04': 'I accidentally forget my homework.', 'n3-05': 'I make a reservation in advance.', 'n3-06': 'If it rains, I will not go.', 'n3-07': 'If I have time, I will go.', 'n3-08': 'Although I studied, I forgot it.', 'n3-09': 'Because it is raining, I stay home.', 'n3-10': 'I study in order to go to Japan.',
+  'n2-01': 'It is not that I dislike it.', 'n2-02': 'I cannot allow myself to go.', 'n2-03': 'It was decided that I would be transferred.', 'n2-04': 'There is no need to worry.', 'n2-05': 'He must be the culprit.', 'n2-06': 'He should come.', 'n2-07': 'Life is difficult.', 'n2-08': "A voice like a bird's.", 'n2-09': 'I write it down so I do not forget.', 'n2-10': 'I am just about to go home.',
+  'n1-01': 'I have no choice but to go.', 'n1-02': 'Success is nothing other than the result of effort.', 'n1-03': 'Although I studied, I forgot it.', 'n1-04': 'It could lead to an accident.', 'n1-05': 'Nothing can begin unless you eat.', 'n1-06': 'Even children know about it.', 'n1-07': 'Culture unique to Japan.', 'n1-08': 'Think according to reality.', 'n1-09': 'Discuss the issue.', 'n1-10': 'Offer a greeting on the occasion of departure.',
+}
+
+function catalogExample(frameId: string, level: PreviewLevel): GeneratedPreviewSentence | null {
+  const pattern = sentencePatternCatalog.find(item => item.id === frameId && item.jlpt === level)
+  if (!pattern) return null
+  return {
+    frameId: pattern.id,
+    level,
+    japanese: pattern.example,
+    reading: '',
+    english: catalogEnglish[pattern.id] ?? pattern.meaning,
+    slots: {},
+    furigana: [{ text: pattern.example, reading: pattern.example }],
+    grammar: [{ pattern: pattern.structure, meaning: pattern.meaning, jlpt: level }],
+    validation: [`Catalog pattern ${pattern.id.toUpperCase()}.`, `Required form: ${pattern.verbForm}.`, 'Advanced pattern uses its reviewed reference example.'],
+  }
+}
+
 export function generatePreviewSentence(
   level: PreviewLevel,
   seed: number,
   previous?: GeneratedPreviewSentence,
+  requestedFrameId?: string,
+  includeInactive = false,
 ): GeneratedPreviewSentence {
   const rand = seeded(seed)
-  const framePool = frames.filter((frame) => frame.jlpt === level)
+  if (level === 'N5') {
+    const categorySentence = generateCategorySentence(seed, requestedFrameId)
+    if (categorySentence) return categorySentence
+  }
+  if (requestedFrameId && !frames.some(frame => frame.id === requestedFrameId)) {
+    const example = catalogExample(requestedFrameId, level)
+    if (example) return example
+  }
+  const eligible = frames.filter((frame) => frame.jlpt === level)
+  const activeIds = new Set(loadActiveSentencePatternIds())
+  const activePool = level === 'N5' && !includeInactive ? eligible.filter(frame => activeIds.has(frame.id)) : eligible
+  const requestedPool = requestedFrameId ? activePool.filter(frame => frame.id === requestedFrameId) : activePool
+  const framePool = requestedPool.length ? requestedPool : activePool.length ? activePool : eligible
+  if (!framePool.length) {
+    const fallback = sentencePatternCatalog.find(pattern => pattern.jlpt === level)
+    const example = fallback ? catalogExample(fallback.id, level) : null
+    if (example) return example
+    throw new Error(`No sentence patterns available for ${level}`)
+  }
   const frame = pick(framePool, rand)
   const slots: Record<string, FilledSlot> = {}
 
   for (const [slotName, spec] of Object.entries(frame.slots)) {
     const previousId = previous?.frameId === frame.id ? previous.slots[slotName]?.id : undefined
-    const pool = candidates(spec, level, previousId)
+    let pool = candidates(spec, level, previousId)
+    if (slotName === 'subject' || slotName === 'companion') pool = pool.filter(isHumanSlotItem)
+    if (slotName === 'companion' && slots.subject) pool = pool.filter(item => item.id !== slots.subject.item.id)
     const item = pick(pool, rand)
     const form = conjugate(item, spec.conjugation)
     slots[slotName] = { item, ...form, conjugation: spec.conjugation }

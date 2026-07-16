@@ -7,6 +7,7 @@ import { vocabTop1000Cards } from './vocabTop1000'
 import { kanjiCards } from './kanji'
 import { readingCards } from './readings'
 import { readingEnglish } from './readingEnglish'
+import { additionalVocabularySenseCards } from './vocabularySenseOverrides'
 import type { CardType, StudyCard } from '../lib/types'
 
 const readingCardsWithEnglish: StudyCard[] = readingCards.map((card) => ({
@@ -22,6 +23,7 @@ export const allCards: StudyCard[] = [
   ...vocabBulkHeroCards,
   ...vocabBulkListCards,
   ...vocabTop1000Cards,
+  ...additionalVocabularySenseCards,
   ...kanjiCards,
   ...readingCardsWithEnglish,
 ]
@@ -37,7 +39,7 @@ export function getCardById(id: string): StudyCard | undefined {
 export const deckInfo = [
   { type: 'reading' as const, label: 'Reading Quiz', count: readingCardsWithEnglish.length, emoji: '読' },
   { type: 'kanji' as const, label: 'Kanji', count: kanjiCards.length, emoji: '漢' },
-  { type: 'vocab' as const, label: 'Vocabulary', count: vocabularyCards.length + vocabBulkCards.length + vocabBulkHeroCards.length + vocabBulkListCards.length + vocabTop1000Cards.length, emoji: '語' },
+  { type: 'vocab' as const, label: 'Vocabulary', count: vocabularyCards.length + vocabBulkCards.length + vocabBulkHeroCards.length + vocabBulkListCards.length + vocabTop1000Cards.length + additionalVocabularySenseCards.length, emoji: '語' },
   { type: 'hiragana' as const, label: 'Hiragana', count: hiraganaCards.length, emoji: 'あ' },
   { type: 'katakana' as const, label: 'Katakana', count: katakanaCards.length, emoji: 'ア' },
 ]
