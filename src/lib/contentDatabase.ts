@@ -33,8 +33,10 @@ function storageAvailable() {
   return typeof window !== 'undefined' && Boolean(window.localStorage)
 }
 
-const senseRepairs: Record<string,{ category:string; english:string; tags:string[] }> = {
+const senseRepairs: Record<string,{ category:string; english:string; preferredTranslation?:string; tags:string[] }> = {
   '表|omote': { category:'Places', english:'front / surface / outside', tags:['front','surface','exterior','relative-location','noun'] },
+  '表|hyou': { category:'Objects', english:'table / chart / spreadsheet', preferredTranslation:'chart', tags:['table','chart','document','readable','noun'] },
+  '表|ひょう': { category:'Objects', english:'table / chart / spreadsheet', preferredTranslation:'chart', tags:['table','chart','document','readable','noun'] },
   '人気|ninki': { category:'Objects', english:'popularity / popular', tags:['popularity','reputation','abstract','noun'] },
   '身|mi': { category:'Objects', english:'body / oneself', tags:['body','body-part','self','noun'] },
   '体|karada': { category:'Objects', english:'body', tags:['body','body-part','health','noun'] },
@@ -42,10 +44,19 @@ const senseRepairs: Record<string,{ category:string; english:string; tags:string
   '者|mono': { category:'Function Words', english:'person (requires a modifier)', tags:['person-reference','noun','requires-modifier'] },
 }
 
+const wordRepairs: Record<string,{ category:string; english:string; preferredTranslation:string; tags:string[] }> = {
+  '家庭': { category:'Objects', english:'household / family / home life', preferredTranslation:'household', tags:['household','family','abstract','noun'] },
+  '通り': { category:'Places', english:'street / road / avenue', preferredTranslation:'street', tags:['street','road','route','urban','noun'] },
+  '私自身': { category:'People & Living Things', english:'myself / I personally', preferredTranslation:'I', tags:['person','pronoun','speaker','human'] },
+  '本人': { category:'People & Living Things', english:'the person himself or herself', preferredTranslation:'the person', tags:['person','individual','human'] },
+  'ご飯': { category:'Food & Drink', english:'rice / meal', preferredTranslation:'meal', tags:['rice','meal','staple-food','edible'] },
+  '男性': { category:'People & Living Things', english:'man / male person', preferredTranslation:'man', tags:['person','man','male','adult','human'] },
+}
+
 function repairKnownCategoryErrors(record: ContentRecord): ContentRecord {
   if (record.kind !== 'vocabulary') return record
-  const senseRepair=senseRepairs[`${record.japanese}|${record.reading.trim().toLowerCase()}`]
-  if (senseRepair) return { ...record, english:senseRepair.english, category:senseRepair.category, categories:[senseRepair.category], tags:[...senseRepair.tags], allowedRoles:[senseRepair.category] }
+  const senseRepair=senseRepairs[`${record.japanese}|${record.reading.trim().toLowerCase()}`] ?? wordRepairs[record.japanese]
+  if (senseRepair) return { ...record, english:senseRepair.english, preferredTranslation:senseRepair.preferredTranslation ?? record.preferredTranslation, category:senseRepair.category, categories:[senseRepair.category], tags:[...senseRepair.tags], allowedRoles:[senseRepair.category] }
   const tags = record.tags.map(tag => tag.trim().replace(/([a-z0-9])([A-Z])/g,'$1-$2').toLowerCase().replace(/[_\s]+/g,'-'))
   if (!tags.some(tag => ['body-part','bodypart','blood','anatomy'].includes(tag))) return record
   return { ...record, category:'Objects', categories:['Objects'], allowedRoles:['Objects'] }
@@ -60,7 +71,7 @@ export function loadContentDatabase(): ContentRecord[] {
     const migrated = parsed.map(record => {
       const repaired = repairKnownCategoryErrors(record)
       if (repaired.kind !== 'vocabulary' || repaired.preferredTranslation?.trim()) return repaired
-      return { ...repaired, preferredTranslation:inferPreferredTranslation(repaired.japanese,repaired.english) }
+      return { ...repaired, preferredTranslation:inferPreferredTranslation(repaired.japanese,repaired.english,repaired.reading) }
     })
     if (JSON.stringify(migrated) !== JSON.stringify(parsed)) window.localStorage.setItem(DATABASE_KEY,JSON.stringify(migrated))
     return migrated

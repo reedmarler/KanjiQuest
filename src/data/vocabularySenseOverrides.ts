@@ -24,12 +24,21 @@ const SENSE_METADATA: Record<string,VocabularySenseMetadata> = {
   '者|mono': { category:'Function Words', tags:['PersonReference','Noun','RequiresModifier'] },
 }
 
+// These words have one generator-safe classification regardless of whether
+// their stored reading is romaji or kana. 家庭 is an abstract household, not a
+// place one travels to; 通り is a street noun, not the grammar sense "as / in
+// accordance with" found first in some dictionary entries.
+const WORD_METADATA: Record<string,VocabularySenseMetadata> = {
+  '家庭': { category:'Objects', tags:['Household','Family','Abstract','Noun'] },
+  '通り': { category:'Places', tags:['Street','Road','Route','Urban','Noun'] },
+}
+
 function senseKey(word: string, reading?: string) {
   return `${word.trim()}|${reading?.trim().toLowerCase() ?? ''}`
 }
 
 export function getVocabularyMetadata(word: string, reading?: string): VocabularySenseMetadata | undefined {
-  const metadata = SENSE_METADATA[senseKey(word,reading)] ?? getImportedVocabularyMetadata(word)
+  const metadata = SENSE_METADATA[senseKey(word,reading)] ?? WORD_METADATA[word.trim()] ?? getImportedVocabularyMetadata(word)
   if (!metadata) return undefined
   if (metadata.tags.some(tag => tag.replace(/[-_\s]/g,'').toLowerCase() === 'bodypart')) return { ...metadata, category:'Objects' }
   return metadata

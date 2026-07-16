@@ -23,28 +23,51 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N5','Subject は Noun です',['Subject','は','Noun','です'],'私は学生です','noun identification','copula',true],
   ['N5','Subject は Object を Adverb Verb',['Subject','は','Object','を','Adverb','Verb'],'私は本をゆっくり読む','adverb-modified action','dictionary',true],
   ['N5','Subject は Destination へ Verb',['Subject','は','Destination','へ','Verb'],'私は駅へ行く','movement toward a destination','dictionary',true],
+  ['N5','Place に AnimateSubject が いる',['Place','に','AnimateSubject','が','いる'],'公園に子供がいる','existence of a person or animal','いる',true],
+  ['N5','Place に InanimateObject が ある',['Place','に','InanimateObject','が','ある'],'教室に机がある','existence of an inanimate object','ある',true],
+  ['N5','Time に Subject が Verb',['Time','に','Subject','が','Verb'],'八時に父が来る','event occurring at a specific time','dictionary',true,'Initially constrained to 来る and times that naturally accept に.'],
+  ['N5','Object は Place に ある',['Object','は','Place','に','ある'],'本は教室にある','location of an inanimate object','ある',true],
+  ['N5','Subject は Origin から 来る',['Subject','は','Origin','から','来る'],'私は大阪から来る','geographical origin','dictionary',true],
+  ['N5','Subject は Endpoint まで MovementVerb',['Subject','は','Endpoint','まで','MovementVerb'],'私は駅まで歩く','endpoint of movement','dictionary',true],
+  ['N5','Object が Adjective',['Object','が','Adjective'],'この本が面白い','adjective description with が focus','adjective predicate',true],
+  ['N5','Subject は Recipient に Verb',['Subject','は','Recipient','に','Verb'],'私は友達に電話する','action directed toward a recipient','dictionary',true,'Normalized from Subject は Object に Verb because this slot is a recipient.'],
+  ['N5','Subject は Recipient に Object を Verb',['Subject','は','Recipient','に','Object','を','Verb'],'私は先生に本を見せる','showing or transfer to a recipient','dictionary',true,'Normalized to match the supplied Japanese example.'],
+  ['N5','Subject は Destination へ PortableObject を 持って行く',['Subject','は','Destination','へ','PortableObject','を','持って行く'],'私は学校へ弁当を持って行く','carrying something to a destination','dictionary',true],
+  ['N5','Subject は PossessableObject が ほしい',['Subject','は','PossessableObject','が','ほしい'],'私は新しい本がほしい','wanting a possessable noun','predicate',true],
+  ['N5','Subject は Origin から Destination まで MovementVerb',['Subject','は','Origin','から','Destination','まで','MovementVerb'],'私は家から学校まで歩く','movement between two places','dictionary',true],
+  ['N5','Subject も Verb',['Subject','も','Verb'],'私も行く','adding another subject','dictionary',true,'Requires an implied or explicit prior discourse context.'],
 
-  ['N4','Subject は Object を Verbたい',['Subject','は','Object','を','Verbたい'],'本を読みたい','desire to do','masu-stem + たい'],
-  ['N4','Subject は Object を Verbている',['Subject','は','Object','を','Verbている'],'本を読んでいる','ongoing or resulting state','te-form + いる'],
-  ['N4','Subject は Object を Verbた',['Subject','は','Object','を','Verbた'],'本を読んだ','plain past action','ta-form'],
-  ['N4','Subject は Object を Verbない',['Subject','は','Object','を','Verbない'],'本を読まない','plain negative action','nai-form'],
-  ['N4','Subject は Verbなければならない',['Subject','は','Verbなければならない'],'勉強しなければならない','must do','negative conditional'],
-  ['N4','Subject は Verbてもいい',['Subject','は','Verbてもいい'],'食べてもいい','permission to do','te-form'],
-  ['N4','Subject は Verbてはいけない',['Subject','は','Verbてはいけない'],'入ってはいけない','prohibition','te-form'],
-  ['N4','Subject は Destination へ Verbたことがある',['Subject','は','Destination','へ','Verbたことがある'],'日本へ行ったことがある','past experience','ta-form',false,'Destination is optional; other verbs may take an object instead.'],
-  ['N4','Subject は Object を Verbながら MainVerb',['Subject','は','Object','を','Verbながら','MainVerb'],'音楽を聞きながら勉強する','two simultaneous actions','masu-stem + ながら'],
-  ['N4','Subject は Verb始める',['Subject','は','Verb始める'],'勉強し始める','begin to do','masu-stem + 始める'],
+  ['N4','Subject は Object を Verbたい',['Subject','は','Object','を','Verbたい'],'本を読みたい','desire to do','masu-stem + たい',true],
+  ['N4','Subject は Object を Verbている',['Subject','は','Object','を','Verbている'],'本を読んでいる','ongoing or resulting state','te-form + いる',true],
+  ['N4','Subject は Object を Verbた',['Subject','は','Object','を','Verbた'],'本を読んだ','plain past action','ta-form',true],
+  ['N4','Subject は Object を Verbない',['Subject','は','Object','を','Verbない'],'本を読まない','plain negative action','nai-form',true],
+  ['N4','Subject は Verbなければならない',['Subject','は','Verbなければならない'],'勉強しなければならない','must do','negative conditional',true],
+  ['N4','Subject は Verbてもいい',['Subject','は','Verbてもいい'],'食べてもいい','permission to do','te-form',true],
+  ['N4','Subject は Verbてはいけない',['Subject','は','Verbてはいけない'],'入ってはいけない','prohibition','te-form',true],
+  ['N4','Subject は Destination へ Verbたことがある',['Subject','は','Destination','へ','Verbたことがある'],'日本へ行ったことがある','past experience','ta-form',true,'Destination is optional; other verbs may take an object instead.'],
+  ['N4','Subject は Object を Verbながら MainVerb',['Subject','は','Object','を','Verbながら','MainVerb'],'音楽を聞きながら勉強する','two simultaneous actions','masu-stem + ながら',true],
+  ['N4','Subject は Verb始める',['Subject','は','Verb始める'],'勉強し始める','begin to do','masu-stem + 始める',true],
+  ['N4','Place で Subject が Verbている',['Place','で','Subject','が','Verbている'],'図書館で学生が勉強している','ongoing action at a compatible location','te-form + いる',true],
+  ['N4','Time (に) Subject が Verbた',['Time','(に)','Subject','が','Verbた'],'昨日先生が来た','completed event at a time','ta-form',true,'The generator omits に for relative times such as 昨日.'],
+  ['N4','Object を Verbてから MainVerb',['Object','を','Verbてから','MainVerb'],'朝ご飯を食べてから学校へ行く','sequence of actions','te-form + から',true],
+  ['N4','Destination へ PurposeVerbに行く',['Destination','へ','PurposeVerbに','行く'],'公園へ遊びに行く','movement with a purpose','masu-stem + に行く',true],
+  ['N4','Subject が Object を Verbてくれる',['Subject','が','Object','を','Verbてくれる'],'先生が本を貸してくれる','someone acts for the speaker','te-form + くれる',true],
+  ['N4','Helper に Object を Verbてもらう',['Helper','に','Object','を','Verbてもらう'],'先生に日本語を教えてもらう','receive someone’s helpful action','te-form + もらう',true],
+  ['N4','Subject は Recipient に Object を Verbてあげる',['Subject','は','Recipient','に','Object','を','Verbてあげる'],'私は友達に本を貸してあげる','act for a recipient','te-form + あげる',true,'Recipient was made explicit to match the supplied example.'],
+  ['N4','CauseClause から ResultClause',['CauseClause','から','ResultClause'],'雨が降っているから家にいる','reason and logical result','plain form + から',true],
+  ['N4','Property1 し Property2',['Property1','し','Property2'],'安いし便利だ','multiple properties or reasons','plain form + し',true],
+  ['N4','Subject は Object が PotentialVerb',['Subject','は','Object','が','PotentialVerb'],'私は漢字が読める','ability','potential form',true,'Uses 読める, not the incorrect 読められる.'],
 
-  ['N3','Subject は Verbようにする',['Subject','は','Verbようにする'],'毎日勉強するようにする','make an effort or habit','plain form + ようにする'],
-  ['N3','Subject は Verbことにする',['Subject','は','Verbことにする'],'日本へ行くことにする','decide to do','plain form + ことにする'],
-  ['N3','Subject は Verbようになる',['Subject','は','Verbようになる'],'漢字が読めるようになる','change in ability or habit','plain/potential + ようになる'],
-  ['N3','Subject は Object を Verbてしまう',['Subject','は','Object','を','Verbてしまう'],'宿題を忘れてしまう','completion or regret','te-form + しまう'],
-  ['N3','Subject は Verbておく',['Subject','は','Verbておく'],'予約しておく','do in preparation','te-form + おく'],
-  ['N3','Condition-ば Result',['Conditionば','Result'],'雨が降れば行かない','conditional if','ba-form'],
-  ['N3','Condition-たら Result',['Conditionたら','Result'],'時間があったら行く','conditional when/if','tara-form'],
-  ['N3','Clause のに Contrasting result',['Clause','のに','Contrasting result'],'勉強したのに忘れた','although or despite','plain form + のに'],
-  ['N3','Reason clause ので Result',['Reason clause','ので','Result'],'雨なので家にいる','because or since','plain/na/noun + ので'],
-  ['N3','Purpose clause ために Main clause',['Purpose clause','ために','Main clause'],'日本へ行くために勉強する','in order to','dictionary form + ために'],
+  ['N3','Subject は Verbようにする',['Subject','は','Verbようにする'],'毎日勉強するようにする','make an effort or habit','plain form + ようにする',true],
+  ['N3','Subject は Verbことにする',['Subject','は','Verbことにする'],'日本へ行くことにする','decide to do','plain form + ことにする',true],
+  ['N3','Subject は Verbようになる',['Subject','は','Verbようになる'],'漢字が読めるようになる','change in ability or habit','plain/potential + ようになる',true],
+  ['N3','Subject は Object を Verbてしまう',['Subject','は','Object','を','Verbてしまう'],'宿題を忘れてしまう','completion or regret','te-form + しまう',true],
+  ['N3','Subject は Verbておく',['Subject','は','Verbておく'],'予約しておく','do in preparation','te-form + おく',true],
+  ['N3','Condition-ば Result',['Conditionば','Result'],'雨が降れば行かない','conditional if','ba-form',true],
+  ['N3','Condition-たら Result',['Conditionたら','Result'],'時間があったら行く','conditional when/if','tara-form',true],
+  ['N3','Clause のに Contrasting result',['Clause','のに','Contrasting result'],'勉強したのに忘れた','although or despite','plain form + のに',true],
+  ['N3','Reason clause ので Result',['Reason clause','ので','Result'],'雨なので家にいる','because or since','plain/na/noun + ので',true],
+  ['N3','Purpose clause ために Main clause',['Purpose clause','ために','Main clause'],'日本へ行くために勉強する','in order to','dictionary form + ために',true],
 
   ['N2','Clause わけではない',['Clause','わけではない'],'嫌いなわけではない','it does not mean that','plain form + わけではない'],
   ['N2','Clause わけにはいかない',['Clause','わけにはいかない'],'行くわけにはいかない','cannot reasonably or socially do','dictionary form + わけにはいかない'],
@@ -69,10 +92,16 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N1','Event に際して Main clause',['Event','に際して','Main clause'],'出発に際して挨拶する','on the occasion of','noun/dictionary + に際して'],
 ]
 
-export const sentencePatternCatalog: SentencePatternRecord[] = rows.map((row, index) => ({
-  id: `${row[0].toLowerCase()}-${String((index % 10) + 1).padStart(2, '0')}`,
-  jlpt: row[0], structure: row[1], slots: row[2], example: row[3], meaning: row[4], verbForm: row[5], generatorReady: row[6] ?? false, note: row[7],
-}))
+const levelCounts = new Map<JlptLevel,number>()
+
+export const sentencePatternCatalog: SentencePatternRecord[] = rows.map((row) => {
+  const number=(levelCounts.get(row[0]) ?? 0)+1
+  levelCounts.set(row[0],number)
+  return {
+    id:`${row[0].toLowerCase()}-${String(number).padStart(2,'0')}`,
+    jlpt:row[0],structure:row[1],slots:row[2],example:row[3],meaning:row[4],verbForm:row[5],generatorReady:row[6] ?? false,note:row[7],
+  }
+})
 
 const ACTIVE_KEY = 'kanji-quest-active-sentence-patterns-v1'
 

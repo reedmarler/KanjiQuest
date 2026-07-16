@@ -10,6 +10,7 @@ type Pos =
   | 'noun'
   | 'verb'
   | 'i_adjective'
+  | 'na_adjective'
   | 'adverb'
   | 'time_expression'
   | 'place_expression'
@@ -325,7 +326,7 @@ function approvedPreviewVocabulary(): PreviewVocabItem[] {
     const verbClass = record.verbClass?.toLowerCase()
     const conjugationClass: PreviewVocabItem['conjugationClass'] = verbClass?.includes('ichidan') ? 'ichidan' : verbClass?.includes('suru') || verbClass?.includes('irregular') ? 'suru' : verbClass?.includes('-mu') ? 'godan_mu' : verbClass?.includes('-ru') ? 'godan_ru' : verbClass?.includes('-ku') ? 'godan_ku_iku' : verbClass?.includes('-su') ? 'godan_su' : verbClass?.includes('-u') ? 'godan_u' : undefined
     const generatorEnglish = record.kind === 'vocabulary'
-      ? record.preferredTranslation ?? inferPreferredTranslation(record.japanese,record.english)
+      ? record.preferredTranslation ?? inferPreferredTranslation(record.japanese,record.english,record.reading)
       : record.english.replace(/^to\s+/i, '')
     return [{ id: `approved-${record.id}`, surface: record.japanese, reading: record.reading, english: generatorEnglish, pos, jlpt: record.jlpt, tags: tags.length ? tags : ['thing'], conjugationClass, transitivity: record.transitivity ?? (isVerb ? 'transitive' : undefined), objectTags: isVerb ? ['thing', 'edible', 'drinkable', 'readable', 'watchable', 'study_item'] : undefined, userVocab: true }]
   })
@@ -445,18 +446,20 @@ export function generatePreviewSentence(
   includeInactive = false,
 ): GeneratedPreviewSentence {
   const rand = seeded(seed)
-  if (level === 'N5') {
-    const categorySentence = generateCategorySentence(seed, requestedFrameId)
+  const readyLevelPatterns=sentencePatternCatalog.filter(pattern=>pattern.jlpt===level && pattern.generatorReady)
+  const effectiveRequestedFrameId=requestedFrameId ?? readyLevelPatterns[Math.abs(seed)%readyLevelPatterns.length]?.id
+  if (level === 'N5' || level === 'N4' || level === 'N3') {
+    const categorySentence = generateCategorySentence(seed, effectiveRequestedFrameId, level)
     if (categorySentence) return categorySentence
   }
-  if (requestedFrameId && !frames.some(frame => frame.id === requestedFrameId)) {
-    const example = catalogExample(requestedFrameId, level)
+  if (effectiveRequestedFrameId && !frames.some(frame => frame.id === effectiveRequestedFrameId)) {
+    const example = catalogExample(effectiveRequestedFrameId, level)
     if (example) return example
   }
   const eligible = frames.filter((frame) => frame.jlpt === level)
   const activeIds = new Set(loadActiveSentencePatternIds())
   const activePool = level === 'N5' && !includeInactive ? eligible.filter(frame => activeIds.has(frame.id)) : eligible
-  const requestedPool = requestedFrameId ? activePool.filter(frame => frame.id === requestedFrameId) : activePool
+  const requestedPool = effectiveRequestedFrameId ? activePool.filter(frame => frame.id === effectiveRequestedFrameId) : activePool
   const framePool = requestedPool.length ? requestedPool : activePool.length ? activePool : eligible
   if (!framePool.length) {
     const fallback = sentencePatternCatalog.find(pattern => pattern.jlpt === level)
