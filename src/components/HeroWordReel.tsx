@@ -7,6 +7,7 @@ import {
 } from '../lib/heroSlotResize'
 import {
   HERO_SWAP_MS,
+  HERO_SWAP_SETTLE_MS,
   HERO_WORD_DRILL_SWAP_MS,
   heroPostSwapMs,
   heroPreSwapMs,
@@ -210,7 +211,7 @@ export function HeroWordReel({
       skipUnhighlight,
     )
     const swapAt = holdMs + preSwapMs
-    const postAt = swapAt + HERO_SWAP_MS
+    const postAt = swapAt + HERO_SWAP_MS + HERO_SWAP_SETTLE_MS
     const doneAt = postAt + postSwapMs
 
     const beginCycle = () => {
@@ -463,7 +464,9 @@ export function HeroWordReel({
       if (inExpand || inSwap || inShrink || inUnhighlight) return 'held' as const
       return undefined
     }
-    if (inSwap || inShrink || inUnhighlight) return 'in' as const
+    // The incoming word enters already fully accented. Replaying the highlight
+    // reveal during the reel caused a brief dim-then-bright color discontinuity.
+    if (inSwap || inShrink || inUnhighlight) return 'held' as const
     return undefined
   }
 
@@ -489,7 +492,7 @@ export function HeroWordReel({
   return (
     <span className={viewportClass} style={slotStyle}>
       <span className="hero-reel-spacer" aria-hidden>
-        <HeroText text={spacerText} reading={cycleSpacerReading} {...cycleTextProps} />
+        <HeroText text={spacerText} reading={cycleSpacerReading} reveal="base" {...cycleTextProps} />
       </span>
       <span className="hero-reel-clip">
         <span className={trackClass}>
@@ -505,7 +508,7 @@ export function HeroWordReel({
               <HeroText
                 text={text}
                 reading={cycleReading}
-                reveal={incomingReveal()}
+                reveal={isSettled ? 'base' : incomingReveal()}
                 unhighlight={inUnhighlight}
                 {...cycleTextProps}
               />

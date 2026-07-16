@@ -9,7 +9,9 @@ import {
 import { frameToJapanese } from '../lib/heroSentenceNatural'
 import {
   HERO_DELAYED_FURIGANA_MS,
-  HERO_SENTENCE_ROTATION_INTERVAL_MULTIPLIER,
+  HERO_HIGHLIGHT_MS,
+  HERO_SENTENCE_REST_MS,
+  HERO_SWAP_MS,
   HERO_WORD_DRILL_MS,
   heroHoldBeforeCycleMs,
   heroStepCycleMs,
@@ -41,6 +43,7 @@ import { HeroText } from './HeroText'
 import { HeroWordReel } from './HeroWordReel'
 
 type HeroDisplayMode = 'sentence' | 'word'
+const HERO_JAPANESE_LETTER_SPACING_EM = 0.02
 
 function posChangingSegmentKeys(
   frame: HeroSentenceFrame,
@@ -51,6 +54,75 @@ function posChangingSegmentKeys(
   return (frame.segments ?? [])
     .filter((s) => s.swappable && prevMap.get(s.key) !== s.text)
     .map((s) => s.key)
+}
+
+function posSentenceVisualOffsetEm(
+  frame: HeroSentenceFrame,
+  stableWidths: Map<string, number>,
+  activeSlot: string | null,
+): number {
+  const segments = frame.segments ?? []
+  if (segments.length === 0) return 0
+
+  const segmentWidth = (segment: NonNullable<HeroSentenceFrame['segments']>[number]) =>
+    segment.swappable
+      ? (stableWidths.get(segment.key) ?? charLength(segment.text)) * HERO_CHAR_WIDTH_EM
+      : charLength(segment.text) * (
+          HERO_CHAR_WIDTH_EM + HERO_JAPANESE_LETTER_SPACING_EM
+        )
+  const widths = segments.map(segmentWidth)
+  const totalWidth = widths.reduce((sum, width) => sum + width, 0)
+  const activeIndex = activeSlot
+    ? segments.findIndex((segment) => segment.key === activeSlot)
+    : -1
+  const activeSegment = activeIndex >= 0 ? segments[activeIndex] : undefined
+  const activeLeftWidth = widths.slice(0, Math.max(0, activeIndex)).reduce((a, b) => a + b, 0)
+  const activeRightWidth = activeIndex >= 0
+    ? widths.slice(activeIndex + 1).reduce((a, b) => a + b, 0)
+    : 0
+  const shorterSide = activeLeftWidth >= activeRightWidth ? 'right' : 'left'
+  const activeGap = activeSegment
+    ? Math.max(
+        0,
+        widths[activeIndex] - charLength(activeSegment.text) * HERO_CHAR_WIDTH_EM,
+      )
+    : 0
+
+  let cursor = 0
+  let visibleLeft = Number.POSITIVE_INFINITY
+  let visibleRight = Number.NEGATIVE_INFINITY
+
+  segments.forEach((segment, segmentIndex) => {
+    const boxWidth = widths[segmentIndex]
+    const textWidth = charLength(segment.text) * (
+      HERO_CHAR_WIDTH_EM + HERO_JAPANESE_LETTER_SPACING_EM
+    )
+    const leftWidth = widths.slice(0, segmentIndex).reduce((a, b) => a + b, 0)
+    const rightWidth = widths.slice(segmentIndex + 1).reduce((a, b) => a + b, 0)
+    const anchoredLeft = !segment.swappable || leftWidth >= rightWidth
+    const contentInset = anchoredLeft ? 0 : boxWidth - textWidth
+    const onShorterSide = activeIndex >= 0 && (
+      shorterSide === 'right' ? segmentIndex > activeIndex : segmentIndex < activeIndex
+    )
+    const spacingOffset = onShorterSide
+      ? shorterSide === 'right' ? -activeGap : activeGap
+      : 0
+    const contentLeft = cursor + contentInset + spacingOffset
+
+    visibleLeft = Math.min(visibleLeft, contentLeft)
+    visibleRight = Math.max(visibleRight, contentLeft + textWidth)
+    cursor += boxWidth
+  })
+
+  const visibleCenter = (visibleLeft + visibleRight) / 2
+  const independentReelBoundaries = Math.max(
+    0,
+    segments.filter((segment) => segment.swappable).length - 1,
+  )
+  const reelBoundaryCompensation = independentReelBoundaries
+    * HERO_JAPANESE_LETTER_SPACING_EM
+    * 0.75
+  return visibleCenter - totalWidth / 2 + reelBoundaryCompensation
 }
 
 interface LevelTransitionState {
@@ -100,6 +172,7 @@ export function RotatingHeroSentence({
   const [index, setIndex] = useState(0)
   const [wordIndex, setWordIndex] = useState(0)
   const [levelTransition, setLevelTransition] = useState<LevelTransitionState | null>(null)
+  const [spacingSwapIndex, setSpacingSwapIndex] = useState(-1)
 
   const step = steps[index % steps.length]
   const prevStep = index === 0 ? step : steps[(index - 1 + steps.length) % steps.length]
@@ -166,19 +239,31 @@ export function RotatingHeroSentence({
     return changingSlots[0]!
   }, [useFullSentenceReel, changingSlots])
 
-  /** Every slot keeps one pattern-wide width; a swap never moves its neighbors. */
-  const stableSegmentWidths = useMemo(() => {
-    const widths = new Map<string, number>()
-    if (!isPosFrame(frame)) return widths
+  /** The prior slot's final offset must remain frozen throughout the next highlight. */
+  const previousActiveSwapSlot = useMemo(() => {
+    if (
+      index <= 1
+      || isLevelTransition
+      || !isPosFrame(effectivePrevFrame)
+      || prevStep.templateRefresh
+    ) return null
 
-    const patternId = frame.generatedPatternId
+    const beforePrevStep = steps[(index - 2 + steps.length) % steps.length]
+    return posChangingSegmentKeys(effectivePrevFrame, beforePrevStep.frame)[0] ?? null
+  }, [index, isLevelTransition, effectivePrevFrame, prevStep.templateRefresh, steps])
+
+  const stableWidthsForFrame = useCallback((targetFrame: HeroSentenceFrame) => {
+    const widths = new Map<string, number>()
+    if (!isPosFrame(targetFrame)) return widths
+
+    const patternId = targetFrame.generatedPatternId
     const relatedFrames = steps
       .map((candidate) => candidate.frame)
       .filter((candidate) =>
         isPosFrame(candidate) && candidate.generatedPatternId === patternId,
       )
 
-    for (const candidate of [...relatedFrames, frame, effectivePrevFrame]) {
+    for (const candidate of [...relatedFrames, targetFrame]) {
       for (const segment of candidate.segments ?? []) {
         if (!segment.swappable) continue
         widths.set(
@@ -189,7 +274,23 @@ export function RotatingHeroSentence({
     }
 
     return widths
-  }, [steps, frame, effectivePrevFrame])
+  }, [steps])
+
+  /** Every slot keeps one pattern-wide width; a swap never moves its neighbors. */
+  const stableSegmentWidths = useMemo(() => {
+    const widths = stableWidthsForFrame(frame)
+    for (const candidate of [effectivePrevFrame]) {
+      for (const segment of candidate.segments ?? []) {
+        if (!segment.swappable) continue
+        widths.set(
+          segment.key,
+          Math.max(widths.get(segment.key) ?? 0, charLength(segment.text)),
+        )
+      }
+    }
+
+    return widths
+  }, [stableWidthsForFrame, frame, effectivePrevFrame])
 
   /** Keep a visible rhythm: highlight, swap, unhighlight, then the next highlight. */
   const skipCycleUnhighlight = false
@@ -306,18 +407,28 @@ export function RotatingHeroSentence({
     [step.templateRefresh, isLevelTransition],
   )
 
+  useEffect(() => {
+    setSpacingSwapIndex(-1)
+    if (useFullSentenceReel || !isPosFrame(frame) || !activeSwapSlot) return
+
+    const timer = window.setTimeout(() => {
+      setSpacingSwapIndex(index)
+    }, holdBeforeCycle + HERO_HIGHLIGHT_MS)
+
+    return () => window.clearTimeout(timer)
+  }, [index, frame, useFullSentenceReel, activeSwapSlot, holdBeforeCycle])
+
   /** Always wait for the full highlight → swap → unhighlight cycle */
   const stepInterval = useMemo(
     () =>
-      (
-        holdBeforeCycle +
-        heroStepCycleMs(
-          useFullSentenceReel ? fullLineSkipSpacing : false,
-          stepResizePlan.needsPreGrow,
-          stepResizePlan.needsPostShrink,
-          { alreadyHighlighted: false, skipUnhighlight: skipCycleUnhighlight },
-        )
-      ) * HERO_SENTENCE_ROTATION_INTERVAL_MULTIPLIER,
+      holdBeforeCycle +
+      heroStepCycleMs(
+        useFullSentenceReel ? fullLineSkipSpacing : false,
+        stepResizePlan.needsPreGrow,
+        stepResizePlan.needsPostShrink,
+        { alreadyHighlighted: false, skipUnhighlight: skipCycleUnhighlight },
+      ) +
+      HERO_SENTENCE_REST_MS,
     [
       holdBeforeCycle,
       useFullSentenceReel,
@@ -467,7 +578,10 @@ export function RotatingHeroSentence({
         return
       }
 
-      setIndex((i) => (i + 1) % steps.length)
+      // Keep a monotonic index so wrapping retains the actual final frame as
+      // the previous sentence. Resetting to zero made the first frame compare
+      // with itself and bypassed the full-sentence reel.
+      setIndex((i) => i + 1)
     }, delay)
 
     return () => window.clearTimeout(stepAdvanceTimerRef.current)
@@ -597,6 +711,49 @@ export function RotatingHeroSentence({
     ) => segment.swappable
       ? stableSegmentWidths.get(segment.key) ?? charLength(segment.text)
       : charLength(segment.text)
+    const buildSpacingOffsets = (
+      spacingFrame: HeroSentenceFrame,
+      slot: string | null,
+    ) => {
+      const offsets = new Map<string, number>()
+      const spacingSegments = spacingFrame.segments ?? []
+      const activeIndex = slot
+        ? spacingSegments.findIndex((segment) => segment.key === slot)
+        : -1
+      if (activeIndex < 0) return offsets
+
+      const activeSegment = spacingSegments[activeIndex]
+      const leftWidth = spacingSegments
+        .slice(0, activeIndex)
+        .reduce((sum, segment) => sum + segmentWidth(segment), 0)
+      const rightWidth = spacingSegments
+        .slice(activeIndex + 1)
+        .reduce((sum, segment) => sum + segmentWidth(segment), 0)
+      const stableChars = activeSegment.swappable
+        ? stableSegmentWidths.get(activeSegment.key) ?? charLength(activeSegment.text)
+        : charLength(activeSegment.text)
+      const gapEm = Math.max(0, stableChars - charLength(activeSegment.text)) * HERO_CHAR_WIDTH_EM
+      const shorterSide = leftWidth >= rightWidth ? 'right' : 'left'
+
+      spacingSegments.forEach((segment, segmentIndex) => {
+        const isShorterSide = shorterSide === 'right'
+          ? segmentIndex > activeIndex
+          : segmentIndex < activeIndex
+        if (!isShorterSide) return
+        offsets.set(segment.key, shorterSide === 'right' ? -gapEm : gapEm)
+      })
+
+      return offsets
+    }
+    const previousSpacingOffsets = isPosFrame(effectivePrevFrame)
+      ? buildSpacingOffsets(effectivePrevFrame, previousActiveSwapSlot)
+      : new Map<string, number>()
+    const targetSpacingOffsets = buildSpacingOffsets(frame, activeSwapSlot)
+    const spacingSwapStarted = spacingSwapIndex === index
+    const sentenceStyle = {
+      '--hero-short-side-delay': '0ms',
+      '--hero-short-side-duration': `${HERO_SWAP_MS}ms`,
+    } as CSSProperties
     const renderSegmentNode = (
       seg: NonNullable<HeroSentenceFrame['segments']>[number],
       segIndex: number,
@@ -613,14 +770,19 @@ export function RotatingHeroSentence({
           ? 'is-anchored-left'
           : 'is-anchored-right'
         : ''
-      const style = stableChars
-        ? { width: `${stableChars * HERO_CHAR_WIDTH_EM}em` } as CSSProperties
-        : undefined
+      const shortSideOffset = spacingSwapStarted
+        ? targetSpacingOffsets.get(seg.key) ?? 0
+        : previousSpacingOffsets.get(seg.key) ?? 0
+      const isShorterSideSegment = shortSideOffset !== 0
+      const style = {
+        ...(stableChars ? { width: `${stableChars * HERO_CHAR_WIDTH_EM}em` } : {}),
+        transform: `translateX(${shortSideOffset}em)`,
+      } as CSSProperties
 
       return (
         <span
           key={`hero-seg-${segIndex}`}
-          className={`hero-segment hero-segment-${seg.key} ${anchorClass}`.trim()}
+          className={`hero-segment hero-segment-${seg.key} ${anchorClass}${isShorterSideSegment ? ' is-short-side-adjusting' : ''}`.trim()}
           style={style}
         >
           {renderSegment(seg, segIndex)}
@@ -629,7 +791,7 @@ export function RotatingHeroSentence({
     }
 
     return (
-      <span className="hero-slot-pos-sentence">
+      <span className="hero-slot-pos-sentence" style={sentenceStyle}>
         {segments.map(renderSegmentNode)}
       </span>
     )
@@ -665,10 +827,29 @@ export function RotatingHeroSentence({
   function renderFullSentenceLine() {
     const textChanged = fullSentence !== prevFullSentence
     const transitionKey = isLevelTransition ? `level-${levelTransition?.toLevel}` : `${index}-full`
+    const previousPosition = isPosFrame(effectivePrevFrame)
+      ? posSentenceVisualOffsetEm(
+          effectivePrevFrame,
+          stableWidthsForFrame(effectivePrevFrame),
+          previousActiveSwapSlot,
+        )
+      : 0
+    const targetPosition = isPosFrame(frame)
+      ? posSentenceVisualOffsetEm(frame, stableWidthsForFrame(frame), null)
+      : 0
+    const positionStyle = {
+      '--hero-full-position-from': `${previousPosition}em`,
+      '--hero-full-position-to': `${targetPosition}em`,
+      '--hero-full-position-delay': `${holdBeforeCycle + HERO_HIGHLIGHT_MS}ms`,
+      '--hero-full-position-duration': `${HERO_SWAP_MS}ms`,
+    } as CSSProperties
 
     return (
       <span className="hero-slot-full-sentence">
-        <span className="hero-full-sentence-mount">
+        <span
+          className={`hero-full-sentence-mount${textChanged ? ' is-position-handoff' : ''}`}
+          style={positionStyle}
+        >
           <HeroWordReel
             text={fullSentence}
             reading={fullSentenceReading}

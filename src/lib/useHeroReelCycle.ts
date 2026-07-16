@@ -5,6 +5,7 @@ import {
 } from '../lib/heroSlotResize'
 import {
   HERO_SWAP_MS,
+  HERO_SWAP_SETTLE_MS,
   heroPostSwapMs,
   heroPreSwapMs,
   heroSlotStyleVars,
@@ -114,7 +115,7 @@ export function useHeroReelCycle({
       skipUnhighlight,
     )
     const swapAt = holdMs + preSwapMs
-    const postAt = swapAt + HERO_SWAP_MS
+    const postAt = swapAt + HERO_SWAP_MS + HERO_SWAP_SETTLE_MS
     const doneAt = postAt + postSwapMs
 
     setPhase(holdMs > 0 ? 'hold' : beginCyclePhase())

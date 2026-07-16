@@ -1,12 +1,14 @@
 /** Single source of truth — JS timeouts and CSS variables must match */
-export const HERO_HIGHLIGHT_MS = 650
+export const HERO_HIGHLIGHT_MS = 1800
 export const HERO_WIDTH_EXPAND_MS = 700
 export const HERO_WIDTH_SHRINK_MS = 700
 export const HERO_SWAP_MS = 1200
-/** Keep a short settled pause without changing the 1.2s vertical reel. */
-export const HERO_SENTENCE_ROTATION_INTERVAL_MULTIPLIER = 1.5
+/** Covers the paint boundary between starting the reel and its CSS transition. */
+export const HERO_SWAP_SETTLE_MS = 34
+/** Stable pause after unhighlight completes and before the next word begins. */
+export const HERO_SENTENCE_REST_MS = 1200
 /** Brief unhighlight — keep under 1s of non-accent text per full cycle */
-export const HERO_UNHIGHLIGHT_MS = 420
+export const HERO_UNHIGHLIGHT_MS = 1800
 /** Outgoing reel fade — ends with the roll so unhighlight can start right after */
 export const HERO_FADE_OUT_MS = HERO_SWAP_MS
 
@@ -22,6 +24,7 @@ export const HERO_ENGLISH_UNBLUR_LEAD_MS = 180
 const HERO_MAX_ANIM_MS =
   HERO_HIGHLIGHT_MS +
   HERO_SWAP_MS +
+  HERO_SWAP_SETTLE_MS +
   Math.max(HERO_WIDTH_EXPAND_MS, HERO_WIDTH_SHRINK_MS, HERO_UNHIGHLIGHT_MS)
 
 /** @deprecated fixed step length — prefer heroStepCycleMs per step */
@@ -105,6 +108,7 @@ export function heroStepCycleMs(
   return (
     heroPreSwapMs(skipPreSwapSpacing, needsPreGrow, options.alreadyHighlighted) +
     HERO_SWAP_MS +
+    HERO_SWAP_SETTLE_MS +
     heroPostSwapMs(
       skipPreSwapSpacing,
       needsPostShrink,

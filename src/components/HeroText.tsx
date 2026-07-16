@@ -3,7 +3,7 @@ import { FuriganaSegment } from './FuriganaText'
 import { heroReadingForDisplay } from '../lib/heroSentenceGloss'
 import { splitHighlightedText } from '../lib/heroHighlightTone'
 
-export type HeroRevealMode = 'in' | 'out' | 'held'
+export type HeroRevealMode = 'in' | 'out' | 'held' | 'base'
 
 interface HeroTextProps {
   text: string
@@ -88,6 +88,37 @@ export function HeroText({
     usesDelayedFurigana,
     furiganaRevealed,
   )
+
+  if (reveal === 'base') {
+    return (
+      <span
+        className={[
+          'hero-text',
+          'hero-text-reveal',
+          'hero-text-reveal-ttb',
+          furiganaClass.trim(),
+        ].filter(Boolean).join(' ')}
+      >
+        <span className="hero-reveal-stem">
+          <span className="hero-reveal-base">
+            <FuriganaSegment
+              text={stem}
+              reading={layoutReading}
+              className="hero-furigana"
+            />
+          </span>
+          <span className="hero-reveal-accent hero-reveal-accent-cleared" aria-hidden>
+            <FuriganaSegment
+              text={stem}
+              reading={layoutReading}
+              className="hero-furigana"
+            />
+          </span>
+        </span>
+        <PlainSuffix suffix={suffix} />
+      </span>
+    )
+  }
 
   if (reveal === 'in') {
     return (

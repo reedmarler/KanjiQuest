@@ -187,6 +187,21 @@ body {
   overflow: visible;
 }
 
+.hero-full-sentence-mount.is-position-handoff {
+  transform: translateX(var(--hero-full-position-from, 0));
+  animation: hero-full-position-handoff
+    var(--hero-full-position-duration, 1200ms)
+    cubic-bezier(0.45, 0, 0.55, 1)
+    var(--hero-full-position-delay, 1800ms)
+    forwards;
+}
+
+@keyframes hero-full-position-handoff {
+  to {
+    transform: translateX(var(--hero-full-position-to, 0));
+  }
+}
+
 .hero-reel-viewport.is-natural-width {
   width: max-content;
   max-width: 100%;
@@ -308,6 +323,14 @@ body {
   display: inline-flex;
   align-items: flex-end;
   flex-shrink: 0;
+  transition:
+    transform var(--hero-short-side-duration, 1200ms)
+    var(--hero-short-side-ease, cubic-bezier(0.45, 0, 0.55, 1));
+  transition-delay: var(--hero-short-side-delay, 0ms);
+}
+
+.hero-segment.is-short-side-adjusting {
+  will-change: transform;
 }
 
 /* The longer sentence half is the anchor; spare width stays on the shorter side. */
@@ -391,9 +414,13 @@ body {
   color: var(--text-muted);
 }
 
-.hero-reveal-base .hero-furigana,
-.hero-reveal-base .hero-furigana rt {
+.hero-reveal-base .hero-furigana {
   color: inherit;
+  text-shadow: none;
+}
+
+.hero-reveal-base .hero-furigana rt {
+  color: var(--kyogre-light);
   text-shadow: none;
 }
 
@@ -410,6 +437,11 @@ body {
 
 .hero-reveal-accent.is-held {
   clip-path: inset(0 0 0 0);
+  animation: none;
+}
+
+.hero-reveal-accent-cleared {
+  clip-path: inset(100% 0 0 0);
   animation: none;
 }
 
@@ -619,6 +651,12 @@ body {
   justify-content: center;
   flex-shrink: 0;
   backface-visibility: hidden;
+}
+
+/* Animated and settled cells share identical inline metrics at handoff. */
+.hero-reel-cell-in > .hero-text {
+  display: inline-flex;
+  align-items: flex-end;
 }
 
 .hero-reel-cell-fill {
