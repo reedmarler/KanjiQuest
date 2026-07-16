@@ -5,17 +5,17 @@ export const HERO_HIGHLIGHT_TONES = ['kyogre', 'groudon', 'rayquaza'] as const
 
 export type HeroHighlightTone = (typeof HERO_HIGHLIGHT_TONES)[number]
 
-/** Scaffold / pronouns — never highlight or swap */
-const STATIC_SLOTS = new Set<string>(['subject', 'prefix', 'bridge', 'P'])
+/** Legacy scaffold segments that never become a standalone reel. */
+const STATIC_SLOTS = new Set<string>(['prefix', 'bridge', 'P'])
 
 /** Blue — verbs */
-const VERB_SLOTS = new Set<string>(['predicate', 'V', 'V2'])
+const VERB_SLOTS = new Set<string>(['predicate', 'verb', 'mainVerb', 'secondaryVerb', 'purposeVerb', 'V', 'V2'])
 
 /** Green — nouns */
-const NOUN_SLOTS = new Set<string>(['word', 'N', 'N2', 'N3'])
+const NOUN_SLOTS = new Set<string>(['subject', 'object', 'destination', 'location', 'companion', 'recipient', 'helper', 'word', 'N', 'N2', 'N3'])
 
 /** Red — adjectives, adverbs, and other modifiers */
-const ADJ_ADV_SLOTS = new Set<string>(['modifier', 'Adv', 'IAdj', 'NaAdj', 'Adj'])
+const ADJ_ADV_SLOTS = new Set<string>(['modifier', 'time', 'adverb', 'Adv', 'IAdj', 'NaAdj', 'Adj'])
 
 /** Particles — never highlighted */
 const PARTICLE_SLOTS = new Set<string>(['topicParticle', 'objectParticle'])
@@ -36,7 +36,7 @@ export function highlightToneForSlot(slot: HeroSlot | string): HeroHighlightTone
 
 /** Only です stays uncolored on predicates — ます is part of the highlighted verb */
 export function plainSuffixForSlot(slot: HeroSlot | string, text: string): string {
-  if (slot !== 'predicate' && slot !== 'V' && slot !== 'V2') return ''
+  if (!VERB_SLOTS.has(slot)) return ''
   if (!text) return ''
   if (text.endsWith('です')) return 'です'
   return ''

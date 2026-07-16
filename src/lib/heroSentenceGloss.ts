@@ -500,11 +500,12 @@ export function getHeroSlotReading(slot: HeroSlot, frame: HeroSentenceFrame): st
 
 /** Hiragana reading for an entire hero frame — used for full-sentence reel swaps */
 export function getHeroFrameReading(frame: HeroSentenceFrame): string | undefined {
+  if (frame.generatedReading) return frame.generatedReading
   if (isPosFrame(frame) && frame.segments) {
     let out = ''
     let hasReading = false
     for (const seg of frame.segments) {
-      const reading = getSegmentReading(seg.text)
+      const reading = seg.reading ?? getSegmentReading(seg.text)
       out += reading ?? seg.text
       if (reading) hasReading = true
     }
@@ -951,6 +952,7 @@ function getVerbEndingEnglish(frame: HeroSentenceFrame): string | null {
 }
 
 export function getHeroEnglish(frame: HeroSentenceFrame): string {
+  if (frame.generatedEnglish) return frame.generatedEnglish
   if (isPosFrame(frame)) return getPosEnglishNormalized(frame)
   return normalizeHeroEnglishGloss(resolveHeroEnglish(frame))
 }

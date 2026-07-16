@@ -1,21 +1,23 @@
 /** Single source of truth — JS timeouts and CSS variables must match */
-export const HERO_HIGHLIGHT_MS = 1600
-export const HERO_WIDTH_EXPAND_MS = 7200
-export const HERO_WIDTH_SHRINK_MS = 7200
-export const HERO_SWAP_MS = 4200
+export const HERO_HIGHLIGHT_MS = 650
+export const HERO_WIDTH_EXPAND_MS = 700
+export const HERO_WIDTH_SHRINK_MS = 700
+export const HERO_SWAP_MS = 1200
+/** Keep a short settled pause without changing the 1.2s vertical reel. */
+export const HERO_SENTENCE_ROTATION_INTERVAL_MULTIPLIER = 1.5
 /** Brief unhighlight — keep under 1s of non-accent text per full cycle */
-export const HERO_UNHIGHLIGHT_MS = 750
+export const HERO_UNHIGHLIGHT_MS = 420
 /** Outgoing reel fade — ends with the roll so unhighlight can start right after */
 export const HERO_FADE_OUT_MS = HERO_SWAP_MS
 
 /** Still frame before highlight on a new sentence — under 1s, non-accent */
-export const HERO_DWELL_MS = 600
+export const HERO_DWELL_MS = 500
 
 /** English unblur — slow enough to feel smooth, finishes before kanji unhighlight */
-export const HERO_ENGLISH_UNBLUR_MS = 1500
+export const HERO_ENGLISH_UNBLUR_MS = 900
 
 /** Buffer between English fully clear and kanji unhighlight (no post-shrink) */
-export const HERO_ENGLISH_UNBLUR_LEAD_MS = 400
+export const HERO_ENGLISH_UNBLUR_LEAD_MS = 180
 
 const HERO_MAX_ANIM_MS =
   HERO_HIGHLIGHT_MS +
@@ -38,10 +40,10 @@ export const HERO_IDLE_MS = HERO_DWELL_MS
 export const HERO_DELAYED_FURIGANA_MS = 750
 
 /** Word drill reel swap — shorter than sentence slots */
-export const HERO_WORD_DRILL_SWAP_MS = 1800
+export const HERO_WORD_DRILL_SWAP_MS = 700
 
 /** Time each kanji drill word stays on screen */
-export const HERO_WORD_DRILL_MS = 6200
+export const HERO_WORD_DRILL_MS = 4000
 
 export const HERO_EASE = 'cubic-bezier(0.33, 1, 0.68, 1)'
 

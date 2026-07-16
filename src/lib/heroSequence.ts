@@ -9,13 +9,19 @@ import {
   getCuratedEnglish,
 } from './curatedSentenceEngine'
 import { segmentsToJapanese } from './posSentenceEngine'
+import { buildGeneratedHeroSteps } from './generatedHeroSequence'
+import { getHeroEnglish } from './heroSentenceGloss'
 import type { JlptLevel } from './types'
 import type { WrongPool } from './wrongPool'
 
 const TOTAL_STEPS = 100
 
 const STEPS_CACHE = new Map<string, HeroStep[]>()
-const STEPS_CACHE_VERSION = 5
+const STEPS_CACHE_VERSION = 6
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('kanji-quest-content-database-change',()=>STEPS_CACHE.clear())
+}
 
 export function clearHeroStepsCache(): void {
   STEPS_CACHE.clear()
@@ -26,17 +32,17 @@ export function buildHeroSteps(
   _progress: Record<string, unknown> = {},
   level: JlptLevel,
 ): HeroStep[] {
-  const cacheKey = `${level}:curated:v${STEPS_CACHE_VERSION}`
+  const cacheKey = `${level}:database:v${STEPS_CACHE_VERSION}`
   const cached = STEPS_CACHE.get(cacheKey)
   if (cached) return cached
 
-  const curated = buildCuratedHeroSteps(TOTAL_STEPS)
-  const steps: HeroStep[] = curated.map((step) => ({
-    frame: step.frame,
-    changed: step.changed,
-    slotWidths: HERO_SLOT_WIDTHS,
-    templateRefresh: step.templateRefresh,
-  }))
+  const generated=buildGeneratedHeroSteps(level)
+  const steps: HeroStep[] = generated.length>1 ? generated : buildCuratedHeroSteps(TOTAL_STEPS).map((step) => ({
+      frame: step.frame,
+      changed: step.changed,
+      slotWidths: HERO_SLOT_WIDTHS,
+      templateRefresh: step.templateRefresh,
+    }))
 
   STEPS_CACHE.set(cacheKey, steps)
   return steps
@@ -48,16 +54,18 @@ export function auditPosSteps(level: JlptLevel): number {
   let issues = 0
   for (const step of steps) {
     const jp = segmentsToJapanese(step.frame.segments ?? [])
-    const en = step.frame.curatedId ? getCuratedEnglish(step.frame.curatedId) : ''
+    const en = step.frame.generatedEnglish ?? (step.frame.curatedId ? getCuratedEnglish(step.frame.curatedId) : getHeroEnglish(step.frame))
     if (!jp || !en) issues++
   }
-  issues += auditCuratedSteps(
-    steps.map((s) => ({
-      frame: s.frame,
-      changed: s.changed,
-      templateRefresh: s.templateRefresh,
-    })),
-  )
+  if (steps.every(step=>!step.frame.generatedEnglish)) {
+    issues += auditCuratedSteps(
+      steps.map((s) => ({
+        frame: s.frame,
+        changed: s.changed,
+        templateRefresh: s.templateRefresh,
+      })),
+    )
+  }
   return issues
 }
 

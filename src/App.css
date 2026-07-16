@@ -310,6 +310,35 @@ body {
   flex-shrink: 0;
 }
 
+/* The longer sentence half is the anchor; spare width stays on the shorter side. */
+.hero-segment.is-anchored-left {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.hero-segment.is-anchored-right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.hero-segment.is-anchored-left .hero-reel-cell {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.hero-segment.is-anchored-right .hero-reel-cell {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.hero-segment.is-anchored-left .hero-reel-spacer {
+  text-align: left;
+}
+
+.hero-segment.is-anchored-right .hero-reel-spacer {
+  text-align: right;
+}
+
 .hero-reel-spacer {
   visibility: hidden;
   white-space: nowrap;
@@ -393,7 +422,7 @@ body {
 
 .hero-reveal-accent .hero-furigana {
   color: var(--hero-highlight, var(--rayquaza));
-  text-shadow: 0 0 8px color-mix(in srgb, var(--hero-highlight, var(--rayquaza)) 18%, transparent);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--hero-highlight, var(--rayquaza)) 34%, transparent);
 }
 
 .hero-reveal-accent .hero-furigana rt,
@@ -421,11 +450,11 @@ body {
   --hero-highlight-light: var(--rayquaza-light);
 }
 
-/* Tone lives on the viewport — subtle, non-intrusive */
+/* Tone lives on the viewport — brief and unmistakable before the reel moves. */
 .hero-reel-viewport.is-highlighted .hero-text-highlight .hero-furigana,
 .hero-reel-viewport.is-highlighted .hero-reveal-accent .hero-furigana {
   color: var(--hero-highlight, var(--rayquaza));
-  text-shadow: 0 0 8px color-mix(in srgb, var(--hero-highlight, var(--rayquaza)) 18%, transparent);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--hero-highlight, var(--rayquaza)) 34%, transparent);
 }
 
 .hero-reel-viewport.is-highlighted .hero-text-highlight .hero-furigana rt,
@@ -528,17 +557,17 @@ body {
 }
 
 .hero-reel-track.is-at-in {
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
 }
 
 .hero-reel-track.is-at-out,
 .hero-reel-track.is-roll-ready {
-  transform: translateY(calc(-1 * var(--hero-roll-distance, var(--hero-cell-height))));
+  transform: translate3d(0, calc(-1 * var(--hero-roll-distance, var(--hero-cell-height))), 0);
   transition: none;
 }
 
 .hero-reel-track.is-rolling {
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
   transition: transform var(--hero-swap-duration, 4.4s) var(--hero-ease, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
@@ -589,6 +618,7 @@ body {
   align-items: flex-end;
   justify-content: center;
   flex-shrink: 0;
+  backface-visibility: hidden;
 }
 
 .hero-reel-cell-fill {
@@ -650,7 +680,7 @@ body {
   }
   100% {
     color: var(--hero-highlight, var(--kyogre));
-    text-shadow: 0 0 14px color-mix(in srgb, var(--hero-highlight, var(--kyogre)) 26%, transparent);
+    text-shadow: 0 0 20px color-mix(in srgb, var(--hero-highlight, var(--kyogre)) 42%, transparent);
     opacity: 1;
   }
 }
@@ -1541,6 +1571,22 @@ body {
 .hero-furigana.furigana-ruby,
 .hero-furigana .furigana-ruby {
   ruby-align: center;
+}
+
+/* Hero readings float above the base glyphs and never widen sentence slots. */
+.hero-sentence-line .hero-furigana .furigana-ruby {
+  display: inline-block;
+  position: relative;
+}
+
+.hero-sentence-line .hero-furigana .furigana-ruby rt {
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 0.04em);
+  width: max-content;
+  line-height: 1;
+  transform: translateX(-50%);
 }
 
 .hero-furigana rt,

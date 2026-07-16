@@ -57,10 +57,12 @@ export function heroReelTrackShowsOutgoing(options: {
 
   if (!needsChange || isSettled) return false
 
+  // Once the roll has landed, shrink/unhighlight must keep the incoming cell.
+  // This check has to precede the generic in-cycle rule below.
+  if (inShrink || inUnhighlight) return false
   if (pendingCycle || inHold || inHighlight) return true
   if (inCycle && !inSwap) return true
   if (inSwap) return true
-  if (inShrink || inUnhighlight) return false
 
   return false
 }

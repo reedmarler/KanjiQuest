@@ -38,6 +38,8 @@ export const ROTATIONS_PER_SENTENCE = 5
 export interface HeroSegment {
   key: string
   text: string
+  /** Generator-provided reading; avoids falling back to the legacy word map. */
+  reading?: string
   swappable: boolean
   posCategory?: PosCategory
 }

@@ -17,6 +17,10 @@ export interface HeroSentenceFrame {
   templateId?: number
   fills?: PosFills
   segments?: HeroSegment[]
+  /** Exact translation supplied by the structured sentence generator. */
+  generatedEnglish?: string
+  generatedPatternId?: string
+  generatedReading?: string
   /** Curated lead clause — conditionals, time adverbs (もし…、昨日) */
   prefix: string
   subject: string

@@ -3,7 +3,7 @@ import type { AppStats, CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
 import { RotatingHeroSentence } from './RotatingHeroSentence'
 
-const HERO_JLPT_OPTIONS: JlptLevel[] = ['N5', 'N4', 'N3', 'N2']
+const HERO_JLPT_OPTIONS: JlptLevel[] = ['N5', 'N4', 'N3']
 
 interface DashboardProps {
   stats: AppStats

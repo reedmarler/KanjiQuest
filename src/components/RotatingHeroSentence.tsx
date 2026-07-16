@@ -1,8 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { charLength, isPosFrame, type HeroSentenceFrame, type HeroSlot } from '../data/heroSentences'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import {
+  charLength,
+  HERO_CHAR_WIDTH_EM,
+  isPosFrame,
+  type HeroSentenceFrame,
+  type HeroSlot,
+} from '../data/heroSentences'
 import { frameToJapanese } from '../lib/heroSentenceNatural'
 import {
   HERO_DELAYED_FURIGANA_MS,
+  HERO_SENTENCE_ROTATION_INTERVAL_MULTIPLIER,
   HERO_WORD_DRILL_MS,
   heroHoldBeforeCycleMs,
   heroStepCycleMs,
@@ -83,11 +90,11 @@ export function RotatingHeroSentence({
 
   const steps = useMemo(
     () => buildHeroSteps(wrongPool, progress, activeLevel),
-    [activeLevel],
+    [wrongPool, progress, activeLevel],
   )
   const wordDrill = useMemo(
     () => buildHeroWordDrill(wrongPool, progress, activeLevel),
-    [activeLevel],
+    [wrongPool, progress, activeLevel],
   )
 
   const [index, setIndex] = useState(0)
@@ -159,6 +166,31 @@ export function RotatingHeroSentence({
     return changingSlots[0]!
   }, [useFullSentenceReel, changingSlots])
 
+  /** Every slot keeps one pattern-wide width; a swap never moves its neighbors. */
+  const stableSegmentWidths = useMemo(() => {
+    const widths = new Map<string, number>()
+    if (!isPosFrame(frame)) return widths
+
+    const patternId = frame.generatedPatternId
+    const relatedFrames = steps
+      .map((candidate) => candidate.frame)
+      .filter((candidate) =>
+        isPosFrame(candidate) && candidate.generatedPatternId === patternId,
+      )
+
+    for (const candidate of [...relatedFrames, frame, effectivePrevFrame]) {
+      for (const segment of candidate.segments ?? []) {
+        if (!segment.swappable) continue
+        widths.set(
+          segment.key,
+          Math.max(widths.get(segment.key) ?? 0, charLength(segment.text)),
+        )
+      }
+    }
+
+    return widths
+  }, [steps, frame, effectivePrevFrame])
+
   /** Keep a visible rhythm: highlight, swap, unhighlight, then the next highlight. */
   const skipCycleUnhighlight = false
 
@@ -208,6 +240,7 @@ export function RotatingHeroSentence({
     frame,
     effectivePrevFrame,
     useFullSentenceReel,
+    activeSwapSlot,
     changingSlots,
     highlightedChangingSlots,
     englishStepKey,
@@ -276,13 +309,15 @@ export function RotatingHeroSentence({
   /** Always wait for the full highlight → swap → unhighlight cycle */
   const stepInterval = useMemo(
     () =>
-      holdBeforeCycle +
-      heroStepCycleMs(
-        useFullSentenceReel ? fullLineSkipSpacing : false,
-        stepResizePlan.needsPreGrow,
-        stepResizePlan.needsPostShrink,
-        { alreadyHighlighted: false, skipUnhighlight: skipCycleUnhighlight },
-      ),
+      (
+        holdBeforeCycle +
+        heroStepCycleMs(
+          useFullSentenceReel ? fullLineSkipSpacing : false,
+          stepResizePlan.needsPreGrow,
+          stepResizePlan.needsPostShrink,
+          { alreadyHighlighted: false, skipUnhighlight: skipCycleUnhighlight },
+        )
+      ) * HERO_SENTENCE_ROTATION_INTERVAL_MULTIPLIER,
     [
       holdBeforeCycle,
       useFullSentenceReel,
@@ -371,7 +406,7 @@ export function RotatingHeroSentence({
       setShownEnglish(getHeroEnglish(frame))
       setWordEnglishRevealed(true)
     }
-  }, [displayMode])
+  }, [displayMode, frame])
 
   useEffect(() => {
     if (displayMode !== 'word') return
@@ -508,11 +543,13 @@ export function RotatingHeroSentence({
     const prevSeg = prevSegs[segIndex]
     const prevText = prevSeg?.text ?? seg.text
     const text = seg.text
-    const reading = getSegmentReading(text)
-    const prevReading = getSegmentReading(prevText)
+    const reading = seg.reading ?? getSegmentReading(text)
+    const prevReading = prevSeg?.reading ?? getSegmentReading(prevText)
     const plainSuffix = plainSuffixForSlot(seg.key, text)
     const prevPlainSuffix = plainSuffixForSlot(seg.key, prevText)
     const textChanged = text !== prevText
+    const stableSlotChars = stableSegmentWidths.get(seg.key)
+      ?? Math.max(charLength(prevText), charLength(text))
 
     if (!seg.swappable) {
       return (
@@ -529,18 +566,6 @@ export function RotatingHeroSentence({
       activeSwapSlot === seg.key
       && textChanged
       && shouldHighlightSlot(seg.key)
-
-    if (!shouldSwap) {
-      return (
-        <HeroText
-          text={text}
-          reading={reading}
-          plainSuffix={plainSuffix}
-          showFurigana={sentenceFurigana}
-        />
-      )
-    }
-
     const highlightTone = highlightToneForSlot(seg.key)
 
     return (
@@ -549,13 +574,13 @@ export function RotatingHeroSentence({
         reading={reading}
         prevText={prevText}
         prevReading={prevReading}
-        spin
-        highlight
+        spin={shouldSwap}
+        highlight={shouldSwap}
         highlightTone={highlightTone}
         plainSuffix={plainSuffix}
         prevPlainSuffix={prevPlainSuffix}
-        prevSlotChars={charLength(prevText)}
-        targetSlotChars={charLength(text)}
+        prevSlotChars={stableSlotChars}
+        targetSlotChars={stableSlotChars}
         stepKey={`${index}-${seg.key}`}
         skipPreSwapSpacing={skipPreSwapSpacing}
         skipUnhighlight={skipCycleUnhighlight}
@@ -566,13 +591,46 @@ export function RotatingHeroSentence({
   }
 
   function renderPosSentenceLine() {
+    const segments = frame.segments ?? []
+    const segmentWidth = (
+      segment: NonNullable<HeroSentenceFrame['segments']>[number],
+    ) => segment.swappable
+      ? stableSegmentWidths.get(segment.key) ?? charLength(segment.text)
+      : charLength(segment.text)
+    const renderSegmentNode = (
+      seg: NonNullable<HeroSentenceFrame['segments']>[number],
+      segIndex: number,
+    ) => {
+      const stableChars = seg.swappable ? stableSegmentWidths.get(seg.key) : undefined
+      const leftWidth = segments
+        .slice(0, segIndex)
+        .reduce((sum, segment) => sum + segmentWidth(segment), 0)
+      const rightWidth = segments
+        .slice(segIndex + 1)
+        .reduce((sum, segment) => sum + segmentWidth(segment), 0)
+      const anchorClass = seg.swappable
+        ? leftWidth >= rightWidth
+          ? 'is-anchored-left'
+          : 'is-anchored-right'
+        : ''
+      const style = stableChars
+        ? { width: `${stableChars * HERO_CHAR_WIDTH_EM}em` } as CSSProperties
+        : undefined
+
+      return (
+        <span
+          key={`hero-seg-${segIndex}`}
+          className={`hero-segment hero-segment-${seg.key} ${anchorClass}`.trim()}
+          style={style}
+        >
+          {renderSegment(seg, segIndex)}
+        </span>
+      )
+    }
+
     return (
       <span className="hero-slot-pos-sentence">
-        {(frame.segments ?? []).map((seg, segIndex) => (
-          <span key={`hero-seg-${segIndex}`} className={`hero-segment hero-segment-${seg.key}`}>
-            {renderSegment(seg, segIndex)}
-          </span>
-        ))}
+        {segments.map(renderSegmentNode)}
       </span>
     )
   }

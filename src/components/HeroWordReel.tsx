@@ -423,7 +423,7 @@ export function HeroWordReel({
       ? swapping
         ? 'is-rolling'
         : 'is-roll-ready'
-      : showOutgoingCell || inShrink || inUnhighlight
+      : showOutgoingCell
         ? 'is-at-out'
         : 'is-at-in',
   ].join(' ')
