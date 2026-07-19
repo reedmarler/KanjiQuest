@@ -340,6 +340,7 @@ function App() {
             current={currentIndex}
             total={session.length}
             onResult={handleSentenceResult}
+            onSkip={advanceOrComplete}
             onExit={() => setView(exitView)}
           />
         </div>

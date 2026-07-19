@@ -46,7 +46,7 @@ export function SentencePractice({ onStartFillGap, onStartBuilder, onBack }: Sen
           <span className="kanji-mode-emoji">🧱</span>
           <span className="kanji-mode-label">Sentence Builder</span>
           <span className="kanji-mode-desc">
-            Tap words in order — {buildCount} sentences with English translation after
+            Translate the English prompt — tap words in order across {buildCount} sentences
           </span>
         </button>
       </div>
