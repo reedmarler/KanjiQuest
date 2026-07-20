@@ -200,7 +200,8 @@ function approvedWords(): WordRecord[] {
       return category ? [category] : []
     })
     if (!categories.length) return []
-    return [{ id:`approved-${record.id}`, japanese:record.japanese, reading:record.reading, english:record.english, preferredTranslation:record.preferredTranslation ?? inferPreferredTranslation(record.japanese,record.english,record.reading), jlpt:record.jlpt, categories, tags:record.tags, source:'approved' as const }]
+    const preferredTranslation = inferPreferredTranslation(record.japanese,record.english,record.reading) || record.preferredTranslation?.trim() || record.english
+    return [{ id:`approved-${record.id}`, japanese:record.japanese, reading:record.reading, english:record.english, preferredTranslation, jlpt:record.jlpt, categories, tags:record.tags, source:'approved' as const }]
   })
 }
 
@@ -329,7 +330,8 @@ function animateEnglish(word: WordRecord, gloss: string) {
 }
 
 function englishPhrase(word: WordRecord, slot: string) {
-  const gloss = primaryEnglishGloss(word.preferredTranslation || word.english)
+  const sentencePreferred = inferPreferredTranslation(word.japanese,word.english,word.reading)
+  const gloss = primaryEnglishGloss(sentencePreferred || word.preferredTranslation?.trim() || word.english)
   const tags = tagSet(word)
 
   if (slot === 'subject') return animateEnglish(word, gloss)
@@ -592,6 +594,7 @@ function generatedWordSlots(filled: Record<string,WordRecord>,slotTagMatches: Re
 
 const additionalN5PatternIds = new Set(Array.from({length:13},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`))
 const geographicOriginTags = new Set(normalizeTags(['country','city','town','village','neighborhood','island']))
+const originSubjectDisallowedTags = new Set(normalizeTags(['patient','sick','illness','medical','hospital','guest','customer']))
 const portableObjectTags = new Set(normalizeTags([
   ...edibleTags,...drinkableTags,...readableTags,'portable','light','book','document','paper','notebook','magazine','newspaper','letter',
   'phone','camera','bottle','cup','box','bag','wallet','clothing','shirt','coat','hat','shoes','tool','pen','pencil','lunch','food',
@@ -738,7 +741,8 @@ function additionalN5Sentence(seed: number,patternId: string): GeneratedPreviewS
   }
   if (patternId === 'n5-15') {
     const origins=places.filter(word=>[...tagSet(word)].some(tag=>geographicOriginTags.has(tag)))
-    const subject=pick(humans,151),origin=pick(origins,152)
+    const originSubjects=humans.filter(word=>![...tagSet(word)].some(tag=>originSubjectDisallowedTags.has(tag)))
+    const subject=pick(originSubjects.length?originSubjects:humans,151),origin=pick(origins,152)
     if (!subject || !origin) return null
     const subjectEnglish=englishPhrase(subject,'subject'),comes=subjectUsesBaseVerb(subjectEnglish)?'come':'comes'
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(origin,'origin'),literalPart('から'),{text:'来ます',reading:'きます',slot:'verb'}]

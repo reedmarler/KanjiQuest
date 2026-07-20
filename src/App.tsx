@@ -11,6 +11,7 @@ import {
   buildMistakeSession,
   buildSentenceSession,
 } from './lib/sentenceLab'
+import { WIRED_BUILDER_LEVELS } from './lib/generatedSentenceExercises'
 import { recordFillGapSeen } from './lib/sentenceRecent'
 import { buildSession } from './lib/session'
 import { isDue, isLearned, reviewCard, reviewKanjiConfident, reviewKanjiDrill } from './lib/srs'
@@ -29,7 +30,7 @@ import {
   saveWrongPool,
   wrongPoolSize,
 } from './lib/wrongPool'
-import type { AppStats, CardProgress, CardType, StudyCard } from './lib/types'
+import type { AppStats, CardProgress, CardType, JlptLevel, StudyCard } from './lib/types'
 import type { SentenceExercise } from './data/sentenceExercises'
 import type { FillGapLevelFilter } from './lib/fillGapLevels'
 import { Dashboard } from './components/Dashboard'
@@ -84,6 +85,7 @@ function App() {
   const [showAnswer, setShowAnswer] = useState(false)
   const [sessionCorrect, setSessionCorrect] = useState(0)
   const [exitView, setExitView] = useState<View>('dashboard')
+  const [builderLevels, setBuilderLevels] = useState<JlptLevel[]>(['N5'])
 
   const dueCount = useMemo(
     () => allCards.filter((c) => {
@@ -181,9 +183,19 @@ function App() {
   }, [progress, confidentKanji])
 
   const startSentenceMode = useCallback((type: 'fill-gap' | 'sentence-builder', fillGapFilter?: FillGapLevelFilter) => {
-    const items = buildSentenceSession(type, wrongPool, fillGapFilter)
+    const items = buildSentenceSession(type, wrongPool, fillGapFilter, builderLevels)
     startStudy(items, 'sentence-practice')
-  }, [wrongPool])
+  }, [builderLevels, wrongPool])
+
+  const toggleBuilderLevel = useCallback((level: JlptLevel) => {
+    if (!WIRED_BUILDER_LEVELS.includes(level)) return
+
+    setBuilderLevels((current) => {
+      if (!current.includes(level)) return [...current, level]
+      if (current.length === 1) return current
+      return current.filter((item) => item !== level)
+    })
+  }, [])
 
   const startMistakeReview = useCallback(() => {
     const items = buildMistakeSession(wrongPool)
@@ -342,6 +354,9 @@ function App() {
             onResult={handleSentenceResult}
             onSkip={advanceOrComplete}
             onExit={() => setView(exitView)}
+            selectedLevels={builderLevels}
+            enabledLevels={WIRED_BUILDER_LEVELS}
+            onToggleLevel={toggleBuilderLevel}
           />
         </div>
       )

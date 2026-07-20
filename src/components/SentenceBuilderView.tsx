@@ -4,6 +4,92 @@ import { AnswerReveal } from './AnswerReveal'
 import { FuriganaSegment, hasKanji } from './FuriganaText'
 import { shuffle } from '../lib/quiz'
 import type { SentenceExercise } from '../data/sentenceExercises'
+import type { JlptLevel } from '../lib/types'
+
+const BUILDER_LEVEL_OPTIONS: JlptLevel[] = ['N1', 'N2', 'N3', 'N4', 'N5']
+const HIDE_WORDS_STORAGE_KEY = 'kanji-quest-sentence-builder-hide-words-v1'
+const SHOW_FURIGANA_STORAGE_KEY = 'kanji-quest-sentence-builder-show-furigana-v1'
+
+function loadBooleanPreference(key: string, fallback: boolean) {
+  if (typeof window === 'undefined') return fallback
+
+  try {
+    const stored = window.localStorage.getItem(key)
+    return stored === null ? fallback : stored === 'true'
+  } catch {
+    return fallback
+  }
+}
+
+function saveBooleanPreference(key: string, value: boolean) {
+  try {
+    window.localStorage.setItem(key, String(value))
+  } catch {
+    // Display preferences can safely remain in memory when storage is unavailable.
+  }
+}
+
+function fitFixedTextBox(element: HTMLElement | null, maximumSize: number, minimumSize: number) {
+  if (!element) return
+
+  element.style.fontSize = `${maximumSize}px`
+
+  for (let size = maximumSize; size > minimumSize; size--) {
+    if (element.scrollHeight <= element.clientHeight + 1 && element.scrollWidth <= element.clientWidth + 1) {
+      return
+    }
+
+    element.style.fontSize = `${size - 1}px`
+  }
+}
+
+function fitContainedText(
+  element: HTMLElement | null,
+  container: HTMLElement | null,
+  maximumSize: number,
+  minimumSize: number,
+) {
+  if (!element || !container) return
+
+  element.style.fontSize = `${maximumSize}px`
+  const styles = window.getComputedStyle(container)
+  const availableHeight =
+    container.clientHeight - Number.parseFloat(styles.paddingTop) - Number.parseFloat(styles.paddingBottom)
+  const availableWidth =
+    container.clientWidth - Number.parseFloat(styles.paddingLeft) - Number.parseFloat(styles.paddingRight)
+
+  for (let size = maximumSize; size > minimumSize; size--) {
+    if (element.scrollHeight <= availableHeight + 1 && element.scrollWidth <= availableWidth + 1) {
+      return
+    }
+
+    element.style.fontSize = `${size - 1}px`
+  }
+}
+
+function fitWordBank(bank: HTMLDivElement | null) {
+  if (!bank) return
+
+  const tiles = Array.from(bank.querySelectorAll<HTMLElement>('.word-bank-tile'))
+  let size = 20
+
+  for (; size > 11; size--) {
+    tiles.forEach((tile) => {
+      tile.style.fontSize = `${size}px`
+    })
+
+    const fits =
+      bank.scrollHeight <= bank.clientHeight + 1 &&
+      bank.scrollWidth <= bank.clientWidth + 1 &&
+      tiles.every((tile) => tile.scrollHeight <= tile.clientHeight + 1 && tile.scrollWidth <= tile.clientWidth + 1)
+
+    if (fits) return
+  }
+
+  tiles.forEach((tile) => {
+    tile.style.fontSize = `${size}px`
+  })
+}
 
 interface SentenceBuilderViewProps {
   exercise: SentenceExercise
@@ -12,6 +98,9 @@ interface SentenceBuilderViewProps {
   onResult: (correct: boolean) => void
   onSkip: () => void
   onExit: () => void
+  selectedLevels: readonly JlptLevel[]
+  enabledLevels: readonly JlptLevel[]
+  onToggleLevel: (level: JlptLevel) => void
 }
 
 function normalizeSentenceAnswer(value: string): string {
@@ -235,6 +324,9 @@ export function SentenceBuilderView({
   onResult,
   onSkip,
   onExit,
+  selectedLevels,
+  enabledLevels,
+  onToggleLevel,
 }: SentenceBuilderViewProps) {
   const segments = exercise.segments ?? []
   const readings = exercise.segmentReadings
@@ -242,12 +334,22 @@ export function SentenceBuilderView({
   const shuffled = useMemo(() => shuffle(tiles), [exercise.id, segments.join('|')])
   const [draft, setDraft] = useState('')
   const [picked, setPicked] = useState<typeof tiles>([])
-  const [hideJapanese, setHideJapanese] = useState(false)
-  const [showFurigana, setShowFurigana] = useState(true)
+  const [hideJapanese, setHideJapanese] = useState(() =>
+    loadBooleanPreference(HIDE_WORDS_STORAGE_KEY, false),
+  )
+  const [showFurigana, setShowFurigana] = useState(() =>
+    loadBooleanPreference(SHOW_FURIGANA_STORAGE_KEY, true),
+  )
   const [showRomajiLegend, setShowRomajiLegend] = useState(true)
+  const [levelMenuOpen, setLevelMenuOpen] = useState(false)
   const [answered, setAnswered] = useState(false)
   const viewRef = useRef<HTMLDivElement>(null)
   const entryRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const englishPromptRef = useRef<HTMLParagraphElement>(null)
+  const wordBankRef = useRef<HTMLDivElement>(null)
+  const feedbackRef = useRef<HTMLDivElement>(null)
+  const levelPickerRef = useRef<HTMLDivElement>(null)
   const checkScrollPositionRef = useRef({ x: 0, y: 0 })
 
   const isCorrect =
@@ -311,6 +413,7 @@ export function SentenceBuilderView({
 
   const handleViewKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Enter' || event.shiftKey) return
+    if (event.target instanceof HTMLButtonElement) return
 
     event.preventDefault()
 
@@ -331,11 +434,50 @@ export function SentenceBuilderView({
     }
   }, [answered])
 
+  useLayoutEffect(() => {
+    fitContainedText(
+      englishPromptRef.current,
+      englishPromptRef.current?.parentElement ?? null,
+      19,
+      11,
+    )
+    fitWordBank(wordBankRef.current)
+
+    if (!answered) {
+      fitFixedTextBox(picked.length > 0 ? entryRef.current : textareaRef.current, 24, 12)
+      return
+    }
+
+    const answerText = feedbackRef.current?.querySelector<HTMLElement>('.sentence-answer-gloss') ?? null
+    fitContainedText(answerText, feedbackRef.current, 24, 12)
+  }, [answered, draft, exercise.id, picked.length, showFurigana])
+
   useEffect(() => {
     if (picked.length > 0 && !answered) {
       entryRef.current?.focus({ preventScroll: true })
     }
   }, [answered, picked.length])
+
+  useEffect(() => {
+    if (!levelMenuOpen) return
+
+    const closeLevelMenu = (event: PointerEvent) => {
+      if (!levelPickerRef.current?.contains(event.target as Node)) {
+        setLevelMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', closeLevelMenu)
+    return () => document.removeEventListener('pointerdown', closeLevelMenu)
+  }, [levelMenuOpen])
+
+  useEffect(() => {
+    saveBooleanPreference(HIDE_WORDS_STORAGE_KEY, hideJapanese)
+  }, [hideJapanese])
+
+  useEffect(() => {
+    saveBooleanPreference(SHOW_FURIGANA_STORAGE_KEY, showFurigana)
+  }, [showFurigana])
 
   return (
     <div
@@ -347,9 +489,43 @@ export function SentenceBuilderView({
       <div className="study-top">
         <button className="btn btn-ghost" onClick={onExit}>← Exit</button>
         <span className="study-progress">{current + 1} / {total}</span>
-        <span className="study-type-badge">
-          Sentence Builder {exercise.jlpt && <span className="jlpt-badge">{exercise.jlpt}</span>}
-        </span>
+        <div className="builder-level-picker" ref={levelPickerRef}>
+          <button
+            type="button"
+            className="study-type-badge builder-level-trigger"
+            aria-expanded={levelMenuOpen}
+            aria-haspopup="true"
+            onClick={() => setLevelMenuOpen((open) => !open)}
+          >
+            <span>Sentence Builder</span>
+            <span className="jlpt-badge">{selectedLevels.join(' + ')}</span>
+            <span className="builder-level-chevron" aria-hidden="true" />
+          </button>
+          {levelMenuOpen && (
+            <div className="builder-level-menu" role="group" aria-label="Sentence Builder JLPT levels">
+              <span className="builder-level-menu-label">Practice levels</span>
+              {BUILDER_LEVEL_OPTIONS.map((level) => {
+                const enabled = enabledLevels.includes(level)
+                const selected = selectedLevels.includes(level)
+
+                return (
+                  <button
+                    key={level}
+                    type="button"
+                    className={`builder-level-option${selected ? ' is-selected' : ''}`}
+                    aria-pressed={selected}
+                    disabled={!enabled}
+                    onClick={() => onToggleLevel(level)}
+                  >
+                    <span className="builder-level-check" aria-hidden="true" />
+                    <strong>{level}</strong>
+                    <small>{enabled ? 'Ready' : 'Soon'}</small>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="study-progress-bar">
@@ -372,11 +548,11 @@ export function SentenceBuilderView({
                   New Sentence
                 </button>
                 <div className="sentence-translation-prompt" aria-label="Sentence to translate">
-                  <p>{exercise.english}</p>
+                  <p ref={englishPromptRef}>{exercise.english}</p>
                 </div>
               </div>
 
-            <div className={`sentence-word-bank ${hideJapanese ? 'is-blurred' : ''}`}>
+            <div ref={wordBankRef} className={`sentence-word-bank ${hideJapanese ? 'is-blurred' : ''}`}>
               {shuffled.map((tile) => {
                 const isUsed = pickedIndexes.has(tile.index)
 
@@ -421,6 +597,7 @@ export function SentenceBuilderView({
               </div>
             )}
             <textarea
+              ref={textareaRef}
               className={`sentence-built sentence-built-input ${picked.length > 0 ? 'sentence-built-hidden-input' : ''}`}
               value={draft}
               onChange={(event) => handleType(event.target.value)}
@@ -475,11 +652,11 @@ export function SentenceBuilderView({
                   New Sentence
                 </button>
                 <div className="sentence-translation-prompt" aria-label="Sentence to translate">
-                  <p>{exercise.english}</p>
+                  <p ref={englishPromptRef}>{exercise.english}</p>
                 </div>
               </div>
 
-              <div className={`sentence-feedback ${isCorrect ? 'correct' : 'wrong'}`}>
+              <div ref={feedbackRef} className={`sentence-feedback ${isCorrect ? 'correct' : 'wrong'}`}>
                 <AnswerReveal gloss={answerGloss} />
               </div>
               {!showRomajiFeedback && <div className="sentence-answer-layout-spacer" aria-hidden="true" />}
@@ -533,7 +710,7 @@ export function SentenceBuilderView({
               </button>
             </div>
           </div>
-          <div className="sentence-actions-row sentence-builder-actions is-placeholder" aria-hidden="true">
+          <div className="sentence-actions-row sentence-builder-actions">
             <button className="btn btn-secondary" disabled>
               Clear
             </button>
@@ -541,10 +718,14 @@ export function SentenceBuilderView({
               Hint
             </button>
             <button className="btn btn-secondary" disabled>
-              Hide Words
+              {hideJapanese ? 'Show Words' : 'Hide Words'}
             </button>
-            <button className="btn btn-secondary" disabled>
-              Hide Furigana
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowFurigana((shown) => !shown)}
+              aria-pressed={showFurigana}
+            >
+              {showFurigana ? 'Hide Furigana' : 'Show Furigana'}
             </button>
           </div>
           </>

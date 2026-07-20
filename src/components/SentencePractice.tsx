@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { getExercisesByType } from '../data/sentenceExercises'
 import type { FillGapLevelFilter } from '../lib/fillGapLevels'
+import { GENERATED_BUILDER_SESSION_SIZE } from '../lib/generatedSentenceExercises'
 import { FillGapLevelPicker } from './FillGapLevelPicker'
 
 interface SentencePracticeProps {
@@ -12,7 +13,6 @@ interface SentencePracticeProps {
 export function SentencePractice({ onStartFillGap, onStartBuilder, onBack }: SentencePracticeProps) {
   const [step, setStep] = useState<'menu' | 'fill-gap-levels'>('menu')
   const fillCount = getExercisesByType('fill-gap').length
-  const buildCount = getExercisesByType('sentence-builder').length
 
   if (step === 'fill-gap-levels') {
     return (
@@ -46,7 +46,7 @@ export function SentencePractice({ onStartFillGap, onStartBuilder, onBack }: Sen
           <span className="kanji-mode-emoji">🧱</span>
           <span className="kanji-mode-label">Sentence Builder</span>
           <span className="kanji-mode-desc">
-            Translate the English prompt — tap words in order across {buildCount} sentences
+            Generate and translate {GENERATED_BUILDER_SESSION_SIZE} N5 sentences from the sentence database
           </span>
         </button>
       </div>

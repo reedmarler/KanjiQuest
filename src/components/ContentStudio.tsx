@@ -6,7 +6,7 @@ import { disableContentRecord, exportContentDatabase, loadContentDatabase, subsc
 import type { ContentRecord } from '../lib/contentDatabase'
 import type { JlptLevel } from '../lib/types'
 import { loadActiveSentencePatternIds, saveActiveSentencePatternIds, sentencePatternCatalog } from '../data/sentencePatternCatalog'
-import { addTagToGroup, formatTagLabel, getTagGroupTags, getUniversalTags, getWordTagGroup, normalizeTags, saveWordTagGroup, suggestedTagsForWord, TAG_GROUPS } from '../data/tagTaxonomy'
+import { addTagToGroup, formatTagLabel, getTagGroupTags, getUniversalTags, getWordTagGroup, normalizeTag, normalizeTags, saveWordTagGroup, suggestedTagsForWord, TAG_GROUPS } from '../data/tagTaxonomy'
 import type { TagGroupName } from '../data/tagTaxonomy'
 import { getAllCategoryWords, getSavedCategoryWordTags, saveCategoryWordTags } from '../lib/categorySentenceEngine'
 import type { CategoryWordRecord } from '../lib/categorySentenceEngine'
@@ -23,6 +23,154 @@ const patterns = sentencePatternCatalog.map(pattern => pattern.slots)
 const QUEUE_KEY = 'kanji-quest-content-draft-queue-v1'
 const APPROVED_KEY = 'kanji-quest-content-approved-v1'
 const REJECTED_KEY = 'kanji-quest-content-rejected-v1'
+const VOCABULARY_TEMPLATE = [
+  'Japanese:',
+  'Reading:',
+  'Dictionary meaning:',
+  'Preferred sentence translation:',
+  'Category:',
+  'JLPT level:',
+  'Tags:',
+  'Notes:',
+].join('\n')
+
+const VOCABULARY_PHILOSOPHY = [
+  ['Preferred sentence translation', 'The clean English the sentence generator should use. Keep the full dictionary meaning for study, but choose one natural sentence meaning here.'],
+  ['Category', 'The slot the word is allowed to fill: person, place, object, food, time, descriptor, action, or function word.'],
+  ['Tags', 'The logic inside the category. Tags keep combinations natural, such as readable, edible, destination, clock-time, student, teacher, or medical.'],
+  ['Rule of thumb', 'Category decides where a word can go. Tags decide whether it actually makes sense there.'],
+] as const
+
+type TemplateVocabularyEntry = {
+  japanese: string
+  reading: string
+  english: string
+  preferredTranslation: string
+  category: string
+  jlpt: JlptLevel
+  tags: string[]
+}
+
+type TemplateVocabularyInput = {
+  index: number
+  japanese: string
+  reading: string
+  english: string
+  preferredTranslation: string
+  requestedCategory: string
+  requestedJlpt: string
+  rawTags: string[]
+  tags: string[]
+}
+
+type TemplateValidation = {
+  input: TemplateVocabularyInput
+  entry?: TemplateVocabularyEntry
+  errors: string[]
+  warnings: string[]
+}
+
+function splitCsvRow(line: string) {
+  const cells: string[] = []
+  let cell = ''
+  let quoted = false
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index]!
+    if (character === '"' && line[index + 1] === '"') { cell += '"'; index += 1 }
+    else if (character === '"') quoted = !quoted
+    else if (character === ',' && !quoted) { cells.push(cell.trim()); cell = '' }
+    else cell += character
+  }
+  cells.push(cell.trim())
+  return cells
+}
+
+function pastedVocabularyCandidates(value: string) {
+  const candidates = value.split(/\r?\n/).flatMap(line => {
+    const trimmed = line.trim()
+    if (!trimmed || /^Japanese(?:\s|,|$)/i.test(trimmed)) return []
+    const labeledMatch = /^Japanese\s*:\s*(.+)$/i.exec(trimmed)
+    if (labeledMatch) return [labeledMatch[1]!.trim()]
+    const firstCell = splitCsvRow(trimmed)[0] ?? ''
+    return [firstCell.split(/\s+|\|/)[0]!.trim()]
+  }).filter(Boolean)
+  return [...new Set(candidates)]
+}
+
+function parseTemplateVocabularyInputs(value: string): TemplateVocabularyInput[] {
+  const blocks = value.split(/(?=^Japanese\s*:)/im).filter(block => /^Japanese\s*:/im.test(block))
+  return blocks.map((block, index) => {
+    const fields = new Map<string, string>()
+    block.split(/\r?\n/).forEach(line => {
+      const match = /^([^:]+):\s*(.*)$/.exec(line)
+      if (match) fields.set(match[1]!.trim().toLowerCase(), match[2]!.trim())
+    })
+    const rawTags = (fields.get('tags') ?? '').split(',').map(tag => tag.trim()).filter(Boolean)
+    return {
+      index: index + 1,
+      japanese: fields.get('japanese') ?? '',
+      reading: fields.get('reading') ?? '',
+      english: fields.get('dictionary meaning') ?? '',
+      preferredTranslation: fields.get('preferred sentence translation') ?? '',
+      requestedCategory: fields.get('category') ?? '',
+      requestedJlpt: fields.get('jlpt level') ?? '',
+      rawTags,
+      tags: normalizeTags(rawTags),
+    }
+  })
+}
+
+function validateTemplateVocabulary(value: string, knownTags: Set<string>, existingKeys: Set<string>) {
+  const seenKeys = new Set<string>()
+  return parseTemplateVocabularyInputs(value)
+    .filter(input => [input.japanese, input.reading, input.english, input.preferredTranslation, input.requestedCategory, input.requestedJlpt, ...input.rawTags].some(Boolean))
+    .map((input): TemplateValidation => {
+    const errors: string[] = []
+    const warnings: string[] = []
+    if (!input.japanese) errors.push('Japanese is required.')
+    if (!input.reading) errors.push('Reading is required.')
+    if (!input.english) errors.push('Dictionary meaning is required.')
+
+    const key = `${input.japanese}|${input.reading}`
+    if (input.japanese && input.reading && existingKeys.has(key)) errors.push('This Japanese + reading pair is already in the database.')
+    if (input.japanese && input.reading && seenKeys.has(key)) errors.push('This entry is duplicated in this paste.')
+    if (input.japanese && input.reading) seenKeys.add(key)
+
+    const categoryIsKnown = (categories as readonly string[]).includes(input.requestedCategory)
+    const levelIsKnown = ['N5', 'N4', 'N3', 'N2', 'N1'].includes(input.requestedJlpt)
+    if (!input.requestedCategory) warnings.push(`Category will default to ${inferCategory(input.english)}.`)
+    else if (!categoryIsKnown) warnings.push(`Unknown category will default to ${inferCategory(input.english)}.`)
+    if (!input.requestedJlpt) warnings.push('JLPT level will default to N5.')
+    else if (!levelIsKnown) warnings.push('Unknown JLPT level will default to N5.')
+    if (!input.preferredTranslation) warnings.push('Preferred sentence translation will be auto-selected.')
+    if (!input.tags.length) warnings.push('No tags supplied yet.')
+
+    const normalizedRawTags = input.rawTags.map(normalizeTag).filter(Boolean)
+    if (new Set(normalizedRawTags).size !== normalizedRawTags.length) warnings.push('Duplicate tags will be collapsed.')
+    const levelTags = input.tags.filter(tag => /^n[1-5]$/.test(tag))
+    if (levelTags.length) warnings.push(`Remove ${levelTags.join(', ')} from tags; JLPT already stores the level.`)
+    const frequencyTags = input.tags.filter(tag => ['common', 'very-common', 'rare'].includes(tag))
+    if (frequencyTags.length > 1) warnings.push('Choose one frequency tag: very-common, common, or rare.')
+    const originTags = input.tags.filter(tag => ['loanword', 'native-japanese', 'sino-japanese'].includes(tag))
+    if (originTags.length > 1) warnings.push('Choose one primary word-origin tag.')
+    const registerTags = input.tags.filter(tag => ['casual', 'polite', 'formal'].includes(tag))
+    if (registerTags.length > 1) warnings.push('Usually choose one register tag: casual, polite, or formal.')
+    if (input.tags.includes('body') && input.tags.includes('body-part')) warnings.push('body is usually redundant when body-part is present.')
+    const unknownTags = input.tags.filter(tag => !knownTags.has(tag))
+    if (unknownTags.length) warnings.push(`Custom tags to review: ${unknownTags.join(', ')}.`)
+
+    const entry = !errors.length ? {
+      japanese: input.japanese,
+      reading: input.reading,
+      english: input.english,
+      preferredTranslation: input.preferredTranslation,
+      category: categoryIsKnown ? input.requestedCategory : inferCategory(input.english),
+      jlpt: levelIsKnown ? input.requestedJlpt as JlptLevel : 'N5',
+      tags: input.tags.filter(tag => !/^n[1-5]$/.test(tag)),
+    } : undefined
+    return { input, entry, errors, warnings }
+    })
+}
 
 function loadJson<T>(key: string, fallback: T): T {
   try { const value = window.localStorage.getItem(key); return value ? JSON.parse(value) as T : fallback } catch { return fallback }
@@ -163,6 +311,9 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
   const [sample, setSample] = useState(0)
   const [testBatchOpen, setTestBatchOpen] = useState(false)
   const [testBatchSeed, setTestBatchSeed] = useState(0)
+  const [vocabTemplateDraft, setVocabTemplateDraft] = useState(VOCABULARY_TEMPLATE)
+  const [vocabComparisonDraft, setVocabComparisonDraft] = useState('')
+  const [vocabImportDraft, setVocabImportDraft] = useState(VOCABULARY_TEMPLATE)
   const [database, setDatabase] = useState<ContentRecord[]>(() => loadContentDatabase())
   const allCategoryWords = useMemo(() => {
     // Both values invalidate this view after local vocabulary or tag storage changes.
@@ -196,7 +347,43 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
     const start=(testBatchSeed+1)*100
     return Array.from({length:10},(_,index)=>generateTestSentence(testLevels,start+index))
   },[testBatchSeed,database,testLevels])
+  const allVocabularyTags = useMemo(() => {
+    void tagRevision
+    const grouped = TAG_GROUPS.map(group => `${group.name}: ${getTagGroupTags(group.name).join(', ')}`)
+    return [...grouped, `Universal: ${getUniversalTags().join(', ')}`].join('\n')
+  }, [tagRevision])
+  const knownVocabularyTags = useMemo(() => {
+    void tagRevision
+    return new Set(normalizeTags([
+      ...TAG_GROUPS.flatMap(group => getTagGroupTags(group.name)),
+      ...getUniversalTags(),
+    ]))
+  }, [tagRevision])
+  const stagedVocabulary = useMemo(() => database.filter(record => record.kind === 'vocabulary' && record.status === 'draft'), [database])
+  const vocabularyValidation = useMemo(() => {
+    const existingKeys = new Set(database
+      .filter(record => record.kind === 'vocabulary')
+      .map(record => `${record.japanese}|${record.reading}`))
+    return validateTemplateVocabulary(vocabImportDraft, knownVocabularyTags, existingKeys)
+  }, [database, knownVocabularyTags, vocabImportDraft])
+  const readyToStageEntries = useMemo(() => vocabularyValidation.flatMap(result => result.entry ? [result.entry] : []), [vocabularyValidation])
+  const vocabularyComparison = useMemo(() => {
+    const knownWords = new Set([
+      ...allCards.filter(card => card.type === 'vocab').map(card => card.front.trim()),
+      ...database.filter(record => record.kind === 'vocabulary').map(record => record.japanese.trim()),
+    ])
+    const submitted = pastedVocabularyCandidates(vocabComparisonDraft)
+    return { submitted, missing: submitted.filter(word => !knownWords.has(word)) }
+  }, [database, vocabComparisonDraft])
   const toast = (message: string) => { setNotice(message); window.setTimeout(() => setNotice(''), 1800) }
+  const copyText = async (text: string, message: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast(message)
+    } catch {
+      toast('Copy failed; select the text manually')
+    }
+  }
   const title = nav.find(n => n.id === view)?.label
   useEffect(() => window.localStorage.setItem(QUEUE_KEY, JSON.stringify(drafts)), [drafts])
   useEffect(() => window.localStorage.setItem(APPROVED_KEY, JSON.stringify(approvedIds)), [approvedIds])
@@ -287,10 +474,74 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
     if (!japanese || !reading || !english) { toast('Japanese, reading, and English are required'); return }
     const selectedCategories = [vocabPrimaryCategory]
     const now = new Date().toISOString()
-    upsertContentRecord({ id:`manual-${Date.now()}`, kind:'vocabulary', japanese, reading, english, preferredTranslation, jlpt, category:vocabPrimaryCategory, categories:selectedCategories, tags, status:'approved', source:'manual', allowedRoles:selectedCategories, approvedAt:now, updatedAt:now })
+    upsertContentRecord({ id:`manual-${Date.now()}`, kind:'vocabulary', japanese, reading, english, preferredTranslation, jlpt, category:vocabPrimaryCategory, categories:selectedCategories, tags, status:'draft', source:'manual', allowedRoles:selectedCategories, updatedAt:now })
     event.currentTarget.reset()
     setVocabPrimaryCategory('Objects')
-    toast('Vocabulary saved and available to compatible verbs ✓')
+    toast('Vocabulary saved to staging for review')
+  }
+
+  function exportVocabularyList() {
+    const vocabulary = new Map<string, { japanese: string; reading: string; meaning: string; jlpt: string }>()
+    const addWord = (japanese: string, reading: string | undefined, meaning: string, jlpt: string | undefined) => {
+      const normalizedJapanese = japanese.trim()
+      const normalizedReading = reading?.trim() ?? ''
+      if (!normalizedJapanese) return
+      const key = `${normalizedJapanese}|${normalizedReading}`
+      if (!vocabulary.has(key)) vocabulary.set(key, {
+        japanese: normalizedJapanese,
+        reading: normalizedReading,
+        meaning: meaning.trim(),
+        jlpt: jlpt ?? '',
+      })
+    }
+
+    allCards.filter(card => card.type === 'vocab').forEach(card => addWord(card.front, card.reading, card.back, card.jlpt))
+    database.filter(record => record.kind === 'vocabulary').forEach(record => addWord(record.japanese, record.reading, record.english, record.jlpt))
+
+    const csvCell = (value: string) => `"${value.replace(/"/g, '""')}"`
+    const rows = [...vocabulary.values()]
+      .sort((a, b) => a.japanese.localeCompare(b.japanese, 'ja'))
+      .map(word => [word.japanese, word.reading, word.meaning, word.jlpt].map(csvCell).join(','))
+    const csv = ['Japanese,Reading,Meaning,JLPT', ...rows].join('\n')
+    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }))
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `kanji-quest-vocabulary-list-${new Date().toISOString().slice(0, 10)}.csv`
+    anchor.click()
+    URL.revokeObjectURL(url)
+    toast(`Exported ${vocabulary.size} vocabulary words`)
+  }
+
+  function stageTemplateVocabulary() {
+    if (!readyToStageEntries.length) {
+      toast('Fix the validation errors before staging entries')
+      return
+    }
+    const now = new Date().toISOString()
+    upsertContentRecords(readyToStageEntries.map((entry, index) => ({
+      id: `manual-${Date.now()}-${index}`,
+      kind: 'vocabulary' as const,
+      japanese: entry.japanese,
+      reading: entry.reading,
+      english: entry.english,
+      preferredTranslation: entry.preferredTranslation || inferPreferredTranslation(entry.japanese, entry.english, entry.reading),
+      jlpt: entry.jlpt,
+      category: entry.category,
+      categories: [entry.category],
+      tags: entry.tags,
+      status: 'draft' as const,
+      source: 'manual' as const,
+      allowedRoles: [entry.category],
+      updatedAt: now,
+    })))
+    setVocabImportDraft(VOCABULARY_TEMPLATE)
+    toast(`Staged ${readyToStageEntries.length} vocabulary ${readyToStageEntries.length === 1 ? 'entry' : 'entries'} for review`)
+  }
+
+  function approveStagedVocabulary(record: ContentRecord) {
+    const now = new Date().toISOString()
+    upsertContentRecord({ ...record, status: 'approved', approvedAt: now, reviewedAt: now, updatedAt: now })
+    toast(`${record.japanese} is now live in the sentence pool`)
   }
 
   return <div className="cs-shell">
@@ -310,7 +561,9 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
         <section className="cs-card numbered"><i>02</i><div><h3>Generated endings & tenses</h3><p className="help">These are derived from the verb class. Override only irregular or lexicalized forms.</p><div className="tense-table"><div><b>Form</b><b>Plain</b><b>Polite</b><b>Use in sentences</b></div>{[['Non-past','読む','読みます'],['Negative','読まない','読みません'],['Past','読んだ','読みました'],['Past negative','読まなかった','読みませんでした'],['Progressive','読んでいる','読んでいます'],['Potential','読める','読めます'],['Volitional','読もう','読みましょう']].map(row => <div key={row[0]}><span>{row[0]}</span><input defaultValue={row[1]} /><input defaultValue={row[2]} /><label><input type="checkbox" defaultChecked /> enabled</label></div>)}</div><div className="cs-grid forms-extra"><Field label="Te-form"><input defaultValue="読んで" /></Field><Field label="Imperative"><input defaultValue="読め" /></Field><Field label="Conditional (ば)"><input defaultValue="読めば" /></Field><Field label="Conditional (たら)"><input defaultValue="読んだら" /></Field></div></div></section>
         <section className="cs-card numbered"><i>03</i><div><h3>Sentence compatibility</h3><p className="help">The verb chooses one pattern and its slots. Categories control grammar eligibility; semantic tags narrow each slot to sensible vocabulary.</p><div className="cs-grid"><Field label="Primary pattern"><select><option>Subject は Object を Verb</option><option>Subject は Location で Object を Verb</option><option>Subject は Recipient に Object を Verb</option></select></Field><Field label="Allowed subject categories"><div className="chip-checks category-picker">{categories.map(x=><label key={x}><input type="checkbox" defaultChecked={x==='People & Living Things'}/><span>{x}</span></label>)}</div></Field><Field label="Allowed object categories" wide><div className="chip-checks category-picker">{categories.map(x=><label key={x}><input type="checkbox" defaultChecked={x==='Objects'}/><span>{x}</span></label>)}</div></Field><Field label="Allowed object tags" wide><input defaultValue="book, document, reading, newspaper" placeholder="food, fruit, bread, edible" /></Field><Field label="Optional slots"><div className="chip-checks">{['Time','Location','Adverb','Reason','Companion'].map((x,i)=><label key={x}><input type="checkbox" defaultChecked={i<3}/><span>{x}</span></label>)}</div></Field><Field label="Supported grammar forms"><div className="chip-checks">{['Dictionary','ます'].map(x=><label key={x}><input type="checkbox" defaultChecked/><span>{x}</span></label>)}</div></Field><Field label="English template" wide><input defaultValue="{Subject} {Verb} {Object}." /></Field><Field label="Notes / exceptions" wide><textarea placeholder="Register restrictions, particle exceptions, unnatural combinations…" /></Field></div></div></section><div className="cs-actions"><button className="ghost" type="button">Save as draft</button><button className="primary">Save verb</button></div></form></div>}
 
-      {view === 'vocab' && <div className="cs-page cs-narrow"><div className="cs-intro"><div><h2>Vocabulary editor</h2><p>Keep the complete dictionary definition for study, then choose one clean translation for generated sentences.</p></div><button className="primary" onClick={() => setView('review')}>Generate from JLPT list</button></div><form className="cs-card cs-simple cs-grid" onSubmit={saveVocabulary}><Field label="Japanese"><input name="japanese" placeholder="資料" required /></Field><Field label="Reading"><input name="reading" placeholder="しりょう" required /></Field><Field label="Dictionary meaning"><input name="english" placeholder="materials / data / documents" required /></Field><Field label="Preferred sentence translation"><input name="preferredTranslation" placeholder="documents (auto-selected if blank)" /></Field><Field label="Category"><select value={vocabPrimaryCategory} onChange={event=>setVocabPrimaryCategory(event.target.value)}>{categories.map(x=><option key={x}>{x}</option>)}</select></Field><Field label="JLPT level"><select name="jlpt">{['N5','N4','N3','N2','N1'].map(x=><option key={x}>{x}</option>)}</select></Field><Field label="Optional tags" wide><input name="tags" placeholder="document, reading, N3" /></Field><Field label="Countability / article"><select><option>Countable · a/an</option><option>Uncountable</option><option>Proper noun</option><option>Person / pronoun</option></select></Field><Field label="Notes" wide><textarea /></Field><div className="cs-actions wide"><button className="primary">Save vocabulary</button></div></form></div>}
+      {view === 'vocab' && <div className="cs-page cs-narrow"><div className="cs-intro"><div><h2>Vocabulary editor</h2><p>Keep the complete dictionary definition for study, then choose one clean translation and logic tags for generated sentences.</p></div><div className="vocab-intro-actions"><button className="ghost" type="button" onClick={exportVocabularyList}>Export vocabulary list</button><button className="primary" onClick={() => setView('review')}>Generate from JLPT list</button></div></div><section className="cs-card vocab-guidance"><small className="eyebrow">SENTENCE DATABASE PHILOSOPHY</small><h3>Add the word once, then let rules reuse it safely</h3><p>Use the dictionary field for full study meaning. Use preferred translation, category, and tags to keep generated sentences natural.</p><div className="vocab-philosophy-grid">{VOCABULARY_PHILOSOPHY.map(item=><article key={item[0]}><b>{item[0]}</b><span>{item[1]}</span></article>)}</div></section><section className="vocab-workbench"><article className="cs-card vocab-template-card"><header><div><small className="eyebrow">PASTE TEMPLATE</small><h3>Vocabulary input template</h3></div><button className="ghost" type="button" onClick={()=>copyText(VOCABULARY_TEMPLATE,'Template copied')}>Copy template</button></header><textarea value={vocabTemplateDraft} onChange={event=>setVocabTemplateDraft(event.target.value)} spellCheck={false} /><p>Paste a filled version here while preparing entries, then move the values into the save form below.</p></article><article className="cs-card vocab-template-card"><header><div><small className="eyebrow">TAG REFERENCE</small><h3>All available tags</h3></div><button className="ghost" type="button" onClick={()=>copyText(allVocabularyTags,'All tags copied')}>Copy all tags</button></header><textarea value={allVocabularyTags} readOnly spellCheck={false} /></article></section><form className="cs-card cs-simple cs-grid vocab-entry-form" onSubmit={saveVocabulary}><Field label="Japanese"><input name="japanese" placeholder="資料" required /></Field><Field label="Reading"><input name="reading" placeholder="しりょう" required /></Field><Field label="Dictionary meaning"><input name="english" placeholder="materials / data / documents" required /></Field><Field label="Preferred sentence translation"><input name="preferredTranslation" placeholder="documents (auto-selected if blank)" /></Field><Field label="Category"><select value={vocabPrimaryCategory} onChange={event=>setVocabPrimaryCategory(event.target.value)}>{categories.map(x=><option key={x}>{x}</option>)}</select></Field><Field label="JLPT level"><select name="jlpt">{['N5','N4','N3','N2','N1'].map(x=><option key={x}>{x}</option>)}</select></Field><Field label="Optional tags" wide><input name="tags" placeholder="document, reading, N3" /></Field><Field label="Countability / article"><select><option>Countable · a/an</option><option>Uncountable</option><option>Proper noun</option><option>Person / pronoun</option></select></Field><Field label="Notes" wide><textarea placeholder="Sentence-generator notes, restrictions, bad pairings, or preferred contexts..." /></Field><div className="cs-actions wide"><button className="primary">Save vocabulary</button></div></form></div>}
+
+      {view === 'vocab' && <section className="cs-page cs-narrow vocab-bottom-tools"><article className="cs-card vocab-compare-card"><header><div><small className="eyebrow">WORD GAP CHECK</small><h3>Find words not in the database</h3><p>Paste a plain word list or the CSV export. The result shows only Japanese words that are not already in Kanji Quest.</p></div><span>{vocabularyComparison.submitted.length} checked</span></header><textarea aria-label="Vocabulary list to compare" value={vocabComparisonDraft} onChange={event=>setVocabComparisonDraft(event.target.value)} placeholder={'日本語\n資料\n新しい言葉'} spellCheck={false} /><div className="vocab-tool-result"><div><b>{vocabularyComparison.missing.length} new words</b><span>{vocabularyComparison.missing.length ? 'Ready to research and tag.' : vocabularyComparison.submitted.length ? 'Everything pasted is already in the database.' : 'Paste words above to compare them.'}</span></div><button className="ghost" type="button" disabled={!vocabularyComparison.missing.length} onClick={()=>copyText(vocabularyComparison.missing.join('\n'),'New words copied')}>Copy new words</button></div><textarea aria-label="New words not in the database" value={vocabularyComparison.missing.join('\n')} readOnly placeholder="New words will appear here" spellCheck={false} /></article><article className="cs-card vocab-import-card"><header><div><small className="eyebrow">VALIDATE + STAGE</small><h3>Validate completed templates</h3><p>Paste one or more completed templates. Fix errors, review warnings, then stage the entries before they enter the sentence pool.</p></div><button className="ghost" type="button" onClick={()=>copyText(VOCABULARY_TEMPLATE,'Template copied')}>Copy template</button></header><textarea aria-label="Vocabulary templates to import" value={vocabImportDraft} onChange={event=>setVocabImportDraft(event.target.value)} spellCheck={false} /><div className="vocab-validation-summary"><b>{readyToStageEntries.length} ready to stage</b><span>{vocabularyValidation.reduce((total,item)=>total+item.errors.length,0)} errors · {vocabularyValidation.reduce((total,item)=>total+item.warnings.length,0)} warnings</span></div>{vocabularyValidation.length>0&&<div className="vocab-validation-list">{vocabularyValidation.map(result=><article key={`${result.input.index}-${result.input.japanese}-${result.input.reading}`} className={result.errors.length?'has-errors':''}><b>Entry {result.input.index}{result.input.japanese?` · ${result.input.japanese}`:''}</b>{[...result.errors,...result.warnings].map(issue=><span key={issue} className={result.errors.includes(issue)?'error':'warning'}>{issue}</span>)}{!result.errors.length&&!result.warnings.length&&<span className="pass">Ready to stage.</span>}</article>)}</div>}<footer><span>Errors block staging. Warnings keep your control: they point out defaults, duplicate logic, and custom tags to review.</span><button className="primary" type="button" disabled={!readyToStageEntries.length} onClick={stageTemplateVocabulary}>Stage {readyToStageEntries.length || ''} entries</button></footer></article><article className="cs-card vocab-staging-card"><header><div><small className="eyebrow">STAGING QUEUE</small><h3>Review before publishing</h3><p>Staged words are kept out of sentence generation until you approve them.</p></div><span>{stagedVocabulary.length} staged</span></header>{stagedVocabulary.length?<div className="vocab-staging-list">{stagedVocabulary.map(record=><article key={record.id}><div><b>{record.japanese}</b><span>{record.reading} · {record.preferredTranslation || record.english}</span><small>{record.category} · {record.jlpt} · {record.tags.map(formatTagLabel).join(', ') || 'no tags'}</small></div><div><button className="ghost" type="button" onClick={()=>disableContentRecord(record.id)}>Remove</button><button className="primary" type="button" onClick={()=>approveStagedVocabulary(record)}>Approve live</button></div></article>)}</div>:<div className="vocab-staging-empty">Nothing staged yet. Validate a template above to start a review queue.</div>}</article></section>}
 
       {view === 'categories' && !managedTagGroup && <div className="cs-page cs-narrow"><div className="cs-intro"><div><h2>Word category editor</h2><p>Review each word once. Saving its category and tags moves the complete word record into the reviewed database.</p></div><div className="category-review-actions"><span className="pill">{unreviewedWords.length} left to review</span><button className="primary" onClick={()=>{setManagedTagGroup('reviewed');setReviewedCategory('All');setCategorySearch('')}}>Reviewed Words ({reviewedWords.length})</button></div></div><div className="cs-category-list tag-group-list">{TAG_GROUPS.map((group,index)=>{const tags=getTagGroupTags(group.name);const wordCount=unreviewedWords.filter(word=>getWordTagGroup(word)===group.name).length;return <article key={group.name}><i>{String(index+1).padStart(2,'0')}</i><div><b>{group.name}</b><span>{tags.length} category tags · {wordCount} waiting for review</span></div><span>{tags.slice(0,3).map(formatTagLabel).join(' · ')}{tags.length>3?'…':''}</span><button onClick={()=>{setManagedTagGroup(group.name);setCategorySearch('')}}>Manage</button></article>})}</div></div>}
 

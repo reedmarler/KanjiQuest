@@ -9,7 +9,11 @@ import { getWrongPoolIds, type WrongPool } from './wrongPool'
 import { filterFillGapExercises, type FillGapLevelFilter } from './fillGapLevels'
 import { getRecentFillGapIds, sortExercisesByFreshness } from './sentenceRecent'
 import { shuffle } from './quiz'
-import type { CardProgress, StudyCard } from './types'
+import {
+  buildGeneratedBuilderExercises,
+  getGeneratedBuilderExerciseById,
+} from './generatedSentenceExercises'
+import type { CardProgress, JlptLevel, StudyCard } from './types'
 import { isDue } from './srs'
 
 const SESSION_SIZE = 15
@@ -36,11 +40,14 @@ export function buildSentenceSession(
   type: SentenceExerciseType,
   wrongPool: WrongPool,
   fillGapFilter?: FillGapLevelFilter,
+  builderLevels: readonly JlptLevel[] = ['N5'],
 ): SentenceSessionItem[] {
   const pool =
     type === 'fill-gap' && fillGapFilter
       ? filterFillGapExercises(fillGapFilter)
-      : sentenceExercises.filter((e) => e.type === type)
+      : type === 'sentence-builder'
+        ? buildGeneratedBuilderExercises(builderLevels)
+        : sentenceExercises.filter((e) => e.type === type)
   const wrongIds = new Set(getWrongPoolIds(wrongPool).filter((id) => id.startsWith('sent-')))
   const recentIds = type === 'fill-gap' ? getRecentFillGapIds() : []
 
@@ -60,7 +67,7 @@ export function buildMistakeSession(
 
   for (const id of ids) {
     if (id.startsWith('sent-')) {
-      const exercise = getSentenceExerciseById(id)
+      const exercise = getSentenceExerciseById(id) ?? getGeneratedBuilderExerciseById(id)
       if (exercise) {
         items.push({ kind: exercise.type, exercise })
       }
