@@ -70,31 +70,14 @@ type TemplateValidation = {
   warnings: string[]
 }
 
-function splitCsvRow(line: string) {
-  const cells: string[] = []
-  let cell = ''
-  let quoted = false
-  for (let index = 0; index < line.length; index += 1) {
-    const character = line[index]!
-    if (character === '"' && line[index + 1] === '"') { cell += '"'; index += 1 }
-    else if (character === '"') quoted = !quoted
-    else if (character === ',' && !quoted) { cells.push(cell.trim()); cell = '' }
-    else cell += character
-  }
-  cells.push(cell.trim())
-  return cells
-}
-
-function pastedVocabularyCandidates(value: string) {
-  const candidates = value.split(/\r?\n/).flatMap(line => {
-    const trimmed = line.trim()
-    if (!trimmed || /^Japanese(?:\s|,|$)/i.test(trimmed)) return []
-    const labeledMatch = /^Japanese\s*:\s*(.+)$/i.exec(trimmed)
-    if (labeledMatch) return [labeledMatch[1]!.trim()]
-    const firstCell = splitCsvRow(trimmed)[0] ?? ''
-    return [firstCell.split(/\s+|\|/)[0]!.trim()]
-  }).filter(Boolean)
-  return [...new Set(candidates)]
+/**
+ * Duplicate key for a vocabulary word. Matches on the Japanese word alone: the
+ * seed data stores readings inconsistently (romaji vs kana, ambiguous long
+ * vowels like "byoin"/"byouin"), so a reading-based key cannot reliably catch
+ * words that already exist. This mirrors the old word-gap check.
+ */
+function vocabDedupeKey(japanese: string): string {
+  return japanese.trim()
 }
 
 function parseTemplateVocabularyInputs(value: string): TemplateVocabularyInput[] {
@@ -131,10 +114,10 @@ function validateTemplateVocabulary(value: string, knownTags: Set<string>, exist
     if (!input.reading) errors.push('Reading is required.')
     if (!input.english) errors.push('Dictionary meaning is required.')
 
-    const key = `${input.japanese}|${input.reading}`
-    if (input.japanese && input.reading && existingKeys.has(key)) errors.push('This Japanese + reading pair is already in the database.')
-    if (input.japanese && input.reading && seenKeys.has(key)) errors.push('This entry is duplicated in this paste.')
-    if (input.japanese && input.reading) seenKeys.add(key)
+    const key = vocabDedupeKey(input.japanese)
+    if (input.japanese && existingKeys.has(key)) errors.push('This word is already in the database.')
+    if (input.japanese && seenKeys.has(key)) errors.push('This entry is duplicated in this paste.')
+    if (input.japanese) seenKeys.add(key)
 
     const categoryIsKnown = (categories as readonly string[]).includes(input.requestedCategory)
     const levelIsKnown = ['N5', 'N4', 'N3', 'N2', 'N1'].includes(input.requestedJlpt)
@@ -312,7 +295,6 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
   const [testBatchOpen, setTestBatchOpen] = useState(false)
   const [testBatchSeed, setTestBatchSeed] = useState(0)
   const [vocabTemplateDraft, setVocabTemplateDraft] = useState(VOCABULARY_TEMPLATE)
-  const [vocabComparisonDraft, setVocabComparisonDraft] = useState('')
   const [vocabImportDraft, setVocabImportDraft] = useState(VOCABULARY_TEMPLATE)
   const [database, setDatabase] = useState<ContentRecord[]>(() => loadContentDatabase())
   const allCategoryWords = useMemo(() => {
@@ -361,20 +343,15 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
   }, [tagRevision])
   const stagedVocabulary = useMemo(() => database.filter(record => record.kind === 'vocabulary' && record.status === 'draft'), [database])
   const vocabularyValidation = useMemo(() => {
-    const existingKeys = new Set(database
-      .filter(record => record.kind === 'vocabulary')
-      .map(record => `${record.japanese}|${record.reading}`))
+    // Duplicate detection covers both the built-in seed vocabulary and the
+    // runtime content database, so this box subsumes the word-gap check.
+    const existingKeys = new Set([
+      ...allCards.filter(card => card.type === 'vocab').map(card => vocabDedupeKey(card.front)),
+      ...database.filter(record => record.kind === 'vocabulary').map(record => vocabDedupeKey(record.japanese)),
+    ])
     return validateTemplateVocabulary(vocabImportDraft, knownVocabularyTags, existingKeys)
   }, [database, knownVocabularyTags, vocabImportDraft])
   const readyToStageEntries = useMemo(() => vocabularyValidation.flatMap(result => result.entry ? [result.entry] : []), [vocabularyValidation])
-  const vocabularyComparison = useMemo(() => {
-    const knownWords = new Set([
-      ...allCards.filter(card => card.type === 'vocab').map(card => card.front.trim()),
-      ...database.filter(record => record.kind === 'vocabulary').map(record => record.japanese.trim()),
-    ])
-    const submitted = pastedVocabularyCandidates(vocabComparisonDraft)
-    return { submitted, missing: submitted.filter(word => !knownWords.has(word)) }
-  }, [database, vocabComparisonDraft])
   const toast = (message: string) => { setNotice(message); window.setTimeout(() => setNotice(''), 1800) }
   const copyText = async (text: string, message: string) => {
     try {
@@ -512,14 +489,20 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
     toast(`Exported ${vocabulary.size} vocabulary words`)
   }
 
-  function stageTemplateVocabulary() {
+  async function addTemplateVocabulary() {
     if (!readyToStageEntries.length) {
-      toast('Fix the validation errors before staging entries')
+      toast('Fix the validation errors before adding entries')
       return
     }
+    const entries = readyToStageEntries
+    const count = entries.length
     const now = new Date().toISOString()
-    upsertContentRecords(readyToStageEntries.map((entry, index) => ({
-      id: `manual-${Date.now()}-${index}`,
+    const stamp = Date.now()
+
+    // Runtime layer: keeps the sentence generator supplied with the hand-picked
+    // category/tags, and gives instant feedback before the disk write reloads.
+    upsertContentRecords(entries.map((entry, index) => ({
+      id: `manual-${stamp}-${index}`,
       kind: 'vocabulary' as const,
       japanese: entry.japanese,
       reading: entry.reading,
@@ -529,19 +512,59 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
       category: entry.category,
       categories: [entry.category],
       tags: entry.tags,
-      status: 'draft' as const,
+      status: 'approved' as const,
       source: 'manual' as const,
       allowedRoles: [entry.category],
+      approvedAt: now,
+      reviewedAt: now,
       updatedAt: now,
     })))
     setVocabImportDraft(VOCABULARY_TEMPLATE)
-    toast(`Staged ${readyToStageEntries.length} vocabulary ${readyToStageEntries.length === 1 ? 'entry' : 'entries'} for review`)
+
+    const plural = count === 1 ? 'word' : 'words'
+
+    // Permanent layer: persist to src/data/userAddedVocab.json on disk via the
+    // dev-server endpoint so the words survive across browsers and reach the
+    // study decks. Falls back to browser-only if the dev server isn't reachable.
+    if (import.meta.env.DEV) {
+      try {
+        const response = await fetch('/__add-vocab', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(entries.map((entry, index) => ({
+            id: `user-${stamp}-${index}`,
+            front: entry.japanese,
+            reading: entry.reading,
+            back: entry.english,
+            jlpt: entry.jlpt,
+          }))),
+        })
+        const result = await response.json() as { ok?: boolean }
+        if (result.ok) {
+          toast(`Added ${count} ${plural} — saved to disk`)
+          return
+        }
+      } catch {
+        // Fall through to the browser-only notice below.
+      }
+      toast(`Added ${count} ${plural} (browser only — dev server unreachable)`)
+      return
+    }
+
+    toast(`Added ${count} ${plural} to the database`)
   }
 
   function approveStagedVocabulary(record: ContentRecord) {
     const now = new Date().toISOString()
     upsertContentRecord({ ...record, status: 'approved', approvedAt: now, reviewedAt: now, updatedAt: now })
     toast(`${record.japanese} is now live in the sentence pool`)
+  }
+
+  function approveAllStagedVocabulary() {
+    if (!stagedVocabulary.length) return
+    const now = new Date().toISOString()
+    upsertContentRecords(stagedVocabulary.map(record => ({ ...record, status: 'approved' as const, approvedAt: now, reviewedAt: now, updatedAt: now })))
+    toast(`${stagedVocabulary.length} ${stagedVocabulary.length === 1 ? 'word is' : 'words are'} now live in the sentence pool`)
   }
 
   return <div className="cs-shell">
@@ -563,7 +586,7 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
 
       {view === 'vocab' && <div className="cs-page cs-narrow"><div className="cs-intro"><div><h2>Vocabulary editor</h2><p>Keep the complete dictionary definition for study, then choose one clean translation and logic tags for generated sentences.</p></div><div className="vocab-intro-actions"><button className="ghost" type="button" onClick={exportVocabularyList}>Export vocabulary list</button><button className="primary" onClick={() => setView('review')}>Generate from JLPT list</button></div></div><section className="cs-card vocab-guidance"><small className="eyebrow">SENTENCE DATABASE PHILOSOPHY</small><h3>Add the word once, then let rules reuse it safely</h3><p>Use the dictionary field for full study meaning. Use preferred translation, category, and tags to keep generated sentences natural.</p><div className="vocab-philosophy-grid">{VOCABULARY_PHILOSOPHY.map(item=><article key={item[0]}><b>{item[0]}</b><span>{item[1]}</span></article>)}</div></section><section className="vocab-workbench"><article className="cs-card vocab-template-card"><header><div><small className="eyebrow">PASTE TEMPLATE</small><h3>Vocabulary input template</h3></div><button className="ghost" type="button" onClick={()=>copyText(VOCABULARY_TEMPLATE,'Template copied')}>Copy template</button></header><textarea value={vocabTemplateDraft} onChange={event=>setVocabTemplateDraft(event.target.value)} spellCheck={false} /><p>Paste a filled version here while preparing entries, then move the values into the save form below.</p></article><article className="cs-card vocab-template-card"><header><div><small className="eyebrow">TAG REFERENCE</small><h3>All available tags</h3></div><button className="ghost" type="button" onClick={()=>copyText(allVocabularyTags,'All tags copied')}>Copy all tags</button></header><textarea value={allVocabularyTags} readOnly spellCheck={false} /></article></section><form className="cs-card cs-simple cs-grid vocab-entry-form" onSubmit={saveVocabulary}><Field label="Japanese"><input name="japanese" placeholder="資料" required /></Field><Field label="Reading"><input name="reading" placeholder="しりょう" required /></Field><Field label="Dictionary meaning"><input name="english" placeholder="materials / data / documents" required /></Field><Field label="Preferred sentence translation"><input name="preferredTranslation" placeholder="documents (auto-selected if blank)" /></Field><Field label="Category"><select value={vocabPrimaryCategory} onChange={event=>setVocabPrimaryCategory(event.target.value)}>{categories.map(x=><option key={x}>{x}</option>)}</select></Field><Field label="JLPT level"><select name="jlpt">{['N5','N4','N3','N2','N1'].map(x=><option key={x}>{x}</option>)}</select></Field><Field label="Optional tags" wide><input name="tags" placeholder="document, reading, N3" /></Field><Field label="Countability / article"><select><option>Countable · a/an</option><option>Uncountable</option><option>Proper noun</option><option>Person / pronoun</option></select></Field><Field label="Notes" wide><textarea placeholder="Sentence-generator notes, restrictions, bad pairings, or preferred contexts..." /></Field><div className="cs-actions wide"><button className="primary">Save vocabulary</button></div></form></div>}
 
-      {view === 'vocab' && <section className="cs-page cs-narrow vocab-bottom-tools"><article className="cs-card vocab-compare-card"><header><div><small className="eyebrow">WORD GAP CHECK</small><h3>Find words not in the database</h3><p>Paste a plain word list or the CSV export. The result shows only Japanese words that are not already in Kanji Quest.</p></div><span>{vocabularyComparison.submitted.length} checked</span></header><textarea aria-label="Vocabulary list to compare" value={vocabComparisonDraft} onChange={event=>setVocabComparisonDraft(event.target.value)} placeholder={'日本語\n資料\n新しい言葉'} spellCheck={false} /><div className="vocab-tool-result"><div><b>{vocabularyComparison.missing.length} new words</b><span>{vocabularyComparison.missing.length ? 'Ready to research and tag.' : vocabularyComparison.submitted.length ? 'Everything pasted is already in the database.' : 'Paste words above to compare them.'}</span></div><button className="ghost" type="button" disabled={!vocabularyComparison.missing.length} onClick={()=>copyText(vocabularyComparison.missing.join('\n'),'New words copied')}>Copy new words</button></div><textarea aria-label="New words not in the database" value={vocabularyComparison.missing.join('\n')} readOnly placeholder="New words will appear here" spellCheck={false} /></article><article className="cs-card vocab-import-card"><header><div><small className="eyebrow">VALIDATE + STAGE</small><h3>Validate completed templates</h3><p>Paste one or more completed templates. Fix errors, review warnings, then stage the entries before they enter the sentence pool.</p></div><button className="ghost" type="button" onClick={()=>copyText(VOCABULARY_TEMPLATE,'Template copied')}>Copy template</button></header><textarea aria-label="Vocabulary templates to import" value={vocabImportDraft} onChange={event=>setVocabImportDraft(event.target.value)} spellCheck={false} /><div className="vocab-validation-summary"><b>{readyToStageEntries.length} ready to stage</b><span>{vocabularyValidation.reduce((total,item)=>total+item.errors.length,0)} errors · {vocabularyValidation.reduce((total,item)=>total+item.warnings.length,0)} warnings</span></div>{vocabularyValidation.length>0&&<div className="vocab-validation-list">{vocabularyValidation.map(result=><article key={`${result.input.index}-${result.input.japanese}-${result.input.reading}`} className={result.errors.length?'has-errors':''}><b>Entry {result.input.index}{result.input.japanese?` · ${result.input.japanese}`:''}</b>{[...result.errors,...result.warnings].map(issue=><span key={issue} className={result.errors.includes(issue)?'error':'warning'}>{issue}</span>)}{!result.errors.length&&!result.warnings.length&&<span className="pass">Ready to stage.</span>}</article>)}</div>}<footer><span>Errors block staging. Warnings keep your control: they point out defaults, duplicate logic, and custom tags to review.</span><button className="primary" type="button" disabled={!readyToStageEntries.length} onClick={stageTemplateVocabulary}>Stage {readyToStageEntries.length || ''} entries</button></footer></article><article className="cs-card vocab-staging-card"><header><div><small className="eyebrow">STAGING QUEUE</small><h3>Review before publishing</h3><p>Staged words are kept out of sentence generation until you approve them.</p></div><span>{stagedVocabulary.length} staged</span></header>{stagedVocabulary.length?<div className="vocab-staging-list">{stagedVocabulary.map(record=><article key={record.id}><div><b>{record.japanese}</b><span>{record.reading} · {record.preferredTranslation || record.english}</span><small>{record.category} · {record.jlpt} · {record.tags.map(formatTagLabel).join(', ') || 'no tags'}</small></div><div><button className="ghost" type="button" onClick={()=>disableContentRecord(record.id)}>Remove</button><button className="primary" type="button" onClick={()=>approveStagedVocabulary(record)}>Approve live</button></div></article>)}</div>:<div className="vocab-staging-empty">Nothing staged yet. Validate a template above to start a review queue.</div>}</article></section>}
+      {view === 'vocab' && <section className="cs-page cs-narrow vocab-bottom-tools"><article className="cs-card vocab-import-card"><header><div><small className="eyebrow">VALIDATE + ADD</small><h3>Paste, check, and add to the database</h3><p>Paste one or more completed templates. Duplicates against the entire database are flagged automatically. Fix errors, review warnings, then add every valid entry straight to the live database.</p></div><button className="ghost" type="button" onClick={()=>copyText(VOCABULARY_TEMPLATE,'Template copied')}>Copy template</button></header><textarea aria-label="Vocabulary templates to import" value={vocabImportDraft} onChange={event=>setVocabImportDraft(event.target.value)} spellCheck={false} /><div className="vocab-validation-summary"><b>{readyToStageEntries.length} ready to add</b><span>{vocabularyValidation.reduce((total,item)=>total+item.errors.length,0)} errors · {vocabularyValidation.reduce((total,item)=>total+item.warnings.length,0)} warnings</span></div>{vocabularyValidation.length>0&&<div className="vocab-validation-list">{vocabularyValidation.map(result=><article key={`${result.input.index}-${result.input.japanese}-${result.input.reading}`} className={result.errors.length?'has-errors':''}><b>Entry {result.input.index}{result.input.japanese?` · ${result.input.japanese}`:''}</b>{[...result.errors,...result.warnings].map(issue=><span key={issue} className={result.errors.includes(issue)?'error':'warning'}>{issue}</span>)}{!result.errors.length&&!result.warnings.length&&<span className="pass">Ready to add.</span>}</article>)}</div>}<footer><span>Errors block adding (duplicates and missing required fields). Warnings are informational: defaults, duplicate logic, and custom tags to review.</span><button className="primary" type="button" disabled={!readyToStageEntries.length} onClick={() => { void addTemplateVocabulary() }}>Add {readyToStageEntries.length || ''} {readyToStageEntries.length === 1 ? 'word' : 'words'} to database</button></footer></article><article className="cs-card vocab-staging-card"><header><div><small className="eyebrow">STAGING QUEUE</small><h3>Review before publishing</h3><p>Words saved one at a time from the entry form land here for review. Pasted templates above are added directly, so they skip this queue.</p></div><div className="vocab-staging-actions"><span>{stagedVocabulary.length} staged</span>{stagedVocabulary.length>0&&<button className="primary" type="button" onClick={approveAllStagedVocabulary}>Approve all</button>}</div></header>{stagedVocabulary.length?<div className="vocab-staging-list">{stagedVocabulary.map(record=><article key={record.id}><div><b>{record.japanese}</b><span>{record.reading} · {record.preferredTranslation || record.english}</span><small>{record.category} · {record.jlpt} · {record.tags.map(formatTagLabel).join(', ') || 'no tags'}</small></div><div><button className="ghost" type="button" onClick={()=>disableContentRecord(record.id)}>Remove</button><button className="primary" type="button" onClick={()=>approveStagedVocabulary(record)}>Approve live</button></div></article>)}</div>:<div className="vocab-staging-empty">Nothing staged yet. Words saved individually from the entry form appear here for review.</div>}</article></section>}
 
       {view === 'categories' && !managedTagGroup && <div className="cs-page cs-narrow"><div className="cs-intro"><div><h2>Word category editor</h2><p>Review each word once. Saving its category and tags moves the complete word record into the reviewed database.</p></div><div className="category-review-actions"><span className="pill">{unreviewedWords.length} left to review</span><button className="primary" onClick={()=>{setManagedTagGroup('reviewed');setReviewedCategory('All');setCategorySearch('')}}>Reviewed Words ({reviewedWords.length})</button></div></div><div className="cs-category-list tag-group-list">{TAG_GROUPS.map((group,index)=>{const tags=getTagGroupTags(group.name);const wordCount=unreviewedWords.filter(word=>getWordTagGroup(word)===group.name).length;return <article key={group.name}><i>{String(index+1).padStart(2,'0')}</i><div><b>{group.name}</b><span>{tags.length} category tags · {wordCount} waiting for review</span></div><span>{tags.slice(0,3).map(formatTagLabel).join(' · ')}{tags.length>3?'…':''}</span><button onClick={()=>{setManagedTagGroup(group.name);setCategorySearch('')}}>Manage</button></article>})}</div></div>}
 

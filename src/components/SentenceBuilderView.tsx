@@ -351,6 +351,7 @@ export function SentenceBuilderView({
   const feedbackRef = useRef<HTMLDivElement>(null)
   const levelPickerRef = useRef<HTMLDivElement>(null)
   const checkScrollPositionRef = useRef({ x: 0, y: 0 })
+  const inputBoxCenterRef = useRef<number | null>(null)
 
   const isCorrect =
     answered &&
@@ -400,6 +401,11 @@ export function SentenceBuilderView({
   const handleCheck = () => {
     if (!draft.trim()) return
     checkScrollPositionRef.current = { x: window.scrollX, y: window.scrollY }
+
+    const inputBox = picked.length > 0 ? entryRef.current : textareaRef.current
+    const inputRect = inputBox?.getBoundingClientRect()
+    inputBoxCenterRef.current = inputRect ? (inputRect.top + inputRect.bottom) / 2 : null
+
     setAnswered(true)
   }
 
@@ -450,7 +456,29 @@ export function SentenceBuilderView({
 
     const answerText = feedbackRef.current?.querySelector<HTMLElement>('.sentence-answer-gloss') ?? null
     fitContainedText(answerText, feedbackRef.current, 24, 12)
-  }, [answered, draft, exercise.id, picked.length, showFurigana])
+
+    if (feedbackRef.current) {
+      feedbackRef.current.style.position = ''
+      feedbackRef.current.style.top = ''
+
+      const targetCenter = inputBoxCenterRef.current
+      if (targetCenter !== null && !showRomajiFeedback) {
+        const contentEl = answerText ?? feedbackRef.current
+        const contentRect = contentEl.getBoundingClientRect()
+        const contentCenter = (contentRect.top + contentRect.bottom) / 2
+
+        // getBoundingClientRect returns post-zoom viewport px, but `top` is
+        // applied in pre-zoom px. Divide by the ancestor zoom so the visual
+        // shift matches the measured delta exactly.
+        const gauge = feedbackRef.current.parentElement ?? feedbackRef.current
+        const zoom = gauge.getBoundingClientRect().width / gauge.offsetWidth || 1
+        const delta = (targetCenter - contentCenter) / zoom
+
+        feedbackRef.current.style.position = 'relative'
+        feedbackRef.current.style.top = `${delta}px`
+      }
+    }
+  }, [answered, draft, exercise.id, picked.length, showFurigana, showRomajiFeedback])
 
   useEffect(() => {
     if (picked.length > 0 && !answered) {
