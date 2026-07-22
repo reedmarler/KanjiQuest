@@ -104,6 +104,11 @@ function fitWordBank(bank: HTMLDivElement | null) {
   })
 }
 
+/** Trailing 。 gives away that a tile ends the sentence, so word-bank tiles never show it. */
+function stripTrailingPeriod(text: string): string {
+  return text.replace(/。+$/u, '')
+}
+
 function particleReading(surface: string, reading: string) {
   const pronunciations: Record<string, string[]> = {
     は: ['は', 'わ'],
@@ -420,11 +425,14 @@ export function SentenceBuilderView({
   const levelPickerRef = useRef<HTMLDivElement>(null)
   const checkScrollPositionRef = useRef({ x: 0, y: 0 })
   const inputBoxCenterRef = useRef<number | null>(null)
-  const tiles = segments.flatMap((word, index) =>
-    splitParticles
-      ? splitParticleTiles(word, readings?.[index], exercise.segmentMeanings?.[index], index)
-      : [{ id: `${index}-word`, word, reading: readings?.[index], meaning: exercise.segmentMeanings?.[index], isParticle: false }],
-  )
+  const tiles = segments.flatMap((word, index) => {
+    const displayWord = stripTrailingPeriod(word)
+    const displayReading = readings?.[index] ? stripTrailingPeriod(readings[index]) : readings?.[index]
+
+    return splitParticles
+      ? splitParticleTiles(displayWord, displayReading, exercise.segmentMeanings?.[index], index)
+      : [{ id: `${index}-word`, word: displayWord, reading: displayReading, meaning: exercise.segmentMeanings?.[index], isParticle: false }]
+  })
   const shuffled = useMemo(() => shuffle(tiles), [exercise.id, splitParticles])
 
   const isCorrect =

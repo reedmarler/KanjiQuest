@@ -63,7 +63,9 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
     const container = gapMeasureRef.current
     if (!container) return
     const widths = Array.from(container.children).map((el) => (el as HTMLElement).offsetWidth)
-    setGapWidth(widths.length ? Math.max(...widths) : null)
+    // A couple of extra pixels absorbs sub-pixel rounding from offsetWidth so the
+    // real gap never comes in a hair too narrow and wraps the text it's sized for.
+    setGapWidth(widths.length ? Math.max(...widths) + 3 : null)
   }, [exercise.id])
 
   function toggleFurigana() {
@@ -210,7 +212,7 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
             onClick={continuePractice}
             disabled={!selected}
           >
-            {answered ? 'Continue' : selected ? 'Check / かくにん / 確認' : 'Choose an answer'}
+            {answered ? 'Continue' : 'Check / かくにん / 確認'}
           </button>
         </div>
 

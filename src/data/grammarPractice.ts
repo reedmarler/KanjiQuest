@@ -100,21 +100,28 @@ function rotate<T>(items: T[], offset: number): T[] {
   return [...items.slice(offset), ...items.slice(0, offset)]
 }
 
+/** Trailing 。 gives away that an option ends the sentence, so answer choices never show it. */
+function stripTrailingPeriod(text: string): string {
+  return text.replace(/。+$/u, '')
+}
+
 /** Grammar choice drills made from every curated grammar sentence in Sentence Builder. */
 export const grammarPracticeExercises: GrammarPracticeExercise[] = sourceExercises.map(({ exercise, focus }, index) => {
   const segments = exercise.segments ?? []
   const readings = exercise.segmentReadings ?? segments
-  const answer = focus.answer ?? segments[focus.segmentIndex]
+  const answer = stripTrailingPeriod(focus.answer ?? segments[focus.segmentIndex])
   // Pure-kana answers (from focus.answer overrides) never need a reading.
-  const answerReading = focus.answer ? undefined : readings[focus.segmentIndex]
+  const answerReading = focus.answer ? undefined : stripTrailingPeriod(readings[focus.segmentIndex])
 
   const alternativeEntries = rotate(sourceExercises, index + 3)
     .map(({ exercise: candidate, focus: candidateFocus }) => {
       const candidateSegments = candidate.segments ?? []
       const candidateReadings = candidate.segmentReadings ?? candidateSegments
+      const text = candidateSegments[candidateFocus.segmentIndex]
+      const reading = candidateReadings[candidateFocus.segmentIndex]
       return {
-        text: candidateSegments[candidateFocus.segmentIndex] ?? '',
-        reading: candidateReadings[candidateFocus.segmentIndex],
+        text: text ? stripTrailingPeriod(text) : '',
+        reading: reading ? stripTrailingPeriod(reading) : reading,
       }
     })
     .filter((entry, entryIndex, entries) =>
@@ -124,7 +131,7 @@ export const grammarPracticeExercises: GrammarPracticeExercise[] = sourceExercis
 
   const optionEntries = focus.options
     ? rotate(
-        focus.options.map((option) => ({ text: option, reading: undefined as string | undefined })),
+        focus.options.map((option) => ({ text: stripTrailingPeriod(option), reading: undefined as string | undefined })),
         index % focus.options.length,
       )
     : rotate([{ text: answer, reading: answerReading }, ...alternativeEntries], index % 4)

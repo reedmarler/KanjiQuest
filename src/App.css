@@ -3638,6 +3638,7 @@ body:has(.dashboard) .app {
   color: var(--sakura);
   border-bottom: 2px solid var(--sakura);
   text-align: center;
+  white-space: nowrap;
 }
 
 /* Off-screen probe that measures every option so the gap can be sized to the
@@ -3681,9 +3682,9 @@ body:has(.dashboard) .app {
 .grammar-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 1.2rem;
-  column-gap: 1.2rem;
-  row-gap: 1.2rem;
+  margin-top: 0.95rem;
+  column-gap: 0.95rem;
+  row-gap: 0.95rem;
 }
 
 .grammar-option {
@@ -3716,7 +3717,7 @@ body:has(.dashboard) .app {
 }
 
 .grammar-practice-view .sentence-actions-row {
-  margin-top: 0.65rem;
+  margin-top: 0.5rem;
   margin-bottom: 0;
 }
 
@@ -3754,12 +3755,21 @@ body:has(.dashboard) .app {
 
 .grammar-action-slot {
   position: static;
-  margin-top: 0.85rem;
+  margin-top: 0.65rem;
   pointer-events: auto;
 }
 
 .grammar-action-slot .btn {
   box-shadow: none;
+}
+
+.grammar-action-slot .sentence-inline-check {
+  min-height: 3.1rem;
+  height: auto;
+  min-width: 11.2rem;
+  padding: 0.58rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 400;
 }
 
 .grammar-action-slot .btn:disabled {
