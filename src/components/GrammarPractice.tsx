@@ -1,6 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { grammarPracticeExercises } from '../data/grammarPractice'
 import { FuriganaSegment } from './FuriganaText'
+import { shuffle } from '../lib/quiz'
 
 const SHOW_FURIGANA_STORAGE_KEY = 'kanji-quest-grammar-practice-show-furigana-v1'
 
@@ -28,6 +29,9 @@ function saveBooleanPreference(key: string, value: boolean) {
 }
 
 export function GrammarPractice({ onBack }: GrammarPracticeProps) {
+  // Shuffled once per visit (and again on restart) so the same 49 sentences
+  // don't always show up in the same fixed order every time.
+  const [exercises, setExercises] = useState(() => shuffle(grammarPracticeExercises))
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selected, setSelected] = useState<string | null>(null)
   const [answered, setAnswered] = useState(false)
@@ -41,9 +45,9 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
   const [gapWidth, setGapWidth] = useState<number | null>(null)
   const gapMeasureRef = useRef<HTMLDivElement>(null)
 
-  const exercise = grammarPracticeExercises[currentIndex]
+  const exercise = exercises[currentIndex]
   const isCorrect = selected === exercise.answer
-  const progress = ((currentIndex + 1) / grammarPracticeExercises.length) * 100
+  const progress = ((currentIndex + 1) / exercises.length) * 100
   const promptParts = useMemo(() => exercise.prompt.split('___'), [exercise.prompt])
   const promptReadingParts = useMemo(
     () => (exercise.promptReading ?? '').split('___'),
@@ -106,7 +110,7 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
       if (selected === exercise.answer) setCorrectCount((count) => count + 1)
       return
     }
-    if (currentIndex + 1 >= grammarPracticeExercises.length) {
+    if (currentIndex + 1 >= exercises.length) {
       setFinished(true)
       return
     }
@@ -118,6 +122,7 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
   }
 
   function restart() {
+    setExercises(shuffle(grammarPracticeExercises))
     setCurrentIndex(0)
     setSelected(null)
     setAnswered(false)
@@ -134,7 +139,7 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
         <section className="grammar-finish-card">
           <span className="grammar-finish-mark">文法</span>
           <h1>Grammar practice complete</h1>
-          <p>You got <strong>{correctCount}</strong> of {grammarPracticeExercises.length} grammar choices right.</p>
+          <p>You got <strong>{correctCount}</strong> of {exercises.length} grammar choices right.</p>
           <div className="grammar-finish-actions">
             <button className="btn btn-primary" onClick={restart}>Practice again</button>
             <button className="btn btn-secondary" onClick={onBack}>Dashboard</button>
@@ -148,7 +153,7 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
     <div className={`grammar-practice-view${showFurigana ? '' : ' is-furigana-hidden'}`}>
       <div className="study-top grammar-study-top">
         <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
-        <span className="study-progress">{currentIndex + 1} / {grammarPracticeExercises.length}</span>
+        <span className="study-progress">{currentIndex + 1} / {exercises.length}</span>
         <span className="study-type-badge">Grammar <span className="jlpt-badge">{exercise.jlpt}</span></span>
       </div>
 
