@@ -4189,6 +4189,7 @@ body:has(.sentence-view) .app {
 }
 
 .sentence-view .sentence-feedback {
+  position: relative;
   height: 4.625rem;
   min-height: 4.625rem;
   max-height: 4.625rem;
@@ -4198,7 +4199,47 @@ body:has(.sentence-view) .app {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-inline: 5.25rem;
   animation: sentence-answer-in 0.2s ease-out;
+}
+
+.sentence-speak-button {
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  translate: 0 -50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2rem;
+  border: 1px solid rgba(255, 139, 167, 0.34);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--sakura);
+  padding: 0.35rem 0.58rem;
+  font: 600 0.68rem 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.sentence-speak-button:hover,
+.sentence-speak-button:focus-visible,
+.sentence-speak-button.is-speaking {
+  border-color: var(--sakura);
+  background: rgba(255, 139, 167, 0.12);
+}
+
+.sentence-speak-button:hover {
+  transform: scale(1.03);
+}
+
+.sentence-speak-button:focus-visible {
+  outline: 2px solid var(--sakura);
+  outline-offset: 2px;
+}
+
+.sentence-speak-button.is-speaking span:first-child {
+  font-size: 0.58rem;
 }
 
 .sentence-view .sentence-answer-gloss {
@@ -4372,6 +4413,31 @@ body:has(.sentence-view) .app {
   .sentence-builder-actions .btn {
     padding-inline: 0.35rem;
     font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .sentence-view .sentence-feedback {
+    padding-inline: 3rem;
+  }
+
+  .sentence-speak-button {
+    right: 0.35rem;
+    width: 2.15rem;
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .sentence-speak-button span:last-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 }
 

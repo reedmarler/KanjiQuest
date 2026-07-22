@@ -343,6 +343,7 @@ export function SentenceBuilderView({
   const [showRomajiLegend, setShowRomajiLegend] = useState(true)
   const [levelMenuOpen, setLevelMenuOpen] = useState(false)
   const [answered, setAnswered] = useState(false)
+  const [isSpeaking, setIsSpeaking] = useState(false)
   const viewRef = useRef<HTMLDivElement>(null)
   const entryRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -370,6 +371,35 @@ export function SentenceBuilderView({
   const romajiAnswerParts = romajiDisplayPartsByWord(draft, correctRomaji)
   const shouldReserveHelperFurigana = (tile: (typeof tiles)[number]) =>
     Boolean(readings?.[tile.index]) && !hasKanji(tile.word)
+  const speechSupported =
+    typeof window !== 'undefined' &&
+    'speechSynthesis' in window &&
+    'SpeechSynthesisUtterance' in window
+
+  const handleSpeak = () => {
+    if (!speechSupported) return
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+      return
+    }
+
+    const utterance = new SpeechSynthesisUtterance(segments.join(''))
+    const japaneseVoice = window.speechSynthesis
+      .getVoices()
+      .find((voice) => voice.lang.toLowerCase().startsWith('ja'))
+
+    utterance.lang = 'ja-JP'
+    utterance.rate = 0.9
+    if (japaneseVoice) utterance.voice = japaneseVoice
+    utterance.onend = () => setIsSpeaking(false)
+    utterance.onerror = () => setIsSpeaking(false)
+
+    window.speechSynthesis.cancel()
+    setIsSpeaking(true)
+    window.speechSynthesis.speak(utterance)
+  }
 
   const handlePick = (tile: (typeof tiles)[number]) => {
     if (answered || pickedIndexes.has(tile.index)) return
@@ -506,6 +536,14 @@ export function SentenceBuilderView({
   useEffect(() => {
     saveBooleanPreference(SHOW_FURIGANA_STORAGE_KEY, showFurigana)
   }, [showFurigana])
+
+  useEffect(() => {
+    setIsSpeaking(false)
+    if (!speechSupported) return
+
+    window.speechSynthesis.cancel()
+    return () => window.speechSynthesis.cancel()
+  }, [exercise.id, speechSupported])
 
   return (
     <div
@@ -686,6 +724,19 @@ export function SentenceBuilderView({
 
               <div ref={feedbackRef} className={`sentence-feedback ${isCorrect ? 'correct' : 'wrong'}`}>
                 <AnswerReveal gloss={answerGloss} />
+                {speechSupported && (
+                  <button
+                    type="button"
+                    className={`sentence-speak-button${isSpeaking ? ' is-speaking' : ''}`}
+                    onClick={handleSpeak}
+                    aria-label={isSpeaking ? 'Stop Japanese sentence audio' : 'Play correct Japanese sentence'}
+                    aria-pressed={isSpeaking}
+                    title={isSpeaking ? 'Stop audio' : 'Listen to the correct Japanese sentence'}
+                  >
+                    <span aria-hidden="true">{isSpeaking ? '■' : '🔊'}</span>
+                    <span>{isSpeaking ? 'Stop' : 'Listen'}</span>
+                  </button>
+                )}
               </div>
               {!showRomajiFeedback && <div className="sentence-answer-layout-spacer" aria-hidden="true" />}
               {showRomajiFeedback && (
