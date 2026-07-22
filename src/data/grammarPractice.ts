@@ -1,8 +1,13 @@
 import { grammarBuilderExercises } from './grammarBuilderExercises'
 
+/** JLPT levels that have curated grammar drills wired up. */
+export type GrammarJlptLevel = 'N5' | 'N4' | 'N3'
+
+export const GRAMMAR_LEVELS: readonly GrammarJlptLevel[] = ['N5', 'N4', 'N3']
+
 export interface GrammarPracticeExercise {
   id: string
-  jlpt: 'N5' | 'N4'
+  jlpt: GrammarJlptLevel
   prompt: string
   /** Hiragana reading for `prompt`, split on the same ___ marker. */
   promptReading?: string
@@ -33,6 +38,21 @@ type GrammarFocus = {
 const politeVerbEndings = ['ます。', 'ました。', 'ません。', 'ませんでした。']
 const plainVerbEndings = ['む。', 'まない。', 'んだ。', 'まなかった。']
 const connectorChoices = ['から、', 'ので、', 'けど、', 'そして、']
+// Particle drills need particle distractors — pulling verb endings from other
+// sentences would make the choice obvious without testing the grammar point.
+const placeParticles = ['で', 'に', 'へ', 'を']
+const companionParticles = ['と', 'に', 'で', 'を']
+const topicParticles = ['も', 'は', 'が', 'を']
+const rangeParticles = ['まで', 'から', 'ごろ', 'より']
+const purposeChoices = ['ために', 'ように', 'ことに', 'ときに']
+// N3 sets group patterns that compete for the same slot, so the English clue is
+// what disambiguates them rather than the shape of the sentence.
+const limitChoices = ['ばかり', 'さえ', 'だけでなく', 'ほど']
+const modalChoices = ['はずです。', 'べきです。', 'ようです。', 'そうです。']
+const clauseChoices = ['うちに', 'たびに', 'まま', 'とおりに']
+const causeChoices = ['おかげで', 'せいで', 'ために', 'ことで']
+const referenceChoices = ['によって', 'について', 'にとって', 'に対して']
+const quoteChoices = ['という', 'として', 'について', 'にとって']
 
 const focusById: Record<string, GrammarFocus> = {
   masu: { segmentIndex: 4, pattern: '〜ます', meaning: 'polite non-past', replacement: '食べ___', replacementReading: 'たべ', answer: 'ます。', options: politeVerbEndings },
@@ -84,6 +104,49 @@ const focusById: Record<string, GrammarFocus> = {
   hajimeru: { segmentIndex: 2, pattern: '〜始める', meaning: 'begin to do' },
   owaru: { segmentIndex: 2, pattern: '〜終わる', meaning: 'finish doing' },
   tsuzukeru: { segmentIndex: 4, pattern: '〜続ける', meaning: 'continue doing' },
+
+  'te-imasu': { segmentIndex: 5, pattern: '〜ています', meaning: 'happening now' },
+  'i-adjective-negative': { segmentIndex: 3, pattern: '〜くないです', meaning: 'not (い-adjective)' },
+  'na-adjective': { segmentIndex: 2, pattern: '〜な + noun', meaning: 'な-adjective before a noun' },
+  'noun-past': { segmentIndex: 2, pattern: '〜でした', meaning: 'was / were' },
+  'noun-negative': { segmentIndex: 3, pattern: '〜じゃありません', meaning: 'is not (noun)' },
+  'kara-made': { segmentIndex: 3, pattern: '〜から〜まで', meaning: 'from … until', options: rangeParticles },
+  'to-with': { segmentIndex: 3, pattern: '〜と', meaning: 'together with', options: companionParticles },
+  'de-place': { segmentIndex: 3, pattern: '〜で', meaning: 'where an action happens', options: placeParticles },
+  'ni-time': { segmentIndex: 3, pattern: '〜に', meaning: 'at a set time', options: placeParticles },
+  'mo-also': { segmentIndex: 1, pattern: '〜も', meaning: 'too / also', options: topicParticles },
+
+  passive: { segmentIndex: 4, pattern: 'passive form', meaning: 'was done to me' },
+  causative: { segmentIndex: 6, pattern: 'causative form', meaning: 'made someone do' },
+  'te-ageru': { segmentIndex: 6, pattern: '〜てあげる', meaning: 'do for someone' },
+  'te-morau': { segmentIndex: 6, pattern: '〜てもらう', meaning: 'have someone do' },
+  'te-kureru': { segmentIndex: 4, pattern: '〜てくれる', meaning: 'someone does for me' },
+  rashii: { segmentIndex: 3, pattern: '〜らしいです', meaning: 'I hear that' },
+  'sou-appearance': { segmentIndex: 3, pattern: '〜そうです', meaning: 'looks like' },
+  kamoshirenai: { segmentIndex: 2, pattern: '〜かもしれません', meaning: 'might' },
+  'te-oku': { segmentIndex: 5, pattern: '〜ておく', meaning: 'do in advance' },
+  'te-shimau': { segmentIndex: 4, pattern: '〜てしまう', meaning: 'end up doing' },
+  'tame-ni': { segmentIndex: 4, pattern: '〜のために', meaning: 'for the sake of', options: purposeChoices },
+  'you-ni-naru': { segmentIndex: 4, pattern: '〜ようになる', meaning: 'become able to' },
+
+  bakari: { segmentIndex: 3, pattern: '〜ばかり', meaning: 'nothing but', options: limitChoices },
+  hazu: { segmentIndex: 4, pattern: '〜はずです', meaning: 'is expected to', replacement: '着く___', replacementReading: 'つく', answer: 'はずです。', options: modalChoices },
+  beki: { segmentIndex: 1, pattern: '〜べきです', meaning: 'ought to', replacement: '休む___', replacementReading: 'やすむ', answer: 'べきです。', options: modalChoices },
+  'wake-dewa-nai': { segmentIndex: 1, pattern: '〜わけではない', meaning: 'it is not that' },
+  'you-ni-suru': { segmentIndex: 3, pattern: '〜ようにする', meaning: 'make an effort to' },
+  'toori-ni': { segmentIndex: 2, pattern: '〜とおりに', meaning: 'just as', options: clauseChoices },
+  'ni-yotte': { segmentIndex: 1, pattern: '〜によって', meaning: 'depending on', options: referenceChoices },
+  'okage-de': { segmentIndex: 2, pattern: '〜おかげで', meaning: 'thanks to', options: causeChoices },
+  'sei-de': { segmentIndex: 2, pattern: '〜せいで', meaning: 'because of (blame)', options: causeChoices },
+  'tabi-ni': { segmentIndex: 4, pattern: '〜たびに', meaning: 'every time', options: clauseChoices },
+  mama: { segmentIndex: 5, pattern: '〜まま', meaning: 'left as it is', options: clauseChoices },
+  'uchi-ni': { segmentIndex: 1, pattern: '〜うちに', meaning: 'while still', options: clauseChoices },
+  hodo: { segmentIndex: 3, pattern: '〜ほど〜ない', meaning: 'not as … as', options: limitChoices },
+  'ba-yokatta': { segmentIndex: 2, pattern: '〜ばよかった', meaning: 'wish I had' },
+  sae: { segmentIndex: 3, pattern: '〜さえ', meaning: 'not even', options: limitChoices },
+  'to-iu-name': { segmentIndex: 1, pattern: '〜という', meaning: 'called / named', options: quoteChoices },
+  'dake-de-naku': { segmentIndex: 3, pattern: '〜だけでなく', meaning: 'not only', options: limitChoices },
+  'you-da': { segmentIndex: 3, pattern: '〜ようです', meaning: 'it seems', replacement: 'いる___', replacementReading: 'いる', answer: 'ようです。', options: modalChoices },
 }
 
 const sourceExercises = grammarBuilderExercises.map((exercise) => {
@@ -151,7 +214,7 @@ export const grammarPracticeExercises: GrammarPracticeExercise[] = sourceExercis
 
   return {
     id: exercise.id,
-    jlpt: exercise.jlpt as 'N5' | 'N4',
+    jlpt: exercise.jlpt as GrammarJlptLevel,
     prompt,
     promptReading,
     answer,

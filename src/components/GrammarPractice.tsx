@@ -1,12 +1,44 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { grammarPracticeExercises } from '../data/grammarPractice'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { GRAMMAR_LEVELS, grammarPracticeExercises } from '../data/grammarPractice'
+import type { GrammarJlptLevel } from '../data/grammarPractice'
 import { FuriganaSegment } from './FuriganaText'
 import { shuffle } from '../lib/quiz'
 
 const SHOW_FURIGANA_STORAGE_KEY = 'kanji-quest-grammar-practice-show-furigana-v1'
+const LEVELS_STORAGE_KEY = 'kanji-quest-grammar-practice-levels-v1'
+const INFINITE_STORAGE_KEY = 'kanji-quest-grammar-practice-infinite-v1'
+const MAX_HINTS = 2
 
 interface GrammarPracticeProps {
   onBack: () => void
+}
+
+const levelCounts = Object.fromEntries(
+  GRAMMAR_LEVELS.map((level) => [level, grammarPracticeExercises.filter((item) => item.jlpt === level).length]),
+) as Record<GrammarJlptLevel, number>
+
+function loadLevelPreference(): GrammarJlptLevel[] {
+  const fallback: GrammarJlptLevel[] = ['N5']
+  if (typeof window === 'undefined') return fallback
+
+  try {
+    const stored = window.localStorage.getItem(LEVELS_STORAGE_KEY)
+    if (!stored) return fallback
+    const parsed = JSON.parse(stored) as unknown
+    if (!Array.isArray(parsed)) return fallback
+    const levels = GRAMMAR_LEVELS.filter((level) => parsed.includes(level))
+    return levels.length ? [...levels] : fallback
+  } catch {
+    return fallback
+  }
+}
+
+function saveLevelPreference(levels: GrammarJlptLevel[]) {
+  try {
+    window.localStorage.setItem(LEVELS_STORAGE_KEY, JSON.stringify(levels))
+  } catch {
+    // Practice preferences can safely remain in memory when storage is unavailable.
+  }
 }
 
 function loadBooleanPreference(key: string, fallback: boolean) {
@@ -29,9 +61,14 @@ function saveBooleanPreference(key: string, value: boolean) {
 }
 
 export function GrammarPractice({ onBack }: GrammarPracticeProps) {
-  // Shuffled once per visit (and again on restart) so the same 49 sentences
-  // don't always show up in the same fixed order every time.
-  const [exercises, setExercises] = useState(() => shuffle(grammarPracticeExercises))
+  const [levels, setLevels] = useState<GrammarJlptLevel[]>(loadLevelPreference)
+  const [levelMenuOpen, setLevelMenuOpen] = useState(false)
+  const levelPickerRef = useRef<HTMLDivElement>(null)
+  // Shuffled once per visit (and again on restart or a level change) so the same
+  // sentences don't always show up in the same fixed order every time.
+  const [exercises, setExercises] = useState(() =>
+    shuffle(grammarPracticeExercises.filter((item) => loadLevelPreference().includes(item.jlpt))),
+  )
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selected, setSelected] = useState<string | null>(null)
   const [answered, setAnswered] = useState(false)
@@ -40,14 +77,24 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
   const [showFurigana, setShowFurigana] = useState(() =>
     loadBooleanPreference(SHOW_FURIGANA_STORAGE_KEY, true),
   )
+  const [infiniteMode, setInfiniteMode] = useState(() =>
+    loadBooleanPreference(INFINITE_STORAGE_KEY, false),
+  )
   const [eliminatedOptions, setEliminatedOptions] = useState<Set<string>>(new Set())
-  const [hintUsed, setHintUsed] = useState(false)
+  const [hintCount, setHintCount] = useState(0)
   const [gapWidth, setGapWidth] = useState<number | null>(null)
   const gapMeasureRef = useRef<HTMLDivElement>(null)
 
-  const exercise = exercises[currentIndex]
+  const exercise = exercises[currentIndex] ?? exercises[0] ?? grammarPracticeExercises[0]
   const isCorrect = selected === exercise.answer
-  const progress = ((currentIndex + 1) / exercises.length) * 100
+  // Infinite mode appends another shuffled pass at the end, so measure progress
+  // within the current pass — otherwise the bar would lurch backwards each lap.
+  const poolSize = useMemo(
+    () => grammarPracticeExercises.filter((item) => levels.includes(item.jlpt)).length,
+    [levels],
+  )
+  const passIndex = poolSize ? currentIndex % poolSize : currentIndex
+  const progress = ((passIndex + 1) / (poolSize || 1)) * 100
   const promptParts = useMemo(() => exercise.prompt.split('___'), [exercise.prompt])
   const promptReadingParts = useMemo(
     () => (exercise.promptReading ?? '').split('___'),
@@ -72,6 +119,51 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
     setGapWidth(widths.length ? Math.max(...widths) + 3 : null)
   }, [exercise.id])
 
+  useEffect(() => {
+    if (!levelMenuOpen) return
+
+    const closeLevelMenu = (event: PointerEvent) => {
+      if (!levelPickerRef.current?.contains(event.target as Node)) {
+        setLevelMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', closeLevelMenu)
+    return () => document.removeEventListener('pointerdown', closeLevelMenu)
+  }, [levelMenuOpen])
+
+  function toggleLevel(level: GrammarJlptLevel) {
+    // Keep at least one level on — an empty set would leave nothing to practice.
+    const next = levels.includes(level)
+      ? levels.filter((item) => item !== level)
+      : GRAMMAR_LEVELS.filter((item) => item === level || levels.includes(item))
+    if (!next.length) return
+
+    setLevels(next)
+    saveLevelPreference(next)
+    startSession(next)
+  }
+
+  /** Restart the run against `nextLevels`, reshuffled. */
+  function startSession(nextLevels: GrammarJlptLevel[]) {
+    setExercises(shuffle(grammarPracticeExercises.filter((item) => nextLevels.includes(item.jlpt))))
+    setCurrentIndex(0)
+    setSelected(null)
+    setAnswered(false)
+    setCorrectCount(0)
+    setFinished(false)
+    setEliminatedOptions(new Set())
+    setHintCount(0)
+  }
+
+  function toggleInfiniteMode() {
+    setInfiniteMode((enabled) => {
+      const next = !enabled
+      saveBooleanPreference(INFINITE_STORAGE_KEY, next)
+      return next
+    })
+  }
+
   function toggleFurigana() {
     setShowFurigana((shown) => {
       const next = !shown
@@ -81,7 +173,7 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
   }
 
   function useHint() {
-    if (answered) return
+    if (answered || hintCount >= MAX_HINTS) return
     const wrongOptions = exercise.options.filter(
       (option) => option !== exercise.answer && !eliminatedOptions.has(option),
     )
@@ -89,7 +181,7 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
 
     const pick = wrongOptions[Math.floor(Math.random() * wrongOptions.length)]
     setEliminatedOptions((prev) => new Set(prev).add(pick))
-    setHintUsed(true)
+    setHintCount((count) => count + 1)
     setSelected((current) => (current === pick ? null : current))
   }
 
@@ -111,25 +203,25 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
       return
     }
     if (currentIndex + 1 >= exercises.length) {
-      setFinished(true)
-      return
+      if (!infiniteMode) {
+        setFinished(true)
+        return
+      }
+      // Queue another reshuffled pass so practice never runs out.
+      setExercises((items) => [
+        ...items,
+        ...shuffle(grammarPracticeExercises.filter((item) => levels.includes(item.jlpt))),
+      ])
     }
     setCurrentIndex((index) => index + 1)
     setSelected(null)
     setAnswered(false)
     setEliminatedOptions(new Set())
-    setHintUsed(false)
+    setHintCount(0)
   }
 
   function restart() {
-    setExercises(shuffle(grammarPracticeExercises))
-    setCurrentIndex(0)
-    setSelected(null)
-    setAnswered(false)
-    setCorrectCount(0)
-    setFinished(false)
-    setEliminatedOptions(new Set())
-    setHintUsed(false)
+    startSession(levels)
   }
 
   if (finished) {
@@ -153,8 +245,56 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
     <div className={`grammar-practice-view${showFurigana ? '' : ' is-furigana-hidden'}`}>
       <div className="study-top grammar-study-top">
         <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
-        <span className="study-progress">{currentIndex + 1} / {exercises.length}</span>
-        <span className="study-type-badge">Grammar <span className="jlpt-badge">{exercise.jlpt}</span></span>
+        <span className="study-progress">
+          {infiniteMode ? `${currentIndex + 1} / ∞` : `${currentIndex + 1} / ${exercises.length}`}
+        </span>
+        <div className="builder-top-controls">
+          <button
+            type="button"
+            className={`builder-infinite-toggle${infiniteMode ? ' is-active' : ''}`}
+            onClick={toggleInfiniteMode}
+            aria-pressed={infiniteMode}
+            aria-label={infiniteMode ? 'Turn off endless grammar practice' : 'Keep grammar practice going indefinitely'}
+            title={infiniteMode ? 'Endless practice on' : 'Keep practicing without an ending'}
+          >
+            ∞
+          </button>
+          <div className="builder-level-picker" ref={levelPickerRef}>
+            <button
+              type="button"
+              className="study-type-badge builder-level-trigger"
+              aria-expanded={levelMenuOpen}
+              aria-haspopup="true"
+              onClick={() => setLevelMenuOpen((open) => !open)}
+            >
+              <span>Grammar</span>
+              <span className="jlpt-badge">{levels.join(' + ')}</span>
+              <span className="builder-level-chevron" aria-hidden="true" />
+            </button>
+            {levelMenuOpen && (
+              <div className="builder-level-menu" role="group" aria-label="Grammar JLPT levels">
+                <span className="builder-level-menu-label">Practice levels</span>
+                {GRAMMAR_LEVELS.map((level) => {
+                  const isSelected = levels.includes(level)
+
+                  return (
+                    <button
+                      key={level}
+                      type="button"
+                      className={`builder-level-option${isSelected ? ' is-selected' : ''}`}
+                      aria-pressed={isSelected}
+                      onClick={() => toggleLevel(level)}
+                    >
+                      <span className="builder-level-check" aria-hidden="true" />
+                      <strong>{level}</strong>
+                      <small>{levelCounts[level]} sentences</small>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="study-progress-bar">
@@ -234,7 +374,7 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
             type="button"
             className="btn btn-secondary"
             onClick={useHint}
-            disabled={answered || hintUsed}
+            disabled={answered || hintCount >= MAX_HINTS}
           >
             Hint
           </button>
