@@ -3,7 +3,7 @@ import { generatePreviewSentence, type GeneratedPreviewSentence } from './senten
 import type { JlptLevel } from './types'
 
 export const GENERATED_BUILDER_SESSION_SIZE = 15
-export const WIRED_BUILDER_LEVELS: readonly JlptLevel[] = ['N5']
+export const WIRED_BUILDER_LEVELS: readonly JlptLevel[] = ['N5', 'N4']
 
 function sentenceSeed() {
   return Math.floor(Date.now() / 1000) % 1_000_000
