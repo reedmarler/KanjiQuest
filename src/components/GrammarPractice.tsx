@@ -1,8 +1,30 @@
-import { useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { grammarPracticeExercises } from '../data/grammarPractice'
+import { FuriganaSegment } from './FuriganaText'
+
+const SHOW_FURIGANA_STORAGE_KEY = 'kanji-quest-grammar-practice-show-furigana-v1'
 
 interface GrammarPracticeProps {
   onBack: () => void
+}
+
+function loadBooleanPreference(key: string, fallback: boolean) {
+  if (typeof window === 'undefined') return fallback
+
+  try {
+    const stored = window.localStorage.getItem(key)
+    return stored === null ? fallback : stored === 'true'
+  } catch {
+    return fallback
+  }
+}
+
+function saveBooleanPreference(key: string, value: boolean) {
+  try {
+    window.localStorage.setItem(key, String(value))
+  } catch {
+    // Display preferences can safely remain in memory when storage is unavailable.
+  }
 }
 
 export function GrammarPractice({ onBack }: GrammarPracticeProps) {
@@ -11,16 +33,68 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
   const [answered, setAnswered] = useState(false)
   const [correctCount, setCorrectCount] = useState(0)
   const [finished, setFinished] = useState(false)
+  const [showFurigana, setShowFurigana] = useState(() =>
+    loadBooleanPreference(SHOW_FURIGANA_STORAGE_KEY, true),
+  )
+  const [eliminatedOptions, setEliminatedOptions] = useState<Set<string>>(new Set())
+  const [hintUsed, setHintUsed] = useState(false)
+  const [gapWidth, setGapWidth] = useState<number | null>(null)
+  const gapMeasureRef = useRef<HTMLDivElement>(null)
 
   const exercise = grammarPracticeExercises[currentIndex]
   const isCorrect = selected === exercise.answer
   const progress = ((currentIndex + 1) / grammarPracticeExercises.length) * 100
   const promptParts = useMemo(() => exercise.prompt.split('___'), [exercise.prompt])
-  const filledAnswer = answered ? exercise.answer : null
+  const promptReadingParts = useMemo(
+    () => (exercise.promptReading ?? '').split('___'),
+    [exercise.promptReading],
+  )
+  // The gap always shows either the answer (once checked) or whatever the learner has picked so far.
+  const previewWord = answered ? exercise.answer : selected
+  const previewReading = answered
+    ? exercise.answerReading
+    : selected
+      ? exercise.optionReadings[exercise.options.indexOf(selected)]
+      : undefined
+
+  // Reserve room for the longest of this question's options so picking an answer never
+  // shifts the sentence around — the gap is sized up front for the widest possible word.
+  useLayoutEffect(() => {
+    const container = gapMeasureRef.current
+    if (!container) return
+    const widths = Array.from(container.children).map((el) => (el as HTMLElement).offsetWidth)
+    setGapWidth(widths.length ? Math.max(...widths) : null)
+  }, [exercise.id])
+
+  function toggleFurigana() {
+    setShowFurigana((shown) => {
+      const next = !shown
+      saveBooleanPreference(SHOW_FURIGANA_STORAGE_KEY, next)
+      return next
+    })
+  }
+
+  function useHint() {
+    if (answered) return
+    const wrongOptions = exercise.options.filter(
+      (option) => option !== exercise.answer && !eliminatedOptions.has(option),
+    )
+    if (wrongOptions.length === 0) return
+
+    const pick = wrongOptions[Math.floor(Math.random() * wrongOptions.length)]
+    setEliminatedOptions((prev) => new Set(prev).add(pick))
+    setHintUsed(true)
+    setSelected((current) => (current === pick ? null : current))
+  }
 
   function choose(option: string) {
+    if (answered || eliminatedOptions.has(option)) return
+    setSelected((current) => (current === option ? null : option))
+  }
+
+  function clearSelection() {
     if (answered) return
-    setSelected(option)
+    setSelected(null)
   }
 
   function continuePractice() {
@@ -37,6 +111,8 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
     setCurrentIndex((index) => index + 1)
     setSelected(null)
     setAnswered(false)
+    setEliminatedOptions(new Set())
+    setHintUsed(false)
   }
 
   function restart() {
@@ -45,6 +121,8 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
     setAnswered(false)
     setCorrectCount(0)
     setFinished(false)
+    setEliminatedOptions(new Set())
+    setHintUsed(false)
   }
 
   if (finished) {
@@ -65,7 +143,7 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
   }
 
   return (
-    <div className="grammar-practice-view">
+    <div className={`grammar-practice-view${showFurigana ? '' : ' is-furigana-hidden'}`}>
       <div className="study-top grammar-study-top">
         <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
         <span className="study-progress">{currentIndex + 1} / {grammarPracticeExercises.length}</span>
@@ -82,26 +160,45 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
         <p className="grammar-english-clue">“{exercise.english}”</p>
 
         <div className="grammar-sentence-frame" lang="ja">
-          <span>{promptParts[0]}</span>
-          <span className={`grammar-gap${filledAnswer ? ' is-filled' : ''}${answered ? (isCorrect ? ' is-correct' : ' is-wrong') : ''}`}>
-            {filledAnswer ?? '___'}
+          <FuriganaSegment text={promptParts[0]} reading={promptReadingParts[0]} />
+          <span
+            className={`grammar-gap${previewWord ? ' is-filled' : ''}${answered ? (isCorrect ? ' is-correct' : ' is-wrong') : ''}`}
+            style={gapWidth ? { width: `${gapWidth}px` } : undefined}
+          >
+            {previewWord ? <FuriganaSegment text={previewWord} reading={previewReading} /> : '___'}
           </span>
-          <span>{promptParts[1]}</span>
+          <FuriganaSegment text={promptParts[1]} reading={promptReadingParts[1]} />
+          <div className="grammar-gap-measure" aria-hidden="true" ref={gapMeasureRef}>
+            {exercise.options.map((option, optionIndex) => (
+              <span key={option} className="grammar-gap">
+                <FuriganaSegment text={option} reading={exercise.optionReadings[optionIndex]} />
+              </span>
+            ))}
+          </div>
         </div>
 
         <div className="grammar-options" aria-label="Grammar answers">
-          {exercise.options.map((option) => {
+          {exercise.options.map((option, optionIndex) => {
+            const isEliminated = !answered && eliminatedOptions.has(option)
             let className = 'grammar-option'
             if (answered) {
               if (option === exercise.answer) className += ' correct'
               else if (option === selected) className += ' wrong'
               else className += ' dimmed'
+            } else if (isEliminated) {
+              className += ' eliminated'
             } else if (option === selected) {
               className += ' selected'
             }
             return (
-              <button key={option} type="button" className={className} onClick={() => choose(option)} disabled={answered}>
-                {option}
+              <button
+                key={option}
+                type="button"
+                className={className}
+                onClick={() => choose(option)}
+                disabled={answered || isEliminated}
+              >
+                <FuriganaSegment text={option} reading={exercise.optionReadings[optionIndex]} />
               </button>
             )
           })}
@@ -109,11 +206,38 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
 
         <div className="sentence-action-slot grammar-action-slot">
           <button
-            className="btn btn-primary btn-large"
+            className="btn btn-primary sentence-inline-check"
             onClick={continuePractice}
             disabled={!selected}
           >
-            {answered ? 'Continue' : selected ? 'Check' : 'Choose an answer'}
+            {answered ? 'Continue' : selected ? 'Check / かくにん / 確認' : 'Choose an answer'}
+          </button>
+        </div>
+
+        <div className="sentence-actions-row sentence-builder-actions">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={clearSelection}
+            disabled={answered || !selected}
+          >
+            Clear
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={useHint}
+            disabled={answered || hintUsed}
+          >
+            Hint
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={toggleFurigana}
+            aria-pressed={showFurigana}
+          >
+            {showFurigana ? 'Hide Furigana' : 'Show Furigana'}
           </button>
         </div>
       </main>

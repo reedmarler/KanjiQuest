@@ -79,6 +79,12 @@ body:has(.grammar-practice-view) .app {
   padding-bottom: 1.4rem;
 }
 
+/* Dashboard is sized to fit a single screen without scrolling. */
+body:has(.dashboard) .app {
+  padding-top: 0.5rem;
+  padding-bottom: 0.4rem;
+}
+
 /* Dashboard */
 .hero {
   text-align: center;
@@ -86,17 +92,18 @@ body:has(.grammar-practice-view) .app {
 }
 
 .hero-compact {
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.4rem;
 }
 
 .hero-compact h1 {
-  font-size: 2rem;
+  font-size: 1.85rem;
   font-weight: 700;
+  line-height: 1.05;
   background: linear-gradient(135deg, var(--kyogre-light), var(--sakura));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.2rem;
 }
 
 .hero-kicker {
@@ -124,13 +131,13 @@ body:has(.grammar-practice-view) .app {
 
 .hero-sentence-block {
   width: 100%;
-  --hero-japanese-row-height: 5.05rem;
+  --hero-japanese-row-height: 4.65rem;
   --hero-rotater-height: calc(var(--hero-japanese-row-height) + var(--hero-english-row-height) + 0.55rem);
   height: var(--hero-rotater-height);
   min-height: var(--hero-rotater-height);
   max-height: var(--hero-rotater-height);
   flex: 0 0 var(--hero-rotater-height);
-  margin: 0.85rem auto 0;
+  margin: 0.25rem auto 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1652,14 +1659,14 @@ body:has(.grammar-practice-view) .app {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  gap: 0.45rem;
+  margin-bottom: 0.5rem;
   align-items: stretch;
 }
 
 .stats-compact .stat-card {
-  padding: 0.85rem 0.5rem;
-  min-height: 4.35rem;
+  padding: 0.4rem 0.4rem;
+  min-height: 2.9rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1668,11 +1675,12 @@ body:has(.grammar-practice-view) .app {
 }
 
 .stats-compact .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.15rem;
+  margin-bottom: 0.1rem;
 }
 
 .stats-compact .stat-label {
-  font-size: 0.65rem;
+  font-size: 0.58rem;
 }
 
 .stat-card {
@@ -1727,25 +1735,25 @@ body:has(.grammar-practice-view) .app {
 }
 
 .stat-card-levels {
-  padding: 0.45rem;
+  padding: 0.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 4.35rem;
+  min-height: 2.9rem;
 }
 
 .hero-level-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.3rem;
+  gap: 0.22rem;
   width: 100%;
 }
 
 .hero-level-btn {
   font-family: 'Outfit', system-ui, sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 600;
-  padding: 0.38rem 0.2rem;
+  padding: 0.24rem 0.2rem;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
   background: color-mix(in srgb, var(--surface-2) 88%, transparent);
@@ -1786,22 +1794,22 @@ body:has(.grammar-practice-view) .app {
 }
 
 .progress-compact {
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
 }
 
 .practice-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, minmax(4.5rem, auto));
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  grid-template-rows: repeat(2, minmax(3.2rem, auto));
+  gap: 0.45rem;
+  margin-bottom: 0;
 }
 
 .practice-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1rem;
+  padding: 0.45rem;
   text-align: center;
   cursor: pointer;
   color: var(--text);
@@ -1816,9 +1824,10 @@ body:has(.grammar-practice-view) .app {
 
 .practice-emoji {
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 1.75rem;
+  font-size: 1.2rem;
+  line-height: 1.2;
   display: block;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.15rem;
 }
 
 .practice-card:first-child .practice-emoji {
@@ -1831,8 +1840,8 @@ body:has(.grammar-practice-view) .app {
 
 .practice-card-grammar .practice-emoji {
   color: var(--gold);
-  font-size: 1.35rem;
-  line-height: 2.27rem;
+  font-size: 0.95rem;
+  line-height: 1.52;
 }
 
 .practice-card-grammar {
@@ -1846,15 +1855,15 @@ body:has(.grammar-practice-view) .app {
 
 .practice-label {
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.72rem;
 }
 
 .progress-header {
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.28rem;
 }
 
 .progress-bar {
@@ -3604,6 +3613,7 @@ body:has(.grammar-practice-view) .app {
 }
 
 .grammar-sentence-frame {
+  position: relative;
   min-height: 4.55rem;
   padding: 0.7rem 0.8rem;
   display: flex;
@@ -3623,9 +3633,25 @@ body:has(.grammar-practice-view) .app {
 
 .grammar-gap {
   min-width: 4.2rem;
+  box-sizing: border-box;
   padding: 0 0.25rem 0.12rem;
   color: var(--sakura);
   border-bottom: 2px solid var(--sakura);
+  text-align: center;
+}
+
+/* Off-screen probe that measures every option so the gap can be sized to the
+   widest one up front — the sentence never reflows once an answer is picked. */
+.grammar-gap-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  display: flex;
+  gap: 0.4rem;
+  pointer-events: none;
 }
 
 .grammar-gap.is-filled {
@@ -3661,14 +3687,15 @@ body:has(.grammar-practice-view) .app {
 }
 
 .grammar-option {
-  min-height: 2.85rem;
-  padding: 0.58rem;
+  min-height: 3.1rem;
+  padding: 0.58rem 0.4rem;
   border: 1px solid var(--border);
   border-radius: 13px;
   background: var(--surface-2);
   color: var(--text);
   cursor: pointer;
-  font: 400 clamp(0.92rem, 2.4vw, 1.08rem)/1.25 'Noto Sans JP', sans-serif;
+  font: 400 clamp(1.05rem, 3vw, 1.35rem)/1.25 'Noto Sans JP', sans-serif;
+  white-space: nowrap;
   transition: transform 0.15s, border-color 0.15s, background 0.15s;
 }
 
@@ -3682,6 +3709,34 @@ body:has(.grammar-practice-view) .app {
 .grammar-option.wrong { border-color: var(--danger); background: rgba(229, 49, 112, 0.15); }
 .grammar-option.selected { border-color: var(--gold); background: rgba(255, 211, 107, 0.13); }
 .grammar-option.dimmed { opacity: 0.4; }
+.grammar-option.eliminated {
+  opacity: 0.35;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.grammar-practice-view .sentence-actions-row {
+  margin-top: 0.65rem;
+  margin-bottom: 0;
+}
+
+.grammar-practice-view .sentence-actions-row .btn {
+  flex: 0 0 auto;
+  min-width: 8rem;
+  height: 2rem;
+  min-height: 0;
+  padding: 0.42rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.grammar-practice-view .furigana-ruby rt {
+  transform: translateY(-0.4em);
+}
+
+.grammar-practice-view.is-furigana-hidden .furigana-ruby rt {
+  visibility: hidden;
+}
 
 .grammar-feedback {
   display: grid;

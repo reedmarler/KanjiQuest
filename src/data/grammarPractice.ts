@@ -4,8 +4,13 @@ export interface GrammarPracticeExercise {
   id: string
   jlpt: 'N5' | 'N4'
   prompt: string
+  /** Hiragana reading for `prompt`, split on the same ___ marker. */
+  promptReading?: string
   answer: string
+  answerReading?: string
   options: string[]
+  /** Parallel to `options` — undefined entries have no kanji to gloss. */
+  optionReadings: (string | undefined)[]
   english: string
   pattern: string
   meaning: string
@@ -17,6 +22,8 @@ type GrammarFocus = {
   meaning: string
   /** The text displayed in the sentence instead of the answer; include ___ for the blank. */
   replacement?: string
+  /** Hiragana reading for the stem kept in `replacement` (without the ___). */
+  replacementReading?: string
   /** The exact grammar piece the learner chooses. */
   answer?: string
   /** Purposeful alternatives for this grammar pattern. */
@@ -28,21 +35,21 @@ const plainVerbEndings = ['む。', 'まない。', 'んだ。', 'まなかっ�
 const connectorChoices = ['から、', 'ので、', 'けど、', 'そして、']
 
 const focusById: Record<string, GrammarFocus> = {
-  masu: { segmentIndex: 4, pattern: '〜ます', meaning: 'polite non-past', replacement: '食べ___', answer: 'ます。', options: politeVerbEndings },
-  mashita: { segmentIndex: 3, pattern: '〜ました', meaning: 'polite past', replacement: '食べ___', answer: 'ました。', options: politeVerbEndings },
-  masen: { segmentIndex: 4, pattern: '〜ません', meaning: 'polite negative', replacement: '食べ___', answer: 'ません。', options: politeVerbEndings },
-  'masen-deshita': { segmentIndex: 3, pattern: '〜ませんでした', meaning: 'polite negative past', replacement: '行き___', answer: 'ませんでした。', options: politeVerbEndings },
-  plain: { segmentIndex: 5, pattern: 'dictionary form', meaning: 'plain non-past', replacement: '飲___', answer: 'む。', options: plainVerbEndings },
-  'plain-negative': { segmentIndex: 3, pattern: '〜ない', meaning: 'plain negative', replacement: 'し___', answer: 'ない。', options: ['ない。', 'た。', 'ます。', 'ません。'] },
-  'plain-past': { segmentIndex: 3, pattern: '〜た', meaning: 'plain past', replacement: '会っ___', answer: 'た。', options: ['た。', 'ない。', 'ます。', 'ません。'] },
-  'plain-negative-past': { segmentIndex: 3, pattern: '〜なかった', meaning: 'plain negative past', replacement: '見___', answer: 'なかった。', options: ['なかった。', 'ない。', 'た。', 'ます。'] },
+  masu: { segmentIndex: 4, pattern: '〜ます', meaning: 'polite non-past', replacement: '食べ___', replacementReading: 'たべ', answer: 'ます。', options: politeVerbEndings },
+  mashita: { segmentIndex: 3, pattern: '〜ました', meaning: 'polite past', replacement: '食べ___', replacementReading: 'たべ', answer: 'ました。', options: politeVerbEndings },
+  masen: { segmentIndex: 4, pattern: '〜ません', meaning: 'polite negative', replacement: '食べ___', replacementReading: 'たべ', answer: 'ません。', options: politeVerbEndings },
+  'masen-deshita': { segmentIndex: 3, pattern: '〜ませんでした', meaning: 'polite negative past', replacement: '行き___', replacementReading: 'いき', answer: 'ませんでした。', options: politeVerbEndings },
+  plain: { segmentIndex: 5, pattern: 'dictionary form', meaning: 'plain non-past', replacement: '飲___', replacementReading: 'の', answer: 'む。', options: plainVerbEndings },
+  'plain-negative': { segmentIndex: 3, pattern: '〜ない', meaning: 'plain negative', replacement: 'し___', replacementReading: 'し', answer: 'ない。', options: ['ない。', 'た。', 'ます。', 'ません。'] },
+  'plain-past': { segmentIndex: 3, pattern: '〜た', meaning: 'plain past', replacement: '会っ___', replacementReading: 'あっ', answer: 'た。', options: ['た。', 'ない。', 'ます。', 'ません。'] },
+  'plain-negative-past': { segmentIndex: 3, pattern: '〜なかった', meaning: 'plain negative past', replacement: '見___', replacementReading: 'み', answer: 'なかった。', options: ['なかった。', 'ない。', 'た。', 'ます。'] },
   arimasu: { segmentIndex: 6, pattern: '〜があります', meaning: 'there is / are (things)' },
   imasu: { segmentIndex: 3, pattern: '〜がいます', meaning: 'there is / are (people or animals)' },
   'ni-arimasu': { segmentIndex: 6, pattern: '〜にあります', meaning: 'is located at' },
   goro: { segmentIndex: 1, pattern: '〜ごろ', meaning: 'around a time' },
   suki: { segmentIndex: 4, pattern: '〜が好きです', meaning: 'like' },
   hoshii: { segmentIndex: 4, pattern: '〜がほしいです', meaning: 'want a thing' },
-  tai: { segmentIndex: 4, pattern: '〜たいです', meaning: 'want to do', replacement: '飲み___', answer: 'たいです。', options: ['たいです。', 'ます。', 'ません。', 'ました。'] },
+  tai: { segmentIndex: 4, pattern: '〜たいです', meaning: 'want to do', replacement: '飲み___', replacementReading: 'のみ', answer: 'たいです。', options: ['たいです。', 'ます。', 'ません。', 'ました。'] },
   dekiru: { segmentIndex: 5, pattern: '〜ことができます', meaning: 'can do' },
   shika: { segmentIndex: 3, pattern: '〜しか〜ない', meaning: 'only' },
   must: { segmentIndex: 4, pattern: '〜なければなりません', meaning: 'must / have to' },
@@ -96,25 +103,54 @@ function rotate<T>(items: T[], offset: number): T[] {
 /** Grammar choice drills made from every curated grammar sentence in Sentence Builder. */
 export const grammarPracticeExercises: GrammarPracticeExercise[] = sourceExercises.map(({ exercise, focus }, index) => {
   const segments = exercise.segments ?? []
+  const readings = exercise.segmentReadings ?? segments
   const answer = focus.answer ?? segments[focus.segmentIndex]
-  const alternatives = rotate(sourceExercises, index + 3)
-    .map(({ exercise: candidate, focus: candidateFocus }) => candidate.segments?.[candidateFocus.segmentIndex] ?? '')
-    .filter((candidate, candidateIndex, candidates) => candidate && candidate !== answer && candidates.indexOf(candidate) === candidateIndex)
+  // Pure-kana answers (from focus.answer overrides) never need a reading.
+  const answerReading = focus.answer ? undefined : readings[focus.segmentIndex]
+
+  const alternativeEntries = rotate(sourceExercises, index + 3)
+    .map(({ exercise: candidate, focus: candidateFocus }) => {
+      const candidateSegments = candidate.segments ?? []
+      const candidateReadings = candidate.segmentReadings ?? candidateSegments
+      return {
+        text: candidateSegments[candidateFocus.segmentIndex] ?? '',
+        reading: candidateReadings[candidateFocus.segmentIndex],
+      }
+    })
+    .filter((entry, entryIndex, entries) =>
+      entry.text && entry.text !== answer && entries.findIndex((other) => other.text === entry.text) === entryIndex,
+    )
     .slice(0, 3)
 
-  const options = focus.options
-    ? rotate(focus.options, index % focus.options.length)
-    : rotate([answer, ...alternatives], index % 4)
+  const optionEntries = focus.options
+    ? rotate(
+        focus.options.map((option) => ({ text: option, reading: undefined as string | undefined })),
+        index % focus.options.length,
+      )
+    : rotate([{ text: answer, reading: answerReading }, ...alternativeEntries], index % 4)
+
+  const options = optionEntries.map((entry) => entry.text)
+  const optionReadings = optionEntries.map((entry) => entry.reading)
+
   const prompt = segments
     .map((segment, segmentIndex) => (segmentIndex === focus.segmentIndex ? focus.replacement ?? '___' : segment))
+    .join('')
+  const promptReading = segments
+    .map((segment, segmentIndex) => {
+      if (segmentIndex !== focus.segmentIndex) return readings[segmentIndex] ?? segment
+      return focus.replacement ? `${focus.replacementReading ?? ''}___` : '___'
+    })
     .join('')
 
   return {
     id: exercise.id,
     jlpt: exercise.jlpt as 'N5' | 'N4',
     prompt,
+    promptReading,
     answer,
+    answerReading,
     options,
+    optionReadings,
     english: exercise.english,
     pattern: focus.pattern,
     meaning: focus.meaning,
