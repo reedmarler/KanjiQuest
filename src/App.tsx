@@ -4,17 +4,14 @@ import { buildSentenceSession } from './lib/sentenceLab'
 import { buildGeneratedBuilderExercises, WIRED_BUILDER_LEVELS } from './lib/generatedSentenceExercises'
 import { recordFillGapSeen } from './lib/sentenceRecent'
 import { isLearned } from './lib/srs'
-import {
-  loadProgress,
-  loadStats,
-} from './lib/storage'
+import { loadProgress } from './lib/storage'
 import {
   loadWrongPool,
   recordCorrect,
   recordWrong,
   saveWrongPool,
 } from './lib/wrongPool'
-import type { AppStats, CardProgress, JlptLevel } from './lib/types'
+import type { CardProgress, JlptLevel } from './lib/types'
 import type { SentenceExercise } from './data/sentenceExercises'
 import type { FillGapLevelFilter } from './lib/fillGapLevels'
 import { Dashboard } from './components/Dashboard'
@@ -25,12 +22,14 @@ import { SessionComplete } from './components/SessionComplete'
 import { VocabList } from './components/VocabList'
 import { ContentStudio } from './components/ContentStudio'
 import { GrammarPractice } from './components/GrammarPractice'
+import { VocabPractice } from './components/VocabPractice'
 import './App.css'
 
 type View =
   | 'dashboard'
   | 'sentence-practice'
   | 'vocab-list'
+  | 'vocab-practice'
   | 'study'
   | 'complete'
   | 'content-studio'
@@ -43,7 +42,6 @@ type SessionItem =
 function App() {
   const [view, setView] = useState<View>('dashboard')
   const [progress] = useState<Record<string, CardProgress>>(() => loadProgress())
-  const [stats] = useState<AppStats>(() => loadStats())
   const [wrongPool, setWrongPool] = useState(() => loadWrongPool())
   const [session, setSession] = useState<SessionItem[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -134,6 +132,14 @@ function App() {
     )
   }
 
+  if (view === 'vocab-practice') {
+    return (
+      <div className="app">
+        <VocabPractice onBack={() => setView('dashboard')} />
+      </div>
+    )
+  }
+
   if (view === 'content-studio') return <ContentStudio onBack={() => setView('dashboard')} />
 
   if (view === 'grammar') {
@@ -212,12 +218,12 @@ function App() {
   return (
     <div className="app">
       <Dashboard
-        stats={stats}
         learnedCount={learnedCount}
         totalCards={allCards.length}
         onOpenSentencePractice={() => setView('sentence-practice')}
         onOpenGrammar={() => setView('grammar')}
         onOpenVocabList={() => setView('vocab-list')}
+        onOpenVocabPractice={() => setView('vocab-practice')}
         onOpenContentStudio={() => setView('content-studio')}
         wrongPool={wrongPool}
         progress={progress}

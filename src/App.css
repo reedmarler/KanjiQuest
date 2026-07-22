@@ -1691,12 +1691,7 @@ body:has(.dashboard) .app {
   text-align: center;
 }
 
-.stat-card.streak {
-  border-color: rgba(200, 120, 56, 0.4);
-  background: linear-gradient(135deg, var(--surface), rgba(200, 120, 56, 0.08));
-}
-
-.stat-card.streak .stat-value {
+.stat-card-studio .stat-value {
   color: var(--groudon-light);
 }
 
@@ -1806,6 +1801,12 @@ body:has(.dashboard) .app {
 }
 
 .practice-card {
+  /* 25% taller than the content-only height these cards used to settle at. */
+  min-height: 4.36rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1844,9 +1845,10 @@ body:has(.dashboard) .app {
   line-height: 1.52;
 }
 
-.practice-card-grammar {
-  grid-column: 2;
-  grid-row: 2;
+.practice-card-vocab-practice .practice-emoji {
+  color: var(--gold);
+  font-size: 1rem;
+  line-height: 1.44;
 }
 
 .practice-card-vocab:hover {

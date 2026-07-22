@@ -1,39 +1,15 @@
 import { grammarBuilderExercises } from './grammarBuilderExercises'
+import { buildDrillExercises, DRILL_LEVELS } from '../lib/drillExercises'
+import type { DrillExercise, DrillFocus, DrillJlptLevel } from '../lib/drillExercises'
 
 /** JLPT levels that have curated grammar drills wired up. */
-export type GrammarJlptLevel = 'N5' | 'N4' | 'N3'
+export type GrammarJlptLevel = DrillJlptLevel
 
-export const GRAMMAR_LEVELS: readonly GrammarJlptLevel[] = ['N5', 'N4', 'N3']
+export const GRAMMAR_LEVELS = DRILL_LEVELS
 
-export interface GrammarPracticeExercise {
-  id: string
-  jlpt: GrammarJlptLevel
-  prompt: string
-  /** Hiragana reading for `prompt`, split on the same ___ marker. */
-  promptReading?: string
-  answer: string
-  answerReading?: string
-  options: string[]
-  /** Parallel to `options` — undefined entries have no kanji to gloss. */
-  optionReadings: (string | undefined)[]
-  english: string
-  pattern: string
-  meaning: string
-}
+export type GrammarPracticeExercise = DrillExercise
 
-type GrammarFocus = {
-  segmentIndex: number
-  pattern: string
-  meaning: string
-  /** The text displayed in the sentence instead of the answer; include ___ for the blank. */
-  replacement?: string
-  /** Hiragana reading for the stem kept in `replacement` (without the ___). */
-  replacementReading?: string
-  /** The exact grammar piece the learner chooses. */
-  answer?: string
-  /** Purposeful alternatives for this grammar pattern. */
-  options?: string[]
-}
+type GrammarFocus = DrillFocus
 
 const politeVerbEndings = ['ます。', 'ました。', 'ません。', 'ませんでした。']
 const plainVerbEndings = ['む。', 'まない。', 'んだ。', 'まなかった。']
@@ -156,73 +132,17 @@ const sourceExercises = grammarBuilderExercises.map((exercise) => {
     throw new Error(`Grammar practice setup is missing ${exercise.id}`)
   }
 
-  return { exercise, focus }
-})
-
-function rotate<T>(items: T[], offset: number): T[] {
-  return [...items.slice(offset), ...items.slice(0, offset)]
-}
-
-/** Trailing 。 gives away that an option ends the sentence, so answer choices never show it. */
-function stripTrailingPeriod(text: string): string {
-  return text.replace(/。+$/u, '')
-}
-
-/** Grammar choice drills made from every curated grammar sentence in Sentence Builder. */
-export const grammarPracticeExercises: GrammarPracticeExercise[] = sourceExercises.map(({ exercise, focus }, index) => {
-  const segments = exercise.segments ?? []
-  const readings = exercise.segmentReadings ?? segments
-  const answer = stripTrailingPeriod(focus.answer ?? segments[focus.segmentIndex])
-  // Pure-kana answers (from focus.answer overrides) never need a reading.
-  const answerReading = focus.answer ? undefined : stripTrailingPeriod(readings[focus.segmentIndex])
-
-  const alternativeEntries = rotate(sourceExercises, index + 3)
-    .map(({ exercise: candidate, focus: candidateFocus }) => {
-      const candidateSegments = candidate.segments ?? []
-      const candidateReadings = candidate.segmentReadings ?? candidateSegments
-      const text = candidateSegments[candidateFocus.segmentIndex]
-      const reading = candidateReadings[candidateFocus.segmentIndex]
-      return {
-        text: text ? stripTrailingPeriod(text) : '',
-        reading: reading ? stripTrailingPeriod(reading) : reading,
-      }
-    })
-    .filter((entry, entryIndex, entries) =>
-      entry.text && entry.text !== answer && entries.findIndex((other) => other.text === entry.text) === entryIndex,
-    )
-    .slice(0, 3)
-
-  const optionEntries = focus.options
-    ? rotate(
-        focus.options.map((option) => ({ text: stripTrailingPeriod(option), reading: undefined as string | undefined })),
-        index % focus.options.length,
-      )
-    : rotate([{ text: answer, reading: answerReading }, ...alternativeEntries], index % 4)
-
-  const options = optionEntries.map((entry) => entry.text)
-  const optionReadings = optionEntries.map((entry) => entry.reading)
-
-  const prompt = segments
-    .map((segment, segmentIndex) => (segmentIndex === focus.segmentIndex ? focus.replacement ?? '___' : segment))
-    .join('')
-  const promptReading = segments
-    .map((segment, segmentIndex) => {
-      if (segmentIndex !== focus.segmentIndex) return readings[segmentIndex] ?? segment
-      return focus.replacement ? `${focus.replacementReading ?? ''}___` : '___'
-    })
-    .join('')
-
   return {
-    id: exercise.id,
-    jlpt: exercise.jlpt as GrammarJlptLevel,
-    prompt,
-    promptReading,
-    answer,
-    answerReading,
-    options,
-    optionReadings,
-    english: exercise.english,
-    pattern: focus.pattern,
-    meaning: focus.meaning,
+    source: {
+      id: exercise.id,
+      jlpt: exercise.jlpt as GrammarJlptLevel,
+      english: exercise.english,
+      segments: exercise.segments,
+      readings: exercise.segmentReadings ?? exercise.segments,
+    },
+    focus,
   }
 })
+
+/** Grammar choice drills made from every curated grammar sentence in Sentence Builder. */
+export const grammarPracticeExercises: GrammarPracticeExercise[] = buildDrillExercises(sourceExercises)
