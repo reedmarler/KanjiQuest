@@ -428,6 +428,14 @@ export function SentenceBuilderView({
     setPicked([])
   }
 
+  const handleRemovePicked = (tileIndex: number) => {
+    if (answered) return
+
+    const remaining = picked.filter((tile) => tile.index !== tileIndex)
+    setPicked(remaining)
+    setDraft(remaining.map((tile) => tile.word).join(''))
+  }
+
   const handleCheck = () => {
     if (!draft.trim()) return
     checkScrollPositionRef.current = { x: window.scrollX, y: window.scrollY }
@@ -441,6 +449,7 @@ export function SentenceBuilderView({
 
   const handleAnswerKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     if (event.key !== 'Enter' || event.shiftKey) return
+    if (event.target instanceof HTMLButtonElement) return
 
     event.preventDefault()
     event.stopPropagation()
@@ -654,11 +663,19 @@ export function SentenceBuilderView({
                 tabIndex={0}
               >
                 {picked.map((tile) => (
-                  <FuriganaSegment
+                  <button
                     key={`${tile.word}-${tile.index}`}
-                    text={tile.word}
-                    reading={readings?.[tile.index]}
-                  />
+                    type="button"
+                    className="sentence-built-tile"
+                    onClick={() => handleRemovePicked(tile.index)}
+                    aria-label={`Return ${tile.word} to the word bank`}
+                    title="Return word to bank"
+                  >
+                    <FuriganaSegment
+                      text={tile.word}
+                      reading={readings?.[tile.index]}
+                    />
+                  </button>
                 ))}
               </div>
             )}

@@ -3801,9 +3801,38 @@ body:has(.sentence-view) .app {
   overflow: hidden;
 }
 
-.sentence-built-entries > span {
+.sentence-built-entries > span,
+.sentence-built-tile {
   max-width: 100%;
   overflow-wrap: anywhere;
+}
+
+.sentence-built-tile {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  padding: 0.18rem 0.3rem;
+  font: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.sentence-built-tile:hover,
+.sentence-built-tile:focus-visible {
+  border-color: rgba(255, 139, 167, 0.4);
+  background: rgba(255, 139, 167, 0.1);
+  color: var(--sakura);
+}
+
+.sentence-built-tile:hover {
+  transform: translateY(-1px);
+}
+
+.sentence-built-tile:focus-visible {
+  outline: 2px solid var(--sakura);
+  outline-offset: 2px;
 }
 
 .sentence-built-hidden-input {
