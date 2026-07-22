@@ -2424,6 +2424,41 @@ body:has(.sentence-view) .app {
   z-index: 20;
 }
 
+.builder-top-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.builder-particle-toggle {
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  padding: 0.28rem 0.55rem;
+  font: 600 0.67rem inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.builder-particle-toggle strong {
+  margin-left: 0.28rem;
+  color: var(--gold);
+}
+
+.builder-particle-toggle:hover,
+.builder-particle-toggle:focus-visible,
+.builder-particle-toggle.is-active {
+  border-color: rgba(255, 139, 167, 0.5);
+  background: rgba(255, 139, 167, 0.1);
+  color: var(--sakura);
+}
+
+.builder-particle-toggle:focus-visible {
+  outline: 2px solid var(--sakura);
+  outline-offset: 2px;
+}
+
 .builder-level-trigger {
   border: 0;
   font-family: inherit;
@@ -4230,6 +4265,12 @@ body:has(.sentence-view) .app {
   justify-content: center;
   padding-inline: 7.4rem;
   animation: sentence-answer-in 0.2s ease-out;
+}
+
+.word-bank-tile.is-particle {
+  background: rgba(231, 194, 102, 0.09);
+  border-color: rgba(231, 194, 102, 0.25);
+  color: var(--gold);
 }
 
 .sentence-audio-controls {

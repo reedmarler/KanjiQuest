@@ -10,6 +10,16 @@ const BUILDER_LEVEL_OPTIONS: JlptLevel[] = ['N1', 'N2', 'N3', 'N4', 'N5']
 const SPEECH_RATES = [0.9, 0.75, 0.6] as const
 const HIDE_WORDS_STORAGE_KEY = 'kanji-quest-sentence-builder-hide-words-v1'
 const SHOW_FURIGANA_STORAGE_KEY = 'kanji-quest-sentence-builder-show-furigana-v1'
+const SPLIT_PARTICLES_STORAGE_KEY = 'kanji-quest-sentence-builder-split-particles-v1'
+const PARTICLE_SUFFIXES = ['から', 'まで', 'は', 'を', 'が', 'に', 'で', 'へ', 'と', 'も', 'の', 'や', 'か'] as const
+
+interface BuilderTile {
+  id: string
+  word: string
+  reading?: string
+  meaning?: string
+  isParticle: boolean
+}
 
 function loadBooleanPreference(key: string, fallback: boolean) {
   if (typeof window === 'undefined') return fallback
@@ -90,6 +100,54 @@ function fitWordBank(bank: HTMLDivElement | null) {
   tiles.forEach((tile) => {
     tile.style.fontSize = `${size}px`
   })
+}
+
+function particleReading(surface: string, reading: string) {
+  const pronunciations: Record<string, string[]> = {
+    は: ['は', 'わ'],
+    へ: ['へ', 'え'],
+    を: ['を', 'お'],
+  }
+
+  return (pronunciations[surface] ?? [surface]).find((value) => reading.endsWith(value)) ?? surface
+}
+
+function splitParticleTiles(word: string, reading: string | undefined, meaning: string | undefined, index: number): BuilderTile[] {
+  const punctuation = word.match(/[。！？!?、,]*$/u)?.[0] ?? ''
+  let remainingWord = word.slice(0, word.length - punctuation.length)
+  let remainingReading = reading ?? word
+  const particles: BuilderTile[] = []
+
+  while (remainingWord.length > 1) {
+    const particle = PARTICLE_SUFFIXES.find((candidate) => remainingWord.endsWith(candidate))
+    if (!particle || remainingWord.length === particle.length) break
+
+    const suffixReading = particleReading(particle, remainingReading)
+    remainingWord = remainingWord.slice(0, -particle.length)
+    if (remainingReading.endsWith(suffixReading)) {
+      remainingReading = remainingReading.slice(0, -suffixReading.length)
+    }
+
+    particles.unshift({
+      id: `${index}-particle-${particles.length}`,
+      word: particle,
+      reading: suffixReading,
+      isParticle: true,
+    })
+  }
+
+  if (!particles.length) {
+    return [{ id: `${index}-word`, word, reading, meaning, isParticle: false }]
+  }
+
+  const lastParticle = particles.at(-1)!
+  lastParticle.word += punctuation
+  lastParticle.reading += punctuation
+
+  return [
+    { id: `${index}-word`, word: remainingWord, reading: remainingReading, meaning, isParticle: false },
+    ...particles,
+  ]
 }
 
 interface SentenceBuilderViewProps {
@@ -331,15 +389,16 @@ export function SentenceBuilderView({
 }: SentenceBuilderViewProps) {
   const segments = exercise.segments ?? []
   const readings = exercise.segmentReadings
-  const tiles = segments.map((word, index) => ({ word, index }))
-  const shuffled = useMemo(() => shuffle(tiles), [exercise.id, segments.join('|')])
   const [draft, setDraft] = useState('')
-  const [picked, setPicked] = useState<typeof tiles>([])
+  const [picked, setPicked] = useState<BuilderTile[]>([])
   const [hideJapanese, setHideJapanese] = useState(() =>
     loadBooleanPreference(HIDE_WORDS_STORAGE_KEY, false),
   )
   const [showFurigana, setShowFurigana] = useState(() =>
     loadBooleanPreference(SHOW_FURIGANA_STORAGE_KEY, true),
+  )
+  const [splitParticles, setSplitParticles] = useState(() =>
+    loadBooleanPreference(SPLIT_PARTICLES_STORAGE_KEY, false),
   )
   const [showRomajiLegend, setShowRomajiLegend] = useState(true)
   const [levelMenuOpen, setLevelMenuOpen] = useState(false)
@@ -355,6 +414,12 @@ export function SentenceBuilderView({
   const levelPickerRef = useRef<HTMLDivElement>(null)
   const checkScrollPositionRef = useRef({ x: 0, y: 0 })
   const inputBoxCenterRef = useRef<number | null>(null)
+  const tiles = segments.flatMap((word, index) =>
+    splitParticles
+      ? splitParticleTiles(word, readings?.[index], exercise.segmentMeanings?.[index], index)
+      : [{ id: `${index}-word`, word, reading: readings?.[index], meaning: exercise.segmentMeanings?.[index], isParticle: false }],
+  )
+  const shuffled = useMemo(() => shuffle(tiles), [exercise.id, splitParticles])
 
   const isCorrect =
     answered &&
@@ -367,12 +432,12 @@ export function SentenceBuilderView({
     segments,
     readings,
   }
-  const pickedIndexes = new Set(picked.map((tile) => tile.index))
+  const pickedIndexes = new Set(picked.map((tile) => tile.id))
   const correctRomaji = (readings ?? segments).map(romajiForSegment).join(' ')
   const showRomajiFeedback = answered && isRomajiAnswer(draft)
   const romajiAnswerParts = romajiDisplayPartsByWord(draft, correctRomaji)
-  const shouldReserveHelperFurigana = (tile: (typeof tiles)[number]) =>
-    Boolean(readings?.[tile.index]) && !hasKanji(tile.word)
+  const shouldReserveHelperFurigana = (tile: BuilderTile) =>
+    Boolean(tile.reading) && !hasKanji(tile.word)
   const speechSupported =
     typeof window !== 'undefined' &&
     'speechSynthesis' in window &&
@@ -413,8 +478,8 @@ export function SentenceBuilderView({
     }
   }
 
-  const handlePick = (tile: (typeof tiles)[number]) => {
-    if (answered || pickedIndexes.has(tile.index)) return
+  const handlePick = (tile: BuilderTile) => {
+    if (answered || pickedIndexes.has(tile.id)) return
     setDraft((prev) => prev + tile.word)
     setPicked((prev) => [...prev, tile])
   }
@@ -422,7 +487,7 @@ export function SentenceBuilderView({
   const handleHint = () => {
     if (answered) return
 
-    const nextTile = tiles.find((tile) => !pickedIndexes.has(tile.index))
+    const nextTile = tiles.find((tile) => !pickedIndexes.has(tile.id))
     if (!nextTile) return
 
     setDraft((prev) => prev + nextTile.word)
@@ -440,12 +505,20 @@ export function SentenceBuilderView({
     setPicked([])
   }
 
-  const handleRemovePicked = (tileIndex: number) => {
+  const handleRemovePicked = (tileId: string) => {
     if (answered) return
 
-    const remaining = picked.filter((tile) => tile.index !== tileIndex)
+    const remaining = picked.filter((tile) => tile.id !== tileId)
     setPicked(remaining)
     setDraft(remaining.map((tile) => tile.word).join(''))
+  }
+
+  const handleToggleParticleMode = () => {
+    setSplitParticles((enabled) => !enabled)
+    if (!answered) {
+      setDraft('')
+      setPicked([])
+    }
   }
 
   const handleCheck = () => {
@@ -559,6 +632,10 @@ export function SentenceBuilderView({
   }, [showFurigana])
 
   useEffect(() => {
+    saveBooleanPreference(SPLIT_PARTICLES_STORAGE_KEY, splitParticles)
+  }, [splitParticles])
+
+  useEffect(() => {
     setIsSpeaking(false)
     if (!speechSupported) return
 
@@ -576,7 +653,18 @@ export function SentenceBuilderView({
       <div className="study-top">
         <button className="btn btn-ghost" onClick={onExit}>← Exit</button>
         <span className="study-progress">{current + 1} / {total}</span>
-        <div className="builder-level-picker" ref={levelPickerRef}>
+        <div className="builder-top-controls">
+          <button
+            type="button"
+            className={`builder-particle-toggle${splitParticles ? ' is-active' : ''}`}
+            onClick={handleToggleParticleMode}
+            aria-pressed={splitParticles}
+            title="Split Japanese particles into separate word tiles"
+          >
+            <span>Particles</span>
+            <strong>{splitParticles ? 'Split' : 'Joined'}</strong>
+          </button>
+          <div className="builder-level-picker" ref={levelPickerRef}>
           <button
             type="button"
             className="study-type-badge builder-level-trigger"
@@ -612,6 +700,7 @@ export function SentenceBuilderView({
               })}
             </div>
           )}
+          </div>
         </div>
       </div>
 
@@ -641,24 +730,24 @@ export function SentenceBuilderView({
 
             <div ref={wordBankRef} className={`sentence-word-bank ${hideJapanese ? 'is-blurred' : ''}`}>
               {shuffled.map((tile) => {
-                const isUsed = pickedIndexes.has(tile.index)
+                const isUsed = pickedIndexes.has(tile.id)
 
                 return (
                   <button
-                    key={tile.index}
-                    className={`word-bank-tile ${isUsed ? 'is-used' : ''}`}
+                    key={tile.id}
+                    className={`word-bank-tile${tile.isParticle ? ' is-particle' : ''}${isUsed ? ' is-used' : ''}`}
                     onClick={() => handlePick(tile)}
                     disabled={isUsed}
                   >
                     <span className="word-bank-text">
                       {shouldReserveHelperFurigana(tile) && (
                         <span className="word-bank-furigana-spacer" aria-hidden="true">
-                          {readings?.[tile.index]}
+                          {tile.reading}
                         </span>
                       )}
                       <FuriganaSegment
                         text={tile.word}
-                        reading={readings?.[tile.index]}
+                        reading={tile.reading}
                       />
                     </span>
                   </button>
@@ -676,16 +765,16 @@ export function SentenceBuilderView({
               >
                 {picked.map((tile) => (
                   <button
-                    key={`${tile.word}-${tile.index}`}
+                    key={tile.id}
                     type="button"
                     className="sentence-built-tile"
-                    onClick={() => handleRemovePicked(tile.index)}
+                    onClick={() => handleRemovePicked(tile.id)}
                     aria-label={`Return ${tile.word} to the word bank`}
                     title="Return word to bank"
                   >
                     <FuriganaSegment
                       text={tile.word}
-                      reading={readings?.[tile.index]}
+                      reading={tile.reading}
                     />
                   </button>
                 ))}
