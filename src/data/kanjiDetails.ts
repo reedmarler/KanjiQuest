@@ -1,7 +1,17 @@
 import { kanjiCards } from './kanji'
 import { kanjiKanaMap } from './kanjiKana'
 import type { StudyCard } from '../lib/types'
-import type { KanjiDetail } from '../lib/kanjiTypes'
+
+export interface KanjiDetail {
+  id: string
+  radicals: Array<{ char: string; meaning: string }>
+  mnemonic: string
+  compounds: Array<{ word: string; reading: string; meaning: string }>
+  onyomi: string[]
+  kunyomi: string[]
+  contextSentence?: string
+  contextReading?: string
+}
 
 const detailMap: Record<string, KanjiDetail> = {
   'kanji-n5-hito': {

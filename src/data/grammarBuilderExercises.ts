@@ -1,0 +1,68 @@
+import type { SentenceExercise } from './sentenceExercises'
+import type { JlptLevel } from '../lib/types'
+
+function grammarSentence(id: string, jlpt: JlptLevel, english: string, ...segments: string[]): SentenceExercise {
+  return {
+    id: `sent-grammar-${id}`,
+    type: 'sentence-builder',
+    segments,
+    segmentReadings: [...segments],
+    segmentMeanings: segments.map(() => ''),
+    english,
+    jlpt,
+  }
+}
+
+/** Curated grammar prompts guaranteed to appear in Sentence Builder sessions. */
+export const grammarBuilderExercises: SentenceExercise[] = [
+  grammarSentence('masu', 'N5', 'I eat bread.', '私', 'は', 'パン', 'を', '食べます。'),
+  grammarSentence('mashita', 'N5', 'I ate sushi yesterday.', '昨日', '寿司', 'を', '食べました。'),
+  grammarSentence('masen', 'N5', 'I do not eat meat.', '私', 'は', '肉', 'を', '食べません。'),
+  grammarSentence('masen-deshita', 'N5', 'I did not go to school yesterday.', '昨日', '学校', 'へ', '行きませんでした。'),
+  grammarSentence('plain', 'N5', 'I drink water every day.', '私', 'は', '毎日', '水', 'を', '飲む。'),
+  grammarSentence('plain-negative', 'N5', 'I do not study today.', '今日', 'は', '勉強', 'しない。'),
+  grammarSentence('plain-past', 'N5', 'I met a friend yesterday.', '昨日', '友だち', 'に', '会った。'),
+  grammarSentence('plain-negative-past', 'N5', 'I did not watch television yesterday.', '昨日', 'テレビ', 'を', '見なかった。'),
+  grammarSentence('arimasu', 'N5', 'There is a book on the desk.', '机', 'の', '上', 'に', '本', 'が', 'あります。'),
+  grammarSentence('imasu', 'N5', 'There is a dog in the park.', '公園', 'に', '犬', 'が', 'います。'),
+  grammarSentence('ni-arimasu', 'N5', 'The bank is in front of the station.', '銀行', 'は', '駅', 'の', '前', 'に', 'あります。'),
+  grammarSentence('goro', 'N5', 'I will go home around seven.', '七時', 'ごろ', '帰ります。'),
+  grammarSentence('suki', 'N5', 'I like Japanese.', '私', 'は', '日本語', 'が', '好きです。'),
+  grammarSentence('hoshii', 'N5', 'I want a car.', '私', 'は', '車', 'が', 'ほしいです。'),
+  grammarSentence('tai', 'N5', 'I want to drink water.', '私', 'は', '水', 'を', '飲みたいです。'),
+  grammarSentence('dekiru', 'N5', 'I can speak Japanese.', '私', 'は', '日本語', 'を', '話す', 'ことができます。'),
+  grammarSentence('shika', 'N5', 'I drink only water.', '私', 'は', '水', 'しか', '飲みません。'),
+  grammarSentence('must', 'N5', 'I must study every day.', '私', 'は', '毎日', '勉強', 'しなければなりません。'),
+  grammarSentence('not-have-to', 'N5', 'You do not have to come tomorrow.', '明日', 'は', '来なくてもいいです。'),
+  grammarSentence('may', 'N5', 'May I take pictures here?', 'ここ', 'で', '写真', 'を', '撮ってもいいですか。'),
+  grammarSentence('comparison', 'N5', 'I like winter more than summer.', '夏', 'より', '冬', 'のほうが', '好きです。'),
+  grammarSentence('ichiban', 'N5', 'I like Japanese the most.', '日本語', 'が', '一番', '好きです。'),
+  grammarSentence('give', 'N5', 'I give flowers to my friend.', '私', 'は', '友だち', 'に', '花', 'を', 'あげます。'),
+  grammarSentence('receive', 'N5', 'I received a book from my friend.', '私', 'は', '友だち', 'に', '本', 'を', 'もらいました。'),
+  grammarSentence('because', 'N5', 'Because I am busy, I will not go today.', '忙しい', 'から、', '今日', 'は', '行きません。'),
+  grammarSentence('but', 'N5', 'It is small, but useful.', '小さい', 'けど、', '便利です。'),
+  grammarSentence('possessive', 'N5', 'This is my book.', 'これ', 'は', '私', 'の', '本です。'),
+  grammarSentence('demonstrative', 'N5', 'This book is interesting.', 'この', '本', 'は', '面白いです。'),
+  grammarSentence('counter', 'N5', 'I bought three apples.', 'りんご', 'を', '三つ', '買いました。'),
+  grammarSentence('please', 'N5', 'Please write your name here.', 'ここ', 'に', '名前', 'を', '書いてください。'),
+  grammarSentence('dont-please', 'N5', 'Please do not take pictures here.', 'ここ', 'で', '写真', 'を', '撮らないでください。'),
+  grammarSentence('lets', 'N5', 'Let us study together.', '一緒に', '勉強', 'しましょう。'),
+  grammarSentence('invitation', 'N5', 'Would you like to go together?', '一緒に', '行きませんか。'),
+
+  grammarSentence('potential', 'N4', 'I can read kanji.', '私', 'は', '漢字', 'が', '読めます。'),
+  grammarSentence('to-omoimasu', 'N4', 'I think this movie is interesting.', 'この', '映画', 'は', '面白い', 'と', '思います。'),
+  grammarSentence('to-iimasu', 'N4', 'I say thank you.', '私', 'は', '「ありがとう」', 'と', '言います。'),
+  grammarSentence('tsumori', 'N4', 'I intend to go to Japan next year.', '私', 'は', '来年', '日本', 'へ', '行く', 'つもりです。'),
+  grammarSentence('yotei', 'N4', 'I plan to leave tomorrow.', '私', 'は', '明日', '出発する', '予定です。'),
+  grammarSentence('experience', 'N4', 'I have been to Japan before.', '私', 'は', '日本', 'へ', '行った', 'ことがあります。'),
+  grammarSentence('tari', 'N4', 'On weekends I do things like read books and watch movies.', '週末', 'は', '本', 'を', '読んだり、', '映画', 'を', '見たりします。'),
+  grammarSentence('nagara', 'N4', 'I study while listening to music.', '私', 'は', '音楽', 'を', '聞きながら、', '勉強します。'),
+  grammarSentence('mae-ni', 'N4', 'I brush my teeth before sleeping.', '寝る', '前に、', '歯', 'を', '磨きます。'),
+  grammarSentence('ato-de', 'N4', 'I study after eating dinner.', '晩ご飯', 'を', '食べた', 'あとで、', '勉強します。'),
+  grammarSentence('node', 'N4', 'Because it is raining, I will not go.', '雨', 'が', '降っている', 'ので、', '行きません。'),
+  grammarSentence('you-ni', 'N4', 'I take notes so that I will not forget.', '忘れない', 'ように、', 'メモ', 'します。'),
+  grammarSentence('sugiru', 'N4', 'This bag is too heavy.', 'この', 'かばん', 'は', '重すぎます。'),
+  grammarSentence('hajimeru', 'N4', 'It began to rain.', '雨', 'が', '降り始めました。'),
+  grammarSentence('owaru', 'N4', 'I finished reading the book.', '本', 'を', '読み終わりました。'),
+  grammarSentence('tsuzukeru', 'N4', 'I will continue studying Japanese.', '私', 'は', '日本語', 'を', '勉強し続けます。'),
+]

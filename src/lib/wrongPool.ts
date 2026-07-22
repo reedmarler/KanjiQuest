@@ -46,7 +46,3 @@ export function getWrongPoolIds(pool: WrongPool, limit = 20): string[] {
     .slice(0, limit)
     .map(([id]) => id)
 }
-
-export function wrongPoolSize(pool: WrongPool): number {
-  return Object.keys(pool).length
-}

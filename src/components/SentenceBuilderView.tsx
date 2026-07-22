@@ -162,6 +162,8 @@ interface SentenceBuilderViewProps {
   selectedLevels: readonly JlptLevel[]
   enabledLevels: readonly JlptLevel[]
   onToggleLevel: (level: JlptLevel) => void
+  infiniteMode: boolean
+  onToggleInfiniteMode: () => void
 }
 
 function normalizeSentenceAnswer(value: string): string {
@@ -388,6 +390,8 @@ export function SentenceBuilderView({
   selectedLevels,
   enabledLevels,
   onToggleLevel,
+  infiniteMode,
+  onToggleInfiniteMode,
 }: SentenceBuilderViewProps) {
   const segments = exercise.segments ?? []
   const readings = exercise.segmentReadings
@@ -654,8 +658,18 @@ export function SentenceBuilderView({
     >
       <div className="study-top">
         <button className="btn btn-ghost" onClick={onExit}>← Exit</button>
-        <span className="study-progress">{current + 1} / {total}</span>
+        <span className="study-progress">{infiniteMode ? `${current + 1} / ∞` : `${current + 1} / ${total}`}</span>
         <div className="builder-top-controls">
+          <button
+            type="button"
+            className={`builder-infinite-toggle${infiniteMode ? ' is-active' : ''}`}
+            onClick={onToggleInfiniteMode}
+            aria-pressed={infiniteMode}
+            aria-label={infiniteMode ? 'Turn off infinite Sentence Builder mode' : 'Keep Sentence Builder going indefinitely'}
+            title={infiniteMode ? 'Infinite practice on' : 'Keep practicing without an ending'}
+          >
+            ∞
+          </button>
           <button
             type="button"
             className={`builder-particle-toggle${splitParticles ? ' is-active' : ''}`}
@@ -664,7 +678,9 @@ export function SentenceBuilderView({
             title="Split Japanese particles into separate word tiles"
           >
             <span>Particles</span>
-            <strong>{splitParticles ? 'Split' : 'Joined'}</strong>
+            <span className="builder-particle-switch" aria-hidden="true">
+              <span className="builder-particle-switch-thumb" />
+            </span>
           </button>
           <div className="builder-level-picker" ref={levelPickerRef}>
           <button

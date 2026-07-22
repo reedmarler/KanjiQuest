@@ -34,5 +34,3 @@ export interface AppStats {
   totalReviews: number
   cardsLearned: number
 }
-
-export type StudyMode = 'hiragana' | 'katakana' | 'vocab' | 'kanji' | 'reading' | 'grammar' | 'review'

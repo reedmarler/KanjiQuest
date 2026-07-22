@@ -1,4 +1,5 @@
 import type { SentenceExercise } from '../data/sentenceExercises'
+import { grammarBuilderExercises } from '../data/grammarBuilderExercises'
 import { generatePreviewSentence, type GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import type { JlptLevel } from './types'
 
@@ -68,6 +69,19 @@ export function buildGeneratedBuilderExercises(
   // Seeds advance by 37 per attempt, so shifting a whole attempt window per batch
   // keeps consecutive batches off each other's seeds even within the same second.
   const baseSeed = sentenceSeed() + batch * attemptLimit * 37
+
+  // Make grammar practice visible and dependable: most N5/N4 sessions include
+  // curated endings and grammar patterns, with generated sentences filling the rest.
+  const grammarPool = grammarBuilderExercises.filter((exercise) => wiredLevels.includes(exercise.jlpt!))
+  const grammarTarget = Math.min(Math.ceil(count * 0.6), grammarPool.length)
+  for (let index = 0; index < grammarTarget; index += 1) {
+    const exercise = grammarPool[(baseSeed + index * 7) % grammarPool.length]!
+    const japanese = exercise.segments?.join('') ?? ''
+    if (japanese && !seenJapanese.has(japanese)) {
+      seenJapanese.add(japanese)
+      exercises.push(exercise)
+    }
+  }
 
   for (let attempt = 0; attempt < attemptLimit && exercises.length < count; attempt += 1) {
     const level = wiredLevels[attempt % wiredLevels.length]!
