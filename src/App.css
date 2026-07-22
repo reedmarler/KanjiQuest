@@ -71,7 +71,7 @@ body {
 
 /* Keep Sentence Builder visually identical to the former 150% browser-zoom view. */
 body:has(.sentence-view) .app {
-  padding-top: 1.3333rem;
+  padding-top: 1.05rem;
 }
 
 /* Dashboard */
@@ -2375,15 +2375,29 @@ body:has(.sentence-view) .app {
 }
 
 .sentence-view .study-top {
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.4rem;
 }
 
 .sentence-view .study-progress-bar {
-  margin-bottom: 1.15rem;
+  margin-bottom: 0.65rem;
 }
 
 .sentence-view .sentence-card {
-  padding-top: 1.35rem;
+  padding-top: 0.9rem;
+}
+
+.sentence-view .study-top .btn {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.78rem;
+}
+
+.sentence-view .study-progress {
+  font-size: 0.78rem;
+}
+
+.sentence-view .study-type-badge {
+  padding: 0.21rem 0.6rem;
+  font-size: 0.69rem;
 }
 
 .study-top {
@@ -3554,24 +3568,24 @@ body:has(.sentence-view) .app {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 0.45rem;
+  gap: 0.35rem;
   text-align: center;
   color: var(--text-muted);
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  margin: -0.35rem 0 0.25rem;
+  margin: -0.2rem 0 0.15rem;
 }
 
 .sentence-prompt span:nth-child(3) {
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 1.12rem;
+  font-size: 1.02rem;
   font-weight: 500;
 }
 
 .sentence-builder-help {
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.35rem;
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   text-align: center;
 }
 
@@ -3592,14 +3606,14 @@ body:has(.sentence-view) .app {
 .sentence-builder-inner-outline {
   min-width: 0;
   box-sizing: border-box;
-  padding: 1rem 1rem 0;
+  padding: 0.55rem 1rem 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
   display: grid;
-  gap: 1rem;
-  height: 14.277rem;
-  min-height: 14.277rem;
-  max-height: 14.277rem;
+  gap: 0.55rem;
+  height: 14.85rem;
+  min-height: 14.85rem;
+  max-height: 14.85rem;
   align-content: start;
   overflow: hidden;
 }
@@ -3833,6 +3847,8 @@ body:has(.sentence-view) .app {
   height: 6.125rem;
   min-height: 6.125rem;
   max-height: 6.125rem;
+  flex-wrap: nowrap;
+  gap: clamp(0.1rem, 1vw, 0.5rem);
   overflow: hidden;
 }
 
@@ -3843,6 +3859,7 @@ body:has(.sentence-view) .app {
 }
 
 .sentence-built-tile {
+  flex: 0 0 auto;
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;
@@ -3850,6 +3867,7 @@ body:has(.sentence-view) .app {
   padding: 0.18rem 0.3rem;
   font: inherit;
   line-height: inherit;
+  white-space: nowrap;
   cursor: pointer;
   transition: color 0.15s, background 0.15s, border-color 0.15s, transform 0.1s;
 }
@@ -3888,17 +3906,17 @@ body:has(.sentence-view) .app {
   max-width: 100%;
   min-width: 0;
   margin: 0 auto;
-  height: 4.5rem;
-  min-height: 4.5rem;
-  max-height: 4.5rem;
+  height: 5.5rem;
+  min-height: 5.5rem;
+  max-height: 5.5rem;
   /* Headroom for the 1px lift a tile takes on hover — without it the raised
      top edge, outline included, is clipped by the overflow rule below. */
   padding-top: 2px;
   display: flex;
-  flex-wrap: nowrap;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: 0.25rem clamp(0.2rem, 0.8vw, 0.5rem);
   justify-content: center;
-  overflow-wrap: anywhere;
   overflow: hidden;
 }
 
@@ -3917,6 +3935,7 @@ body:has(.sentence-view) .app {
 }
 
 .word-bank-tile {
+  flex: 0 0 auto;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -3924,11 +3943,11 @@ body:has(.sentence-view) .app {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 9px;
-  padding: 0.52rem 0.72rem 0.86rem;
+  padding: 0.16rem clamp(0.25rem, 1.6vw, 0.72rem) 0.25rem;
   font-size: clamp(1rem, 3.2vw, 1.25rem);
-  height: calc(4.5rem - 2px);
-  min-height: calc(4.5rem - 2px);
-  max-height: calc(4.5rem - 2px);
+  height: 2.55rem;
+  min-height: 2.55rem;
+  max-height: 2.55rem;
   color: var(--text);
   cursor: pointer;
   transition: border-color 0.15s, transform 0.1s, filter 0.15s, opacity 0.15s;
@@ -3936,8 +3955,8 @@ body:has(.sentence-view) .app {
   flex-direction: column;
   align-items: center;
   gap: 0.2rem;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow-wrap: normal;
   overflow: hidden;
 }
 
@@ -3954,10 +3973,10 @@ body:has(.sentence-view) .app {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 2.55rem;
+  min-height: 1.75rem;
   line-height: 1.2;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow-wrap: normal;
 }
 
 .word-bank-furigana-spacer {

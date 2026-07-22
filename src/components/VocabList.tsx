@@ -75,8 +75,8 @@ export function VocabList({ onBack }: VocabListProps) {
   const [level, setLevel] = useState<JlptLevel>('N5')
   const content = useMemo(() => getLevelContent(level), [level])
   const buckets: ContentBucket[] = level === 'N5'
-    ? ['kana', 'vocab', 'kanji', 'reading', 'sentences']
-    : ['vocab', 'kanji', 'reading', 'sentences']
+    ? ['kana', 'vocab', 'grammar', 'kanji', 'reading', 'sentences']
+    : ['vocab', 'grammar', 'kanji', 'reading', 'sentences']
 
   return (
     <div className="vocab-list-page">

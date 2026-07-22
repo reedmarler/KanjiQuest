@@ -23,6 +23,7 @@ const typeLabels: Record<string, string> = {
   hiragana: 'Hiragana',
   katakana: 'Katakana',
   vocab: 'Vocabulary',
+  grammar: 'Grammar',
   kanji: 'Kanji',
 }
 

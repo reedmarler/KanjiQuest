@@ -16,12 +16,13 @@ function vocabKey(japanese: string): string {
 
 export const JLPT_LEVELS: JlptLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1']
 
-export type ContentBucket = 'kana' | 'vocab' | 'kanji' | 'reading' | 'sentences'
+export type ContentBucket = 'kana' | 'vocab' | 'grammar' | 'kanji' | 'reading' | 'sentences'
 
 export interface LevelContentSummary {
   level: JlptLevel
   kana: number
   vocab: number
+  grammar: number
   kanji: number
   reading: number
   sentences: number
@@ -32,6 +33,7 @@ export interface LevelContent {
   level: JlptLevel
   kana: StudyCard[]
   vocab: StudyCard[]
+  grammar: StudyCard[]
   kanji: StudyCard[]
   reading: StudyCard[]
   sentences: SentenceExercise[]
@@ -74,6 +76,7 @@ export function getLevelContent(level: JlptLevel): LevelContent {
   const seedVocab = cardsAtLevel(level, 'vocab')
   const seedVocabKeys = new Set(seedVocab.map((c) => vocabKey(c.front)))
   const vocab = [...seedVocab, ...addedVocabAtLevel(level, seedVocabKeys)]
+  const grammar = cardsAtLevel(level, 'grammar')
   const kanji = cardsAtLevel(level, 'kanji')
   const reading = cardsAtLevel(level, 'reading')
   const sentences = sentencesAtLevel(level)
@@ -82,13 +85,14 @@ export function getLevelContent(level: JlptLevel): LevelContent {
     level,
     kana: kana.length,
     vocab: vocab.length,
+    grammar: grammar.length,
     kanji: kanji.length,
     reading: reading.length,
     sentences: sentences.length,
-    total: kana.length + vocab.length + kanji.length + reading.length + sentences.length,
+    total: kana.length + vocab.length + grammar.length + kanji.length + reading.length + sentences.length,
   }
 
-  return { level, kana, vocab, kanji, reading, sentences, summary }
+  return { level, kana, vocab, grammar, kanji, reading, sentences, summary }
 }
 
 export function getAllLevelSummaries(): LevelContentSummary[] {
@@ -102,6 +106,7 @@ export function totalCatalogItems(): number {
 export const BUCKET_LABELS: Record<ContentBucket, string> = {
   kana: 'Kana',
   vocab: 'Vocabulary',
+  grammar: 'Grammar',
   kanji: 'Kanji',
   reading: 'Reading',
   sentences: 'Sentences',

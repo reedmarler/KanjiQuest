@@ -82,9 +82,11 @@ function fitWordBank(bank: HTMLDivElement | null) {
   if (!bank) return
 
   const tiles = Array.from(bank.querySelectorAll<HTMLElement>('.word-bank-tile'))
+  // A second row keeps long sentences compact, so use a slightly smaller
+  // starting size while keeping every word easy to read.
   let size = 20
 
-  for (; size > 11; size--) {
+  for (; size >= 11; size--) {
     tiles.forEach((tile) => {
       tile.style.fontSize = `${size}px`
     })
@@ -98,7 +100,7 @@ function fitWordBank(bank: HTMLDivElement | null) {
   }
 
   tiles.forEach((tile) => {
-    tile.style.fontSize = `${size}px`
+    tile.style.fontSize = '11px'
   })
 }
 
@@ -574,7 +576,7 @@ export function SentenceBuilderView({
     fitWordBank(wordBankRef.current)
 
     if (!answered) {
-      fitFixedTextBox(picked.length > 0 ? entryRef.current : textareaRef.current, 24, 12)
+      fitFixedTextBox(picked.length > 0 ? entryRef.current : textareaRef.current, 24, 8)
       return
     }
 
@@ -602,7 +604,7 @@ export function SentenceBuilderView({
         feedbackRef.current.style.top = `${delta}px`
       }
     }
-  }, [answered, draft, exercise.id, picked.length, showFurigana, showRomajiFeedback])
+  }, [answered, draft, exercise.id, picked.length, showFurigana, showRomajiFeedback, splitParticles, tiles.length])
 
   useEffect(() => {
     if (picked.length > 0 && !answered) {

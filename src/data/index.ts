@@ -9,6 +9,7 @@ import { kanjiCards } from './kanji'
 import { readingCards } from './readings'
 import { readingEnglish } from './readingEnglish'
 import { additionalVocabularySenseCards } from './vocabularySenseOverrides'
+import { grammarCards } from './grammar'
 import type { CardType, StudyCard } from '../lib/types'
 
 const readingCardsWithEnglish: StudyCard[] = readingCards.map((card) => ({
@@ -26,6 +27,7 @@ export const allCards: StudyCard[] = [
   ...vocabTop1000Cards,
   ...additionalVocabularySenseCards,
   ...userAddedVocabCards,
+  ...grammarCards,
   ...kanjiCards,
   ...readingCardsWithEnglish,
 ]
@@ -39,6 +41,7 @@ export function getCardById(id: string): StudyCard | undefined {
 }
 
 export const deckInfo = [
+  { type: 'grammar' as const, label: 'Grammar', count: grammarCards.length, emoji: '文' },
   { type: 'reading' as const, label: 'Reading Quiz', count: readingCardsWithEnglish.length, emoji: '読' },
   { type: 'kanji' as const, label: 'Kanji', count: kanjiCards.length, emoji: '漢' },
   { type: 'vocab' as const, label: 'Vocabulary', count: vocabularyCards.length + vocabBulkCards.length + vocabBulkHeroCards.length + vocabBulkListCards.length + vocabTop1000Cards.length + additionalVocabularySenseCards.length + userAddedVocabCards.length, emoji: '語' },

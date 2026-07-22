@@ -1,4 +1,4 @@
-export type CardType = 'hiragana' | 'katakana' | 'vocab' | 'kanji' | 'reading'
+export type CardType = 'hiragana' | 'katakana' | 'vocab' | 'kanji' | 'reading' | 'grammar'
 
 export type JlptLevel = 'N5' | 'N4' | 'N3' | 'N2' | 'N1'
 
@@ -35,4 +35,4 @@ export interface AppStats {
   cardsLearned: number
 }
 
-export type StudyMode = 'hiragana' | 'katakana' | 'vocab' | 'kanji' | 'reading' | 'review'
+export type StudyMode = 'hiragana' | 'katakana' | 'vocab' | 'kanji' | 'reading' | 'grammar' | 'review'
