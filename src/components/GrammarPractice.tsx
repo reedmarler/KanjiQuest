@@ -165,7 +165,7 @@ export function GrammarPractice({ onBack }: GrammarPracticeProps) {
             className={`grammar-gap${previewWord ? ' is-filled' : ''}${answered ? (isCorrect ? ' is-correct' : ' is-wrong') : ''}`}
             style={gapWidth ? { width: `${gapWidth}px` } : undefined}
           >
-            {previewWord ? <FuriganaSegment text={previewWord} reading={previewReading} /> : '___'}
+            {previewWord ? <FuriganaSegment text={previewWord} reading={previewReading} /> : ' '}
           </span>
           <FuriganaSegment text={promptParts[1]} reading={promptReadingParts[1]} />
           <div className="grammar-gap-measure" aria-hidden="true" ref={gapMeasureRef}>
