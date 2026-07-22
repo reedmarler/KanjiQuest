@@ -12,6 +12,7 @@ interface DashboardProps {
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
   onOpenSentencePractice: () => void
+  onOpenGrammar: () => void
   onOpenVocabList: () => void
   onOpenContentStudio: () => void
 }
@@ -21,6 +22,7 @@ export function Dashboard({
   learnedCount,
   totalCards,
   onOpenSentencePractice,
+  onOpenGrammar,
   onOpenVocabList,
   onOpenContentStudio,
   wrongPool,
@@ -131,6 +133,10 @@ export function Dashboard({
         <button type="button" className="practice-card" onClick={onOpenSentencePractice}>
           <span className="practice-emoji">文</span>
           <span className="practice-label">Sentence Practice</span>
+        </button>
+        <button type="button" className="practice-card practice-card-grammar" onClick={onOpenGrammar}>
+          <span className="practice-emoji">文法</span>
+          <span className="practice-label">Grammar</span>
         </button>
         <button type="button" className="practice-card practice-card-vocab" onClick={onOpenVocabList}>
           <span className="practice-emoji">語</span>

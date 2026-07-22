@@ -24,6 +24,7 @@ import { SentencePractice } from './components/SentencePractice'
 import { SessionComplete } from './components/SessionComplete'
 import { VocabList } from './components/VocabList'
 import { ContentStudio } from './components/ContentStudio'
+import { GrammarPractice } from './components/GrammarPractice'
 import './App.css'
 
 type View =
@@ -33,6 +34,7 @@ type View =
   | 'study'
   | 'complete'
   | 'content-studio'
+  | 'grammar'
 
 type SessionItem =
   | { kind: 'fill-gap'; exercise: SentenceExercise }
@@ -134,6 +136,14 @@ function App() {
 
   if (view === 'content-studio') return <ContentStudio onBack={() => setView('dashboard')} />
 
+  if (view === 'grammar') {
+    return (
+      <div className="app">
+        <GrammarPractice onBack={() => setView('dashboard')} />
+      </div>
+    )
+  }
+
   if (view === 'sentence-practice') {
     return (
       <div className="app">
@@ -206,6 +216,7 @@ function App() {
         learnedCount={learnedCount}
         totalCards={allCards.length}
         onOpenSentencePractice={() => setView('sentence-practice')}
+        onOpenGrammar={() => setView('grammar')}
         onOpenVocabList={() => setView('vocab-list')}
         onOpenContentStudio={() => setView('content-studio')}
         wrongPool={wrongPool}

@@ -1,0 +1,122 @@
+import { grammarBuilderExercises } from './grammarBuilderExercises'
+
+export interface GrammarPracticeExercise {
+  id: string
+  jlpt: 'N5' | 'N4'
+  prompt: string
+  answer: string
+  options: string[]
+  english: string
+  pattern: string
+  meaning: string
+}
+
+type GrammarFocus = {
+  segmentIndex: number
+  pattern: string
+  meaning: string
+  /** The text displayed in the sentence instead of the answer; include ___ for the blank. */
+  replacement?: string
+  /** The exact grammar piece the learner chooses. */
+  answer?: string
+  /** Purposeful alternatives for this grammar pattern. */
+  options?: string[]
+}
+
+const politeVerbEndings = ['ます。', 'ました。', 'ません。', 'ませんでした。']
+const plainVerbEndings = ['む。', 'まない。', 'んだ。', 'まなかった。']
+const connectorChoices = ['から、', 'ので、', 'けど、', 'そして、']
+
+const focusById: Record<string, GrammarFocus> = {
+  masu: { segmentIndex: 4, pattern: '〜ます', meaning: 'polite non-past', replacement: '食べ___', answer: 'ます。', options: politeVerbEndings },
+  mashita: { segmentIndex: 3, pattern: '〜ました', meaning: 'polite past', replacement: '食べ___', answer: 'ました。', options: politeVerbEndings },
+  masen: { segmentIndex: 4, pattern: '〜ません', meaning: 'polite negative', replacement: '食べ___', answer: 'ません。', options: politeVerbEndings },
+  'masen-deshita': { segmentIndex: 3, pattern: '〜ませんでした', meaning: 'polite negative past', replacement: '行き___', answer: 'ませんでした。', options: politeVerbEndings },
+  plain: { segmentIndex: 5, pattern: 'dictionary form', meaning: 'plain non-past', replacement: '飲___', answer: 'む。', options: plainVerbEndings },
+  'plain-negative': { segmentIndex: 3, pattern: '〜ない', meaning: 'plain negative', replacement: 'し___', answer: 'ない。', options: ['ない。', 'た。', 'ます。', 'ません。'] },
+  'plain-past': { segmentIndex: 3, pattern: '〜た', meaning: 'plain past', replacement: '会っ___', answer: 'た。', options: ['た。', 'ない。', 'ます。', 'ません。'] },
+  'plain-negative-past': { segmentIndex: 3, pattern: '〜なかった', meaning: 'plain negative past', replacement: '見___', answer: 'なかった。', options: ['なかった。', 'ない。', 'た。', 'ます。'] },
+  arimasu: { segmentIndex: 6, pattern: '〜があります', meaning: 'there is / are (things)' },
+  imasu: { segmentIndex: 3, pattern: '〜がいます', meaning: 'there is / are (people or animals)' },
+  'ni-arimasu': { segmentIndex: 6, pattern: '〜にあります', meaning: 'is located at' },
+  goro: { segmentIndex: 1, pattern: '〜ごろ', meaning: 'around a time' },
+  suki: { segmentIndex: 4, pattern: '〜が好きです', meaning: 'like' },
+  hoshii: { segmentIndex: 4, pattern: '〜がほしいです', meaning: 'want a thing' },
+  tai: { segmentIndex: 4, pattern: '〜たいです', meaning: 'want to do', replacement: '飲み___', answer: 'たいです。', options: ['たいです。', 'ます。', 'ません。', 'ました。'] },
+  dekiru: { segmentIndex: 5, pattern: '〜ことができます', meaning: 'can do' },
+  shika: { segmentIndex: 3, pattern: '〜しか〜ない', meaning: 'only' },
+  must: { segmentIndex: 4, pattern: '〜なければなりません', meaning: 'must / have to' },
+  'not-have-to': { segmentIndex: 2, pattern: '〜なくてもいいです', meaning: 'do not have to' },
+  may: { segmentIndex: 4, pattern: '〜てもいいですか', meaning: 'may I?' },
+  comparison: { segmentIndex: 3, pattern: '〜より…のほうが', meaning: 'more than' },
+  ichiban: { segmentIndex: 2, pattern: '一番', meaning: 'most' },
+  give: { segmentIndex: 6, pattern: '〜をあげます', meaning: 'give' },
+  receive: { segmentIndex: 6, pattern: '〜をもらいます', meaning: 'receive' },
+  because: { segmentIndex: 1, pattern: '〜から', meaning: 'because', answer: 'から、', options: connectorChoices },
+  but: { segmentIndex: 1, pattern: '〜けど', meaning: 'but / though', answer: 'けど、', options: connectorChoices },
+  possessive: { segmentIndex: 3, pattern: '〜の', meaning: 'possession' },
+  demonstrative: { segmentIndex: 0, pattern: 'この', meaning: 'this (before a noun)' },
+  counter: { segmentIndex: 2, pattern: '〜つ', meaning: 'general object counter' },
+  please: { segmentIndex: 4, pattern: '〜てください', meaning: 'please do' },
+  'dont-please': { segmentIndex: 4, pattern: '〜ないでください', meaning: 'please do not' },
+  lets: { segmentIndex: 2, pattern: '〜ましょう', meaning: "let's" },
+  invitation: { segmentIndex: 1, pattern: '〜ませんか', meaning: "won't you?" },
+  potential: { segmentIndex: 4, pattern: 'potential form', meaning: 'can do' },
+  'to-omoimasu': { segmentIndex: 4, pattern: '〜と思います', meaning: 'I think' },
+  'to-iimasu': { segmentIndex: 3, pattern: '〜と言います', meaning: 'say / call' },
+  tsumori: { segmentIndex: 5, pattern: '〜つもりです', meaning: 'intend to' },
+  yotei: { segmentIndex: 4, pattern: '〜予定です', meaning: 'plan to' },
+  experience: { segmentIndex: 4, pattern: '〜たことがあります', meaning: 'have done before' },
+  tari: { segmentIndex: 4, pattern: '〜たり〜たりする', meaning: 'do things like…' },
+  nagara: { segmentIndex: 4, pattern: '〜ながら', meaning: 'while doing' },
+  'mae-ni': { segmentIndex: 1, pattern: '〜前に', meaning: 'before' },
+  'ato-de': { segmentIndex: 3, pattern: '〜あとで', meaning: 'after' },
+  node: { segmentIndex: 3, pattern: '〜ので', meaning: 'because', answer: 'ので、', options: connectorChoices },
+  'you-ni': { segmentIndex: 1, pattern: '〜ように', meaning: 'so that' },
+  sugiru: { segmentIndex: 3, pattern: '〜すぎる', meaning: 'too much' },
+  hajimeru: { segmentIndex: 2, pattern: '〜始める', meaning: 'begin to do' },
+  owaru: { segmentIndex: 2, pattern: '〜終わる', meaning: 'finish doing' },
+  tsuzukeru: { segmentIndex: 4, pattern: '〜続ける', meaning: 'continue doing' },
+}
+
+const sourceExercises = grammarBuilderExercises.map((exercise) => {
+  const shortId = exercise.id.replace('sent-grammar-', '')
+  const focus = focusById[shortId]
+  if (!focus || !exercise.segments || !exercise.jlpt) {
+    throw new Error(`Grammar practice setup is missing ${exercise.id}`)
+  }
+
+  return { exercise, focus }
+})
+
+function rotate<T>(items: T[], offset: number): T[] {
+  return [...items.slice(offset), ...items.slice(0, offset)]
+}
+
+/** Grammar choice drills made from every curated grammar sentence in Sentence Builder. */
+export const grammarPracticeExercises: GrammarPracticeExercise[] = sourceExercises.map(({ exercise, focus }, index) => {
+  const segments = exercise.segments ?? []
+  const answer = focus.answer ?? segments[focus.segmentIndex]
+  const alternatives = rotate(sourceExercises, index + 3)
+    .map(({ exercise: candidate, focus: candidateFocus }) => candidate.segments?.[candidateFocus.segmentIndex] ?? '')
+    .filter((candidate, candidateIndex, candidates) => candidate && candidate !== answer && candidates.indexOf(candidate) === candidateIndex)
+    .slice(0, 3)
+
+  const options = focus.options
+    ? rotate(focus.options, index % focus.options.length)
+    : rotate([answer, ...alternatives], index % 4)
+  const prompt = segments
+    .map((segment, segmentIndex) => (segmentIndex === focus.segmentIndex ? focus.replacement ?? '___' : segment))
+    .join('')
+
+  return {
+    id: exercise.id,
+    jlpt: exercise.jlpt as 'N5' | 'N4',
+    prompt,
+    answer,
+    options,
+    english: exercise.english,
+    pattern: focus.pattern,
+    meaning: focus.meaning,
+  }
+})
