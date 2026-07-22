@@ -32,6 +32,8 @@ interface PreviewVocabItem {
 interface PreviewSlotSpec {
   pos: Pos
   tags?: string[]
+  /** A second group the word must also match, narrowing an otherwise broad tag. */
+  alsoTags?: string[]
   transitivity?: 'transitive' | 'intransitive'
   conjugation?: 'dictionary' | 'masu' | 'te' | 'ta'
 }
@@ -170,7 +172,10 @@ const frames: PreviewFrame[] = [
   },
   {
     id: 'n5-08', jlpt: 'N5', label: '[subject] は [noun] です',
-    slots: { subject: { pos: 'pronoun', tags: ['person'] }, noun: { pos: 'noun', tags: ['identity'] } },
+    // 「私は〜です」 names what someone is, so the noun has to be a role a person
+    // can hold. `identity` alone also covers 名前 and 住所 — facts about a person
+    // rather than what they are — hence the second group.
+    slots: { subject: { pos: 'pronoun', tags: ['person'] }, noun: { pos: 'noun', tags: ['identity', 'occupation', 'profession', 'role'], alsoTags: ['person', 'human', 'occupation'] } },
     tokens: [{ type: 'slot', slot: 'subject' }, { type: 'literal', text: 'は' }, { type: 'slot', slot: 'noun' }, { type: 'literal', text: 'です' }],
     grammar: [{ pattern: 'です', meaning: 'polite copula', jlpt: 'N5' }],
   },
@@ -299,6 +304,7 @@ function candidates(spec: PreviewSlotSpec, target: PreviewLevel, previousId?: st
     .filter((item) => allowsLevel(item, target))
     .filter((item) => item.id !== previousId)
     .filter((item) => hasAny(item.tags, spec.tags))
+    .filter((item) => !spec.alsoTags || hasAny(item.tags, spec.alsoTags))
     .filter((item) => !spec.transitivity || item.transitivity === spec.transitivity)
     .sort((a, b) => Number(Boolean(b.userVocab)) - Number(Boolean(a.userVocab)))
 }
@@ -386,6 +392,20 @@ const participle: Record<string, string> = {
   make: 'made',
 }
 
+function capitalizeSentence(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+/**
+ * “I am a teacher.” An English role after the copula needs an article, and the
+ * vocabulary carries the bare noun so it can also be used as a plain gloss.
+ */
+function roleWithArticle(value: string) {
+  if (!value || /^(?:a|an|the|my|your|his|her|our|their)\b/i.test(value)) return value
+  if (/s$/i.test(value) && !/(?:ss|us|is)$/i.test(value)) return value
+  return `${/^[aeiou]/i.test(value) ? 'an' : 'a'} ${value}`
+}
+
 function english(frame: PreviewFrame, slots: Record<string, FilledSlot>) {
   const subject = slots.subject?.item.english ?? ''
   if (frame.id === 'n5-01') {
@@ -402,7 +422,7 @@ function english(frame: PreviewFrame, slots: Record<string, FilledSlot>) {
   if (frame.id === 'n5-05') return `${subject} ${verb3(slots.verb!.item.english, subject)} ${slots.time!.item.english}.`
   if (frame.id === 'n5-06') return `${subject} ${subject === 'I' ? 'like' : 'likes'} ${slots.object!.item.english}.`
   if (frame.id === 'n5-07') return `${slots.subject!.item.english} is ${slots.adjective!.item.english}.`
-  if (frame.id === 'n5-08') return `${subject} ${subject === 'I' ? 'am' : 'is'} ${slots.noun!.item.english}.`
+  if (frame.id === 'n5-08') return `${subject} ${subject === 'I' ? 'am' : 'is'} ${roleWithArticle(slots.noun!.item.english)}.`
   if (frame.id === 'n5-09') return `${subject} ${slots.adverb!.item.english} ${verb3(slots.verb!.item.english, subject)} ${slots.object!.item.english}.`
   if (frame.id === 'n4-te-kudasai') {
     return `Please ${slots.verb!.item.english} ${slots.object!.item.english}.`
@@ -475,6 +495,8 @@ export function generatePreviewSentence(
     let pool = candidates(spec, level, previousId)
     if (slotName === 'subject' || slotName === 'companion') pool = pool.filter(isHumanSlotItem)
     if (slotName === 'companion' && slots.subject) pool = pool.filter(item => item.id !== slots.subject.item.id)
+    // 先生は先生です states nothing. The copula needs two different words.
+    if (slotName === 'noun' && slots.subject) pool = pool.filter(item => item.surface !== slots.subject.item.surface)
     const item = pick(pool, rand)
     const form = conjugate(item, spec.conjugation)
     slots[slotName] = { item, ...form, conjugation: spec.conjugation }
@@ -506,7 +528,7 @@ export function generatePreviewSentence(
     level,
     japanese: furigana.map((part) => part.text).join(''),
     reading: furigana.map((part) => part.reading).join(''),
-    english: english(frame, slots),
+    english: capitalizeSentence(english(frame, slots)),
     slots: Object.fromEntries(Object.entries(slots).map(([name, slot]) => [
       name,
       {

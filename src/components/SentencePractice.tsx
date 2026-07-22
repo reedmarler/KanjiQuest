@@ -3,6 +3,7 @@ import { getExercisesByType } from '../data/sentenceExercises'
 import type { FillGapLevelFilter } from '../lib/fillGapLevels'
 import { GENERATED_BUILDER_SESSION_SIZE } from '../lib/generatedSentenceExercises'
 import { FillGapLevelPicker } from './FillGapLevelPicker'
+import { BATCH_CHECK_SIZE, SentenceBatchCheck } from './SentenceBatchCheck'
 
 interface SentencePracticeProps {
   onStartFillGap: (filter: FillGapLevelFilter) => void
@@ -11,7 +12,7 @@ interface SentencePracticeProps {
 }
 
 export function SentencePractice({ onStartFillGap, onStartBuilder, onBack }: SentencePracticeProps) {
-  const [step, setStep] = useState<'menu' | 'fill-gap-levels'>('menu')
+  const [step, setStep] = useState<'menu' | 'fill-gap-levels' | 'batch-check'>('menu')
   const fillCount = getExercisesByType('fill-gap').length
 
   if (step === 'fill-gap-levels') {
@@ -21,6 +22,10 @@ export function SentencePractice({ onStartFillGap, onStartBuilder, onBack }: Sen
         onBack={() => setStep('menu')}
       />
     )
+  }
+
+  if (step === 'batch-check') {
+    return <SentenceBatchCheck onBack={() => setStep('menu')} />
   }
 
   return (
@@ -47,6 +52,15 @@ export function SentencePractice({ onStartFillGap, onStartBuilder, onBack }: Sen
           <span className="kanji-mode-label">Sentence Builder</span>
           <span className="kanji-mode-desc">
             Generate and translate {GENERATED_BUILDER_SESSION_SIZE} N5 sentences from the sentence database
+          </span>
+        </button>
+
+        <button className="kanji-mode-card kanji-mode-mixed" onClick={() => setStep('batch-check')}>
+          <span className="kanji-mode-emoji">🔍</span>
+          <span className="kanji-mode-label">Translation Check</span>
+          <span className="kanji-mode-desc">
+            Generate {BATCH_CHECK_SIZE} builder sentences at once and review every English
+            translation in one pass
           </span>
         </button>
       </div>

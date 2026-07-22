@@ -15,6 +15,8 @@ const CURATED_PREFERRED_TRANSLATIONS: Record<string,string> = {
   '文字': 'characters',
   'ご飯': 'meal',
   'マンション': 'apartment building',
+  '医者': 'doctor',
+  '近所': 'neighborhood',
 }
 
 const CURATED_SENSE_TRANSLATIONS: Record<string,string> = {

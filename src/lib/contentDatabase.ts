@@ -1,5 +1,6 @@
 import type { JlptLevel } from './types'
 import { inferPreferredTranslation } from '../data/preferredVocabularyTranslations'
+import seedContentDatabase from '../data/seedContentDatabase.json'
 
 export type ContentStatus = 'draft' | 'approved' | 'disabled'
 export type ContentKind = 'verb' | 'vocabulary' | 'pattern'
@@ -62,11 +63,28 @@ function repairKnownCategoryErrors(record: ContentRecord): ContentRecord {
   return { ...record, category:'Objects', categories:['Objects'], allowedRoles:['Objects'] }
 }
 
+/**
+ * Records shipped with the build. The reviewed database otherwise lives only in
+ * the browser that created it, so a fresh install — a different machine, a
+ * cleared cache — would generate sentences from the built-in catalog alone.
+ * Seeding runs once; after that the stored copy is the source of truth and is
+ * free to diverge.
+ */
+function seedRecords(): ContentRecord[] {
+  const records = seedContentDatabase.records as unknown as ContentRecord[]
+  return Array.isArray(records) ? records : []
+}
+
 export function loadContentDatabase(): ContentRecord[] {
   if (!storageAvailable()) return []
   try {
     const stored = window.localStorage.getItem(DATABASE_KEY)
-    if (!stored) return []
+    if (!stored) {
+      const seed = seedRecords()
+      if (!seed.length) return []
+      window.localStorage.setItem(DATABASE_KEY, JSON.stringify(seed))
+      return seed
+    }
     const parsed = JSON.parse(stored) as ContentRecord[]
     const migrated = parsed.map(record => {
       const repaired = repairKnownCategoryErrors(record)

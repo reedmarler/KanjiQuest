@@ -26,7 +26,7 @@ const tests: Array<{ category: SentenceCategory; pattern: RegExp; tags?: string[
   { category:'Animal', pattern:/\b(animal|dog|cat|bird|fish|horse|cow|pig|rabbit|mouse|monkey|insect|bug|butterfly|bee|snake|frog|chicken|duck|pet)\b/, tags:['animal'] },
   { category:'Plant', pattern:/\b(plant|tree|flower|grass|leaf|leaves|forest|wood|bamboo|seed)\b/, tags:['plant'] },
   { category:'Drink', pattern:/\b(drink|beverage|water|tea|coffee|juice|milk|beer|wine|alcohol|sake)\b/, tags:['drink'] },
-  { category:'Food', pattern:/\b(food|meal|breakfast|lunch|dinner|rice|bread|noodle|ramen|soba|udon|meat|beef|pork|chicken|fish|seafood|sushi|egg|fruit|apple|orange|banana|vegetable|potato|tomato|cake|candy|sweet|dessert|snack|ingredient|salt|sugar|spice|soup)\b/, tags:[] },
+  { category:'Food', pattern:/\b(food|meal|breakfast|lunch|dinner|rice|bread|noodle|ramen|soba|udon|meat|beef|pork|chicken|fish|seafood|sushi|egg|fruit|apple|orange|banana|vegetable|potato|tomato|cake|candy|sweet|dessert|snack|ingredient|salt|sugar|spice|soup|ice cream|icecream|yogurt|yoghurt|chocolate|pudding)\b/, tags:[] },
   { category:'Medicine', pattern:/\b(medicine|medication|drug|pill|tablet|prescription|treatment|remedy)\b/, tags:['health'] },
   { category:'Vehicle', pattern:/\b(vehicle|car|automobile|bus|train|subway|bicycle|bike|motorcycle|taxi|truck|airplane|plane|ship|boat)\b/, tags:['vehicle'] },
   { category:'Building', pattern:/\b(building|house|home|school|university|office|store|shop|restaurant|hospital|station|airport|hotel|library|bank|factory|temple|shrine|church|museum|theater|theatre)\b/, tags:['building'] },
@@ -48,6 +48,11 @@ const tests: Array<{ category: SentenceCategory; pattern: RegExp; tags?: string[
   { category:'Number', pattern:/\b(number|amount|quantity|count|counter|first|second|third|half|double|hundred|thousand|million|length|weight|volume|meter|kilogram|degree|percent)\b/, tags:['number'] },
   { category:'Language', pattern:/\b(language|japanese|english|word|vocabulary|grammar|sentence|meaning|name|kanji|hiragana|katakana|character|pronunciation|translation)\b/, tags:[] },
 ]
+
+// Liquids are drunk; the solid tags win when a word carries both, so ice cream
+// and yogurt stay eatable.
+const drinkTags = ['drink','drinkable','beverage','water','tea','coffee','juice','soda','alcohol','milk','dairy']
+const solidFoodTags = ['dessert','snack','candy','ice-cream','yogurt','cheese','butter','fruit','vegetable','meat','seafood','fish','rice','bread','noodles','egg','protein','staple-food','meal','grain']
 
 const grammarPattern = /(^|\b)(particle|conjunction|copula|auxiliary|suffix|prefix|interjection|pronoun|expression|counter|case|polite after verb|assertion|conj\.|disc\.)($|\b)/
 const adverbPattern = /\b(adverb|quickly|slowly|already|always|often|sometimes|usually|really|very|together|again|still|soon|perhaps|probably|almost|especially|suddenly|finally|immediately)\b/
@@ -151,7 +156,12 @@ export function classifyVocabularyCard(card: StudyCard): VocabularyClassificatio
   const imported = getVocabularyMetadata(card.front,card.reading)
   if (imported) {
     const tags=normalizeTags([...imported.tags,...universal])
-    const category=tags.some(tag=>['body-part','blood','anatomy'].includes(tag)) ? 'Object' : importedCategoryMap[imported.category]
+    const bodyPart=tags.some(tag=>['body-part','blood','anatomy'].includes(tag))
+    // The imported taxonomy has one bucket for food and drink, but 食べる and
+    // 飲む do not share objects. Tags decide which half of the bucket a word is
+    // in, so that milk is never eaten.
+    const drink=tags.some(tag=>drinkTags.includes(tag)) && !tags.some(tag=>solidFoodTags.includes(tag))
+    const category=bodyPart ? 'Object' : drink && importedCategoryMap[imported.category] === 'Food' ? 'Drink' : importedCategoryMap[imported.category]
     return { category, tags, confidence:'high' }
   }
   const finish = (category: SentenceCategory, tags: string[], confidence: VocabularyClassification['confidence']): VocabularyClassification => {
@@ -170,5 +180,8 @@ export function classifyVocabularyCard(card: StudyCard): VocabularyClassificatio
   }
   const adjectiveLike = card.front.endsWith('い') || /\b(new|old|big|small|large|long|short|high|low|fast|slow|heavy|light|good|bad|beautiful|difficult|easy|strong|weak|bright|dark|expensive|cheap|delicious)\b/.test(meaning)
   if (adjectiveLike) return finish('Object',[card.front.endsWith('い')?'i-adjective':'na-adjective'],'medium')
-  return finish('Object',['noun'],'fallback')
+  // Nothing matched, so the word may well be a grammar fragment rather than a
+  // noun — 例えば and など land here. `unclassified` keeps these out of the slots
+  // that expect a real object until a reviewer gives them proper tags.
+  return finish('Object',['noun','unclassified'],'fallback')
 }

@@ -3010,6 +3010,115 @@ body:has(.sentence-view) .app {
   line-height: 1.35;
 }
 
+/* Sentence Practice — bulk translation check */
+.batch-check-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.batch-check-tally {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.batch-check-tally b.is-good { color: var(--success); }
+.batch-check-tally b.is-bad { color: var(--danger); }
+
+.batch-check-list {
+  display: grid;
+  gap: 0.6rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: batch-check;
+}
+
+.batch-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  counter-increment: batch-check;
+}
+
+.batch-check-row.is-good { border-left-color: var(--success); }
+.batch-check-row.is-bad { border-left-color: var(--danger); }
+
+.batch-check-sentence {
+  flex: 1;
+  min-width: 0;
+}
+
+.batch-check-sentence::before {
+  content: counter(batch-check);
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.batch-check-japanese {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 1.35rem;
+  line-height: 2;
+}
+
+.batch-check-english {
+  font-size: 0.95rem;
+  margin: 0.35rem 0 0;
+}
+
+.batch-check-verdict {
+  display: flex;
+  gap: 0.4rem;
+  flex: none;
+}
+
+.batch-check-mark {
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.batch-check-mark.is-good:hover,
+.batch-check-mark.is-good.is-active {
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(44, 182, 125, 0.15);
+}
+
+.batch-check-mark.is-bad:hover,
+.batch-check-mark.is-bad.is-active {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(229, 49, 112, 0.15);
+}
+
+.batch-check-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .batch-check-row { flex-direction: column; }
+  .batch-check-verdict { align-self: flex-end; }
+}
+
 /* Kanji Learn */
 .kanji-learn-card {
   background: var(--surface);
@@ -3718,6 +3827,9 @@ body:has(.sentence-view) .app {
   height: 4.5rem;
   min-height: 4.5rem;
   max-height: 4.5rem;
+  /* Headroom for the 1px lift a tile takes on hover — without it the raised
+     top edge, outline included, is clipped by the overflow rule below. */
+  padding-top: 2px;
   display: flex;
   flex-wrap: nowrap;
   gap: 0.5rem;
@@ -3750,9 +3862,9 @@ body:has(.sentence-view) .app {
   border-radius: 9px;
   padding: 0.52rem 0.72rem 0.86rem;
   font-size: clamp(1rem, 3.2vw, 1.25rem);
-  height: 4.5rem;
-  min-height: 4.5rem;
-  max-height: 4.5rem;
+  height: calc(4.5rem - 2px);
+  min-height: calc(4.5rem - 2px);
+  max-height: calc(4.5rem - 2px);
   color: var(--text);
   cursor: pointer;
   transition: border-color 0.15s, transform 0.1s, filter 0.15s, opacity 0.15s;

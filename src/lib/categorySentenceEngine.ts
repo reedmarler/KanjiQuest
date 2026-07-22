@@ -107,7 +107,7 @@ export interface CategorySentenceOptions {
 }
 
 const words: WordRecord[] = [
-  ['watashi','私','わたし','I',['Person'],['speaker']], ['gakusei','学生','がくせい','the student',['Person'],['student']], ['sensei','先生','せんせい','the teacher',['Person'],['teacher']], ['tomodachi','友達','ともだち','a friend',['Person'],['friend']],
+  ['watashi','私','わたし','I',['Person'],['speaker']], ['watashitachi','私たち','わたしたち','we',['Person'],['speaker','group','pronoun']], ['gakusei','学生','がくせい','the student',['Person'],['student']], ['sensei','先生','せんせい','the teacher',['Person'],['teacher']], ['tomodachi','友達','ともだち','a friend',['Person'],['friend']],
   ['inu','犬','いぬ','the dog',['Animal'],['pet']], ['neko','猫','ねこ','the cat',['Animal'],['pet']],
   ['ringo','りんご','りんご','an apple',['Food'],['fruit','healthy']], ['pan','パン','パン','bread',['Food'],['baked']], ['sushi','寿司','すし','sushi',['Food'],['japanese']], ['ramen','ラーメン','ラーメン','ramen',['Food'],['noodles']], ['cake','ケーキ','ケーキ','cake',['Food'],['dessert','sweet']], ['hamburger','ハンバーガー','ハンバーガー','a hamburger',['Food'],['fast-food']],
   ['ocha','お茶','おちゃ','tea',['Drink'],['tea','hot']], ['mizu','水','みず','water',['Drink'],['cold','healthy']], ['coffee','コーヒー','コーヒー','coffee',['Drink'],['coffee','hot']], ['milk','牛乳','ぎゅうにゅう','milk',['Drink'],['dairy','cold']],
@@ -130,9 +130,25 @@ function catalogWords(): WordRecord[] {
   return catalogWordCache
 }
 
-const edibleTags = ['food','fruit','vegetable','meat','seafood','fish','rice','bread','noodles','soup','dessert','snack','candy','ice-cream','ingredient','edible']
+// `ingredient` is deliberately absent: sugar, flour, and oil are what a dish is
+// made of, not what someone sits down and eats.
+const edibleTags = ['food','fruit','vegetable','meat','seafood','fish','rice','bread','noodles','soup','dessert','snack','candy','ice-cream','edible']
 const drinkableTags = ['drink','drinkable','beverage','water','tea','coffee','juice','soda','alcohol','milk','dairy']
-const readableTags = ['book','document','paper','notebook','magazine','newspaper','reading','fiction','news','letter','text','textbook','comic']
+// Solid foods that also carry a drink tag — ice cream and yogurt are dairy but
+// are eaten, so these tags override drinkability.
+const solidFoodTags = ['dessert','snack','candy','ice-cream','yogurt','cheese','butter','fruit','vegetable','meat','seafood','fish','rice','bread','noodles','egg','protein','staple-food','meal','grain']
+// Cooking inputs, whatever else they are tagged. 砂糖 is food, but 砂糖を食べます
+// describes an odd habit rather than a meal.
+const cookingInputTags = ['ingredient','seasoning','condiment','spice','flavoring','sauce','oil','flour','sugar','salt']
+// `paper` and `text` are deliberately absent: they describe the material or the
+// writing on an item rather than something a person reads end to end, and they
+// let stamps, tickets, and name cards become objects of 読む. `letter` is absent
+// for a different reason — it covers both mail and letters of the alphabet, so
+// it made 文字 readable. 手紙 qualifies through `document`.
+const readableTags = ['book','document','notebook','magazine','newspaper','reading','fiction','news','textbook','comic']
+// Paper goods that carry writing but are not read. Tagging alone cannot separate
+// these from letters and documents, so they are named directly.
+const unreadableObjectWords = new Set(['切手','切符','名刺','カード','札','紙','封筒','領収書','値札'])
 // A broad `media` tag is descriptive but not enough to make an item a natural
 // object of 見る. For example, books are media but default to 読む.
 const watchableTags = ['movie','film','television','tv','video','anime','animation','picture','photo','game']
@@ -141,18 +157,39 @@ const watchableTags = ['movie','film','television','tv','video','anime','animati
 // sentence such as “a horse goes to university” or “a tree talks.”
 const humanSubjectTags = ['person','pronoun','speaker','man','woman','boy','girl','baby','child','teenager','adult','elderly','human','family','mother','father','wife','husband','brother','sister','grandparent','grandchild','relative','friend','partner','classmate','coworker','neighbor','customer','boss','employee','occupation','teacher','student','doctor','nurse']
 const standaloneDestinationTags = ['country','city','town','village','neighborhood','building','house','home','apartment','school','education','university','office','store','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','river','lake','beach','ocean','island','platform','parking-lot','room','kitchen','bathroom','bedroom','classroom','public','transport','destination']
-const eatingLocationTags = ['restaurant','cafe','house','home','kitchen','dining-room','room','school','education','classroom','office','workplace','park','hotel','eating-location']
+// `education` is deliberately absent: it also covers libraries and study rooms,
+// where eating is exactly what you do not do. Schools stay through `school`.
+const eatingLocationTags = ['restaurant','cafe','cafeteria','house','home','kitchen','dining-room','room','school','classroom','office','workplace','park','hotel','eating-location']
 // These tags describe words that can stand directly before a verb. Broad tags
 // such as Speed, Manner, or naAdjective are not sufficient: 急速, for example,
 // needs に and cannot be inserted as 急速読みます.
-const readingMannerTags = ['slowly','leisurely','quickly','carefully','quietly','silently','aloud','clearly','fluently','adverbial-manner']
+// `clearly` is excluded: はっきり describes speech and perception, and はっきり読む
+// reads as “read out distinctly” rather than the plain manner of reading this
+// pattern teaches.
+const readingMannerTags = ['slowly','leisurely','quickly','carefully','quietly','silently','aloud','fluently','adverbial-manner']
 const wakeTimeTags = ['clock-time','hour','morning','dawn','sunrise','wake-time']
 const niIncompatibleTimeTags = new Set(normalizeTags(['today','tonight','tomorrow','yesterday','morning','this-morning','this-evening','this-time','frequency','daily','weekly','monthly','yearly','every-morning','every-evening','every-night','every-day']))
 const niIncompatibleTimeWords = new Set(['今朝','今晩','今日','明日','昨日','毎朝','毎晩','毎日'])
-const destinationIncompatibleWords = new Set(['家庭','通り'])
-const destinationIncompatibleTags = new Set(normalizeTags(['household','family','street','road','route','front','surface','exterior','relative-location']))
+// 床, 壁, and 天井 are parts of a place rather than places you travel between:
+// walking from the floor to the library names no starting point.
+// 国 names no particular place — “goes to a country” says nothing a learner can
+// picture. 外国 and the named countries in the catalog carry the same grammar
+// with a meaning attached.
+const destinationIncompatibleWords = new Set(['家庭','通り','床','壁','天井','屋根','階','段','角','国'])
+const destinationIncompatibleTags = new Set(normalizeTags(['household','family','street','road','route','front','surface','exterior','relative-location','floor','wall','ceiling','roof','building-part','stairs','pillar']))
 const nonHumanSubjectTags = new Set(normalizeTags(['animal','pet','dog','cat','bird','fish','insect','plant','tree','flower','grass','bush','crop','body','body-part','anatomy']))
 const politeSubjectIncompatibleWords = new Set(['お前','あんた','貴様','てめえ','奴','人間','人類','誰','だれ','どなた','何方'])
+// Written and formal-speech pronouns. They are not wrong with ます, but these
+// sentences model everyday speech, where 私たち carries the same meaning.
+const formalRegisterSubjectWords = new Set(['我々','我','私共','小生','当方','貴殿','拙者'])
+// Person words that need an antecedent (本人 = the person just mentioned) or that
+// belong to legal and business register (個人 = an individual). A generated
+// sentence supplies no such context, so 人 or a named person reads naturally
+// where these do not.
+const contextDependentSubjectWords = new Set(['個人','本人','他人','当人','各自','人物','相手','私自身'])
+// Bare 子 is clipped or literary — everyday Japanese says 子ども, or attaches a
+// modifier as in あの子. The catalog already carries 子供 and 女の子.
+const preferLongerFormWords = new Set(['子'])
 
 const verbs: VerbUsageRecord[] = [
   { id:'taberu-basic', japanese:'食べる', reading:'たべる', english:'eat', englishThird:'eats', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','eating','ichidan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
@@ -276,6 +313,33 @@ function definite(value: string) {
   return `the ${value}`
 }
 
+// English nouns that take no article and no plural — “eats rice”, “wants money”.
+// Everything else in an object slot gets “a”, which is the safer default: a
+// missing article reads as broken English, while these read as broken only if
+// one is added.
+const uncountableGlosses = new Set([
+  'water','rice','bread','milk','tea','coffee','juice','alcohol','sake','beer','wine','soup','ramen','sushi','udon','soba','pasta',
+  'meat','beef','pork','chicken','fish','seafood','fruit','food','sugar','salt','oil','butter','cheese','ice cream',
+  'money','music','information','news','homework','work','weather','clothing','furniture','luggage','advice','anime','paper','mail',
+  // Foods English treats as a substance when eaten: “eats cake”, not “eats a cake”.
+  'cake','pizza','curry','salad','chocolate','candy','cereal','yogurt','pie',
+])
+// テレビ is the set when you want one and the medium when you watch it, so the
+// article depends on the verb rather than on the noun.
+const mediumNotDeviceVerbs = new Set(['見る'])
+
+/** Plural-only nouns and regular plurals, for is/are agreement. */
+function isPluralPhrase(value: string) {
+  const head = value.replace(/^(?:a|an|the|my|your|his|her|our|their)\s+/i, '')
+  if (/^(?:people|men|women|children|data|clothes|shoes|glasses|pants|scissors|documents|parents)$/i.test(head)) return true
+  return /s$/i.test(head) && !/(?:ss|us|is)$/i.test(head)
+}
+
+/** An object phrase with the article English expects, mass nouns excepted. */
+function objectEnglish(gloss: string) {
+  return uncountableGlosses.has(gloss.toLowerCase()) ? gloss : indefinite(gloss)
+}
+
 function tagSet(word: WordRecord) {
   return new Set(normalizeTags(word.tags))
 }
@@ -297,16 +361,9 @@ const animateEnglishByTag: Array<[string,string]> = [
   ['tiger','tiger'],['elephant','elephant'],['monkey','monkey'],['snake','snake'],['insect','insect'],
 ]
 
-const countableObjectTags = new Set(normalizeTags([
-  'book','document','paper','notebook','magazine','newspaper','letter','textbook','comic','dictionary',
-  'movie','film','picture','photo','game','computer','laptop','phone','tablet','camera','television',
-  'bottle','cup','glass','box','bag','wallet','pen','pencil','knife','tool','fruit','vegetable','dessert','snack','candy','egg','meal','article','chart','table','spreadsheet',
-]))
-const countableObjectCategories = new Set<SentenceCategory>(['Tool','Technology','Vehicle','Clothing','Furniture','Book','Document'])
-
 const definitePlaceTags = new Set(normalizeTags([
   'building','house','home','school','university','office','store','restaurant','cafe','hospital','hotel',
-  'library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','apartment',
+  'library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','apartment','neighborhood','local-area','post-office','movie-theater','shop',
   'river','lake','beach','ocean','platform','parking-lot','road','bridge','intersection','room','kitchen',
   'bathroom','bedroom','living-room','classroom',
 ]))
@@ -314,7 +371,7 @@ const definitePlaceTags = new Set(normalizeTags([
 function animateEnglish(word: WordRecord, gloss: string) {
   const tags = tagSet(word)
   const familyReference: Record<string,string> = {
-    '母':'my mother','父':'my father','娘':'my daughter','息子':'my son','妻':'my wife','夫':'my husband','主人':'my husband',
+    '母':'my mother','父':'my father','娘':'my daughter','息子':'my son','妻':'my wife','夫':'my husband','主人':'my husband','両親':'my parents',
   }
   if (familyReference[word.japanese]) return familyReference[word.japanese]!
   if (/^(?:I|you|he|she|we|they|it)$/i.test(gloss)) return /^i$/i.test(gloss) ? 'I' : gloss.toLowerCase()
@@ -342,9 +399,8 @@ function englishPhrase(word: WordRecord, slot: string) {
     const objectPronouns: Record<string,string> = { I:'me',we:'us',he:'him',she:'her',they:'them' }
     return objectPronouns[phrase] ?? phrase
   }
-  if (slot === 'object' && word.japanese === 'テレビ') return 'television'
   if (slot === 'object' && word.japanese === '果物') return 'fruit'
-  if (slot === 'object' && ([...tags].some(tag => countableObjectTags.has(tag)) || word.categories.some(category=>countableObjectCategories.has(category)))) return indefinite(gloss)
+  if (slot === 'object') return objectEnglish(gloss)
   if (slot === 'location') {
     if (tags.has('home') && ['家','うち','自宅'].includes(word.japanese)) return 'at home'
     if ([...tags].some(tag=>['country','city','town','village','neighborhood','island'].includes(tag))) return `in ${/^[A-Z]/.test(gloss) ? gloss : definite(gloss)}`
@@ -355,7 +411,7 @@ function englishPhrase(word: WordRecord, slot: string) {
   if (slot === 'destination') {
     if (tags.has('home') && ['家','うち','自宅'].includes(word.japanese)) return 'the house'
     if ([...tags].some(tag => definitePlaceTags.has(tag))) return definite(gloss)
-    if ([...tags].some(tag => ['country','city','town','village','neighborhood','island'].includes(tag))) return /^[A-Z]/.test(gloss) ? gloss : indefinite(gloss)
+    if ([...tags].some(tag => ['country','city','town','village','island'].includes(tag))) return /^[A-Z]/.test(gloss) ? gloss : indefinite(gloss)
   }
   if (slot === 'time') {
     if (tags.has('morning')) return `in ${definite(gloss)}`
@@ -380,17 +436,27 @@ function subjectPossessive(subject: WordRecord) {
   return 'their'
 }
 
-function contextualSlotEnglish(slot: string,word: WordRecord,filled: Record<string,WordRecord>) {
+function contextualSlotEnglish(slot: string,word: WordRecord,filled: Record<string,WordRecord>,verb?: VerbUsageRecord) {
+  if (slot === 'object' && word.japanese === 'テレビ' && verb && mediumNotDeviceVerbs.has(verb.japanese)) return 'television'
   if (slot === 'companion' && filled.subject) {
     const manWords=new Set(['男','男性'])
     const womanWords=new Set(['女','女性'])
     if (manWords.has(filled.subject.japanese) && manWords.has(word.japanese)) return 'another man'
     if (womanWords.has(filled.subject.japanese) && womanWords.has(word.japanese)) return 'another woman'
   }
-  if (slot === 'companion' && filled.subject && companionKinshipTerms[word.japanese]) {
+  if ((slot === 'companion' || slot === 'recipient') && filled.subject && companionKinshipTerms[word.japanese]) {
     return `${subjectPossessive(filled.subject)} ${companionKinshipTerms[word.japanese]}`
   }
   return englishPhrase(word,slot)
+}
+
+/**
+ * A kinship term belongs to whoever the sentence is about: 彼は娘に…… is his
+ * daughter, not mine. Patterns that build their English by hand call this so
+ * they agree with the subject the same way template patterns do.
+ */
+function relatedPersonEnglish(slot: string, word: WordRecord, subject: WordRecord) {
+  return contextualSlotEnglish(slot,word,{ subject })
 }
 
 function contextualSubjectEnglish(word: WordRecord,verb: VerbUsageRecord,filled: Record<string,WordRecord>) {
@@ -405,7 +471,10 @@ function contextualSubjectEnglish(word: WordRecord,verb: VerbUsageRecord,filled:
 }
 
 function subjectUsesBaseVerb(subject: string) {
-  return /^(?:I|you|we|they|people|men|women|children|parents|siblings|grandparents|relatives|friends|classmates|coworkers)\b/i.test(subject)
+  // A possessive can sit in front of the noun — “my parents” is still plural —
+  // so plurality is decided by the head noun, not by the first word.
+  if (/^(?:I|you|we|they)\b/i.test(subject)) return true
+  return isPluralPhrase(subject)
 }
 
 function translatedVerb(verb: VerbUsageRecord, filled: Record<string,WordRecord>, useBase: boolean) {
@@ -421,7 +490,7 @@ function renderTranslation(template: string, verb: VerbUsageRecord, filled: Reco
   const englishVerb = verbOverride ?? translatedVerb(verb, filled, subjectUsesBaseVerb(subject))
   const values: Record<string,string> = { Verb:englishVerb }
   for (const [slot,word] of Object.entries(filled)) {
-    values[slot.charAt(0).toUpperCase()+slot.slice(1)] = slot==='subject' ? subject : contextualSlotEnglish(slot,word,filled)
+    values[slot.charAt(0).toUpperCase()+slot.slice(1)] = slot==='subject' ? subject : contextualSlotEnglish(slot,word,filled,verb)
   }
   const rendered = template.replace(/\{([A-Za-z]+)\}/g, (_,name: string) => values[name] ?? `{${name}}`)
   return rendered.charAt(0).toUpperCase() + rendered.slice(1)
@@ -502,8 +571,13 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
   for (const [slot,rule] of Object.entries(verb.slots)) {
     let pool=vocabulary.filter(word=>categoryMatch(word,rule.categories))
     if (rule.tags?.length) pool=pool.filter(word=>matchingTags(word,rule.tags).length>0)
-    if (verb.japanese === '食べる' && slot === 'object') pool=pool.filter(word=>!['米','食べ物'].includes(word.japanese))
+    // A word only reaches 食べる through a Food category, but an import can file a
+    // drink there. Anything drinkable that is not also solid food is not eaten.
+    if (verb.japanese === '食べる' && slot === 'object') pool=pool.filter(word=>!['米','食べ物'].includes(word.japanese)
+      && !(matchingTags(word,drinkableTags).length>0 && matchingTags(word,solidFoodTags).length===0)
+      && !(matchingTags(word,cookingInputTags).length>0 && matchingTags(word,solidFoodTags).length===0))
     if (verb.id === 'yomu-adverb' && slot === 'object') pool=pool.filter(word=>!tagSet(word).has('news')&&word.japanese!=='ニュース')
+    if (verb.japanese === '読む' && slot === 'object') pool=pool.filter(word=>!unreadableObjectWords.has(word.japanese))
     if (slot === 'destination') pool=pool.filter(word=>{
       const tags=tagSet(word)
       return word.japanese!=='庭'&&!destinationIncompatibleWords.has(word.japanese) && ![...tags].some(tag=>destinationIncompatibleTags.has(tag))
@@ -515,6 +589,9 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
     if (slot === 'subject' || slot === 'companion') pool=pool.filter(word=>{
       const tags=tagSet(word)
       return !politeSubjectIncompatibleWords.has(word.japanese)
+        && !contextDependentSubjectWords.has(word.japanese)
+        && !preferLongerFormWords.has(word.japanese)
+        && !formalRegisterSubjectWords.has(word.japanese)
         && !tags.has('question')
         && !tags.has('question-word')
         && !tags.has('interrogative')
@@ -600,21 +677,55 @@ const portableObjectTags = new Set(normalizeTags([
   'phone','camera','bottle','cup','box','bag','wallet','clothing','shirt','coat','hat','shoes','tool','pen','pencil','lunch','food',
 ]))
 const showableObjectTags = new Set(normalizeTags([...readableTags,...watchableTags,'picture','photo','phone','camera','book','document','newspaper','letter','magazine']))
-const disallowedPhysicalObjectTags = new Set(normalizeTags(['abstract','body','body-part','blood','anatomy','building','room','character','text','language','word','grammar']))
-const invalidObjectLexicalTags = new Set(normalizeTags(['verb','auxiliary-verb','particle','expression','adverb','i-adjective','na-adjective','requires-modifier']))
+// Phenomena, substances, and qualities read as concrete because every Object is
+// tagged `concrete`, but none of them is a thing that sits somewhere or gets
+// carried, wanted, or shown: 電気 is electric power, not a lamp; 光 and 音 are
+// what a lamp or a speaker produces. Devices keep their own `electronic`,
+// `phone`, and `camera` tags, so they are unaffected.
+const disallowedPhysicalObjectTags = new Set(normalizeTags([
+  'abstract','body','body-part','blood','anatomy','building','room','character','text','language','word','grammar',
+  'nature','element','energy','weather','atmosphere','phenomenon','utility','electricity','perception','sound','emotion','philosophy','appearance','motion','activity','data','information','taste','flavor','flavour','smell','scent',
+]))
+// Utilities are supplied rather than located, and an import may tag them as
+// household objects, so they are also named directly.
+const utilitySupplyWords = new Set(['電気','電力','水道','ガス','熱','蒸気','煙','電波'])
+// Vehicles that cannot be inside the buildings the existence patterns use. Cars
+// and bicycles stay: they park at a company or a library.
+const indoorIncompatibleWords = new Set(['電車','船','飛行機','バス','トラック','地下鉄','ヘリコプター'])
+const invalidObjectLexicalTags = new Set(normalizeTags(['verb','auxiliary-verb','particle','expression','adverb','i-adjective','na-adjective','requires-modifier','unclassified']))
 const invalidStandaloneObjectWords = new Set(['事','こと','もの','物','てしまう','てくださる','てくれる','ほど','など','等','くらい','ぐらい','しか','だけ','だから','ので','のに','けれど','しかし','そして','それで'])
 const physicalObjectTags = new Set(normalizeTags([
   'concrete','furniture','chair','table','desk','bed','sofa','shelf','cabinet','tool','knife','pen','pencil','scissors','electronics','computer','laptop','phone','tablet','camera','television','tv',
   'vehicle','car','bus','train','bicycle','container','bottle','cup','glass','box','bag','wallet','clothing','shirt','pants','shoes','hat','coat','dress','book','document','paper','notebook','magazine','newspaper','letter','picture','photo','toy','instrument',
 ]))
+// An everyday object resting at a pond, a mountain, or the sky reports a mishap
+// rather than where the thing is kept. Existence sentences stay indoors.
+const openAirLocationTags = new Set(normalizeTags(['nature','outdoor','water','sky','geography','mountain','river','ocean','sea','beach','forest','field']))
+// Saying where a thing is implies somewhere it is kept or was left. Museums,
+// shrines, and galleries hold exhibits, so an everyday object being “at the art
+// museum” reads as a curiosity rather than a location.
+const exhibitionVenueTags = new Set(normalizeTags(['museum','gallery','exhibition','shrine','temple','church','tourism','religion','monument']))
+// Walking is a trip you make on foot in one go. Cities, countries, and open
+// water are the wrong scale for it — nobody walks from a classroom to Tokyo.
+const walkingIncompatibleTags = new Set(normalizeTags(['country','island','ocean','sea','city','prefecture','region','geography','municipality','capital']))
+// Calling or showing something to “a person” or “a man” leaves out the one thing
+// these sentences are about: which person. Relatives, friends, classmates, and
+// occupations all name someone; these words do not.
+const genericRecipientWords = new Set(['人','人々','男','女','男性','女性','大人','子','若者','人間'])
+// Work documents need an office context that a generated sentence cannot supply,
+// so 見せる keeps to things anyone carries and shows.
+const workplaceDocumentWords = new Set(['資料','書類','名刺','報告書','表','記録'])
 const inanimateCategories: SentenceCategory[] = ['Object','Tool','Technology','Vehicle','Clothing','Furniture','Book','Document','Media']
 const possessableCategories: SentenceCategory[] = ['Object','Tool','Technology','Vehicle','Clothing','Furniture','Book','Document','Media','Food','Drink']
 
+// Size and newness are properties of things you can point at. Without
+// `physicalOnly` the broad Object category lets 教育 and 習慣 through, and
+// “education is new” is not what this pattern teaches.
 const adjectiveRules = [
   { id:'omoshiroi',japanese:'面白い',reading:'おもしろい',english:'interesting',categories:['Book','Document','Media'] as SentenceCategory[] },
   { id:'oishii',japanese:'美味しい',reading:'おいしい',english:'delicious',categories:['Food','Drink'] as SentenceCategory[] },
-  { id:'ookii',japanese:'大きい',reading:'おおきい',english:'large',categories:['Object','Animal','Building','Room','Vehicle','Furniture','Technology'] as SentenceCategory[] },
-  { id:'atarashii',japanese:'新しい',reading:'あたらしい',english:'new',categories:['Object','Tool','Technology','Vehicle','Clothing','Furniture','Book'] as SentenceCategory[] },
+  { id:'ookii',japanese:'大きい',reading:'おおきい',english:'large',categories:['Object','Animal','Building','Room','Vehicle','Furniture','Technology'] as SentenceCategory[],physicalOnly:true },
+  { id:'atarashii',japanese:'新しい',reading:'あたらしい',english:'new',categories:['Object','Tool','Technology','Vehicle','Clothing','Furniture','Book'] as SentenceCategory[],physicalOnly:true },
 ]
 
 function hasCompositeSurface(word: WordRecord) {
@@ -634,9 +745,17 @@ function validHumanPool(vocabulary: WordRecord[]) {
       && word.categories.includes('Person')
       && matchingTags(word,humanSubjectTags).length>0
       && !politeSubjectIncompatibleWords.has(word.japanese)
+      && !contextDependentSubjectWords.has(word.japanese)
+      && !preferLongerFormWords.has(word.japanese)
+      && !formalRegisterSubjectWords.has(word.japanese)
       && !tags.has('question-word')
       && !tags.has('requires-modifier')
   })
+}
+
+/** Recipients of calling and showing must identify someone, not just a human. */
+function namedRecipients(humans: WordRecord[]) {
+  return humans.filter(word=>!genericRecipientWords.has(word.japanese))
 }
 
 function validPlacePool(vocabulary: WordRecord[]) {
@@ -669,6 +788,7 @@ function validInanimatePool(vocabulary: WordRecord[],categories=inanimateCategor
     const verbLike=/[うくぐすつぬぶむる]$/.test(word.japanese) && (/\bto\s+[a-z]/i.test(word.english) || /\bdo something\b/i.test(word.english) || /^て/.test(word.japanese))
     return !hasCompositeSurface(word)
       && !invalidStandaloneObjectWords.has(word.japanese)
+      && !utilitySupplyWords.has(word.japanese)
       && !verbLike
       && categoryMatch(word,categories)
       && Boolean(meaning)
@@ -693,6 +813,7 @@ function additionalN5Sentence(seed: number,patternId: string): GeneratedPreviewS
   const humans=validHumanPool(vocabulary)
   const places=validPlacePool(vocabulary)
   const localizedPlaces=places.filter(word=>![...tagSet(word)].some(tag=>geographicOriginTags.has(tag)))
+  const enclosedPlaces=localizedPlaces.filter(word=>![...tagSet(word)].some(tag=>openAirLocationTags.has(tag) || exhibitionVenueTags.has(tag)))
   const times=validTimePool(vocabulary)
   const inanimate=validInanimatePool(vocabulary)
   const pick=(pool: WordRecord[],salt: number)=>pool.length ? seededPick(pool,seed,salt) : null
@@ -720,10 +841,11 @@ function additionalN5Sentence(seed: number,patternId: string): GeneratedPreviewS
     return finish(furigana,`There ${plural?'are':'is'} ${subjectEnglish} ${englishPhrase(place,'location')}.`,{place,subject},{verb:verbSlot('verb-iru','います','いる','います','exist',['existence','animate'])},['Subject is animate.','Place supports an existence location.'])
   }
   if (patternId === 'n5-12') {
-    const place=pick(localizedPlaces,121),object=pick(inanimate.filter(isPhysicalObject),122)
+    const place=pick(enclosedPlaces,121),object=pick(inanimate.filter(word=>isPhysicalObject(word) && !indoorIncompatibleWords.has(word.japanese)),122)
     if (!place || !object) return null
     const furigana=[wordPart(place,'place'),literalPart('に'),wordPart(object,'object'),literalPart('が'),{text:'あります',reading:'あります',slot:'verb'}]
-    return finish(furigana,`There is ${indefinite(primaryEnglishGloss(object.preferredTranslation || object.english))} ${englishPhrase(place,'location')}.`,{place,object},{verb:verbSlot('verb-aru','あります','ある','あります','exist',['existence','inanimate'])},['Object is inanimate.','Place supports an existence location.'])
+    const existingEnglish=objectEnglish(primaryEnglishGloss(object.preferredTranslation || object.english))
+    return finish(furigana,`There ${isPluralPhrase(existingEnglish)?'are':'is'} ${existingEnglish} ${englishPhrase(place,'location')}.`,{place,object},{verb:verbSlot('verb-aru','あります','ある','あります','exist',['existence','inanimate'])},['Object is inanimate.','Place supports an existence location.'])
   }
   if (patternId === 'n5-13') {
     const time=pick(times,131),subject=pick(humans,132)
@@ -733,11 +855,11 @@ function additionalN5Sentence(seed: number,patternId: string): GeneratedPreviewS
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${comes} ${englishPhrase(time,'time')}.`,{time,subject},{verb:verbSlot('verb-kuru','来ます','来る','きます','come',['movement','arrival','time-compatible'])},['Time naturally accepts に.','来る supports the selected time frame.'])
   }
   if (patternId === 'n5-14') {
-    const object=pick(inanimate.filter(isPhysicalObject),141),place=pick(localizedPlaces,142)
+    const object=pick(inanimate.filter(word=>isPhysicalObject(word) && !indoorIncompatibleWords.has(word.japanese)),141),place=pick(enclosedPlaces,142)
     if (!object || !place) return null
-    const objectEnglish=indefinite(primaryEnglishGloss(object.preferredTranslation || object.english))
+    const objectPhrase=objectEnglish(primaryEnglishGloss(object.preferredTranslation || object.english))
     const furigana=[wordPart(object,'object'),literalPart('は','わ'),wordPart(place,'place'),literalPart('に'),{text:'あります',reading:'あります',slot:'verb'}]
-    return finish(furigana,`${objectEnglish.charAt(0).toUpperCase()+objectEnglish.slice(1)} is ${englishPhrase(place,'location')}.`,{object,place},{verb:verbSlot('verb-aru-location','あります','ある','あります','be located',['existence','location','inanimate'])},['Object is inanimate.','Place is a valid location.'])
+    return finish(furigana,`${objectPhrase.charAt(0).toUpperCase()+objectPhrase.slice(1)} ${isPluralPhrase(objectPhrase)?'are':'is'} ${englishPhrase(place,'location')}.`,{object,place},{verb:verbSlot('verb-aru-location','あります','ある','あります','be located',['existence','location','inanimate'])},['Object is inanimate.','Place is a valid location.'])
   }
   if (patternId === 'n5-15') {
     const origins=places.filter(word=>[...tagSet(word)].some(tag=>geographicOriginTags.has(tag)))
@@ -749,7 +871,7 @@ function additionalN5Sentence(seed: number,patternId: string): GeneratedPreviewS
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${comes} from ${originEnglish(origin)}.`,{subject,origin},{verb:verbSlot('verb-kuru-origin','来ます','来る','きます','come',['movement','origin'])},['Origin is a city, country, town, village, or island.'])
   }
   if (patternId === 'n5-16') {
-    const walkablePlaces=places.filter(word=>![...tagSet(word)].some(tag=>['country','island','ocean','sea'].includes(tag)))
+    const walkablePlaces=places.filter(word=>![...tagSet(word)].some(tag=>walkingIncompatibleTags.has(tag)))
     const subject=pick(humans,161),endpoint=pick(walkablePlaces,162)
     if (!subject || !endpoint) return null
     const subjectEnglish=englishPhrase(subject,'subject'),walks=subjectUsesBaseVerb(subjectEnglish)?'walk':'walks'
@@ -758,29 +880,29 @@ function additionalN5Sentence(seed: number,patternId: string): GeneratedPreviewS
   }
   if (patternId === 'n5-17') {
     const adjective=seededPick(adjectiveRules,seed,171)
-    const object=pick(validInanimatePool(vocabulary,adjective.categories),172)
+    const object=pick(validInanimatePool(vocabulary,adjective.categories).filter(word=>!adjective.physicalOnly || isPhysicalObject(word)),172)
     if (!object) return null
-    const objectEnglish=indefinite(primaryEnglishGloss(object.preferredTranslation || object.english))
+    const objectPhrase=objectEnglish(primaryEnglishGloss(object.preferredTranslation || object.english))
     const furigana=[wordPart(object,'object'),literalPart('が'),{text:`${adjective.japanese}です`,reading:`${adjective.reading}です`,slot:'adjective'}]
     const adjectiveSlot={id:`adjective-${adjective.id}`,surface:`${adjective.japanese}です`,dictionaryForm:adjective.japanese,reading:`${adjective.reading}です`,english:adjective.english,pos:'i_adjective' as const,jlpt:'N5' as const,tags:['adjective','compatible-predicate']}
-    return finish(furigana,`${objectEnglish.charAt(0).toUpperCase()+objectEnglish.slice(1)} is ${adjective.english}.`,{object},{adjective:adjectiveSlot},['Adjective selected from a reviewed noun-compatibility rule.'])
+    return finish(furigana,`${objectPhrase.charAt(0).toUpperCase()+objectPhrase.slice(1)} ${isPluralPhrase(objectPhrase)?'are':'is'} ${adjective.english}.`,{object},{adjective:adjectiveSlot},['Adjective selected from a reviewed noun-compatibility rule.'])
   }
   if (patternId === 'n5-18') {
     const subject=pick(humans,181)
-    const recipient=pick(humans.filter(word=>word.id!==subject?.id),182)
+    const recipient=pick(namedRecipients(humans).filter(word=>word.id!==subject?.id),182)
     if (!subject || !recipient) return null
     const subjectEnglish=englishPhrase(subject,'subject'),calls=subjectUsesBaseVerb(subjectEnglish)?'call':'calls'
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(recipient,'recipient'),literalPart('に'),{text:'電話します',reading:'でんわします',slot:'verb'}]
-    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${calls} ${englishPhrase(recipient,'recipient')}.`,{subject,recipient},{verb:verbSlot('verb-denwa','電話します','電話する','でんわします','call',['communication','recipient-ni','suru-verb'])},['Recipient is a different person from the subject.','電話する accepts a に recipient.'])
+    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${calls} ${relatedPersonEnglish('recipient',recipient,subject)}.`,{subject,recipient},{verb:verbSlot('verb-denwa','電話します','電話する','でんわします','call',['communication','recipient-ni','suru-verb'])},['Recipient is a different person from the subject.','電話する accepts a に recipient.'])
   }
   if (patternId === 'n5-19') {
-    const subject=pick(humans,191),recipient=pick(humans.filter(word=>word.id!==subject?.id),192)
-    const showable=inanimate.filter(word=>[...tagSet(word)].some(tag=>showableObjectTags.has(tag)))
+    const subject=pick(humans,191),recipient=pick(namedRecipients(humans).filter(word=>word.id!==subject?.id),192)
+    const showable=inanimate.filter(word=>[...tagSet(word)].some(tag=>showableObjectTags.has(tag)) && !workplaceDocumentWords.has(word.japanese))
     const object=pick(showable,193)
     if (!subject || !recipient || !object) return null
     const subjectEnglish=englishPhrase(subject,'subject'),shows=subjectUsesBaseVerb(subjectEnglish)?'show':'shows'
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(recipient,'recipient'),literalPart('に'),wordPart(object,'object'),literalPart('を'),{text:'見せます',reading:'みせます',slot:'verb'}]
-    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${shows} ${englishPhrase(object,'object')} to ${englishPhrase(recipient,'recipient')}.`,{subject,recipient,object},{verb:verbSlot('verb-miseru','見せます','見せる','みせます','show',['transfer','showing','recipient-ni','transitive'])},['Object is reasonably showable.','Recipient is a different person from the subject.'])
+    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${shows} ${englishPhrase(object,'object')} to ${relatedPersonEnglish('recipient',recipient,subject)}.`,{subject,recipient,object},{verb:verbSlot('verb-miseru','見せます','見せる','みせます','show',['transfer','showing','recipient-ni','transitive'])},['Object is reasonably showable.','Recipient is a different person from the subject.'])
   }
   if (patternId === 'n5-20') {
     const subject=pick(humans,201),destination=pick(places,202)
@@ -802,7 +924,7 @@ function additionalN5Sentence(seed: number,patternId: string): GeneratedPreviewS
     return finish(furigana,`${englishPhrase(subject,'subject').replace(/^./,character=>character.toUpperCase())} ${wants} ${englishPhrase(object,'object')}.`,{subject,object},{predicate},['Object is tangible and reasonably possessable.'])
   }
   if (patternId === 'n5-22') {
-    const walkablePlaces=places.filter(word=>![...tagSet(word)].some(tag=>['country','island','ocean','sea'].includes(tag)))
+    const walkablePlaces=places.filter(word=>![...tagSet(word)].some(tag=>walkingIncompatibleTags.has(tag)))
     const subject=pick(humans,221),origin=pick(walkablePlaces,222)
     const destination=pick(walkablePlaces.filter(word=>word.japanese!==origin?.japanese),223)
     if (!subject || !origin || !destination) return null

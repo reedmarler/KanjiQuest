@@ -57,14 +57,17 @@ function generatedExercise(level: JlptLevel, seed: number): SentenceExercise {
 export function buildGeneratedBuilderExercises(
   levels: readonly JlptLevel[],
   count = GENERATED_BUILDER_SESSION_SIZE,
+  batch = 0,
 ): SentenceExercise[] {
   const wiredLevels = levels.filter((level) => WIRED_BUILDER_LEVELS.includes(level))
   if (!wiredLevels.length) return []
 
   const exercises: SentenceExercise[] = []
   const seenJapanese = new Set<string>()
-  const baseSeed = sentenceSeed()
   const attemptLimit = count * 8
+  // Seeds advance by 37 per attempt, so shifting a whole attempt window per batch
+  // keeps consecutive batches off each other's seeds even within the same second.
+  const baseSeed = sentenceSeed() + batch * attemptLimit * 37
 
   for (let attempt = 0; attempt < attemptLimit && exercises.length < count; attempt += 1) {
     const level = wiredLevels[attempt % wiredLevels.length]!
