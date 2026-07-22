@@ -4228,17 +4228,25 @@ body:has(.sentence-view) .app {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-inline: 5.25rem;
+  padding-inline: 7.4rem;
   animation: sentence-answer-in 0.2s ease-out;
 }
 
-.sentence-speak-button {
+.sentence-audio-controls {
   position: absolute;
   right: 0.55rem;
   top: 50%;
   translate: 0 -50%;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sentence-speak-button,
+.sentence-speed-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.3rem;
   min-height: 2rem;
   border: 1px solid rgba(255, 139, 167, 0.34);
@@ -4251,18 +4259,28 @@ body:has(.sentence-view) .app {
   transition: background 0.15s, border-color 0.15s, transform 0.15s;
 }
 
+.sentence-speed-button {
+  min-width: 2.65rem;
+  padding-inline: 0.48rem;
+  color: var(--gold);
+}
+
 .sentence-speak-button:hover,
 .sentence-speak-button:focus-visible,
-.sentence-speak-button.is-speaking {
+.sentence-speak-button.is-speaking,
+.sentence-speed-button:hover,
+.sentence-speed-button:focus-visible {
   border-color: var(--sakura);
   background: rgba(255, 139, 167, 0.12);
 }
 
-.sentence-speak-button:hover {
+.sentence-speak-button:hover,
+.sentence-speed-button:hover {
   transform: scale(1.03);
 }
 
-.sentence-speak-button:focus-visible {
+.sentence-speak-button:focus-visible,
+.sentence-speed-button:focus-visible {
   outline: 2px solid var(--sakura);
   outline-offset: 2px;
 }
@@ -4447,14 +4465,22 @@ body:has(.sentence-view) .app {
 
 @media (max-width: 520px) {
   .sentence-view .sentence-feedback {
-    padding-inline: 3rem;
+    padding-left: 0.6rem;
+    padding-right: 5.8rem;
+  }
+
+  .sentence-audio-controls {
+    right: 0.35rem;
+    gap: 0.25rem;
   }
 
   .sentence-speak-button {
-    right: 0.35rem;
     width: 2.15rem;
-    justify-content: center;
     padding-inline: 0;
+  }
+
+  .sentence-speed-button {
+    min-width: 2.55rem;
   }
 
   .sentence-speak-button span:last-child {

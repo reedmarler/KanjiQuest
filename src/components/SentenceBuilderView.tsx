@@ -7,6 +7,7 @@ import type { SentenceExercise } from '../data/sentenceExercises'
 import type { JlptLevel } from '../lib/types'
 
 const BUILDER_LEVEL_OPTIONS: JlptLevel[] = ['N1', 'N2', 'N3', 'N4', 'N5']
+const SPEECH_RATES = [0.9, 0.75, 0.6] as const
 const HIDE_WORDS_STORAGE_KEY = 'kanji-quest-sentence-builder-hide-words-v1'
 const SHOW_FURIGANA_STORAGE_KEY = 'kanji-quest-sentence-builder-show-furigana-v1'
 
@@ -344,6 +345,7 @@ export function SentenceBuilderView({
   const [levelMenuOpen, setLevelMenuOpen] = useState(false)
   const [answered, setAnswered] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [speechRate, setSpeechRate] = useState<(typeof SPEECH_RATES)[number]>(0.9)
   const viewRef = useRef<HTMLDivElement>(null)
   const entryRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -391,7 +393,7 @@ export function SentenceBuilderView({
       .find((voice) => voice.lang.toLowerCase().startsWith('ja'))
 
     utterance.lang = 'ja-JP'
-    utterance.rate = 0.9
+    utterance.rate = speechRate
     if (japaneseVoice) utterance.voice = japaneseVoice
     utterance.onend = () => setIsSpeaking(false)
     utterance.onerror = () => setIsSpeaking(false)
@@ -399,6 +401,16 @@ export function SentenceBuilderView({
     window.speechSynthesis.cancel()
     setIsSpeaking(true)
     window.speechSynthesis.speak(utterance)
+  }
+
+  const handleCycleSpeechRate = () => {
+    const currentIndex = SPEECH_RATES.indexOf(speechRate)
+    setSpeechRate(SPEECH_RATES[(currentIndex + 1) % SPEECH_RATES.length])
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+    }
   }
 
   const handlePick = (tile: (typeof tiles)[number]) => {
@@ -742,17 +754,28 @@ export function SentenceBuilderView({
               <div ref={feedbackRef} className={`sentence-feedback ${isCorrect ? 'correct' : 'wrong'}`}>
                 <AnswerReveal gloss={answerGloss} />
                 {speechSupported && (
-                  <button
-                    type="button"
-                    className={`sentence-speak-button${isSpeaking ? ' is-speaking' : ''}`}
-                    onClick={handleSpeak}
-                    aria-label={isSpeaking ? 'Stop Japanese sentence audio' : 'Play correct Japanese sentence'}
-                    aria-pressed={isSpeaking}
-                    title={isSpeaking ? 'Stop audio' : 'Listen to the correct Japanese sentence'}
-                  >
-                    <span aria-hidden="true">{isSpeaking ? '■' : '🔊'}</span>
-                    <span>{isSpeaking ? 'Stop' : 'Listen'}</span>
-                  </button>
+                  <div className="sentence-audio-controls">
+                    <button
+                      type="button"
+                      className={`sentence-speak-button${isSpeaking ? ' is-speaking' : ''}`}
+                      onClick={handleSpeak}
+                      aria-label={isSpeaking ? 'Stop Japanese sentence audio' : 'Play correct Japanese sentence'}
+                      aria-pressed={isSpeaking}
+                      title={isSpeaking ? 'Stop audio' : 'Listen to the correct Japanese sentence'}
+                    >
+                      <span aria-hidden="true">{isSpeaking ? '■' : '🔊'}</span>
+                      <span>{isSpeaking ? 'Stop' : 'Listen'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="sentence-speed-button"
+                      onClick={handleCycleSpeechRate}
+                      aria-label={`Playback speed ${speechRate} times. Click to change speed.`}
+                      title="Change playback speed"
+                    >
+                      {speechRate}×
+                    </button>
+                  </div>
                 )}
               </div>
               {!showRomajiFeedback && <div className="sentence-answer-layout-spacer" aria-hidden="true" />}
