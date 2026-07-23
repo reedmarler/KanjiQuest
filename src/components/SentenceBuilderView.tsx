@@ -718,7 +718,7 @@ export function SentenceBuilderView({
           <button
             type="button"
             className={`builder-infinite-toggle${infiniteMode ? ' is-active' : ''}`}
-            onClick={onToggleInfiniteMode}
+            onClick={(event) => { onToggleInfiniteMode(); event.currentTarget.blur() }}
             aria-pressed={infiniteMode}
             aria-label={infiniteMode ? 'Turn off infinite Sentence Builder mode' : 'Keep Sentence Builder going indefinitely'}
             title={infiniteMode ? 'Infinite practice on' : 'Keep practicing without an ending'}
@@ -728,7 +728,7 @@ export function SentenceBuilderView({
           <button
             type="button"
             className={`builder-fast-toggle${fastMode ? ' is-active' : ''}`}
-            onClick={handleToggleFastMode}
+            onClick={(event) => { handleToggleFastMode(); event.currentTarget.blur() }}
             aria-pressed={fastMode}
             aria-label={fastMode ? 'Turn off fast mode' : 'Turn on fast mode: checks your sentence the instant every tile is placed'}
             title={fastMode ? 'Fast mode on — the sentence checks itself the moment it is complete' : 'Fast mode: skip the Check button and blitz through sentences'}
@@ -738,7 +738,7 @@ export function SentenceBuilderView({
           <button
             type="button"
             className={`builder-particle-toggle${splitParticles ? ' is-active' : ''}`}
-            onClick={handleToggleParticleMode}
+            onClick={(event) => { handleToggleParticleMode(); event.currentTarget.blur() }}
             aria-pressed={splitParticles}
             aria-label={splitParticles ? 'Turn off splitting particles into separate tiles' : 'Split Japanese particles into separate word tiles'}
             title={splitParticles ? 'Particles are split into their own tiles' : 'Split Japanese particles into separate word tiles'}

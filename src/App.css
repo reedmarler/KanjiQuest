@@ -2533,24 +2533,26 @@ body:has(.dashboard) .app {
   font: 700 1.18rem/1 'Noto Sans JP', 'Outfit', system-ui, sans-serif;
 }
 
-.builder-infinite-toggle:hover,
-.builder-infinite-toggle:focus-visible,
 .builder-infinite-toggle.is-active,
-.builder-fast-toggle:hover,
-.builder-fast-toggle:focus-visible,
 .builder-fast-toggle.is-active,
-.builder-particle-toggle:hover,
-.builder-particle-toggle:focus-visible,
 .builder-particle-toggle.is-active {
   border-color: rgba(255, 139, 167, 0.5);
   background: rgba(255, 139, 167, 0.1);
   color: var(--sakura);
 }
 
-.builder-infinite-toggle:hover,
-.builder-fast-toggle:hover,
-.builder-particle-toggle:hover {
-  transform: translateY(-1px);
+/* Hover-only visuals are gated behind (hover: hover) so touchscreens — which
+   fake a lingering hover after a tap instead of clearing it on release —
+   never get stuck showing the same highlight as a real .is-active toggle. */
+@media (hover: hover) {
+  .builder-infinite-toggle:hover,
+  .builder-fast-toggle:hover,
+  .builder-particle-toggle:hover {
+    border-color: rgba(255, 139, 167, 0.5);
+    background: rgba(255, 139, 167, 0.1);
+    color: var(--sakura);
+    transform: translateY(-1px);
+  }
 }
 
 .builder-infinite-toggle:focus-visible,
@@ -5216,6 +5218,12 @@ body:has(.dashboard) .app {
 
   .grammar-practice-view .sentence-actions-row {
     margin-top: 0.6rem;
+  }
+
+  .sentence-builder-inner-outline {
+    height: 29.8rem;
+    min-height: 29.8rem;
+    max-height: 29.8rem;
   }
 
   .sentence-translation-shell {

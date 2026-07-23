@@ -408,7 +408,7 @@ export function ChoiceDrill({
           <button
             type="button"
             className={`builder-infinite-toggle${infiniteMode ? ' is-active' : ''}`}
-            onClick={toggleInfiniteMode}
+            onClick={(event) => { toggleInfiniteMode(); event.currentTarget.blur() }}
             aria-pressed={infiniteMode}
             aria-label={
               infiniteMode
@@ -422,7 +422,7 @@ export function ChoiceDrill({
           <button
             type="button"
             className={`builder-fast-toggle${fastMode ? ' is-active' : ''}`}
-            onClick={toggleFastMode}
+            onClick={(event) => { toggleFastMode(); event.currentTarget.blur() }}
             aria-pressed={fastMode}
             aria-label={fastMode ? 'Turn off fast mode' : 'Turn on fast mode: checks your answer the instant you pick it'}
             title={fastMode ? 'Fast mode on — picking an answer checks it instantly' : 'Fast mode: skip the Check button and blitz through questions'}
