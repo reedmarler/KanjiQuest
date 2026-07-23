@@ -3682,6 +3682,7 @@ body:has(.dashboard) .app {
 }
 
 .sentence-card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 24px;
@@ -3706,6 +3707,31 @@ body:has(.dashboard) .app {
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 1.02rem;
   font-weight: 500;
+}
+
+.sentence-header-actions {
+  position: absolute;
+  top: 1.65rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.sentence-header-actions .sentence-back-button,
+.sentence-header-actions .sentence-new-button {
+  pointer-events: auto;
+}
+
+.sentence-header-actions .sentence-favorite-button {
+  position: static;
+  pointer-events: auto;
+}
+
+.sentence-header-actions .sentence-top-right-actions {
+  margin-left: auto;
 }
 
 .sentence-builder-help {

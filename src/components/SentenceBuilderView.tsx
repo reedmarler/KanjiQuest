@@ -772,36 +772,38 @@ export function SentenceBuilderView({
           <span>/</span>
           <span>文章作り</span>
         </p>
+        <div className="sentence-header-actions">
+          <button
+            type="button"
+            className="sentence-back-button"
+            onClick={onPrevious}
+            disabled={current === 0}
+            title={current === 0 ? 'First sentence' : 'Go back to the previous sentence'}
+          >
+            ‹
+          </button>
+          <div className="sentence-top-right-actions">
+            <button className="sentence-new-button" onClick={onSkip}>
+              ↻
+            </button>
+            <button
+              type="button"
+              className={`sentence-favorite-button${isFavorite ? ' is-favorite' : ''}`}
+              onClick={onToggleFavorite}
+              aria-label={isFavorite ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
+              aria-pressed={isFavorite}
+              title={isFavorite ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
+            >
+              {isFavorite ? '★' : '☆'}
+            </button>
+          </div>
+        </div>
         <p className="sentence-builder-help">Click the words or type the sentence</p>
         {!answered && (
           <>
             <div className="sentence-builder-panel">
               <div className="sentence-builder-inner-outline">
               <div className="sentence-translation-shell">
-                <button
-                  type="button"
-                  className="sentence-back-button"
-                  onClick={onPrevious}
-                  disabled={current === 0}
-                  title={current === 0 ? 'First sentence' : 'Go back to the previous sentence'}
-                >
-                  ‹
-                </button>
-                <div className="sentence-top-right-actions">
-                  <button className="sentence-new-button" onClick={onSkip}>
-                    ↻
-                  </button>
-                  <button
-                    type="button"
-                    className={`sentence-favorite-button${isFavorite ? ' is-favorite' : ''}`}
-                    onClick={onToggleFavorite}
-                    aria-label={isFavorite ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
-                    aria-pressed={isFavorite}
-                    title={isFavorite ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
-                  >
-                    {isFavorite ? '★' : '☆'}
-                  </button>
-                </div>
                 <div className="sentence-translation-prompt" aria-label="Sentence to translate">
                   <p ref={englishPromptRef}>{exercise.english}</p>
                 </div>
@@ -911,35 +913,6 @@ export function SentenceBuilderView({
           <div className="sentence-builder-panel">
             <div className="sentence-builder-inner-outline">
               <div className="sentence-translation-shell">
-                <button
-                  type="button"
-                  className="sentence-back-button"
-                  onClick={onPrevious}
-                  disabled={current === 0}
-                  title={current === 0 ? 'First sentence' : 'Go back to the previous sentence'}
-                >
-                  ‹
-                </button>
-                <div className="sentence-top-right-actions">
-                  <button
-                    type="button"
-                    className="sentence-new-button"
-                    onClick={onSkip}
-                    title="Move to the next sentence"
-                  >
-                    ↻
-                  </button>
-                  <button
-                    type="button"
-                    className={`sentence-favorite-button${isFavorite ? ' is-favorite' : ''}`}
-                    onClick={onToggleFavorite}
-                    aria-label={isFavorite ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
-                    aria-pressed={isFavorite}
-                    title={isFavorite ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
-                  >
-                    {isFavorite ? '★' : '☆'}
-                  </button>
-                </div>
                 <div className="sentence-translation-prompt" aria-label="Sentence to translate">
                   <p ref={englishPromptRef}>{exercise.english}</p>
                 </div>
