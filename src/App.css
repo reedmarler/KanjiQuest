@@ -5207,7 +5207,7 @@ body:has(.dashboard) .app {
 
   .grammar-sentence-frame {
     height: auto;
-    min-height: 5.9rem;
+    min-height: 8.4rem;
     max-height: none;
     line-height: 1.9;
     padding: 1rem 0.7rem;
@@ -5218,9 +5218,13 @@ body:has(.dashboard) .app {
   }
 
   .grammar-english-clue {
+    min-height: 3.3rem;
     margin: 0.7rem 0 1rem;
     font-size: 1.15rem;
     color: rgba(255, 255, 255, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .grammar-practice-view .furigana-ruby rt {
