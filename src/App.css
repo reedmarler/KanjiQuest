@@ -5207,7 +5207,7 @@ body:has(.dashboard) .app {
 
   .grammar-sentence-frame {
     height: auto;
-    min-height: 8.4rem;
+    min-height: 9.3rem;
     max-height: none;
     line-height: 1.9;
     padding: 1rem 0.7rem;
@@ -5218,7 +5218,7 @@ body:has(.dashboard) .app {
   }
 
   .grammar-english-clue {
-    min-height: 3.3rem;
+    min-height: 3.4rem;
     margin: 0.7rem 0 1rem;
     font-size: 1.15rem;
     color: rgba(255, 255, 255, 0.88);
