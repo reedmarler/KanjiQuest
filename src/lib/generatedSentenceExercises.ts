@@ -1,13 +1,14 @@
 import type { SentenceExercise } from '../data/sentenceExercises'
 import { grammarBuilderExercises } from '../data/grammarBuilderExercises'
 import { generatePreviewSentence, type GeneratedPreviewSentence } from './sentenceGeneratorPreview'
+import { shuffle } from './quiz'
 import type { JlptLevel } from './types'
 
 export const GENERATED_BUILDER_SESSION_SIZE = 15
 export const WIRED_BUILDER_LEVELS: readonly JlptLevel[] = ['N5', 'N4', 'N3']
 
 function sentenceSeed() {
-  return Math.floor(Date.now() / 1000) % 1_000_000
+  return Math.floor((Date.now() + Math.random() * 1_000_000_000) % 1_000_000_000)
 }
 
 function builderSegments(sentence: GeneratedPreviewSentence) {
@@ -72,10 +73,10 @@ export function buildGeneratedBuilderExercises(
 
   // Make grammar practice visible and dependable: most N5/N4 sessions include
   // curated endings and grammar patterns, with generated sentences filling the rest.
-  const grammarPool = grammarBuilderExercises.filter((exercise) => wiredLevels.includes(exercise.jlpt!))
+  const grammarPool = shuffle(grammarBuilderExercises.filter((exercise) => wiredLevels.includes(exercise.jlpt!)))
   const grammarTarget = Math.min(Math.ceil(count * 0.6), grammarPool.length)
   for (let index = 0; index < grammarTarget; index += 1) {
-    const exercise = grammarPool[(baseSeed + index * 7) % grammarPool.length]!
+    const exercise = grammarPool[index]!
     const japanese = exercise.segments?.join('') ?? ''
     if (japanese && !seenJapanese.has(japanese)) {
       seenJapanese.add(japanese)
@@ -98,7 +99,7 @@ export function buildGeneratedBuilderExercises(
     }
   }
 
-  return exercises
+  return shuffle(exercises)
 }
 
 export function getGeneratedBuilderExerciseById(id: string): SentenceExercise | undefined {

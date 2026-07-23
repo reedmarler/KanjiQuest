@@ -36,6 +36,7 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N5','Subject は PossessableObject が ほしい',['Subject','は','PossessableObject','が','ほしい'],'私は新しい本がほしい','wanting a possessable noun','predicate',true],
   ['N5','Subject は Origin から Destination まで MovementVerb',['Subject','は','Origin','から','Destination','まで','MovementVerb'],'私は家から学校まで歩く','movement between two places','dictionary',true],
   ['N5','Subject も Verb',['Subject','も','Verb'],'私も行く','adding another subject','dictionary',true,'Requires an implied or explicit prior discourse context.'],
+  ['N5','Subject は Object しか Verbない',['Subject','は','Object','しか','Verbない'],'私は水しか飲みません','nothing but / only','negative polite + しか',true],
 
   ['N4','Subject は Object を Verbたい',['Subject','は','Object','を','Verbたい'],'本を読みたい','desire to do','masu-stem + たい',true],
   ['N4','Subject は Object を Verbている',['Subject','は','Object','を','Verbている'],'本を読んでいる','ongoing or resulting state','te-form + いる',true],
@@ -57,6 +58,11 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N4','CauseClause から ResultClause',['CauseClause','から','ResultClause'],'雨が降っているから家にいる','reason and logical result','plain form + から',true],
   ['N4','Property1 し Property2',['Property1','し','Property2'],'安いし便利だ','multiple properties or reasons','plain form + し',true],
   ['N4','Subject は Object が PotentialVerb',['Subject','は','Object','が','PotentialVerb'],'私は漢字が読める','ability','potential form',true,'Uses 読める, not the incorrect 読められる.'],
+  ['N4','Subject は FirstVerb dictionary 前に MainVerb',['Subject','は','FirstVerb','前に','MainVerb'],'本を読む前にお茶を飲みます','before doing X, do Y','dictionary form + 前に',true],
+  ['N4','Subject は FirstVerbた後で MainVerb',['Subject','は','FirstVerbた','後で','MainVerb'],'本を読んだ後でお茶を飲みます','after doing X, do Y','past plain + 後で',true],
+  ['N4','Subject は FirstVerbたり SecondVerbたりする',['Subject','は','FirstVerbたり','SecondVerbたり','する'],'本を読んだりお茶を飲んだりします','do things such as X and Y','たり-form + たり-form + する',true],
+  ['N4','Subject は Object を Verbことができる',['Subject','は','Object','を','Verbことができる'],'私は本を読むことができます','can do','dictionary form + ことができる',true],
+  ['N4','Subject は Object を Verbなくてもいい',['Subject','は','Object','を','Verbなくてもいい'],'本を読まなくてもいいです','do not have to do','nai-form + なくてもいい',true],
 
   ['N3','Subject は Verbようにする',['Subject','は','Verbようにする'],'毎日勉強するようにする','make an effort or habit','plain form + ようにする',true],
   ['N3','Subject は Verbことにする',['Subject','は','Verbことにする'],'日本へ行くことにする','decide to do','plain form + ことにする',true],

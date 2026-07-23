@@ -6,6 +6,36 @@ export function hasKanji(text: string): boolean {
 
 type TextRun = { kanji: boolean; text: string }
 
+function katakanaToHiragana(text: string): string {
+  return text.replace(/[\u30A1-\u30F6]/g, (character) =>
+    String.fromCodePoint(character.codePointAt(0)! - 0x60),
+  )
+}
+
+function matchingKanaRunLength(remaining: string, text: string, start = 0): number | null {
+  const normalizedRemaining = katakanaToHiragana(remaining)
+  const normalizedText = katakanaToHiragana(text)
+  if (start + normalizedText.length > normalizedRemaining.length) return null
+
+  for (let index = 0; index < normalizedText.length; index += 1) {
+    const written = normalizedText[index]
+    const spoken = normalizedRemaining[start + index]
+    const isParticlePronunciation = (written === 'は' && spoken === 'わ')
+      || (written === 'へ' && spoken === 'え')
+    if (written !== spoken && !isParticlePronunciation) return null
+  }
+
+  return normalizedText.length
+}
+
+function kanaRunIndex(remaining: string, text: string): number {
+  const normalizedRemaining = katakanaToHiragana(remaining)
+  for (let index = 0; index < normalizedRemaining.length; index += 1) {
+    if (matchingKanaRunLength(remaining, text, index) !== null) return index
+  }
+  return -1
+}
+
 function splitRuns(text: string): TextRun[] {
   if (!text) return []
 
@@ -40,8 +70,9 @@ function kanjiReadingsForRuns(runs: TextRun[], reading: string): Map<number, str
     const run = runs[i]
 
     if (!run.kanji) {
-      if (remaining.startsWith(run.text)) {
-        remaining = remaining.slice(run.text.length)
+      const literalLength = matchingKanaRunLength(remaining, run.text)
+      if (literalLength !== null) {
+        remaining = remaining.slice(literalLength)
       }
       continue
     }
@@ -49,8 +80,8 @@ function kanjiReadingsForRuns(runs: TextRun[], reading: string): Map<number, str
     const nextLiteral = runs.slice(i + 1).find((r) => !r.kanji)
     let kanjiReading: string
 
-    if (nextLiteral && remaining.includes(nextLiteral.text)) {
-      const pos = remaining.indexOf(nextLiteral.text)
+    const pos = nextLiteral ? kanaRunIndex(remaining, nextLiteral.text) : -1
+    if (pos >= 0) {
       kanjiReading = remaining.slice(0, pos)
       remaining = remaining.slice(pos)
     } else {
@@ -70,18 +101,30 @@ interface FuriganaSegmentProps {
   className?: string
 }
 
-/** Renders text with furigana above kanji only — kana and punctuation stay plain. */
-export function FuriganaSegment({ text, reading, className = '' }: FuriganaSegmentProps) {
-  if (!reading || !hasKanji(text)) {
-    return <span className={className}>{text}</span>
-  }
+export interface FuriganaRun {
+  text: string
+  reading?: string
+}
+
+/** Returns the same kanji-to-reading runs that the visible ruby renderer uses. */
+export function getFuriganaRuns(text: string, reading?: string): FuriganaRun[] {
+  if (!reading || !hasKanji(text)) return [{ text }]
 
   const runs = splitRuns(text)
   const kanjiReadings = kanjiReadingsForRuns(runs, reading)
+  return runs.map((run, index) => ({
+    text: run.text,
+    reading: run.kanji ? kanjiReadings.get(index) : undefined,
+  }))
+}
 
+/** Renders text with furigana above kanji only — kana and punctuation stay plain. */
+export function FuriganaSegment({ text, reading, className = '' }: FuriganaSegmentProps) {
   return (
     <span className={className}>
-      {runs.map((run, i) => renderKanjiRun(run, i, kanjiReadings.get(i)))}
+      {getFuriganaRuns(text, reading).map((run, index) =>
+        renderKanjiRun({ kanji: hasKanji(run.text), text: run.text }, index, run.reading),
+      )}
     </span>
   )
 }

@@ -1,4 +1,4 @@
-import { buildDrillExercises, DRILL_LEVELS } from '../lib/drillExercises'
+import { buildDrillExercises, DRILL_LEVELS, stripTrailingPeriod } from '../lib/drillExercises'
 import type { DrillExercise, DrillJlptLevel, DrillOption } from '../lib/drillExercises'
 
 /** JLPT levels that have curated vocab drills wired up. */
@@ -43,6 +43,49 @@ const n3VerbWords: DrillOption[] = [['認めます', 'みとめます'], ['断�
 const n3VerbWords2: DrillOption[] = [['求めます', 'もとめます'], ['示します', 'しめします'], ['含みます', 'ふくみます'], ['支えます', 'ささえます']]
 const n3AdjWords: DrillOption[] = [['複雑です', 'ふくざつです'], ['確実です', 'かくじつです'], ['適当です', 'てきとうです'], ['深刻です', 'しんこくです']]
 
+const optionEnglish = new Map<string, string>([
+  ['パン', 'bread'], ['寿司', 'sushi'], ['肉', 'meat'], ['野菜', 'vegetables'],
+  ['魚', 'fish'], ['卵', 'eggs'], ['果物', 'fruit'], ['ご飯', 'rice'],
+  ['水', 'water'], ['お茶', 'tea'], ['牛乳', 'milk'], ['コーヒー', 'coffee'],
+  ['学校', 'school'], ['駅', 'the station'], ['銀行', 'the bank'], ['図書館', 'the library'],
+  ['病院', 'the hospital'], ['公園', 'the park'], ['店', 'the store'], ['空港', 'the airport'],
+  ['今日', 'today'], ['明日', 'tomorrow'], ['昨日', 'yesterday'], ['毎日', 'every day'],
+  ['友だち', 'my friend'], ['先生', 'my teacher'], ['母', 'my mother'], ['弟', 'my younger brother'],
+  ['電車', 'train'], ['車', 'car'], ['自転車', 'bicycle'], ['飛行機', 'airplane'],
+  ['本', 'a book'], ['ノート', 'a notebook'], ['ペン', 'a pen'], ['かばん', 'a bag'],
+  ['目', 'my eyes'], ['耳', 'my ears'], ['口', 'my mouth'], ['手', 'my hands'],
+  ['山', 'the mountain'], ['海', 'the sea'], ['川', 'the river'], ['空', 'the sky'],
+  ['雨', 'rain'], ['雪', 'snow'], ['風', 'wind'], ['雲', 'clouds'],
+  ['食べます', 'eat'], ['飲みます', 'drink'], ['読みます', 'read'], ['見ます', 'watch'],
+  ['行きます', 'go'], ['買います', 'buy'], ['書きます', 'write'], ['聞きます', 'listen to'],
+  ['高いです', 'expensive'], ['安いです', 'cheap'], ['新しいです', 'new'], ['古いです', 'old'],
+  ['大きいです', 'big'], ['小さいです', 'small'], ['忙しいです', 'busy'], ['面白いです', 'interesting'],
+  ['工場', 'a factory'], ['事務所', 'the office'], ['美術館', 'the art museum'],
+  ['社長', 'the company president'], ['医者', 'a doctor'], ['客', 'a customer'], ['店員', 'the shop assistant'],
+  ['約束', 'my promise'], ['準備', 'preparations'], ['相談', 'a consultation'], ['経験', 'experience'],
+  ['届きます', 'arrive'], ['集めます', 'collect'], ['調べます', 'look up'], ['決めます', 'decide'],
+  ['続けます', 'continue'], ['始めます', 'start'], ['比べます', 'compare'], ['選びます', 'choose'],
+  ['簡単でした', 'simple'], ['大切でした', 'important'], ['複雑でした', 'complicated'], ['有名でした', 'famous'],
+  ['状況', 'the situation'], ['結果', 'the results'], ['原因', 'the cause'], ['影響', 'the effect'],
+  ['責任', 'responsibility'], ['目的', 'the purpose'], ['方法', 'a method'], ['条件', 'the conditions'],
+  ['認めます', 'admit'], ['断ります', 'decline'], ['許します', 'permit'], ['疑います', 'doubt'],
+  ['求めます', 'ask for'], ['示します', 'show'], ['含みます', 'include'], ['支えます', 'support'],
+  ['複雑です', 'complex'], ['確実です', 'certain'], ['適当です', 'suitable'], ['深刻です', 'serious'],
+])
+
+function optionText(option: DrillOption): string {
+  return stripTrailingPeriod(typeof option === 'string' ? option : option[0])
+}
+
+function optionReading(option: DrillOption): string {
+  return stripTrailingPeriod(typeof option === 'string' ? option : option[1])
+}
+
+function updateEnglishClue(english: string, from: string, to: string): string {
+  if (from === to) return english
+  return english.replace(new RegExp(`\\b${from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'), to)
+}
+
 function drill(
   id: string,
   jlpt: VocabJlptLevel,
@@ -57,6 +100,37 @@ function drill(
     source: { id: `vocab-drill-${id}`, jlpt, english, segments, readings },
     focus: { segmentIndex, pattern: segments[segmentIndex], meaning, options },
   }
+}
+
+function rotateAnswers(entry: ReturnType<typeof drill>) {
+  const answer = stripTrailingPeriod(entry.source.segments[entry.focus.segmentIndex])
+  const answerEnglish = optionEnglish.get(answer)
+
+  return entry.focus.options?.map((option, optionIndex) => {
+    const text = optionText(option)
+    const reading = optionReading(option)
+    const english = answerEnglish
+      ? updateEnglishClue(entry.source.english, answerEnglish, optionEnglish.get(text) ?? answerEnglish)
+      : entry.source.english
+
+    return {
+      source: {
+        ...entry.source,
+        id: `${entry.source.id}-${optionIndex + 1}`,
+        english,
+        segments: entry.source.segments.map((segment, segmentIndex) =>
+          segmentIndex === entry.focus.segmentIndex ? text : segment,
+        ),
+        readings: entry.source.readings.map((readingSegment, segmentIndex) =>
+          segmentIndex === entry.focus.segmentIndex ? reading : readingSegment,
+        ),
+      },
+      focus: {
+        ...entry.focus,
+        pattern: text,
+      },
+    }
+  }) ?? [entry]
 }
 
 const entries = [
@@ -173,4 +247,4 @@ const entries = [
 ]
 
 /** Vocab choice drills — the blank is a word, not a grammar pattern. */
-export const vocabPracticeExercises: VocabPracticeExercise[] = buildDrillExercises(entries)
+export const vocabPracticeExercises: VocabPracticeExercise[] = buildDrillExercises(entries.flatMap(rotateAnswers))

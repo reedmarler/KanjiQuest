@@ -1860,6 +1860,395 @@ body:has(.dashboard) .app {
   font-size: 0.72rem;
 }
 
+.tag-testing {
+  margin-top: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 0.75rem;
+}
+
+.tag-testing-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.tag-testing-kicker {
+  display: block;
+  color: var(--rayquaza-light);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.tag-testing h2 {
+  font-size: 0.95rem;
+  line-height: 1.15;
+}
+
+.tag-testing-refresh {
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--rayquaza-light) 45%, var(--border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--rayquaza) 12%, var(--surface-2));
+  color: var(--text);
+  cursor: pointer;
+  font: 600 0.62rem inherit;
+  padding: 0.38rem 0.55rem;
+}
+
+.tag-testing-refresh:hover {
+  border-color: var(--rayquaza-light);
+}
+
+.tag-testing-verb {
+  display: grid;
+  gap: 0.22rem;
+  margin-top: 0.65rem;
+  color: var(--text-muted);
+  font-size: 0.56rem;
+  font-weight: 600;
+}
+
+.tag-testing-verb select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: 600 0.68rem 'Noto Sans JP', sans-serif;
+  padding: 0.42rem 0.5rem;
+}
+
+.tag-testing-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+  margin-top: 0.5rem;
+}
+
+.tag-testing-rules span {
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 24%, var(--border));
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--kyogre) 8%, var(--surface-2));
+  color: var(--text-muted);
+  font-size: 0.52rem;
+  overflow-wrap: anywhere;
+  padding: 0.22rem 0.35rem;
+}
+
+.tag-testing-rules b {
+  color: var(--kyogre-light);
+  text-transform: capitalize;
+}
+
+.tag-testing-samples {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.42rem;
+  margin-top: 0.55rem;
+}
+
+.tag-testing-sample {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  padding: 0.5rem;
+}
+
+.tag-testing-sample-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.48rem;
+  font-weight: 700;
+}
+
+.tag-testing-sample h3 {
+  color: var(--text);
+  font: 600 0.92rem/1.9 'Noto Sans JP', sans-serif;
+  margin: 0.2rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.tag-testing-sample h3 rt {
+  color: var(--kyogre-light);
+  font-size: 0.48em;
+}
+
+.tag-testing-sample > p {
+  color: var(--text-muted);
+  font-size: 0.58rem;
+  line-height: 1.3;
+  margin-top: 0.22rem;
+}
+
+.tag-testing-slots {
+  display: grid;
+  gap: 0.25rem;
+  border-top: 1px solid var(--border);
+  margin-top: 0.42rem;
+  padding-top: 0.38rem;
+}
+
+.tag-testing-slots div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.28rem;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.tag-testing-slots b {
+  color: var(--rayquaza-light);
+  font-size: 0.5rem;
+  text-transform: capitalize;
+}
+
+.tag-testing-slots span {
+  color: var(--text);
+  font: 600 0.62rem 'Noto Sans JP', sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.tag-testing-slots small {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: 0.47rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 680px) {
+  .tag-testing-samples {
+    grid-template-columns: 1fr;
+  }
+}
+
+.verb-example-generator {
+  margin-top: 1.15rem;
+}
+
+.generated-grammar-test {
+  margin-top: 1.15rem;
+}
+
+.generated-grammar-test-header,
+.generated-grammar-test-progress,
+.generated-grammar-test-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.generated-grammar-test-kicker {
+  display: block;
+  color: var(--gold);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.generated-grammar-test h2 {
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+.generated-grammar-test-refresh {
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--gold) 9%, var(--surface-2));
+  color: var(--text);
+  cursor: pointer;
+  font: 600 0.62rem inherit;
+  padding: 0.38rem 0.55rem;
+}
+
+.generated-grammar-test-refresh:hover {
+  border-color: var(--gold);
+}
+
+.generated-grammar-test-progress {
+  margin-top: 0.55rem;
+  color: var(--text-muted);
+  font-size: 0.58rem;
+}
+
+.generated-grammar-test-progress-bar {
+  height: 3px;
+  margin-top: 0.28rem;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--surface-2);
+}
+
+.generated-grammar-test-progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gold);
+  transition: width 0.2s ease;
+}
+
+.generated-grammar-test-card {
+  max-width: none;
+  margin-top: 0.55rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.generated-grammar-test .grammar-sentence-frame {
+  min-height: 3.75rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 8px;
+  font-size: clamp(1rem, 3.2vw, 1.4rem);
+}
+
+.generated-grammar-test .grammar-options {
+  margin-top: 0.7rem;
+  gap: 0.55rem;
+}
+
+.generated-grammar-test .grammar-option {
+  min-height: 2.65rem;
+  border-radius: 7px;
+  font-size: clamp(0.92rem, 2.8vw, 1.15rem);
+}
+
+.generated-grammar-test-actions {
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.7rem;
+}
+
+.generated-grammar-test-actions .btn {
+  min-width: 5.5rem;
+  min-height: 2rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.68rem;
+}
+
+.generated-grammar-test.is-furigana-hidden .furigana-ruby rt {
+  visibility: hidden;
+}
+
+.verb-example-generator-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.verb-example-generator-kicker {
+  display: block;
+  color: var(--sakura-light);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.verb-example-generator h2 {
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+.verb-example-generator-refresh {
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--sakura-light) 45%, var(--border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--sakura) 12%, var(--surface-2));
+  color: var(--text);
+  cursor: pointer;
+  font: 600 0.62rem inherit;
+  padding: 0.38rem 0.55rem;
+}
+
+.verb-example-generator-refresh:hover {
+  border-color: var(--sakura-light);
+}
+
+.verb-example-generator-meta {
+  color: var(--text-muted);
+  font-size: 0.56rem;
+  margin-top: 0.25rem;
+}
+
+.verb-example-generator-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.55rem;
+}
+
+.verb-example {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  padding: 0.55rem 0.6rem;
+}
+
+.verb-example header,
+.verb-example footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+}
+
+.verb-example header {
+  color: var(--text-muted);
+  font-size: 0.49rem;
+  font-weight: 700;
+}
+
+.verb-example h3 {
+  color: var(--text);
+  font: 600 0.88rem/1.85 'Noto Sans JP', sans-serif;
+  margin-top: 0.2rem;
+  overflow-wrap: anywhere;
+}
+
+.verb-example h3 rt {
+  color: var(--kyogre-light);
+  font-size: 0.48em;
+}
+
+.verb-example > p {
+  color: var(--text-muted);
+  font-size: 0.59rem;
+  line-height: 1.35;
+  margin-top: 0.18rem;
+}
+
+.verb-example footer {
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.52rem;
+  margin-top: 0.4rem;
+  padding-top: 0.3rem;
+}
+
+.verb-example footer b {
+  color: var(--sakura-light);
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+@media (max-width: 680px) {
+  .verb-example-generator-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 .progress-header {
   display: flex;
   justify-content: space-between;
@@ -3608,6 +3997,18 @@ body:has(.dashboard) .app {
   text-transform: uppercase;
 }
 
+.drill-answer-top-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 2rem;
+  margin-bottom: 0.45rem;
+}
+
+.drill-answer-top-actions .sentence-favorite-button {
+  position: static;
+}
+
 .grammar-instruction {
   margin: 0.24rem 0 0.75rem;
   color: var(--text-muted);
@@ -3955,7 +4356,8 @@ body:has(.dashboard) .app {
 }
 
 .furigana-ruby rt {
-  font-size: 0.5em;
+  /* Matches the hero's ruby scale, and keeps furigana clear of tile/option borders. */
+  font-size: 0.42em;
   color: var(--gold);
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -4035,6 +4437,45 @@ body:has(.dashboard) .app {
   text-align: center;
 }
 
+.sentence-favorite-button {
+  position: absolute;
+  top: 0.45rem;
+  left: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: 1.45rem/1 system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.sentence-favorite-button:hover,
+.sentence-favorite-button:focus-visible,
+.sentence-favorite-button.is-favorite {
+  color: var(--gold);
+}
+
+.sentence-favorite-button:hover {
+  transform: scale(1.06);
+}
+
+.sentence-favorite-button:focus-visible {
+  outline: 0;
+}
+
+.sentence-translation-shell .sentence-favorite-button {
+  position: static;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+}
+
 .answer-reveal .sentence-english {
   margin-bottom: 0.75rem;
 }
@@ -4048,6 +4489,101 @@ body:has(.dashboard) .app {
 
 .card-answer .answer-reveal {
   margin-top: 0.5rem;
+}
+
+.favorite-sentences-view {
+  min-height: calc(66.6667vh - 4rem);
+}
+
+.favorite-sentences-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+}
+
+.favorite-sentences-header h1 {
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+
+.favorite-sentences-header p {
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.favorite-sentence-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.favorite-sentence-row {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 1rem 3.35rem 0.9rem 1rem;
+  text-align: center;
+}
+
+.favorite-sentence-japanese {
+  min-height: 2.85rem;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 1.25rem;
+  line-height: 1.8;
+}
+
+.favorite-sentence-row .furigana-gloss-sentence {
+  justify-content: center;
+}
+
+.favorite-sentence-english {
+  margin-top: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.favorite-sentence-row .jlpt-badge {
+  position: absolute;
+  left: 0.7rem;
+  top: 0.7rem;
+}
+
+.favorite-sentence-remove {
+  position: absolute;
+  right: 0.7rem;
+  top: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--gold);
+  font: 1.45rem/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.favorite-sentence-remove:hover,
+.favorite-sentence-remove:focus-visible {
+  color: var(--sakura-light);
+}
+
+.favorite-sentence-remove:focus-visible {
+  outline: 0;
+}
+
+.favorite-sentences-empty {
+  padding: 2.5rem 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  text-align: center;
 }
 
 .reading-result-note {
@@ -4569,3 +5105,5 @@ body:has(.dashboard) .app {
 @media(max-width:930px){.vocab-philosophy-grid,.vocab-workbench,.vocab-bottom-tools{grid-template-columns:1fr}.vocab-intro-actions{justify-content:flex-start}.vocab-import-card footer{align-items:flex-start;flex-direction:column}.vocab-import-card footer span{max-width:none}}
 
 .category-word-english label{display:flex;flex-direction:column;gap:3px;margin-top:8px;color:#607068;font-size:.52rem;font-weight:600}.category-word-english label span{font-size:.5rem}.category-word-english input,.draft-meaning input{width:100%;border:1px solid #d8dbd5;background:#fbfbf8;border-radius:6px;padding:6px 8px;font:500 .62rem inherit;color:#294737;outline:none}.category-word-english input:focus,.draft-meaning input:focus{border-color:#56816b;box-shadow:0 0 0 3px rgba(86,129,107,.1)}.draft-meaning label{display:flex;flex-direction:column;gap:3px;margin-top:6px}.draft-meaning label span{font-weight:600;color:#607068}
+
+.practice-loading{min-height:calc(66.6667vh - 2.15rem)}.practice-loading-card{max-width:31rem;margin:12vh auto 0;padding:1.25rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:var(--shadow);text-align:center}.practice-loading-mark{display:block;color:var(--gold);font:600 2rem 'Noto Sans JP',sans-serif}.practice-loading-card h1{margin-top:.28rem;font-size:1.1rem}.practice-loading-card p{margin-top:.32rem;color:var(--text-muted);font-size:.74rem}.practice-loading-bar{height:5px;margin-top:1rem;overflow:hidden;border-radius:3px;background:var(--surface-2)}.practice-loading-bar span{display:block;height:100%;border-radius:inherit;background:var(--gold);transition:width .2s ease}.practice-loading-bar .is-indeterminate{width:42%;animation:practice-loading-sweep 1s ease-in-out infinite}@keyframes practice-loading-sweep{from{transform:translateX(-110%)}to{transform:translateX(270%)}}

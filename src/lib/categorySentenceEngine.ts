@@ -104,6 +104,8 @@ export interface VerbUsageRecord {
 export interface CategorySentenceOptions {
   /** Keep the sentence seed fixed while varying one eligible slot. */
   slotSeeds?: Partial<Record<string,number>>
+  /** Force one verb usage so callers can inspect its compatible vocabulary. */
+  verbId?: string
 }
 
 const words: WordRecord[] = [
@@ -137,6 +139,9 @@ const drinkableTags = ['drink','drinkable','beverage','water','tea','coffee','ju
 // Solid foods that also carry a drink tag — ice cream and yogurt are dairy but
 // are eaten, so these tags override drinkability.
 const solidFoodTags = ['dessert','snack','candy','ice-cream','yogurt','cheese','butter','fruit','vegetable','meat','seafood','fish','rice','bread','noodles','egg','protein','staple-food','meal','grain']
+// A few imported dairy words arrive without a solid-food tag. Keep this small
+// lexical backstop until their source metadata is enriched.
+const solidFoodWords = new Set(['アイスクリーム','アイス','ヨーグルト','チーズ','バター'])
 // Cooking inputs, whatever else they are tagged. 砂糖 is food, but 砂糖を食べます
 // describes an odd habit rather than a meal.
 const cookingInputTags = ['ingredient','seasoning','condiment','spice','flavoring','sauce','oil','flour','sugar','salt']
@@ -576,6 +581,8 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
     if (verb.japanese === '食べる' && slot === 'object') pool=pool.filter(word=>!['米','食べ物'].includes(word.japanese)
       && !(matchingTags(word,drinkableTags).length>0 && matchingTags(word,solidFoodTags).length===0)
       && !(matchingTags(word,cookingInputTags).length>0 && matchingTags(word,solidFoodTags).length===0))
+    if (verb.japanese === '飲む' && slot === 'object') pool=pool.filter(word=>
+      !solidFoodWords.has(word.japanese) && matchingTags(word,solidFoodTags).length===0)
     if (verb.id === 'yomu-adverb' && slot === 'object') pool=pool.filter(word=>!tagSet(word).has('news')&&word.japanese!=='ニュース')
     if (verb.japanese === '読む' && slot === 'object') pool=pool.filter(word=>!unreadableObjectWords.has(word.japanese))
     if (slot === 'destination') pool=pool.filter(word=>{
@@ -669,7 +676,7 @@ function generatedWordSlots(filled: Record<string,WordRecord>,slotTagMatches: Re
   }])) as GeneratedPreviewSentence['slots']
 }
 
-const additionalN5PatternIds = new Set(Array.from({length:13},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`))
+const additionalN5PatternIds = new Set(Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`))
 const geographicOriginTags = new Set(normalizeTags(['country','city','town','village','neighborhood','island']))
 const originSubjectDisallowedTags = new Set(normalizeTags(['patient','sick','illness','medical','hospital','guest','customer']))
 const portableObjectTags = new Set(normalizeTags([
@@ -807,7 +814,7 @@ function originEnglish(word: WordRecord) {
   return /^[A-Z]/.test(gloss) ? gloss : englishPhrase(word,'destination')
 }
 
-function additionalN5Sentence(seed: number,patternId: string): GeneratedPreviewSentence | null {
+function additionalN5Sentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!additionalN5PatternIds.has(patternId)) return null
   const vocabulary=editorWords()
   const humans=validHumanPool(vocabulary)
@@ -932,6 +939,19 @@ function additionalN5Sentence(seed: number,patternId: string): GeneratedPreviewS
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(origin,'origin'),literalPart('から'),wordPart(destination,'destination'),literalPart('まで'),{text:'歩きます',reading:'あるきます',slot:'verb'}]
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${walks} from ${originEnglish(origin)} to ${englishPhrase(destination,'destination')}.`,{subject,origin,destination},{verb:verbSlot('verb-aruku-route','歩きます','歩く','あるきます','walk',['movement','origin','endpoint'])},['Origin and destination are different valid places.','歩く is a movement verb.'])
   }
+  if (patternId === 'n5-24') {
+    const directVerbs=verbs.filter(verb=>['taberu-basic','nomu-basic','yomu-basic','miru-basic'].includes(verb.id))
+    const verb=options.verbId ? directVerbs.find(candidate=>candidate.id===options.verbId) : seededPick(directVerbs,seed,241)
+    const result=verb ? fillVerbSlots(verb,vocabulary,seed,242) : null
+    if (!verb||!result) return null
+    const negative=appendForm(n4VerbForms(verb).aStem,'ません')
+    const subject=result.filled.subject!,object=result.filled.object!
+    const subjectEnglish=englishPhrase(subject,'subject')
+    const englishVerb=translatedVerb(verb,{subject,object},subjectUsesBaseVerb(subjectEnglish))
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('しか'),{text:negative.japanese,reading:negative.reading,slot:'verb'}]
+    const verbSlotData={...verbSlot(`verb-${verb.id}-shika-nai`,negative.japanese,verb.japanese,negative.reading,verb.english,['only','negative-polite','shika-nai']),conjugation:'negative-polite'}
+    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} only ${englishVerb} ${englishPhrase(object,'object')}.`,{subject,object},{verb:verbSlotData},['Verb selected first and supplied the object rule.','しか is paired with a negative polite verb.'])
+  }
   const subject=pick(humans,231)
   if (!subject) return null
   const subjectEnglish=englishPhrase(subject,'subject'),go=subjectUsesBaseVerb(subjectEnglish)?'go':'goes'
@@ -939,9 +959,9 @@ function additionalN5Sentence(seed: number,patternId: string): GeneratedPreviewS
   return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${go} too.`,{subject},{verb:verbSlot('verb-iku-mo','行きます','行く','いきます','go',['movement','additive-topic','context-dependent'])},['も marks an additional subject.','This template assumes prior discourse context.'])
 }
 
-const additionalN4PatternIds = new Set(Array.from({length:10},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
+const additionalN4PatternIds = new Set(Array.from({length:15},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
 
-function additionalN4Sentence(seed: number,patternId: string): GeneratedPreviewSentence | null {
+function additionalN4Sentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!additionalN4PatternIds.has(patternId)) return null
   const vocabulary=editorWords()
   const humans=validHumanPool(vocabulary)
@@ -960,6 +980,30 @@ function additionalN4Sentence(seed: number,patternId: string): GeneratedPreviewS
   const destinationEnglish=(word: WordRecord)=>({家:'home',学校:'school',大学:'university',高校:'high school'}[word.japanese]??englishPhrase(word,'destination'))
   const movementDestination=(word: WordRecord)=>word.japanese==='家'?'home':`to ${destinationEnglish(word)}`
   const studyLocationEnglish=(word: WordRecord)=>({家:'at home',学校:'at school',大学:'at university',高校:'at high school'}[word.japanese]??englishPhrase(word,'location'))
+  const directActionVerbs=verbs.filter(verb=>['taberu-basic','nomu-basic','yomu-basic','miru-basic'].includes(verb.id))
+  const pickDirectVerb=(salt: number) => options.verbId
+    ? directActionVerbs.find(candidate=>candidate.id===options.verbId)
+    : seededPick(directActionVerbs,seed,salt)
+  const actionPair=(salt: number) => {
+    const firstVerb=pickDirectVerb(salt)
+    const firstResult=firstVerb ? fillVerbSlots(firstVerb,vocabulary,seed,salt+1) : null
+    const mainVerb=pick(directActionVerbs.filter(verb=>verb.id!==firstVerb?.id),salt+2)
+    if (!firstVerb||!firstResult||!mainVerb) return null
+
+    let mainResult: ReturnType<typeof fillVerbSlots> = null
+    for (let attempt=0;attempt<8;attempt+=1) {
+      const candidate=fillVerbSlots(mainVerb,vocabulary,seed+attempt,salt+3+attempt)
+      if (candidate && candidate.filled.object?.id!==firstResult.filled.object?.id) {
+        mainResult=candidate
+        break
+      }
+    }
+    const subject=pick(humans,salt+20)
+    if (!mainResult||!subject) return null
+    firstResult.filled.subject=subject
+    mainResult.filled.subject=subject
+    return { firstVerb, firstResult, mainVerb, mainResult, subject }
+  }
 
   if (patternId==='n4-11') {
     const studyPlaces=new Set(['図書館','学校','大学','高校','教室','家','カフェ'])
@@ -988,19 +1032,23 @@ function additionalN4Sentence(seed: number,patternId: string): GeneratedPreviewS
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} came ${englishPhrase(time,'time')}.`,{time,subject},{verb:grammarSlot('verb-kuru-past','来ました','来る','きました','come',['completed-event','past'])},[useNi?'Specific clock time accepts に.':'Relative time correctly omits に.'])
   }
   if (patternId==='n4-13') {
-    const activityVerb=seededPick(verbs.filter(verb=>['taberu-basic','nomu-basic'].includes(verb.id)),seed,431)
+    const activityVerb=pickDirectVerb(431)
+    if (!activityVerb) return null
     const activity=fillVerbSlots(activityVerb,vocabulary,seed,432)
     const destinations=places.filter(word=>[...tagSet(word)].some(tag=>['school','university','library','office','store','park','station','home','house'].includes(tag)))
     const destination=pick(destinations,433)
     if (!activity||!destination) return null
     const selectedObject=activity.filled.object!
+    const subject=activity.filled.subject!
     const replacementFoods=exact(['ご飯','パン','魚','肉','果物','卵','ラーメン','寿司'])
     const object=selectedObject.japanese==='食べ物'?(pick(replacementFoods,434)??selectedObject):selectedObject
     const te=n4VerbForms(activityVerb).te
     const objectEnglish=object.japanese==='ご飯'?'a meal':object.japanese==='食べ物'?'food':englishPhrase(object,'object')
-    const furigana=[wordPart(object,'object'),literalPart('を'),literalPart(`${te.japanese}から`,`${te.reading}から`,'firstVerb'),wordPart(destination,'destination'),literalPart('へ','え'),literalPart('行きます','いきます','mainVerb')]
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart(`${te.japanese}から`,`${te.reading}から`,'firstVerb'),wordPart(destination,'destination'),literalPart('へ','え'),literalPart('行きます','いきます','mainVerb')]
     const extra={firstVerb:grammarSlot(`verb-${activityVerb.id}-tekara`,`${te.japanese}から`,activityVerb.japanese,`${te.reading}から`,activityVerb.english,['sequence','te-kara']),mainVerb:grammarSlot('verb-iku-after','行きます','行く','いきます','go',['movement','sequence-result'])}
-    return finish(furigana,`After ${presentParticiple(activityVerb.english)} ${objectEnglish}, I go ${movementDestination(destination)}.`,{object,destination},extra,['The second action follows the first.','Destination supports 行く.'])
+    const subjectEnglish=englishPhrase(subject,'subject')
+    const goes=subjectUsesBaseVerb(subjectEnglish)?'go':'goes'
+    return finish(furigana,`After ${presentParticiple(activityVerb.english)} ${objectEnglish}, ${subjectEnglish} ${goes} ${movementDestination(destination)}.`,{subject,object,destination},extra,['firstVerb.object is governed by the first verb.','mainVerb.destination is governed by the main verb.','Both actions share one compatible subject.'])
   }
   if (patternId==='n4-14') {
     const purposes=[
@@ -1062,11 +1110,55 @@ function additionalN4Sentence(seed: number,patternId: string): GeneratedPreviewS
     const furigana=[literalPart(pair.one,pair.oneReading,'property1'),literalPart('し'),literalPart(pair.two,pair.twoReading,'property2')]
     return finish(furigana,pair.english,{}, {property1:grammarSlot('property-1',pair.one,pair.one,pair.oneReading,pair.oneEnglish,['shared-topic-property'],'i_adjective'),property2:grammarSlot('property-2',pair.two,pair.two.replace(/です$/,''),pair.twoReading,pair.twoEnglish,['shared-topic-property'],'na_adjective')},['Both properties describe the same implied topic.'])
   }
-  const subject=pick(humans,501),object=pick(exact(['漢字','本','記事','新聞','小説','辞書']),502)
-  if (!subject||!object) return null
-  const subjectEnglish=englishPhrase(subject,'subject')
-  const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('が'),literalPart('読めます','よめます','verb')]
-  return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} can read ${englishPhrase(object,'object')}.`,{subject,object},{verb:grammarSlot('verb-yomeru','読めます','読める','よめます','can read',['potential','ability','godan-potential'])},['Uses the correct potential form 読める.','Object is readable.'])
+  if (patternId==='n4-20') {
+    const subject=pick(humans,501),object=pick(exact(['漢字','本','記事','新聞','小説','辞書']),502)
+    if (!subject||!object) return null
+    const subjectEnglish=englishPhrase(subject,'subject')
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('が'),literalPart('読めます','よめます','verb')]
+    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} can read ${englishPhrase(object,'object')}.`,{subject,object},{verb:grammarSlot('verb-yomeru','読めます','読める','よめます','can read',['potential','ability','godan-potential'])},['Uses the correct potential form 読める.','Object is readable.'])
+  }
+  if (patternId==='n4-21' || patternId==='n4-22' || patternId==='n4-23') {
+    const pair=actionPair(patternId==='n4-21'?511:patternId==='n4-22'?521:531)
+    if (!pair) return null
+    const {firstVerb,firstResult,mainVerb,mainResult,subject}=pair
+    const firstObject=firstResult.filled.object!,mainObject=mainResult.filled.object!
+    const subjectEnglish=englishPhrase(subject,'subject')
+    const firstEnglish=translatedVerb(firstVerb,{subject,object:firstObject},true)
+    const mainEnglish=translatedVerb(mainVerb,{subject,object:mainObject},subjectUsesBaseVerb(subjectEnglish))
+    const firstForms=n4VerbForms(firstVerb),mainForms=n4VerbForms(mainVerb)
+    const firstObjectEnglish=englishPhrase(firstObject,'object'),mainObjectEnglish=englishPhrase(mainObject,'object')
+    const sharedFilled={subject,firstObject,mainObject}
+
+    if (patternId==='n4-21') {
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(firstObject,'firstObject'),literalPart('を'),literalPart(firstVerb.japanese,firstVerb.reading,'firstVerb'),literalPart('前に','まえに'),wordPart(mainObject,'mainObject'),literalPart('を'),literalPart(mainForms.masu.japanese,mainForms.masu.reading,'mainVerb')]
+      return finish(furigana,`Before ${presentParticiple(firstEnglish)} ${firstObjectEnglish}, ${subjectEnglish} ${mainEnglish} ${mainObjectEnglish}.`,sharedFilled,{firstVerb:grammarSlot(`verb-${firstVerb.id}-mae`,firstVerb.japanese,firstVerb.japanese,firstVerb.reading,firstVerb.english,['before','dictionary-form']),mainVerb:grammarSlot(`verb-${mainVerb.id}-mae`,mainForms.masu.japanese,mainVerb.japanese,mainForms.masu.reading,mainVerb.english,['main-action','masu'])},['firstVerb.object is governed by the first verb.','mainVerb.object is governed by the main verb.','Both actions share one compatible subject.'])
+    }
+    if (patternId==='n4-22') {
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(firstObject,'firstObject'),literalPart('を'),literalPart(firstForms.ta.japanese,firstForms.ta.reading,'firstVerb'),literalPart('後で','あとで'),wordPart(mainObject,'mainObject'),literalPart('を'),literalPart(mainForms.masu.japanese,mainForms.masu.reading,'mainVerb')]
+      return finish(furigana,`After ${presentParticiple(firstEnglish)} ${firstObjectEnglish}, ${subjectEnglish} ${mainEnglish} ${mainObjectEnglish}.`,sharedFilled,{firstVerb:grammarSlot(`verb-${firstVerb.id}-ato`,firstForms.ta.japanese,firstVerb.japanese,firstForms.ta.reading,firstVerb.english,['after','past-plain']),mainVerb:grammarSlot(`verb-${mainVerb.id}-ato`,mainForms.masu.japanese,mainVerb.japanese,mainForms.masu.reading,mainVerb.english,['main-action','masu'])},['firstVerb.object is governed by the first verb.','mainVerb.object is governed by the main verb.','The two objects are different.'])
+    }
+    const firstTari=appendForm(firstForms.ta,'り'),mainTari=appendForm(mainForms.ta,'り')
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(firstObject,'firstObject'),literalPart('を'),literalPart(firstTari.japanese,firstTari.reading,'firstVerb'),wordPart(mainObject,'mainObject'),literalPart('を'),literalPart(mainTari.japanese,mainTari.reading,'mainVerb'),literalPart('します','します','summaryVerb')]
+    const doesThings=subjectUsesBaseVerb(subjectEnglish)?'do things':'does things'
+    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${doesThings} like ${presentParticiple(firstEnglish)} ${firstObjectEnglish} and ${presentParticiple(translatedVerb(mainVerb,{subject,object:mainObject},true))} ${mainObjectEnglish}.`,sharedFilled,{firstVerb:grammarSlot(`verb-${firstVerb.id}-tari`,firstTari.japanese,firstVerb.japanese,firstTari.reading,firstVerb.english,['example-action','tari-form']),mainVerb:grammarSlot(`verb-${mainVerb.id}-tari`,mainTari.japanese,mainVerb.japanese,mainTari.reading,mainVerb.english,['example-action','tari-form']),summaryVerb:grammarSlot('verb-suru-tari','します','する','します','do',['summary-action','tari-tari'])},['firstVerb.object is governed by the first verb.','mainVerb.object is governed by the main verb.','The two objects are different.'])
+  }
+  if (patternId==='n4-24' || patternId==='n4-25') {
+    const verb=pickDirectVerb(541)
+    const result=verb ? fillVerbSlots(verb,vocabulary,seed,542) : null
+    if (!verb||!result) return null
+    const subject=result.filled.subject!,object=result.filled.object!
+    const subjectEnglish=englishPhrase(subject,'subject')
+    const base=translatedVerb(verb,{subject,object},true)
+    const forms=n4VerbForms(verb)
+    if (patternId==='n4-24') {
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),literalPart(verb.japanese,verb.reading,'verb'),literalPart('ことができます','ことができます')]
+      return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} can ${base} ${englishPhrase(object,'object')}.`,{subject,object},{verb:grammarSlot(`verb-${verb.id}-dekiru`,verb.japanese,verb.japanese,verb.reading,verb.english,['ability','dictionary-form','koto-ga-dekiru'])},['Verb selected first and supplied the object rule.','ことができます attaches to the dictionary form.'])
+    }
+    const negative=appendForm(forms.aStem,'なくてもいいです')
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),literalPart(negative.japanese,negative.reading,'verb')]
+    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} does not have to ${base} ${englishPhrase(object,'object')}.`,{subject,object},{verb:grammarSlot(`verb-${verb.id}-nakute`,negative.japanese,verb.japanese,negative.reading,verb.english,['not-required','nakute-mo-ii'])},['Verb selected first and supplied the object rule.','なくてもいい expresses that the action is not required.'])
+  }
+  return null
 }
 
 const n3PatternIds = new Set(Array.from({length:10},(_,index)=>`n3-${String(index+1).padStart(2,'0')}`))
@@ -1350,6 +1442,8 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
   }
   const excluded=incompatibleVerbs[patternId]
   if (excluded) verbPool=verbPool.filter(verb=>!excluded.has(verb.id))
+  if (options.verbId) verbPool=verbPool.filter(verb=>verb.id===options.verbId)
+  if (!verbPool.length) return null
   const verb=seededPick(verbPool,seed,62)
   const result=fillVerbSlots(verb,vocabulary,seed,63,options)
   const form=n4SurfaceForm(patternId,verb)
@@ -1386,14 +1480,17 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
 
 export function generateCategorySentence(seed: number, requestedPatternId?: string, level: 'N5'|'N4'|'N3'='N5',options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (level==='N3'||requestedPatternId?.startsWith('n3-')) return requestedPatternId?generateN3CategorySentence(seed,requestedPatternId):null
-  if (requestedPatternId && additionalN4PatternIds.has(requestedPatternId)) return additionalN4Sentence(seed,requestedPatternId)
+  if (requestedPatternId && additionalN4PatternIds.has(requestedPatternId)) return additionalN4Sentence(seed,requestedPatternId,options)
   if (level === 'N4' || requestedPatternId?.startsWith('n4-')) return generateN4CategorySentence(seed,requestedPatternId,options)
-  if (requestedPatternId && additionalN5PatternIds.has(requestedPatternId)) return additionalN5Sentence(seed,requestedPatternId)
+  if (requestedPatternId && additionalN5PatternIds.has(requestedPatternId)) return additionalN5Sentence(seed,requestedPatternId,options)
   // A requested pattern limits the eligible records, but the executable unit is
   // still the verb: once chosen, its own pattern and slot rules drive the rest.
   const verbPool = requestedPatternId ? verbs.filter(verb => verb.sentencePattern === requestedPatternId) : verbs
   if (!verbPool.length) return null
-  const verb = seededPick(verbPool, seed, 1)
+  const verb = options.verbId
+    ? verbPool.find(candidate => candidate.id === options.verbId)
+    : seededPick(verbPool, seed, 1)
+  if (!verb) return null
   const vocabulary = editorWords()
   const result = fillVerbSlots(verb,vocabulary,seed,2,options)
   if (!result) return null

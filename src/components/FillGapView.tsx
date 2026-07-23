@@ -10,9 +10,19 @@ interface FillGapViewProps {
   total: number
   onResult: (correct: boolean) => void
   onExit: () => void
+  isFavorite: boolean
+  onToggleFavorite: () => void
 }
 
-export function FillGapView({ exercise, current, total, onResult, onExit }: FillGapViewProps) {
+export function FillGapView({
+  exercise,
+  current,
+  total,
+  onResult,
+  onExit,
+  isFavorite,
+  onToggleFavorite,
+}: FillGapViewProps) {
   const [selected, setSelected] = useState<string | null>(null)
   const [answered, setAnswered] = useState(false)
 
@@ -80,6 +90,16 @@ export function FillGapView({ exercise, current, total, onResult, onExit }: Fill
           ) : answerGloss ? (
             <div className={`sentence-feedback ${isCorrect ? 'correct' : 'wrong'}`}>
               <AnswerReveal gloss={answerGloss} />
+              <button
+                type="button"
+                className={`sentence-favorite-button${isFavorite ? ' is-favorite' : ''}`}
+                onClick={onToggleFavorite}
+                aria-label={isFavorite ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
+                aria-pressed={isFavorite}
+                title={isFavorite ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
+              >
+                {isFavorite ? '★' : '☆'}
+              </button>
             </div>
           ) : null}
         </div>

@@ -45,6 +45,11 @@ export interface DrillExercise {
   prompt: string
   /** Hiragana for `prompt`, split on the same ___ marker. */
   promptReading?: string
+  /** Original sentence pieces on either side of the blank, for exact ruby placement. */
+  promptFurigana?: {
+    before: Array<{ text: string; reading?: string }>
+    after: Array<{ text: string; reading?: string }>
+  }
   answer: string
   answerReading?: string
   options: string[]

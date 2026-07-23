@@ -20,6 +20,10 @@ export interface ChoiceDrillProps {
   finishNoun: string
   /** Namespaces the saved preferences so each drill remembers its own settings. */
   storagePrefix: string
+  /** Vocab can generate a fresh set when an endless pass ends. */
+  onLoadNextPool?: () => Promise<DrillExercise[]>
+  isFavorite: (exercise: DrillExercise) => boolean
+  onToggleFavorite: (exercise: DrillExercise) => void
   onBack: () => void
 }
 
@@ -66,6 +70,12 @@ function saveLevelPreference(key: string, levels: DrillJlptLevel[]) {
   }
 }
 
+function initialAvailableLevels(key: string, availableLevels: DrillJlptLevel[]) {
+  const stored = loadLevelPreference(key)
+  const selected = stored.filter((level) => availableLevels.includes(level))
+  return selected.length ? selected : [availableLevels[0] ?? 'N5']
+}
+
 /**
  * Fill-the-blank multiple-choice drill shared by Grammar and Vocab practice.
  * Styling reuses the `grammar-*` classes, which are the drill's visual system
@@ -79,6 +89,9 @@ export function ChoiceDrill({
   finishTitle,
   finishNoun,
   storagePrefix,
+  onLoadNextPool,
+  isFavorite,
+  onToggleFavorite,
   onBack,
 }: ChoiceDrillProps) {
   const furiganaKey = `${storagePrefix}-show-furigana-v1`
@@ -92,20 +105,26 @@ export function ChoiceDrill({
       ) as Record<DrillJlptLevel, number>,
     [pool],
   )
+  const availableLevels = useMemo(
+    () => DRILL_LEVELS.filter((level) => levelCounts[level] > 0),
+    [levelCounts],
+  )
 
-  const [levels, setLevels] = useState<DrillJlptLevel[]>(() => loadLevelPreference(levelsKey))
+  const [levels, setLevels] = useState<DrillJlptLevel[]>(() => initialAvailableLevels(levelsKey, availableLevels))
   const [levelMenuOpen, setLevelMenuOpen] = useState(false)
   const levelPickerRef = useRef<HTMLDivElement>(null)
   // Shuffled once per visit (and again on restart or a level change) so the same
   // sentences don't always show up in the same fixed order every time.
   const [exercises, setExercises] = useState(() =>
-    shuffle(pool.filter((item) => loadLevelPreference(levelsKey).includes(item.jlpt))),
+    shuffle(pool.filter((item) => initialAvailableLevels(levelsKey, availableLevels).includes(item.jlpt))),
   )
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selected, setSelected] = useState<string | null>(null)
   const [answered, setAnswered] = useState(false)
   const [correctCount, setCorrectCount] = useState(0)
   const [finished, setFinished] = useState(false)
+  const [loadingNextPool, setLoadingNextPool] = useState(false)
+  const [infiniteCompletedCount, setInfiniteCompletedCount] = useState(0)
   const [showFurigana, setShowFurigana] = useState(() => loadBooleanPreference(furiganaKey, true))
   const [infiniteMode, setInfiniteMode] = useState(() => loadBooleanPreference(infiniteKey, false))
   const [eliminatedOptions, setEliminatedOptions] = useState<Set<string>>(new Set())
@@ -164,7 +183,7 @@ export function ChoiceDrill({
     // Keep at least one level on — an empty set would leave nothing to practice.
     const next = levels.includes(level)
       ? levels.filter((item) => item !== level)
-      : DRILL_LEVELS.filter((item) => item === level || levels.includes(item))
+      : availableLevels.filter((item) => item === level || levels.includes(item))
     if (!next.length) return
 
     setLevels(next)
@@ -180,6 +199,7 @@ export function ChoiceDrill({
     setAnswered(false)
     setCorrectCount(0)
     setFinished(false)
+    setInfiniteCompletedCount(0)
     setEliminatedOptions(new Set())
     setHintCount(0)
   }
@@ -223,8 +243,8 @@ export function ChoiceDrill({
     setSelected(null)
   }
 
-  function continuePractice() {
-    if (!selected) return
+  async function continuePractice() {
+    if (!selected || loadingNextPool) return
     if (!answered) {
       setAnswered(true)
       if (selected === exercise.answer) setCorrectCount((count) => count + 1)
@@ -235,12 +255,32 @@ export function ChoiceDrill({
         setFinished(true)
         return
       }
-      // Queue another reshuffled pass so practice never runs out.
+      if (onLoadNextPool) {
+        setInfiniteCompletedCount((count) => count + 1)
+        setLoadingNextPool(true)
+        try {
+          const nextPool = await onLoadNextPool()
+          const nextExercises = shuffle(nextPool.filter((item) => levels.includes(item.jlpt)))
+          if (nextExercises.length) {
+            setExercises(nextExercises)
+            setCurrentIndex(0)
+          }
+        } finally {
+          setLoadingNextPool(false)
+        }
+        setSelected(null)
+        setAnswered(false)
+        setEliminatedOptions(new Set())
+        setHintCount(0)
+        return
+      }
+      // Grammar has a fixed curated pool, so it still receives a reshuffled pass.
       setExercises((items) => [
         ...items,
         ...shuffle(pool.filter((item) => levels.includes(item.jlpt))),
       ])
     }
+    setInfiniteCompletedCount((count) => infiniteMode ? count + 1 : count)
     setCurrentIndex((index) => index + 1)
     setSelected(null)
     setAnswered(false)
@@ -250,6 +290,22 @@ export function ChoiceDrill({
 
   function restart() {
     startSession(levels)
+  }
+
+  if (loadingNextPool) {
+    return (
+      <div className="practice-loading">
+        <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        <section className="practice-loading-card" role="status" aria-live="polite">
+          <span className="practice-loading-mark">{finishMark}</span>
+          <h1>{badgeLabel}</h1>
+          <p>Generating another fresh practice set</p>
+          <div className="practice-loading-bar" aria-label="Generating a new practice set">
+            <span className="is-indeterminate" />
+          </div>
+        </section>
+      </div>
+    )
   }
 
   if (finished) {
@@ -274,7 +330,7 @@ export function ChoiceDrill({
       <div className="study-top grammar-study-top">
         <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
         <span className="study-progress">
-          {infiniteMode ? `${currentIndex + 1} / ∞` : `${currentIndex + 1} / ${exercises.length}`}
+          {infiniteMode ? `${infiniteCompletedCount + 1} / ∞` : `${currentIndex + 1} / ${exercises.length}`}
         </span>
         <div className="builder-top-controls">
           <button
@@ -306,7 +362,7 @@ export function ChoiceDrill({
             {levelMenuOpen && (
               <div className="builder-level-menu" role="group" aria-label={`${badgeLabel} JLPT levels`}>
                 <span className="builder-level-menu-label">Practice levels</span>
-                {DRILL_LEVELS.map((level) => {
+                {availableLevels.map((level) => {
                   const isSelected = levels.includes(level)
 
                   return (
@@ -334,12 +390,40 @@ export function ChoiceDrill({
       </div>
 
       <main className="grammar-choice-card">
+        <div className="drill-answer-top-actions">
+          {answered && (
+            <>
+            <button
+              type="button"
+              className={`sentence-favorite-button${isFavorite(exercise) ? ' is-favorite' : ''}`}
+              onClick={() => onToggleFavorite(exercise)}
+              aria-label={isFavorite(exercise) ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
+              aria-pressed={isFavorite(exercise)}
+              title={isFavorite(exercise) ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
+            >
+              {isFavorite(exercise) ? '★' : '☆'}
+            </button>
+            <button
+              type="button"
+              className="sentence-new-button"
+              onClick={() => void continuePractice()}
+              title="Move to the next sentence"
+            >
+              New Sentence
+            </button>
+            </>
+          )}
+        </div>
         <div className="grammar-eyebrow">{eyebrow}</div>
 
         <p className="grammar-english-clue">“{exercise.english}”</p>
 
         <div className="grammar-sentence-frame" lang="ja">
-          <FuriganaSegment text={promptParts[0]} reading={promptReadingParts[0]} />
+          {exercise.promptFurigana
+            ? exercise.promptFurigana.before.map((part, index) => (
+                <FuriganaSegment key={`before-${index}-${part.text}`} text={part.text} reading={part.reading} />
+              ))
+            : <FuriganaSegment text={promptParts[0]} reading={promptReadingParts[0]} />}
           <span
             className={`grammar-gap${previewWord ? ' is-filled' : ''}${answered ? (isCorrect ? ' is-correct' : ' is-wrong') : ''}`}
             style={gapWidth ? { width: `${gapWidth}px` } : undefined}
@@ -348,7 +432,11 @@ export function ChoiceDrill({
                 collapsed inside the flex row, leaving the underline stranded mid-sentence. */}
             {previewWord ? <FuriganaSegment text={previewWord} reading={previewReading} /> : ' '}
           </span>
-          <FuriganaSegment text={promptParts[1]} reading={promptReadingParts[1]} />
+          {exercise.promptFurigana
+            ? exercise.promptFurigana.after.map((part, index) => (
+                <FuriganaSegment key={`after-${index}-${part.text}`} text={part.text} reading={part.reading} />
+              ))
+            : <FuriganaSegment text={promptParts[1]} reading={promptReadingParts[1]} />}
           <div className="grammar-gap-measure" aria-hidden="true" ref={gapMeasureRef}>
             {exercise.options.map((option, optionIndex) => (
               <span key={option} className="grammar-gap">

@@ -15,6 +15,7 @@ interface DashboardProps {
   onOpenVocabList: () => void
   onOpenVocabPractice: () => void
   onOpenContentStudio: () => void
+  onOpenFavoriteSentences: () => void
 }
 
 export function Dashboard({
@@ -25,27 +26,18 @@ export function Dashboard({
   onOpenVocabList,
   onOpenVocabPractice,
   onOpenContentStudio,
+  onOpenFavoriteSentences,
   wrongPool,
   progress,
 }: DashboardProps) {
-  const [displayMode, setDisplayMode] = useState<'sentence' | 'word'>('sentence')
   const [furiganaOn, setFuriganaOn] = useState(true)
-  const [delayedFurigana, setDelayedFurigana] = useState(true)
   const [jlptLevel, setJlptLevel] = useState<JlptLevel>('N5')
 
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
-  const furiganaActive = displayMode === 'sentence' ? furiganaOn : delayedFurigana
+  const furiganaActive = furiganaOn
 
   function toggleFurigana() {
-    if (displayMode === 'sentence') {
-      setFuriganaOn((on) => !on)
-      return
-    }
-    setDelayedFurigana((on) => !on)
-  }
-
-  function toggleDisplayMode() {
-    setDisplayMode((mode) => (mode === 'sentence' ? 'word' : 'sentence'))
+    setFuriganaOn((on) => !on)
   }
 
   return (
@@ -55,9 +47,9 @@ export function Dashboard({
         <RotatingHeroSentence
           wrongPool={wrongPool}
           progress={progress}
-          displayMode={displayMode}
+          displayMode="sentence"
           furiganaOn={furiganaOn}
-          delayedFurigana={delayedFurigana}
+          delayedFurigana={false}
           jlptLevel={jlptLevel}
         />
       </header>
@@ -77,11 +69,7 @@ export function Dashboard({
           className={`stat-card stat-card-btn${furiganaActive ? ' is-active' : ''}`}
           onClick={toggleFurigana}
           aria-pressed={furiganaActive}
-          aria-label={
-            displayMode === 'sentence'
-              ? 'Toggle furigana'
-              : 'Toggle delayed furigana'
-          }
+          aria-label="Toggle furigana"
         >
           <span className="stat-value stat-value-jp">ふり</span>
           <span className="stat-label">Furigana</span>
@@ -90,15 +78,11 @@ export function Dashboard({
         <button
           type="button"
           className="stat-card stat-card-btn"
-          onClick={toggleDisplayMode}
-          aria-label={displayMode === 'sentence' ? 'Kanji word mode' : 'Sentence mode'}
+          onClick={onOpenFavoriteSentences}
+          aria-label="Open favorite sentences"
         >
-          <span className="stat-value stat-value-jp">
-            {displayMode === 'sentence' ? '漢' : '文'}
-          </span>
-          <span className="stat-label">
-            {displayMode === 'sentence' ? 'Kanji' : 'Sentence'}
-          </span>
+          <span className="stat-value stat-value-jp" aria-hidden="true">★</span>
+          <span className="stat-label">Favorite Sentences</span>
         </button>
 
         <div className="stat-card stat-card-levels">

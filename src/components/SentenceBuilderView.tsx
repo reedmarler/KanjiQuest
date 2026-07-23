@@ -169,6 +169,8 @@ interface SentenceBuilderViewProps {
   onToggleLevel: (level: JlptLevel) => void
   infiniteMode: boolean
   onToggleInfiniteMode: () => void
+  isFavorite: boolean
+  onToggleFavorite: () => void
 }
 
 function normalizeSentenceAnswer(value: string): string {
@@ -397,6 +399,8 @@ export function SentenceBuilderView({
   onToggleLevel,
   infiniteMode,
   onToggleInfiniteMode,
+  isFavorite,
+  onToggleFavorite,
 }: SentenceBuilderViewProps) {
   const segments = exercise.segments ?? []
   const readings = exercise.segmentReadings
@@ -858,7 +862,22 @@ export function SentenceBuilderView({
           <div className="sentence-builder-panel">
             <div className="sentence-builder-inner-outline">
               <div className="sentence-translation-shell">
-                <button className="sentence-new-button is-placeholder" disabled aria-hidden="true" tabIndex={-1}>
+                <button
+                  type="button"
+                  className={`sentence-favorite-button${isFavorite ? ' is-favorite' : ''}`}
+                  onClick={onToggleFavorite}
+                  aria-label={isFavorite ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
+                  aria-pressed={isFavorite}
+                  title={isFavorite ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
+                >
+                  {isFavorite ? '★' : '☆'}
+                </button>
+                <button
+                  type="button"
+                  className="sentence-new-button"
+                  onClick={onSkip}
+                  title="Move to the next sentence"
+                >
                   New Sentence
                 </button>
                 <div className="sentence-translation-prompt" aria-label="Sentence to translate">
@@ -866,7 +885,7 @@ export function SentenceBuilderView({
                 </div>
               </div>
 
-              <div ref={feedbackRef} className={`sentence-feedback ${isCorrect ? 'correct' : 'wrong'}`}>
+              <div ref={feedbackRef} className={`sentence-feedback has-audio ${isCorrect ? 'correct' : 'wrong'}`}>
                 <AnswerReveal gloss={answerGloss} />
                 {speechSupported && (
                   <div className="sentence-audio-controls">

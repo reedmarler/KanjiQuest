@@ -6,6 +6,15 @@ import { recordFillGapSeen } from './lib/sentenceRecent'
 import { isLearned } from './lib/srs'
 import { loadProgress } from './lib/storage'
 import {
+  favoriteFromExercise,
+  favoriteFromDrillExercise,
+  isDrillExerciseFavorite,
+  isExerciseFavorite,
+  loadFavoriteSentences,
+  saveFavoriteSentences,
+  type FavoriteSentence,
+} from './lib/favoriteSentences'
+import {
   loadWrongPool,
   recordCorrect,
   recordWrong,
@@ -13,6 +22,7 @@ import {
 } from './lib/wrongPool'
 import type { CardProgress, JlptLevel } from './lib/types'
 import type { SentenceExercise } from './data/sentenceExercises'
+import type { DrillExercise } from './lib/drillExercises'
 import type { FillGapLevelFilter } from './lib/fillGapLevels'
 import { Dashboard } from './components/Dashboard'
 import { FillGapView } from './components/FillGapView'
@@ -23,6 +33,7 @@ import { VocabList } from './components/VocabList'
 import { ContentStudio } from './components/ContentStudio'
 import { GrammarPractice } from './components/GrammarPractice'
 import { VocabPractice } from './components/VocabPractice'
+import { FavoriteSentences } from './components/FavoriteSentences'
 import './App.css'
 
 type View =
@@ -34,6 +45,7 @@ type View =
   | 'complete'
   | 'content-studio'
   | 'grammar'
+  | 'favorites'
 
 type SessionItem =
   | { kind: 'fill-gap'; exercise: SentenceExercise }
@@ -49,6 +61,7 @@ function App() {
   const [exitView, setExitView] = useState<View>('dashboard')
   const [builderLevels, setBuilderLevels] = useState<JlptLevel[]>(['N5'])
   const [infiniteBuilderMode, setInfiniteBuilderMode] = useState(false)
+  const [favoriteSentences, setFavoriteSentences] = useState<FavoriteSentence[]>(() => loadFavoriteSentences())
 
   const learnedCount = useMemo(
     () => allCards.filter((c) => {
@@ -73,6 +86,25 @@ function App() {
     }
     updateWrongPool(pool)
   }, [wrongPool, updateWrongPool])
+
+  const toggleFavorite = useCallback((favorite: FavoriteSentence) => {
+    setFavoriteSentences((current) => {
+      const saved = current.some((item) => item.japanese === favorite.japanese)
+      const next = saved
+        ? current.filter((item) => item.japanese !== favorite.japanese)
+        : [favorite, ...current]
+      saveFavoriteSentences(next)
+      return next
+    })
+  }, [])
+
+  const toggleFavoriteSentence = useCallback((exercise: SentenceExercise) => {
+    toggleFavorite(favoriteFromExercise(exercise))
+  }, [toggleFavorite])
+
+  const toggleDrillFavorite = useCallback((exercise: DrillExercise) => {
+    toggleFavorite(favoriteFromDrillExercise(exercise))
+  }, [toggleFavorite])
 
   const startStudy = (items: SessionItem[], returnTo: View = 'dashboard') => {
     if (items.length === 0) return
@@ -132,10 +164,32 @@ function App() {
     )
   }
 
+  if (view === 'favorites') {
+    return (
+      <div className="app">
+        <FavoriteSentences
+          favorites={favoriteSentences}
+          onBack={() => setView('dashboard')}
+          onRemove={(favorite) => {
+            setFavoriteSentences((current) => {
+              const next = current.filter((item) => item.japanese !== favorite.japanese)
+              saveFavoriteSentences(next)
+              return next
+            })
+          }}
+        />
+      </div>
+    )
+  }
+
   if (view === 'vocab-practice') {
     return (
       <div className="app">
-        <VocabPractice onBack={() => setView('dashboard')} />
+        <VocabPractice
+          onBack={() => setView('dashboard')}
+          isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
+          onToggleFavorite={toggleDrillFavorite}
+        />
       </div>
     )
   }
@@ -145,7 +199,11 @@ function App() {
   if (view === 'grammar') {
     return (
       <div className="app">
-        <GrammarPractice onBack={() => setView('dashboard')} />
+        <GrammarPractice
+          onBack={() => setView('dashboard')}
+          isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
+          onToggleFavorite={toggleDrillFavorite}
+        />
       </div>
     )
   }
@@ -186,6 +244,8 @@ function App() {
             total={session.length}
             onResult={handleSentenceResult}
             onExit={() => setView(exitView)}
+            isFavorite={isExerciseFavorite(favoriteSentences, item.exercise)}
+            onToggleFavorite={() => toggleFavoriteSentence(item.exercise)}
           />
         </div>
       )
@@ -207,6 +267,8 @@ function App() {
             onToggleLevel={toggleBuilderLevel}
             infiniteMode={infiniteBuilderMode}
             onToggleInfiniteMode={() => setInfiniteBuilderMode((enabled) => !enabled)}
+            isFavorite={isExerciseFavorite(favoriteSentences, item.exercise)}
+            onToggleFavorite={() => toggleFavoriteSentence(item.exercise)}
           />
         </div>
       )
@@ -225,6 +287,7 @@ function App() {
         onOpenVocabList={() => setView('vocab-list')}
         onOpenVocabPractice={() => setView('vocab-practice')}
         onOpenContentStudio={() => setView('content-studio')}
+        onOpenFavoriteSentences={() => setView('favorites')}
         wrongPool={wrongPool}
         progress={progress}
       />
