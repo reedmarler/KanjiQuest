@@ -944,7 +944,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const verb=options.verbId ? directVerbs.find(candidate=>candidate.id===options.verbId) : seededPick(directVerbs,seed,241)
     const result=verb ? fillVerbSlots(verb,vocabulary,seed,242) : null
     if (!verb||!result) return null
-    const negative=appendForm(n4VerbForms(verb).aStem,'ません')
+    const negative=appendForm(n4VerbForms(verb).masuStem,'ません')
     const subject=result.filled.subject!,object=result.filled.object!
     const subjectEnglish=englishPhrase(subject,'subject')
     const englishVerb=translatedVerb(verb,{subject,object},subjectUsesBaseVerb(subjectEnglish))
