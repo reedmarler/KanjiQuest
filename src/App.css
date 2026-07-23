@@ -5221,9 +5221,9 @@ body:has(.dashboard) .app {
   }
 
   .sentence-builder-inner-outline {
-    height: 29.8rem;
-    min-height: 29.8rem;
-    max-height: 29.8rem;
+    height: 22.8rem;
+    min-height: 22.8rem;
+    max-height: 22.8rem;
   }
 
   .sentence-translation-shell {
