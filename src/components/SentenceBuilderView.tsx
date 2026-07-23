@@ -11,6 +11,7 @@ const SPEECH_RATES = [0.9, 0.75, 0.6] as const
 const HIDE_WORDS_STORAGE_KEY = 'kanji-quest-sentence-builder-hide-words-v1'
 const SHOW_FURIGANA_STORAGE_KEY = 'kanji-quest-sentence-builder-show-furigana-v1'
 const SPLIT_PARTICLES_STORAGE_KEY = 'kanji-quest-sentence-builder-split-particles-v1'
+const FAST_MODE_STORAGE_KEY = 'kanji-quest-sentence-builder-fast-mode-v1'
 const PARTICLE_SUFFIXES = ['から', 'まで', 'は', 'を', 'が', 'に', 'で', 'へ', 'と', 'も', 'の', 'や', 'か'] as const
 
 interface BuilderTile {
@@ -417,6 +418,9 @@ export function SentenceBuilderView({
   const [splitParticles, setSplitParticles] = useState(() =>
     loadBooleanPreference(SPLIT_PARTICLES_STORAGE_KEY, false),
   )
+  const [fastMode, setFastMode] = useState(() =>
+    loadBooleanPreference(FAST_MODE_STORAGE_KEY, false),
+  )
   const [showRomajiLegend, setShowRomajiLegend] = useState(true)
   const [levelMenuOpen, setLevelMenuOpen] = useState(false)
   const [pendingLevels, setPendingLevels] = useState<JlptLevel[]>(() => [...selectedLevels])
@@ -552,6 +556,24 @@ export function SentenceBuilderView({
 
     setAnswered(true)
   }
+
+  const handleToggleFastMode = () => {
+    setFastMode((enabled) => {
+      const next = !enabled
+      saveBooleanPreference(FAST_MODE_STORAGE_KEY, next)
+      return next
+    })
+  }
+
+  // Fast mode: once every tile has been placed, check immediately instead of
+  // waiting for the learner to also press the Check button.
+  useEffect(() => {
+    if (!fastMode || answered || tiles.length === 0) return
+    if (picked.length !== tiles.length) return
+
+    handleCheck()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fastMode, picked.length, tiles.length, answered])
 
   const handleAnswerKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     if (event.key !== 'Enter' || event.shiftKey) return
@@ -702,6 +724,16 @@ export function SentenceBuilderView({
             title={infiniteMode ? 'Infinite practice on' : 'Keep practicing without an ending'}
           >
             ∞
+          </button>
+          <button
+            type="button"
+            className={`builder-fast-toggle${fastMode ? ' is-active' : ''}`}
+            onClick={handleToggleFastMode}
+            aria-pressed={fastMode}
+            aria-label={fastMode ? 'Turn off fast mode' : 'Turn on fast mode: checks your sentence the instant every tile is placed'}
+            title={fastMode ? 'Fast mode on — the sentence checks itself the moment it is complete' : 'Fast mode: skip the Check button and blitz through sentences'}
+          >
+            ⚡
           </button>
           <button
             type="button"
