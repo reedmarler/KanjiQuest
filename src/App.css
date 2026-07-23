@@ -5182,6 +5182,20 @@ body:has(.dashboard) .app {
 }
 
 @media (max-width: 480px) {
+  .sentence-header-actions,
+  .drill-answer-top-actions {
+    position: static;
+    margin-bottom: 0.4rem;
+  }
+
+  .grammar-practice-view .sentence-actions-row .btn {
+    min-width: 0;
+    flex: 1 1 0;
+    height: auto;
+    padding: 0.32rem 0.28rem;
+    font-size: 0.62rem;
+  }
+
   .sentence-back-button {
     width: 2.3rem;
     height: 1.6rem;
