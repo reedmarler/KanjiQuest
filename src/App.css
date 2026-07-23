@@ -5201,6 +5201,15 @@ body:has(.dashboard) .app {
     margin-bottom: 0.4rem;
   }
 
+  .sentence-inline-check {
+    height: 2.6rem;
+    padding-block: 0.5rem;
+  }
+
+  .grammar-action-slot .sentence-inline-check {
+    min-height: 3.6rem;
+  }
+
   .grammar-choice-card {
     padding: 1.1rem 0.9rem;
   }
