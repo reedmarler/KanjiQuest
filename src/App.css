@@ -4493,7 +4493,7 @@ body:has(.dashboard) .app {
 }
 
 .sentence-view .furigana-ruby rt {
-  transform: translateY(-0.44em);
+  transform: translateY(-0.18em);
 }
 
 .sentence-built-answered {
