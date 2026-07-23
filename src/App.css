@@ -3779,6 +3779,17 @@ body:has(.dashboard) .app {
   background: rgba(61, 122, 184, 0.1);
 }
 
+.sentence-new-button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.sentence-new-button:disabled:hover {
+  border-color: var(--border);
+  color: var(--text-muted);
+  background: var(--surface);
+}
+
 .sentence-new-button.is-placeholder,
 .sentence-builder-actions.is-placeholder {
   visibility: hidden;
@@ -4007,6 +4018,10 @@ body:has(.dashboard) .app {
 
 .drill-answer-top-actions .sentence-favorite-button {
   position: static;
+}
+
+.drill-answer-top-actions .sentence-new-button {
+  margin-left: auto;
 }
 
 .grammar-instruction {

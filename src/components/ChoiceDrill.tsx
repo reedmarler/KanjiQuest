@@ -243,13 +243,8 @@ export function ChoiceDrill({
     setSelected(null)
   }
 
-  async function continuePractice() {
-    if (!selected || loadingNextPool) return
-    if (!answered) {
-      setAnswered(true)
-      if (selected === exercise.answer) setCorrectCount((count) => count + 1)
-      return
-    }
+  async function advanceToNextExercise() {
+    if (loadingNextPool) return
     if (currentIndex + 1 >= exercises.length) {
       if (!infiniteMode) {
         setFinished(true)
@@ -286,6 +281,17 @@ export function ChoiceDrill({
     setAnswered(false)
     setEliminatedOptions(new Set())
     setHintCount(0)
+  }
+
+  async function continuePractice() {
+    if (!selected || loadingNextPool) return
+    if (!answered) {
+      setAnswered(true)
+      if (selected === exercise.answer) setCorrectCount((count) => count + 1)
+      return
+    }
+
+    await advanceToNextExercise()
   }
 
   function restart() {
@@ -391,28 +397,25 @@ export function ChoiceDrill({
 
       <main className="grammar-choice-card">
         <div className="drill-answer-top-actions">
-          {answered && (
-            <>
-            <button
-              type="button"
-              className={`sentence-favorite-button${isFavorite(exercise) ? ' is-favorite' : ''}`}
-              onClick={() => onToggleFavorite(exercise)}
-              aria-label={isFavorite(exercise) ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
-              aria-pressed={isFavorite(exercise)}
-              title={isFavorite(exercise) ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
-            >
-              {isFavorite(exercise) ? '★' : '☆'}
-            </button>
-            <button
-              type="button"
-              className="sentence-new-button"
-              onClick={() => void continuePractice()}
-              title="Move to the next sentence"
-            >
-              New Sentence
-            </button>
-            </>
-          )}
+          <button
+            type="button"
+            className={`sentence-favorite-button${isFavorite(exercise) ? ' is-favorite' : ''}`}
+            onClick={() => onToggleFavorite(exercise)}
+            aria-label={isFavorite(exercise) ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
+            aria-pressed={isFavorite(exercise)}
+            title={isFavorite(exercise) ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
+          >
+            {isFavorite(exercise) ? '★' : '☆'}
+          </button>
+          <button
+            type="button"
+            className="sentence-new-button"
+            onClick={() => void advanceToNextExercise()}
+            disabled={answered || loadingNextPool}
+            title={answered ? 'Answer shown' : 'Move to the next sentence'}
+          >
+            New Sentence
+          </button>
         </div>
         <div className="grammar-eyebrow">{eyebrow}</div>
 
