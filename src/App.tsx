@@ -27,7 +27,6 @@ import type { FillGapLevelFilter } from './lib/fillGapLevels'
 import { Dashboard } from './components/Dashboard'
 import { FillGapView } from './components/FillGapView'
 import { SentenceBuilderView } from './components/SentenceBuilderView'
-import { SentencePractice } from './components/SentencePractice'
 import { SessionComplete } from './components/SessionComplete'
 import { VocabList } from './components/VocabList'
 import { ContentStudio } from './components/ContentStudio'
@@ -38,7 +37,6 @@ import './App.css'
 
 type View =
   | 'dashboard'
-  | 'sentence-practice'
   | 'vocab-list'
   | 'vocab-practice'
   | 'study'
@@ -115,20 +113,25 @@ function App() {
     setView('study')
   }
 
-  const startSentenceMode = useCallback((type: 'fill-gap' | 'sentence-builder', fillGapFilter?: FillGapLevelFilter) => {
+  const startSentenceMode = useCallback((type: 'fill-gap' | 'sentence-builder', fillGapFilter?: FillGapLevelFilter, returnTo: View = 'dashboard') => {
     const items = buildSentenceSession(type, wrongPool, fillGapFilter, builderLevels)
-    startStudy(items, 'sentence-practice')
+    startStudy(items, returnTo)
   }, [builderLevels, wrongPool])
 
-  const toggleBuilderLevel = useCallback((level: JlptLevel) => {
-    if (!WIRED_BUILDER_LEVELS.includes(level)) return
+  const applyBuilderLevels = useCallback((nextLevels: readonly JlptLevel[]) => {
+    const next = WIRED_BUILDER_LEVELS.filter((level) => nextLevels.includes(level))
+    if (!next.length) return
 
-    setBuilderLevels((current) => {
-      if (!current.includes(level)) return [...current, level]
-      if (current.length === 1) return current
-      return current.filter((item) => item !== level)
-    })
-  }, [])
+    setBuilderLevels([...next])
+    if (session[currentIndex]?.kind === 'sentence-builder') {
+      const nextExercises = buildGeneratedBuilderExercises(next)
+      if (nextExercises.length) {
+        setSession(nextExercises.map((exercise) => ({ kind: 'sentence-builder' as const, exercise })))
+        setCurrentIndex(0)
+        setSessionCorrect(0)
+      }
+    }
+  }, [currentIndex, session])
 
   const advanceOrComplete = () => {
     if (currentIndex + 1 >= session.length) {
@@ -162,6 +165,10 @@ function App() {
         <VocabList onBack={() => setView('dashboard')} />
       </div>
     )
+  }
+
+  const goToPreviousSentence = () => {
+    setCurrentIndex((index) => Math.max(0, index - 1))
   }
 
   if (view === 'favorites') {
@@ -208,18 +215,6 @@ function App() {
     )
   }
 
-  if (view === 'sentence-practice') {
-    return (
-      <div className="app">
-        <SentencePractice
-          onStartFillGap={(filter) => startSentenceMode('fill-gap', filter)}
-          onStartBuilder={() => startSentenceMode('sentence-builder')}
-          onBack={() => setView('dashboard')}
-        />
-      </div>
-    )
-  }
-
   if (view === 'complete') {
     return (
       <div className="app">
@@ -260,11 +255,12 @@ function App() {
             current={currentIndex}
             total={session.length}
             onResult={handleSentenceResult}
+            onPrevious={goToPreviousSentence}
             onSkip={advanceOrComplete}
             onExit={() => setView(exitView)}
             selectedLevels={builderLevels}
             enabledLevels={WIRED_BUILDER_LEVELS}
-            onToggleLevel={toggleBuilderLevel}
+            onApplyLevels={applyBuilderLevels}
             infiniteMode={infiniteBuilderMode}
             onToggleInfiniteMode={() => setInfiniteBuilderMode((enabled) => !enabled)}
             isFavorite={isExerciseFavorite(favoriteSentences, item.exercise)}
@@ -282,7 +278,7 @@ function App() {
       <Dashboard
         learnedCount={learnedCount}
         totalCards={allCards.length}
-        onOpenSentencePractice={() => setView('sentence-practice')}
+        onOpenSentencePractice={() => startSentenceMode('sentence-builder')}
         onOpenGrammar={() => setView('grammar')}
         onOpenVocabList={() => setView('vocab-list')}
         onOpenVocabPractice={() => setView('vocab-practice')}

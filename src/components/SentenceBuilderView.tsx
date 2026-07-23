@@ -3,10 +3,10 @@ import { toHiragana, toRomaji } from 'wanakana'
 import { AnswerReveal } from './AnswerReveal'
 import { FuriganaSegment, hasKanji } from './FuriganaText'
 import { shuffle } from '../lib/quiz'
+import { DRILL_LEVELS } from '../lib/drillExercises'
 import type { SentenceExercise } from '../data/sentenceExercises'
 import type { JlptLevel } from '../lib/types'
 
-const BUILDER_LEVEL_OPTIONS: JlptLevel[] = ['N1', 'N2', 'N3', 'N4', 'N5']
 const SPEECH_RATES = [0.9, 0.75, 0.6] as const
 const HIDE_WORDS_STORAGE_KEY = 'kanji-quest-sentence-builder-hide-words-v1'
 const SHOW_FURIGANA_STORAGE_KEY = 'kanji-quest-sentence-builder-show-furigana-v1'
@@ -162,11 +162,12 @@ interface SentenceBuilderViewProps {
   current: number
   total: number
   onResult: (correct: boolean) => void
+  onPrevious: () => void
   onSkip: () => void
   onExit: () => void
   selectedLevels: readonly JlptLevel[]
   enabledLevels: readonly JlptLevel[]
-  onToggleLevel: (level: JlptLevel) => void
+  onApplyLevels: (levels: readonly JlptLevel[]) => void
   infiniteMode: boolean
   onToggleInfiniteMode: () => void
   isFavorite: boolean
@@ -392,11 +393,12 @@ export function SentenceBuilderView({
   current,
   total,
   onResult,
+  onPrevious,
   onSkip,
   onExit,
   selectedLevels,
   enabledLevels,
-  onToggleLevel,
+  onApplyLevels,
   infiniteMode,
   onToggleInfiniteMode,
   isFavorite,
@@ -417,6 +419,7 @@ export function SentenceBuilderView({
   )
   const [showRomajiLegend, setShowRomajiLegend] = useState(true)
   const [levelMenuOpen, setLevelMenuOpen] = useState(false)
+  const [pendingLevels, setPendingLevels] = useState<JlptLevel[]>(() => [...selectedLevels])
   const [answered, setAnswered] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [speechRate, setSpeechRate] = useState<(typeof SPEECH_RATES)[number]>(0.9)
@@ -630,6 +633,7 @@ export function SentenceBuilderView({
 
   useEffect(() => {
     if (!levelMenuOpen) return
+    setPendingLevels([...selectedLevels])
 
     const closeLevelMenu = (event: PointerEvent) => {
       if (!levelPickerRef.current?.contains(event.target as Node)) {
@@ -639,7 +643,24 @@ export function SentenceBuilderView({
 
     document.addEventListener('pointerdown', closeLevelMenu)
     return () => document.removeEventListener('pointerdown', closeLevelMenu)
-  }, [levelMenuOpen])
+  }, [levelMenuOpen, selectedLevels])
+
+  function togglePendingLevel(level: JlptLevel) {
+    if (!enabledLevels.includes(level)) return
+    setPendingLevels((current) => {
+      const next = current.includes(level)
+        ? current.filter((item) => item !== level)
+        : DRILL_LEVELS.filter((item) => item === level || current.includes(item))
+      return next.length ? next : current
+    })
+  }
+
+  function applyPendingLevels() {
+    const next = pendingLevels.filter((level) => enabledLevels.includes(level))
+    if (!next.length) return
+    setLevelMenuOpen(false)
+    onApplyLevels(next)
+  }
 
   useEffect(() => {
     saveBooleanPreference(HIDE_WORDS_STORAGE_KEY, hideJapanese)
@@ -709,9 +730,9 @@ export function SentenceBuilderView({
           {levelMenuOpen && (
             <div className="builder-level-menu" role="group" aria-label="Sentence Builder JLPT levels">
               <span className="builder-level-menu-label">Practice levels</span>
-              {BUILDER_LEVEL_OPTIONS.map((level) => {
+              {DRILL_LEVELS.map((level) => {
                 const enabled = enabledLevels.includes(level)
-                const selected = selectedLevels.includes(level)
+                const selected = pendingLevels.includes(level)
 
                 return (
                   <button
@@ -720,7 +741,7 @@ export function SentenceBuilderView({
                     className={`builder-level-option${selected ? ' is-selected' : ''}`}
                     aria-pressed={selected}
                     disabled={!enabled}
-                    onClick={() => onToggleLevel(level)}
+                    onClick={() => togglePendingLevel(level)}
                   >
                     <span className="builder-level-check" aria-hidden="true" />
                     <strong>{level}</strong>
@@ -728,6 +749,13 @@ export function SentenceBuilderView({
                   </button>
                 )
               })}
+              <button
+                type="button"
+                className="builder-level-save"
+                onClick={applyPendingLevels}
+              >
+                Save
+              </button>
             </div>
           )}
           </div>
@@ -750,9 +778,30 @@ export function SentenceBuilderView({
             <div className="sentence-builder-panel">
               <div className="sentence-builder-inner-outline">
               <div className="sentence-translation-shell">
-                <button className="sentence-new-button" onClick={onSkip}>
-                  New Sentence
+                <button
+                  type="button"
+                  className="sentence-back-button"
+                  onClick={onPrevious}
+                  disabled={current === 0}
+                  title={current === 0 ? 'First sentence' : 'Go back to the previous sentence'}
+                >
+                  ‹
                 </button>
+                <div className="sentence-top-right-actions">
+                  <button className="sentence-new-button" onClick={onSkip}>
+                    ↻
+                  </button>
+                  <button
+                    type="button"
+                    className={`sentence-favorite-button${isFavorite ? ' is-favorite' : ''}`}
+                    onClick={onToggleFavorite}
+                    aria-label={isFavorite ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
+                    aria-pressed={isFavorite}
+                    title={isFavorite ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
+                  >
+                    {isFavorite ? '★' : '☆'}
+                  </button>
+                </div>
                 <div className="sentence-translation-prompt" aria-label="Sentence to translate">
                   <p ref={englishPromptRef}>{exercise.english}</p>
                 </div>
@@ -864,22 +913,33 @@ export function SentenceBuilderView({
               <div className="sentence-translation-shell">
                 <button
                   type="button"
-                  className={`sentence-favorite-button${isFavorite ? ' is-favorite' : ''}`}
-                  onClick={onToggleFavorite}
-                  aria-label={isFavorite ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
-                  aria-pressed={isFavorite}
-                  title={isFavorite ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
+                  className="sentence-back-button"
+                  onClick={onPrevious}
+                  disabled={current === 0}
+                  title={current === 0 ? 'First sentence' : 'Go back to the previous sentence'}
                 >
-                  {isFavorite ? '★' : '☆'}
+                  ‹
                 </button>
-                <button
-                  type="button"
-                  className="sentence-new-button"
-                  onClick={onSkip}
-                  title="Move to the next sentence"
-                >
-                  New Sentence
-                </button>
+                <div className="sentence-top-right-actions">
+                  <button
+                    type="button"
+                    className="sentence-new-button"
+                    onClick={onSkip}
+                    title="Move to the next sentence"
+                  >
+                    ↻
+                  </button>
+                  <button
+                    type="button"
+                    className={`sentence-favorite-button${isFavorite ? ' is-favorite' : ''}`}
+                    onClick={onToggleFavorite}
+                    aria-label={isFavorite ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
+                    aria-pressed={isFavorite}
+                    title={isFavorite ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
+                  >
+                    {isFavorite ? '★' : '☆'}
+                  </button>
+                </div>
                 <div className="sentence-translation-prompt" aria-label="Sentence to translate">
                   <p ref={englishPromptRef}>{exercise.english}</p>
                 </div>

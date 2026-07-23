@@ -9,7 +9,7 @@ interface GrammarPracticeProps {
   onToggleFavorite: (exercise: DrillExercise) => void
 }
 
-const GRAMMAR_BATCH_COUNT = 4
+const GRAMMAR_BATCH_COUNT = 5
 
 export function GrammarPractice({ onBack, isFavorite, onToggleFavorite }: GrammarPracticeProps) {
   const [pool, setPool] = useState<DrillExercise[] | null>(null)

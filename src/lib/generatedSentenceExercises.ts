@@ -1,11 +1,17 @@
 import type { SentenceExercise } from '../data/sentenceExercises'
-import { grammarBuilderExercises } from '../data/grammarBuilderExercises'
-import { generatePreviewSentence, type GeneratedPreviewSentence } from './sentenceGeneratorPreview'
+import { generateCategorySentence } from './categorySentenceEngine'
+import type { GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import { shuffle } from './quiz'
 import type { JlptLevel } from './types'
 
 export const GENERATED_BUILDER_SESSION_SIZE = 15
 export const WIRED_BUILDER_LEVELS: readonly JlptLevel[] = ['N5', 'N4', 'N3']
+
+const CATEGORY_BUILDER_PATTERNS: Record<Extract<JlptLevel, 'N5' | 'N4' | 'N3'>, Array<string | undefined>> = {
+  N5: [undefined],
+  N4: [undefined],
+  N3: ['n3-08', 'n3-09', 'n3-10'],
+}
 
 function sentenceSeed() {
   return Math.floor((Date.now() + Math.random() * 1_000_000_000) % 1_000_000_000)
@@ -41,12 +47,19 @@ function builderSegments(sentence: GeneratedPreviewSentence) {
 }
 
 function generatedExercise(level: JlptLevel, seed: number): SentenceExercise {
-  const sentence = generatePreviewSentence(level, seed)
+  const requestedPatternId =
+    level === 'N5' || level === 'N4'
+      ? CATEGORY_BUILDER_PATTERNS[level][0]
+      : CATEGORY_BUILDER_PATTERNS.N3[seed % CATEGORY_BUILDER_PATTERNS.N3.length]
+  const sentence = generateCategorySentence(seed, requestedPatternId, level as 'N5' | 'N4' | 'N3')
+  if (!sentence) {
+    throw new Error(`Could not generate ${level} sentence-builder exercise`)
+  }
   const segments = builderSegments(sentence)
   const english = sentence.english.charAt(0).toUpperCase() + sentence.english.slice(1)
 
   return {
-    id: `sent-generated-${level.toLowerCase()}-${seed}`,
+    id: `sent-generated-${level.toLowerCase()}-${sentence.frameId}-${seed}`,
     type: 'sentence-builder',
     segments: segments.map((segment) => segment.text),
     segmentReadings: segments.map((segment) => segment.reading),
@@ -71,19 +84,6 @@ export function buildGeneratedBuilderExercises(
   // keeps consecutive batches off each other's seeds even within the same second.
   const baseSeed = sentenceSeed() + batch * attemptLimit * 37
 
-  // Make grammar practice visible and dependable: most N5/N4 sessions include
-  // curated endings and grammar patterns, with generated sentences filling the rest.
-  const grammarPool = shuffle(grammarBuilderExercises.filter((exercise) => wiredLevels.includes(exercise.jlpt!)))
-  const grammarTarget = Math.min(Math.ceil(count * 0.6), grammarPool.length)
-  for (let index = 0; index < grammarTarget; index += 1) {
-    const exercise = grammarPool[index]!
-    const japanese = exercise.segments?.join('') ?? ''
-    if (japanese && !seenJapanese.has(japanese)) {
-      seenJapanese.add(japanese)
-      exercises.push(exercise)
-    }
-  }
-
   for (let attempt = 0; attempt < attemptLimit && exercises.length < count; attempt += 1) {
     const level = wiredLevels[attempt % wiredLevels.length]!
     const seed = baseSeed + attempt * 37
@@ -103,7 +103,7 @@ export function buildGeneratedBuilderExercises(
 }
 
 export function getGeneratedBuilderExerciseById(id: string): SentenceExercise | undefined {
-  const match = /^sent-generated-(n[1-5])-(\d+)$/.exec(id)
+  const match = /^sent-generated-(n[1-5])-(?:[^-]+-\d+-)?(\d+)$/.exec(id)
   if (!match) return undefined
 
   const level = match[1].toUpperCase() as JlptLevel

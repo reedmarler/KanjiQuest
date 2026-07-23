@@ -2680,6 +2680,23 @@ body:has(.dashboard) .app {
   content: '\2713';
 }
 
+.builder-level-save {
+  min-height: 2rem;
+  margin-top: 0.15rem;
+  border: 1px solid rgba(255, 139, 167, 0.38);
+  border-radius: 8px;
+  background: rgba(255, 139, 167, 0.12);
+  color: var(--text);
+  cursor: pointer;
+  font: 800 0.72rem inherit;
+}
+
+.builder-level-save:hover,
+.builder-level-save:focus-visible {
+  border-color: var(--sakura);
+  background: rgba(255, 139, 167, 0.18);
+}
+
 .study-progress-bar {
   height: 4px;
   background: var(--surface-2);
@@ -3732,19 +3749,19 @@ body:has(.dashboard) .app {
 }
 
 .sentence-translation-shell {
-  height: 1.55rem;
+  height: 1.9rem;
   margin: 0;
   display: grid;
-  grid-template-columns: 7rem minmax(0, 1fr) 7rem;
+  grid-template-columns: 3rem minmax(0, 1fr) 5.4rem;
   align-items: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .sentence-translation-prompt {
   grid-column: 2;
   grid-row: 1;
   width: 100%;
-  height: 1.55rem;
+  height: 1.9rem;
   box-sizing: border-box;
   margin: 0;
   padding: 0 0.25rem;
@@ -3753,11 +3770,12 @@ body:has(.dashboard) .app {
   background: transparent;
   text-align: center;
   display: grid;
-  place-items: end center;
-  overflow: hidden;
+  place-items: center;
+  overflow: visible;
   transform: none;
 }
 
+.sentence-back-button,
 .sentence-new-button {
   grid-column: 3;
   grid-row: 1;
@@ -3773,12 +3791,51 @@ body:has(.dashboard) .app {
   transition: border-color 0.15s, color 0.15s, background-color 0.15s;
 }
 
+.sentence-back-button {
+  position: relative;
+  grid-column: 1;
+  justify-self: start;
+  width: 3.15rem;
+  height: 1.9rem;
+  padding-inline: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0;
+  font-weight: 900;
+  line-height: 0.8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.sentence-back-button::before {
+  content: '‹‹';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.18rem;
+  transform: translate(-50%, calc(-58% - 3px));
+}
+
 .sentence-new-button:hover {
   border-color: var(--accent);
   color: var(--text);
   background: rgba(61, 122, 184, 0.1);
 }
 
+.sentence-back-button:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(61, 122, 184, 0.1);
+}
+
+.sentence-back-button:disabled,
 .sentence-new-button:disabled {
   cursor: default;
   opacity: 0.45;
@@ -3787,7 +3844,37 @@ body:has(.dashboard) .app {
 .sentence-new-button:disabled:hover {
   border-color: var(--border);
   color: var(--text-muted);
+  background: transparent;
+}
+
+.sentence-back-button:disabled:hover {
+  border-color: var(--border);
+  color: var(--text-muted);
   background: var(--surface);
+}
+
+.sentence-top-right-actions {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  min-width: 0;
+  height: 1.9rem;
+}
+
+.sentence-top-right-actions .sentence-new-button {
+  grid-column: auto;
+  grid-row: auto;
+  justify-self: auto;
+  width: 4rem;
+  height: 1.9rem;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  font-size: 1.45rem;
+  line-height: 1;
 }
 
 .sentence-new-button.is-placeholder,
@@ -3811,7 +3898,7 @@ body:has(.dashboard) .app {
   color: var(--text);
   font-size: clamp(1rem, 3.2vw, 1.2rem);
   font-weight: 600;
-  line-height: 1.28;
+  line-height: 1.45;
   overflow-wrap: anywhere;
 }
 
@@ -3988,6 +4075,7 @@ body:has(.dashboard) .app {
 
 .grammar-choice-card,
 .grammar-finish-card {
+  position: relative;
   max-width: 47rem;
   margin: 0 auto;
   padding: clamp(0.95rem, 3vw, 1.55rem);
@@ -4006,21 +4094,34 @@ body:has(.dashboard) .app {
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  margin-top: -0.15rem;
 }
 
 .drill-answer-top-actions {
+  position: absolute;
+  top: 0.72rem;
+  left: clamp(0.95rem, 3vw, 1.55rem);
+  right: clamp(0.95rem, 3vw, 1.55rem);
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 2rem;
-  margin-bottom: 0.45rem;
+  min-height: 1.9rem;
+  margin-bottom: 0;
+  pointer-events: none;
 }
 
 .drill-answer-top-actions .sentence-favorite-button {
   position: static;
 }
 
-.drill-answer-top-actions .sentence-new-button {
+.drill-answer-top-actions .sentence-back-button,
+.drill-answer-top-actions .sentence-new-button,
+.drill-answer-top-actions .sentence-favorite-button {
+  pointer-events: auto;
+}
+
+.drill-answer-top-actions .sentence-top-right-actions {
   margin-left: auto;
 }
 
@@ -4032,7 +4133,9 @@ body:has(.dashboard) .app {
 
 .grammar-sentence-frame {
   position: relative;
-  min-height: 4.55rem;
+  height: 5.75rem;
+  min-height: 5.75rem;
+  max-height: 5.75rem;
   padding: 0.7rem 0.8rem;
   display: flex;
   align-items: center;
@@ -4047,6 +4150,7 @@ body:has(.dashboard) .app {
   font-size: clamp(1.12rem, 3.5vw, 1.65rem);
   font-weight: 400;
   line-height: 1.45;
+  overflow: hidden;
 }
 
 .grammar-gap {
@@ -4095,6 +4199,7 @@ body:has(.dashboard) .app {
   color: var(--text-muted);
   font-size: clamp(1.02rem, 2.6vw, 1.25rem);
   font-style: italic;
+  line-height: 1.45;
 }
 
 .grammar-options {
@@ -4486,9 +4591,10 @@ body:has(.dashboard) .app {
 
 .sentence-translation-shell .sentence-favorite-button {
   position: static;
-  grid-column: 1;
+  grid-column: auto;
   grid-row: 1;
-  justify-self: start;
+  justify-self: auto;
+  align-self: center;
 }
 
 .answer-reveal .sentence-english {

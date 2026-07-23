@@ -5,6 +5,21 @@ import { FuriganaSegment } from './FuriganaText'
 import { shuffle } from '../lib/quiz'
 
 const MAX_HINTS = 2
+const DEFAULT_SESSION_SIZE = 15
+
+function fitFixedTextBox(element: HTMLElement | null, maximumSize: number, minimumSize: number) {
+  if (!element) return
+
+  element.style.fontSize = `${maximumSize}px`
+
+  for (let size = maximumSize; size > minimumSize; size -= 1) {
+    if (element.scrollHeight <= element.clientHeight + 1 && element.scrollWidth <= element.clientWidth + 1) {
+      return
+    }
+
+    element.style.fontSize = `${size - 1}px`
+  }
+}
 
 export interface ChoiceDrillProps {
   /** Every exercise available; the level picker filters this pool. */
@@ -76,6 +91,10 @@ function initialAvailableLevels(key: string, availableLevels: DrillJlptLevel[]) 
   return selected.length ? selected : [availableLevels[0] ?? 'N5']
 }
 
+function buildPracticeSession(pool: DrillExercise[], levels: readonly DrillJlptLevel[]) {
+  return shuffle(pool.filter((item) => levels.includes(item.jlpt))).slice(0, DEFAULT_SESSION_SIZE)
+}
+
 /**
  * Fill-the-blank multiple-choice drill shared by Grammar and Vocab practice.
  * Styling reuses the `grammar-*` classes, which are the drill's visual system
@@ -111,13 +130,15 @@ export function ChoiceDrill({
   )
 
   const [levels, setLevels] = useState<DrillJlptLevel[]>(() => initialAvailableLevels(levelsKey, availableLevels))
+  const [pendingLevels, setPendingLevels] = useState<DrillJlptLevel[]>(levels)
   const [levelMenuOpen, setLevelMenuOpen] = useState(false)
   const levelPickerRef = useRef<HTMLDivElement>(null)
   // Shuffled once per visit (and again on restart or a level change) so the same
   // sentences don't always show up in the same fixed order every time.
   const [exercises, setExercises] = useState(() =>
-    shuffle(pool.filter((item) => initialAvailableLevels(levelsKey, availableLevels).includes(item.jlpt))),
+    buildPracticeSession(pool, initialAvailableLevels(levelsKey, availableLevels)),
   )
+  const [sessionPool, setSessionPool] = useState(pool)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selected, setSelected] = useState<string | null>(null)
   const [answered, setAnswered] = useState(false)
@@ -130,18 +151,12 @@ export function ChoiceDrill({
   const [eliminatedOptions, setEliminatedOptions] = useState<Set<string>>(new Set())
   const [hintCount, setHintCount] = useState(0)
   const [gapWidth, setGapWidth] = useState<number | null>(null)
+  const sentenceFrameRef = useRef<HTMLDivElement>(null)
   const gapMeasureRef = useRef<HTMLDivElement>(null)
 
   const exercise = exercises[currentIndex] ?? exercises[0] ?? pool[0]
   const isCorrect = selected === exercise.answer
-  // Infinite mode appends another shuffled pass at the end, so measure progress
-  // within the current pass — otherwise the bar would lurch backwards each lap.
-  const poolSize = useMemo(
-    () => pool.filter((item) => levels.includes(item.jlpt)).length,
-    [levels, pool],
-  )
-  const passIndex = poolSize ? currentIndex % poolSize : currentIndex
-  const progress = ((passIndex + 1) / (poolSize || 1)) * 100
+  const progress = ((currentIndex + 1) / (exercises.length || 1)) * 100
   const promptParts = useMemo(() => exercise.prompt.split('___'), [exercise.prompt])
   const promptReadingParts = useMemo(
     () => (exercise.promptReading ?? '').split('___'),
@@ -166,8 +181,13 @@ export function ChoiceDrill({
     setGapWidth(widths.length ? Math.max(...widths) + 3 : null)
   }, [exercise.id])
 
+  useLayoutEffect(() => {
+    fitFixedTextBox(sentenceFrameRef.current, 26, 13)
+  }, [answered, exercise.id, gapWidth, previewWord, showFurigana])
+
   useEffect(() => {
     if (!levelMenuOpen) return
+    setPendingLevels(levels)
 
     const closeLevelMenu = (event: PointerEvent) => {
       if (!levelPickerRef.current?.contains(event.target as Node)) {
@@ -177,23 +197,43 @@ export function ChoiceDrill({
 
     document.addEventListener('pointerdown', closeLevelMenu)
     return () => document.removeEventListener('pointerdown', closeLevelMenu)
-  }, [levelMenuOpen])
+  }, [levelMenuOpen, levels])
 
-  function toggleLevel(level: DrillJlptLevel) {
-    // Keep at least one level on — an empty set would leave nothing to practice.
-    const next = levels.includes(level)
-      ? levels.filter((item) => item !== level)
-      : availableLevels.filter((item) => item === level || levels.includes(item))
+
+  function togglePendingLevel(level: DrillJlptLevel) {
+    if (!availableLevels.includes(level)) return
+    setPendingLevels((current) => {
+      const next = current.includes(level)
+        ? current.filter((item) => item !== level)
+        : availableLevels.filter((item) => item === level || current.includes(item))
+      return next.length ? next : current
+    })
+  }
+
+  async function applyPendingLevels() {
+    const next = pendingLevels.filter((level) => availableLevels.includes(level))
     if (!next.length) return
-
+    setLevelMenuOpen(false)
     setLevels(next)
     saveLevelPreference(levelsKey, next)
-    startSession(next)
+    if (!onLoadNextPool) {
+      startSession(next, sessionPool)
+      return
+    }
+
+    setLoadingNextPool(true)
+    try {
+      const nextPool = await onLoadNextPool()
+      setSessionPool(nextPool)
+      startSession(next, nextPool)
+    } finally {
+      setLoadingNextPool(false)
+    }
   }
 
   /** Restart the run against `nextLevels`, reshuffled. */
-  function startSession(nextLevels: DrillJlptLevel[]) {
-    setExercises(shuffle(pool.filter((item) => nextLevels.includes(item.jlpt))))
+  function startSession(nextLevels: DrillJlptLevel[], sourcePool = sessionPool) {
+    setExercises(buildPracticeSession(sourcePool, nextLevels))
     setCurrentIndex(0)
     setSelected(null)
     setAnswered(false)
@@ -255,8 +295,9 @@ export function ChoiceDrill({
         setLoadingNextPool(true)
         try {
           const nextPool = await onLoadNextPool()
-          const nextExercises = shuffle(nextPool.filter((item) => levels.includes(item.jlpt)))
+          const nextExercises = buildPracticeSession(nextPool, levels)
           if (nextExercises.length) {
+            setSessionPool(nextPool)
             setExercises(nextExercises)
             setCurrentIndex(0)
           }
@@ -272,11 +313,20 @@ export function ChoiceDrill({
       // Grammar has a fixed curated pool, so it still receives a reshuffled pass.
       setExercises((items) => [
         ...items,
-        ...shuffle(pool.filter((item) => levels.includes(item.jlpt))),
+        ...buildPracticeSession(sessionPool, levels),
       ])
     }
     setInfiniteCompletedCount((count) => infiniteMode ? count + 1 : count)
     setCurrentIndex((index) => index + 1)
+    setSelected(null)
+    setAnswered(false)
+    setEliminatedOptions(new Set())
+    setHintCount(0)
+  }
+
+  function goToPreviousExercise() {
+    if (currentIndex === 0 || loadingNextPool) return
+    setCurrentIndex((index) => Math.max(0, index - 1))
     setSelected(null)
     setAnswered(false)
     setEliminatedOptions(new Set())
@@ -368,8 +418,9 @@ export function ChoiceDrill({
             {levelMenuOpen && (
               <div className="builder-level-menu" role="group" aria-label={`${badgeLabel} JLPT levels`}>
                 <span className="builder-level-menu-label">Practice levels</span>
-                {availableLevels.map((level) => {
-                  const isSelected = levels.includes(level)
+                {DRILL_LEVELS.map((level) => {
+                  const enabled = availableLevels.includes(level)
+                  const isSelected = pendingLevels.includes(level)
 
                   return (
                     <button
@@ -377,14 +428,22 @@ export function ChoiceDrill({
                       type="button"
                       className={`builder-level-option${isSelected ? ' is-selected' : ''}`}
                       aria-pressed={isSelected}
-                      onClick={() => toggleLevel(level)}
+                      disabled={!enabled}
+                      onClick={() => togglePendingLevel(level)}
                     >
                       <span className="builder-level-check" aria-hidden="true" />
                       <strong>{level}</strong>
-                      <small>{levelCounts[level]} sentences</small>
+                      <small>{enabled ? 'Ready' : 'Soon'}</small>
                     </button>
                   )
                 })}
+                <button
+                  type="button"
+                  className="builder-level-save"
+                  onClick={() => void applyPendingLevels()}
+                >
+                  Save
+                </button>
               </div>
             )}
           </div>
@@ -399,29 +458,40 @@ export function ChoiceDrill({
         <div className="drill-answer-top-actions">
           <button
             type="button"
-            className={`sentence-favorite-button${isFavorite(exercise) ? ' is-favorite' : ''}`}
-            onClick={() => onToggleFavorite(exercise)}
-            aria-label={isFavorite(exercise) ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
-            aria-pressed={isFavorite(exercise)}
-            title={isFavorite(exercise) ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
+            className="sentence-back-button"
+            onClick={goToPreviousExercise}
+            disabled={currentIndex === 0 || loadingNextPool}
+            title={currentIndex === 0 ? 'First sentence' : 'Go back to the previous sentence'}
           >
-            {isFavorite(exercise) ? '★' : '☆'}
+            ‹
           </button>
-          <button
-            type="button"
-            className="sentence-new-button"
-            onClick={() => void advanceToNextExercise()}
-            disabled={answered || loadingNextPool}
-            title={answered ? 'Answer shown' : 'Move to the next sentence'}
-          >
-            New Sentence
-          </button>
+          <div className="sentence-top-right-actions">
+            <button
+              type="button"
+              className="sentence-new-button"
+              onClick={() => void advanceToNextExercise()}
+              disabled={answered || loadingNextPool}
+              title={answered ? 'Answer shown' : 'Move to the next sentence'}
+            >
+              ↻
+            </button>
+            <button
+              type="button"
+              className={`sentence-favorite-button${isFavorite(exercise) ? ' is-favorite' : ''}`}
+              onClick={() => onToggleFavorite(exercise)}
+              aria-label={isFavorite(exercise) ? 'Remove sentence from favorites' : 'Add sentence to favorites'}
+              aria-pressed={isFavorite(exercise)}
+              title={isFavorite(exercise) ? 'Remove from favorite sentences' : 'Add to favorite sentences'}
+            >
+              {isFavorite(exercise) ? '★' : '☆'}
+            </button>
+          </div>
         </div>
         <div className="grammar-eyebrow">{eyebrow}</div>
 
         <p className="grammar-english-clue">“{exercise.english}”</p>
 
-        <div className="grammar-sentence-frame" lang="ja">
+        <div className="grammar-sentence-frame" lang="ja" ref={sentenceFrameRef}>
           {exercise.promptFurigana
             ? exercise.promptFurigana.before.map((part, index) => (
                 <FuriganaSegment key={`before-${index}-${part.text}`} text={part.text} reading={part.reading} />
