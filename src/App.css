@@ -2513,6 +2513,7 @@ body:has(.dashboard) .app {
 }
 
 .builder-infinite-toggle,
+.builder-fast-toggle,
 .builder-particle-toggle {
   border: 1px solid var(--border);
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface-2) 88%, var(--accent)), var(--surface-2));
@@ -2521,7 +2522,8 @@ body:has(.dashboard) .app {
   transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.15s;
 }
 
-.builder-infinite-toggle {
+.builder-infinite-toggle,
+.builder-fast-toggle {
   width: 2rem;
   height: 2rem;
   padding: 0;
@@ -2573,6 +2575,9 @@ body:has(.dashboard) .app {
 .builder-infinite-toggle:hover,
 .builder-infinite-toggle:focus-visible,
 .builder-infinite-toggle.is-active,
+.builder-fast-toggle:hover,
+.builder-fast-toggle:focus-visible,
+.builder-fast-toggle.is-active,
 .builder-particle-toggle:hover,
 .builder-particle-toggle:focus-visible,
 .builder-particle-toggle.is-active {
@@ -2582,11 +2587,13 @@ body:has(.dashboard) .app {
 }
 
 .builder-infinite-toggle:hover,
+.builder-fast-toggle:hover,
 .builder-particle-toggle:hover {
   transform: translateY(-1px);
 }
 
 .builder-infinite-toggle:focus-visible,
+.builder-fast-toggle:focus-visible,
 .builder-particle-toggle:focus-visible {
   outline: 2px solid var(--sakura);
   outline-offset: 2px;
@@ -5310,7 +5317,8 @@ body:has(.dashboard) .app {
     font-size: 1.05rem;
   }
 
-  .builder-infinite-toggle {
+  .builder-infinite-toggle,
+  .builder-fast-toggle {
     width: 1.6rem;
     height: 1.6rem;
     font-size: 0.92rem;

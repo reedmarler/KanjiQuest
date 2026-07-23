@@ -116,6 +116,7 @@ export function ChoiceDrill({
   const furiganaKey = `${storagePrefix}-show-furigana-v1`
   const levelsKey = `${storagePrefix}-levels-v1`
   const infiniteKey = `${storagePrefix}-infinite-v1`
+  const fastModeKey = `${storagePrefix}-fast-mode-v1`
 
   const levelCounts = useMemo(
     () =>
@@ -148,6 +149,7 @@ export function ChoiceDrill({
   const [infiniteCompletedCount, setInfiniteCompletedCount] = useState(0)
   const [showFurigana, setShowFurigana] = useState(() => loadBooleanPreference(furiganaKey, true))
   const [infiniteMode, setInfiniteMode] = useState(() => loadBooleanPreference(infiniteKey, false))
+  const [fastMode, setFastMode] = useState(() => loadBooleanPreference(fastModeKey, false))
   const [eliminatedOptions, setEliminatedOptions] = useState<Set<string>>(new Set())
   const [hintCount, setHintCount] = useState(0)
   const [gapWidth, setGapWidth] = useState<number | null>(null)
@@ -252,6 +254,14 @@ export function ChoiceDrill({
     })
   }
 
+  function toggleFastMode() {
+    setFastMode((enabled) => {
+      const next = !enabled
+      saveBooleanPreference(fastModeKey, next)
+      return next
+    })
+  }
+
   function toggleFurigana() {
     setShowFurigana((shown) => {
       const next = !shown
@@ -275,6 +285,12 @@ export function ChoiceDrill({
 
   function choose(option: string) {
     if (answered || eliminatedOptions.has(option)) return
+    if (fastMode) {
+      setSelected(option)
+      setAnswered(true)
+      if (option === exercise.answer) setCorrectCount((count) => count + 1)
+      return
+    }
     setSelected((current) => (current === option ? null : option))
   }
 
@@ -402,6 +418,16 @@ export function ChoiceDrill({
             title={infiniteMode ? 'Endless practice on' : 'Keep practicing without an ending'}
           >
             ∞
+          </button>
+          <button
+            type="button"
+            className={`builder-fast-toggle${fastMode ? ' is-active' : ''}`}
+            onClick={toggleFastMode}
+            aria-pressed={fastMode}
+            aria-label={fastMode ? 'Turn off fast mode' : 'Turn on fast mode: checks your answer the instant you pick it'}
+            title={fastMode ? 'Fast mode on — picking an answer checks it instantly' : 'Fast mode: skip the Check button and blitz through questions'}
+          >
+            ⚡
           </button>
           <div className="builder-level-picker" ref={levelPickerRef}>
             <button
