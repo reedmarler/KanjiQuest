@@ -489,7 +489,9 @@ export function ChoiceDrill({
             disabled={currentIndex === 0 || loadingNextPool}
             title={currentIndex === 0 ? 'First sentence' : 'Go back to the previous sentence'}
           >
-            ‹
+            <svg className="sentence-back-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <polyline points="15 5 8 12 15 19" />
+            </svg>
           </button>
           <div className="sentence-top-right-actions">
             <button

@@ -740,12 +740,10 @@ export function SentenceBuilderView({
             className={`builder-particle-toggle${splitParticles ? ' is-active' : ''}`}
             onClick={handleToggleParticleMode}
             aria-pressed={splitParticles}
-            title="Split Japanese particles into separate word tiles"
+            aria-label={splitParticles ? 'Turn off splitting particles into separate tiles' : 'Split Japanese particles into separate word tiles'}
+            title={splitParticles ? 'Particles are split into their own tiles' : 'Split Japanese particles into separate word tiles'}
           >
-            <span>Particles</span>
-            <span className="builder-particle-switch" aria-hidden="true">
-              <span className="builder-particle-switch-thumb" />
-            </span>
+            を
           </button>
           <div className="builder-level-picker" ref={levelPickerRef}>
           <button
@@ -812,7 +810,9 @@ export function SentenceBuilderView({
             disabled={current === 0}
             title={current === 0 ? 'First sentence' : 'Go back to the previous sentence'}
           >
-            ‹
+            <svg className="sentence-back-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <polyline points="15 5 8 12 15 19" />
+            </svg>
           </button>
           <div className="sentence-top-right-actions">
             <button className="sentence-new-button" onClick={onSkip}>
