@@ -13,6 +13,7 @@ import type { CategoryWordRecord } from '../lib/categorySentenceEngine'
 import { getVocabularyMetadata } from '../data/vocabularySenseOverrides'
 import { inferPreferredTranslation } from '../data/preferredVocabularyTranslations'
 import { FuriganaSentence } from './FuriganaText'
+import { complexityDetails, complexityForPattern, GENERATION_COMPLEXITIES, patternsForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
 
 type View = 'dashboard' | 'review' | 'verbs' | 'vocab' | 'categories' | 'patterns' | 'test'
 type Draft = { id: number; sourceId?: string; type: 'Verb' | 'Vocabulary' | 'Pattern'; japanese: string; reading: string; english: string; preferredTranslation?: string; detail: string }
@@ -234,14 +235,14 @@ function Field({ label, children, wide }: { label: string; children: React.React
   return <label className={`cs-field${wide ? ' wide' : ''}`}><span>{label}</span>{children}</label>
 }
 
-function generateTestSentence(levels: JlptLevel[], turn: number) {
-  const level=levels[turn % levels.length]!
-  const levelTurn=Math.floor(turn / levels.length)
-  const allLevelPatterns=sentencePatternCatalog.filter(pattern=>pattern.jlpt===level)
-  const executablePatterns=allLevelPatterns.filter(pattern=>pattern.generatorReady)
-  const levelPatterns=executablePatterns.length ? executablePatterns : allLevelPatterns
-  const requestedFrame=levelPatterns[levelTurn % levelPatterns.length]?.id
-  return generatePreviewSentence(level,turn+1,undefined,requestedFrame,true)
+function generateTestSentence(complexities: GenerationComplexity[], turn: number) {
+  const complexity=complexities[turn % complexities.length]!
+  const complexityTurn=Math.floor(turn / complexities.length)
+  const allPatterns=patternsForComplexity(complexity)
+  const executablePatterns=allPatterns.filter(pattern=>pattern.generatorReady)
+  const patterns=executablePatterns.length ? executablePatterns : allPatterns
+  const requestedFrame=patterns[complexityTurn % patterns.length]!
+  return generatePreviewSentence(requestedFrame.jlpt,turn+1,undefined,requestedFrame.id,true)
 }
 
 function TestSentenceText({ sentence, showFurigana }: { sentence: ReturnType<typeof generatePreviewSentence>; showFurigana: boolean }) {
@@ -280,9 +281,9 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
   const [rejectedIds, setRejectedIds] = useState<string[]>(() => loadJson(REJECTED_KEY, []))
   const [batchSize, setBatchSize] = useState(10)
   const [batchLevel, setBatchLevel] = useState('All')
-  const [patternLevels, setPatternLevels] = useState<JlptLevel[]>(['N1', 'N2', 'N3', 'N4', 'N5'])
+  const [patternComplexities, setPatternComplexities] = useState<GenerationComplexity[]>([1, 2, 3, 4, 5])
   const [activePatternIds, setActivePatternIds] = useState<string[]>(() => loadActiveSentencePatternIds())
-  const [testLevels, setTestLevels] = useState<JlptLevel[]>(['N5'])
+  const [testComplexities, setTestComplexities] = useState<GenerationComplexity[]>([1])
   const [vocabPrimaryCategory, setVocabPrimaryCategory] = useState<string>('Objects')
   const [managedTagGroup, setManagedTagGroup] = useState<CategoryPanel | null>(null)
   const [reviewedCategory, setReviewedCategory] = useState<TagGroupName | 'All'>('All')
@@ -322,13 +323,13 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
     // The generator reads approved records from local storage; this state reference
     // invalidates the preview immediately after the database emits a change.
     void database
-    return generateTestSentence(testLevels,sample)
-  }, [sample, database, testLevels])
+    return generateTestSentence(testComplexities,sample)
+  }, [sample, database, testComplexities])
   const generatedTestBatch = useMemo(() => {
     void database
     const start=(testBatchSeed+1)*100
-    return Array.from({length:10},(_,index)=>generateTestSentence(testLevels,start+index))
-  },[testBatchSeed,database,testLevels])
+    return Array.from({length:10},(_,index)=>generateTestSentence(testComplexities,start+index))
+  },[testBatchSeed,database,testComplexities])
   const allVocabularyTags = useMemo(() => {
     void tagRevision
     const grouped = TAG_GROUPS.map(group => `${group.name}: ${getTagGroupTags(group.name).join(', ')}`)
@@ -426,16 +427,16 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
     toast(next.includes(id) ? 'Pattern activated ✓' : 'Pattern removed from rotation')
   }
 
-  function togglePatternLevel(level: JlptLevel) {
-    setPatternLevels(current => current.includes(level)
-      ? current.length === 1 ? current : current.filter(item => item !== level)
-      : [...current, level])
+  function togglePatternComplexity(complexity: GenerationComplexity) {
+    setPatternComplexities(current => current.includes(complexity)
+      ? current.length === 1 ? current : current.filter(item => item !== complexity)
+      : [...current, complexity])
   }
 
-  function toggleTestLevel(level: JlptLevel) {
-    setTestLevels(current => current.includes(level)
-      ? current.length === 1 ? current : current.filter(item => item !== level)
-      : [...current, level])
+  function toggleTestComplexity(complexity: GenerationComplexity) {
+    setTestComplexities(current => current.includes(complexity)
+      ? current.length === 1 ? current : current.filter(item => item !== complexity)
+      : [...current, complexity])
     setSample(value => value + 1)
   }
 
@@ -594,16 +595,16 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
 
       {view === 'categories' && managedTagGroup === 'reviewed' && <div className="cs-page cs-narrow category-detail reviewed-words"><button className="category-back" onClick={()=>{setManagedTagGroup(null);setCategorySearch('')}}>← All categories</button><div className="cs-intro"><div><span className="category-kicker">SAVED DATABASE</span><h2>Reviewed Words</h2><p>{reviewedWords.length} complete word records with approved categories and tags. These records are available to the sentence generator and included in database exports.</p></div><label className="category-search"><span>Search reviewed words or tags</span><input value={categorySearch} onChange={event=>setCategorySearch(event.target.value)} placeholder="Search reviewed words…" /></label></div><div className="reviewed-category-menu" role="group" aria-label="Filter reviewed words by category"><button className={reviewedCategory==='All'?'active':''} aria-pressed={reviewedCategory==='All'} onClick={()=>setReviewedCategory('All')}><b>All Words</b><span>{reviewedWords.length}</span></button>{TAG_GROUPS.map((group,index)=>{const count=reviewedWords.filter(word=>getWordTagGroup(word)===group.name).length;return <button key={group.name} className={reviewedCategory===group.name?'active':''} aria-pressed={reviewedCategory===group.name} onClick={()=>setReviewedCategory(group.name)}><i>{String(index+1).padStart(2,'0')}</i><b>{group.name}</b><span>{count}</span></button>})}</div><div className="category-word-header"><span>{managedWords.length} {managedWords.length===1?'word':'words'} shown</span><span>{reviewedCategory==='All'?'All reviewed categories':reviewedCategory} · saved category and tags</span></div>{managedWords.length ? <div className="category-word-list">{managedWords.map(word=><CategoryWordTagRow key={word.id} word={word} onTaxonomyChange={()=>setTagRevision(value=>value+1)} onSave={saveReviewedWord} />)}</div> : <div className="cs-empty">No reviewed words are saved in {reviewedCategory==='All'?'the database':reviewedCategory} yet.</div>}</div>}
 
-      {view === 'patterns' && <div className="cs-page cs-narrow"><div className="cs-intro"><div><h2>Sentence pattern library</h2><p>{patternLevels.length} levels selected · {sentencePatternCatalog.filter(pattern=>patternLevels.includes(pattern.jlpt)).length} patterns shown.</p></div><button className="primary" onClick={()=>toast('New pattern draft created')}>New pattern +</button></div><div className="pattern-level-tabs" role="group" aria-label="Filter sentence patterns by JLPT level">{(['N1','N2','N3','N4','N5'] as JlptLevel[]).map(level=>{const selected=patternLevels.includes(level);return <button key={level} className={selected?'active':''} aria-pressed={selected} onClick={()=>togglePatternLevel(level)}>{level}</button>})}</div><div className="cs-patterns">{sentencePatternCatalog.filter(pattern=>patternLevels.includes(pattern.jlpt)).map((pattern,i)=>{const active=activePatternIds.includes(pattern.id);return <article className="cs-card" key={pattern.id}><header><i>{String(i+1).padStart(2,'0')}</i><span className={active?'active':'review-status'}>{active?'Active':pattern.generatorReady?'Inactive':'Needs rule'}</span></header><h3 className="pattern-structure">{pattern.structure}</h3><Slots items={pattern.slots}/><p><b>{pattern.example}</b><span>{pattern.meaning} · {pattern.verbForm}</span>{pattern.note&&<em>{pattern.note}</em>}</p><footer><span>{pattern.jlpt} · {active?'included in test rotation':pattern.generatorReady?'ready to activate':'saved in library'}</span><button disabled={!pattern.generatorReady} onClick={()=>togglePattern(pattern.id)}>{active?'Disable':'Activate'}</button></footer></article>})}</div></div>}
+      {view === 'patterns' && <div className="cs-page cs-narrow"><div className="cs-intro"><div><h2>Sentence pattern library</h2><p>{patternComplexities.length} complexity levels selected · {sentencePatternCatalog.filter(pattern=>patternComplexities.includes(complexityForPattern(pattern.id))).length} patterns shown.</p></div><button className="primary" onClick={()=>toast('New pattern draft created')}>New pattern +</button></div><div className="pattern-level-tabs" role="group" aria-label="Filter sentence patterns by generation complexity">{GENERATION_COMPLEXITIES.map(complexity=>{const selected=patternComplexities.includes(complexity);return <button key={complexity} className={selected?'active':''} aria-pressed={selected} onClick={()=>togglePatternComplexity(complexity)}>L{complexity}</button>})}</div><div className="cs-patterns">{sentencePatternCatalog.filter(pattern=>patternComplexities.includes(complexityForPattern(pattern.id))).map((pattern,i)=>{const active=activePatternIds.includes(pattern.id);const complexity=complexityForPattern(pattern.id);return <article className="cs-card" key={pattern.id}><header><i>{String(i+1).padStart(2,'0')}</i><span className={active?'active':'review-status'}>{active?'Active':pattern.generatorReady?'Inactive':'Needs rule'}</span></header><h3 className="pattern-structure">{pattern.structure}</h3><Slots items={pattern.slots}/><p><b>{pattern.example}</b><span>{pattern.meaning} · {pattern.verbForm}</span>{pattern.note&&<em>{pattern.note}</em>}</p><footer><span>{complexityDetails[complexity].shortLabel} · {active?'included in test rotation':pattern.generatorReady?'ready to activate':'saved in library'}</span><button disabled={!pattern.generatorReady} onClick={()=>togglePattern(pattern.id)}>{active?'Disable':'Activate'}</button></footer></article>})}</div></div>}
 
       {view === 'test' && testBatchOpen && <div className="cs-page cs-narrow test-batch-page">
         <button className="category-back" onClick={()=>setTestBatchOpen(false)}>← Single sentence generator</button>
-        <div className="cs-intro"><div><span className="category-kicker">BATCH MODE</span><h2>Generate 10 sentences</h2><p>Review a full set using the currently selected JLPT levels and approved vocabulary.</p></div><div className="test-generator-actions"><button className={`ghost${english?' active':''}`} aria-pressed={english} onClick={()=>setEnglish(!english)}>EN English {english?'on':'off'}</button><button className={`ghost${furigana?' active':''}`} aria-pressed={furigana} onClick={()=>setFurigana(!furigana)}>ふ Furigana {furigana?'on':'off'}</button><button className="primary" onClick={()=>setTestBatchSeed(seed=>seed+1)}>Generate 10 more ↻</button></div></div>
-        <div className="test-level-menu" role="group" aria-label="Filter batch patterns by JLPT level">{(['N1','N2','N3','N4','N5'] as JlptLevel[]).map(level=>{const selected=testLevels.includes(level);return <button key={level} className={selected?'active':''} aria-pressed={selected} onClick={()=>toggleTestLevel(level)}>{level}</button>})}</div>
+        <div className="cs-intro"><div><span className="category-kicker">BATCH MODE</span><h2>Generate 10 sentences</h2><p>Review a full set using the selected generation-complexity levels and approved vocabulary.</p></div><div className="test-generator-actions"><button className={`ghost${english?' active':''}`} aria-pressed={english} onClick={()=>setEnglish(!english)}>EN English {english?'on':'off'}</button><button className={`ghost${furigana?' active':''}`} aria-pressed={furigana} onClick={()=>setFurigana(!furigana)}>ふ Furigana {furigana?'on':'off'}</button><button className="primary" onClick={()=>setTestBatchSeed(seed=>seed+1)}>Generate 10 more ↻</button></div></div>
+        <div className="test-level-menu" role="group" aria-label="Filter batch patterns by generation complexity">{GENERATION_COMPLEXITIES.map(complexity=>{const selected=testComplexities.includes(complexity);return <button key={complexity} className={selected?'active':''} aria-pressed={selected} onClick={()=>toggleTestComplexity(complexity)}>L{complexity}</button>})}</div>
         <div className="test-batch-list">{generatedTestBatch.map((sentence,index)=><article className="cs-card test-batch-sentence" key={`${testBatchSeed}-${index}-${sentence.frameId}`}><header><i>{String(index+1).padStart(2,'0')}</i><small>{sentence.frameId.toUpperCase()} · {sentence.level}</small></header><h3><TestSentenceText sentence={sentence} showFurigana={furigana}/></h3>{furigana&&sentence.reading&&<p className="reading">{sentence.reading}</p>}{english&&<p className="translation">{sentence.english}</p>}<footer>{Object.entries(sentence.slots).map(([name,slot])=><span key={name}><b>{name}</b> {slot.dictionaryForm}</span>)}</footer></article>)}</div>
       </div>}
 
-      {view === 'test' && !testBatchOpen && <div className="cs-page cs-narrow"><div className="cs-intro"><div><h2>Test generator</h2><p>Select one or more JLPT levels to define the sentence-pattern pool.</p></div><div className="test-generator-actions"><button className={`ghost${english?' active':''}`} aria-pressed={english} onClick={()=>setEnglish(!english)}>EN English {english?'on':'off'}</button><button className={`ghost${furigana?' active':''}`} aria-pressed={furigana} onClick={()=>setFurigana(!furigana)}>ふ Furigana {furigana?'on':'off'}</button><button className="ghost" onClick={()=>setTestBatchOpen(true)}>Generate 10 sentences →</button><button className="primary" onClick={()=>setSample(sample+1)} disabled={!generatedTest}>Generate ↻</button></div></div><div className="test-level-menu" role="group" aria-label="Filter test patterns by JLPT level">{(['N1','N2','N3','N4','N5'] as JlptLevel[]).map(level=>{const selected=testLevels.includes(level);return <button key={level} className={selected?'active':''} aria-pressed={selected} onClick={()=>toggleTestLevel(level)}>{level}</button>})}</div>{generatedTest ? <div className="cs-test"><section className="cs-card result"><small><span /> {generatedTest.frameId.toUpperCase()} · {generatedTest.level} PATTERN</small><h3><TestSentenceText sentence={generatedTest} showFurigana={furigana}/></h3>{furigana&&generatedTest.reading&&<p className="reading">{generatedTest.reading}</p>}{english&&<p className="translation">{generatedTest.english}</p>}</section><aside className="cs-card audit"><small className="eyebrow">SELECTION AUDIT</small><h3>Data used</h3>{Object.entries(generatedTest.slots).map(([name, slot],i)=>{const category=slot.tags.find(tag=>tag.startsWith('category:'))?.slice(9);const matchedTags=slot.tags.filter(tag=>tag.startsWith('matched:')).map(tag=>tag.slice(8));return <div key={name}><i>{i+1}</i><span><b>{slot.dictionaryForm}</b><small>{name}{category?` · ${category}`:''} · {slot.jlpt}{slot.id.startsWith('approved-') ? ' · approved' : ' · built-in'}</small>{matchedTags.length>0&&<small>Matched tags: {matchedTags.join(', ')}</small>}</span></div>})}<footer><small>Pattern</small><Slots items={sentencePatternCatalog.find(pattern=>pattern.id===generatedTest.frameId)?.slots ?? []} /></footer></aside></div> : <div className="cs-empty">No active executable pattern is available for the selected levels.</div>}</div>}
+      {view === 'test' && !testBatchOpen && <div className="cs-page cs-narrow"><div className="cs-intro"><div><h2>Test generator</h2><p>Select one or more complexity levels to define the sentence-pattern pool.</p></div><div className="test-generator-actions"><button className={`ghost${english?' active':''}`} aria-pressed={english} onClick={()=>setEnglish(!english)}>EN English {english?'on':'off'}</button><button className={`ghost${furigana?' active':''}`} aria-pressed={furigana} onClick={()=>setFurigana(!furigana)}>ふ Furigana {furigana?'on':'off'}</button><button className="ghost" onClick={()=>setTestBatchOpen(true)}>Generate 10 sentences →</button><button className="primary" onClick={()=>setSample(sample+1)} disabled={!generatedTest}>Generate ↻</button></div></div><div className="test-level-menu" role="group" aria-label="Filter test patterns by generation complexity">{GENERATION_COMPLEXITIES.map(complexity=>{const selected=testComplexities.includes(complexity);return <button key={complexity} className={selected?'active':''} aria-pressed={selected} onClick={()=>toggleTestComplexity(complexity)}>L{complexity}</button>})}</div>{generatedTest ? <div className="cs-test"><section className="cs-card result"><small><span /> {generatedTest.frameId.toUpperCase()} · {complexityDetails[complexityForPattern(generatedTest.frameId)].shortLabel} PATTERN</small><h3><TestSentenceText sentence={generatedTest} showFurigana={furigana}/></h3>{furigana&&generatedTest.reading&&<p className="reading">{generatedTest.reading}</p>}{english&&<p className="translation">{generatedTest.english}</p>}</section><aside className="cs-card audit"><small className="eyebrow">SELECTION AUDIT</small><h3>Data used</h3>{Object.entries(generatedTest.slots).map(([name, slot],i)=>{const category=slot.tags.find(tag=>tag.startsWith('category:'))?.slice(9);const matchedTags=slot.tags.filter(tag=>tag.startsWith('matched:')).map(tag=>tag.slice(8));return <div key={name}><i>{i+1}</i><span><b>{slot.dictionaryForm}</b><small>{name}{category?` · ${category}`:''} · {slot.jlpt}{slot.id.startsWith('approved-') ? ' · approved' : ' · built-in'}</small>{matchedTags.length>0&&<small>Matched tags: {matchedTags.join(', ')}</small>}</span></div>})}<footer><small>Pattern</small><Slots items={sentencePatternCatalog.find(pattern=>pattern.id===generatedTest.frameId)?.slots ?? []} /></footer></aside></div> : <div className="cs-empty">No template is available for the selected complexity level.</div>}</div>}
     </main>
   </div>
 }

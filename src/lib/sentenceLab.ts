@@ -10,7 +10,7 @@ import { shuffle } from './quiz'
 import {
   buildGeneratedBuilderExercises,
 } from './generatedSentenceExercises'
-import type { JlptLevel } from './types'
+import type { GenerationComplexity } from './generationComplexity'
 
 const SESSION_SIZE = 15
 
@@ -36,7 +36,7 @@ export function buildSentenceSession(
   type: SentenceExerciseType,
   wrongPool: WrongPool,
   fillGapFilter?: FillGapLevelFilter,
-  builderLevels: readonly JlptLevel[] = ['N5'],
+  builderLevels: readonly GenerationComplexity[] = [1],
 ): SentenceSessionItem[] {
   const pool =
     type === 'fill-gap' && fillGapFilter

@@ -1,17 +1,11 @@
 import type { SentenceExercise } from '../data/sentenceExercises'
 import { generateCategorySentence } from './categorySentenceEngine'
-import type { GeneratedPreviewSentence } from './sentenceGeneratorPreview'
+import { generatePreviewSentence, type GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import { shuffle } from './quiz'
-import type { JlptLevel } from './types'
+import { GENERATION_COMPLEXITIES, patternsForComplexity, type GenerationComplexity } from './generationComplexity'
 
 export const GENERATED_BUILDER_SESSION_SIZE = 15
-export const WIRED_BUILDER_LEVELS: readonly JlptLevel[] = ['N5', 'N4', 'N3']
-
-const CATEGORY_BUILDER_PATTERNS: Record<Extract<JlptLevel, 'N5' | 'N4' | 'N3'>, Array<string | undefined>> = {
-  N5: [undefined],
-  N4: [undefined],
-  N3: ['n3-08', 'n3-09', 'n3-10'],
-}
+export const WIRED_BUILDER_LEVELS: readonly GenerationComplexity[] = GENERATION_COMPLEXITIES
 
 function sentenceSeed() {
   return Math.floor((Date.now() + Math.random() * 1_000_000_000) % 1_000_000_000)
@@ -46,31 +40,32 @@ function builderSegments(sentence: GeneratedPreviewSentence) {
   return segments
 }
 
-function generatedExercise(level: JlptLevel, seed: number): SentenceExercise {
-  const requestedPatternId =
-    level === 'N5' || level === 'N4'
-      ? CATEGORY_BUILDER_PATTERNS[level][0]
-      : CATEGORY_BUILDER_PATTERNS.N3[seed % CATEGORY_BUILDER_PATTERNS.N3.length]
-  const sentence = generateCategorySentence(seed, requestedPatternId, level as 'N5' | 'N4' | 'N3')
+function generatedExercise(complexity: GenerationComplexity, seed: number): SentenceExercise {
+  const patterns = patternsForComplexity(complexity)
+  const pattern = patterns[seed % patterns.length]
+  if (!pattern) throw new Error(`Could not find a Level ${complexity} template`)
+  const sentence = pattern.jlpt === 'N1' || pattern.jlpt === 'N2'
+    ? generatePreviewSentence(pattern.jlpt, seed, undefined, pattern.id, true)
+    : generateCategorySentence(seed, pattern.id, pattern.jlpt)
   if (!sentence) {
-    throw new Error(`Could not generate ${level} sentence-builder exercise`)
+    throw new Error(`Could not generate Level ${complexity} sentence-builder exercise`)
   }
   const segments = builderSegments(sentence)
   const english = sentence.english.charAt(0).toUpperCase() + sentence.english.slice(1)
 
   return {
-    id: `sent-generated-${level.toLowerCase()}-${sentence.frameId}-${seed}`,
+    id: `sent-generated-l${complexity}-${sentence.frameId}-${seed}`,
     type: 'sentence-builder',
     segments: segments.map((segment) => segment.text),
     segmentReadings: segments.map((segment) => segment.reading),
     segmentMeanings: segments.map((segment) => segment.meaning),
     english,
-    jlpt: level,
+    jlpt: pattern.jlpt,
   }
 }
 
 export function buildGeneratedBuilderExercises(
-  levels: readonly JlptLevel[],
+  levels: readonly GenerationComplexity[],
   count = GENERATED_BUILDER_SESSION_SIZE,
   batch = 0,
 ): SentenceExercise[] {
@@ -103,10 +98,10 @@ export function buildGeneratedBuilderExercises(
 }
 
 export function getGeneratedBuilderExerciseById(id: string): SentenceExercise | undefined {
-  const match = /^sent-generated-(n[1-5])-(?:[^-]+-\d+-)?(\d+)$/.exec(id)
+  const match = /^sent-generated-l([1-5])-(?:[^-]+-\d+-)?(\d+)$/.exec(id)
   if (!match) return undefined
 
-  const level = match[1].toUpperCase() as JlptLevel
+  const level = Number(match[1]) as GenerationComplexity
   if (!WIRED_BUILDER_LEVELS.includes(level)) return undefined
 
   try {

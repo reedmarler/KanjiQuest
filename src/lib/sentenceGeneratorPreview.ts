@@ -468,7 +468,7 @@ export function generatePreviewSentence(
   const rand = seeded(seed)
   const readyLevelPatterns=sentencePatternCatalog.filter(pattern=>pattern.jlpt===level && pattern.generatorReady)
   const effectiveRequestedFrameId=requestedFrameId ?? readyLevelPatterns[Math.abs(seed)%readyLevelPatterns.length]?.id
-  if (level === 'N5' || level === 'N4' || level === 'N3') {
+  {
     const categorySentence = generateCategorySentence(seed, effectiveRequestedFrameId, level)
     if (categorySentence) return categorySentence
   }

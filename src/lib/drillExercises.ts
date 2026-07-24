@@ -7,7 +7,7 @@
  * derivation lives here and each data module supplies its own sentences.
  */
 
-/** JLPT levels that have curated drills wired up. */
+/** JLPT remains catalog metadata; learner-facing difficulty uses generation complexity. */
 export type DrillJlptLevel = 'N5' | 'N4' | 'N3'
 
 export const DRILL_LEVELS: readonly DrillJlptLevel[] = ['N5', 'N4', 'N3']
@@ -42,6 +42,8 @@ export interface DrillFocus {
 export interface DrillExercise {
   id: string
   jlpt: DrillJlptLevel
+  /** How much grammatical structure the underlying sentence coordinates. */
+  complexity?: 1 | 2 | 3 | 4 | 5
   prompt: string
   /** Hiragana for `prompt`, split on the same ___ marker. */
   promptReading?: string

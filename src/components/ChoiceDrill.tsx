@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { DRILL_LEVELS } from '../lib/drillExercises'
-import type { DrillExercise, DrillJlptLevel } from '../lib/drillExercises'
+import type { DrillExercise } from '../lib/drillExercises'
+import { complexityDetails, GENERATION_COMPLEXITIES, type GenerationComplexity } from '../lib/generationComplexity'
 import { FuriganaSegment } from './FuriganaText'
 import { shuffle } from '../lib/quiz'
 
@@ -61,8 +61,8 @@ function saveBooleanPreference(key: string, value: boolean) {
   }
 }
 
-function loadLevelPreference(key: string): DrillJlptLevel[] {
-  const fallback: DrillJlptLevel[] = ['N5']
+function loadLevelPreference(key: string): GenerationComplexity[] {
+  const fallback: GenerationComplexity[] = [1]
   if (typeof window === 'undefined') return fallback
 
   try {
@@ -70,14 +70,14 @@ function loadLevelPreference(key: string): DrillJlptLevel[] {
     if (!stored) return fallback
     const parsed = JSON.parse(stored) as unknown
     if (!Array.isArray(parsed)) return fallback
-    const levels = DRILL_LEVELS.filter((level) => parsed.includes(level))
+    const levels = GENERATION_COMPLEXITIES.filter((level) => parsed.includes(level))
     return levels.length ? [...levels] : fallback
   } catch {
     return fallback
   }
 }
 
-function saveLevelPreference(key: string, levels: DrillJlptLevel[]) {
+function saveLevelPreference(key: string, levels: GenerationComplexity[]) {
   try {
     window.localStorage.setItem(key, JSON.stringify(levels))
   } catch {
@@ -85,14 +85,18 @@ function saveLevelPreference(key: string, levels: DrillJlptLevel[]) {
   }
 }
 
-function initialAvailableLevels(key: string, availableLevels: DrillJlptLevel[]) {
+function initialAvailableLevels(key: string, availableLevels: GenerationComplexity[]) {
   const stored = loadLevelPreference(key)
   const selected = stored.filter((level) => availableLevels.includes(level))
-  return selected.length ? selected : [availableLevels[0] ?? 'N5']
+  return selected.length ? selected : [availableLevels[0] ?? 1]
 }
 
-function buildPracticeSession(pool: DrillExercise[], levels: readonly DrillJlptLevel[]) {
-  return shuffle(pool.filter((item) => levels.includes(item.jlpt))).slice(0, DEFAULT_SESSION_SIZE)
+function exerciseComplexity(exercise: DrillExercise): GenerationComplexity {
+  return exercise.complexity ?? 1
+}
+
+function buildPracticeSession(pool: DrillExercise[], levels: readonly GenerationComplexity[]) {
+  return shuffle(pool.filter((item) => levels.includes(exerciseComplexity(item)))).slice(0, DEFAULT_SESSION_SIZE)
 }
 
 /**
@@ -121,17 +125,17 @@ export function ChoiceDrill({
   const levelCounts = useMemo(
     () =>
       Object.fromEntries(
-        DRILL_LEVELS.map((level) => [level, pool.filter((item) => item.jlpt === level).length]),
-      ) as Record<DrillJlptLevel, number>,
+        GENERATION_COMPLEXITIES.map((level) => [level, pool.filter((item) => exerciseComplexity(item) === level).length]),
+      ) as Record<GenerationComplexity, number>,
     [pool],
   )
   const availableLevels = useMemo(
-    () => DRILL_LEVELS.filter((level) => levelCounts[level] > 0),
+    () => GENERATION_COMPLEXITIES.filter((level) => levelCounts[level] > 0),
     [levelCounts],
   )
 
-  const [levels, setLevels] = useState<DrillJlptLevel[]>(() => initialAvailableLevels(levelsKey, availableLevels))
-  const [pendingLevels, setPendingLevels] = useState<DrillJlptLevel[]>(levels)
+  const [levels, setLevels] = useState<GenerationComplexity[]>(() => initialAvailableLevels(levelsKey, availableLevels))
+  const [pendingLevels, setPendingLevels] = useState<GenerationComplexity[]>(levels)
   const [levelMenuOpen, setLevelMenuOpen] = useState(false)
   const levelPickerRef = useRef<HTMLDivElement>(null)
   // Shuffled once per visit (and again on restart or a level change) so the same
@@ -202,7 +206,7 @@ export function ChoiceDrill({
   }, [levelMenuOpen, levels])
 
 
-  function togglePendingLevel(level: DrillJlptLevel) {
+  function togglePendingLevel(level: GenerationComplexity) {
     if (!availableLevels.includes(level)) return
     setPendingLevels((current) => {
       const next = current.includes(level)
@@ -234,7 +238,7 @@ export function ChoiceDrill({
   }
 
   /** Restart the run against `nextLevels`, reshuffled. */
-  function startSession(nextLevels: DrillJlptLevel[], sourcePool = sessionPool) {
+  function startSession(nextLevels: GenerationComplexity[], sourcePool = sessionPool) {
     setExercises(buildPracticeSession(sourcePool, nextLevels))
     setCurrentIndex(0)
     setSelected(null)
@@ -438,13 +442,13 @@ export function ChoiceDrill({
               onClick={() => setLevelMenuOpen((open) => !open)}
             >
               <span>{badgeLabel}</span>
-              <span className="jlpt-badge">{levels.join(' + ')}</span>
+              <span className="jlpt-badge">{levels.map((level) => complexityDetails[level].shortLabel).join(' + ')}</span>
               <span className="builder-level-chevron" aria-hidden="true" />
             </button>
             {levelMenuOpen && (
-              <div className="builder-level-menu" role="group" aria-label={`${badgeLabel} JLPT levels`}>
-                <span className="builder-level-menu-label">Practice levels</span>
-                {DRILL_LEVELS.map((level) => {
+              <div className="builder-level-menu" role="group" aria-label={`${badgeLabel} complexity levels`}>
+                <span className="builder-level-menu-label">Generation complexity</span>
+                {GENERATION_COMPLEXITIES.map((level) => {
                   const enabled = availableLevels.includes(level)
                   const isSelected = pendingLevels.includes(level)
 
@@ -458,8 +462,8 @@ export function ChoiceDrill({
                       onClick={() => togglePendingLevel(level)}
                     >
                       <span className="builder-level-check" aria-hidden="true" />
-                      <strong>{level}</strong>
-                      <small>{enabled ? 'Ready' : 'Soon'}</small>
+                      <strong>Level {level}</strong>
+                      <small>{enabled ? complexityDetails[level].label.split(' · ')[1] : 'Soon'}</small>
                     </button>
                   )
                 })}

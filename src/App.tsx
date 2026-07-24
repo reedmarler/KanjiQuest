@@ -20,7 +20,8 @@ import {
   recordWrong,
   saveWrongPool,
 } from './lib/wrongPool'
-import type { CardProgress, JlptLevel } from './lib/types'
+import type { CardProgress } from './lib/types'
+import type { GenerationComplexity } from './lib/generationComplexity'
 import type { SentenceExercise } from './data/sentenceExercises'
 import type { DrillExercise } from './lib/drillExercises'
 import type { FillGapLevelFilter } from './lib/fillGapLevels'
@@ -33,6 +34,7 @@ import { ContentStudio } from './components/ContentStudio'
 import { GrammarPractice } from './components/GrammarPractice'
 import { VocabPractice } from './components/VocabPractice'
 import { FavoriteSentences } from './components/FavoriteSentences'
+import { SentenceTesting } from './components/SentenceTesting'
 import './App.css'
 
 type View =
@@ -44,6 +46,7 @@ type View =
   | 'content-studio'
   | 'grammar'
   | 'favorites'
+  | 'sentence-testing'
 
 type SessionItem =
   | { kind: 'fill-gap'; exercise: SentenceExercise }
@@ -57,7 +60,7 @@ function App() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [sessionCorrect, setSessionCorrect] = useState(0)
   const [exitView, setExitView] = useState<View>('dashboard')
-  const [builderLevels, setBuilderLevels] = useState<JlptLevel[]>(['N5'])
+  const [builderLevels, setBuilderLevels] = useState<GenerationComplexity[]>([1])
   const [infiniteBuilderMode, setInfiniteBuilderMode] = useState(false)
   const [favoriteSentences, setFavoriteSentences] = useState<FavoriteSentence[]>(() => loadFavoriteSentences())
 
@@ -118,7 +121,7 @@ function App() {
     startStudy(items, returnTo)
   }, [builderLevels, wrongPool])
 
-  const applyBuilderLevels = useCallback((nextLevels: readonly JlptLevel[]) => {
+  const applyBuilderLevels = useCallback((nextLevels: readonly GenerationComplexity[]) => {
     const next = WIRED_BUILDER_LEVELS.filter((level) => nextLevels.includes(level))
     if (!next.length) return
 
@@ -203,6 +206,14 @@ function App() {
 
   if (view === 'content-studio') return <ContentStudio onBack={() => setView('dashboard')} />
 
+  if (view === 'sentence-testing') {
+    return (
+      <div className="app">
+        <SentenceTesting onBack={() => setView('dashboard')} />
+      </div>
+    )
+  }
+
   if (view === 'grammar') {
     return (
       <div className="app">
@@ -284,6 +295,7 @@ function App() {
         onOpenVocabPractice={() => setView('vocab-practice')}
         onOpenContentStudio={() => setView('content-studio')}
         onOpenFavoriteSentences={() => setView('favorites')}
+        onOpenSentenceTesting={() => setView('sentence-testing')}
         wrongPool={wrongPool}
         progress={progress}
       />

@@ -1870,6 +1870,195 @@ body:has(.dashboard) .app {
   font-size: 0.72rem;
 }
 
+.sentence-testing-launch {
+  margin-top: 0.6rem;
+  padding: 0.72rem 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  border: 1px solid rgba(110, 176, 224, 0.42);
+  border-radius: var(--radius);
+  background: linear-gradient(110deg, rgba(26, 61, 102, 0.44), rgba(36, 35, 54, 0.88));
+}
+
+.sentence-testing-launch span,
+.sentence-testing-kicker {
+  display: block;
+  color: var(--kyogre-light);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+.sentence-testing-launch h2 {
+  margin-top: 0.12rem;
+  font-size: 0.95rem;
+}
+
+.sentence-testing-launch p {
+  margin-top: 0.1rem;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
+.sentence-testing-launch .btn {
+  flex: 0 0 auto;
+  font-size: 0.65rem;
+}
+
+.sentence-testing {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.sentence-testing-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sentence-testing-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.32rem;
+}
+
+.sentence-testing-controls .builder-infinite-toggle {
+  width: 2rem;
+  font: 800 0.54rem/1 'Outfit', sans-serif;
+}
+
+.sentence-testing-controls .sentence-testing-furigana-toggle {
+  font: 800 0.92rem/1 'Noto Sans JP', sans-serif;
+}
+
+.sentence-testing-intro {
+  margin: 1.5rem 0 0.85rem;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sentence-testing-intro h1 {
+  margin-top: 0.18rem;
+  font-size: 1.55rem;
+  line-height: 1.1;
+}
+
+.sentence-testing-intro p {
+  max-width: 28rem;
+  margin-top: 0.38rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.sentence-testing-generate {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-size: 0.7rem;
+}
+
+.sentence-testing-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+
+.sentence-testing-summary span {
+  padding: 0.26rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.62rem;
+}
+
+.sentence-testing-summary b {
+  color: var(--text);
+}
+
+.sentence-testing-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.sentence-testing-card {
+  min-width: 0;
+  padding: 0.78rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.sentence-testing-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.sentence-testing-card > header span {
+  color: var(--kyogre-light);
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.sentence-testing-card > header small {
+  color: var(--text-muted);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.sentence-testing-japanese {
+  min-height: 2.25rem;
+  color: var(--text);
+  font: 500 1.05rem/1.75 'Noto Sans JP', sans-serif;
+}
+
+.sentence-testing-english {
+  min-height: 1.7rem;
+  margin-top: 0.3rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.sentence-testing-card footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.48rem;
+  padding-top: 0.48rem;
+  border-top: 1px solid var(--border);
+}
+
+.sentence-testing-card footer span {
+  color: var(--gold);
+  font-size: 0.55rem;
+}
+
+@media (max-width: 520px) {
+  .sentence-testing-intro {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sentence-testing-list {
+    grid-template-columns: 1fr;
+  }
+
+  .sentence-testing-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 .tag-testing {
   margin-top: 0.7rem;
   border: 1px solid var(--border);

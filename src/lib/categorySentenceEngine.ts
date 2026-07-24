@@ -328,6 +328,8 @@ const uncountableGlosses = new Set([
   'money','music','information','news','homework','work','weather','clothing','furniture','luggage','advice','anime','paper','mail',
   // Foods English treats as a substance when eaten: “eats cake”, not “eats a cake”.
   'cake','pizza','curry','salad','chocolate','candy','cereal','yogurt','pie',
+  // Language names take no article as a study/speech object: “speaks Japanese”, not “speaks a Japanese”.
+  'japanese','english','chinese','french','spanish','german','korean',
 ])
 // テレビ is the set when you want one and the medium when you watch it, so the
 // article depends on the verb rather than on the noun.
@@ -342,7 +344,12 @@ function isPluralPhrase(value: string) {
 
 /** An object phrase with the article English expects, mass nouns excepted. */
 function objectEnglish(gloss: string) {
-  return uncountableGlosses.has(gloss.toLowerCase()) ? gloss : indefinite(gloss)
+  const lower = gloss.toLowerCase()
+  // "English language", "Chinese language", etc. are uncountable regardless of
+  // which language, so a suffix check catches every gloss the vocab data uses
+  // without needing to enumerate every language by name.
+  if (uncountableGlosses.has(lower) || /\blanguage$/.test(lower)) return gloss
+  return indefinite(gloss)
 }
 
 function tagSet(word: WordRecord) {
@@ -1331,6 +1338,485 @@ function generateN3CategorySentence(seed: number,patternId: string): GeneratedPr
   return finish(furigana,`I study ${pair.languageEnglish} in order to go to ${pair.countryEnglish}.`,{destination:pair.country,object:pair.language},{purpose:grammarSlot('purpose-tameni','行く','行く','いく','go',['purpose','movement'],'verb'),mainVerb:grammarSlot('main-benkyou','勉強します','勉強する','べんきょうします','study',['learning','purpose-result'])},['Country and language are paired deliberately.','The main action supports the stated purpose.'])
 }
 
+/**
+ * Advanced (N2/N1) grammar attaches to whole propositions rather than a single
+ * governed verb, so — like the trickier N3 blocks — these mix real vocabulary
+ * pools with a handful of hand-verified grammar templates per pattern. Every
+ * combination of subject/object/verb still gets correct per-word furigana.
+ */
+const advancedPatternMeanings: Record<string,string> = {
+  'n2-01':'it is not that','n2-02':'cannot afford to','n2-09':'so that','n1-01':'have no choice but to','n1-02':'nothing other than',
+  'n3-11':'while (bounded window)','n3-12':'while / before it is too late','n3-13':'just did','n3-14':'finish doing','n3-15':'continue doing',
+  'n2-10':'about to, in the middle of, or just did',
+  'n3-16':'thanks to','n3-17':'because of (blame)','n3-18':'leaving a state as-is','n3-19':'while (formal)',
+  'n2-11':'should do','n1-03':'although','n1-04':'might result in something negative',
+  'n2-12':'as / along with a change','n2-13':'even (emphatic)','n2-14':'precisely / it is X that','n2-15':'not only X but also Y',
+  'n1-11':'if / supposing','n1-12':'according to / depending on','n1-13':'not necessarily',
+  'n2-04':'there is no need to','n1-05':'unless something is done','n1-06':'extending even to','n1-07':'unique or characteristic of',
+  'n1-08':'in accordance with','n1-09':'concerning or surrounding a topic','n1-10':'on the occasion of',
+}
+
+const advancedPatternIds = new Set([
+  'n2-01', 'n2-02', 'n2-09', 'n1-01', 'n1-02', 'n3-11', 'n3-12', 'n3-13', 'n3-14', 'n3-15', 'n2-10',
+  'n3-16', 'n3-17', 'n3-18', 'n3-19', 'n2-11', 'n1-03', 'n1-04',
+  'n2-12', 'n2-13', 'n2-14', 'n2-15', 'n1-11', 'n1-12', 'n1-13',
+  'n2-04', 'n1-05', 'n1-06', 'n1-07', 'n1-08', 'n1-09', 'n1-10',
+])
+
+function advancedPatternLevel(patternId: string): 'N4' | 'N3' | 'N2' | 'N1' {
+  if (patternId.startsWith('n1-')) return 'N1'
+  if (patternId.startsWith('n2-')) return 'N2'
+  if (patternId.startsWith('n3-')) return 'N3'
+  return 'N4'
+}
+
+function generateAdvancedCategorySentence(seed: number, patternId: string): GeneratedPreviewSentence | null {
+  if (!advancedPatternIds.has(patternId)) return null
+  const level = advancedPatternLevel(patternId)
+  const vocabulary = editorWords()
+  const humans = validHumanPool(vocabulary)
+  const pick = <T>(pool: T[], salt: number) => pool.length ? seededPick(pool, seed, salt) : null
+  const exact = (japanese: string[]) => vocabulary.filter(word => japanese.includes(word.japanese) && hasUsableMeaning(word))
+  const wordPart = (word: WordRecord, slot: string) => ({ text: word.japanese, reading: kanaReading(word.reading, word.japanese), slot })
+  const literalPart = (text: string, reading = text, slot?: string) => ({ text, reading, slot })
+  const grammarSlot = (id: string, surface: string, dictionaryForm: string, reading: string, english: string, tags: string[]) => ({
+    id, surface, dictionaryForm, reading, english, pos: 'verb' as const, jlpt: level, tags, conjugation: patternId,
+  })
+  const finish = (furigana: GeneratedPreviewSentence['furigana'], english: string, filled: Record<string,WordRecord>, extraSlots: GeneratedPreviewSentence['slots'], note: string): GeneratedPreviewSentence => ({
+    frameId: patternId, level, japanese: furigana.map(part => part.text).join(''), reading: furigana.map(part => part.reading || part.text).join(''), english,
+    slots: { ...generatedWordSlots(filled, {}), ...extraSlots }, furigana, grammar: [{ pattern: patternId, meaning: advancedPatternMeanings[patternId]!, jlpt: level }],
+    validation: [note, 'Advanced-grammar sentence combining vocabulary pools with a verified template.'],
+  })
+  const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1)
+
+  if (patternId === 'n2-09') {
+    type Variant = { furigana: GeneratedPreviewSentence['furigana']; filled: Record<string,WordRecord>; english: string; note: string }
+    const variants: Variant[] = []
+    const readable = exact(['漢字','本','新聞','小説','記事'])
+    const readingTarget = pick(readable, 801)
+    const effort = pick([{ surface:'勉強します', reading:'べんきょうします', english:'study' }, { surface:'練習します', reading:'れんしゅうします', english:'practice' }], 802)
+    if (readingTarget && effort) variants.push({
+      furigana:[wordPart(readingTarget,'object'),literalPart('が'),literalPart('読める','よめる','ability'),literalPart('ように、'),literalPart('毎日','まいにち','time'),literalPart(effort.surface,effort.reading,'verb')],
+      filled:{object:readingTarget},english:`I ${effort.english} every day so that I can read ${englishPhrase(readingTarget,'object')}.`,
+      note:'ように pairs a potential verb with the effort that achieves it.',
+    })
+    const prevention = pick([
+      { trigger:'忘れ',triggerReading:'わすれ',action:'メモします',actionReading:'めもします',english:['forget','take notes']},
+      { trigger:'遅刻し',triggerReading:'ちこくし',action:'早く家を出ます',actionReading:'はやくいえをでます',english:['be late','leave home early']},
+      { trigger:'風邪をひか',triggerReading:'かぜをひか',action:'気をつけます',actionReading:'きをつけます',english:['catch a cold','am careful']},
+    ], 803)
+    if (prevention) variants.push({
+      furigana:[literalPart(prevention.trigger,prevention.triggerReading,'verb'),literalPart('ないように、'),literalPart(prevention.action,prevention.actionReading,'result')],
+      filled:{},english:`I ${prevention.english[1]} so that I will not ${prevention.english[0]}.`,
+      note:'ように pairs a negative verb with a deliberate preventive action.',
+    })
+    const variant = pick(variants, 804)
+    return variant ? finish(variant.furigana, capitalize(variant.english), variant.filled, {}, variant.note) : null
+  }
+
+  if (patternId === 'n1-01') {
+    const candidateVerbs = verbs.filter(verb => ['iku-e','hanasu-companion','yomu-basic','nomu-basic','taberu-basic','miru-basic','okiru-time'].includes(verb.id))
+    const verb = pick(candidateVerbs, 811)
+    const subject = pick(humans, 812)
+    const reason = pick([
+      { surface:'ルールなので、', reading:'るーるなので、', english:'Since it is the rule' },
+      { surface:'約束なので、', reading:'やくそくなので、', english:'Since it is a promise' },
+      { surface:'仕事なので、', reading:'しごとなので、', english:'Since it is work' },
+    ], 813)
+    if (!verb || !subject || !reason) return null
+    const aStem = n4VerbForms(verb).aStem
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const furigana=[literalPart(reason.surface,reason.reading,'reason'),wordPart(subject,'subject'),literalPart('は','わ'),{text:aStem.japanese,reading:aStem.reading,slot:'verb'},literalPart('ざるを'),literalPart('得ません。','えません。','modal')]
+    return finish(furigana,`${reason.english}, ${subjectEnglish} ${subjectUsesBaseVerb(subjectEnglish)?'have':'has'} no choice but to ${verb.english}.`,{subject},{verb:grammarSlot(`verb-${verb.id}-zaruoenai`,`${aStem.japanese}ざるを得ません`,verb.japanese,`${aStem.reading}ざるをえません`,`have no choice but to ${verb.english}`,['obligation','zaru-o-enai'])},'ざるを得ない follows a reason the subject cannot resist.')
+  }
+
+  if (patternId === 'n1-02') {
+    const subject = pick([
+      { surface:'成功', reading:'せいこう', english:'success' },
+      { surface:'合格', reading:'ごうかく', english:'passing the exam' },
+      { surface:'勝利', reading:'しょうり', english:'victory' },
+    ], 821)
+    const cause = pick([
+      { surface:'努力', reading:'どりょく', english:'effort' },
+      { surface:'準備', reading:'じゅんび', english:'preparation' },
+      { surface:'練習', reading:'れんしゅう', english:'practice' },
+    ], 822)
+    const tail = pick([{ surface:'結果', reading:'けっか', english:'result' }, { surface:'成果', reading:'せいか', english:'fruit' }], 823)
+    if (!subject || !cause || !tail) return null
+    const furigana=[literalPart(subject.surface,subject.reading,'subject'),literalPart('は','わ'),literalPart(cause.surface,cause.reading,'cause'),literalPart('の'),literalPart(tail.surface,tail.reading,'object'),literalPart('にほかならない。')]
+    return finish(furigana,`${capitalize(subject.english)} is nothing other than the ${tail.english} of ${cause.english}.`,{},{},'にほかならない equates a result with its single true cause.')
+  }
+
+  if (patternId === 'n2-01') {
+    type Variant = { furigana: GeneratedPreviewSentence['furigana']; filled: Record<string,WordRecord>; english: string }
+    const variants: Variant[] = []
+    const dislikable = exact(['肉','魚','野菜','勉強'])
+    const dislikeObject = pick(dislikable, 831)
+    if (dislikeObject) variants.push({
+      furigana:[wordPart(dislikeObject,'object'),literalPart('が'),literalPart('嫌い','きらい','predicate'),literalPart('な'),literalPart('わけではありません。')],
+      filled:{object:dislikeObject},english:`It is not that I dislike ${englishPhrase(dislikeObject,'object')}.`,
+    })
+    const habitVerb = pick([
+      { surface:'勉強して', reading:'べんきょうして', english:'study' },
+      { surface:'運動して', reading:'うんどうして', english:'exercise' },
+      { surface:'料理して', reading:'りょうりして', english:'cook' },
+    ], 832)
+    const frequency = pick([{ surface:'毎日', reading:'まいにち' }, { surface:'いつも', reading:'いつも' }], 833)
+    if (habitVerb && frequency) variants.push({
+      furigana:[literalPart(frequency.surface,frequency.reading,'time'),literalPart(habitVerb.surface,habitVerb.reading,'verb'),literalPart('いるわけではありません。')],
+      filled:{},english:`It is not that I ${habitVerb.english} ${frequency.surface==='毎日'?'every day':'always'}.`,
+    })
+    const variant = pick(variants, 834)
+    return variant ? finish(variant.furigana, capitalize(variant.english), variant.filled, {}, 'わけではない softens an assumed generalization.') : null
+  }
+
+  if (patternId === 'n2-02') {
+    const reason = pick(exact(['試験','仕事','会議','約束']), 841)
+    const declinedVerb = pick([
+      { surface:'休む', reading:'やすむ', english:'skip it' },
+      { surface:'帰る', reading:'かえる', english:'go home' },
+      { surface:'寝る', reading:'ねる', english:'go to sleep' },
+      { surface:'断る', reading:'ことわる', english:'refuse' },
+    ], 842)
+    if (!reason || !declinedVerb) return null
+    const furigana=[wordPart(reason,'reason'),literalPart('が'),literalPart('あるので、'),literalPart(declinedVerb.surface,declinedVerb.reading,'verb'),literalPart('わけにはいきません。')]
+    return finish(furigana,`There is ${englishPhrase(reason,'object')}, so I cannot afford to ${declinedVerb.english}.`,{reason},{},'わけにはいかない marks an option the situation forbids.')
+  }
+
+  const smallVerbPool = verbs.filter(verb => ['iku-e','hanasu-companion','yomu-basic','nomu-basic','taberu-basic','miru-basic','okiru-time'].includes(verb.id))
+
+  if (patternId === 'n3-13') {
+    const verb = pick(smallVerbPool, 851)
+    const subject = pick(humans, 852)
+    if (!verb || !subject) return null
+    const ta = n4VerbForms(verb).ta
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),{text:ta.japanese,reading:ta.reading,slot:'verb'},literalPart('ばかりです。')]
+    return finish(furigana,`${capitalize(subjectEnglish)} just ${simplePast(verb.english)}.`,{subject},{verb:grammarSlot(`verb-${verb.id}-tabakari`,`${ta.japanese}ばかりです`,verb.japanese,`${ta.reading}ばかりです`,`just ${verb.english}`,['just-completed','ta-bakari'])},'たばかり marks an action that finished a moment ago.')
+  }
+
+  if (patternId === 'n2-10') {
+    const verb = pick(smallVerbPool, 861)
+    const subject = pick(humans, 862)
+    const aspect = pick(['about-to','ongoing','just-did'] as const, 863)
+    if (!verb || !subject || !aspect) return null
+    const forms = n4VerbForms(verb)
+    const subjectEnglish = englishPhrase(subject,'subject')
+    if (aspect === 'about-to') {
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('今から','いまから','time'),{text:verb.japanese,reading:verb.reading,slot:'verb'},literalPart('ところです。')]
+      const beAboutTo = subjectEnglish==='I'?'am':subjectUsesBaseVerb(subjectEnglish)?'are':'is'
+      return finish(furigana,`${capitalize(subjectEnglish)} ${beAboutTo} just about to ${verb.english}.`,{subject},{},'ところだ with a dictionary-form verb means about to do something.')
+    }
+    if (aspect === 'ongoing') {
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('今','いま','time'),{text:forms.te.japanese,reading:forms.te.reading,slot:'verb'},literalPart('いるところです。')]
+      const beOngoing = subjectEnglish==='I'?'am':subjectUsesBaseVerb(subjectEnglish)?'are':'is'
+      return finish(furigana,`${capitalize(subjectEnglish)} ${beOngoing} in the middle of ${presentParticiple(verb.english)}.`,{subject},{},'ところだ with ている means currently in the middle of doing something.')
+    }
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('今','いま','time'),{text:forms.ta.japanese,reading:forms.ta.reading,slot:'verb'},literalPart('ところです。')]
+    return finish(furigana,`${capitalize(subjectEnglish)} just ${simplePast(verb.english)}.`,{subject},{},'ところだ with a past-form verb means an action just finished.')
+  }
+
+  if (patternId === 'n3-11') {
+    const subject = pick(humans, 871)
+    const companion = pick(humans.filter(word => word.id !== subject?.id), 872)
+    const scene = pick([
+      { activity:'話して', activityReading:'はなして', result:'メモを取ります', resultReading:'めもをとります', companionVerb:['talks','talk'], resultBase:'take notes', resultThird:'takes notes' },
+      { activity:'テレビを見て', activityReading:'てれびをみて', result:'家事をします', resultReading:'かじをします', companionVerb:['watches television','watch television'], resultBase:'do housework', resultThird:'does housework' },
+      { activity:'寝て', activityReading:'ねて', result:'宿題をします', resultReading:'しゅくだいをします', companionVerb:['sleeps','sleep'], resultBase:'do homework', resultThird:'does homework' },
+    ], 873)
+    if (!subject || !companion || !scene) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const companionEnglish = englishPhrase(companion,'subject')
+    const companionUsesBase = subjectUsesBaseVerb(companionEnglish)
+    const resultVerb = subjectEnglish==='I' || subjectUsesBaseVerb(subjectEnglish) ? scene.resultBase : scene.resultThird
+    const furigana=[wordPart(companion,'companion'),literalPart('が'),literalPart(scene.activity,scene.activityReading,'reason'),literalPart('いる'),literalPart('間に','あいだに'),wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,capitalize(`while ${companionEnglish} ${companionUsesBase ? scene.companionVerb[1] : scene.companionVerb[0]}, ${subjectEnglish} ${resultVerb}.`),{subject,companion},{},'間に marks a bounded window during which the main action happens.')
+  }
+
+  if (patternId === 'n3-12') {
+    const subject = pick(humans, 881)
+    const scene = pick([
+      { condition:'若い', conditionReading:'わかい', result:'たくさん勉強します', resultReading:'たくさんべんきょうします', english:'young', resultBase:'study a lot', resultThird:'studies a lot' },
+      { condition:'元気な', conditionReading:'げんきな', result:'旅行します', resultReading:'りょこうします', english:'healthy', resultBase:'travel', resultThird:'travels' },
+    ], 882)
+    if (!subject || !scene) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const beVerb = subjectEnglish==='I' ? 'am' : subjectUsesBaseVerb(subjectEnglish) ? 'are' : 'is'
+    const resultVerb = subjectEnglish==='I' || subjectUsesBaseVerb(subjectEnglish) ? scene.resultBase : scene.resultThird
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.condition,scene.conditionReading,'condition'),literalPart('うちに、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,`While ${subjectEnglish} ${beVerb} still ${scene.english}, ${subjectEnglish==='I'?'I':subjectEnglish} ${resultVerb}.`,{subject},{},'うちに marks a window that closes, so the action must happen before it does.')
+  }
+
+  const objectVerbPairs = [
+    { verbId:'taberu-basic', objects: exact(['ご飯','パン','肉','魚']) },
+    { verbId:'yomu-basic', objects: exact(['本','新聞','小説','記事']) },
+    { verbId:'nomu-basic', objects: exact(['水','お茶','コーヒー']) },
+  ]
+
+  if (patternId === 'n3-14' || patternId === 'n3-15') {
+    const pairPool = objectVerbPairs.filter(pair => pair.objects.length)
+    const pair = pick(pairPool, 891)
+    const verb = pair ? verbs.find(candidate => candidate.id === pair.verbId) : null
+    const object = pair ? pick(pair.objects, 892) : null
+    const subject = pick(humans, 893)
+    if (!verb || !object || !subject) return null
+    const masuStem = n4VerbForms(verb).masuStem
+    const subjectEnglish = englishPhrase(subject,'subject')
+    if (patternId === 'n3-14') {
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:masuStem.japanese,reading:masuStem.reading,slot:'verb'},literalPart('終わりました。','おわりました。')]
+      return finish(furigana,`${capitalize(subjectEnglish)} finished ${presentParticiple(verb.english)} ${englishPhrase(object,'object')}.`,{subject,object},{},'終わる attaches to the masu-stem and means to finish doing something.')
+    }
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:masuStem.japanese,reading:masuStem.reading,slot:'verb'},literalPart('続けています。','つづけています。')]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${subjectUsesBaseVerb(subjectEnglish)?'keep':'keeps'} ${presentParticiple(verb.english)} ${englishPhrase(object,'object')}.`,{subject,object},{},'続ける attaches to the masu-stem and means to continue doing something.')
+  }
+
+  if (patternId === 'n3-16') {
+    const subject = pick(humans, 901)
+    const scene = pick([
+      { cause:'先生', causeReading:'せんせい', causeEnglish:'the teacher', result:'合格しました', resultReading:'ごうかくしました', resultEnglish:'passed' },
+      { cause:'努力', causeReading:'どりょく', causeEnglish:'the effort', result:'成功しました', resultReading:'せいこうしました', resultEnglish:'succeeded' },
+      { cause:'練習', causeReading:'れんしゅう', causeEnglish:'the practice', result:'上手になりました', resultReading:'じょうずになりました', resultEnglish:'became skilled' },
+    ], 902)
+    if (!subject || !scene) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const furigana=[literalPart(scene.cause,scene.causeReading,'cause'),literalPart('のおかげで、'),wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,`Thanks to ${scene.causeEnglish}, ${subjectEnglish} ${scene.resultEnglish}.`,{subject},{},'おかげで credits a cause for a positive result.')
+  }
+
+  if (patternId === 'n3-17') {
+    const subject = pick(humans, 911)
+    const scene = pick([
+      { cause:'雨', causeReading:'あめ', causeEnglish:'the rain', result:'遅れました', resultReading:'おくれました', resultEnglish:'was late' },
+      { cause:'渋滞', causeReading:'じゅうたい', causeEnglish:'the traffic jam', result:'遅刻しました', resultReading:'ちこくしました', resultEnglish:'arrived late' },
+      { cause:'病気', causeReading:'びょうき', causeEnglish:'the illness', result:'休みました', resultReading:'やすみました', resultEnglish:'stayed home' },
+    ], 912)
+    if (!subject || !scene) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const furigana=[literalPart(scene.cause,scene.causeReading,'cause'),literalPart('のせいで、'),wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,`Because of ${scene.causeEnglish}, ${subjectEnglish} ${scene.resultEnglish}.`,{subject},{},'せいで blames a cause for a negative result.')
+  }
+
+  if (patternId === 'n3-18') {
+    const subject = pick(humans, 921)
+    const scene = pick([
+      { clause:'靴を履いた', clauseReading:'くつをはいた', result:'部屋に入りました', resultReading:'へやにはいりました', english:'entered the room with shoes still on' },
+      { clause:'窓を開けた', clauseReading:'まどをあけた', result:'出かけました', resultReading:'でかけました', english:'went out leaving the window open' },
+      { clause:'テレビをつけた', clauseReading:'てれびをつけた', result:'寝ました', resultReading:'ねました', english:'slept with the television on' },
+    ], 922)
+    if (!subject || !scene) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('まま、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${scene.english}.`,{subject},{},'たまま means an action leaves a state unchanged while something else happens.')
+  }
+
+  if (patternId === 'n3-19') {
+    const readable = exact(['漢字','本','新聞','小説','記事'])
+    const readingTarget = pick(readable, 931)
+    const subject = pick(humans, 932)
+    const secondary = pick([
+      { surface:'メモを取ります', reading:'めもをとります', base:'take notes', third:'takes notes' },
+      { surface:'お茶を飲みます', reading:'おちゃをのみます', base:'drink tea', third:'drinks tea' },
+    ], 933)
+    if (!readingTarget || !subject || !secondary) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const secondaryVerb = subjectEnglish==='I' || subjectUsesBaseVerb(subjectEnglish) ? secondary.base : secondary.third
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(readingTarget,'object'),literalPart('を'),literalPart('読み','よみ','verb'),literalPart('つつ、'),literalPart(secondary.surface,secondary.reading,'result')]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${secondaryVerb} while reading ${englishPhrase(readingTarget,'object')}.`,{subject,object:readingTarget},{},'つつ is a formal equivalent of ながら for two simultaneous actions.')
+  }
+
+  if (patternId === 'n2-11') {
+    const verb = pick(smallVerbPool, 941)
+    const subject = pick(humans, 942)
+    if (!verb || !subject) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),{text:verb.japanese,reading:verb.reading,slot:'verb'},literalPart('べきです。')]
+    return finish(furigana,`${capitalize(subjectEnglish)} should ${verb.english}.`,{subject},{verb:grammarSlot(`verb-${verb.id}-bekida`,`${verb.japanese}べきです`,verb.japanese,`${verb.reading}べきです`,`should ${verb.english}`,['obligation','bekida'])},'べきだ attaches to the dictionary form and expresses a recommendation or duty.')
+  }
+
+  if (patternId === 'n1-03') {
+    type Variant = { furigana: GeneratedPreviewSentence['furigana']; filled: Record<string,WordRecord>; english: string }
+    const variants: Variant[] = []
+    const studyObject = pick(exact(['漢字','単語']), 951)
+    if (studyObject) variants.push({
+      furigana:[wordPart(studyObject,'object'),literalPart('を'),literalPart('勉強した','べんきょうした','clause'),literalPart('ものの、'),literalPart('忘れました','わすれました','result')],
+      filled:{object:studyObject},english:`Although I studied ${englishPhrase(studyObject,'object')}, I forgot it.`,
+    })
+    const umbrella = pick(exact(['傘']), 952), rain = pick(exact(['雨']), 953)
+    if (umbrella && rain) variants.push({
+      furigana:[wordPart(umbrella,'object'),literalPart('を'),literalPart('持って行った','もっていった','clause'),literalPart('ものの、'),wordPart(rain,'weather'),literalPart('は','わ'),literalPart('降りませんでした','ふりませんでした','result')],
+      filled:{object:umbrella,weather:rain},english:'Although I took an umbrella, it did not rain.',
+    })
+    const variant = pick(variants, 954)
+    return variant ? finish(variant.furigana, capitalize(variant.english), variant.filled, {}, 'ものの is a formal equivalent of のに for an unexpected contrast.') : null
+  }
+
+  if (patternId === 'n1-04') {
+    const scene = pick([
+      { cause:'無理をする', causeReading:'むりをする', result:'病気になり', resultReading:'びょうきになり', english:'Overdoing it might result in illness.' },
+      { cause:'油断する', causeReading:'ゆだんする', result:'事故になり', resultReading:'じこになり', english:'Carelessness might result in an accident.' },
+      { cause:'遅刻する', causeReading:'ちこくする', result:'信用を失い', resultReading:'しんようをうしない', english:'Being late might result in losing trust.' },
+    ], 961)
+    if (!scene) return null
+    const furigana=[literalPart(scene.cause,scene.causeReading,'reason'),literalPart('と、'),literalPart(scene.result,scene.resultReading,'result'),literalPart('かねません。')]
+    return finish(furigana,scene.english,{},{},'かねない attaches to the masu-stem and warns of a possible negative outcome.')
+  }
+
+  if (patternId === 'n2-12') {
+    const scene = pick([
+      { cause:'年を取る', causeReading:'としをとる', result:'体が弱くなります', resultReading:'からだがよわくなります', english:'As you get older, your body weakens.' },
+      { cause:'練習する', causeReading:'れんしゅうする', result:'上手になります', resultReading:'じょうずになります', english:'As you practice, you get better.' },
+      { cause:'勉強する', causeReading:'べんきょうする', result:'漢字が読めるようになります', resultReading:'かんじがよめるようになります', english:'As you study, you become able to read kanji.' },
+    ], 971)
+    if (!scene) return null
+    const furigana=[literalPart(scene.cause,scene.causeReading,'reason'),literalPart('につれて、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{},'につれて links two changes that progress together.')
+  }
+
+  if (patternId === 'n2-13') {
+    const subject = pick(humans, 981)
+    const readingTarget = pick(exact(['漢字','本','新聞','小説','記事']), 982)
+    if (!subject || !readingTarget) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(readingTarget,'object'),literalPart('さえ'),literalPart('読めません。','よめません。')]
+    return finish(furigana,`${capitalize(subjectEnglish)} cannot even read ${englishPhrase(readingTarget,'object')}.`,{subject,object:readingTarget},{},'さえ singles out an extreme example to emphasize a broader claim.')
+  }
+
+  if (patternId === 'n2-14') {
+    const subject = pick(humans, 991)
+    const predicate = pick([
+      { surface:'天才', reading:'てんさい', english:'the genius' },
+      { surface:'専門家', reading:'せんもんか', english:'the expert' },
+      { surface:'リーダー', reading:'リーダー', english:'the leader' },
+    ], 992)
+    if (!subject || !predicate) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const furigana=[wordPart(subject,'subject'),literalPart('こそ、'),literalPart(predicate.surface,predicate.reading,'object'),literalPart('です。')]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${subjectEnglish==='I'||subjectUsesBaseVerb(subjectEnglish)?'are':'is'} precisely ${predicate.english}.`,{subject},{},'こそ emphasizes that the preceding word — and no other — fits the predicate.')
+  }
+
+  if (patternId === 'n2-15') {
+    const languageEnglish: Record<string,string> = { 日本語:'Japanese', 英語:'English', 中国語:'Chinese', 外国語:'a foreign language' }
+    const subject = pick(humans, 1001)
+    const languages = exact(['日本語','英語','中国語','外国語'])
+    const first = pick(languages, 1002)
+    const second = pick(languages.filter(word => word.id !== first?.id), 1003)
+    if (!subject || !first || !second) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(first,'object'),literalPart('ばかりか、'),wordPart(second,'result'),literalPart('も'),literalPart('話せます。','はなせます。')]
+    return finish(furigana,`${capitalize(subjectEnglish)} can speak not only ${languageEnglish[first.japanese]} but also ${languageEnglish[second.japanese]}.`,{subject,object:first},{},'ばかりか adds a second, often more surprising, item on top of the first.')
+  }
+
+  if (patternId === 'n1-11') {
+    const destination = pick(validPlacePool(vocabulary).filter(word => ['日本','東京','大阪','学校','大学','図書館','公園','駅','病院'].includes(word.japanese)), 1011)
+    const requirement = pick([
+      { surface:'お金', reading:'おかね', english:'money' },
+      { surface:'準備', reading:'じゅんび', english:'preparation' },
+      { surface:'時間', reading:'じかん', english:'time' },
+    ], 1012)
+    if (!destination || !requirement) return null
+    const destinationEnglish = englishPhrase(destination,'destination')
+    const furigana=[wordPart(destination,'destination'),literalPart('へ','え'),literalPart('行く','いく','reason'),literalPart('とすれば、'),literalPart(requirement.surface,requirement.reading,'object'),literalPart('が'),literalPart('必要です。','ひつようです。')]
+    return finish(furigana,`If we suppose you go to ${destinationEnglish}, you will need ${requirement.english}.`,{destination},{},'とすれば sets up a hypothetical premise and reasons from it.')
+  }
+
+  if (patternId === 'n1-12') {
+    const scene = pick([
+      { basis:'天気', basisReading:'てんき', result:'予定が変わります', resultReading:'よていがかわります', english:"Plans change according to the weather." },
+      { basis:'成績', basisReading:'せいせき', result:'評価が決まります', resultReading:'ひょうかがきまります', english:"Evaluation is decided according to the grades." },
+      { basis:'状況', basisReading:'じょうきょう', result:'対応が変わります', resultReading:'たいおうがかわります', english:"The response changes according to the situation." },
+    ], 1021)
+    if (!scene) return null
+    const furigana=[literalPart(scene.basis,scene.basisReading,'reason'),literalPart('に応じて、','におうじて、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{},'に応じて marks a basis that a result varies with.')
+  }
+
+  if (patternId === 'n1-13') {
+    const scene = pick([
+      { clause:'高いものがいい', clauseReading:'たかいものがいい', english:'Expensive things are not necessarily good.' },
+      { clause:'有名な店がおいしい', clauseReading:'ゆうめいなみせがおいしい', english:'A famous restaurant is not necessarily delicious.' },
+      { clause:'頭がいい人が成功する', clauseReading:'あたまがいいひとがせいこうする', english:'Smart people do not necessarily succeed.' },
+    ], 1031)
+    if (!scene) return null
+    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('とは','とわ'),literalPart('限りません。','かぎりません。')]
+    return finish(furigana,scene.english,{},{},'とは限らない denies that a general rule always holds.')
+  }
+
+  if (patternId === 'n2-04') {
+    const verb = pick(smallVerbPool, 1041)
+    if (!verb) return null
+    const furigana=[{text:verb.japanese,reading:verb.reading,slot:'verb'},literalPart('ことはありません。')]
+    return finish(furigana,`There is no need to ${verb.english}.`,{},{verb:grammarSlot(`verb-${verb.id}-kotohanai`,`${verb.japanese}ことはありません`,verb.japanese,`${verb.reading}ことはありません`,`no need to ${verb.english}`,['no-need','koto-ha-nai'])},'ことはない attaches to the dictionary form and reassures that something is unnecessary.')
+  }
+
+  if (patternId === 'n1-05') {
+    const scene = pick([
+      { cause:'参加しない', causeReading:'さんかしない', result:'始まりません', resultReading:'はじまりません', english:'Unless you participate, it will not start.' },
+      { cause:'試してみない', causeReading:'ためしてみない', result:'わかりません', resultReading:'わかりません', english:'Unless you try it, you will not know.' },
+      { cause:'練習しない', causeReading:'れんしゅうしない', result:'上手になりません', resultReading:'じょうずになりません', english:'Unless you practice, you will not improve.' },
+    ], 1051)
+    if (!scene) return null
+    const furigana=[literalPart(scene.cause,scene.causeReading,'reason'),literalPart('ことには、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{},'ないことには states that nothing else can happen until this precondition is met.')
+  }
+
+  if (patternId === 'n1-06') {
+    const scene = pick([
+      { start:'子供', startReading:'こども', end:'大人', endReading:'おとな', result:'みんな知っています', resultReading:'みんなしっています', english:'From children to adults, everyone knows it.' },
+      { start:'朝', startReading:'あさ', end:'夜', endReading:'よる', result:'休みなく働きます', resultReading:'やすみなくはたらきます', english:'From morning to night, they work without rest.' },
+      { start:'初心者', startReading:'しょしんしゃ', end:'上級者', endReading:'じょうきゅうしゃ', result:'誰でも楽しめます', resultReading:'だれでもたのしめます', english:'From beginners to advanced learners, anyone can enjoy it.' },
+    ], 1061)
+    if (!scene) return null
+    const furigana=[literalPart(scene.start,scene.startReading,'reason'),literalPart('から'),literalPart(scene.end,scene.endReading,'object'),literalPart('に至るまで、','にいたるまで、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{},'に至るまで stretches a range out to an extreme endpoint.')
+  }
+
+  if (patternId === 'n1-07') {
+    const scene = pick([
+      { place:'日本', placeReading:'にほん', noun:'文化', nounReading:'ぶんか', english:'culture unique to Japan' },
+      { place:'京都', placeReading:'きょうと', noun:'魅力', nounReading:'みりょく', english:'charm unique to Kyoto' },
+      { place:'この店', placeReading:'このみせ', noun:'味', nounReading:'あじ', english:'a flavor unique to this restaurant' },
+    ], 1071)
+    if (!scene) return null
+    const furigana=[literalPart(scene.place,scene.placeReading,'subject'),literalPart('ならではの'),literalPart(scene.noun,scene.nounReading,'object'),literalPart('です。')]
+    return finish(furigana,capitalize(`this is ${scene.english}.`),{},{},'ならでは marks something only possible because of that specific place or thing.')
+  }
+
+  if (patternId === 'n1-08') {
+    const scene = pick([
+      { basis:'現実', basisReading:'げんじつ', result:'考えます', resultReading:'かんがえます', english:'think in accordance with reality' },
+      { basis:'事実', basisReading:'じじつ', result:'判断します', resultReading:'はんだんします', english:'judge in accordance with the facts' },
+      { basis:'規則', basisReading:'きそく', result:'行動します', resultReading:'こうどうします', english:'act in accordance with the rules' },
+    ], 1081)
+    if (!scene) return null
+    const furigana=[literalPart(scene.basis,scene.basisReading,'reason'),literalPart('に即して、','にそくして、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,capitalize(`${scene.english}.`),{},{},'に即して means acting strictly on the basis of something concrete, not personal opinion.')
+  }
+
+  if (patternId === 'n1-09') {
+    const scene = pick([
+      { topic:'問題', topicReading:'もんだい', result:'議論します', resultReading:'ぎろんします', english:'discuss concerning the issue' },
+      { topic:'予算', topicReading:'よさん', result:'対立します', resultReading:'たいりつします', english:'clash over the budget' },
+      { topic:'契約', topicReading:'けいやく', result:'交渉します', resultReading:'こうしょうします', english:'negotiate concerning the contract' },
+    ], 1091)
+    if (!scene) return null
+    const furigana=[literalPart(scene.topic,scene.topicReading,'object'),literalPart('をめぐって、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,capitalize(`they ${scene.english}.`),{},{},'をめぐって marks the contested topic that an action revolves around.')
+  }
+
+  if (patternId === 'n1-10') {
+    const scene = pick([
+      { event:'出発', eventReading:'しゅっぱつ', result:'挨拶します', resultReading:'あいさつします', english:'give a greeting on the occasion of departure' },
+      { event:'卒業', eventReading:'そつぎょう', result:'感謝します', resultReading:'かんしゃします', english:'express gratitude on the occasion of graduation' },
+      { event:'開会', eventReading:'かいかい', result:'演説します', resultReading:'えんぜつします', english:'give a speech on the occasion of the opening' },
+    ], 1101)
+    if (!scene) return null
+    const furigana=[literalPart(scene.event,scene.eventReading,'reason'),literalPart('に際して、','にさいして、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,capitalize(`they ${scene.english}.`),{},{},'に際して marks a formal occasion that prompts the following action.')
+  }
+
+  return null
+}
+
 const n4PatternMeanings: Record<string,string> = {
   'n4-01':'want to do','n4-02':'ongoing action or resulting state','n4-03':'polite past action','n4-04':'polite negative action',
   'n4-05':'must do','n4-06':'permission to do','n4-07':'must not do','n4-08':'past experience','n4-09':'two simultaneous actions','n4-10':'begin doing',
@@ -1478,7 +1964,9 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
   }
 }
 
-export function generateCategorySentence(seed: number, requestedPatternId?: string, level: 'N5'|'N4'|'N3'='N5',options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
+export function generateCategorySentence(seed: number, requestedPatternId?: string, level: 'N5'|'N4'|'N3'|'N2'|'N1'='N5',options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
+  if (requestedPatternId && advancedPatternIds.has(requestedPatternId)) return generateAdvancedCategorySentence(seed,requestedPatternId)
+  if (level==='N2'||level==='N1') return null
   if (level==='N3'||requestedPatternId?.startsWith('n3-')) return requestedPatternId?generateN3CategorySentence(seed,requestedPatternId):null
   if (requestedPatternId && additionalN4PatternIds.has(requestedPatternId)) return additionalN4Sentence(seed,requestedPatternId,options)
   if (level === 'N4' || requestedPatternId?.startsWith('n4-')) return generateN4CategorySentence(seed,requestedPatternId,options)

@@ -3,9 +3,8 @@ import { toHiragana, toRomaji } from 'wanakana'
 import { AnswerReveal } from './AnswerReveal'
 import { FuriganaSegment, hasKanji } from './FuriganaText'
 import { shuffle } from '../lib/quiz'
-import { DRILL_LEVELS } from '../lib/drillExercises'
 import type { SentenceExercise } from '../data/sentenceExercises'
-import type { JlptLevel } from '../lib/types'
+import { complexityDetails, GENERATION_COMPLEXITIES, type GenerationComplexity } from '../lib/generationComplexity'
 
 const SPEECH_RATES = [0.9, 0.75, 0.6] as const
 const HIDE_WORDS_STORAGE_KEY = 'kanji-quest-sentence-builder-hide-words-v1'
@@ -166,9 +165,9 @@ interface SentenceBuilderViewProps {
   onPrevious: () => void
   onSkip: () => void
   onExit: () => void
-  selectedLevels: readonly JlptLevel[]
-  enabledLevels: readonly JlptLevel[]
-  onApplyLevels: (levels: readonly JlptLevel[]) => void
+  selectedLevels: readonly GenerationComplexity[]
+  enabledLevels: readonly GenerationComplexity[]
+  onApplyLevels: (levels: readonly GenerationComplexity[]) => void
   infiniteMode: boolean
   onToggleInfiniteMode: () => void
   isFavorite: boolean
@@ -423,7 +422,7 @@ export function SentenceBuilderView({
   )
   const [showRomajiLegend, setShowRomajiLegend] = useState(true)
   const [levelMenuOpen, setLevelMenuOpen] = useState(false)
-  const [pendingLevels, setPendingLevels] = useState<JlptLevel[]>(() => [...selectedLevels])
+  const [pendingLevels, setPendingLevels] = useState<GenerationComplexity[]>(() => [...selectedLevels])
   const [answered, setAnswered] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [speechRate, setSpeechRate] = useState<(typeof SPEECH_RATES)[number]>(0.9)
@@ -667,12 +666,12 @@ export function SentenceBuilderView({
     return () => document.removeEventListener('pointerdown', closeLevelMenu)
   }, [levelMenuOpen, selectedLevels])
 
-  function togglePendingLevel(level: JlptLevel) {
+  function togglePendingLevel(level: GenerationComplexity) {
     if (!enabledLevels.includes(level)) return
     setPendingLevels((current) => {
       const next = current.includes(level)
         ? current.filter((item) => item !== level)
-        : DRILL_LEVELS.filter((item) => item === level || current.includes(item))
+        : GENERATION_COMPLEXITIES.filter((item) => item === level || current.includes(item))
       return next.length ? next : current
     })
   }
@@ -754,13 +753,13 @@ export function SentenceBuilderView({
             onClick={() => setLevelMenuOpen((open) => !open)}
           >
             <span>Sentence Builder</span>
-            <span className="jlpt-badge">{selectedLevels.join(' + ')}</span>
+            <span className="jlpt-badge">{selectedLevels.map((level) => complexityDetails[level].shortLabel).join(' + ')}</span>
             <span className="builder-level-chevron" aria-hidden="true" />
           </button>
           {levelMenuOpen && (
-            <div className="builder-level-menu" role="group" aria-label="Sentence Builder JLPT levels">
-              <span className="builder-level-menu-label">Practice levels</span>
-              {DRILL_LEVELS.map((level) => {
+            <div className="builder-level-menu" role="group" aria-label="Sentence Builder complexity levels">
+              <span className="builder-level-menu-label">Generation complexity</span>
+              {GENERATION_COMPLEXITIES.map((level) => {
                 const enabled = enabledLevels.includes(level)
                 const selected = pendingLevels.includes(level)
 
@@ -774,8 +773,8 @@ export function SentenceBuilderView({
                     onClick={() => togglePendingLevel(level)}
                   >
                     <span className="builder-level-check" aria-hidden="true" />
-                    <strong>{level}</strong>
-                    <small>{enabled ? 'Ready' : 'Soon'}</small>
+                    <strong>Level {level}</strong>
+                    <small>{enabled ? complexityDetails[level].label.split(' · ')[1] : 'Soon'}</small>
                   </button>
                 )
               })}

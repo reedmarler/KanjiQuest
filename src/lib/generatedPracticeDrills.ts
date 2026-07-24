@@ -1,6 +1,7 @@
 import { generateCategorySentence, getVerbUsageRecords } from './categorySentenceEngine'
 import type { GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import type { DrillExercise, DrillJlptLevel } from './drillExercises'
+import { complexityForPattern } from './generationComplexity'
 
 type GeneratedSentence = NonNullable<ReturnType<typeof generateCategorySentence>>
 
@@ -118,6 +119,7 @@ function exerciseFromRange(
   choices: Choice[],
   pattern: string,
   meaning: string,
+  complexity = 1,
 ): DrillExercise | null {
   if (choices.length !== 4) return null
   const before = join(sentence.furigana.slice(0, start))
@@ -125,6 +127,7 @@ function exerciseFromRange(
   return {
     id,
     jlpt: sentence.level as DrillJlptLevel,
+    complexity: complexity as DrillExercise['complexity'],
     prompt: `${before.text}___${after.text}`,
     promptReading: `${before.reading}___${after.reading}`,
     promptFurigana: {
@@ -167,6 +170,7 @@ function grammarExercise(sentence: GeneratedSentence, spec: GrammarSpec, order: 
       uniqueChoices(answer, spec.choices, order),
       spec.pattern,
       spec.meaning,
+      complexityForPattern(spec.frameId),
     )
   }
 
@@ -187,6 +191,7 @@ function grammarExercise(sentence: GeneratedSentence, spec: GrammarSpec, order: 
     uniqueChoices(answer, distractors, order),
     spec.pattern,
     spec.meaning,
+    complexityForPattern(spec.frameId),
   )
 }
 
@@ -242,6 +247,7 @@ function vocabExercise(seed: number, spec: VocabSpec, order: number) {
       uniqueChoices(answer, alternatives, order),
       answer.text,
       spec.meaning,
+      complexityForPattern(spec.frameId),
     )
   }
 
@@ -266,6 +272,7 @@ function vocabExercise(seed: number, spec: VocabSpec, order: number) {
     uniqueChoices(answer, candidates, order),
     answerPart.text,
     spec.meaning,
+    complexityForPattern(spec.frameId),
   )
 }
 
