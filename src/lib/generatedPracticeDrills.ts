@@ -78,6 +78,48 @@ const grammarSpecs: GrammarSpec[] = [
   { id: 'try-doing', frameId: 'n3-31', level: 'N3', target: { type: 'literal', text: 'みます。' }, pattern: 'てみる', meaning: 'try doing', choices: [{ text: '終わります。' }, { text: '続けます。' }, { text: '始めます。' }] },
   { id: 'effort-habit', frameId: 'n3-01', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ようにします', alternatives: ['ようになります', 'ことにします', 'てみます'] }, pattern: 'ようにする', meaning: 'make an effort or habit' },
   { id: 'decide-to', frameId: 'n3-02', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ことにします', alternatives: ['ようにします', 'ようになります', 'てみます'] }, pattern: 'ことにする', meaning: 'decide to do' },
+  // Alternatives must share the same stem as the answer's own suffix — ことにします/
+  // ようにします need the dictionary form, てみます needs the te-form, so only
+  // other masu-stem endings are safe distractors here.
+  { id: 'begin-doing', frameId: 'n4-10', level: 'N4', target: { type: 'slot', slot: 'verb', suffix: '始めます', alternatives: ['ます', 'たいです', 'ました'] }, pattern: '始める', meaning: 'begin doing' },
+  // The stem here is the て-form with て itself stripped (買っ, not 買って), so
+  // only alternatives that themselves start with て reconstruct correctly.
+  { id: 'prepare-in-advance', frameId: 'n3-05', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ておきます', alternatives: ['てみます', 'てしまいます', 'てあげます'] }, pattern: 'ておく', meaning: 'do in advance / preparation' },
+  { id: 'not-until', frameId: 'n1-05', level: 'N1', target: { type: 'literal', text: 'ことには、' }, pattern: 'ないことには', meaning: 'not until / unless', choices: [{ text: 'に即して、' }, { text: 'をめぐって、' }, { text: 'に際して、' }] },
+  { id: 'in-accordance-with', frameId: 'n1-08', level: 'N1', target: { type: 'literal', text: 'に即して、' }, pattern: 'に即して', meaning: 'in accordance with', choices: [{ text: 'ことには、' }, { text: 'をめぐって、' }, { text: 'に際して、' }] },
+  { id: 'concerning', frameId: 'n1-09', level: 'N1', target: { type: 'literal', text: 'をめぐって、' }, pattern: 'をめぐって', meaning: 'concerning / over (a contested topic)', choices: [{ text: 'ことには、' }, { text: 'に即して、' }, { text: 'に際して、' }] },
+  { id: 'on-the-occasion-of', frameId: 'n1-10', level: 'N1', target: { type: 'literal', text: 'に際して、' }, pattern: 'に際して', meaning: 'on the occasion of', choices: [{ text: 'ことには、' }, { text: 'に即して、' }, { text: 'をめぐって、' }] },
+
+  // Level 1 top-up — existing base-engine/smallVerbPool patterns not yet tested.
+  { id: 'no-need-to', frameId: 'n2-04', level: 'N2', target: { type: 'literal', text: 'ことはありません。' }, pattern: 'ことはない', meaning: 'no need to', choices: [{ text: 'はずです。' }, { text: 'べきではありません。' }, { text: 'かねます。' }] },
+  { id: 'expected-to', frameId: 'n2-06', level: 'N2', target: { type: 'literal', text: 'はずです。' }, pattern: 'はずだ', meaning: 'expected to', choices: [{ text: 'ことはありません。' }, { text: 'べきではありません。' }, { text: 'かねます。' }] },
+  { id: 'should-not', frameId: 'n2-16', level: 'N2', target: { type: 'literal', text: 'べきではありません。' }, pattern: 'べきではない', meaning: 'should not', choices: [{ text: 'ことはありません。' }, { text: 'はずです。' }, { text: 'かねます。' }] },
+  { id: 'cannot-readily', frameId: 'n2-18', level: 'N2', target: { type: 'literal', text: 'かねます。' }, pattern: 'かねる', meaning: 'cannot readily', choices: [{ text: 'ことはありません。' }, { text: 'はずです。' }, { text: 'べきではありません。' }] },
+  { id: 'no-longer', frameId: 'n3-33', level: 'N3', target: { type: 'literal', text: 'なくなりました。' }, pattern: 'なくなる', meaning: 'no longer', choices: [{ text: 'ないでください。' }, { text: 'ことはありません。' }, { text: 'べきではありません。' }] },
+  { id: 'please-dont', frameId: 'n3-39', level: 'N3', target: { type: 'literal', text: 'ないでください。' }, pattern: 'ないでください', meaning: 'please do not', choices: [{ text: 'なくなりました。' }, { text: 'ことはありません。' }, { text: 'べきではありません。' }] },
+  { id: 'decided-that', frameId: 'n2-03', level: 'N2', target: { type: 'literal', text: 'ことになりました。' }, pattern: 'ことになる', meaning: 'it has been decided that', choices: [{ text: 'なくなりました。' }, { text: 'ないでください。' }, { text: 'ことはありません。' }] },
+  { id: 'like-a', frameId: 'n2-08', level: 'N2', target: { type: 'literal', text: 'のような' }, pattern: 'のような', meaning: 'like a / resembling', choices: [{ text: 'に違いない' }, { text: 'に至るまで' }, { text: 'ならではの' }] },
+
+  // Level 2 top-up.
+  { id: 'before-doing', frameId: 'n4-21', level: 'N4', target: { type: 'literal', text: '前に' }, pattern: '前に', meaning: 'before doing', choices: [{ text: '後で' }, { text: 'うちに、' }, { text: 'まま、' }] },
+  { id: 'after-doing', frameId: 'n4-22', level: 'N4', target: { type: 'literal', text: '後で' }, pattern: '後で', meaning: 'after doing', choices: [{ text: '前に' }, { text: 'うちに、' }, { text: 'まま、' }] },
+  { id: 'while-still', frameId: 'n3-12', level: 'N3', target: { type: 'literal', text: 'うちに、' }, pattern: 'うちに', meaning: 'while still (a window that closes)', choices: [{ text: '前に' }, { text: '後で' }, { text: 'まま、' }] },
+  { id: 'leaving-unchanged', frameId: 'n3-18', level: 'N3', target: { type: 'literal', text: 'まま、' }, pattern: 'たまま', meaning: 'leaving a state unchanged', choices: [{ text: '前に' }, { text: '後で' }, { text: 'うちに、' }] },
+
+  // Level 4 top-up.
+  { id: 'so-that', frameId: 'n2-09', level: 'N2', target: { type: 'literal', text: 'ように、' }, pattern: 'ように', meaning: 'so that', choices: [{ text: 'ものの、' }, { text: 'くせに、' }, { text: 'どころか、' }] },
+  { id: 'even-though-formal', frameId: 'n1-03', level: 'N1', target: { type: 'literal', text: 'ものの、' }, pattern: 'ものの', meaning: 'although (formal)', choices: [{ text: 'ように、' }, { text: 'くせに、' }, { text: 'どころか、' }] },
+  { id: 'according-to', frameId: 'n1-12', level: 'N1', target: { type: 'literal', text: 'に応じて、' }, pattern: 'に応じて', meaning: 'according to / varying with', choices: [{ text: 'ように、' }, { text: 'ものの、' }, { text: 'あまり、' }] },
+  { id: 'even-though-blaming', frameId: 'n2-20', level: 'N2', target: { type: 'literal', text: 'くせに、' }, pattern: 'くせに', meaning: 'even though (blaming)', choices: [{ text: 'ように、' }, { text: 'ものの、' }, { text: 'どころか、' }] },
+  { id: 'far-from', frameId: 'n2-21', level: 'N2', target: { type: 'literal', text: 'どころか、' }, pattern: 'どころか', meaning: 'far from', choices: [{ text: 'ように、' }, { text: 'くせに、' }, { text: 'あまり、' }] },
+  { id: 'so-much-that', frameId: 'n3-36', level: 'N3', target: { type: 'literal', text: 'あまり、' }, pattern: 'あまり', meaning: 'so much that', choices: [{ text: 'どころか、' }, { text: 'に応じて、' }, { text: 'ものの、' }] },
+  { id: 'as-soon-as', frameId: 'n2-23', level: 'N2', target: { type: 'literal', text: '次第、' }, pattern: '次第', meaning: 'as soon as', choices: [{ text: 'あまり、' }, { text: 'どころか、' }, { text: 'ように、' }] },
+
+  // Level 5 top-up.
+  { id: 'softened-denial-2', frameId: 'n2-01', level: 'N2', target: { type: 'literal', text: 'わけではありません。' }, pattern: 'わけではない', meaning: 'it is not that (softened)', choices: [{ text: 'に違いない。' }, { text: 'ものだ。' }, { text: 'にほかならない。' }] },
+  { id: 'must-be', frameId: 'n2-05', level: 'N2', target: { type: 'literal', text: 'に違いない。' }, pattern: 'に違いない', meaning: 'must be (certainty)', choices: [{ text: 'わけではありません。' }, { text: 'ものだ。' }, { text: 'にほかならない。' }] },
+  { id: 'all-the-way-to', frameId: 'n1-06', level: 'N1', target: { type: 'literal', text: 'に至るまで、' }, pattern: 'に至るまで', meaning: 'all the way to (an extreme)', choices: [{ text: 'ならではの' }, { text: 'をめぐって、' }, { text: 'に際して、' }] },
+  { id: 'unique-to', frameId: 'n1-07', level: 'N1', target: { type: 'literal', text: 'ならではの' }, pattern: 'ならでは', meaning: 'unique to / only possible because of', choices: [{ text: 'に至るまで、' }, { text: 'をめぐって、' }, { text: 'に際して、' }] },
 
   // Complexity Level 4 — logical relationships between clauses.
   { id: 'thanks-to', frameId: 'n3-16', level: 'N3', target: { type: 'literal', text: 'のおかげで、' }, pattern: 'おかげで', meaning: 'thanks to', choices: [{ text: 'のせいで、' }, { text: 'にもかかわらず、' }, { text: 'のわりに、' }] },
@@ -131,9 +173,85 @@ const vocabSpecs: VocabSpec[] = [
   // in its reading-habit variant, object (readable thing).
   { id: 'younisuru-subject', frameId: 'n3-01', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
   { id: 'younisuru-object', frameId: 'n3-01', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'readable word' },
+  // n3-02 (ことにする) always fills subject (person) and destination (place).
+  { id: 'kotonisuru-subject', frameId: 'n3-02', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'kotonisuru-destination', frameId: 'n3-02', level: 'N3', verbId: 'taberu-basic', slot: 'destination', meaning: 'destination word' },
+  // n3-03 (ようになる) always fills subject (person) and object (readable thing).
+  { id: 'youninaru-subject', frameId: 'n3-03', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'youninaru-object', frameId: 'n3-03', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'readable word' },
+  // n3-04 (てしまう) always fills subject (person) and object (a lost/broken/forgotten thing).
+  { id: 'teshimau-subject', frameId: 'n3-04', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'teshimau-object', frameId: 'n3-04', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'object word' },
 
   // Complexity Level 4 — n3-16 (おかげで) always fills subject from the person pool.
   { id: 'okagede-subject', frameId: 'n3-16', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  // n2-15 (ばかりか) always fills subject (person) and first/second (languages).
+  { id: 'bakarika-subject', frameId: 'n2-15', level: 'N2', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'bakarika-object', frameId: 'n2-15', level: 'N2', verbId: 'taberu-basic', slot: 'object', meaning: 'language word' },
+  // n1-11 (とすれば) always fills destination (place) and object (a needed thing).
+  { id: 'tosureba-destination', frameId: 'n1-11', level: 'N1', verbId: 'taberu-basic', slot: 'destination', meaning: 'destination word' },
+  { id: 'tosureba-object', frameId: 'n1-11', level: 'N1', verbId: 'taberu-basic', slot: 'object', meaning: 'necessary word' },
+  // n3-27 (なら) always fills destination (place) and object (travel advice item).
+  { id: 'nara-destination', frameId: 'n3-27', level: 'N3', verbId: 'taberu-basic', slot: 'destination', meaning: 'destination word' },
+  { id: 'nara-object', frameId: 'n3-27', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'necessary word' },
+  // n4-10 (始める) draws subject/object from the full verb pool — the richest
+  // Level 3 pattern available, since it reuses the base engine's own variety.
+  { id: 'hajimeru-l3-subject', frameId: 'n4-10', level: 'N4', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'hajimeru-l3-object', frameId: 'n4-10', level: 'N4', verbId: 'taberu-basic', slot: 'object', meaning: 'object word' },
+  // n3-05 (ておく) always fills subject (person) and object (a thing to prepare).
+  { id: 'teoku-subject', frameId: 'n3-05', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'teoku-object', frameId: 'n3-05', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'object word' },
+  // n3-14 (終わる) and n3-15 (続ける) always fill subject (person) and object
+  // (whatever the paired verb takes).
+  { id: 'owaru-subject', frameId: 'n3-14', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'owaru-object', frameId: 'n3-14', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'object word' },
+  { id: 'tsuzukeru-subject', frameId: 'n3-15', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'tsuzukeru-object', frameId: 'n3-15', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'object word' },
+  // n3-31 (てみる) always fills subject (person) and object (food/drink/reading).
+  { id: 'temiru-subject', frameId: 'n3-31', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'temiru-object', frameId: 'n3-31', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'object word' },
+  // More Level 4 patterns — n1-05/08/09/10 are hand-curated 3-scene patterns
+  // (like n2-19/20), so their word pool per spec is small but still real.
+  { id: 'naikotoniha-reason', frameId: 'n1-05', level: 'N1', verbId: 'taberu-basic', slot: 'reason', meaning: 'reason word' },
+  { id: 'nisokushite-reason', frameId: 'n1-08', level: 'N1', verbId: 'taberu-basic', slot: 'reason', meaning: 'basis word' },
+  { id: 'womegutte-object', frameId: 'n1-09', level: 'N1', verbId: 'taberu-basic', slot: 'object', meaning: 'topic word' },
+  { id: 'nisaishite-reason', frameId: 'n1-10', level: 'N1', verbId: 'taberu-basic', slot: 'reason', meaning: 'occasion word' },
+  // n3-06 (ば) and n3-07 (たら) both fill object from the readable-things pool
+  // in their reading-habit variant.
+  { id: 'ba-object', frameId: 'n3-06', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'readable word' },
+  { id: 'tara-object', frameId: 'n3-07', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'readable word' },
+
+  // Level 2 top-up — n4-21/22/23 draw subject/objects from the full verb
+  // pool via actionPair(), so they're rich; n4-14/n3-12/n3-18 are modest.
+  { id: 'mae-subject', frameId: 'n4-21', level: 'N4', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'mae-firstobject', frameId: 'n4-21', level: 'N4', verbId: 'taberu-basic', slot: 'firstObject', meaning: 'object word' },
+  { id: 'mae-mainobject', frameId: 'n4-21', level: 'N4', verbId: 'taberu-basic', slot: 'mainObject', meaning: 'object word' },
+  { id: 'ato-subject', frameId: 'n4-22', level: 'N4', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'ato-firstobject', frameId: 'n4-22', level: 'N4', verbId: 'taberu-basic', slot: 'firstObject', meaning: 'object word' },
+  { id: 'ato-mainobject', frameId: 'n4-22', level: 'N4', verbId: 'taberu-basic', slot: 'mainObject', meaning: 'object word' },
+  { id: 'tari-subject', frameId: 'n4-23', level: 'N4', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'tari-firstobject', frameId: 'n4-23', level: 'N4', verbId: 'taberu-basic', slot: 'firstObject', meaning: 'object word' },
+  { id: 'tari-mainobject', frameId: 'n4-23', level: 'N4', verbId: 'taberu-basic', slot: 'mainObject', meaning: 'object word' },
+  { id: 'purpose-destination', frameId: 'n4-14', level: 'N4', verbId: 'taberu-basic', slot: 'destination', meaning: 'destination word' },
+  { id: 'uchini-subject', frameId: 'n3-12', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'mama-subject', frameId: 'n3-18', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+
+  // Level 4 top-up.
+  { id: 'monono-object', frameId: 'n1-03', level: 'N1', verbId: 'taberu-basic', slot: 'object', meaning: 'study-subject word' },
+  { id: 'nikotaete-reason', frameId: 'n1-12', level: 'N1', verbId: 'taberu-basic', slot: 'reason', meaning: 'basis word' },
+  { id: 'kuseni-subject', frameId: 'n2-20', level: 'N2', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'dokoroka-reason', frameId: 'n2-21', level: 'N2', verbId: 'taberu-basic', slot: 'reason', meaning: 'expectation word' },
+  { id: 'to-jidoutai-reason', frameId: 'n3-28', level: 'N3', verbId: 'taberu-basic', slot: 'reason', meaning: 'condition word' },
+  { id: 'amari-reason', frameId: 'n3-36', level: 'N3', verbId: 'taberu-basic', slot: 'reason', meaning: 'cause word' },
+  { id: 'shidai-reason', frameId: 'n2-23', level: 'N2', verbId: 'taberu-basic', slot: 'reason', meaning: 'trigger word' },
+
+  // Level 5 top-up.
+  { id: 'wakedewanai-object', frameId: 'n2-01', level: 'N2', verbId: 'taberu-basic', slot: 'object', meaning: 'food word' },
+  { id: 'nichigainai-subject', frameId: 'n2-05', level: 'N2', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'niitarumade-reason', frameId: 'n1-06', level: 'N1', verbId: 'taberu-basic', slot: 'reason', meaning: 'start-point word' },
+  { id: 'niitarumade-object', frameId: 'n1-06', level: 'N1', verbId: 'taberu-basic', slot: 'object', meaning: 'end-point word' },
+  { id: 'narade-subject', frameId: 'n1-07', level: 'N1', verbId: 'taberu-basic', slot: 'subject', meaning: 'place word' },
+  { id: 'narade-object', frameId: 'n1-07', level: 'N1', verbId: 'taberu-basic', slot: 'object', meaning: 'quality word' },
 
   // Complexity Level 5 — n1-01 (ざるを得ない) and n2-02 (わけにはいかない) both
   // always fill subject/reason from the person and reason pools respectively.
@@ -302,7 +420,12 @@ function vocabExercise(seed: number, spec: VocabSpec, order: number) {
   }
 
   const candidates: Choice[] = []
-  for (let attempt = 0; attempt < 10 && candidates.length < 3; attempt += 1) {
+  // Capped at 5 (was 10): with 86 vocab specs now in play, each one running
+  // through the full sentence generator per attempt, the old cap made a full
+  // 3-batch load take ~12 seconds. Rich patterns find 3 distinct alternatives
+  // within a couple of attempts anyway; only already-thin patterns burned
+  // through all 10, which just wasted time rather than finding more variety.
+  for (let attempt = 0; attempt < 5 && candidates.length < 3; attempt += 1) {
     const alternativeSeed = seed + 101 + attempt * 31
     // slotSeeds only steers the base N5/N4 engine — N3/N2/N1 patterns ignore
     // options entirely, so without also varying the seed itself, every
