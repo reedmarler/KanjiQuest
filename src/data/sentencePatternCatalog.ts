@@ -40,6 +40,8 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N5','Subject は Location で Verb',['Subject','は','Location','で','Verb'],'私は会社で働く','action happening at a location, no object','dictionary',true],
   ['N5','Subject は Location に Verb',['Subject','は','Location','に','Verb'],'私は東京に住む','residing or staying at a location','dictionary',true],
   ['N5','Location に Subject が いる/ある',['Location','に','Subject','が','Verb'],'公園に子供がいる','existence of a person, animal, or thing at a location','いる/ある',true],
+  ['N5','Subject は Verb',['Subject','は','Verb'],'子供が泣く','a bare state or action verb with no object, destination, or location','dictionary',true],
+  ['N5','Subject は Source から Verb',['Subject','は','Source','から','Verb'],'私は部屋から出る','leaving or exiting from a source, the opposite of a destination','dictionary',true],
 
   ['N4','Subject は Object を Verbたい',['Subject','は','Object','を','Verbたい'],'本を読みたい','desire to do','masu-stem + たい',true],
   ['N4','Subject は Object を Verbている',['Subject','は','Object','を','Verbている'],'本を読んでいる','ongoing or resulting state','te-form + いる',true],

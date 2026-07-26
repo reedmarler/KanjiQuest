@@ -1,1 +1,25 @@
-[]
+[
+  { "id": "user-ishi", "front": "医師", "reading": "いし", "back": "doctor", "jlpt": "N3" },
+  { "id": "user-kangoshi", "front": "看護師", "reading": "かんごし", "back": "nurse", "jlpt": "N3" },
+  { "id": "user-bengoshi", "front": "弁護士", "reading": "べんごし", "back": "lawyer", "jlpt": "N2" },
+  { "id": "user-shouboushi", "front": "消防士", "reading": "しょうぼうし", "back": "firefighter", "jlpt": "N2" },
+  { "id": "user-shachou", "front": "社長", "reading": "しゃちょう", "back": "company president", "jlpt": "N3" },
+  { "id": "user-buchou", "front": "部長", "reading": "ぶちょう", "back": "department manager", "jlpt": "N2" },
+  { "id": "user-kachou", "front": "課長", "reading": "かちょう", "back": "section manager", "jlpt": "N2" },
+  { "id": "user-untenshu", "front": "運転手", "reading": "うんてんしゅ", "back": "driver", "jlpt": "N3" },
+  { "id": "user-okyakusama", "front": "お客様", "reading": "おきゃくさま", "back": "customer", "jlpt": "N4" },
+  { "id": "user-tenin", "front": "店員", "reading": "てんいん", "back": "store employee", "jlpt": "N4" },
+  { "id": "user-keisatsukan", "front": "警察官", "reading": "けいさつかん", "back": "police officer", "jlpt": "N3" },
+  { "id": "user-kaishain", "front": "会社員", "reading": "かいしゃいん", "back": "office worker", "jlpt": "N4" },
+  { "id": "user-tenchou", "front": "店長", "reading": "てんちょう", "back": "store manager", "jlpt": "N3" },
+  { "id": "user-shain", "front": "社員", "reading": "しゃいん", "back": "company employee", "jlpt": "N3" },
+  { "id": "user-shokuin", "front": "職員", "reading": "しょくいん", "back": "staff member", "jlpt": "N3" },
+  { "id": "user-koumuin", "front": "公務員", "reading": "こうむいん", "back": "government employee", "jlpt": "N3" },
+  { "id": "user-saibankan", "front": "裁判官", "reading": "さいばんかん", "back": "judge", "jlpt": "N1" },
+  { "id": "user-yakuzaishi", "front": "薬剤師", "reading": "やくざいし", "back": "pharmacist", "jlpt": "N2" },
+  { "id": "user-kyouju", "front": "教授", "reading": "きょうじゅ", "back": "professor", "jlpt": "N2" },
+  { "id": "user-ekiin", "front": "駅員", "reading": "えきいん", "back": "station employee", "jlpt": "N3" },
+  { "id": "user-senpai", "front": "先輩", "reading": "せんぱい", "back": "senior colleague", "jlpt": "N4" },
+  { "id": "user-kouhai", "front": "後輩", "reading": "こうはい", "back": "junior colleague", "jlpt": "N3" },
+  { "id": "user-douryou", "front": "同僚", "reading": "どうりょう", "back": "coworker", "jlpt": "N3" }
+]

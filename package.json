@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "generate:hero-pos": "tsx scripts/generate-hero-pos-vocab.ts",
+    "audit:sentences": "tsx scripts/audit-sentence-regressions.ts",
     "vet:sentences": "tsx scripts/vet-sentences-openai.ts"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
     "@vitejs/plugin-react": "^6.0.3",
     "kuromoji": "^0.1.2",
     "oxlint": "^1.71.0",
+    "tsx": "^4.23.1",
     "typescript": "~6.0.2",
     "vite": "^8.1.1",
     "wanakana": "^5.3.1"

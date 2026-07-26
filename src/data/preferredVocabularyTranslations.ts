@@ -6,6 +6,7 @@ const CURATED_PREFERRED_TRANSLATIONS: Record<string,string> = {
   '家庭': 'household',
   '通り': 'street',
   'フランス': 'France',
+  'イギリス': 'the United Kingdom',
   '私自身': 'I',
   '本人': 'the person',
   '男性': 'man',

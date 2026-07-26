@@ -1,7 +1,7 @@
 import { generateCategorySentence, getVerbUsageRecords } from './categorySentenceEngine'
 import type { GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import type { DrillExercise, DrillJlptLevel } from './drillExercises'
-import { complexityForPattern } from './generationComplexity'
+import { complexityForPattern, type GenerationComplexity } from './generationComplexity'
 
 type GeneratedSentence = NonNullable<ReturnType<typeof generateCategorySentence>>
 
@@ -288,6 +288,7 @@ function exerciseFromRange(
   pattern: string,
   meaning: string,
   complexity = 1,
+  blankSlot?: string,
 ): DrillExercise | null {
   if (choices.length !== 4) return null
   const before = join(sentence.furigana.slice(0, start))
@@ -309,6 +310,7 @@ function exerciseFromRange(
     english: sentence.english,
     pattern,
     meaning,
+    blankSlot,
   }
 }
 
@@ -363,13 +365,21 @@ function grammarExercise(sentence: GeneratedSentence, spec: GrammarSpec, order: 
   )
 }
 
-/** One generated Grammar batch. Each batch uses every grammar target once. */
-export function createGeneratedGrammarDrillBatch(batch: number) {
+/**
+ * One generated Grammar batch. Each batch uses every grammar target once —
+ * or, when `levels` is given, only the targets whose pattern actually falls
+ * in a selected complexity level. A session only ever shows 15 items from
+ * 1-2 selected levels, so processing specs for levels nobody picked is pure
+ * waste; this is what makes level-aware rebuilds (on Save, or on first load
+ * once the saved preference is known) cheap instead of running all ~90 specs.
+ */
+export function createGeneratedGrammarDrillBatch(batch: number, levels?: readonly GenerationComplexity[]) {
   const exercises: DrillExercise[] = []
-  grammarSpecs.forEach((spec, specIndex) => {
+  const specs = levels ? grammarSpecs.filter((spec) => levels.includes(complexityForPattern(spec.frameId))) : grammarSpecs
+  specs.forEach((spec, specIndex) => {
     const sentence = generateCategorySentence(24000 + batch * 997 + specIndex * 503, spec.frameId, spec.level)
     if (!sentence) return
-    const exercise = grammarExercise(sentence, spec, batch * grammarSpecs.length + specIndex)
+    const exercise = grammarExercise(sentence, spec, batch * specs.length + specIndex)
     if (exercise) exercises.push(exercise)
   })
   return exercises
@@ -416,6 +426,7 @@ function vocabExercise(seed: number, spec: VocabSpec, order: number) {
       answer.text,
       spec.meaning,
       complexityForPattern(spec.frameId),
+      spec.slot,
     )
   }
 
@@ -450,13 +461,21 @@ function vocabExercise(seed: number, spec: VocabSpec, order: number) {
     answerPart.text,
     spec.meaning,
     complexityForPattern(spec.frameId),
+    spec.slot,
   )
 }
 
-/** One generated Vocab batch. The caller can build batches incrementally without blocking the UI. */
-export function createGeneratedVocabDrillBatch(batch: number) {
+/**
+ * One generated Vocab batch. The caller can build batches incrementally
+ * without blocking the UI. When `levels` is given, only specs whose pattern
+ * falls in a selected complexity level run — each spec can cost up to 6 full
+ * sentence-generation calls (1 answer + up to 5 distractor-search retries),
+ * so skipping specs for unselected levels is the main lever against slow loads.
+ */
+export function createGeneratedVocabDrillBatch(batch: number, levels?: readonly GenerationComplexity[]) {
   const exercises: DrillExercise[] = []
-  vocabSpecs.forEach((spec, specIndex) => {
+  const specs = levels ? vocabSpecs.filter((spec) => levels.includes(complexityForPattern(spec.frameId))) : vocabSpecs
+  specs.forEach((spec, specIndex) => {
     const exercise = vocabExercise(36000 + batch * 997 + specIndex * 641, spec, specIndex)
     if (exercise) exercises.push(exercise)
   })

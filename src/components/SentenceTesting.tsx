@@ -10,15 +10,17 @@ import {
 } from '../lib/generationComplexity'
 import { FuriganaSentence } from './FuriganaText'
 
-const BATCH_SIZE = 15
+const DEFAULT_BATCH_SIZE = 15
+const BATCH_SIZE_OPTIONS = [15, 100] as const
+type BatchSize = typeof BATCH_SIZE_OPTIONS[number]
 
-function makeBatch(levels: readonly GenerationComplexity[], seed: number): GeneratedPreviewSentence[] {
-  return Array.from({ length: BATCH_SIZE }, (_, index) => {
+function makeBatch(levels: readonly GenerationComplexity[], seed: number, batchSize: BatchSize): GeneratedPreviewSentence[] {
+  return Array.from({ length: batchSize }, (_, index) => {
     const complexity = levels[index % levels.length]!
     const patterns = patternsForComplexity(complexity)
     const pattern = patterns[(Math.floor(index / levels.length) + seed) % patterns.length]
     if (!pattern) throw new Error(`No templates are mapped to generation complexity ${complexity}`)
-    return generatePreviewSentence(pattern.jlpt, seed * BATCH_SIZE + index + 1, undefined, pattern.id, true)
+    return generatePreviewSentence(pattern.jlpt, seed * batchSize + index + 1, undefined, pattern.id, true)
   })
 }
 
@@ -39,8 +41,36 @@ export function SentenceTesting({ onBack }: { onBack: () => void }) {
   const [showEnglish, setShowEnglish] = useState(true)
   const [showFurigana, setShowFurigana] = useState(true)
   const [batchSeed, setBatchSeed] = useState(1)
+  const [batchSize, setBatchSize] = useState<BatchSize>(DEFAULT_BATCH_SIZE)
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle')
 
-  const sentences = useMemo(() => makeBatch(levels, batchSeed), [levels, batchSeed])
+  const sentences = useMemo(() => makeBatch(levels, batchSeed, batchSize), [levels, batchSeed, batchSize])
+
+  async function copyAll() {
+    const text = sentences.map((sentence) => `${sentence.japanese}\n${sentence.english}`).join('\n\n')
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopyStatus('copied')
+    } catch {
+      // Clipboard API can be blocked by permissions policy (e.g. in some
+      // embedded/sandboxed views) even on a direct click; a hidden textarea
+      // + execCommand fallback still works there.
+      try {
+        const textarea = document.createElement('textarea')
+        textarea.value = text
+        textarea.style.position = 'fixed'
+        textarea.style.opacity = '0'
+        document.body.appendChild(textarea)
+        textarea.select()
+        const ok = document.execCommand('copy')
+        document.body.removeChild(textarea)
+        setCopyStatus(ok ? 'copied' : 'error')
+      } catch {
+        setCopyStatus('error')
+      }
+    }
+    setTimeout(() => setCopyStatus('idle'), 2000)
+  }
 
   function togglePendingLevel(level: GenerationComplexity) {
     setPendingLevels((current) => {
@@ -111,7 +141,7 @@ export function SentenceTesting({ onBack }: { onBack: () => void }) {
                     </button>
                   )
                 })}
-                <button type="button" className="builder-level-save" onClick={applyLevels}>Generate 15</button>
+                <button type="button" className="builder-level-save" onClick={applyLevels}>Generate {batchSize}</button>
               </div>
             )}
           </div>
@@ -122,15 +152,36 @@ export function SentenceTesting({ onBack }: { onBack: () => void }) {
         <div>
           <span className="sentence-testing-kicker">SENTENCE TESTING</span>
           <h1 id="sentence-testing-title">Explore generated sentences</h1>
-          <p>Fifteen sentences at a time, grouped by the grammatical complexity the generator must coordinate.</p>
+          <p>Generate focused or large review batches, grouped by the grammatical complexity the generator must coordinate.</p>
         </div>
-        <button type="button" className="btn btn-primary sentence-testing-generate" onClick={() => setBatchSeed((seed) => seed + 1)}>
-          Generate 15 more ↻
-        </button>
+        <div className="sentence-testing-actions">
+          <div className="sentence-testing-batch-size" role="group" aria-label="Sentence batch size">
+            {BATCH_SIZE_OPTIONS.map((size) => (
+              <button
+                key={size}
+                type="button"
+                className={batchSize === size ? 'is-selected' : ''}
+                aria-pressed={batchSize === size}
+                onClick={() => {
+                  setBatchSize(size)
+                  setBatchSeed((seed) => seed + 1)
+                }}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="btn btn-ghost sentence-testing-copy-all" onClick={copyAll}>
+            {copyStatus === 'copied' ? 'Copied ✓' : copyStatus === 'error' ? 'Copy failed' : 'Copy all'}
+          </button>
+          <button type="button" className="btn btn-primary sentence-testing-generate" onClick={() => setBatchSeed((seed) => seed + 1)}>
+            Generate {batchSize} more ↻
+          </button>
+        </div>
       </div>
 
       <div className="sentence-testing-summary" aria-live="polite">
-        <span><b>15</b> sentences</span>
+        <span><b>{sentences.length}</b> sentences</span>
         <span><b>{levels.map((level) => `L${level}`).join(' + ')}</b> complexity</span>
       </div>
 

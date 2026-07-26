@@ -60,6 +60,10 @@ export interface DrillExercise {
   english: string
   pattern: string
   meaning: string
+  /** Which sentence slot the blank tests (e.g. 'subject', 'object') — lets the
+   * session picker balance variety instead of drawing whichever slot happens
+   * to dominate the pool. Undefined for exercise types that don't track it. */
+  blankSlot?: string
 }
 
 interface Choice {

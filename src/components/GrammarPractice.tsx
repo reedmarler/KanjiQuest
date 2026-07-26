@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { DrillExercise } from '../lib/drillExercises'
 import { createGeneratedGrammarDrillBatch } from '../lib/generatedPracticeDrills'
-import { ChoiceDrill } from './ChoiceDrill'
+import type { GenerationComplexity } from '../lib/generationComplexity'
+import { ChoiceDrill, loadLevelPreference } from './ChoiceDrill'
 
 interface GrammarPracticeProps {
   onBack: () => void
@@ -10,20 +11,21 @@ interface GrammarPracticeProps {
 }
 
 const GRAMMAR_BATCH_COUNT = 5
+const GRAMMAR_LEVELS_KEY = 'kanji-quest-generated-grammar-practice-levels-v1'
 
 export function GrammarPractice({ onBack, isFavorite, onToggleFavorite }: GrammarPracticeProps) {
   const [pool, setPool] = useState<DrillExercise[] | null>(null)
   const [completedBatches, setCompletedBatches] = useState(0)
   const nextBatchSeed = useRef(Math.floor(Date.now() / 1000))
 
-  const buildFreshPool = useCallback(async (onBatchReady?: (completed: number) => void) => {
+  const buildFreshPool = useCallback(async (levels: readonly GenerationComplexity[], onBatchReady?: (completed: number) => void) => {
     await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
     const exercises: DrillExercise[] = []
     const seedBase = nextBatchSeed.current
     nextBatchSeed.current += GRAMMAR_BATCH_COUNT
 
     for (let batch = 0; batch < GRAMMAR_BATCH_COUNT; batch += 1) {
-      exercises.push(...createGeneratedGrammarDrillBatch(seedBase + batch))
+      exercises.push(...createGeneratedGrammarDrillBatch(seedBase + batch, levels))
       onBatchReady?.(batch + 1)
       await new Promise<void>((resolve) => window.setTimeout(resolve, 0))
     }
@@ -35,7 +37,8 @@ export function GrammarPractice({ onBack, isFavorite, onToggleFavorite }: Gramma
     let cancelled = false
 
     async function buildSession() {
-      const exercises = await buildFreshPool((completed) => {
+      const initialLevels = loadLevelPreference(GRAMMAR_LEVELS_KEY)
+      const exercises = await buildFreshPool(initialLevels, (completed) => {
         if (!cancelled) setCompletedBatches(completed)
       })
       if (!cancelled) setPool(exercises)

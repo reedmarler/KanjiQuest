@@ -35,8 +35,9 @@ export interface ChoiceDrillProps {
   finishNoun: string
   /** Namespaces the saved preferences so each drill remembers its own settings. */
   storagePrefix: string
-  /** Vocab can generate a fresh set when an endless pass ends. */
-  onLoadNextPool?: () => Promise<DrillExercise[]>
+  /** Vocab/Grammar can generate a fresh set when an endless pass ends, or when
+   * the level selection changes — called with the levels that set should cover. */
+  onLoadNextPool?: (levels: readonly GenerationComplexity[]) => Promise<DrillExercise[]>
   isFavorite: (exercise: DrillExercise) => boolean
   onToggleFavorite: (exercise: DrillExercise) => void
   onBack: () => void
@@ -61,7 +62,7 @@ function saveBooleanPreference(key: string, value: boolean) {
   }
 }
 
-function loadLevelPreference(key: string): GenerationComplexity[] {
+export function loadLevelPreference(key: string): GenerationComplexity[] {
   const fallback: GenerationComplexity[] = [1]
   if (typeof window === 'undefined') return fallback
 
@@ -85,7 +86,7 @@ function saveLevelPreference(key: string, levels: GenerationComplexity[]) {
   }
 }
 
-function initialAvailableLevels(key: string, availableLevels: GenerationComplexity[]) {
+function initialAvailableLevels(key: string, availableLevels: readonly GenerationComplexity[]) {
   const stored = loadLevelPreference(key)
   const selected = stored.filter((level) => availableLevels.includes(level))
   return selected.length ? selected : [availableLevels[0] ?? 1]
@@ -95,8 +96,41 @@ function exerciseComplexity(exercise: DrillExercise): GenerationComplexity {
   return exercise.complexity ?? 1
 }
 
+/**
+ * The generated pool skews toward whichever blank slot (subject, object,
+ * reason...) happens to be easiest to find valid multiple-choice distractors
+ * for, so a plain shuffle-and-slice can hand back long runs of the same slot
+ * type (e.g. ten "subject" questions in a row). Round-robining across slot
+ * groups instead guarantees no slot dominates a session just because it's
+ * overrepresented — or survives distractor-search failures more often — in
+ * the underlying pool.
+ */
 function buildPracticeSession(pool: DrillExercise[], levels: readonly GenerationComplexity[]) {
-  return shuffle(pool.filter((item) => levels.includes(exerciseComplexity(item)))).slice(0, DEFAULT_SESSION_SIZE)
+  const filtered = pool.filter((item) => levels.includes(exerciseComplexity(item)))
+  const groups = new Map<string, DrillExercise[]>()
+  for (const item of filtered) {
+    const key = item.blankSlot ?? 'other'
+    const list = groups.get(key)
+    if (list) list.push(item)
+    else groups.set(key, [item])
+  }
+
+  const groupOrder = shuffle([...groups.keys()])
+  const shuffledGroups = new Map(groupOrder.map((key) => [key, shuffle(groups.get(key)!)]))
+
+  const session: DrillExercise[] = []
+  let tookAny = true
+  while (session.length < DEFAULT_SESSION_SIZE && tookAny) {
+    tookAny = false
+    for (const key of groupOrder) {
+      const next = shuffledGroups.get(key)!.shift()
+      if (!next) continue
+      session.push(next)
+      tookAny = true
+      if (session.length >= DEFAULT_SESSION_SIZE) break
+    }
+  }
+  return session
 }
 
 /**
@@ -122,17 +156,11 @@ export function ChoiceDrill({
   const infiniteKey = `${storagePrefix}-infinite-v1`
   const fastModeKey = `${storagePrefix}-fast-mode-v1`
 
-  const levelCounts = useMemo(
-    () =>
-      Object.fromEntries(
-        GENERATION_COMPLEXITIES.map((level) => [level, pool.filter((item) => exerciseComplexity(item) === level).length]),
-      ) as Record<GenerationComplexity, number>,
-    [pool],
-  )
-  const availableLevels = useMemo(
-    () => GENERATION_COMPLEXITIES.filter((level) => levelCounts[level] > 0),
-    [levelCounts],
-  )
+  // Every level now has real generated content (both Grammar and Vocab), so
+  // all five are always selectable — the pool itself is intentionally
+  // filtered to just the selected level(s) for load-time reasons, so it can
+  // no longer be used to detect which levels exist.
+  const availableLevels = GENERATION_COMPLEXITIES
 
   const [levels, setLevels] = useState<GenerationComplexity[]>(() => initialAvailableLevels(levelsKey, availableLevels))
   const [pendingLevels, setPendingLevels] = useState<GenerationComplexity[]>(levels)
@@ -229,7 +257,7 @@ export function ChoiceDrill({
 
     setLoadingNextPool(true)
     try {
-      const nextPool = await onLoadNextPool()
+      const nextPool = await onLoadNextPool(next)
       setSessionPool(nextPool)
       startSession(next, nextPool)
     } finally {
@@ -314,7 +342,7 @@ export function ChoiceDrill({
         setInfiniteCompletedCount((count) => count + 1)
         setLoadingNextPool(true)
         try {
-          const nextPool = await onLoadNextPool()
+          const nextPool = await onLoadNextPool(levels)
           const nextExercises = buildPracticeSession(nextPool, levels)
           if (nextExercises.length) {
             setSessionPool(nextPool)

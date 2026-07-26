@@ -8,6 +8,11 @@ import { isVerbEndingId, type VerbEndingId } from './verbEndings'
 
 const PRONOUN_EN: Record<string, string> = {
   '私': 'I',
+  '君': 'you',
+  'あなた': 'you',
+  '僕': 'I',
+  '俺': 'I',
+  '私たち': 'we',
   '彼': 'he',
   '彼女': 'she',
   'みんな': 'everyone',
@@ -39,6 +44,7 @@ const VERB_EN: Record<string, string> = {
   '歌う': 'sing',
   '始める': 'start',
   '覚える': 'learn',
+  '住む': 'live',
 }
 
 const I_ADJ_EN: Record<string, string> = {
@@ -102,6 +108,10 @@ function adjEn(word: string, pos: 'i_adj' | 'na_adj'): string {
 
 function advEn(word: string): string {
   return ADV_EN[word] ?? word
+}
+
+function usesBaseVerb(subject: string) {
+  return /^(?:I|you|we|they)\b/i.test(subject)
 }
 
 function templateUsesBuiltInGrammar(label: string): boolean {
@@ -268,7 +278,7 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
   if (label.includes('はず だ')) return `${p} is supposed to ${v} ${n}.`
   if (label.includes('べき だ')) return `${p} should ${v} ${n}.`
   if (label.includes('なければ ならない')) return `${p} must ${v} ${n}.`
-  if (label.includes('なくても いい')) return `${p} does not have to ${v} ${n}.`
+  if (label.includes('なくても いい')) return `${p} ${usesBaseVerb(p) ? 'do' : 'does'} not have to ${v} ${n}.`
   if (label.includes('て は いけない')) return `${p} must not ${v} ${n}.`
   if (label.includes('て もらう')) return `${p} has ${n} ${v}ed for them.`
   if (label.includes('て くれる')) return `${n} ${v}s for ${p}.`
@@ -330,7 +340,7 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
   }
   if (label.includes('ない')) {
     const advBit = adv ? `${adv} ` : ''
-    return `${p} does not ${advBit}${v} ${n}.`
+    return `${p} ${usesBaseVerb(p) ? 'do' : 'does'} not ${advBit}${v} ${n}.`
   }
   if (label.includes(' た') && !label.includes('たい')) {
     const advBit = adv ? `${adv} ` : ''
@@ -367,6 +377,7 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
     return `${p} ${v}s ${n2} ${place} ${n}.`
   }
   if (label.includes('に [V]')) {
+    if (f.V === '住む') return `${p} ${usesBaseVerb(p) ? 'live' : 'lives'} in ${n}.`
     return `${p} ${adv ? `${adv} ` : ''}${v}s to ${n}.`
   }
   if (label.includes('で [V]')) {
