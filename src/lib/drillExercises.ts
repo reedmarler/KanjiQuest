@@ -8,9 +8,9 @@
  */
 
 /** JLPT remains catalog metadata; learner-facing difficulty uses generation complexity. */
-export type DrillJlptLevel = 'N5' | 'N4' | 'N3'
+export type DrillJlptLevel = 'N5' | 'N4' | 'N3' | 'N2' | 'N1'
 
-export const DRILL_LEVELS: readonly DrillJlptLevel[] = ['N5', 'N4', 'N3']
+export const DRILL_LEVELS: readonly DrillJlptLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1']
 
 /** A choice is either kana-only text or a [text, reading] pair for furigana. */
 export type DrillOption = string | readonly [text: string, reading: string]

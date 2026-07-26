@@ -1,5 +1,4 @@
 import type { SentenceExercise } from '../data/sentenceExercises'
-import { filledGapParts } from '../components/FuriganaText'
 import type { DrillExercise } from './drillExercises'
 
 const FAVORITE_SENTENCES_STORAGE_KEY = 'kanji-quest-favorite-sentences-v1'
@@ -49,19 +48,15 @@ export function saveFavoriteSentences(favorites: FavoriteSentence[]) {
 }
 
 export function favoriteFromExercise(exercise: SentenceExercise): FavoriteSentence {
-  const segments = exercise.segments
-    ? [...exercise.segments]
-    : filledGapParts(exercise.sentence ?? '', exercise.gapAnswer ?? '')
-  const readings = exercise.segments ? exercise.segmentReadings : exercise.filledReadings
-  const meanings = exercise.segments ? exercise.segmentMeanings : exercise.filledMeanings
+  const segments = exercise.segments ? [...exercise.segments] : []
 
   return {
     id: exercise.id,
     japanese: segments.join(''),
     english: exercise.english,
     segments,
-    readings: readings ? [...readings] : undefined,
-    meanings: meanings ? [...meanings] : undefined,
+    readings: exercise.segmentReadings ? [...exercise.segmentReadings] : undefined,
+    meanings: exercise.segmentMeanings ? [...exercise.segmentMeanings] : undefined,
     jlpt: exercise.jlpt,
     savedAt: Date.now(),
   }

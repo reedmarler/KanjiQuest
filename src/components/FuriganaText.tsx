@@ -258,8 +258,3 @@ export function readingForSegment(
   if (index === -1 || !readings) return undefined
   return readings[index]
 }
-
-export function filledGapParts(sentence: string, gapWord: string): [string, string, string] {
-  const [before, after = ''] = sentence.split('___')
-  return [before, gapWord, after]
-}

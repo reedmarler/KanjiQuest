@@ -11,33 +11,17 @@ export interface SentenceGlossData {
   meanings: string[]
 }
 
-function filledParts(sentence: string, gap: string): [string, string, string] {
-  const [before, after = ''] = sentence.split('___')
-  return [before, gap, after]
-}
-
 function buildExerciseGlossMap(): Record<string, SentenceGlossData> {
   const map: Record<string, SentenceGlossData> = {}
 
   for (const ex of sentenceExercises) {
-    if (ex.type === 'sentence-builder' && ex.segments && ex.segmentReadings && ex.segmentMeanings) {
+    if (ex.segments && ex.segmentReadings && ex.segmentMeanings) {
       const sentence = ex.segments.join('')
       map[sentence] = {
         english: ex.english,
         segments: ex.segments,
         readings: ex.segmentReadings,
         meanings: ex.segmentMeanings,
-      }
-    }
-
-    if (ex.type === 'fill-gap' && ex.sentence && ex.gapAnswer && ex.filledReadings && ex.filledMeanings) {
-      const parts = filledParts(ex.sentence, ex.gapAnswer)
-      const sentence = parts.join('')
-      map[sentence] = {
-        english: ex.english,
-        segments: [...parts],
-        readings: [...ex.filledReadings],
-        meanings: [...ex.filledMeanings],
       }
     }
   }

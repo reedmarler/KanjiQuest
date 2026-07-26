@@ -2,7 +2,6 @@ import { useCallback, useMemo, useState } from 'react'
 import { allCards } from './data'
 import { buildSentenceSession } from './lib/sentenceLab'
 import { buildGeneratedBuilderExercises, WIRED_BUILDER_LEVELS } from './lib/generatedSentenceExercises'
-import { recordFillGapSeen } from './lib/sentenceRecent'
 import { isLearned } from './lib/srs'
 import { loadProgress } from './lib/storage'
 import {
@@ -24,9 +23,7 @@ import type { CardProgress } from './lib/types'
 import type { GenerationComplexity } from './lib/generationComplexity'
 import type { SentenceExercise } from './data/sentenceExercises'
 import type { DrillExercise } from './lib/drillExercises'
-import type { FillGapLevelFilter } from './lib/fillGapLevels'
 import { Dashboard } from './components/Dashboard'
-import { FillGapView } from './components/FillGapView'
 import { SentenceBuilderView } from './components/SentenceBuilderView'
 import { SessionComplete } from './components/SessionComplete'
 import { VocabList } from './components/VocabList'
@@ -49,7 +46,6 @@ type View =
   | 'sentence-testing'
 
 type SessionItem =
-  | { kind: 'fill-gap'; exercise: SentenceExercise }
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
 
 function App() {
@@ -116,8 +112,8 @@ function App() {
     setView('study')
   }
 
-  const startSentenceMode = useCallback((type: 'fill-gap' | 'sentence-builder', fillGapFilter?: FillGapLevelFilter, returnTo: View = 'dashboard') => {
-    const items = buildSentenceSession(type, wrongPool, fillGapFilter, builderLevels)
+  const startSentenceMode = useCallback((returnTo: View = 'dashboard') => {
+    const items = buildSentenceSession(wrongPool, builderLevels)
     startStudy(items, returnTo)
   }, [builderLevels, wrongPool])
 
@@ -155,9 +151,8 @@ function App() {
 
   const handleSentenceResult = (correct: boolean) => {
     const item = session[currentIndex]
-    if (item.kind === 'fill-gap' || item.kind === 'sentence-builder') {
+    if (item.kind === 'sentence-builder') {
       recordSentenceResult(item.exercise.id, correct)
-      if (item.kind === 'fill-gap') recordFillGapSeen(item.exercise.id)
     }
     advanceOrComplete()
   }
@@ -240,23 +235,6 @@ function App() {
 
   const item = session[currentIndex]
   if (view === 'study' && item) {
-    if (item.kind === 'fill-gap') {
-      return (
-        <div className="app">
-          <FillGapView
-            key={item.exercise.id}
-            exercise={item.exercise}
-            current={currentIndex}
-            total={session.length}
-            onResult={handleSentenceResult}
-            onExit={() => setView(exitView)}
-            isFavorite={isExerciseFavorite(favoriteSentences, item.exercise)}
-            onToggleFavorite={() => toggleFavoriteSentence(item.exercise)}
-          />
-        </div>
-      )
-    }
-
     if (item.kind === 'sentence-builder') {
       return (
         <div className="app">
@@ -289,7 +267,7 @@ function App() {
       <Dashboard
         learnedCount={learnedCount}
         totalCards={allCards.length}
-        onOpenSentencePractice={() => startSentenceMode('sentence-builder')}
+        onOpenSentencePractice={() => startSentenceMode()}
         onOpenGrammar={() => setView('grammar')}
         onOpenVocabList={() => setView('vocab-list')}
         onOpenVocabPractice={() => setView('vocab-practice')}

@@ -11,12 +11,22 @@ function sentenceSeed() {
   return Math.floor((Date.now() + Math.random() * 1_000_000_000) % 1_000_000_000)
 }
 
+// A bare particle (は/を/から/くらい/…) reads naturally glued onto the tile
+// before it. A full grammar ending — にほかならない, ものだ, どころか — is its
+// own idea and deserves its own tile, even though it also has no slot. Short
+// length plus not looking like a complete predicate is a good enough proxy:
+// real endings are either long or finish in a predicate-final form (だ/です/
+// ます/ない and their conjugations).
+function isGluableParticle(text: string) {
+  return text.length <= 3 && !/(?:だ|です|ます|ました|ません|でした|ない)。?$/.test(text)
+}
+
 function builderSegments(sentence: GeneratedPreviewSentence) {
   const segments: Array<{ text: string; reading: string; meaning: string }> = []
 
   for (const part of sentence.furigana) {
     const reading = part.reading || part.text
-    if (part.slot || segments.length === 0) {
+    if (part.slot || segments.length === 0 || !isGluableParticle(part.text)) {
       segments.push({
         text: part.text,
         reading,

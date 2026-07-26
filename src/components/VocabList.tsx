@@ -15,9 +15,6 @@ interface VocabListProps {
 }
 
 function sentencePreview(exercise: SentenceExercise): string {
-  if (exercise.type === 'fill-gap' && exercise.sentence) {
-    return exercise.sentence.replace('___', exercise.gapAnswer ?? '___')
-  }
   if (exercise.segments) return exercise.segments.join('')
   return exercise.english
 }
@@ -44,7 +41,7 @@ function ContentSection({
               <li key={exercise.id} className="vocab-list-item vocab-list-item-sentence">
                 <div className="vocab-list-item-main">
                   <span className="vocab-list-jp">{sentencePreview(exercise)}</span>
-                  <span className="vocab-list-type">{exercise.type === 'fill-gap' ? 'Gap' : 'Build'}</span>
+                  <span className="vocab-list-type">Build</span>
                 </div>
                 <span className="vocab-list-en">{exercise.english}</span>
               </li>

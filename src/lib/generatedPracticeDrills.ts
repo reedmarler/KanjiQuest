@@ -23,7 +23,10 @@ interface GrammarSpec {
 interface VocabSpec {
   id: string
   frameId: string
-  level: Extract<DrillJlptLevel, 'N5' | 'N4'>
+  level: DrillJlptLevel
+  /** Unused by N3/N2/N1 patterns — they pick their own vocabulary internally
+   * rather than reading generation options, so this is only meaningful for the
+   * base N5/N4 verb-pool patterns. */
   verbId: string
   slot: string
   meaning: string
@@ -34,6 +37,7 @@ interface VocabSpec {
 const particleChoices: Choice[] = ['に', 'へ', 'で', 'と'].map((text) => ({ text, reading: text }))
 const routeChoices: Choice[] = ['から', 'まで', 'に', 'へ'].map((text) => ({ text, reading: text }))
 const connectorChoices: Choice[] = ['から', 'ので', 'のに', 'ために'].map((text) => ({ text, reading: text }))
+const timeConnectorChoices: Choice[] = ['間に', 'うちに', 'つつ', 'まま'].map((text) => ({ text, reading: text }))
 
 const grammarSpecs: GrammarSpec[] = [
   { id: 'masu', frameId: 'n5-01', level: 'N5', target: { type: 'slot', slot: 'verb', suffix: 'ます', alternatives: ['ました', 'ません', 'ませんでした'] }, pattern: 'ます', meaning: 'polite non-past' },
@@ -60,6 +64,34 @@ const grammarSpecs: GrammarSpec[] = [
   { id: 'contrast-noni', frameId: 'n3-08', level: 'N3', target: { type: 'literal', text: 'のに' }, pattern: 'のに', meaning: 'although / despite', choices: connectorChoices },
   { id: 'reason-node', frameId: 'n3-09', level: 'N3', target: { type: 'literal', text: 'ので' }, pattern: 'ので', meaning: 'because / since', choices: connectorChoices },
   { id: 'purpose-tameni', frameId: 'n3-10', level: 'N3', target: { type: 'literal', text: 'ために' }, pattern: 'ために', meaning: 'in order to', choices: connectorChoices },
+
+  // Complexity Level 2 — grammar covering two interacting verbs/clauses.
+  { id: 'while-bounded', frameId: 'n3-11', level: 'N3', target: { type: 'literal', text: '間に' }, pattern: '間に', meaning: 'while (bounded window)', choices: timeConnectorChoices },
+  { id: 'formal-while', frameId: 'n3-19', level: 'N3', target: { type: 'literal', text: 'つつ、' }, pattern: 'つつ', meaning: 'while (formal)', choices: [{ text: 'ながら、' }, { text: 'ものの、' }, { text: 'けれど、' }] },
+  { id: 'more-than', frameId: 'n3-24', level: 'N3', target: { type: 'literal', text: 'より' }, pattern: 'より', meaning: 'more than (comparison)', choices: [{ text: 'ほど' }, { text: 'くらい' }, { text: 'だけ' }] },
+  { id: 'not-as-much', frameId: 'n3-25', level: 'N3', target: { type: 'literal', text: 'ほど' }, pattern: 'ほど', meaning: 'not as much as', choices: [{ text: 'より' }, { text: 'くらい' }, { text: 'だけ' }] },
+  { id: 'during-span', frameId: 'n3-32', level: 'N3', target: { type: 'literal', text: '間、' }, pattern: '間', meaning: 'during (the whole span)', choices: [{ text: '間に、' }, { text: 'うちに、' }, { text: 'つつ、' }] },
+
+  // Complexity Level 3 — chained / aspectual verb forms.
+  { id: 'finish-doing', frameId: 'n3-14', level: 'N3', target: { type: 'literal', text: '終わりました。' }, pattern: '終わる', meaning: 'finish doing', choices: [{ text: '続けています。' }, { text: '始めます。' }, { text: 'てみます。' }] },
+  { id: 'continue-doing', frameId: 'n3-15', level: 'N3', target: { type: 'literal', text: '続けています。' }, pattern: '続ける', meaning: 'continue doing', choices: [{ text: '終わりました。' }, { text: '始めます。' }, { text: 'てみます。' }] },
+  { id: 'try-doing', frameId: 'n3-31', level: 'N3', target: { type: 'literal', text: 'みます。' }, pattern: 'てみる', meaning: 'try doing', choices: [{ text: '終わります。' }, { text: '続けます。' }, { text: '始めます。' }] },
+  { id: 'effort-habit', frameId: 'n3-01', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ようにします', alternatives: ['ようになります', 'ことにします', 'てみます'] }, pattern: 'ようにする', meaning: 'make an effort or habit' },
+  { id: 'decide-to', frameId: 'n3-02', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ことにします', alternatives: ['ようにします', 'ようになります', 'てみます'] }, pattern: 'ことにする', meaning: 'decide to do' },
+
+  // Complexity Level 4 — logical relationships between clauses.
+  { id: 'thanks-to', frameId: 'n3-16', level: 'N3', target: { type: 'literal', text: 'のおかげで、' }, pattern: 'おかげで', meaning: 'thanks to', choices: [{ text: 'のせいで、' }, { text: 'にもかかわらず、' }, { text: 'のわりに、' }] },
+  { id: 'because-of-blame', frameId: 'n3-17', level: 'N3', target: { type: 'literal', text: 'のせいで、' }, pattern: 'せいで', meaning: 'because of (blame)', choices: [{ text: 'のおかげで、' }, { text: 'にしては、' }, { text: 'のわりに、' }] },
+  { id: 'despite', frameId: 'n2-19', level: 'N2', target: { type: 'literal', text: 'にもかかわらず、' }, pattern: 'にもかかわらず', meaning: 'despite', choices: [{ text: 'のおかげで、' }, { text: 'ものの、' }, { text: 'とすれば、' }] },
+  { id: 'the-moment', frameId: 'n2-22', level: 'N2', target: { type: 'literal', text: 'とたん、' }, pattern: 'たとたん', meaning: 'the moment that', choices: [{ text: 'うえで、' }, { text: '最中に、' }, { text: '次第、' }] },
+  { id: 'formal-though', frameId: 'n2-30', level: 'N2', target: { type: 'literal', text: 'とはいえ、' }, pattern: 'とはいえ', meaning: 'though (formal contrast)', choices: [{ text: 'ものだから、' }, { text: 'ことから、' }, { text: 'に対して、' }] },
+
+  // Complexity Level 5 — advanced discourse grammar over a whole proposition.
+  { id: 'nothing-other-than', frameId: 'n1-02', level: 'N1', target: { type: 'literal', text: 'にほかならない。' }, pattern: 'にほかならない', meaning: 'nothing other than', choices: [{ text: 'というものだ。' }, { text: 'にすぎない。' }, { text: 'どころではない。' }] },
+  { id: 'no-choice', frameId: 'n1-01', level: 'N1', target: { type: 'literal', text: 'ざるを' }, pattern: 'ざるを得ない', meaning: 'have no choice but to', choices: [{ text: 'てもいいを' }, { text: 'てはいけないを' }, { text: 'なくてもいいを' }] },
+  { id: 'not-necessarily', frameId: 'n1-13', level: 'N1', target: { type: 'literal', text: '限りません。' }, pattern: 'とは限らない', meaning: 'not necessarily', choices: [{ text: 'に決まっています。' }, { text: 'に違いありません。' }, { text: 'わけです。' }] },
+  { id: 'general-truth', frameId: 'n2-07', level: 'N2', target: { type: 'literal', text: 'ものだ。' }, pattern: 'ものだ', meaning: 'general truth or recollection', choices: [{ text: 'はずだ。' }, { text: 'に違いない。' }, { text: 'ところだ。' }] },
+  { id: 'softened-denial', frameId: 'n2-17', level: 'N2', target: { type: 'literal', text: 'わけではありません。' }, pattern: 'というわけではない', meaning: 'it is not that (softened)', choices: [{ text: 'わけにはいきません。' }, { text: 'に違いありません。' }, { text: 'ものではありません。' }] },
 ]
 
 const vocabSpecs: VocabSpec[] = [
@@ -89,6 +121,24 @@ const vocabSpecs: VocabSpec[] = [
   { id: 'verb-drink', frameId: 'n5-01', level: 'N5', verbId: 'nomu-basic', slot: 'verb', meaning: 'verb word', verbOptions: ['taberu-basic', 'nomu-basic', 'yomu-basic', 'miru-basic'] },
   { id: 'verb-read', frameId: 'n5-01', level: 'N5', verbId: 'yomu-basic', slot: 'verb', meaning: 'verb word', verbOptions: ['taberu-basic', 'nomu-basic', 'yomu-basic', 'miru-basic'] },
   { id: 'verb-watch', frameId: 'n5-01', level: 'N5', verbId: 'miru-basic', slot: 'verb', meaning: 'verb word', verbOptions: ['taberu-basic', 'nomu-basic', 'yomu-basic', 'miru-basic'] },
+
+  // Complexity Level 2 — n3-25 (ほど) always fills both subject and object from
+  // the person pool, regardless of which verb-pool option is passed in.
+  { id: 'hodo-subject', frameId: 'n3-25', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'hodo-object', frameId: 'n3-25', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'person word' },
+
+  // Complexity Level 3 — n3-01 (ようにする) always fills subject (person) and,
+  // in its reading-habit variant, object (readable thing).
+  { id: 'younisuru-subject', frameId: 'n3-01', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'younisuru-object', frameId: 'n3-01', level: 'N3', verbId: 'taberu-basic', slot: 'object', meaning: 'readable word' },
+
+  // Complexity Level 4 — n3-16 (おかげで) always fills subject from the person pool.
+  { id: 'okagede-subject', frameId: 'n3-16', level: 'N3', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+
+  // Complexity Level 5 — n1-01 (ざるを得ない) and n2-02 (わけにはいかない) both
+  // always fill subject/reason from the person and reason pools respectively.
+  { id: 'zaruoenai-subject', frameId: 'n1-01', level: 'N1', verbId: 'taberu-basic', slot: 'subject', meaning: 'person word' },
+  { id: 'wakenihaikanai-reason', frameId: 'n2-02', level: 'N2', verbId: 'taberu-basic', slot: 'reason', meaning: 'reason word' },
 ]
 
 function join(parts: GeneratedPreviewSentence['furigana']) {
@@ -253,9 +303,13 @@ function vocabExercise(seed: number, spec: VocabSpec, order: number) {
 
   const candidates: Choice[] = []
   for (let attempt = 0; attempt < 10 && candidates.length < 3; attempt += 1) {
-    const alternative = generateCategorySentence(seed, spec.frameId, spec.level, {
+    const alternativeSeed = seed + 101 + attempt * 31
+    // slotSeeds only steers the base N5/N4 engine — N3/N2/N1 patterns ignore
+    // options entirely, so without also varying the seed itself, every
+    // "alternative" here would just regenerate the identical answer sentence.
+    const alternative = generateCategorySentence(alternativeSeed, spec.frameId, spec.level, {
       verbId: spec.verbId,
-      slotSeeds: { [spec.slot]: seed + 101 + attempt * 31 },
+      slotSeeds: { [spec.slot]: alternativeSeed },
     })
     const part = alternative?.furigana.find((candidate) => candidate.slot === spec.slot)
     if (part && part.text !== answerPart.text && !candidates.some((choice) => choice.text === part.text)) {
