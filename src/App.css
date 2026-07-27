@@ -89,6 +89,11 @@ body:has(.grammar-practice-view) .app {
   padding-bottom: 1.4rem;
 }
 
+body:has(.kanji-lab) .app {
+  padding-top: 0.75rem;
+  padding-bottom: 1.4rem;
+}
+
 /* Dashboard is sized to fit a single screen without scrolling. */
 body:has(.dashboard) .app {
   padding-top: 0.5rem;
@@ -1668,7 +1673,7 @@ body:has(.dashboard) .app {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 0.45rem;
   margin-bottom: 0.5rem;
   align-items: stretch;
@@ -1863,6 +1868,14 @@ body:has(.dashboard) .app {
 
 .practice-card-vocab:hover {
   border-color: var(--rayquaza);
+}
+
+.practice-card-kanji .practice-emoji {
+  color: var(--sakura-light);
+}
+
+.practice-card-kanji:hover {
+  border-color: var(--sakura);
 }
 
 .practice-label {
@@ -5068,6 +5081,365 @@ body:has(.dashboard) .app {
   text-align: center;
   color: var(--text-muted);
   padding: 2rem 1rem;
+}
+
+/* ── Shared study library ── */
+.library-panel {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1rem 3rem;
+}
+
+.library-panel-header,
+.kanji-lab-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.library-panel-header h1,
+.kanji-lab-header h1 {
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+
+.library-panel-header p,
+.library-panel-count {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.library-panel-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 1.15rem;
+}
+
+.library-panel-tabs button {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-muted);
+  padding: 0.65rem 0.75rem;
+  font: 600 0.72rem inherit;
+  cursor: pointer;
+}
+
+.library-panel-tabs button.active {
+  background: color-mix(in srgb, var(--kyogre) 16%, var(--surface));
+  border-color: var(--kyogre-light);
+  color: var(--text);
+}
+
+.library-panel .vocab-list-page {
+  max-width: none;
+  padding: 0;
+}
+
+.library-panel .favorite-sentences-view {
+  padding: 0;
+}
+
+/* ── Kanji Lab ── */
+.kanji-lab {
+  max-width: 47rem;
+  margin: 0 auto;
+  min-height: calc(66.6667vh - 2.15rem);
+  padding: 0;
+}
+
+.kanji-level-picker-compact {
+  margin: 0 0 0.55rem;
+}
+
+.kanji-lab .kanji-level-tabs {
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.kanji-lab .kanji-level-tabs button {
+  min-width: 2.7rem;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  padding: 0.32rem 0.48rem;
+  cursor: pointer;
+  font: 700 0.66rem inherit;
+}
+
+.kanji-lab .kanji-level-tabs button.active {
+  border-color: var(--gold);
+  background: rgba(255, 211, 107, 0.11);
+  color: var(--gold);
+}
+
+.kanji-learning-card {
+  height: calc(66.6667vh - 7rem);
+  min-height: 0;
+  max-height: calc(66.6667vh - 7rem);
+  margin: 0;
+  padding: clamp(0.95rem, 3vw, 1.55rem);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 33%, color-mix(in srgb, var(--kyogre) 16%, transparent), transparent 45%),
+    var(--surface);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kanji-learning-meta {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.67rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kanji-learning-character {
+  margin: clamp(0.65rem, 2vh, 1.15rem) 0;
+  font: clamp(4.5rem, 11vh, 6.5rem)/1 'Noto Sans JP', sans-serif;
+  color: var(--text);
+  flex: 0 0 auto;
+}
+
+.kanji-learning-divider {
+  width: min(15rem, 74%);
+  height: 1px;
+  margin: clamp(0.85rem, 2vh, 1.25rem) auto clamp(0.3rem, 0.9vh, 0.6rem);
+  flex: 0 0 auto;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--kyogre-light) 60%, transparent) 26%, color-mix(in srgb, var(--sakura-light) 75%, transparent) 50%, color-mix(in srgb, var(--kyogre-light) 60%, transparent) 74%, transparent);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--kyogre-light) 20%, transparent);
+}
+
+.kanji-learning-character-reading {
+  min-height: 1.1em;
+  margin: calc(clamp(0.65rem, 2vh, 1.15rem) * -0.45) 0 0;
+  color: var(--text-muted);
+  font: 500 clamp(0.84rem, 1.95vw, 1rem)/1.25 'Noto Sans JP', sans-serif;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  visibility: hidden;
+}
+
+.kanji-learning-character-reading.is-revealed {
+  opacity: 1;
+  visibility: visible;
+}
+
+.kanji-learning-character-reading span + span::before {
+  margin: 0 0.45rem;
+  color: var(--border);
+  content: '·';
+}
+
+.kanji-learning-examples {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  column-gap: 0.65rem;
+  width: min(100%, 75%);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.kanji-learning-examples.example-count-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.kanji-learning-examples.example-count-1 {
+  grid-template-columns: 1fr;
+}
+
+.kanji-learning-examples > div {
+  display: grid;
+  grid-template-rows: 0.58rem auto minmax(1.2rem, auto);
+  justify-items: center;
+  align-items: center;
+  min-width: 0;
+}
+
+.kanji-learning-examples b {
+  color: var(--text);
+  font: 500 clamp(1.34rem, 3.4vw, 1.68rem)/1.2 'Noto Sans JP', sans-serif;
+  white-space: nowrap;
+}
+
+.kanji-learning-examples > div > small,
+.kanji-learning-examples > div > span {
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 180ms ease;
+  visibility: hidden;
+}
+
+.kanji-learning-examples > div > small {
+  align-self: end;
+  font: 500 clamp(0.42rem, 1vw, 0.5rem)/1 'Noto Sans JP', sans-serif;
+}
+
+.kanji-learning-examples > div > span {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: clamp(0.46rem, 1vw, 0.53rem);
+  line-height: 1.08;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.kanji-learning-examples.is-revealed > div > small,
+.kanji-learning-examples.is-revealed > div > span {
+  opacity: 1;
+  visibility: visible;
+}
+
+.kanji-learning-examples.is-hidden > div > small,
+.kanji-learning-examples.is-hidden > div > b,
+.kanji-learning-examples.is-hidden > div > span {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.kanji-learning-word-target {
+  text-decoration: none;
+}
+
+.kanji-learning-answer {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  align-content: center;
+  overflow: hidden;
+  padding: 0 0.25rem;
+}
+
+.kanji-learning-reading {
+  color: var(--kyogre-light);
+  font: 600 1.1rem 'Noto Sans JP', sans-serif;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+}
+
+.kanji-learning-meaning {
+  font-size: 1rem;
+}
+
+.kanji-learning-mnemonic {
+  max-width: 32rem;
+  margin: 0.3rem auto 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+.kanji-learning-compounds {
+  margin: 0.6rem auto 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.kanji-learning-compounds > span {
+  display: block;
+  grid-column: 1 / -1;
+  margin-bottom: 0.25rem;
+  color: var(--sakura-light);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kanji-learning-compounds b {
+  color: var(--text);
+  font: 500 0.95rem 'Noto Sans JP', sans-serif;
+}
+
+.kanji-learning-controls {
+  position: relative;
+  flex: 0 0 auto;
+  margin-top: 0;
+  padding-top: 0.12rem;
+}
+
+.kanji-learning-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.16rem;
+}
+
+.kanji-learning-actions .btn-ghost {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.kanji-learning-actions .btn-ghost:not(:disabled):hover {
+  border-color: var(--text-muted);
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--text-muted));
+}
+
+.kanji-learning-examples-toggle {
+  position: absolute;
+  top: 0.2rem;
+  left: 0;
+  min-height: 1.75rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.62rem;
+}
+
+.kanji-learning-more-examples {
+  position: absolute;
+  top: 0.2rem;
+  right: 0;
+  min-height: 1.75rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.62rem;
+}
+
+.kanji-learning-actions .btn,
+.kanji-learning-reveal {
+  min-height: 1.62rem;
+  padding-block: 0.3rem;
+}
+
+.kanji-learning-reveal {
+  display: block;
+  width: min(12rem, 100%);
+  margin: 0 auto;
+}
+
+.kanji-learning-easy {
+  border: 1px solid var(--success);
+  background: var(--success);
+  color: #082416;
+  font-weight: 800;
+}
+
+.kanji-learning-easy:not(:disabled):hover {
+  background: var(--rayquaza-light);
+  border-color: var(--rayquaza-light);
+}
+
+.kanji-learning-easy:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
 }
 
 .sentence-word-bank.is-blurred .word-bank-tile > * {

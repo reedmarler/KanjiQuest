@@ -183,11 +183,12 @@ const animalSubjectTags = ['animal','dog','cat','bird','fish','pet']
 const humanSubjectTags = ['person','pronoun','speaker','man','woman','boy','girl','baby','child','teenager','adult','elderly','human','family','mother','father','wife','husband','brother','sister','grandparent','grandchild','relative','friend','partner','classmate','coworker','neighbor','customer','boss','employee','occupation','teacher','student','doctor','nurse']
 const standaloneDestinationTags = ['country','city','town','village','neighborhood','building','house','home','apartment','school','education','university','office','store','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','river','lake','beach','ocean','island','platform','parking-lot','room','kitchen','bathroom','bedroom','classroom','public','transport','destination']
 const workplaceLocationTags = ['company','office','store','shop','school','education','university','hospital','bank','restaurant','cafe','library','museum','station','airport','hotel','post-office','movie-theater']
-const standingLocationTags = ['room','kitchen','bathroom','bedroom','classroom','office','store','shop','station','platform','park','restaurant','cafe']
+const standingLocationTags = ['room','classroom','office','store','shop','station','platform']
 const crowdedPlaceTags = ['city','town','village','neighborhood','park','restaurant','cafe','station','market','festival','event','downtown','public']
 const pushableObjectTags = ['button','door','box','bag','cart','chair','table','furniture','switch','key','tool']
 const pullableObjectTags = ['door','drawer','cart','rope','string','handle','bag','box','chair','table','furniture']
 const bakedFoodTags = ['meat','seafood','fish','bread','dessert','cake','pie','pastry','baked']
+const boilableFoodTags = ['meat','seafood','fish','vegetable','bean','egg','potato','tofu']
 // A subset of destinations you can walk into and be inside of. Open-air or
 // natural places (mountains, forests, rivers) fit 行く/帰る but not 入る —
 // nobody "enters" a mountain, they climb it.
@@ -298,11 +299,11 @@ const verbs: VerbUsageRecord[] = [
   { id:'erabu-basic', japanese:'選ぶ', reading:'えらぶ', english:'choose', englishThird:'chooses', verbClass:'godan-bu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:usableToolTags} } },
   { id:'oboeru-basic', japanese:'覚える', reading:'おぼえる', english:'memorize', englishThird:'memorizes', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cognition','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags} } },
   { id:'wasureru-basic', japanese:'忘れる', reading:'わすれる', english:'forget', englishThird:'forgets', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Object','Book','Document'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cognition','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Object','Book','Document'],tags:['wallet','key','book','document','notebook','bag','umbrella','phone','letter','ticket']} } },
-  { id:'narau-basic', japanese:'習う', reading:'ならう', english:'learn', englishThird:'learns', verbClass:'godan-u', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cognition','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags} } },
+  { id:'narau-basic', japanese:'習う', reading:'ならう', english:'learn', englishThird:'learns', verbClass:'godan-u', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Language','Activity','Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cognition','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Language','Activity','Object'],tags:['language','skill','instrument','sport','swimming','music','studying','practice']} } },
   { id:'tomeru-basic', japanese:'止める', reading:'とめる', english:'stop', englishThird:'stops', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Vehicle','Tool','Technology'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Vehicle','Tool','Technology'],tags:['car','vehicle','bicycle','train','bus','machine','clock','engine']} } },
   { id:'akeru-basic', japanese:'開ける', reading:'あける', english:'open', englishThird:'opens', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Object','Furniture'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Object','Furniture'],tags:['door','window','box','bag','bottle','jar','suitcase']} } },
   { id:'shimeru-basic', japanese:'閉める', reading:'しめる', english:'close', englishThird:'closes', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Object','Furniture'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Object','Furniture'],tags:['door','window','box','bag','bottle','jar','suitcase']} } },
-  { id:'hajimeru-basic', japanese:'始める', reading:'はじめる', english:'begin', englishThird:'begins', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media','Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','time','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media','Food'],tags:[...readableTags,...edibleTags]} } },
+  { id:'hajimeru-basic', japanese:'始める', reading:'はじめる', english:'begin', englishThird:'begins', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Activity','Event'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','time','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Activity','Event'],tags:['studying','working','practice','exercise','meal','meeting','event','activity']} } },
   { id:'wakareru-companion', japanese:'別れる', reading:'わかれる', english:'break up', englishThird:'breaks up', verbClass:'ichidan', sentencePattern:'n5-04', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} with {Companion}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','social','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, companion:{categories:['Person'],tags:humanSubjectTags} } },
   { id:'modoru-destination', japanese:'戻る', reading:'もどる', english:'go back', englishThird:'goes back', verbClass:'godan-ru', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
   { id:'tsutomeru-location', japanese:'勤める', reading:'つとめる', english:'work', englishThird:'works', verbClass:'ichidan', sentencePattern:'n5-25', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','occupation','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:workplaceLocationTags} } },
@@ -330,7 +331,7 @@ const verbs: VerbUsageRecord[] = [
   { id:'sawaru-basic', japanese:'触る', reading:'さわる', english:'touch', englishThird:'touches', verbClass:'godan-ru', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Object'],tags:usableToolTags} } },
   { id:'osu-basic', japanese:'押す', reading:'おす', english:'push', englishThird:'pushes', verbClass:'godan-su', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Object','Furniture'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Object','Furniture'],tags:pushableObjectTags} } },
   { id:'hiku-basic', japanese:'引く', reading:'ひく', english:'pull', englishThird:'pulls', verbClass:'godan-ku', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Object','Furniture'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Object','Furniture'],tags:pullableObjectTags} } },
-  { id:'niru-basic', japanese:'煮る', reading:'にる', english:'boil', englishThird:'boils', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
+  { id:'niru-basic', japanese:'煮る', reading:'にる', english:'boil', englishThird:'boils', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:boilableFoodTags} } },
   { id:'ageru-fry-basic', japanese:'揚げる', reading:'あげる', english:'fry', englishThird:'fries', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'hiyasu-basic', japanese:'冷やす', reading:'ひやす', english:'chill', englishThird:'chills', verbClass:'godan-su', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food','Drink'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food','Drink'],tags:[...edibleTags,...drinkableTags]} } },
   { id:'atatameru-basic', japanese:'温める', reading:'あたためる', english:'warm up', englishThird:'warms up', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food','Drink'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food','Drink'],tags:[...edibleTags,...drinkableTags]} } },
@@ -428,7 +429,7 @@ const verbs: VerbUsageRecord[] = [
   { id:'kuwaeru-basic', japanese:'加える', reading:'くわえる', english:'add', englishThird:'adds', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'mazeru-basic', japanese:'混ぜる', reading:'まぜる', english:'mix', englishThird:'mixes', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'atsumeru-basic', japanese:'集める', reading:'あつめる', english:'collect', englishThird:'collects', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object'],tags:genericObjectTags} } },
-  { id:'hirogeru-basic', japanese:'広げる', reading:'ひろげる', english:'spread out', englishThird:'spreads out', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object'],tags:genericObjectTags} } },
+  { id:'hirogeru-basic', japanese:'広げる', reading:'ひろげる', english:'spread out', englishThird:'spreads out', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Document'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Document'],tags:['paper','document','map','newspaper','cloth']} } },
   { id:'todokeru-basic', japanese:'届ける', reading:'とどける', english:'deliver', englishThird:'delivers', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Document'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','transfer','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Document'],tags:genericObjectTags} } },
   { id:'tsutaeru-basic', japanese:'伝える', reading:'つたえる', english:'convey', englishThird:'conveys', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Document'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Document'],tags:readableTags} } },
   { id:'uketoru-basic', japanese:'受け取る', reading:'うけとる', english:'receive', englishThird:'receives', verbClass:'godan-ru', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Document'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','transfer','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Document'],tags:genericObjectTags} } },
@@ -604,8 +605,8 @@ const uncountableGlosses = new Set([
   'water','rice','bread','milk','tea','coffee','juice','alcohol','sake','beer','wine','soup','ramen','sushi','udon','soba','pasta',
   'meat','beef','pork','chicken','fish','seafood','fruit','food','sugar','salt','oil','butter','cheese','ice cream',
   'money','music','information','news','homework','work','weather','clothing','furniture','luggage','advice','anime','paper','mail',
-  // Foods English treats as a substance when eaten: “eats cake”, not “eats a cake”.
-  'cake','pizza','curry','salad','chocolate','candy','cereal','yogurt','pie',
+  // These foods are generally treated as substances when eaten.
+  'pizza','curry','salad','chocolate','candy','cereal','yogurt',
   // Language names take no article as a study/speech object: “speaks Japanese”, not “speaks a Japanese”.
   'japanese','english','chinese','french','spanish','german','korean',
   // Academic subjects read as a field of study, not a countable item: “studied math”, not “studied a math”.
@@ -702,6 +703,7 @@ function englishPhrase(word: WordRecord, slot: string) {
     return objectEnglish(gloss)
   }
   if (slot === 'location') {
+    if (word.japanese === '床' || tags.has('floor')) return 'on the floor'
     if (tags.has('home') && ['家','うち','自宅'].includes(word.japanese)) return 'at home'
     if ([...tags].some(tag=>['country','city','town','village','neighborhood','island'].includes(tag))) return `in ${/^[A-Z]/.test(gloss) ? gloss : definite(gloss)}`
     if ([...tags].some(tag => ['room','kitchen','bathroom','bedroom','living-room','classroom','house'].includes(tag))) return `in ${definite(gloss)}`
@@ -779,6 +781,9 @@ function subjectUsesBaseVerb(subject: string) {
 
 function translatedVerb(verb: VerbUsageRecord, filled: Record<string,WordRecord>, useBase: boolean) {
   const objectTags = filled.object ? tagSet(filled.object) : new Set<string>()
+  if (verb.japanese === '焼く' && (objectTags.has('meat') || objectTags.has('seafood') || objectTags.has('fish'))) {
+    return useBase ? 'grill' : 'grills'
+  }
   if (verb.japanese === '見る' && (objectTags.has('picture') || objectTags.has('photo'))) {
     return useBase ? 'look at' : 'looks at'
   }
@@ -883,12 +888,14 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
       !solidFoodWords.has(word.japanese) && matchingTags(word,solidFoodTags).length===0)
     if (verb.id === 'yomu-adverb' && slot === 'object') pool=pool.filter(word=>!tagSet(word).has('news')&&word.japanese!=='ニュース')
     if (verb.japanese === '読む' && slot === 'object') pool=pool.filter(word=>!unreadableObjectWords.has(word.japanese))
+    if (verb.id === 'hirou-basic' && slot === 'object') pool=pool.filter(word=>!['光','電気','音','熱','空気','影'].includes(word.japanese))
+    if (verb.id === 'narau-basic' && slot === 'object') pool=pool.filter(word=>narauCompatibleWords.has(word.japanese))
     // The classifier files any verb gloss under Activity right alongside real
     // する-compatible nouns like 買い物/料理/相談, and not every verb entry in
     // that bucket carries a reliable 'verb' tag (some come from an imported
     // source with its own tag set). Every Japanese verb dictionary form ends
     // in one of these hiragana; a real suru-noun essentially never does.
-    if (verb.id === 'suru-basic' && slot === 'object') pool=pool.filter(word=>!/(?:[うくぐすつぬぶむる]|[てでたなければ])$/.test(word.japanese))
+    if (verb.id === 'suru-basic' && slot === 'object') pool=pool.filter(word=>word.japanese!=='練習' && !/(?:[うくぐすつぬぶむる]|[てでたなければ])$/.test(word.japanese))
     if (slot === 'destination') pool=pool.filter(word=>{
       const tags=tagSet(word)
       if (verb.id === 'kayou-destination' && word.japanese === '教室') return false
@@ -899,6 +906,12 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
       const subjectGloss = `${filled.subject.english} ${filled.subject.preferredTranslation ?? ''}`.toLowerCase()
       const requiredTags = occupationWorkplaceTags.find(([pattern]) => pattern.test(subjectGloss))?.[1]
       if (requiredTags) pool=pool.filter(word=>matchingTags(word,requiredTags).length>0)
+    }
+    if (slot === 'location' && (verb.id === 'hataraku-location' || verb.id === 'tsutomeru-location')) {
+      pool=pool.filter(word=>!['廊下','台所','トイレ','浴室'].includes(word.japanese))
+    }
+    if (slot === 'location' && verb.id === 'tomaru-location') {
+      pool=pool.filter(word=>!['台所','キッチン','浴室','トイレ','廊下'].includes(word.japanese))
     }
     if (slot === 'time') pool=pool.filter(word=>{
       const tags=tagSet(word)
@@ -936,6 +949,12 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
         && !tags.has('interrogative')
     })
     if (slot === 'companion' && filled.subject) pool=pool.filter(word=>word.id!==filled.subject.id)
+    if (slot === 'companion' && verb.id === 'asobu-companion' && filled.subject) {
+      const subjectTags=tagSet(filled.subject)
+      if ([...subjectTags].some(tag=>['child','boy','girl','son','daughter'].includes(tag))) {
+        pool=pool.filter(word=>!['息子','娘'].includes(word.japanese))
+      }
+    }
     if (slot === 'companion') pool=pool.filter(word=>word.japanese!=='女')
     if (slot === 'companion' && verb.id === 'deau-companion') pool=pool.filter(word=>!['人','人々','個人'].includes(word.japanese))
     if (!pool.length) return null
@@ -968,21 +987,27 @@ function baseFurigana(verb: VerbUsageRecord, filled: Record<string,WordRecord>, 
 
 function presentParticiple(phrase: string) {
   const [head,...rest]=phrase.split(' ')
-  const irregular: Record<string,string> = { eat:'eating',drink:'drinking',read:'reading',watch:'watching',look:'looking',go:'going',talk:'talking',wake:'waking',forget:'forgetting',be:'being' }
+  const irregular: Record<string,string> = { eat:'eating',drink:'drinking',read:'reading',watch:'watching',look:'looking',go:'going',talk:'talking',wake:'waking',forget:'forgetting',be:'being',get:'getting',put:'putting',run:'running',sit:'sitting',begin:'beginning',stop:'stopping' }
   const transformed=irregular[head!] ?? (head!.endsWith('e') ? `${head!.slice(0,-1)}ing` : `${head}ing`)
   return [transformed,...rest].join(' ')
 }
 
+function regularPast(head: string) {
+  if (head.endsWith('e')) return `${head}d`
+  if (/[^aeiou]y$/i.test(head)) return `${head.slice(0,-1)}ied`
+  return `${head}ed`
+}
+
 function pastParticiple(phrase: string) {
   const [head,...rest]=phrase.split(' ')
-  const irregular: Record<string,string> = { eat:'eaten',drink:'drunk',read:'read',watch:'watched',look:'looked',go:'gone',come:'come',run:'run',hold:'held',talk:'talked',wake:'woken',buy:'bought',make:'made',use:'used',write:'written',meet:'met',fight:'fought',lend:'lent' }
-  return [irregular[head!] ?? `${head}ed`,...rest].join(' ')
+  const irregular: Record<string,string> = { be:'been',break:'broken',choose:'chosen',eat:'eaten',drink:'drunk',forget:'forgotten',give:'given',read:'read',watch:'watched',look:'looked',go:'gone',come:'come',get:'gotten',run:'run',hold:'held',have:'had',sit:'sat',sleep:'slept',spread:'spread',invite:'invited',save:'saved',dislike:'disliked',talk:'talked',wake:'woken',buy:'bought',make:'made',use:'used',write:'written',meet:'met',fight:'fought',lend:'lent' }
+  return [irregular[head!] ?? regularPast(head!),...rest].join(' ')
 }
 
 function simplePast(phrase: string) {
   const [head,...rest]=phrase.split(' ')
-  const irregular: Record<string,string> = { eat:'ate',drink:'drank',read:'read',watch:'watched',look:'looked',go:'went',come:'came',run:'ran',sit:'sat',hold:'held',compete:'competed',talk:'talked',wake:'woke',buy:'bought',make:'made',use:'used',write:'wrote',meet:'met',fight:'fought',lend:'lent' }
-  return [irregular[head!] ?? `${head}ed`,...rest].join(' ')
+  const irregular: Record<string,string> = { be:'was',break:'broke',choose:'chose',eat:'ate',drink:'drank',forget:'forgot',give:'gave',read:'read',watch:'watched',look:'looked',go:'went',come:'came',get:'got',run:'ran',sit:'sat',hold:'held',have:'had',sleep:'slept',spread:'spread',invite:'invited',save:'saved',dislike:'disliked',compete:'competed',talk:'talked',wake:'woke',buy:'bought',make:'made',use:'used',write:'wrote',meet:'met',fight:'fought',lend:'lent' }
+  return [irregular[head!] ?? regularPast(head!),...rest].join(' ')
 }
 
 function n4EnglishVerb(patternId: string,verb: VerbUsageRecord,filled: Record<string,WordRecord>) {
@@ -991,7 +1016,10 @@ function n4EnglishVerb(patternId: string,verb: VerbUsageRecord,filled: Record<st
   const base=translatedVerb(verb,filled,true)
   if (patternId === 'n4-02' && verb.japanese === '起きる') return `${subject === 'I' ? 'am' : plural ? 'are' : 'is'} awake`
   if (patternId === 'n4-02' && verb.japanese === '行く') return `${plural?'have':'has'} gone`
+  if (patternId === 'n4-02' && verb.japanese === '置く') return `${plural?'have':'has'} placed`
   if (patternId === 'n4-02' && verb.japanese === '忘れる') return `${plural?'have':'has'} forgotten`
+  if (patternId === 'n4-08' && verb.japanese === '来る') return `${plural?'have':'has'} been to`
+  if (patternId === 'n4-08' && (verb.id === 'iru-existence' || verb.id === 'aru-existence')) return `${plural?'have':'has'} been`
   if (patternId === 'n4-06' && (verb.id === 'iru-existence' || verb.id === 'aru-existence')) return 'may be'
   const forms: Record<string,string> = {
     'n4-01':`${plural?'want':'wants'} to ${base}`,
@@ -1067,13 +1095,15 @@ const genericRecipientWords = new Set(['人','人々','男','女','男性','女�
 // so 見せる keeps to things anyone carries and shows.
 const workplaceDocumentWords = new Set(['資料','書類','名刺','報告書','表','記録'])
 const sukunaiCompatibleWords = new Set(['人','人々','時間','お金','問題','機会','車','木'])
+const kanzenCompatibleWords = new Set(['計画','準備','情報','資料','書類','システム','状態','答え'])
+const narauCompatibleWords = new Set(['日本語','英語','中国語','韓国語','フランス語','ピアノ','ギター','歌','水泳','ダンス','書道','料理'])
 const animalHoshiiTags = new Set(normalizeTags([...edibleTags,...drinkableTags,'food','water','bone','toy','pet-toy']))
 const inanimateCategories: SentenceCategory[] = ['Object','Tool','Technology','Vehicle','Clothing','Furniture','Book','Document','Media']
 const possessableCategories: SentenceCategory[] = ['Object','Tool','Technology','Vehicle','Clothing','Furniture','Book','Document','Media','Food','Drink']
 const contextNeedyBareVerbIds = new Set([
   'tsuduku-basic','hajimaru-basic','owaru-basic','eru-basic','negau-basic',
   'kawaru-basic','fueru-basic','heru-basic','nokoru-basic','susumu-basic',
-  'mazaru-basic','hirogaru-basic','tameru-basic','ushinau-basic','sodatsu-basic',
+  'mazaru-basic','hirogaru-basic','tameru-basic','ushinau-basic','sodatsu-basic','tayoru-basic','kuraberu-basic',
 ])
 const occupationWorkplaceTags: Array<[RegExp,string[]]> = [
   [/station employee/i, ['station']],
@@ -1110,7 +1140,7 @@ export const adjectiveRules = [
   { id:'chikai',japanese:'近い',reading:'ちかい',english:'nearby',categories:['Place','Building'] as SentenceCategory[] },
   { id:'tooi',japanese:'遠い',reading:'とおい',english:'far',categories:['Place','Building'] as SentenceCategory[] },
   { id:'hayai-early',japanese:'早い',reading:'はやい',english:'early',categories:['Time'] as SentenceCategory[] },
-  { id:'osoi',japanese:'遅い',reading:'おそい',english:'late',categories:['Time'] as SentenceCategory[] },
+  { id:'osoi',japanese:'遅い',reading:'おそい',english:'late',categories:['Person','Vehicle','Event'] as SentenceCategory[] },
   { id:'hayai-fast',japanese:'速い',reading:'はやい',english:'fast',categories:['Vehicle','Technology','Animal'] as SentenceCategory[] },
   { id:'omoi',japanese:'重い',reading:'おもい',english:'heavy',categories:['Object','Furniture','Vehicle'] as SentenceCategory[] },
   { id:'karui',japanese:'軽い',reading:'かるい',english:'light',categories:['Object','Furniture','Vehicle'] as SentenceCategory[] },
@@ -1191,7 +1221,7 @@ export const adjectiveRules = [
   { id:'fukuzatsu',japanese:'複雑',reading:'ふくざつ',english:'complex',categories:['Document','Object'] as SentenceCategory[] },
   { id:'tanjun',japanese:'単純',reading:'たんじゅん',english:'simple',categories:['Document','Object'] as SentenceCategory[] },
   { id:'juubun',japanese:'十分',reading:'じゅうぶん',english:'sufficient',categories:['Food','Object','Money'] as SentenceCategory[] },
-  { id:'kanzen',japanese:'完全',reading:'かんぜん',english:'complete',categories:['Object','Document'] as SentenceCategory[] },
+  { id:'kanzen',japanese:'完全',reading:'かんぜん',english:'complete',categories:['Document'] as SentenceCategory[] },
   { id:'jiyuu',japanese:'自由',reading:'じゆう',english:'free',categories:['Person'] as SentenceCategory[] },
   { id:'daijoubu',japanese:'大丈夫',reading:'だいじょうぶ',english:'okay',categories:['Person','Object'] as SentenceCategory[] },
   { id:'suki',japanese:'好き',reading:'すき',english:'likable',categories:['Food','Media','Person'] as SentenceCategory[] },
@@ -1342,7 +1372,9 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const object=pick(inanimate.filter(word=>isPhysicalObject(word) && !indoorIncompatibleWords.has(word.japanese)),141)
     const place=object ? pick(placesForObject(object),142) : null
     if (!object || !place) return null
-    const objectPhrase=objectEnglish(primaryEnglishGloss(object.preferredTranslation || object.english))
+    const objectPhrase=object.categories.includes('Person')
+      ? englishPhrase(object,'subject')
+      : objectEnglish(primaryEnglishGloss(object.preferredTranslation || object.english))
     const furigana=[wordPart(object,'object'),literalPart('は','わ'),wordPart(place,'place'),literalPart('に'),{text:'あります',reading:'あります',slot:'verb'}]
     return finish(furigana,`${objectPhrase.charAt(0).toUpperCase()+objectPhrase.slice(1)} ${isPluralPhrase(objectPhrase)?'are':'is'} ${englishPhrase(place,'location')}.`,{object,place},{verb:verbSlot('verb-aru-location','あります','ある','あります','be located',['existence','location','inanimate'])},['Object is inanimate.','Place is a valid location.'])
   }
@@ -1374,10 +1406,16 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
       ? pick(vocabulary.filter(word=>hitsuyouCompatibleWords.has(word.japanese) && hasUsableMeaning(word)),172)
       : adjective.id==='sukunai'
         ? pick(vocabulary.filter(word=>sukunaiCompatibleWords.has(word.japanese) && hasUsableMeaning(word)),172)
+        : adjective.id==='kanzen'
+          ? pick(vocabulary.filter(word=>kanzenCompatibleWords.has(word.japanese) && hasUsableMeaning(word)),172)
         : adjective.id==='nigiyaka'
           ? pick(validPlacePool(vocabulary).filter(word=>matchingTags(word,crowdedPlaceTags).length>0 && !['ヨーロッパ','アジア','アフリカ','外国'].includes(word.japanese)),172)
           : adjective.id==='daijoubu'
             ? pick([...validHumanPool(vocabulary),...validInanimatePool(vocabulary,['Object']).filter(isPhysicalObject)],172)
+            : adjective.id==='osoi'
+              ? pick([...validHumanPool(vocabulary),...validInanimatePool(vocabulary,['Vehicle','Event'])],172)
+              : adjective.categories.length===1 && adjective.categories[0]==='Person'
+                ? pick(validHumanPool(vocabulary),172)
             : pick(validInanimatePool(vocabulary,adjective.categories).filter(word=>!adjective.physicalOnly || isPhysicalObject(word)),172)
     if (!object) return null
     const objectPhrase=objectEnglish(primaryEnglishGloss(object.preferredTranslation || object.english))
@@ -1440,6 +1478,9 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
       const tags=tagSet(word)
       return isPhysicalObject(word)
         && !tags.has('rare')
+        && !['電車','列車','新幹線'].includes(word.japanese)
+        && !tags.has('train')
+        && !tags.has('railway')
         && (!animalSubject || [...tags].some(tag=>animalHoshiiTags.has(tag)))
     })
     const object=pick(objects,212)
@@ -1563,7 +1604,7 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     const object=selectedObject.japanese==='食べ物'?(pick(replacementFoods,434)??selectedObject):selectedObject
     const te=n4VerbForms(activityVerb).te
     const objectEnglish=object.japanese==='ご飯'?'a meal':object.japanese==='食べ物'?'food':englishPhrase(object,'object')
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart(`${te.japanese}から`,`${te.reading}から`,'firstVerb'),wordPart(destination,'destination'),literalPart('へ','え'),literalPart('行きます','いきます','mainVerb')]
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),literalPart(`${te.japanese}から`,`${te.reading}から`,'firstVerb'),wordPart(destination,'destination'),literalPart('へ','え'),literalPart('行きます','いきます','mainVerb')]
     const extra={firstVerb:grammarSlot(`verb-${activityVerb.id}-tekara`,`${te.japanese}から`,activityVerb.japanese,`${te.reading}から`,activityVerb.english,['sequence','te-kara']),mainVerb:grammarSlot('verb-iku-after','行きます','行く','いきます','go',['movement','sequence-result'])}
     const subjectEnglish=englishPhrase(subject,'subject')
     const goes=subjectUsesBaseVerb(subjectEnglish)?'go':'goes'
@@ -2657,16 +2698,14 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n2-05') {
-    const subject = pick(humans, 1121)
-    const predicate = pick([
-      { surface:'犯人', reading:'はんにん', english:'the culprit' },
-      { surface:'天才', reading:'てんさい', english:'a genius' },
-      { surface:'専門家', reading:'せんもんか', english:'an expert' },
-    ], 1122)
-    if (!subject || !predicate) return null
-    const subjectEnglish = englishPhrase(subject,'subject')
-    const furigana=[wordPart(subject,'subject'),literalPart('が'),literalPart(predicate.surface,predicate.reading,'object'),literalPart('に違いない。','にちがいない。')]
-    return finish(furigana,`${capitalize(subjectEnglish)} must be ${predicate.english}.`,{subject},{},'に違いない expresses strong certainty based on evidence, not just guessing.')
+    const scene = pick([
+      { subject:'あの人', subjectReading:'あのひと', predicate:'専門家', predicateReading:'せんもんか', english:'That person must be an expert.' },
+      { subject:'彼', subjectReading:'かれ', predicate:'犯人', predicateReading:'はんにん', english:'He must be the culprit.' },
+      { subject:'彼女', subjectReading:'かのじょ', predicate:'天才', predicateReading:'てんさい', english:'She must be a genius.' },
+    ], 1121)
+    if (!scene) return null
+    const furigana=[literalPart(scene.subject,scene.subjectReading,'subject'),literalPart('は','わ'),literalPart(scene.predicate,scene.predicateReading,'object'),literalPart('に違いない。','にちがいない。')]
+    return finish(furigana,scene.english,{},{},'に違いない expresses strong certainty based on evidence, not just guessing.')
   }
 
   if (patternId === 'n2-06') {
@@ -2680,19 +2719,15 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n2-07') {
-    const topic = pick(abstractConcepts, 1141)
-    // ものだ states a generic truth about a concept, so only adjectives that make
-    // sense as a timeless quality (not physical properties like "large"/"red")
-    // are eligible here.
-    // 同じ is excluded: it attaches directly to a noun without な (同じもの, not
-    // 同じなもの) unlike every other na-adjective here.
-    const predicate = pick(adjectiveRules.filter(rule => ['muzukashii','kantan','taisetsu','hitsuyou','fukuzatsu','tanjun','juubun','kanzen','tokubetsu','rippa','futsuu'].includes(rule.id)), 1142)
-    if (!topic || !predicate) return null
-    const isIAdjective = predicate.japanese.endsWith('い')
-    const attributive = isIAdjective ? predicate.japanese : `${predicate.japanese}な`
-    const attributiveReading = isIAdjective ? predicate.reading : `${predicate.reading}な`
-    const furigana=[literalPart(topic.japanese,topic.reading,'subject'),literalPart('は','わ'),literalPart(attributive,attributiveReading,'object'),literalPart('ものだ。')]
-    return finish(furigana,`${capitalize(topic.english)} is ${indefinite(`${predicate.english} thing`)}.`,{},{},'ものだ states something as a natural or generally accepted truth.')
+    const scene = pick([
+      { topic:'方法', topicReading:'ほうほう', predicate:'単純な', predicateReading:'たんじゅんな', english:'A method is simple.' },
+      { topic:'規則', topicReading:'きそく', predicate:'必要な', predicateReading:'ひつような', english:'Rules are necessary.' },
+      { topic:'計画', topicReading:'けいかく', predicate:'大切な', predicateReading:'たいせつな', english:'A plan is important.' },
+      { topic:'問題', topicReading:'もんだい', predicate:'複雑な', predicateReading:'ふくざつな', english:'A problem can be complicated.' },
+    ], 1141)
+    if (!scene) return null
+    const furigana=[literalPart(scene.topic,scene.topicReading,'subject'),literalPart('は','わ'),literalPart(scene.predicate,scene.predicateReading,'object'),literalPart('ものだ。')]
+    return finish(furigana,scene.english,{},{},'ものだ states something as a natural or generally accepted truth.')
   }
 
   if (patternId === 'n2-08') {
@@ -2902,12 +2937,16 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     // Third-person subjects only: くせに carries a blaming tone that fits describing
     // someone else, and it keeps the fixed English predicates ("is bad at it", "wants
     // to teach") in agreement without per-person conjugation.
-    const subject = pick(humans.filter(word => !['私','俺','僕','私自身','我々','私たち','あなた','君'].includes(word.japanese) && !isPluralPhrase(englishPhrase(word,'subject'))), 1321)
     const scene = pick([
       { trait:'下手な', traitReading:'へたな', result:'教えたがります', resultReading:'おしえたがります', copula:'is', predicate:'bad at it', clause:'wants to teach' },
       { trait:'知らない', traitReading:'しらない', result:'説明します', resultReading:'せつめいします', copula:"doesn't", predicate:'know it', clause:'explains anyway' },
       { trait:'子供の', traitReading:'こどもの', result:'偉そうです', resultReading:'えらそうです', copula:'is', predicate:'just a child', clause:'acts important' },
     ], 1322)
+    const eligibleSubjects = humans.filter(word => {
+      if (['私','俺','僕','私自身','我々','私たち','あなた','君'].includes(word.japanese) || isPluralPhrase(englishPhrase(word,'subject'))) return false
+      return scene?.trait !== '子供の' || [...tagSet(word)].some(tag=>['child','boy','girl','son','daughter'].includes(tag))
+    })
+    const subject = pick(eligibleSubjects, 1321)
     if (!subject || !scene) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.trait,scene.traitReading,'reason'),literalPart('くせに、'),literalPart(scene.result,scene.resultReading,'result')]
@@ -3173,8 +3212,9 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     const object = pick(exact(['名前','漢字','日本語','英語','住所','電話番号','答え','理由','意味']), 1552)
     if (!subject || !object) return null
     const subjectEnglish = englishPhrase(subject,'subject')
+    const objectEnglish = object.japanese === '答え' ? 'the answer' : englishPhrase(object,'object')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('すら'),literalPart('知りません。','しりません。')]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${subjectUsesBaseVerb(subjectEnglish)?"don't":"doesn't"} even know ${englishPhrase(object,'object')}.`,{subject,object},{},'すら is a formal, literary equivalent of さえ, singling out an extreme example.')
+    return finish(furigana,`${capitalize(subjectEnglish)} ${subjectUsesBaseVerb(subjectEnglish)?"don't":"doesn't"} even know ${objectEnglish}.`,{subject,object},{},'すら is a formal, literary equivalent of さえ, singling out an extreme example.')
   }
 
   if (patternId === 'n2-36') {
@@ -3308,8 +3348,9 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
     // useful generated sentence. Keep 起きる for desire, past, negative, and
     // obligation patterns where it has a natural interpretation.
     'n4-07':new Set(['okiru-time']),
-    'n4-08':new Set(['okiru-time','yasumu-time']),
-    'n4-10':new Set(['okiru-time']),
+    'n4-03':new Set(['kirau-basic']),
+    'n4-08':new Set(['okiru-time','neru-time','nemuru-time','yasumu-time','shiru-basic','kirau-basic']),
+    'n4-10':new Set(['okiru-time','tatsu-basic','tatsu-location']),
   }
   const excluded=incompatibleVerbs[patternId]
   if (excluded) verbPool=verbPool.filter(verb=>!excluded.has(verb.id))

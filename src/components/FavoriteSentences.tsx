@@ -3,20 +3,22 @@ import type { FavoriteSentence } from '../lib/favoriteSentences'
 
 interface FavoriteSentencesProps {
   favorites: FavoriteSentence[]
-  onBack: () => void
   onRemove: (favorite: FavoriteSentence) => void
+  onBack?: () => void
+  embedded?: boolean
 }
 
-export function FavoriteSentences({ favorites, onBack, onRemove }: FavoriteSentencesProps) {
+export function FavoriteSentences({ favorites, onBack, onRemove, embedded = false }: FavoriteSentencesProps) {
   return (
     <div className="favorite-sentences-view">
-      <header className="favorite-sentences-header">
+      {!embedded && <header className="favorite-sentences-header">
         <button className="btn btn-ghost" onClick={onBack}>Back to Dashboard</button>
         <div>
           <h1>Favorite Sentences</h1>
           <p>{favorites.length} saved</p>
         </div>
-      </header>
+      </header>}
+      {embedded && <p className="library-panel-count">{favorites.length} saved sentence{favorites.length === 1 ? '' : 's'}</p>}
 
       {favorites.length ? (
         <div className="favorite-sentence-list">

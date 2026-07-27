@@ -26,23 +26,23 @@ import type { DrillExercise } from './lib/drillExercises'
 import { Dashboard } from './components/Dashboard'
 import { SentenceBuilderView } from './components/SentenceBuilderView'
 import { SessionComplete } from './components/SessionComplete'
-import { VocabList } from './components/VocabList'
 import { ContentStudio } from './components/ContentStudio'
 import { GrammarPractice } from './components/GrammarPractice'
 import { VocabPractice } from './components/VocabPractice'
-import { FavoriteSentences } from './components/FavoriteSentences'
+import { LibraryPanel, type LibraryTab } from './components/LibraryPanel'
+import { KanjiLab } from './components/KanjiLab'
 import { SentenceTesting } from './components/SentenceTesting'
 import './App.css'
 
 type View =
   | 'dashboard'
-  | 'vocab-list'
+  | 'library'
   | 'vocab-practice'
   | 'study'
   | 'complete'
   | 'content-studio'
   | 'grammar'
-  | 'favorites'
+  | 'kanji'
   | 'sentence-testing'
 
 type SessionItem =
@@ -59,6 +59,7 @@ function App() {
   const [builderLevels, setBuilderLevels] = useState<GenerationComplexity[]>([1])
   const [infiniteBuilderMode, setInfiniteBuilderMode] = useState(false)
   const [favoriteSentences, setFavoriteSentences] = useState<FavoriteSentence[]>(() => loadFavoriteSentences())
+  const [libraryTab, setLibraryTab] = useState<LibraryTab>('vocab')
 
   const learnedCount = useMemo(
     () => allCards.filter((c) => {
@@ -157,22 +158,15 @@ function App() {
     advanceOrComplete()
   }
 
-  if (view === 'vocab-list') {
-    return (
-      <div className="app">
-        <VocabList onBack={() => setView('dashboard')} />
-      </div>
-    )
-  }
-
   const goToPreviousSentence = () => {
     setCurrentIndex((index) => Math.max(0, index - 1))
   }
 
-  if (view === 'favorites') {
+  if (view === 'library') {
     return (
       <div className="app">
-        <FavoriteSentences
+        <LibraryPanel
+          initialTab={libraryTab}
           favorites={favoriteSentences}
           onBack={() => setView('dashboard')}
           onRemove={(favorite) => {
@@ -183,6 +177,14 @@ function App() {
             })
           }}
         />
+      </div>
+    )
+  }
+
+  if (view === 'kanji') {
+    return (
+      <div className="app">
+        <KanjiLab onBack={() => setView('dashboard')} />
       </div>
     )
   }
@@ -269,10 +271,17 @@ function App() {
         totalCards={allCards.length}
         onOpenSentencePractice={() => startSentenceMode()}
         onOpenGrammar={() => setView('grammar')}
-        onOpenVocabList={() => setView('vocab-list')}
+        onOpenVocabList={() => {
+          setLibraryTab('vocab')
+          setView('library')
+        }}
         onOpenVocabPractice={() => setView('vocab-practice')}
         onOpenContentStudio={() => setView('content-studio')}
-        onOpenFavoriteSentences={() => setView('favorites')}
+        onOpenKanji={() => setView('kanji')}
+        onOpenFavoriteSentences={() => {
+          setLibraryTab('favorites')
+          setView('library')
+        }}
         onOpenSentenceTesting={() => setView('sentence-testing')}
         wrongPool={wrongPool}
         progress={progress}

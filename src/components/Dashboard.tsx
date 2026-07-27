@@ -14,6 +14,7 @@ interface DashboardProps {
   onOpenGrammar: () => void
   onOpenVocabList: () => void
   onOpenVocabPractice: () => void
+  onOpenKanji: () => void
   onOpenContentStudio: () => void
   onOpenFavoriteSentences: () => void
   onOpenSentenceTesting: () => void
@@ -26,6 +27,7 @@ export function Dashboard({
   onOpenGrammar,
   onOpenVocabList,
   onOpenVocabPractice,
+  onOpenKanji,
   onOpenContentStudio,
   onOpenFavoriteSentences,
   onOpenSentenceTesting,
@@ -75,6 +77,16 @@ export function Dashboard({
         >
           <span className="stat-value stat-value-jp">ふり</span>
           <span className="stat-label">Furigana</span>
+        </button>
+
+        <button
+          type="button"
+          className="stat-card stat-card-btn"
+          onClick={onOpenVocabList}
+          aria-label="Open vocabulary list"
+        >
+          <span className="stat-value stat-value-jp" aria-hidden="true">語</span>
+          <span className="stat-label">Vocab List</span>
         </button>
 
         <button
@@ -132,9 +144,9 @@ export function Dashboard({
           <span className="practice-emoji">語彙</span>
           <span className="practice-label">Vocab</span>
         </button>
-        <button type="button" className="practice-card practice-card-vocab" onClick={onOpenVocabList}>
-          <span className="practice-emoji">語</span>
-          <span className="practice-label">Vocab List</span>
+        <button type="button" className="practice-card practice-card-kanji" onClick={onOpenKanji}>
+          <span className="practice-emoji">漢</span>
+          <span className="practice-label">Kanji</span>
         </button>
       </section>
 

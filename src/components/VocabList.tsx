@@ -11,7 +11,8 @@ import type { SentenceExercise } from '../data/sentenceExercises'
 import type { StudyCard } from '../lib/types'
 
 interface VocabListProps {
-  onBack: () => void
+  onBack?: () => void
+  embedded?: boolean
 }
 
 function sentencePreview(exercise: SentenceExercise): string {
@@ -68,7 +69,7 @@ function ContentSection({
   )
 }
 
-export function VocabList({ onBack }: VocabListProps) {
+export function VocabList({ onBack, embedded = false }: VocabListProps) {
   const [level, setLevel] = useState<JlptLevel>('N5')
   const content = useMemo(() => getLevelContent(level), [level])
   const buckets: ContentBucket[] = level === 'N5'
@@ -77,7 +78,7 @@ export function VocabList({ onBack }: VocabListProps) {
 
   return (
     <div className="vocab-list-page">
-      <header className="kanji-lab-header">
+      {!embedded && <header className="kanji-lab-header">
         <button type="button" className="btn btn-ghost" onClick={onBack}>
           ← Dashboard
         </button>
@@ -87,7 +88,7 @@ export function VocabList({ onBack }: VocabListProps) {
             All study content by JLPT level — {content.summary.total} items at {level}
           </p>
         </div>
-      </header>
+      </header>}
 
       <section className="kanji-level-picker">
         <h2>JLPT level</h2>
