@@ -1,9 +1,44 @@
-import { useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import type { CardProgress } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
 import { GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
-import { RotatingHeroSentence } from './RotatingHeroSentence'
 
+const RotatingHeroSentence = lazy(() => import('./RotatingHeroSentence').then((module) => ({ default: module.RotatingHeroSentence })))
+
+function DashboardHeroSentence({
+  wrongPool,
+  progress,
+  furiganaOn,
+  jlptLevel,
+}: {
+  wrongPool: WrongPool
+  progress: Record<string, CardProgress>
+  furiganaOn: boolean
+  jlptLevel: ReturnType<typeof heroJlptForComplexity>
+}) {
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    // Let the dashboard controls paint before the sentence data is requested.
+    const timer = window.setTimeout(() => setReady(true), 900)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  if (!ready) return <div className="hero-sentence-loading" aria-hidden="true" />
+
+  return (
+    <Suspense fallback={<div className="hero-sentence-loading" aria-hidden="true" />}>
+      <RotatingHeroSentence
+        wrongPool={wrongPool}
+        progress={progress}
+        displayMode="sentence"
+        furiganaOn={furiganaOn}
+        delayedFurigana={false}
+        jlptLevel={jlptLevel}
+      />
+    </Suspense>
+  )
+}
 
 interface DashboardProps {
   learnedCount: number
@@ -48,12 +83,10 @@ export function Dashboard({
     <div className="dashboard">
       <header className="hero hero-compact">
         <h1>Kanji Quest</h1>
-        <RotatingHeroSentence
+        <DashboardHeroSentence
           wrongPool={wrongPool}
           progress={progress}
-          displayMode="sentence"
           furiganaOn={furiganaOn}
-          delayedFurigana={false}
           jlptLevel={heroJlptForComplexity(complexity)}
         />
       </header>

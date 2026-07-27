@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import type { FavoriteSentence } from '../lib/favoriteSentences'
-import { FavoriteSentences } from './FavoriteSentences'
-import { VocabList } from './VocabList'
+
+const FavoriteSentences = lazy(() => import('./FavoriteSentences').then((module) => ({ default: module.FavoriteSentences })))
+const VocabList = lazy(() => import('./VocabList').then((module) => ({ default: module.VocabList })))
 
 export type LibraryTab = 'vocab' | 'favorites'
 
@@ -34,9 +35,11 @@ export function LibraryPanel({ initialTab, favorites, onBack, onRemove }: Librar
         </button>
       </div>
 
-      {tab === 'vocab'
-        ? <VocabList embedded />
-        : <FavoriteSentences embedded favorites={favorites} onRemove={onRemove} />}
+      <Suspense fallback={<div className="library-panel-loading" role="status">Loading</div>}>
+        {tab === 'vocab'
+          ? <VocabList embedded />
+          : <FavoriteSentences embedded favorites={favorites} onRemove={onRemove} />}
+      </Suspense>
     </div>
   )
 }

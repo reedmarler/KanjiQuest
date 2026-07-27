@@ -22,7 +22,7 @@ export interface KanjiLabEntry {
 
 function kanaReading(card: StudyCard): string {
   const mapped = vocabKanaMap[card.id] ?? vocabBulkKanaMap[card.id]
-  if (mapped) return mapped
+  if (mapped) return /[\u3040-\u30FF]/u.test(mapped) ? mapped : toHiragana(mapped)
   if (card.reading) return /[\u3040-\u30FF]/u.test(card.reading) ? card.reading : toHiragana(card.reading)
   return ''
 }

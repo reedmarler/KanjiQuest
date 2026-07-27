@@ -169,12 +169,13 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
             >
               {revealed ? 'Hide' : 'Reveal'}
             </button>
-            <label className="kanji-learning-keep-revealed" title="Keep reveal">
+            <label className="kanji-learning-keep-revealed" title="Keep answers revealed on the next card">
               <input type="checkbox" aria-label="Keep reveal" checked={keepRevealed} onChange={(event) => setKeepRevealed(event.target.checked)} />
+              <span>Keep reveal</span>
             </label>
           </div>
           <div className="kanji-learning-actions">
-            <button type="button" className="btn btn-ghost" onClick={() => nextCard(false)} disabled={!revealed}>Study again</button>
+            <button type="button" className="btn btn-ghost" onClick={() => nextCard(false)}>Study again</button>
             <button type="button" className="btn kanji-learning-easy" onClick={() => nextCard(true)}>Too Easy</button>
           </div>
         </div>

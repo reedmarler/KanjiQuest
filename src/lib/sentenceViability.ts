@@ -16,6 +16,11 @@ const EVENTS = new Set(['雨', '春', '夏', '秋', '冬', '仕事', '試験', '
 const STUDY_NOUNS = new Set([
   '漢字', '日本語', '数学', '科学', '歴史', '宿題', '試験', '仕事',
 ])
+const SIZE_NOUNS = new Set([
+  '本', '雑誌', '新聞', '小説', '漫画', '映画', '写真', '料理', 'パン', 'リンゴ',
+  '寿司', 'コーヒー', 'お茶', '魚', '肉', '米', '花', '車', '電車', '犬', '猫', '鳥',
+  '図書館', '学校', '会社', '公園', '駅', '病院', '京都', '東京', '海', '山',
+])
 
 function normalizeAdj(raw: string | undefined): string {
   if (!raw) return ''
@@ -32,6 +37,9 @@ function iAdjFitsNoun(adj: string, noun: string): boolean {
   }
   if (base === '美味しい') {
     return FOOD_DRINK.has(noun) || ['料理', 'パン', '寿司'].includes(noun)
+  }
+  if (base === '大きい' || base === '小さい') {
+    return SIZE_NOUNS.has(noun)
   }
   if (base === '忙しい') {
     return PEOPLE.has(noun) || ['先生', '友達', '仕事'].includes(noun)

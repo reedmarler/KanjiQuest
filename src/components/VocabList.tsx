@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   BUCKET_LABELS,
   getLevelContent,
@@ -15,6 +15,9 @@ interface VocabListProps {
   embedded?: boolean
 }
 
+const INITIAL_RENDERED_ITEMS = 120
+const RENDER_BATCH_SIZE = 160
+
 function sentencePreview(exercise: SentenceExercise): string {
   if (exercise.segments) return exercise.segments.join('')
   return exercise.english
@@ -23,22 +26,29 @@ function sentencePreview(exercise: SentenceExercise): string {
 function ContentSection({
   bucket,
   content,
+  visibleCount,
 }: {
   bucket: ContentBucket
   content: LevelContent
+  visibleCount: number
 }) {
   const items = content[bucket]
   if (!items || items.length === 0) return null
+
+  const visibleItems = items.slice(0, visibleCount)
+  const hiddenCount = Math.max(0, items.length - visibleItems.length)
 
   return (
     <section className="vocab-list-section">
       <h2 className="vocab-list-section-title">
         {BUCKET_LABELS[bucket]}
-        <span className="vocab-list-section-count">{items.length}</span>
+        <span className="vocab-list-section-count">
+          {hiddenCount ? `${visibleItems.length} / ${items.length}` : items.length}
+        </span>
       </h2>
       <ul className="vocab-list-items">
         {bucket === 'sentences'
-          ? (items as SentenceExercise[]).map((exercise) => (
+          ? (visibleItems as SentenceExercise[]).map((exercise) => (
               <li key={exercise.id} className="vocab-list-item vocab-list-item-sentence">
                 <div className="vocab-list-item-main">
                   <span className="vocab-list-jp">{sentencePreview(exercise)}</span>
@@ -47,7 +57,7 @@ function ContentSection({
                 <span className="vocab-list-en">{exercise.english}</span>
               </li>
             ))
-          : (items as StudyCard[]).map((card) => (
+          : (visibleItems as StudyCard[]).map((card) => (
               <li key={card.id} className="vocab-list-item">
                 <div className="vocab-list-item-main">
                   <span className="vocab-list-jp">{card.front}</span>
@@ -65,16 +75,35 @@ function ContentSection({
               </li>
             ))}
       </ul>
+      {hiddenCount > 0 && (
+        <p className="vocab-list-loading-more" role="status">
+          Loading {hiddenCount} more
+        </p>
+      )}
     </section>
   )
 }
 
 export function VocabList({ onBack, embedded = false }: VocabListProps) {
   const [level, setLevel] = useState<JlptLevel>('N5')
+  const [visibleCount, setVisibleCount] = useState(INITIAL_RENDERED_ITEMS)
   const content = useMemo(() => getLevelContent(level), [level])
   const buckets: ContentBucket[] = level === 'N5'
     ? ['kana', 'vocab', 'grammar', 'kanji', 'reading', 'sentences']
     : ['vocab', 'grammar', 'kanji', 'reading', 'sentences']
+  const maxBucketItems = Math.max(...buckets.map((bucket) => content[bucket].length))
+
+  useEffect(() => {
+    setVisibleCount(INITIAL_RENDERED_ITEMS)
+  }, [level])
+
+  useEffect(() => {
+    if (visibleCount >= maxBucketItems) return
+    const timer = window.setTimeout(() => {
+      setVisibleCount((count) => Math.min(count + RENDER_BATCH_SIZE, maxBucketItems))
+    }, 16)
+    return () => window.clearTimeout(timer)
+  }, [maxBucketItems, visibleCount])
 
   return (
     <div className="vocab-list-page">
@@ -124,7 +153,7 @@ export function VocabList({ onBack, embedded = false }: VocabListProps) {
 
       <div className="vocab-list-sections">
         {buckets.map((bucket) => (
-          <ContentSection key={bucket} bucket={bucket} content={content} />
+          <ContentSection key={bucket} bucket={bucket} content={content} visibleCount={visibleCount} />
         ))}
         {content.summary.total === 0 && (
           <p className="vocab-list-empty">No content tagged for {level} yet.</p>

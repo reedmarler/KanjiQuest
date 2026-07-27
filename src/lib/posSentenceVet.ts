@@ -97,22 +97,24 @@ function passesGrammarTemplateRules(template: PosTemplate, fills: PosFills): boo
   const n = fills.N
   const v = fills.V
   const v2 = fills.V2 ?? fills.V
-  if (!n || !v) return false
 
-  if (id >= 134 && id <= 140) return isPerson(n)
-  if (id === 141 || id === 142) return isAnimateGaSubject(n) || EVENT_NOUNS.has(n)
+  if (id >= 134 && id <= 140) return Boolean(n && isPerson(n))
+  if (id === 141 || id === 142) return Boolean(n && (isAnimateGaSubject(n) || EVENT_NOUNS.has(n)))
   if (id >= 143 && id <= 150) {
-    if (!isAnimateGaSubject(n) && !EVENT_NOUNS.has(n)) return false
+    if (!n || !v || (!isAnimateGaSubject(n) && !EVENT_NOUNS.has(n))) return false
     if (v2 && v2 === v && (id === 108 || id >= 109)) return false
     return true
   }
-  if (id === 108 && v === v2) return false
+  if (id === 108 && v && v === v2) return false
   return true
 }
 
 /** Whether every verb–object binding in the template is satisfied */
 export function posFillsAreValid(template: PosTemplate, fills: PosFills): boolean {
-  if (!fills.V || !fills.N) return false
+  const requiredSlots = template.pieces
+    .filter((piece): piece is Extract<typeof piece, { kind: 'slot' }> => piece.kind === 'slot')
+    .map((piece) => piece.key)
+  if (requiredSlots.some((slot) => !fills[slot])) return false
   if (!passesGrammarTemplateRules(template, fills)) return false
 
   const bindings = getVerbObjectBindings(template)
@@ -127,6 +129,7 @@ export function posFillsAreValid(template: PosTemplate, fills: PosFills): boolea
   if (label.includes('で [V]') && !label.includes('を [V]')) {
     if (!isPlace(fills.N)) return false
     const n2 = fills.N2 ?? fills.N!
+    if (!n2 || !fills.V) return false
     return fitsWo(n2, fills.V)
   }
   if (label.includes('と [V]') && fills.V === '会う') {

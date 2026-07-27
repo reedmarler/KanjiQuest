@@ -1,7 +1,6 @@
-import { useCallback, useMemo, useState } from 'react'
-import { allCards } from './data'
-import { buildSentenceSession } from './lib/sentenceLab'
-import { buildGeneratedBuilderExercises, WIRED_BUILDER_LEVELS } from './lib/generatedSentenceExercises'
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
+import { CARD_TOTAL } from './data/cardStats'
+import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
 import { loadProgress } from './lib/storage'
 import {
@@ -24,21 +23,24 @@ import type { GenerationComplexity } from './lib/generationComplexity'
 import type { SentenceExercise } from './data/sentenceExercises'
 import type { DrillExercise } from './lib/drillExercises'
 import { Dashboard } from './components/Dashboard'
-import { SentenceBuilderView } from './components/SentenceBuilderView'
 import { SessionComplete } from './components/SessionComplete'
-import { ContentStudio } from './components/ContentStudio'
-import { GrammarPractice } from './components/GrammarPractice'
-import { VocabPractice } from './components/VocabPractice'
-import { LibraryPanel, type LibraryTab } from './components/LibraryPanel'
-import { KanjiLab } from './components/KanjiLab'
-import { SentenceTesting } from './components/SentenceTesting'
+import type { LibraryTab } from './components/LibraryPanel'
 import './App.css'
+
+const ContentStudio = lazy(() => import('./components/ContentStudio').then((module) => ({ default: module.ContentStudio })))
+const GrammarPractice = lazy(() => import('./components/GrammarPractice').then((module) => ({ default: module.GrammarPractice })))
+const KanjiLab = lazy(() => import('./components/KanjiLab').then((module) => ({ default: module.KanjiLab })))
+const LibraryPanel = lazy(() => import('./components/LibraryPanel').then((module) => ({ default: module.LibraryPanel })))
+const SentenceBuilderView = lazy(() => import('./components/SentenceBuilderView').then((module) => ({ default: module.SentenceBuilderView })))
+const SentenceTesting = lazy(() => import('./components/SentenceTesting').then((module) => ({ default: module.SentenceTesting })))
+const VocabPractice = lazy(() => import('./components/VocabPractice').then((module) => ({ default: module.VocabPractice })))
 
 type View =
   | 'dashboard'
   | 'library'
   | 'vocab-practice'
   | 'study'
+  | 'study-loading'
   | 'complete'
   | 'content-studio'
   | 'grammar'
@@ -62,10 +64,7 @@ function App() {
   const [libraryTab, setLibraryTab] = useState<LibraryTab>('vocab')
 
   const learnedCount = useMemo(
-    () => allCards.filter((c) => {
-      const p = progress[c.id]
-      return p && isLearned(p)
-    }).length,
+    () => Object.values(progress).filter((item) => isLearned(item)).length,
     [progress],
   )
 
@@ -114,22 +113,28 @@ function App() {
   }
 
   const startSentenceMode = useCallback((returnTo: View = 'dashboard') => {
-    const items = buildSentenceSession(wrongPool, builderLevels)
-    startStudy(items, returnTo)
+    setExitView(returnTo)
+    setView('study-loading')
+    void import('./lib/sentenceLab').then(({ buildSentenceSession }) => {
+      const items = buildSentenceSession(wrongPool, builderLevels)
+      startStudy(items, returnTo)
+    })
   }, [builderLevels, wrongPool])
 
   const applyBuilderLevels = useCallback((nextLevels: readonly GenerationComplexity[]) => {
-    const next = WIRED_BUILDER_LEVELS.filter((level) => nextLevels.includes(level))
+    const next = GENERATION_COMPLEXITIES.filter((level) => nextLevels.includes(level))
     if (!next.length) return
 
     setBuilderLevels([...next])
     if (session[currentIndex]?.kind === 'sentence-builder') {
-      const nextExercises = buildGeneratedBuilderExercises(next)
-      if (nextExercises.length) {
-        setSession(nextExercises.map((exercise) => ({ kind: 'sentence-builder' as const, exercise })))
-        setCurrentIndex(0)
-        setSessionCorrect(0)
-      }
+      void import('./lib/generatedSentenceExercises').then(({ buildGeneratedBuilderExercises }) => {
+        const nextExercises = buildGeneratedBuilderExercises(next)
+        if (nextExercises.length) {
+          setSession(nextExercises.map((exercise) => ({ kind: 'sentence-builder' as const, exercise })))
+          setCurrentIndex(0)
+          setSessionCorrect(0)
+        }
+      })
     }
   }, [currentIndex, session])
 
@@ -137,12 +142,16 @@ function App() {
     if (currentIndex + 1 >= session.length) {
       const finalItem = session[currentIndex]
       if (infiniteBuilderMode && finalItem?.kind === 'sentence-builder') {
-        const nextExercises = buildGeneratedBuilderExercises(builderLevels, 1, session.length)
-        if (nextExercises.length) {
-          setSession((items) => [...items, ...nextExercises.map((exercise) => ({ kind: 'sentence-builder' as const, exercise }))])
-          setCurrentIndex((index) => index + 1)
-          return
-        }
+        void import('./lib/generatedSentenceExercises').then(({ buildGeneratedBuilderExercises }) => {
+          const nextExercises = buildGeneratedBuilderExercises(builderLevels, 1, session.length)
+          if (nextExercises.length) {
+            setSession((items) => [...items, ...nextExercises.map((exercise) => ({ kind: 'sentence-builder' as const, exercise }))])
+            setCurrentIndex((index) => index + 1)
+          } else {
+            setView('complete')
+          }
+        })
+        return
       }
       setView('complete')
     } else {
@@ -165,18 +174,20 @@ function App() {
   if (view === 'library') {
     return (
       <div className="app">
-        <LibraryPanel
-          initialTab={libraryTab}
-          favorites={favoriteSentences}
-          onBack={() => setView('dashboard')}
-          onRemove={(favorite) => {
-            setFavoriteSentences((current) => {
-              const next = current.filter((item) => item.japanese !== favorite.japanese)
-              saveFavoriteSentences(next)
-              return next
-            })
-          }}
-        />
+        <Suspense fallback={<RouteLoading label="Study Library" />}>
+          <LibraryPanel
+            initialTab={libraryTab}
+            favorites={favoriteSentences}
+            onBack={() => setView('dashboard')}
+            onRemove={(favorite) => {
+              setFavoriteSentences((current) => {
+                const next = current.filter((item) => item.japanese !== favorite.japanese)
+                saveFavoriteSentences(next)
+                return next
+              })
+            }}
+          />
+        </Suspense>
       </div>
     )
   }
@@ -184,7 +195,9 @@ function App() {
   if (view === 'kanji') {
     return (
       <div className="app">
-        <KanjiLab onBack={() => setView('dashboard')} />
+        <Suspense fallback={<RouteLoading label="Kanji Lab" />}>
+          <KanjiLab onBack={() => setView('dashboard')} />
+        </Suspense>
       </div>
     )
   }
@@ -192,21 +205,31 @@ function App() {
   if (view === 'vocab-practice') {
     return (
       <div className="app">
-        <VocabPractice
-          onBack={() => setView('dashboard')}
-          isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
-          onToggleFavorite={toggleDrillFavorite}
-        />
+        <Suspense fallback={<RouteLoading label="Vocab" />}>
+          <VocabPractice
+            onBack={() => setView('dashboard')}
+            isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
+            onToggleFavorite={toggleDrillFavorite}
+          />
+        </Suspense>
       </div>
     )
   }
 
-  if (view === 'content-studio') return <ContentStudio onBack={() => setView('dashboard')} />
+  if (view === 'content-studio') {
+    return (
+      <Suspense fallback={<RouteLoading label="Content Studio" />}>
+        <ContentStudio onBack={() => setView('dashboard')} />
+      </Suspense>
+    )
+  }
 
   if (view === 'sentence-testing') {
     return (
       <div className="app">
-        <SentenceTesting onBack={() => setView('dashboard')} />
+        <Suspense fallback={<RouteLoading label="Sentence Testing" />}>
+          <SentenceTesting onBack={() => setView('dashboard')} />
+        </Suspense>
       </div>
     )
   }
@@ -214,11 +237,21 @@ function App() {
   if (view === 'grammar') {
     return (
       <div className="app">
-        <GrammarPractice
-          onBack={() => setView('dashboard')}
-          isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
-          onToggleFavorite={toggleDrillFavorite}
-        />
+        <Suspense fallback={<RouteLoading label="Grammar" />}>
+          <GrammarPractice
+            onBack={() => setView('dashboard')}
+            isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
+            onToggleFavorite={toggleDrillFavorite}
+          />
+        </Suspense>
+      </div>
+    )
+  }
+
+  if (view === 'study-loading') {
+    return (
+      <div className="app">
+        <RouteLoading label="Sentence Practice" />
       </div>
     )
   }
@@ -240,23 +273,25 @@ function App() {
     if (item.kind === 'sentence-builder') {
       return (
         <div className="app">
-          <SentenceBuilderView
-            key={item.exercise.id}
-            exercise={item.exercise}
-            current={currentIndex}
-            total={session.length}
-            onResult={handleSentenceResult}
-            onPrevious={goToPreviousSentence}
-            onSkip={advanceOrComplete}
-            onExit={() => setView(exitView)}
-            selectedLevels={builderLevels}
-            enabledLevels={WIRED_BUILDER_LEVELS}
-            onApplyLevels={applyBuilderLevels}
-            infiniteMode={infiniteBuilderMode}
-            onToggleInfiniteMode={() => setInfiniteBuilderMode((enabled) => !enabled)}
-            isFavorite={isExerciseFavorite(favoriteSentences, item.exercise)}
-            onToggleFavorite={() => toggleFavoriteSentence(item.exercise)}
-          />
+          <Suspense fallback={<RouteLoading label="Sentence Builder" />}>
+            <SentenceBuilderView
+              key={item.exercise.id}
+              exercise={item.exercise}
+              current={currentIndex}
+              total={session.length}
+              onResult={handleSentenceResult}
+              onPrevious={goToPreviousSentence}
+              onSkip={advanceOrComplete}
+              onExit={() => setView(exitView)}
+              selectedLevels={builderLevels}
+              enabledLevels={GENERATION_COMPLEXITIES}
+              onApplyLevels={applyBuilderLevels}
+              infiniteMode={infiniteBuilderMode}
+              onToggleInfiniteMode={() => setInfiniteBuilderMode((enabled) => !enabled)}
+              isFavorite={isExerciseFavorite(favoriteSentences, item.exercise)}
+              onToggleFavorite={() => toggleFavoriteSentence(item.exercise)}
+            />
+          </Suspense>
         </div>
       )
     }
@@ -268,7 +303,7 @@ function App() {
     <div className="app">
       <Dashboard
         learnedCount={learnedCount}
-        totalCards={allCards.length}
+        totalCards={CARD_TOTAL}
         onOpenSentencePractice={() => startSentenceMode()}
         onOpenGrammar={() => setView('grammar')}
         onOpenVocabList={() => {
@@ -286,6 +321,18 @@ function App() {
         wrongPool={wrongPool}
         progress={progress}
       />
+    </div>
+  )
+}
+
+function RouteLoading({ label }: { label: string }) {
+  return (
+    <div className="practice-loading" role="status" aria-live="polite">
+      <section className="practice-loading-card">
+        <span className="practice-loading-mark">学</span>
+        <h1>{label}</h1>
+        <p>Loading</p>
+      </section>
     </div>
   )
 }
