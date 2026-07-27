@@ -173,7 +173,7 @@ body:has(.dashboard) .app {
 
 /* Database sentence stream: one vetted slot moves while the sentence stays put. */
 .hero-database-block {
-  --hero-rotater-height: calc(var(--hero-japanese-row-height) + 1.22rem);
+  --hero-rotater-height: calc(var(--hero-japanese-row-height) + 2.62rem);
   height: var(--hero-rotater-height);
   min-height: var(--hero-rotater-height);
   max-height: var(--hero-rotater-height);
@@ -188,6 +188,63 @@ body:has(.dashboard) .app {
   gap: 0;
   overflow: visible;
   animation: hero-database-breathe 3.4s ease-in-out infinite;
+}
+
+.hero-database-english {
+  width: 100%;
+  min-height: 1.18rem;
+  margin: 0.3rem 0 0;
+  padding-inline: 0.75rem;
+  color: var(--text-muted);
+  font: 500 0.7rem/1.25 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+
+.hero-database-english-slot {
+  display: inline-grid;
+  height: 1.2em;
+  overflow: hidden;
+  vertical-align: -0.23em;
+  place-items: center;
+}
+
+.hero-database-english-word {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+
+.hero-database-english-word.is-outgoing {
+  animation: hero-database-roll-down var(--hero-database-swap-duration, 1350ms) cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+.hero-database-english-word.is-incoming {
+  animation: hero-database-roll-in var(--hero-database-swap-duration, 1350ms) cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+.hero-database-english-blur {
+  display: inline-grid;
+  place-items: center;
+}
+
+.hero-database-english-blur > span { grid-area: 1 / 1; }
+
+.hero-database-english-blur .is-outgoing {
+  animation: hero-database-english-blur-out var(--hero-database-swap-duration, 1350ms) ease both;
+}
+
+.hero-database-english-blur .is-incoming {
+  animation: hero-database-english-blur-in var(--hero-database-swap-duration, 1350ms) ease both;
+}
+
+@keyframes hero-database-english-blur-out {
+  from { opacity: 1; filter: blur(0); }
+  to { opacity: 0; filter: blur(3px); }
+}
+
+@keyframes hero-database-english-blur-in {
+  from { opacity: 0; filter: blur(3px); }
+  to { opacity: 1; filter: blur(0); }
 }
 
 .hero-database-segment {

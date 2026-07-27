@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { charLength, type HeroSentenceFrame } from '../data/heroSentences'
 import { getSegmentReading } from '../lib/heroSentenceGloss'
+import { getHeroEnglish } from '../lib/heroSentenceGloss'
+import { diffEnglishWordSwap, isStrictSingleWordEnglishDiff } from '../lib/heroEnglishDiff'
 import { buildHeroSteps } from '../lib/heroSequence'
 import type { HeroSegment } from '../lib/posSentenceEngine'
 import type { CardProgress, JlptLevel } from '../lib/types'
@@ -128,6 +130,12 @@ export function RotatingHeroSentence({
 
   const isFrameChange = nextStep.templateRefresh
   const activeKey = isFrameChange ? null : nextStep.changed[0] ?? null
+  const english = getHeroEnglish(frame)
+  const nextEnglish = getHeroEnglish(nextFrame)
+  const englishWordDiff = !isFrameChange
+    ? diffEnglishWordSwap(english, nextEnglish, true)
+    : null
+  const canSwapEnglishWord = Boolean(englishWordDiff && isStrictSingleWordEnglishDiff(englishWordDiff))
   const nextByKey = new Map((nextFrame.segments ?? []).map((segment) => [segment.key, segment]))
   const speedIndex = PLAYBACK_RATES.indexOf(playbackRate as typeof PLAYBACK_RATES[number])
 
@@ -164,6 +172,31 @@ export function RotatingHeroSentence({
     })
   }
 
+  function renderEnglish() {
+    if (!english) return null
+    if (phase !== 'swap' || english === nextEnglish) return english
+
+    if (canSwapEnglishWord && englishWordDiff) {
+      return (
+        <>
+          {englishWordDiff.before}
+          <span className="hero-database-english-slot">
+            <span className="hero-database-english-word is-outgoing">{englishWordDiff.prevWord}</span>
+            <span className="hero-database-english-word is-incoming">{englishWordDiff.nextWord}</span>
+          </span>
+          {englishWordDiff.after}
+        </>
+      )
+    }
+
+    return (
+      <span className="hero-database-english-blur">
+        <span className="is-outgoing">{english}</span>
+        <span className="is-incoming">{nextEnglish}</span>
+      </span>
+    )
+  }
+
   return (
     <div
       className="hero-sentence-block hero-database-block"
@@ -180,6 +213,8 @@ export function RotatingHeroSentence({
           </span>
         ) : renderSegments(frame)}
       </p>
+
+      <p className="hero-database-english" aria-live="polite">{renderEnglish()}</p>
 
       <div className="hero-playback-controls" aria-label="Sentence speed controls">
         <button type="button" aria-label="Slow down sentence" disabled={speedIndex === 0} onClick={() => setPlaybackRate(PLAYBACK_RATES[speedIndex - 1]!)}>−</button>

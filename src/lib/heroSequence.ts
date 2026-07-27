@@ -24,6 +24,8 @@ export function clearHeroStepsCache(): void {
 
 function frameFor(templateId: number, fills: Parameters<typeof compileSegments>[1]): HeroSentenceFrame {
   return {
+    templateId,
+    fills,
     segments: compileSegments(
       HERO_POS_TEMPLATES_BY_LEVEL.All.find((template) => template.id === templateId)
         ?? HERO_POS_TEMPLATES_BY_LEVEL.All[0]!,
