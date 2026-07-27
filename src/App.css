@@ -5269,7 +5269,7 @@ body:has(.dashboard) .app {
 
 .kanji-learning-examples b {
   color: var(--text);
-  font: 500 clamp(1.34rem, 3.4vw, 1.68rem)/1.2 'Noto Sans JP', sans-serif;
+  font: 500 clamp(1.608rem, 4.08vw, 2.016rem)/1.2 'Noto Sans JP', sans-serif;
   white-space: nowrap;
 }
 
@@ -5283,7 +5283,7 @@ body:has(.dashboard) .app {
 
 .kanji-learning-examples > div > small {
   align-self: end;
-  font: 500 clamp(0.42rem, 1vw, 0.5rem)/1 'Noto Sans JP', sans-serif;
+  font: 500 clamp(0.63rem, 1.5vw, 0.75rem)/1 'Noto Sans JP', sans-serif;
 }
 
 .kanji-learning-examples > div > span {
@@ -5419,10 +5419,36 @@ body:has(.dashboard) .app {
   padding-block: 0.3rem;
 }
 
-.kanji-learning-reveal {
-  display: block;
+.kanji-learning-reveal-row {
+  position: relative;
   width: min(12rem, 100%);
   margin: 0 auto;
+}
+
+.kanji-learning-reveal {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
+.kanji-learning-keep-revealed {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 0.45rem);
+  width: 1.75rem;
+  height: 1.62rem;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.kanji-learning-keep-revealed input {
+  width: 0.76rem;
+  height: 0.76rem;
+  margin: 0;
+  accent-color: var(--kyogre-light);
 }
 
 .kanji-learning-easy {
@@ -5440,6 +5466,141 @@ body:has(.dashboard) .app {
 .kanji-learning-easy:disabled {
   opacity: 0.42;
   cursor: not-allowed;
+}
+
+/* On a phone the study card earns the available viewport instead of inheriting
+   the deliberately compact desktop height.  The answer area absorbs the
+   difference, while the character and controls remain in fixed positions. */
+@media (max-width: 720px) {
+  .kanji-lab {
+    min-height: calc(100vh - 2.15rem);
+    min-height: calc(100dvh - 2.15rem);
+  }
+
+  .kanji-learning-card {
+    height: calc(100vh - 8.2rem);
+    height: calc(100dvh - 8.2rem);
+    max-height: calc(100vh - 8.2rem);
+    max-height: calc(100dvh - 8.2rem);
+    padding: clamp(0.8rem, 3vw, 1.1rem);
+  }
+
+  .kanji-learning-meta {
+    font-size: 0.61rem;
+  }
+
+  .kanji-learning-character {
+    margin: clamp(0.5rem, 1.6dvh, 0.9rem) 0;
+    font-size: clamp(4.05rem, 12dvh, 5rem);
+  }
+
+  .kanji-learning-character-reading {
+    font-size: clamp(0.82rem, 3.8vw, 0.98rem);
+  }
+
+  .kanji-learning-divider {
+    width: min(15rem, 82%);
+    margin: clamp(0.65rem, 1.6dvh, 0.95rem) auto clamp(0.25rem, 0.7dvh, 0.45rem);
+  }
+
+  .kanji-learning-examples {
+    width: 100%;
+    column-gap: clamp(0.3rem, 2vw, 0.55rem);
+  }
+
+  .kanji-learning-examples b {
+    font-size: clamp(1.38rem, 7.2vw, 1.78rem);
+    letter-spacing: -0.035em;
+  }
+
+  .kanji-learning-examples > div > small {
+    font-size: clamp(0.69rem, 3.15vw, 0.87rem);
+  }
+
+  .kanji-learning-examples > div > span {
+    font-size: clamp(0.52rem, 2.25vw, 0.62rem);
+  }
+
+  .kanji-learning-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem 0.45rem;
+    padding-top: 0;
+  }
+
+  .kanji-learning-reveal-row {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    order: 1;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .kanji-learning-reveal {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    min-height: 2.15rem;
+  }
+
+  .kanji-learning-keep-revealed {
+    position: static;
+    flex: 0 0 auto;
+    height: 2.15rem;
+    transform: none;
+  }
+
+  .kanji-learning-examples-toggle,
+  .kanji-learning-more-examples {
+    position: static;
+    width: 100%;
+    min-height: 1.95rem;
+    padding: 0.28rem 0.35rem;
+    font-size: 0.64rem;
+  }
+
+  .kanji-learning-examples-toggle {
+    grid-column: 1;
+    grid-row: 2;
+    order: 2;
+  }
+
+  .kanji-learning-more-examples {
+    grid-column: 2;
+    grid-row: 2;
+    order: 3;
+  }
+
+  .kanji-learning-actions {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    order: 4;
+    gap: 0.45rem;
+    margin-top: 0;
+  }
+
+  .kanji-learning-actions .btn {
+    min-height: 2.3rem;
+    padding-block: 0.4rem;
+  }
+}
+
+/* A landscape phone cannot sensibly fit the fixed study view.  Let this rare
+   orientation scroll rather than hiding the answer or rating controls. */
+@media (max-width: 720px) and (max-height: 540px) {
+  .kanji-learning-card {
+    height: auto;
+    min-height: calc(100dvh - 8.2rem);
+    max-height: none;
+    overflow: visible;
+  }
+
+  .kanji-learning-answer {
+    min-height: 5.4rem;
+  }
 }
 
 .sentence-word-bank.is-blurred .word-bank-tile > * {

@@ -8,6 +8,7 @@ interface KanjiLabProps {
 }
 
 const levels: JlptLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1']
+const retryDistance = 5
 
 function ContextWord({ word, character }: { word: string; character: string }) {
   return (
@@ -39,15 +40,13 @@ function uniqueKanjiOrder(entries: readonly KanjiLabEntry[]) {
 
 export function KanjiLab({ onBack }: KanjiLabProps) {
   const [level, setLevel] = useState<JlptLevel>('N5')
+  const [entries, setEntries] = useState(() => uniqueKanjiOrder(kanjiLabEntries.filter((entry) => entry.card.jlpt === 'N5')))
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
+  const [keepRevealed, setKeepRevealed] = useState(false)
   const [examplesVisible, setExamplesVisible] = useState(true)
   const [exampleOffset, setExampleOffset] = useState(0)
   const [known, setKnown] = useState(0)
-  const entries = useMemo(
-    () => uniqueKanjiOrder(kanjiLabEntries.filter((entry) => entry.card.jlpt === level)),
-    [level],
-  )
   const entry = entries[index % entries.length]
   const card = entry?.card
   const characterReadings = entry ? kanjiReadings[entry.character] : undefined
@@ -68,15 +67,36 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
 
   function chooseLevel(nextLevel: JlptLevel) {
     setLevel(nextLevel)
+    setEntries(uniqueKanjiOrder(kanjiLabEntries.filter((entry) => entry.card.jlpt === nextLevel)))
     setIndex(0)
-    setRevealed(false)
+    setRevealed(keepRevealed)
     setExampleOffset(0)
   }
 
   function nextCard(knewIt = false) {
     if (knewIt) setKnown((count) => count + 1)
-    setIndex((current) => (current + 1) % entries.length)
-    setRevealed(false)
+    if (!knewIt && entry) {
+      const currentIndex = index % entries.length
+      const desiredInsertAt = currentIndex + retryDistance
+      const insertAt = desiredInsertAt <= entries.length
+        ? desiredInsertAt
+        : desiredInsertAt % entries.length
+      const insertShiftsTheNextCard = insertAt <= currentIndex
+
+      setEntries((currentEntries) => {
+        // Revisit after several other cards: soon enough to reinforce it, but
+        // never as an immediate repeat.
+        return [
+          ...currentEntries.slice(0, insertAt),
+          entry,
+          ...currentEntries.slice(insertAt),
+        ]
+      })
+      setIndex((currentIndex + 1 + (insertShiftsTheNextCard ? 1 : 0)) % (entries.length + 1))
+    } else {
+      setIndex((current) => (current + 1) % entries.length)
+    }
+    setRevealed(keepRevealed)
     setExampleOffset(0)
   }
 
@@ -141,13 +161,18 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
           <button type="button" className="btn btn-ghost kanji-learning-examples-toggle" onClick={() => setExamplesVisible((visible) => !visible)}>
             {examplesVisible ? 'Hide examples' : 'Show examples'}
           </button>
-          <button
-            type="button"
-            className="btn btn-primary kanji-learning-reveal"
-            onClick={() => setRevealed((isRevealed) => !isRevealed)}
-          >
-            {revealed ? 'Hide' : 'Reveal'}
-          </button>
+          <div className="kanji-learning-reveal-row">
+            <button
+              type="button"
+              className="btn btn-primary kanji-learning-reveal"
+              onClick={() => setRevealed((isRevealed) => !isRevealed)}
+            >
+              {revealed ? 'Hide' : 'Reveal'}
+            </button>
+            <label className="kanji-learning-keep-revealed" title="Keep reveal">
+              <input type="checkbox" aria-label="Keep reveal" checked={keepRevealed} onChange={(event) => setKeepRevealed(event.target.checked)} />
+            </label>
+          </div>
           <div className="kanji-learning-actions">
             <button type="button" className="btn btn-ghost" onClick={() => nextCard(false)} disabled={!revealed}>Study again</button>
             <button type="button" className="btn kanji-learning-easy" onClick={() => nextCard(true)}>Too Easy</button>
