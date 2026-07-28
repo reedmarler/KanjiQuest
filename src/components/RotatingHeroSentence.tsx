@@ -36,6 +36,7 @@ export interface RotatingHeroSentenceProps {
   storyId?: string | null
   paused: boolean
   playbackRate: HeroPlaybackRate
+  onRotate?: () => void
 }
 
 function SegmentText({ segment, furiganaOn, delayedFurigana }: {
@@ -65,6 +66,7 @@ export function RotatingHeroSentence({
   storyId,
   paused,
   playbackRate,
+  onRotate,
 }: RotatingHeroSentenceProps) {
   const [sequenceSeed, setSequenceSeed] = useState(newSequenceSeed)
   const steps = useMemo(
@@ -116,11 +118,12 @@ export function RotatingHeroSentence({
           setIndex((current) => current + 1)
         }
         setPhase('rest')
+        onRotate?.()
       }
     }, duration)
 
     return () => window.clearTimeout(timer)
-  }, [displayMode, index, isStreamRollover, paused, phase, playbackRate, rolloverSeed, steps.length])
+  }, [displayMode, index, isStreamRollover, onRotate, paused, phase, playbackRate, rolloverSeed, steps.length])
 
   if (!frame || !nextFrame) return <div className="hero-sentence-loading" aria-hidden="true" />
 

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { CardProgress } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
 import { GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
@@ -19,6 +19,7 @@ function DashboardHeroSentence({
   storyId,
   paused,
   playbackRate,
+  onRotate,
 }: {
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
@@ -27,6 +28,7 @@ function DashboardHeroSentence({
   storyId: string | null
   paused: boolean
   playbackRate: HeroPlaybackRate
+  onRotate?: () => void
 }) {
   const [ready, setReady] = useState(false)
 
@@ -50,10 +52,13 @@ function DashboardHeroSentence({
         storyId={storyId}
         paused={paused}
         playbackRate={playbackRate}
+        onRotate={onRotate}
       />
     </Suspense>
   )
 }
+
+const HERO_ROTATIONS_PER_SPEED_BUMP = 3
 
 function savedPlaybackRate(): HeroPlaybackRate {
   if (typeof window === 'undefined') return 0.5
@@ -110,6 +115,18 @@ export function Dashboard({
 
   const speedIndex = HERO_PLAYBACK_RATES.indexOf(playbackRate)
 
+  const rotationCountRef = useRef(0)
+  const handleRotate = useCallback(() => {
+    rotationCountRef.current += 1
+    if (rotationCountRef.current < HERO_ROTATIONS_PER_SPEED_BUMP) return
+    rotationCountRef.current = 0
+    setPlaybackRate((current) => {
+      const currentIndex = HERO_PLAYBACK_RATES.indexOf(current)
+      const nextRate = HERO_PLAYBACK_RATES[currentIndex + 1]
+      return nextRate ?? current
+    })
+  }, [])
+
   return (
     <div className="dashboard">
       <header className="hero hero-compact">
@@ -122,6 +139,7 @@ export function Dashboard({
           storyId={storyMode ? storyId : null}
           paused={paused}
           playbackRate={playbackRate}
+          onRotate={handleRotate}
         />
       </header>
 
