@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { kanjiReadings } from '../data/kanjiReadings.generated'
+import { kanjiFocusSets, type KanjiFocusSet } from '../data/kanjiFocusSets'
 import { kanjiLabEntries, type KanjiLabEntry } from '../lib/kanjiLabCatalog'
 import type { JlptLevel } from '../lib/types'
 
@@ -9,6 +10,7 @@ interface KanjiLabProps {
 
 const levels: JlptLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1']
 const retryDistance = 5
+type KanjiStudyMode = 'paths' | 'levels'
 
 function ContextWord({ word, character }: { word: string; character: string }) {
   return (
@@ -38,9 +40,23 @@ function uniqueKanjiOrder(entries: readonly KanjiLabEntry[]) {
   return shuffled([...firstEntryByCharacter.values()])
 }
 
+function entriesForPath(path: KanjiFocusSet) {
+  const entryByCharacter = new Map<string, KanjiLabEntry>()
+  for (const entry of kanjiLabEntries) {
+    if (!path.characters.includes(entry.character) || entryByCharacter.has(entry.character)) continue
+    entryByCharacter.set(entry.character, entry)
+  }
+  return shuffled(path.characters.flatMap((character) => {
+    const entry = entryByCharacter.get(character)
+    return entry ? [entry] : []
+  }))
+}
+
 export function KanjiLab({ onBack }: KanjiLabProps) {
+  const [mode, setMode] = useState<KanjiStudyMode>('paths')
+  const [path, setPath] = useState(() => shuffled(kanjiFocusSets)[0]!)
   const [level, setLevel] = useState<JlptLevel>('N5')
-  const [entries, setEntries] = useState(() => uniqueKanjiOrder(kanjiLabEntries.filter((entry) => entry.card.jlpt === 'N5')))
+  const [entries, setEntries] = useState(() => entriesForPath(path))
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
   const [keepRevealed, setKeepRevealed] = useState(false)
@@ -66,11 +82,26 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
   const hasMoreExamples = allExamples.length > relatedExamples.length
 
   function chooseLevel(nextLevel: JlptLevel) {
+    setMode('levels')
     setLevel(nextLevel)
     setEntries(uniqueKanjiOrder(kanjiLabEntries.filter((entry) => entry.card.jlpt === nextLevel)))
     setIndex(0)
     setRevealed(keepRevealed)
     setExampleOffset(0)
+  }
+
+  function choosePath(nextPath: KanjiFocusSet) {
+    setMode('paths')
+    setPath(nextPath)
+    setEntries(entriesForPath(nextPath))
+    setIndex(0)
+    setRevealed(keepRevealed)
+    setExampleOffset(0)
+  }
+
+  function chooseNextPath() {
+    const choices = shuffled(kanjiFocusSets.filter((candidate) => candidate.id !== path.id))
+    if (choices[0]) choosePath(choices[0])
   }
 
   function nextCard(knewIt = false) {
@@ -103,27 +134,46 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
   if (!card || !entry) return null
 
   return (
-    <div className="grammar-practice-view kanji-lab">
+    <div className={'grammar-practice-view kanji-lab' + (mode === 'paths' ? ' kanji-lab-paths' : '')}>
       <div className="study-top grammar-study-top">
         <button type="button" className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
         <span className="study-progress">{index + 1} / {entries.length}</span>
         <span className="study-type-badge">
           <span>Kanji</span>
-          <span className="jlpt-badge">{level}</span>
+          <span className="jlpt-badge">{mode === 'paths' ? 'Path' : level}</span>
         </span>
       </div>
       <div className="study-progress-bar">
         <div className="study-progress-fill" style={{ width: ((index + 1) / entries.length) * 100 + '%' }} />
       </div>
 
-      <section className="kanji-level-picker kanji-level-picker-compact">
-        <div className="kanji-level-tabs">
-          {levels.map((item) => (
-            <button key={item} type="button" className={item === level ? 'active' : ''} onClick={() => chooseLevel(item)}>
-              {item}
-            </button>
-          ))}
+      <section className="kanji-study-navigation">
+        <div className="kanji-study-mode-tabs" role="tablist" aria-label="Kanji study mode">
+          <button type="button" role="tab" aria-selected={mode === 'paths'} className={mode === 'paths' ? 'active' : ''} onClick={() => choosePath(path)}>
+            Kanji Paths
+          </button>
+          <button type="button" role="tab" aria-selected={mode === 'levels'} className={mode === 'levels' ? 'active' : ''} onClick={() => chooseLevel(level)}>
+            JLPT Explorer
+          </button>
         </div>
+        {mode === 'paths' ? (
+          <div className="kanji-path-heading">
+            <div>
+              <span>15-CHARACTER PATH</span>
+              <h2>{path.title}</h2>
+              <p>{path.description}</p>
+            </div>
+            <button type="button" onClick={chooseNextPath}>New path</button>
+          </div>
+        ) : (
+          <div className="kanji-level-tabs">
+            {levels.map((item) => (
+              <button key={item} type="button" className={item === level ? 'active' : ''} onClick={() => chooseLevel(item)}>
+                {item}
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       <main className={'grammar-choice-card kanji-learning-card' + (revealed ? ' is-revealed' : '')}>

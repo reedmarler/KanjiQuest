@@ -107,13 +107,6 @@ export function HeroText({
               className="hero-furigana"
             />
           </span>
-          <span className="hero-reveal-accent hero-reveal-accent-cleared" aria-hidden>
-            <FuriganaSegment
-              text={stem}
-              reading={layoutReading}
-              className="hero-furigana"
-            />
-          </span>
         </span>
         <PlainSuffix suffix={suffix} />
       </span>

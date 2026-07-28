@@ -127,7 +127,14 @@ let catalogWordCache: WordRecord[] | null = null
 
 function catalogWords(): WordRecord[] {
   if (catalogWordCache) return catalogWordCache
-  catalogWordCache = allCards.filter(card => card.type === 'vocab').map(card => {
+  // The large study-only core expansion deliberately has no hand-reviewed
+  // generator tags yet. Keeping it out of this pool lets Vocab and Kanji Lab
+  // grow without weakening the sentence generator's semantic constraints.
+  catalogWordCache = allCards.filter(card =>
+    card.type === 'vocab'
+    && !card.id.startsWith('vocab-core-expansion-')
+    && !card.id.startsWith('vocab-focus-'),
+  ).map(card => {
     const classification = classifyVocabularyCard(card)
     const english = card.back || card.english || 'Meaning needed'
     return { id:`catalog-${card.id}`, japanese:card.front, reading:card.reading ?? 'Reading needed', english, preferredTranslation:inferPreferredTranslation(card.front,english,card.reading), jlpt:card.jlpt, categories:[classification.category], tags:classification.tags, source:'built-in' }

@@ -20,7 +20,7 @@ export const HERO_WATCH_OBJECTS = [
 export const HERO_LISTEN_OBJECTS = ['音楽', 'ラジオ', '歌'] as const
 
 export const HERO_BORROW_OBJECTS = [
-  '本', '雑誌', '小説', '漫画', '辞書', '地図', '映画', '写真', '新聞',
+  '本', '雑誌', '小説', '漫画', '辞書', '地図', '映画', '新聞',
 ] as const
 
 export type HeroVerbObjectRole = 'read' | 'watch' | 'listen' | 'borrow'

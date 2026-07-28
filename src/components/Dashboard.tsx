@@ -2,6 +2,12 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import type { CardProgress } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
 import { GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
+import { HERO_STORIES } from '../data/heroStories'
+import {
+  HERO_PLAYBACK_RATES,
+  HERO_SPEED_STORAGE_KEY,
+  type HeroPlaybackRate,
+} from '../lib/heroPlayback'
 
 const RotatingHeroSentence = lazy(() => import('./RotatingHeroSentence').then((module) => ({ default: module.RotatingHeroSentence })))
 
@@ -10,11 +16,17 @@ function DashboardHeroSentence({
   progress,
   furiganaOn,
   jlptLevel,
+  storyId,
+  paused,
+  playbackRate,
 }: {
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
   furiganaOn: boolean
   jlptLevel: ReturnType<typeof heroJlptForComplexity>
+  storyId: string | null
+  paused: boolean
+  playbackRate: HeroPlaybackRate
 }) {
   const [ready, setReady] = useState(false)
 
@@ -35,9 +47,18 @@ function DashboardHeroSentence({
         furiganaOn={furiganaOn}
         delayedFurigana={false}
         jlptLevel={jlptLevel}
+        storyId={storyId}
+        paused={paused}
+        playbackRate={playbackRate}
       />
     </Suspense>
   )
+}
+
+function savedPlaybackRate(): HeroPlaybackRate {
+  if (typeof window === 'undefined') return 0.5
+  const stored = Number(window.localStorage.getItem(HERO_SPEED_STORAGE_KEY))
+  return HERO_PLAYBACK_RATES.includes(stored as HeroPlaybackRate) ? stored as HeroPlaybackRate : 0.5
 }
 
 interface DashboardProps {
@@ -71,6 +92,10 @@ export function Dashboard({
 }: DashboardProps) {
   const [furiganaOn, setFuriganaOn] = useState(true)
   const [complexity, setComplexity] = useState<GenerationComplexity>(1)
+  const [storyMode, setStoryMode] = useState(false)
+  const [storyId, setStoryId] = useState(HERO_STORIES[0]?.id ?? '')
+  const [paused, setPaused] = useState(false)
+  const [playbackRate, setPlaybackRate] = useState<HeroPlaybackRate>(savedPlaybackRate)
 
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
   const furiganaActive = furiganaOn
@@ -78,6 +103,12 @@ export function Dashboard({
   function toggleFurigana() {
     setFuriganaOn((on) => !on)
   }
+
+  useEffect(() => {
+    window.localStorage.setItem(HERO_SPEED_STORAGE_KEY, String(playbackRate))
+  }, [playbackRate])
+
+  const speedIndex = HERO_PLAYBACK_RATES.indexOf(playbackRate)
 
   return (
     <div className="dashboard">
@@ -88,18 +119,49 @@ export function Dashboard({
           progress={progress}
           furiganaOn={furiganaOn}
           jlptLevel={heroJlptForComplexity(complexity)}
+          storyId={storyMode ? storyId : null}
+          paused={paused}
+          playbackRate={playbackRate}
         />
       </header>
 
       <section className="stats-grid stats-compact">
-        <button
-          type="button"
-          className="stat-card stat-card-btn stat-card-studio"
-          onClick={onOpenContentStudio}
-        >
-          <span className="stat-value stat-value-jp">編</span>
-          <span className="stat-label">Studio</span>
-        </button>
+        <div className={`stat-card stat-card-playback${paused ? ' is-paused' : ''}`}>
+          <div className="playback-speed-row" aria-label="Sentence speed controls">
+            <button
+              type="button"
+              aria-label="Slow down sentence"
+              disabled={speedIndex === 0}
+              onClick={() => setPlaybackRate(HERO_PLAYBACK_RATES[speedIndex - 1]!)}
+            >
+              −
+            </button>
+            <button
+              type="button"
+              className="playback-rate"
+              aria-label={`Sentence speed ${playbackRate} times`}
+              onClick={() => setPlaybackRate(0.5)}
+            >
+              {playbackRate}×
+            </button>
+            <button
+              type="button"
+              aria-label="Speed up sentence"
+              disabled={speedIndex === HERO_PLAYBACK_RATES.length - 1}
+              onClick={() => setPlaybackRate(HERO_PLAYBACK_RATES[speedIndex + 1]!)}
+            >
+              +
+            </button>
+          </div>
+          <button
+            type="button"
+            className="playback-toggle"
+            onClick={() => setPaused((value) => !value)}
+            aria-pressed={paused}
+          >
+            {paused ? 'Play' : 'Pause'}
+          </button>
+        </div>
 
         <button
           type="button"
@@ -110,26 +172,6 @@ export function Dashboard({
         >
           <span className="stat-value stat-value-jp">ふり</span>
           <span className="stat-label">Furigana</span>
-        </button>
-
-        <button
-          type="button"
-          className="stat-card stat-card-btn"
-          onClick={onOpenVocabList}
-          aria-label="Open vocabulary list"
-        >
-          <span className="stat-value stat-value-jp" aria-hidden="true">語</span>
-          <span className="stat-label">Vocab List</span>
-        </button>
-
-        <button
-          type="button"
-          className="stat-card stat-card-btn"
-          onClick={onOpenFavoriteSentences}
-          aria-label="Open favorite sentences"
-        >
-          <span className="stat-value stat-value-jp" aria-hidden="true">★</span>
-          <span className="stat-label">Favorite Sentences</span>
         </button>
 
         <div className="stat-card stat-card-levels">
@@ -148,6 +190,31 @@ export function Dashboard({
             ))}
           </div>
         </div>
+
+        <div className={`stat-card stat-card-story${storyMode ? ' is-active' : ''}`}>
+          <button
+            type="button"
+            className="story-mode-toggle"
+            onClick={() => setStoryMode((enabled) => !enabled)}
+            aria-pressed={storyMode}
+          >
+            <span className="stat-value stat-value-jp" aria-hidden="true">物</span>
+            <span className="stat-label">Story</span>
+          </button>
+          <select
+            value={storyId}
+            onChange={(event) => {
+              setStoryId(event.target.value)
+              setStoryMode(true)
+            }}
+            aria-label="Choose story"
+          >
+            {HERO_STORIES.map((story) => (
+              <option key={story.id} value={story.id}>{story.shortTitle}</option>
+            ))}
+          </select>
+        </div>
+
       </section>
 
       <section className="progress-section progress-compact">
@@ -160,27 +227,56 @@ export function Dashboard({
         </div>
       </section>
 
-      <section className="practice-grid">
-        <button type="button" className="practice-card" onClick={onOpenSentencePractice}>
-          <span className="practice-emoji">文</span>
-          <span className="practice-label">Sentences</span>
-        </button>
-        <button type="button" className="practice-card practice-card-grammar" onClick={onOpenGrammar}>
-          <span className="practice-emoji">文法</span>
-          <span className="practice-label">Grammar</span>
-        </button>
-        <button
-          type="button"
-          className="practice-card practice-card-vocab-practice"
-          onClick={onOpenVocabPractice}
-        >
-          <span className="practice-emoji">語彙</span>
-          <span className="practice-label">Vocab</span>
-        </button>
-        <button type="button" className="practice-card practice-card-kanji" onClick={onOpenKanji}>
-          <span className="practice-emoji">漢</span>
-          <span className="practice-label">Kanji</span>
-        </button>
+      <section className="five-minute-study" aria-labelledby="five-minute-study-title">
+        <div className="five-minute-study-heading">
+          <div>
+            <h2 id="five-minute-study-title">5-minute study</h2>
+          </div>
+          <p>Choose one quick focused session.</p>
+        </div>
+        <div className="practice-grid">
+          <button type="button" className="practice-card" onClick={onOpenSentencePractice}>
+            <span className="practice-emoji">文</span>
+            <span className="practice-label">Sentences</span>
+          </button>
+          <button type="button" className="practice-card practice-card-grammar" onClick={onOpenGrammar}>
+            <span className="practice-emoji">文法</span>
+            <span className="practice-label">Grammar</span>
+          </button>
+          <button
+            type="button"
+            className="practice-card practice-card-vocab-practice"
+            onClick={onOpenVocabPractice}
+          >
+            <span className="practice-emoji">語彙</span>
+            <span className="practice-label">Vocab</span>
+          </button>
+          <button type="button" className="practice-card practice-card-kanji" onClick={onOpenKanji}>
+            <span className="practice-emoji">漢</span>
+            <span className="practice-label">Kanji</span>
+          </button>
+        </div>
+      </section>
+
+      <section className="dashboard-additional" aria-labelledby="dashboard-additional-title">
+        <div className="dashboard-additional-heading">
+          <h2 id="dashboard-additional-title">Additional</h2>
+          <p>Browse, save, and shape your study library.</p>
+        </div>
+        <div className="dashboard-additional-actions">
+          <button type="button" onClick={onOpenVocabList}>
+            <span className="dashboard-additional-mark" aria-hidden="true">語</span>
+            <span><b>Vocab List</b><small>Browse every word by level</small></span>
+          </button>
+          <button type="button" onClick={onOpenFavoriteSentences}>
+            <span className="dashboard-additional-mark" aria-hidden="true">★</span>
+            <span><b>Favorite Sentences</b><small>Come back to saved sentences</small></span>
+          </button>
+          <button type="button" onClick={onOpenContentStudio}>
+            <span className="dashboard-additional-mark" aria-hidden="true">編</span>
+            <span><b>Content Studio</b><small>Add and organize your own content</small></span>
+          </button>
+        </div>
       </section>
 
       <section className="sentence-testing-launch">

@@ -21,7 +21,8 @@ import {
 import {
   applyVerbEnding,
   isVerbEndingId,
-  rotateVerbEnding,
+  VERB_ENDING_ROTATION,
+  type VerbEndingId,
 } from './verbEndings'
 import {
   nounsForTemplateSlot,
@@ -68,6 +69,39 @@ const CURATED_ADVERBS = [
 
 export const HERO_POS_TEMPLATES_ALL = HERO_POS_TEMPLATES
 
+/**
+ * The rotator only uses frames that are complete, standalone learner
+ * sentences. More advanced fragments stay available to the grammar tools,
+ * but need richer relationship/context data before they can join this stream.
+ */
+const ROTATOR_SAFE_TEMPLATE_IDS = new Set([
+  // Object + verb frames are the dashboard's safest shape: the validator can
+  // prove the noun and verb belong together before allowing any swap.
+  1, 2, 11, 20, 21, 22, 23, 24,
+  // The same object + verb frame with fixed adverb lessons.
+  38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+])
+
+const HERO_ROTATOR_TEMPLATES = HERO_POS_TEMPLATES.filter(
+  (template) => ROTATOR_SAFE_TEMPLATE_IDS.has(template.id),
+)
+
+// These endings are complete statements on their own. Conditional and
+// connector endings (〜て, 〜たら, 〜ば, etc.) need a following clause, so they
+// must never be rotated into a standalone hero sentence.
+const STANDALONE_VERB_ENDINGS = new Set<VerbEndingId>([
+  'plain', 'masu', 'mashita', 'masen', 'masenDeshita', 'nai', 'nakatta',
+  'ta', 'volitional', 'tai', 'tagaru', 'teiru', 'teita', 'teshimau',
+  'teshimatta', 'kotogaDekiru', 'nakerebaNaranai', 'nakutehaIkenai',
+  'nakutemoIi', 'temoIi', 'tehaIkenai',
+])
+
+function rotateStandaloneVerbEnding(current: VerbEndingId, seed: number): VerbEndingId {
+  const choices = VERB_ENDING_ROTATION.filter((ending) => STANDALONE_VERB_ENDINGS.has(ending))
+  const alternatives = choices.filter((ending) => ending !== current)
+  return alternatives[Math.abs(seed) % alternatives.length] ?? current
+}
+
 const N5_N3_IDS = new Set([
   1, 2, 3, 4, 5, 6, 7, 20, 21, 23, 25, 27, 28, 38, 39, 82,
 ])
@@ -77,12 +111,12 @@ const N2_N3_GRAMMAR_IDS = new Set(
 )
 
 export const HERO_POS_TEMPLATES_BY_LEVEL: Record<string, PosTemplate[]> = {
-  N5: HERO_POS_TEMPLATES.filter((t) => N5_N3_IDS.has(t.id) && t.id <= 30),
-  N4: HERO_POS_TEMPLATES.filter((t) => N5_N3_IDS.has(t.id)),
-  N3: HERO_POS_TEMPLATES.filter((t) => t.id <= 50 || (t.id >= 101 && t.id <= 125)),
-  N2: HERO_POS_TEMPLATES.filter((t) => t.id <= 80 || N2_N3_GRAMMAR_IDS.has(t.id)),
-  N1: HERO_POS_TEMPLATES,
-  All: HERO_POS_TEMPLATES,
+  N5: HERO_ROTATOR_TEMPLATES.filter((t) => N5_N3_IDS.has(t.id) && t.id <= 30),
+  N4: HERO_ROTATOR_TEMPLATES.filter((t) => N5_N3_IDS.has(t.id)),
+  N3: HERO_ROTATOR_TEMPLATES.filter((t) => t.id <= 50 || (t.id >= 101 && t.id <= 125)),
+  N2: HERO_ROTATOR_TEMPLATES.filter((t) => t.id <= 80 || N2_N3_GRAMMAR_IDS.has(t.id)),
+  N1: HERO_ROTATOR_TEMPLATES,
+  All: HERO_ROTATOR_TEMPLATES,
 }
 
 const POOL_CACHE: Partial<Record<PosCategory, string[]>> = {}
@@ -196,11 +230,11 @@ export function rotateFill(
   if (!template) {
     if (slot === 'VEnd') {
       const current = isVerbEndingId(fills.VEnd) ? fills.VEnd : 'plain'
-      return { ...fills, VEnd: rotateVerbEnding(current, seed) }
+      return { ...fills, VEnd: rotateStandaloneVerbEnding(current, seed) }
     }
     if (slot === 'V2End') {
       const current = isVerbEndingId(fills.V2End) ? fills.V2End : 'plain'
-      return { ...fills, V2End: rotateVerbEnding(current, seed) }
+      return { ...fills, V2End: rotateStandaloneVerbEnding(current, seed) }
     }
     return {
       ...fills,
@@ -213,10 +247,10 @@ export function rotateFill(
     let next: PosFills
     if (slot === 'VEnd') {
       const current = isVerbEndingId(fills.VEnd) ? fills.VEnd : 'plain'
-      next = { ...fills, VEnd: rotateVerbEnding(current, s) }
+      next = { ...fills, VEnd: rotateStandaloneVerbEnding(current, s) }
     } else if (slot === 'V2End') {
       const current = isVerbEndingId(fills.V2End) ? fills.V2End : 'plain'
-      next = { ...fills, V2End: rotateVerbEnding(current, s) }
+      next = { ...fills, V2End: rotateStandaloneVerbEnding(current, s) }
     } else {
       next = { ...fills, [slot]: pickSlotValue(template, slot, fills, s) }
     }

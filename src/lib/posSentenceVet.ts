@@ -88,8 +88,7 @@ function bindingIsValid(binding: VerbObjectBinding, fills: PosFills): boolean {
     return fitsWo(noun, verb)
   }
   if (NI_VERBS.has(verb)) return fitsNi(noun, verb)
-  if (verb === '待つ') return isPerson(noun) || isPlace(noun)
-  return true
+  return false
 }
 
 function passesGrammarTemplateRules(template: PosTemplate, fills: PosFills): boolean {
@@ -106,6 +105,7 @@ function passesGrammarTemplateRules(template: PosTemplate, fills: PosFills): boo
     return true
   }
   if (id === 108 && v && v === v2) return false
+  if (id === 18 && !isAnimateGaSubject(n)) return false
   return true
 }
 
@@ -152,12 +152,12 @@ export function verbsForTemplate(
     if (binding.particle === 'を') {
       return allVerbs.filter((v) => !NI_VERBS.has(v) && fitsWo(noun, v))
     }
-    return allVerbs.filter((v) => fitsNi(noun, v) || (v === '待つ' && (isPerson(noun) || isPlace(noun))))
+    return allVerbs.filter((v) => fitsNi(noun, v))
   }
 
   const label = template.label
   if (label.includes('に [V]') && !label.includes('を [V]')) {
-    return allVerbs.filter((v) => NI_VERBS.has(v) || v === '待つ' || v === 'する' || v === '勉強する')
+    return allVerbs.filter((v) => NI_VERBS.has(v))
   }
   if (label.includes('を') && label.includes('[V]')) {
     return allVerbs.filter((v) => !NI_VERBS.has(v))
@@ -187,10 +187,10 @@ export function nounsForTemplateSlot(
   if (asTarget) {
     const verb = fills[asTarget.verbSlot] ?? fills.V
     if (verb && NI_VERBS.has(verb)) return allNouns.filter((n) => fitsNi(n, verb))
-    if (verb === '待つ') return allNouns.filter((n) => isPerson(n) || isPlace(n))
   }
 
   if (slot === 'N') {
+    if (template.id === 18) return allNouns.filter((n) => isAnimateGaSubject(n))
     if (template.id >= 134 && template.id <= 140) return allNouns.filter((n) => isPerson(n))
     if (template.label.includes('[N] が [V]') || (template.id >= 141 && template.id <= 150)) {
       return allNouns.filter((n) => isAnimateGaSubject(n) || EVENT_NOUNS.has(n))

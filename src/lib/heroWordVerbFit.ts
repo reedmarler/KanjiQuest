@@ -41,7 +41,6 @@ export function roleFitsVerbObject(word: string, role: HeroPhraseRole): boolean 
 const FOOD_WORDS = new Set([
   'ピザ', '寿司', '弁当', 'ラーメン', 'ハンバーガー', 'サラダ', 'ケーキ',
   'チョコレート', 'パン', '魚', '肉', '米', '卵', '野菜', '果物',
-  'コーヒー', 'ジュース', 'ミルク', 'お茶', 'プレゼント',
 ])
 
 const DRINK_WORDS = new Set([
@@ -96,11 +95,7 @@ const WO_VERB_WORDS: Record<string, ReadonlySet<string>> = {
   勉強します: STUDY_WORDS,
   買います: BUY_WORDS,
   します: ACTIVITY_WORDS,
-  書きます: READ_WORDS,
-  話します: new Set([...PEOPLE_WORDS, '日本語', '漢字', '友達', '先生']),
-  走ります: new Set([...PLACE_WORDS, '公園', '海', '山', '駅']),
-  泳ぎます: new Set(['海', 'プール', '川', '公園']),
-  遊びます: new Set([...ACTIVITY_WORDS, '公園', '海', 'ゲーム']),
+  話します: new Set(['日本語']),
   歌います: new Set(['歌', '音楽']),
   始めます: new Set([...STUDY_WORDS, '仕事', '勉強', '料理', '映画']),
   覚えます: STUDY_WORDS,
@@ -109,8 +104,9 @@ const WO_VERB_WORDS: Record<string, ReadonlySet<string>> = {
 
 const NI_VERB_WORDS: Record<string, ReadonlySet<string>> = {
   行きます: PLACE_WORDS,
+  来ます: PLACE_WORDS,
+  帰ります: PLACE_WORDS,
   会います: PEOPLE_WORDS,
-  待ちます: PEOPLE_WORDS,
 }
 
 const PHONE_PREDICATES = new Set([
@@ -146,9 +142,9 @@ export function wordFitsPredicate(
   }
 
   if (objectParticle === 'に') {
-    if (!base) return PEOPLE_WORDS.has(word) || PLACE_WORDS.has(word)
+    if (!base) return false
     const allowed = NI_VERB_WORDS[base]
-    if (!allowed) return true
+    if (!allowed) return false
     return allowed.has(word)
   }
 

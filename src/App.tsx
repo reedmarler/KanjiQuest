@@ -33,7 +33,7 @@ const KanjiLab = lazy(() => import('./components/KanjiLab').then((module) => ({ 
 const LibraryPanel = lazy(() => import('./components/LibraryPanel').then((module) => ({ default: module.LibraryPanel })))
 const SentenceBuilderView = lazy(() => import('./components/SentenceBuilderView').then((module) => ({ default: module.SentenceBuilderView })))
 const SentenceTesting = lazy(() => import('./components/SentenceTesting').then((module) => ({ default: module.SentenceTesting })))
-const VocabPractice = lazy(() => import('./components/VocabPractice').then((module) => ({ default: module.VocabPractice })))
+const FocusedVocabPractice = lazy(() => import('./components/FocusedVocabPractice').then((module) => ({ default: module.FocusedVocabPractice })))
 
 type View =
   | 'dashboard'
@@ -206,11 +206,7 @@ function App() {
     return (
       <div className="app">
         <Suspense fallback={<RouteLoading label="Vocab" />}>
-          <VocabPractice
-            onBack={() => setView('dashboard')}
-            isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
-            onToggleFavorite={toggleDrillFavorite}
-          />
+          <FocusedVocabPractice onBack={() => setView('dashboard')} />
         </Suspense>
       </div>
     )

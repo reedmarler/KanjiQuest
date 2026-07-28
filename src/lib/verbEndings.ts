@@ -235,10 +235,10 @@ export function applyVerbEnding(dict: string, ending: VerbEndingId): string {
       surface = `${naiStem(dict)}ければならない`
       break
     case 'nakutehaIkenai':
-      surface = `${p.nai}くてはいけない`
+      surface = `${naiStem(dict)}くてはいけない`
       break
     case 'nakutemoIi':
-      surface = `${p.nai}くてもいい`
+      surface = `${naiStem(dict)}くてもいい`
       break
     case 'temoIi':
       surface = `${p.te}もいい`

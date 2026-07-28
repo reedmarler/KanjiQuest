@@ -44,6 +44,16 @@ function cardsAtLevel(level: JlptLevel, type: StudyCard['type']): StudyCard[] {
   return allCards.filter((c) => c.type === type && c.jlpt === level)
 }
 
+function uniqueVocabulary(cards: StudyCard[]): StudyCard[] {
+  const seen = new Set<string>()
+  return cards.filter((card) => {
+    const key = vocabKey(card.front)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 /**
  * Approved vocabulary from the runtime content database (Content Studio),
  * surfaced alongside the built-in seed vocab. Deduped against the seed and
@@ -73,7 +83,9 @@ function sentencesAtLevel(level: JlptLevel): SentenceExercise[] {
 
 export function getLevelContent(level: JlptLevel): LevelContent {
   const kana = level === 'N5' ? [...hiraganaCards, ...katakanaCards] : []
-  const seedVocab = cardsAtLevel(level, 'vocab')
+  // The library combines several intentionally overlapping sources. Show each
+  // Japanese word once, while still allowing every source to support Kanji Lab.
+  const seedVocab = uniqueVocabulary(cardsAtLevel(level, 'vocab'))
   const seedVocabKeys = new Set(seedVocab.map((c) => vocabKey(c.front)))
   const vocab = [...seedVocab, ...addedVocabAtLevel(level, seedVocabKeys)]
   const grammar = cardsAtLevel(level, 'grammar')

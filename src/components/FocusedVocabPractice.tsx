@@ -1,0 +1,115 @@
+import { useState } from 'react'
+import { vocabFocusSets, type VocabFocusSet } from '../data/vocabFocusSets'
+
+interface FocusedVocabPracticeProps {
+  onBack: () => void
+}
+
+function shuffled<T>(items: readonly T[]) {
+  const copy = [...items]
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const next = Math.floor(Math.random() * (index + 1))
+    ;[copy[index], copy[next]] = [copy[next]!, copy[index]!]
+  }
+  return copy
+}
+
+function newSession(previousTopicId?: string) {
+  const topics = shuffled(vocabFocusSets)
+  if (previousTopicId && topics[0]?.id === previousTopicId && topics.length > 1) {
+    ;[topics[0], topics[1]] = [topics[1]!, topics[0]!]
+  }
+  const topic = topics[0]!
+  return { topic, cards: shuffled(topic.cards) }
+}
+
+export function FocusedVocabPractice({ onBack }: FocusedVocabPracticeProps) {
+  const [session, setSession] = useState(() => newSession())
+  const [index, setIndex] = useState(0)
+  const [revealed, setRevealed] = useState(false)
+  const [known, setKnown] = useState(0)
+  const [completed, setCompleted] = useState(false)
+  const card = session.cards[index]
+
+  function nextCard(knew = false) {
+    if (knew) setKnown((count) => count + 1)
+    if (index + 1 >= session.cards.length) {
+      setCompleted(true)
+      return
+    }
+    setIndex((current) => current + 1)
+    setRevealed(false)
+  }
+
+  function loadNextTopic() {
+    setSession(newSession(session.topic.id))
+    setIndex(0)
+    setRevealed(false)
+    setKnown(0)
+    setCompleted(false)
+  }
+
+  function replayTopic() {
+    setSession((current) => ({ ...current, cards: shuffled(current.cards) }))
+    setIndex(0)
+    setRevealed(false)
+    setKnown(0)
+    setCompleted(false)
+  }
+
+  return (
+    <div className="grammar-practice-view focused-vocab-practice">
+      <header className="focused-vocab-top">
+        <button type="button" className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        <span>Focused vocab</span>
+        <button type="button" className="focused-vocab-change-topic" onClick={loadNextTopic}>New topic</button>
+      </header>
+
+      <section className="focused-vocab-topic" aria-labelledby="focused-vocab-topic-title">
+        <span>15-WORD PATH</span>
+        <h1 id="focused-vocab-topic-title">{session.topic.title}</h1>
+        <p>{session.topic.description}</p>
+      </section>
+
+      {completed ? (
+        <section className="focused-vocab-complete">
+          <span className="focused-vocab-complete-mark">語</span>
+          <h2>Set complete</h2>
+          <p>You got through all 15 words in {session.topic.title}. {known} felt easy.</p>
+          <button type="button" className="btn btn-primary" onClick={loadNextTopic}>New topic →</button>
+          <button type="button" className="btn btn-ghost" onClick={replayTopic}>Replay this set</button>
+        </section>
+      ) : card ? (
+        <>
+          <div className="focused-vocab-progress" aria-label={`Word ${index + 1} of ${session.cards.length}`}>
+            <span style={{ width: `${((index + 1) / session.cards.length) * 100}%` }} />
+          </div>
+          <main className={`focused-vocab-card${revealed ? ' is-revealed' : ''}`}>
+            <div className="focused-vocab-card-meta">
+              <span>{index + 1} / {session.cards.length}</span>
+              <span>{known} easy this set</span>
+            </div>
+            <p className="focused-vocab-word" lang="ja">{card.front}</p>
+            <div className="focused-vocab-answer" aria-live="polite">
+              <p className={revealed ? 'is-visible' : ''} lang="ja" aria-hidden={!revealed}>{card.reading}</p>
+              <strong className={revealed ? 'is-visible' : ''} aria-hidden={!revealed}>{card.back}</strong>
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary focused-vocab-reveal"
+              onClick={() => setRevealed((current) => !current)}
+            >
+              {revealed ? 'Hide answer' : 'Reveal answer'}
+            </button>
+            <div className="focused-vocab-actions">
+              <button type="button" className="btn btn-ghost" onClick={() => nextCard(false)}>Study again</button>
+              <button type="button" className="btn focused-vocab-easy" onClick={() => nextCard(true)}>I knew it</button>
+            </div>
+          </main>
+        </>
+      ) : null}
+    </div>
+  )
+}
+
+export type { VocabFocusSet }
