@@ -134,6 +134,7 @@ export function Dashboard({
 
   return (
     <div className="dashboard">
+      <div style={{ position: 'fixed', top: 8, left: 8, fontSize: '1.5rem', fontWeight: 700, zIndex: 9999 }}>1</div>
       <header className="hero hero-compact">
         <h1>Kanji Quest</h1>
         <DashboardHeroSentence
