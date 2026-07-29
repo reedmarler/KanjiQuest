@@ -74,7 +74,7 @@ function userVocabPersistencePlugin(): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ command }) => ({
+export default defineConfig(({  }) => ({
   // GitHub Pages serves the site from /KanjiQuest/, so built asset URLs need
   // that prefix. The dev server still runs at the root.
   base: '/',
