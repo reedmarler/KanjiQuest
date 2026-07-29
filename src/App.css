@@ -1989,6 +1989,38 @@ body:has(.dashboard) .app {
   color: var(--rayquaza-light);
 }
 
+.story-level-row {
+  display: flex;
+  gap: 0.16rem;
+  width: 100%;
+}
+
+.story-level-btn {
+  flex: 1 1 0;
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 0.52rem;
+  font-weight: 600;
+  padding: 0.14rem 0.1rem;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.story-level-btn:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--rayquaza-light) 35%, var(--border));
+}
+
+.story-level-btn.is-active {
+  color: var(--rayquaza-light);
+  border-color: color-mix(in srgb, var(--rayquaza-light) 55%, transparent);
+  background: color-mix(in srgb, var(--rayquaza) 12%, var(--surface-2));
+}
+
 .stat-card-story select {
   width: 100%;
   min-width: 0;

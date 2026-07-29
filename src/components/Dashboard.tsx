@@ -1,8 +1,8 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
-import type { CardProgress } from '../lib/types'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
 import { GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
-import { HERO_STORIES } from '../data/heroStories'
+import { HERO_STORY_DEFINITIONS, HERO_STORY_LEVELS, getHeroStoriesForLevel } from '../data/heroStories'
 import {
   HERO_PLAYBACK_RATES,
   HERO_SPEED_STORAGE_KEY,
@@ -17,6 +17,7 @@ function DashboardHeroSentence({
   furiganaOn,
   jlptLevel,
   storyId,
+  storyLevel,
   paused,
   playbackRate,
   onRotate,
@@ -26,6 +27,7 @@ function DashboardHeroSentence({
   furiganaOn: boolean
   jlptLevel: ReturnType<typeof heroJlptForComplexity>
   storyId: string | null
+  storyLevel: JlptLevel
   paused: boolean
   playbackRate: HeroPlaybackRate
   onRotate?: () => void
@@ -50,6 +52,7 @@ function DashboardHeroSentence({
         delayedFurigana={false}
         jlptLevel={jlptLevel}
         storyId={storyId}
+        storyLevel={storyLevel}
         paused={paused}
         playbackRate={playbackRate}
         onRotate={onRotate}
@@ -98,7 +101,9 @@ export function Dashboard({
   const [furiganaOn, setFuriganaOn] = useState(true)
   const [complexity, setComplexity] = useState<GenerationComplexity>(1)
   const [storyMode, setStoryMode] = useState(false)
-  const [storyId, setStoryId] = useState(HERO_STORIES[0]?.id ?? '')
+  const [storyId, setStoryId] = useState(HERO_STORY_DEFINITIONS[0]?.id ?? '')
+  const [storyLevel, setStoryLevel] = useState<JlptLevel>(HERO_STORY_LEVELS[0] ?? 'N5')
+  const storiesAtLevel = useMemo(() => getHeroStoriesForLevel(storyLevel), [storyLevel])
   const [paused, setPaused] = useState(false)
   const [playbackRate, setPlaybackRate] = useState<HeroPlaybackRate>(savedPlaybackRate)
 
@@ -137,6 +142,7 @@ export function Dashboard({
           furiganaOn={furiganaOn}
           jlptLevel={heroJlptForComplexity(complexity)}
           storyId={storyMode ? storyId : null}
+          storyLevel={storyLevel}
           paused={paused}
           playbackRate={playbackRate}
           onRotate={handleRotate}
@@ -219,6 +225,21 @@ export function Dashboard({
             <span className="stat-value stat-value-jp" aria-hidden="true">物</span>
             <span className="stat-label">Story</span>
           </button>
+          {HERO_STORY_LEVELS.length > 1 && (
+            <div className="story-level-row" role="group" aria-label="Story level">
+              {HERO_STORY_LEVELS.map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  className={`story-level-btn${level === storyLevel ? ' is-active' : ''}`}
+                  aria-pressed={level === storyLevel}
+                  onClick={() => setStoryLevel(level)}
+                >
+                  {level}
+                </button>
+              ))}
+            </div>
+          )}
           <select
             value={storyId}
             onChange={(event) => {
@@ -227,7 +248,7 @@ export function Dashboard({
             }}
             aria-label="Choose story"
           >
-            {HERO_STORIES.map((story) => (
+            {storiesAtLevel.map((story) => (
               <option key={story.id} value={story.id}>{story.shortTitle}</option>
             ))}
           </select>

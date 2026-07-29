@@ -19,7 +19,9 @@ export function GrammarPractice({ onBack, isFavorite, onToggleFavorite }: Gramma
   const nextBatchSeed = useRef(Math.floor(Date.now() / 1000))
 
   const buildFreshPool = useCallback(async (levels: readonly GenerationComplexity[], onBatchReady?: (completed: number) => void) => {
-    await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
+    // requestAnimationFrame never fires while the tab is hidden/backgrounded
+    // (common on mobile mid-navigation), which would hang this forever.
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0))
     const exercises: DrillExercise[] = []
     const seedBase = nextBatchSeed.current
     nextBatchSeed.current += GRAMMAR_BATCH_COUNT

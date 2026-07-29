@@ -34,6 +34,7 @@ export interface RotatingHeroSentenceProps {
   delayedFurigana: boolean
   jlptLevel: JlptLevel
   storyId?: string | null
+  storyLevel?: JlptLevel
   paused: boolean
   playbackRate: HeroPlaybackRate
   onRotate?: () => void
@@ -64,14 +65,16 @@ export function RotatingHeroSentence({
   delayedFurigana,
   jlptLevel,
   storyId,
+  storyLevel,
   paused,
   playbackRate,
   onRotate,
 }: RotatingHeroSentenceProps) {
   const [sequenceSeed, setSequenceSeed] = useState(newSequenceSeed)
+  const effectiveStoryLevel = storyLevel ?? 'N5'
   const steps = useMemo(
-    () => storyId ? buildHeroStorySteps(storyId) : buildHeroSteps(wrongPool, progress, jlptLevel, sequenceSeed),
-    [wrongPool, progress, jlptLevel, sequenceSeed, storyId],
+    () => storyId ? buildHeroStorySteps(storyId, effectiveStoryLevel) : buildHeroSteps(wrongPool, progress, jlptLevel, sequenceSeed),
+    [wrongPool, progress, jlptLevel, sequenceSeed, storyId, effectiveStoryLevel],
   )
   const [index, setIndex] = useState(0)
   const [phase, setPhase] = useState<StreamPhase>('rest')
@@ -80,15 +83,15 @@ export function RotatingHeroSentence({
     setSequenceSeed(newSequenceSeed())
     setIndex(0)
     setPhase('rest')
-  }, [jlptLevel, storyId])
+  }, [jlptLevel, storyId, effectiveStoryLevel])
 
   const safeLength = Math.max(steps.length, 1)
   const step = steps[index % safeLength]
   const isStreamRollover = index + 1 >= steps.length
   const rolloverSeed = nextSequenceSeed(sequenceSeed)
   const rolloverSteps = useMemo(
-    () => storyId ? buildHeroStorySteps(storyId) : buildHeroSteps(wrongPool, progress, jlptLevel, rolloverSeed),
-    [wrongPool, progress, jlptLevel, rolloverSeed, storyId],
+    () => storyId ? buildHeroStorySteps(storyId, effectiveStoryLevel) : buildHeroSteps(wrongPool, progress, jlptLevel, rolloverSeed),
+    [wrongPool, progress, jlptLevel, rolloverSeed, storyId, effectiveStoryLevel],
   )
   const nextStep = isStreamRollover
     ? rolloverSteps[0]
