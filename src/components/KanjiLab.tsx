@@ -59,10 +59,7 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
   const [entries, setEntries] = useState(() => entriesForPath(path))
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
-  const [keepRevealed, setKeepRevealed] = useState(false)
-  const [examplesVisible, setExamplesVisible] = useState(true)
   const [exampleOffset, setExampleOffset] = useState(0)
-  const [known, setKnown] = useState(0)
   const entry = entries[index % entries.length]
   const card = entry?.card
   const characterReadings = entry ? kanjiReadings[entry.character] : undefined
@@ -86,7 +83,7 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
     setLevel(nextLevel)
     setEntries(uniqueKanjiOrder(kanjiLabEntries.filter((entry) => entry.card.jlpt === nextLevel)))
     setIndex(0)
-    setRevealed(keepRevealed)
+    setRevealed(false)
     setExampleOffset(0)
   }
 
@@ -95,7 +92,7 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
     setPath(nextPath)
     setEntries(entriesForPath(nextPath))
     setIndex(0)
-    setRevealed(keepRevealed)
+    setRevealed(false)
     setExampleOffset(0)
   }
 
@@ -105,7 +102,6 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
   }
 
   function nextCard(knewIt = false) {
-    if (knewIt) setKnown((count) => count + 1)
     if (!knewIt && entry) {
       const currentIndex = index % entries.length
       const desiredInsertAt = currentIndex + retryDistance
@@ -127,7 +123,7 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
     } else {
       setIndex((current) => (current + 1) % entries.length)
     }
-    setRevealed(keepRevealed)
+    setRevealed(false)
     setExampleOffset(0)
   }
 
@@ -178,7 +174,15 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
 
       <main className={'grammar-choice-card kanji-learning-card' + (revealed ? ' is-revealed' : '')}>
         <div className="kanji-learning-meta">
-          <span>{known} easy this visit</span>
+          {hasMoreExamples && (
+            <button
+              type="button"
+              className="btn btn-ghost kanji-learning-more-examples"
+              onClick={() => setExampleOffset((offset) => (offset + relatedExamples.length) % allExamples.length)}
+            >
+              More examples
+            </button>
+          )}
         </div>
         <p className="kanji-learning-character" lang="ja">{card.front}</p>
         <p className={'kanji-learning-character-reading' + (revealed ? ' is-revealed' : '')} lang="ja" aria-hidden={!revealed}>
@@ -188,7 +192,7 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
         <div className="kanji-learning-divider" aria-hidden="true" />
 
         <div className="kanji-learning-answer">
-          <div className={'kanji-learning-examples example-count-' + relatedExamples.length + (revealed ? ' is-revealed' : '') + (examplesVisible ? '' : ' is-hidden')} lang="ja">
+          <div className={'kanji-learning-examples example-count-' + relatedExamples.length + (revealed ? ' is-revealed' : '')} lang="ja">
             {relatedExamples.map((example) => (
               <div key={example.character + example.example.word}>
                 <small>{example.example.reading}</small>
@@ -199,18 +203,6 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
           </div>
         </div>
         <div className="kanji-learning-controls">
-          {hasMoreExamples && (
-            <button
-              type="button"
-              className="btn btn-ghost kanji-learning-more-examples"
-              onClick={() => setExampleOffset((offset) => (offset + relatedExamples.length) % allExamples.length)}
-            >
-              More examples
-            </button>
-          )}
-          <button type="button" className="btn btn-ghost kanji-learning-examples-toggle" onClick={() => setExamplesVisible((visible) => !visible)}>
-            {examplesVisible ? 'Hide examples' : 'Show examples'}
-          </button>
           <div className="kanji-learning-reveal-row">
             <button
               type="button"
@@ -219,10 +211,6 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
             >
               {revealed ? 'Hide' : 'Reveal'}
             </button>
-            <label className="kanji-learning-keep-revealed" title="Keep answers revealed on the next card">
-              <input type="checkbox" aria-label="Keep reveal" checked={keepRevealed} onChange={(event) => setKeepRevealed(event.target.checked)} />
-              <span>Keep reveal</span>
-            </label>
           </div>
           <div className="kanji-learning-actions">
             <button type="button" className="btn btn-ghost" onClick={() => nextCard(false)}>Study again</button>
