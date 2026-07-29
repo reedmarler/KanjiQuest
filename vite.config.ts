@@ -77,7 +77,7 @@ function userVocabPersistencePlugin(): Plugin {
 export default defineConfig(({ command }) => ({
   // GitHub Pages serves the site from /KanjiQuest/, so built asset URLs need
   // that prefix. The dev server still runs at the root.
-  base: command === 'build' ? '/KanjiQuest/' : '/',
+  base: '/',
   plugins: [react(), userVocabPersistencePlugin()],
   server: {
     watch: {
