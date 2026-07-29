@@ -1,8 +1,24 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { vocabFocusSets, type VocabFocusSet } from '../data/vocabFocusSets'
 
 interface FocusedVocabPracticeProps {
   onBack: () => void
+}
+
+/** Matches the app's other mobile breakpoints (e.g. Kanji Lab's phone layout). */
+function useIsMobile(maxWidth = 720) {
+  const query = `(max-width: ${maxWidth}px)`
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia(query).matches)
+
+  useEffect(() => {
+    const media = window.matchMedia(query)
+    const onChange = () => setIsMobile(media.matches)
+    onChange()
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [query])
+
+  return isMobile
 }
 
 function shuffled<T>(items: readonly T[]) {
@@ -24,6 +40,7 @@ function newSession(previousTopicId?: string) {
 }
 
 export function FocusedVocabPractice({ onBack }: FocusedVocabPracticeProps) {
+  const isMobile = useIsMobile()
   const [session, setSession] = useState(() => newSession())
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
@@ -55,6 +72,78 @@ export function FocusedVocabPractice({ onBack }: FocusedVocabPracticeProps) {
     setRevealed(false)
     setKnown(0)
     setCompleted(false)
+  }
+
+  // Kanji Lab's phone layout: reuse its classes so the mobile vocab card looks
+  // identical to it, without touching the desktop layout below.
+  if (isMobile) {
+    return (
+      <div className="grammar-practice-view kanji-lab kanji-lab-paths focused-vocab-practice-mobile">
+        <div className="study-top grammar-study-top">
+          <button type="button" className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+          <span className="study-progress">{Math.min(index + 1, session.cards.length)} / {session.cards.length}</span>
+          <span className="study-type-badge">
+            <span>Vocab</span>
+            <span className="jlpt-badge">Path</span>
+          </span>
+        </div>
+        <div className="study-progress-bar">
+          <div className="study-progress-fill" style={{ width: `${((index + 1) / session.cards.length) * 100}%` }} />
+        </div>
+
+        <section className="kanji-study-navigation">
+          <div className="kanji-path-heading">
+            <div>
+              <span>15-WORD PATH</span>
+              <h2>{session.topic.title}</h2>
+              <p>{session.topic.description}</p>
+            </div>
+            <button type="button" onClick={loadNextTopic}>New topic</button>
+          </div>
+        </section>
+
+        {completed ? (
+          <main className="grammar-choice-card kanji-learning-card focused-vocab-complete">
+            <span className="focused-vocab-complete-mark">語</span>
+            <h2>Set complete</h2>
+            <p>You got through all 15 words in {session.topic.title}. {known} felt easy.</p>
+            <button type="button" className="btn btn-primary" onClick={loadNextTopic}>New topic →</button>
+            <button type="button" className="btn btn-ghost" onClick={replayTopic}>Replay this set</button>
+          </main>
+        ) : card ? (
+          <main className={'grammar-choice-card kanji-learning-card' + (revealed ? ' is-revealed' : '')}>
+            <div className="kanji-learning-meta">
+              <span>{known} easy this set</span>
+            </div>
+            <p className="kanji-learning-character" lang="ja">{card.front}</p>
+            <p className={'kanji-learning-character-reading' + (revealed ? ' is-revealed' : '')} lang="ja" aria-hidden={!revealed}>
+              <span>{card.reading}</span>
+            </p>
+            <div className="kanji-learning-divider" aria-hidden="true" />
+
+            <div className="kanji-learning-answer">
+              <p className={'kanji-learning-meaning' + (revealed ? ' is-revealed' : '')} aria-hidden={!revealed}>{card.back}</p>
+            </div>
+
+            <div className="kanji-learning-controls">
+              <div className="kanji-learning-reveal-row">
+                <button
+                  type="button"
+                  className="btn btn-primary kanji-learning-reveal"
+                  onClick={() => setRevealed((current) => !current)}
+                >
+                  {revealed ? 'Hide' : 'Reveal'}
+                </button>
+              </div>
+              <div className="kanji-learning-actions">
+                <button type="button" className="btn btn-ghost" onClick={() => nextCard(false)}>Study again</button>
+                <button type="button" className="btn kanji-learning-easy" onClick={() => nextCard(true)}>Too Easy</button>
+              </div>
+            </div>
+          </main>
+        ) : null}
+      </div>
+    )
   }
 
   return (

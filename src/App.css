@@ -6047,6 +6047,14 @@ body:has(.dashboard) .app {
 
 .kanji-learning-meaning {
   font-size: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 180ms ease;
+}
+
+.kanji-learning-meaning.is-revealed {
+  opacity: 1;
+  visibility: visible;
 }
 
 .kanji-learning-mnemonic {
