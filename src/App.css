@@ -6246,58 +6246,42 @@ body:has(.dashboard) .app {
 
   .kanji-learning-examples {
     width: 100%;
-    column-gap: clamp(0.3rem, 2vw, 0.55rem);
+    column-gap: clamp(0.4rem, 2.6vw, 0.7rem);
   }
 
   .kanji-learning-examples b {
-    font-size: clamp(1.38rem, 7.2vw, 1.78rem);
-    letter-spacing: -0.035em;
+    font-size: clamp(1.75rem, 9.4vw, 2.35rem);
+    letter-spacing: -0.03em;
   }
 
   .kanji-learning-examples > div > small {
-    font-size: clamp(0.69rem, 3.15vw, 0.87rem);
+    font-size: clamp(0.78rem, 3.6vw, 0.98rem);
   }
 
   .kanji-learning-examples > div > span {
-    font-size: clamp(0.52rem, 2.25vw, 0.62rem);
+    font-size: clamp(0.58rem, 2.6vw, 0.7rem);
   }
 
   .kanji-learning-controls {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.35rem 0.45rem;
+    grid-template-columns: minmax(5.6rem, auto) 1fr;
+    grid-template-rows: auto auto auto;
+    column-gap: 0.5rem;
+    row-gap: 0.32rem;
     padding-top: 0;
   }
 
+  /* Unwrap the row so the reveal button and keep-reveal toggle become
+     independent grid items of kanji-learning-controls, without touching
+     the desktop markup or desktop layout for this row. */
   .kanji-learning-reveal-row {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    order: 1;
-    width: 100%;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-  }
-
-  .kanji-learning-reveal {
-    flex: 1 1 auto;
-    width: auto;
-    min-width: 0;
-    min-height: 2.15rem;
-  }
-
-  .kanji-learning-keep-revealed {
-    position: static;
-    flex: 0 0 auto;
-    height: 2.15rem;
-    padding: 0 0.58rem;
-    transform: none;
+    display: contents;
   }
 
   .kanji-learning-examples-toggle,
   .kanji-learning-more-examples {
     position: static;
+    grid-column: 1;
     width: 100%;
     min-height: 1.95rem;
     padding: 0.28rem 0.35rem;
@@ -6305,21 +6289,35 @@ body:has(.dashboard) .app {
   }
 
   .kanji-learning-examples-toggle {
-    grid-column: 1;
-    grid-row: 2;
-    order: 2;
+    grid-row: 1;
   }
 
   .kanji-learning-more-examples {
-    grid-column: 2;
     grid-row: 2;
-    order: 3;
+  }
+
+  .kanji-learning-keep-revealed {
+    position: static;
+    grid-column: 1;
+    grid-row: 3;
+    width: 100%;
+    height: auto;
+    justify-content: flex-start;
+    padding: 0.3rem 0.5rem;
+    transform: none;
+  }
+
+  .kanji-learning-reveal {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    width: 100%;
+    min-height: 4.3rem;
+    align-self: stretch;
   }
 
   .kanji-learning-actions {
-    grid-column: 1 / -1;
+    grid-column: 2;
     grid-row: 3;
-    order: 4;
     gap: 0.45rem;
     margin-top: 0;
   }
