@@ -15,6 +15,7 @@ function DashboardHeroSentence({
   wrongPool,
   progress,
   furiganaOn,
+  englishOn,
   jlptLevel,
   storyId,
   storyLevel,
@@ -25,6 +26,7 @@ function DashboardHeroSentence({
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
   furiganaOn: boolean
+  englishOn: boolean
   jlptLevel: ReturnType<typeof heroJlptForComplexity>
   storyId: string | null
   storyLevel: JlptLevel
@@ -49,6 +51,7 @@ function DashboardHeroSentence({
         progress={progress}
         displayMode="sentence"
         furiganaOn={furiganaOn}
+        englishOn={englishOn}
         delayedFurigana={false}
         jlptLevel={jlptLevel}
         storyId={storyId}
@@ -99,6 +102,7 @@ export function Dashboard({
   progress,
 }: DashboardProps) {
   const [furiganaOn, setFuriganaOn] = useState(true)
+  const [englishOn, setEnglishOn] = useState(true)
   const [complexity, setComplexity] = useState<GenerationComplexity>(1)
   const [storyMode, setStoryMode] = useState(false)
   const [storyId, setStoryId] = useState(HERO_STORY_DEFINITIONS[0]?.id ?? '')
@@ -112,6 +116,10 @@ export function Dashboard({
 
   function toggleFurigana() {
     setFuriganaOn((on) => !on)
+  }
+
+  function toggleEnglish() {
+    setEnglishOn((on) => !on)
   }
 
   useEffect(() => {
@@ -140,6 +148,7 @@ export function Dashboard({
           wrongPool={wrongPool}
           progress={progress}
           furiganaOn={furiganaOn}
+          englishOn={englishOn}
           jlptLevel={heroJlptForComplexity(complexity)}
           storyId={storyMode ? storyId : null}
           storyLevel={storyLevel}
@@ -187,16 +196,28 @@ export function Dashboard({
           </button>
         </div>
 
-        <button
-          type="button"
-          className={`stat-card stat-card-btn${furiganaActive ? ' is-active' : ''}`}
-          onClick={toggleFurigana}
-          aria-pressed={furiganaActive}
-          aria-label="Toggle furigana"
-        >
-          <span className="stat-value stat-value-jp">ふり</span>
-          <span className="stat-label">Furigana</span>
-        </button>
+        <div className="stat-card stat-card-language" role="group" aria-label="Sentence display toggles">
+          <button
+            type="button"
+            className={`language-toggle-btn${furiganaActive ? ' is-active' : ''}`}
+            onClick={toggleFurigana}
+            aria-pressed={furiganaActive}
+            aria-label="Toggle furigana"
+          >
+            <span className="stat-value stat-value-jp">ふり</span>
+            <span className="stat-label">Furigana</span>
+          </button>
+          <button
+            type="button"
+            className={`language-toggle-btn${englishOn ? ' is-active' : ''}`}
+            onClick={toggleEnglish}
+            aria-pressed={englishOn}
+            aria-label="Toggle English translation"
+          >
+            <span className="stat-value stat-value-jp">EN</span>
+            <span className="stat-label">English</span>
+          </button>
+        </div>
 
         <div className="stat-card stat-card-levels">
           <div className="hero-level-grid" role="group" aria-label="Sentence complexity">

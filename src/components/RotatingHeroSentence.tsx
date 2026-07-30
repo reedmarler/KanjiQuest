@@ -31,6 +31,7 @@ export interface RotatingHeroSentenceProps {
   progress: Record<string, CardProgress>
   displayMode: HeroDisplayMode
   furiganaOn: boolean
+  englishOn: boolean
   delayedFurigana: boolean
   jlptLevel: JlptLevel
   storyId?: string | null
@@ -62,6 +63,7 @@ export function RotatingHeroSentence({
   progress,
   displayMode,
   furiganaOn,
+  englishOn,
   delayedFurigana,
   jlptLevel,
   storyId,
@@ -191,16 +193,18 @@ export function RotatingHeroSentence({
         ) : renderSegments(frame)}
       </p>
 
-      <p className={`hero-database-english${englishIsSwapping ? ' is-swapping' : ''}`} aria-live="polite">
-        {englishIsSwapping ? (
-          <span className="hero-database-english-stack">
-            <span className="hero-database-english-text is-outgoing">{english}</span>
-            <span className="hero-database-english-text is-incoming">{nextEnglish}</span>
-          </span>
-        ) : (
-          <span className="hero-database-english-text">{english}</span>
-        )}
-      </p>
+      {englishOn && (
+        <p className={`hero-database-english${englishIsSwapping ? ' is-swapping' : ''}`} aria-live="polite">
+          {englishIsSwapping ? (
+            <span className="hero-database-english-stack">
+              <span className="hero-database-english-text is-outgoing">{english}</span>
+              <span className="hero-database-english-text is-incoming">{nextEnglish}</span>
+            </span>
+          ) : (
+            <span className="hero-database-english-text">{english}</span>
+          )}
+        </p>
+      )}
 
     </div>
   )
