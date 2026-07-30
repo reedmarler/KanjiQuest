@@ -5483,6 +5483,32 @@ body:has(.dashboard) .app {
   font-style: italic;
 }
 
+.vocab-list-example {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.5rem;
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed var(--border);
+}
+
+.vocab-list-example-jp {
+  font: 500 0.85rem 'Noto Sans JP', sans-serif;
+  color: var(--text);
+}
+
+.vocab-list-example-reading {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.vocab-list-example-en {
+  flex-basis: 100%;
+  font-size: 0.72rem;
+  color: var(--kyogre-light);
+}
+
 .vocab-list-item-sentence .vocab-list-jp {
   font-size: 1rem;
   line-height: 1.45;

@@ -9,6 +9,7 @@ import {
 import type { JlptLevel } from '../lib/types'
 import type { SentenceExercise } from '../data/sentenceExercises'
 import type { StudyCard } from '../lib/types'
+import { getVocabExampleSentence } from '../lib/vocabExampleSentence'
 
 interface VocabListProps {
   onBack?: () => void
@@ -57,23 +58,33 @@ function ContentSection({
                 <span className="vocab-list-en">{exercise.english}</span>
               </li>
             ))
-          : (visibleItems as StudyCard[]).map((card) => (
-              <li key={card.id} className="vocab-list-item">
-                <div className="vocab-list-item-main">
-                  <span className="vocab-list-jp">{card.front}</span>
-                  {card.reading && (
-                    <span className="vocab-list-reading">{card.reading}</span>
+          : (visibleItems as StudyCard[]).map((card) => {
+              const example = card.type === 'vocab' ? getVocabExampleSentence(card) : undefined
+              return (
+                <li key={card.id} className="vocab-list-item">
+                  <div className="vocab-list-item-main">
+                    <span className="vocab-list-jp">{card.front}</span>
+                    {card.reading && (
+                      <span className="vocab-list-reading">{card.reading}</span>
+                    )}
+                    <span className="vocab-list-type">{card.type}</span>
+                  </div>
+                  <span className="vocab-list-en">
+                    {card.english ?? card.back}
+                  </span>
+                  {card.hint && (
+                    <span className="vocab-list-hint">{card.hint}</span>
                   )}
-                  <span className="vocab-list-type">{card.type}</span>
-                </div>
-                <span className="vocab-list-en">
-                  {card.english ?? card.back}
-                </span>
-                {card.hint && (
-                  <span className="vocab-list-hint">{card.hint}</span>
-                )}
-              </li>
-            ))}
+                  {example && (
+                    <div className="vocab-list-example">
+                      <span className="vocab-list-example-jp" lang="ja">{example.japanese}</span>
+                      <span className="vocab-list-example-reading" lang="ja">{example.reading}</span>
+                      <span className="vocab-list-example-en">{example.english}</span>
+                    </div>
+                  )}
+                </li>
+              )
+            })}
       </ul>
       {hiddenCount > 0 && (
         <p className="vocab-list-loading-more" role="status">

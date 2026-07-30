@@ -15,7 +15,7 @@ function isHeroEligibleShape(word: string): boolean {
   return KANJI_RE.test(word) || KANA_RE.test(word)
 }
 
-function autoGlossFromBack(back: string): string {
+export function autoGlossFromBack(back: string): string {
   const first = back.split(';')[0]?.split('/')[0]?.trim() ?? ''
   return first
     .replace(/^(n\.|v\.|p\.|aux\.|cp\.|i-adj\.|adj\.|na-adj\.|adv\.|conj\.|interj\.|pron\.|disc\.|adn\.)\s*/i, '')

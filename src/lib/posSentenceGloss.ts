@@ -3,8 +3,96 @@ import { getPosTemplate } from '../data/heroPosTemplates'
 import type { HeroSentenceFrame } from '../data/heroSentences'
 import { isPosFrame } from '../data/heroSentences'
 import { normalizeHeroEnglishGloss } from './heroEnglishNormalize'
-import { heroObjectPhrase } from './heroVocabPhrases'
+import { autoGlossFromBack, heroObjectPhrase } from './heroVocabPhrases'
 import { isVerbEndingId, type VerbEndingId } from './verbEndings'
+import { allCards } from '../data'
+
+/**
+ * Curated dicts above only cover the small hand-picked word pools the hero
+ * rotator normally draws from. Anything outside that pool (e.g. a vocab word
+ * forced into a slot for a one-off example sentence) falls back to an
+ * auto-derived gloss from that card's own English meaning, instead of
+ * leaking the raw Japanese into the English sentence.
+ */
+function buildAutoGlossMap(filter: (word: string) => boolean): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const card of allCards) {
+    if (card.type !== 'vocab') continue
+    if (!card.front || !filter(card.front)) continue
+    const gloss = autoGlossFromBack(card.back)
+    if (gloss) result[card.front] = gloss
+  }
+  return result
+}
+
+const AUTO_VERB_EN = buildAutoGlossMap((word) => word.endsWith('る') || word.endsWith('う') || word.endsWith('く') || word.endsWith('ぐ') || word.endsWith('す') || word.endsWith('つ') || word.endsWith('ぬ') || word.endsWith('ぶ') || word.endsWith('む'))
+const AUTO_I_ADJ_EN = buildAutoGlossMap((word) => word.endsWith('い'))
+const AUTO_NA_ADJ_EN = buildAutoGlossMap(() => true)
+const AUTO_ADV_EN = buildAutoGlossMap(() => true)
+
+const IRREGULAR_PAST_EN: Record<string, string> = {
+  eat: 'ate',
+  drink: 'drank',
+  read: 'read',
+  watch: 'watched',
+  go: 'went',
+  buy: 'bought',
+  make: 'made',
+  meet: 'met',
+  'wait for': 'waited for',
+  come: 'came',
+  write: 'wrote',
+  run: 'ran',
+  swim: 'swam',
+  sing: 'sang',
+  do: 'did',
+  see: 'saw',
+  say: 'said',
+  take: 'took',
+}
+
+/** English simple past tense, e.g. "eat" -> "ate", "watch" -> "watched". */
+function pastTenseEn(phrase: string): string {
+  if (IRREGULAR_PAST_EN[phrase]) return IRREGULAR_PAST_EN[phrase]
+  const [base, ...rest] = phrase.split(' ')
+  if (!base) return phrase
+  let conjugated: string
+  if (base.endsWith('e')) conjugated = `${base}d`
+  else if (/[^aeiou]y$/.test(base)) conjugated = `${base.slice(0, -1)}ied`
+  else conjugated = `${base}ed`
+  return [conjugated, ...rest].join(' ')
+}
+
+/** English present tense of a (possibly phrasal) verb, e.g. "watch" -> "watches", "wait for" -> "waits for". */
+function presentTenseEn(phrase: string): string {
+  const [base, ...rest] = phrase.split(' ')
+  if (!base) return phrase
+  let conjugated: string
+  if (/(?:[sxz]|[cs]h)$/.test(base)) conjugated = `${base}es`
+  else if (/[^aeiou]y$/.test(base)) conjugated = `${base.slice(0, -1)}ies`
+  else conjugated = `${base}s`
+  return [conjugated, ...rest].join(' ')
+}
+
+/** English present participle, e.g. "make" -> "making", "run" -> "running". */
+function presentParticipleEn(phrase: string): string {
+  const [base, ...rest] = phrase.split(' ')
+  if (!base) return phrase
+  let conjugated: string
+  if (base.endsWith('ie')) conjugated = `${base.slice(0, -2)}ying`
+  else if (/[^aeiou]e$/.test(base) && base !== 'be') conjugated = `${base.slice(0, -1)}ing`
+  else conjugated = `${base}ing`
+  return [conjugated, ...rest].join(' ')
+}
+
+/** "I/you/we/they" take the base verb form; "he/she/it/everyone" take -s. */
+function verbFor(subject: string, verb: string): string {
+  return usesBaseVerb(subject) ? verb : presentTenseEn(verb)
+}
+
+function sayEn(subject: string): string {
+  return usesBaseVerb(subject) ? 'say' : 'says'
+}
 
 const PRONOUN_EN: Record<string, string> = {
   '私': 'I',
@@ -78,6 +166,7 @@ const NA_ADJ_EN: Record<string, string> = {
 const ADV_EN: Record<string, string> = {
   'よく': 'often',
   '時々': 'sometimes',
+  'ときどき': 'sometimes',
   'とても': 'very',
   'すぐ': 'right away',
   'もう': 'already',
@@ -85,6 +174,11 @@ const ADV_EN: Record<string, string> = {
   '少し': 'a little',
   'たくさん': 'a lot',
   '毎日': 'every day',
+  'ゆっくり': 'slowly',
+  'はやく': 'quickly',
+  'ぜんぜん': 'not at all',
+  'あまり': 'not much',
+  '必ず': 'certainly',
 }
 
 function nounEn(word: string): string {
@@ -92,7 +186,7 @@ function nounEn(word: string): string {
 }
 
 function verbEn(dict: string): string {
-  return VERB_EN[dict] ?? dict
+  return VERB_EN[dict] ?? AUTO_VERB_EN[dict] ?? dict
 }
 
 function pronounEn(word: string, capital = false): string {
@@ -102,12 +196,12 @@ function pronounEn(word: string, capital = false): string {
 }
 
 function adjEn(word: string, pos: 'i_adj' | 'na_adj'): string {
-  if (pos === 'i_adj') return I_ADJ_EN[word] ?? word.replace(/い$/, '')
-  return NA_ADJ_EN[word] ?? word
+  if (pos === 'i_adj') return I_ADJ_EN[word] ?? AUTO_I_ADJ_EN[word] ?? word.replace(/い$/, '')
+  return NA_ADJ_EN[word] ?? AUTO_NA_ADJ_EN[word] ?? word
 }
 
 function advEn(word: string): string {
-  return ADV_EN[word] ?? word
+  return ADV_EN[word] ?? AUTO_ADV_EN[word] ?? word
 }
 
 function usesBaseVerb(subject: string) {
@@ -131,9 +225,9 @@ function glossVerbEnding(
   switch (ending) {
     case 'plain':
     case 'masu':
-      return `${p} ${advBit}${v}s ${n}.`
+      return `${p} ${advBit}${verbFor(p, v)} ${n}.`
     case 'mashita':
-      return `${p} ${advBit}${v}ed ${n}.`
+      return `${p} ${advBit}${pastTenseEn(v)} ${n}.`
     case 'masen':
     case 'nai':
       return `${p} does not ${advBit}${v} ${n}.`
@@ -141,30 +235,30 @@ function glossVerbEnding(
     case 'nakatta':
       return `${p} did not ${advBit}${v} ${n}.`
     case 'ta':
-      return `${p} ${advBit}${v}ed ${n}.`
+      return `${p} ${advBit}${pastTenseEn(v)} ${n}.`
     case 'te':
-      return `${p} ${v}s ${n} (and…).`
+      return `${p} ${verbFor(p, v)} ${n} (and…).`
     case 'volitional':
       return `${p} will ${advBit}${v} ${n}.`
     case 'tai':
     case 'tagaru':
       return `${p} wants to ${advBit}${v} ${n}.`
     case 'teiru':
-      return `${p} is ${v}ing ${n}.`
+      return `${p} is ${presentParticipleEn(v)} ${n}.`
     case 'teita':
-      return `${p} was ${v}ing ${n}.`
+      return `${p} was ${presentParticipleEn(v)} ${n}.`
     case 'tearu':
       return `${p} has ${n} ${v}ed.`
     case 'teoku':
-      return `${p} ${v}s ${n} in advance.`
+      return `${p} ${verbFor(p, v)} ${n} in advance.`
     case 'teiku':
       return `${p} goes on to ${v} ${n}.`
     case 'tekuru':
-      return `${p} has been ${v}ing ${n}.`
+      return `${p} has been ${presentParticipleEn(v)} ${n}.`
     case 'teshimau':
-      return `${p} ends up ${v}ing ${n}.`
+      return `${p} ends up ${presentParticipleEn(v)} ${n}.`
     case 'teshimatta':
-      return `${p} ended up ${v}ing ${n}.`
+      return `${p} ended up ${presentParticipleEn(v)} ${n}.`
     case 'kotogaDekiru':
       return `${p} can ${v} ${n}.`
     case 'nakerebaNaranai':
@@ -180,13 +274,13 @@ function glossVerbEnding(
     case 'tara':
     case 'nara':
     case 'to':
-      return `If ${p} ${v}s ${n}, …`
+      return `If ${p} ${verbFor(p, v)} ${n}, …`
     case 'sou':
       return `It looks like ${p} will ${v} ${n}.`
     case 'rashii':
     case 'mitai':
     case 'youda':
-      return `It seems ${p} ${v}s ${n}.`
+      return `It seems ${p} ${verbFor(p, v)} ${n}.`
     case 'youniSuru':
       return `${p} tries to ${v} ${n}.`
     case 'youniNaru':
@@ -202,13 +296,13 @@ function glossVerbEnding(
     case 'youtoSuru':
       return `${p} tries to ${v} ${n}.`
     case 'hajimeru':
-      return `${p} starts ${v}ing ${n}.`
+      return `${p} starts ${presentParticipleEn(v)} ${n}.`
     case 'tsuzukeru':
-      return `${p} keeps ${v}ing ${n}.`
+      return `${p} keeps ${presentParticipleEn(v)} ${n}.`
     case 'owaru':
-      return `${p} finishes ${v}ing ${n}.`
+      return `${p} finishes ${presentParticipleEn(v)} ${n}.`
     case 'sugiru':
-      return `${p} ${v}s ${n} too much.`
+      return `${p} ${verbFor(p, v)} ${n} too much.`
     case 'yasui':
       return `${n} is easy to ${v}.`
     case 'nikui':
@@ -218,7 +312,7 @@ function glossVerbEnding(
     case 'tokoroDatta':
       return `${p} was just about to ${v} ${n}.`
     default:
-      return `${p} ${advBit}${v}s ${n}.`
+      return `${p} ${advBit}${verbFor(p, v)} ${n}.`
   }
 }
 
@@ -249,29 +343,29 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
   }
 
   if (label.includes('ように する')) return `${p} tries to ${v} ${n}.`
-  if (label.includes('ように なる')) return `${p} ends up ${v}ing ${n}.`
+  if (label.includes('ように なる')) return `${p} ends up ${presentParticipleEn(v)} ${n}.`
   if (label.includes('ことに する')) return `${p} decides to ${v} ${n}.`
   if (label.includes('ことに なる')) return `It is decided that ${p} will ${v} ${n}.`
-  if (label.includes('た ばかり')) return `${p} just ${v}ed ${n}.`
-  if (label.includes('て しまう')) return `${p} ends up ${v}ing ${n}.`
-  if (label.includes('て おく')) return `${p} ${v}s ${n} in advance.`
-  if (label.includes('ながら')) return `${p} ${v2}s while ${v}ing ${n}.`
-  if (label.includes('ため に')) return `${p} ${v2}s in order to ${v} ${n}.`
-  if (label.includes('ので')) return `${p} ${v2}s because ${p} ${v}s ${n}.`
-  if (label.includes('のに')) return `Even though ${p} ${v}s ${n}, ${p} ${v2}s.`
-  if (label.includes('なら') && label.includes('[V] なら')) return `If ${p} ${v}s ${n}, ${p} ${v2}s.`
-  if (label.includes('たら') && label.includes('[V] たら')) return `When ${p} ${v}s ${n}, ${p} ${v2}s.`
-  if (label.includes('ても')) return `Even if ${p} ${v}s ${n}, ${p} ${v2}s.`
-  if (label.includes(' ば') && label.includes('[V] ば')) return `If ${p} ${v}s ${n}, ${p} ${v2}s.`
+  if (label.includes('た ばかり')) return `${p} just ${pastTenseEn(v)} ${n}.`
+  if (label.includes('て しまう')) return `${p} ends up ${presentParticipleEn(v)} ${n}.`
+  if (label.includes('て おく')) return `${p} ${verbFor(p, v)} ${n} in advance.`
+  if (label.includes('ながら')) return `${p} ${verbFor(p, v2)} while ${presentParticipleEn(v)} ${n}.`
+  if (label.includes('ため に')) return `${p} ${verbFor(p, v2)} in order to ${v} ${n}.`
+  if (label.includes('ので')) return `${p} ${verbFor(p, v2)} because ${p} ${verbFor(p, v)} ${n}.`
+  if (label.includes('のに')) return `Even though ${p} ${verbFor(p, v)} ${n}, ${p} ${verbFor(p, v2)}.`
+  if (label.includes('なら') && label.includes('[V] なら')) return `If ${p} ${verbFor(p, v)} ${n}, ${p} ${verbFor(p, v2)}.`
+  if (label.includes('たら') && label.includes('[V] たら')) return `When ${p} ${verbFor(p, v)} ${n}, ${p} ${verbFor(p, v2)}.`
+  if (label.includes('ても')) return `Even if ${p} ${verbFor(p, v)} ${n}, ${p} ${verbFor(p, v2)}.`
+  if (label.includes(' ば') && label.includes('[V] ば')) return `If ${p} ${verbFor(p, v)} ${n}, ${p} ${verbFor(p, v2)}.`
   if (label.includes(' そう') && !label.includes('しれない')) return `It looks like ${p} will ${v} ${n}.`
-  if (label.includes('らしい')) return `It seems ${p} ${v}ed ${n}.`
-  if (label.includes('みたい')) return `It seems like ${p} ${v}ed ${n}.`
-  if (label.includes('すぎる')) return `${p} ${v}s ${n} too much.`
+  if (label.includes('らしい')) return `It seems ${p} ${pastTenseEn(v)} ${n}.`
+  if (label.includes('みたい')) return `It seems like ${p} ${pastTenseEn(v)} ${n}.`
+  if (label.includes('すぎる')) return `${p} ${verbFor(p, v)} ${n} too much.`
   if (label.includes('やすい')) return `${n} is easy to ${v}.`
   if (label.includes('にくい')) return `${n} is hard to ${v}.`
-  if (label.includes('始める')) return `${p} starts ${v}ing ${n}.`
-  if (label.includes('続ける')) return `${p} keeps ${v}ing ${n}.`
-  if (label.includes('終わる')) return `${p} finishes ${v}ing ${n}.`
+  if (label.includes('始める')) return `${p} starts ${presentParticipleEn(v)} ${n}.`
+  if (label.includes('続ける')) return `${p} keeps ${presentParticipleEn(v)} ${n}.`
+  if (label.includes('終わる')) return `${p} finishes ${presentParticipleEn(v)} ${n}.`
   if (label.includes('ようと する')) return `${p} tries to ${v} ${n}.`
   if (label.includes('かも しれない')) return `${p} might ${v} ${n}.`
   if (label.includes('違いない')) return `${p} must ${v} ${n}.`
@@ -281,22 +375,22 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
   if (label.includes('なくても いい')) return `${p} ${usesBaseVerb(p) ? 'do' : 'does'} not have to ${v} ${n}.`
   if (label.includes('て は いけない')) return `${p} must not ${v} ${n}.`
   if (label.includes('て もらう')) return `${p} has ${n} ${v}ed for them.`
-  if (label.includes('て くれる')) return `${n} ${v}s for ${p}.`
-  if (label.includes('て あげる')) return `${p} ${v}s ${n} for someone.`
+  if (label.includes('て くれる')) return `${n} ${verbFor(p, v)} for ${p}.`
+  if (label.includes('て あげる')) return `${p} ${verbFor(p, v)} ${n} for someone.`
   if (label.includes('させられる')) return `${p} is made to ${v} ${n}.`
   if (label.includes(' させる')) return `${p} makes ${n} ${v}.`
   if (label.includes(' られる')) return `${p} is ${v}ed by ${n}.`
   if (label.includes(' れる') && label.includes('に [V]')) return `${p} can ${v} ${n}.`
-  if (label.includes('と 思う')) return `${p} thinks ${n} ${v}s.`
-  if (label.includes('と 言う')) return `${p} says ${n} ${v}s.`
-  if (label.includes('か どうか')) return `${p} checks whether ${n} ${v}s.`
-  if (label.includes('ように [V]') && label.includes('が [V]')) return `${p} ${v2}s so that ${n} ${v}s.`
-  if (label.includes('ような [N]')) return `${p} ${v}s a ${n2}-like ${n}.`
+  if (label.includes('と 思う')) return `${p} thinks ${n} ${verbFor(p, v)}.`
+  if (label.includes('と 言う')) return `${p} says ${n} ${verbFor(p, v)}.`
+  if (label.includes('か どうか')) return `${p} checks whether ${n} ${verbFor(p, v)}.`
+  if (label.includes('ように [V]') && label.includes('が [V]')) return `${p} ${verbFor(p, v2)} so that ${n} ${verbFor(p, v)}.`
+  if (label.includes('ような [N]')) return `${p} ${verbFor(p, v)} a ${n2}-like ${n}.`
   if (label.includes('ところ')) return `${p} is just about to ${v} ${n}.`
-  if (label.includes('あいだ に')) return `${p} ${v2}s while ${n} ${v}s.`
-  if (label.includes('うち に')) return `${p} ${v2}s while ${n} ${v}s.`
-  if (label.includes('あと で')) return `After ${n} ${v}s, ${p} ${v2}s.`
-  if (label.includes('前 に') && label.includes('が [V]')) return `Before ${n} ${v}s, ${p} ${v2}s.`
+  if (label.includes('あいだ に')) return `${p} ${verbFor(p, v2)} while ${n} ${verbFor(p, v)}.`
+  if (label.includes('うち に')) return `${p} ${verbFor(p, v2)} while ${n} ${verbFor(p, v)}.`
+  if (label.includes('あと で')) return `After ${n} ${verbFor(p, v)}, ${p} ${verbFor(p, v2)}.`
+  if (label.includes('前 に') && label.includes('が [V]')) return `Before ${n} ${verbFor(p, v)}, ${p} ${verbFor(p, v2)}.`
 
   if (label.includes('が 好き')) {
     return `${p} likes ${naAdj} ${n}.`
@@ -314,10 +408,10 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
     return `${p} is more ${iAdj} than ${n}.`
   }
   if (label.includes('を [I-Adj]') && !label.includes('[V]') && !label.includes('く')) {
-    return `${p} finds ${n} ${iAdj}.`
+    return `${p} ${verbFor(p, 'find')} ${n} ${iAdj}.`
   }
   if (label.includes('を [Na-Adj]') && !label.includes('[V]') && !label.includes('に する')) {
-    return `${p} finds ${n} ${naAdj}.`
+    return `${p} ${verbFor(p, 'find')} ${n} ${naAdj}.`
   }
   if (label.includes('に する') || label.includes('に した')) {
     return `${p} makes ${n} ${naAdj}.`
@@ -326,10 +420,10 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
     return `${p} made ${n} more ${iAdj}.`
   }
   if (label.includes('が [I-Adj]') && !label.includes('[V]')) {
-    return `${p} says ${n} is ${adv ? `${adv} ` : ''}${iAdj}.`
+    return `${p} ${sayEn(p)} ${n} is ${adv ? `${adv} ` : ''}${iAdj}.`
   }
   if (label.includes('が [Na-Adj]') && !label.includes('[V]')) {
-    return `${p} says ${n} is ${adv ? `${adv} ` : ''}${naAdj}.`
+    return `${p} ${sayEn(p)} ${n} is ${adv ? `${adv} ` : ''}${naAdj}.`
   }
   if (label.includes('たい')) {
     const advBit = adv ? `${adv} ` : ''
@@ -344,16 +438,16 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
   }
   if (label.includes(' た') && !label.includes('たい')) {
     const advBit = adv ? `${adv} ` : ''
-    return `${p} ${advBit}${v} ${n}.`
+    return `${p} ${advBit}${pastTenseEn(v)} ${n}.`
   }
   if (label.includes('です') && !label.includes('でしょう')) {
     const advBit = adv ? `${adv} ` : ''
-    if (label.includes('に [V]')) return `${p} ${advBit}${v}s at ${n}.`
-    if (label.includes('で [V]')) return `${p} ${advBit}${v}s at ${n}.`
-    if (label.includes('と [V]')) return `${p} ${advBit}${v}s with ${n}.`
-    if (label.includes('が [I-Adj]')) return `${p} says ${n} is ${iAdj}.`
-    if (label.includes('が [Na-Adj]')) return `${p} says ${n} is ${naAdj}.`
-    return `${p} ${advBit}${v}s ${n}.`
+    if (label.includes('に [V]')) return `${p} ${advBit}${verbFor(p, v)} at ${n}.`
+    if (label.includes('で [V]')) return `${p} ${advBit}${verbFor(p, v)} at ${n}.`
+    if (label.includes('と [V]')) return `${p} ${advBit}${verbFor(p, v)} with ${n}.`
+    if (label.includes('が [I-Adj]')) return `${p} ${sayEn(p)} ${n} is ${iAdj}.`
+    if (label.includes('が [Na-Adj]')) return `${p} ${sayEn(p)} ${n} is ${naAdj}.`
+    return `${p} ${advBit}${verbFor(p, v)} ${n}.`
   }
   if (label.includes('でしょう')) {
     return `${p} will probably ${v} ${n}.`
@@ -362,39 +456,39 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
     return `Does ${p} ${adv ? `${adv} ` : ''}${v} ${n}?`
   }
   if (label.includes(' よ')) {
-    return `${p} ${adv ? `${adv} ` : ''}${v}s ${n}!`
+    return `${p} ${adv ? `${adv} ` : ''}${verbFor(p, v)} ${n}!`
   }
   if (label.includes('く [V]')) {
     return adv
-      ? `${p} ${v}s ${n} ${adv} because it is ${iAdj}.`
-      : `${p} ${v}s ${n} because it is ${iAdj}.`
+      ? `${p} ${verbFor(p, v)} ${n} ${adv} because it is ${iAdj}.`
+      : `${p} ${verbFor(p, v)} ${n} because it is ${iAdj}.`
   }
   if (label.includes('Na-Adj] に [V]') || label.includes('Na-Adj] な [N] を [V]')) {
-    return `${p} ${v}s ${naAdj} ${n}.`
+    return `${p} ${verbFor(p, v)} ${naAdj} ${n}.`
   }
   if (label.includes('に [N] を [V]') || label.includes('で [N] を [V]')) {
     const place = label.includes('に') ? 'at' : 'at'
-    return `${p} ${v}s ${n2} ${place} ${n}.`
+    return `${p} ${verbFor(p, v)} ${n2} ${place} ${n}.`
   }
   if (label.includes('に [V]')) {
     if (f.V === '住む') return `${p} ${usesBaseVerb(p) ? 'live' : 'lives'} in ${n}.`
-    return `${p} ${adv ? `${adv} ` : ''}${v}s to ${n}.`
+    return `${p} ${adv ? `${adv} ` : ''}${verbFor(p, v)} to ${n}.`
   }
   if (label.includes('で [V]')) {
-    return `${p} ${adv ? `${adv} ` : ''}${v}s at ${n}.`
+    return `${p} ${adv ? `${adv} ` : ''}${verbFor(p, v)} at ${n}.`
   }
   if (label.includes('と [V]')) {
-    return `${p} ${adv ? `${adv} ` : ''}${v}s with ${n}.`
+    return `${p} ${adv ? `${adv} ` : ''}${verbFor(p, v)} with ${n}.`
   }
   if (label.includes('から [V]')) {
-    return `${p} ${v}s from ${n}.`
+    return `${p} ${verbFor(p, v)} from ${n}.`
   }
   if (label.includes('まで [V]')) {
-    return `${p} ${v}s until ${n}.`
+    return `${p} ${verbFor(p, v)} until ${n}.`
   }
 
   const advBit = adv ? `${adv} ` : ''
-  return `${p} ${advBit}${v}s ${n}.`
+  return `${p} ${advBit}${verbFor(p, v)} ${n}.`
 }
 
 export function getPosEnglishNormalized(frame: HeroSentenceFrame): string {
