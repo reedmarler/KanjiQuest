@@ -381,6 +381,8 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
   if (label.includes(' させる')) return `${p} makes ${n} ${v}.`
   if (label.includes(' られる')) return `${p} is ${v}ed by ${n}.`
   if (label.includes(' れる') && label.includes('に [V]')) return `${p} can ${v} ${n}.`
+  if (label.includes('[I-Adj] と 思う')) return `${p} ${usesBaseVerb(p) ? 'think' : 'thinks'} ${n} is ${iAdj}.`
+  if (label.includes('[Na-Adj] だ と 思う')) return `${p} ${usesBaseVerb(p) ? 'think' : 'thinks'} ${n} is ${naAdj}.`
   if (label.includes('と 思う')) return `${p} thinks ${n} ${verbFor(p, v)}.`
   if (label.includes('と 言う')) return `${p} says ${n} ${verbFor(p, v)}.`
   if (label.includes('か どうか')) return `${p} checks whether ${n} ${verbFor(p, v)}.`

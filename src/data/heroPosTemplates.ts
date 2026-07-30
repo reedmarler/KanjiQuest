@@ -302,6 +302,10 @@ export const HERO_POS_TEMPLATES: PosTemplate[] = [
   p(148, '[P] は [N] が [V] うち に [V]', ...pHaNgaVForm('plain', lit('うち'), lit('に'), s('V2'))),
   p(149, '[P] は [N] が [V] あと で [V]', ...pHaNgaVForm('ta', lit('あと'), lit('で'), s('V2'))),
   p(150, '[P] は [N] が [V] 前 に [V]', ...pHaNgaVForm('plain', lit('前'), lit('に'), s('V2'))),
+  // "[N] が [I-Adj]/[Na-Adj] です" reads like a flat, disconnected claim in
+  // English. "〜と思う" ("I think...") is how this is actually phrased.
+  p(151, '[P] は [N] が [I-Adj] と 思う', s('P'), lit('は'), s('N'), lit('が'), s('IAdj'), lit('と'), lit('思う')),
+  p(152, '[P] は [N] が [Na-Adj] だ と 思う', s('P'), lit('は'), s('N'), lit('が'), s('NaAdj'), lit('だ'), lit('と'), lit('思う')),
 ]
 
 export function verbSlotUsesEndingRotation(

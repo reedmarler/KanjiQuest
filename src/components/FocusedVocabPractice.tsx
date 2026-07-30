@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { vocabFocusSets, type VocabFocusSet } from '../data/vocabFocusSets'
+import { getVocabExampleSentence } from '../lib/vocabExampleSentence'
+import { FuriganaSegment } from './FuriganaText'
 
 interface FocusedVocabPracticeProps {
   onBack: () => void
@@ -47,6 +49,7 @@ export function FocusedVocabPractice({ onBack }: FocusedVocabPracticeProps) {
   const [known, setKnown] = useState(0)
   const [completed, setCompleted] = useState(false)
   const card = session.cards[index]
+  const example = useMemo(() => (card ? getVocabExampleSentence(card) : undefined), [card])
 
   function nextCard(knew = false) {
     if (knew) setKnown((count) => count + 1)
@@ -123,6 +126,16 @@ export function FocusedVocabPractice({ onBack }: FocusedVocabPracticeProps) {
 
             <div className="kanji-learning-answer">
               <p className={'kanji-learning-meaning' + (revealed ? ' is-revealed' : '')} aria-hidden={!revealed}>{card.back}</p>
+              {example && (
+                <div className={'focused-vocab-example' + (revealed ? ' is-revealed' : '')} aria-hidden={!revealed}>
+                  <span className="focused-vocab-example-en">{example.english}</span>
+                  <span className="focused-vocab-example-jp" lang="ja">
+                    {example.segments.map((segment, index) => (
+                      <FuriganaSegment key={index} text={segment.text} reading={segment.reading} />
+                    ))}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="kanji-learning-controls">
@@ -183,6 +196,16 @@ export function FocusedVocabPractice({ onBack }: FocusedVocabPracticeProps) {
               <p className={revealed ? 'is-visible' : ''} lang="ja" aria-hidden={!revealed}>{card.reading}</p>
               <strong className={revealed ? 'is-visible' : ''} aria-hidden={!revealed}>{card.back}</strong>
             </div>
+            {example && (
+              <div className={'focused-vocab-example' + (revealed ? ' is-visible' : '')} aria-hidden={!revealed}>
+                <span className="focused-vocab-example-en">{example.english}</span>
+                <span className="focused-vocab-example-jp" lang="ja">
+                  {example.segments.map((segment, index) => (
+                    <FuriganaSegment key={index} text={segment.text} reading={segment.reading} />
+                  ))}
+                </span>
+              </div>
+            )}
             <button
               type="button"
               className="btn btn-primary focused-vocab-reveal"

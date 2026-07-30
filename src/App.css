@@ -5751,6 +5751,44 @@ body:has(.dashboard) .app {
   transform: translateY(0);
 }
 
+.focused-vocab-example {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 180ms ease;
+}
+
+.focused-vocab-example.is-visible,
+.focused-vocab-example.is-revealed {
+  opacity: 1;
+  visibility: visible;
+}
+
+.focused-vocab-example-jp {
+  display: block;
+  max-width: 22rem;
+  font: 500 0.9rem/2.1 'Noto Sans JP', sans-serif;
+  color: var(--text);
+  text-align: left;
+}
+
+.focused-vocab-example-jp .furigana-ruby rt {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+.focused-vocab-example-en {
+  font-size: 0.74rem;
+  color: var(--kyogre-light);
+}
+
 .focused-vocab-reveal {
   width: min(100%, 17rem);
   margin-top: auto;

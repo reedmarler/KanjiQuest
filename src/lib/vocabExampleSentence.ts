@@ -18,15 +18,17 @@ import { getHeroEnglish, getSegmentReading } from './heroSentenceGloss'
 import { isVerbEndingId } from './verbEndings'
 import type { HeroSentenceFrame } from '../data/heroSentences'
 
-/** Same safe, standalone templates the dashboard's hero sentence rotator uses. */
+/**
+ * Same safe, standalone templates the dashboard's hero sentence rotator
+ * uses, plus 151/152 ("〜と思う" adjective statements) added specifically
+ * for this generator — bare "[N] が [I-Adj] です" reads like a flat,
+ * disconnected claim ("He says hats is old"); "I think..." is how this is
+ * actually phrased naturally.
+ */
 const ROTATOR_SAFE_TEMPLATE_IDS = new Set([
   1, 2, 11, 20, 21, 22, 23, 24,
   38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-  // Simple subject+adjective statements — verified separately from the
-  // verb templates above. id 3 ([N] は [N] が [I-Adj]) is deliberately
-  // excluded: it pairs two unrelated nouns and produces nonsense like
-  // "The train — my teacher is early".
-  25, 27, 28, 80, 81,
+  151, 152,
 ])
 
 const SAFE_TEMPLATES = HERO_POS_TEMPLATES_ALL.filter((template) => ROTATOR_SAFE_TEMPLATE_IDS.has(template.id))
@@ -58,10 +60,16 @@ function isUsableAdjective(word: string, category: string): boolean {
   return true
 }
 
+export interface VocabExampleSegment {
+  text: string
+  reading?: string
+}
+
 export interface VocabExampleSentence {
   japanese: string
   reading: string
   english: string
+  segments: VocabExampleSegment[]
 }
 
 const cache = new Map<string, VocabExampleSentence | null>()
@@ -149,8 +157,12 @@ function buildExample(card: StudyCard): VocabExampleSentence | undefined {
       const english = getHeroEnglish(frame)
       if (!english) continue
 
-      const reading = segments.map((segment) => segment.reading ?? getSegmentReading(segment.text)).join('')
-      return { japanese, reading, english }
+      const resolvedSegments = segments.map((segment) => ({
+        text: segment.text,
+        reading: segment.reading ?? getSegmentReading(segment.text),
+      }))
+      const reading = resolvedSegments.map((segment) => segment.reading).join('')
+      return { japanese, reading, english, segments: resolvedSegments }
     }
   }
 
