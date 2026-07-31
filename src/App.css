@@ -3702,6 +3702,17 @@ body:has(.dashboard) .app {
   .practice-label {
     font-size: 0.95rem;
   }
+
+  /* At mobile font sizes the ~0.04em furigana-to-glyph gap is imperceptible
+     and reads as the reading touching/overlapping the kanji it labels — pull
+     it clear and size it up so it's legible as a separate line above. */
+  .hero-sentence-line .hero-furigana .furigana-ruby rt {
+    bottom: calc(100% + 0.1em);
+  }
+  .hero-furigana rt,
+  .hero-furigana .furigana-ruby rt {
+    font-size: 0.5em;
+  }
 }
 
 /* Kanji Lab */
