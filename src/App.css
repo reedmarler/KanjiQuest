@@ -210,6 +210,12 @@ body:has(.dashboard) .app {
 .hero-sentence-line.hero-database-line {
   white-space: normal;
   flex-wrap: wrap;
+  /* Center at rest — a single settled sentence (1 or 2 lines) should look
+     centered in its row, same as desktop. The competing per-line-count jump
+     this used to cause during a swap is fixed at the source instead: see
+     .hero-database-frame-stack, which keeps the outgoing/incoming frames
+     pinned to a shared top edge for the swap's duration so this outer
+     centering only ever has one settled height to center at a time. */
   align-content: center;
   gap: 0;
   justify-content: center;
@@ -299,7 +305,6 @@ body:has(.dashboard) .app {
 .hero-database-frame-stack {
   display: grid;
   grid-template-columns: 1fr;
-  align-items: center;
   /* justify-items must stay "stretch" (the grid default), not "center":
      centering the grid items lets the single implicit column shrink-to-fit
      the widest overlaid sentence, which silently re-widens the whole stack
@@ -316,12 +321,26 @@ body:has(.dashboard) .app {
   overflow: visible;
 }
 
+.hero-database-swap-stack {
+  align-items: center;
+}
+
 .hero-database-word {
   grid-area: 1 / 1;
   display: inline-flex;
   align-items: flex-end;
   justify-content: center;
   white-space: nowrap;
+}
+
+/* Full-sentence swaps can differ in wrapped line count (1 line vs 2), and
+   grid's default centering would re-center the shorter one relative to the
+   taller — visibly shifting text vertically as outgoing/incoming cross-fade,
+   and doing so independently of the outer line's own alignment. Anchoring
+   both frames to the same top edge keeps their first line at one fixed
+   position regardless of how many lines either one wraps to. */
+.hero-database-frame-stack {
+  align-items: start;
 }
 
 .hero-database-frame {
@@ -3646,6 +3665,24 @@ body:has(.dashboard) .app {
 
 @media (max-width: 720px) {
   .hero h1 { font-size: 2rem; }
+  /* Pull the settled block down closer to the controls panel below it —
+     roughly half the gap it used to leave (0.35rem + 0.4rem combined). */
+  .hero-database-english { margin-bottom: 0.18rem; }
+  .hero-compact { margin-bottom: 0.2rem; }
+
+  /* On phones the base clamp is already pinned to its 1.08rem floor
+     (2.5vw is well under it at this width), so a long sentence has nowhere
+     left to shrink and wraps to a cramped 3rd line instead. Once the
+     sentence is longer than ~32 characters, scale further down as it grows,
+     down to a 0.78rem floor, so it keeps fitting in 2 lines. */
+  .hero-database-line {
+    font-size: clamp(
+      0.78rem,
+      calc(1.08rem - max(0px, (var(--hero-database-char-count, 0) - 32) * 0.15px)),
+      1.6rem
+    );
+  }
+
   .hero-controls-row { justify-content: center; }
   .control-group-levels { width: 100%; justify-content: center; }
   .control-group-story { width: 100%; justify-content: center; }
@@ -3664,19 +3701,6 @@ body:has(.dashboard) .app {
   .reading-sentence { font-size: 1.55rem; }
   .kanji-mode-grid { grid-template-columns: 1fr; }
   .kanji-learn-char { font-size: 4.5rem; }
-
-  /* Wrapped database sentences on phones: give the wrapped lines room to
-     breathe so a word's furigana (positioned above it) doesn't crowd into
-     the line below it, and keep the fixed-height rotater box tall enough
-     to hold that extra spacing without clipping. */
-  .hero-database-block {
-    --hero-japanese-row-height: 7.6rem;
-  }
-  .hero-sentence-line.hero-database-line {
-    row-gap: 0.95em;
-    column-gap: 0.4em;
-    padding-top: 0.9rem;
-  }
 
   /* Fill more of the phone screen: bigger panels, bigger type. */
   .five-minute-study {
@@ -3702,17 +3726,6 @@ body:has(.dashboard) .app {
   }
   .practice-label {
     font-size: 0.95rem;
-  }
-
-  /* At mobile font sizes the ~0.04em furigana-to-glyph gap is imperceptible
-     and reads as the reading touching/overlapping the kanji it labels — pull
-     it clear and size it up so it's legible as a separate line above. */
-  .hero-sentence-line .hero-furigana .furigana-ruby rt {
-    bottom: calc(100% + 0.1em);
-  }
-  .hero-furigana rt,
-  .hero-furigana .furigana-ruby rt {
-    font-size: 0.5em;
   }
 }
 

@@ -167,6 +167,13 @@ export function RotatingHeroSentence({
   const englishIsSwapping = phase === 'swap' && english !== nextEnglish
   const nextByKey = new Map((nextFrame.segments ?? []).map((segment) => [segment.key, segment]))
 
+  // Longer sentences risk wrapping to a cramped 3rd line on narrow phones —
+  // taking the longer of the outgoing/incoming frame keeps this stable
+  // across a swap instead of resizing mid-transition.
+  const frameCharCount = (targetFrame: HeroSentenceFrame) =>
+    (targetFrame.segments ?? []).reduce((sum, segment) => sum + charLength(segment.text), 0)
+  const heroCharCount = Math.max(frameCharCount(frame), frameCharCount(nextFrame))
+
   function renderSegments(targetFrame: HeroSentenceFrame, isIncoming = false) {
     return (targetFrame.segments ?? []).map((segment) => {
       const isActive = segment.key === activeKey
@@ -210,6 +217,7 @@ export function RotatingHeroSentence({
         '--hero-database-highlight-duration': `${HERO_HIGHLIGHT_MS / playbackRate}ms`,
         '--hero-database-space-duration': `${HERO_HIGHLIGHT_MS / playbackRate}ms`,
         '--hero-database-swap-duration': `${HERO_SWAP_MS / playbackRate}ms`,
+        '--hero-database-char-count': heroCharCount,
       } as CSSProperties}
     >
       <p className={`hero-sentence-line hero-database-line${phase === 'swap' && isFrameChange ? ' is-frame-swapping' : ''}`} aria-live="polite">
