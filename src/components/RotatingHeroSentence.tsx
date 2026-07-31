@@ -74,9 +74,14 @@ export function RotatingHeroSentence({
 }: RotatingHeroSentenceProps) {
   const [sequenceSeed, setSequenceSeed] = useState(newSequenceSeed)
   const effectiveStoryLevel = storyLevel ?? 'N5'
+  // The level actually driving the visible stream. Changing the dashboard's
+  // difficulty picker updates `jlptLevel` immediately, but we deliberately
+  // keep rotating the current stream until the next scheduled swap rather
+  // than cutting away mid-sentence — see the pending-level handling below.
+  const [activeLevel, setActiveLevel] = useState(jlptLevel)
   const steps = useMemo(
-    () => storyId ? buildHeroStorySteps(storyId, effectiveStoryLevel) : buildHeroSteps(wrongPool, progress, jlptLevel, sequenceSeed),
-    [wrongPool, progress, jlptLevel, sequenceSeed, storyId, effectiveStoryLevel],
+    () => storyId ? buildHeroStorySteps(storyId, effectiveStoryLevel) : buildHeroSteps(wrongPool, progress, activeLevel, sequenceSeed),
+    [wrongPool, progress, activeLevel, sequenceSeed, storyId, effectiveStoryLevel],
   )
   const [index, setIndex] = useState(0)
   const [phase, setPhase] = useState<StreamPhase>('rest')
@@ -85,19 +90,33 @@ export function RotatingHeroSentence({
     setSequenceSeed(newSequenceSeed())
     setIndex(0)
     setPhase('rest')
-  }, [jlptLevel, storyId, effectiveStoryLevel])
+  }, [storyId, effectiveStoryLevel])
 
   const safeLength = Math.max(steps.length, 1)
   const step = steps[index % safeLength]
   const isStreamRollover = index + 1 >= steps.length
   const rolloverSeed = nextSequenceSeed(sequenceSeed)
   const rolloverSteps = useMemo(
-    () => storyId ? buildHeroStorySteps(storyId, effectiveStoryLevel) : buildHeroSteps(wrongPool, progress, jlptLevel, rolloverSeed),
-    [wrongPool, progress, jlptLevel, rolloverSeed, storyId, effectiveStoryLevel],
+    () => storyId ? buildHeroStorySteps(storyId, effectiveStoryLevel) : buildHeroSteps(wrongPool, progress, activeLevel, rolloverSeed),
+    [wrongPool, progress, activeLevel, rolloverSeed, storyId, effectiveStoryLevel],
   )
-  const nextStep = isStreamRollover
-    ? rolloverSteps[0]
-    : steps[(index + 1) % safeLength]
+
+  // A level change previews on its own seed as soon as it's requested, so the
+  // very next scheduled swap can rotate straight into it — but the currently
+  // visible sentence (driven by `steps`/`activeLevel`) never gets cut short.
+  const levelIsPending = !storyId && jlptLevel !== activeLevel
+  // jlptLevel is a deliberate cache key, not a dependency of the computation
+  // itself: a fresh random seed should be drawn each time the requested level
+  // changes, even though newSequenceSeed() doesn't read jlptLevel's value.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const pendingSeed = useMemo(() => newSequenceSeed(), [jlptLevel])
+  const pendingSteps = useMemo(
+    () => levelIsPending ? buildHeroSteps(wrongPool, progress, jlptLevel, pendingSeed) : null,
+    [levelIsPending, wrongPool, progress, jlptLevel, pendingSeed],
+  )
+
+  const nextStep = pendingSteps?.[0]
+    ?? (isStreamRollover ? rolloverSteps[0] : steps[(index + 1) % safeLength])
   const frame = step?.frame
   const nextFrame = nextStep?.frame
 
@@ -114,9 +133,13 @@ export function RotatingHeroSentence({
       if (phase === 'rest') setPhase('highlight')
       else if (phase === 'highlight') setPhase('swap')
       else {
-        if (isStreamRollover) {
-          // The incoming frame is already the first frame of this next seed.
-          // Committing it here therefore does not create a second visual jump.
+        if (pendingSteps) {
+          // The incoming frame already came from pendingSteps[0], so adopting
+          // that same level/seed here does not create a second visual jump.
+          setActiveLevel(jlptLevel)
+          setSequenceSeed(pendingSeed)
+          setIndex(0)
+        } else if (isStreamRollover) {
           setSequenceSeed(rolloverSeed)
           setIndex(0)
         } else {
@@ -128,7 +151,7 @@ export function RotatingHeroSentence({
     }, duration)
 
     return () => window.clearTimeout(timer)
-  }, [displayMode, index, isStreamRollover, onRotate, paused, phase, playbackRate, rolloverSeed, steps.length])
+  }, [displayMode, index, isStreamRollover, jlptLevel, onRotate, paused, pendingSeed, pendingSteps, phase, playbackRate, rolloverSeed, steps.length])
 
   if (!frame || !nextFrame) return <div className="hero-sentence-loading" aria-hidden="true" />
 

@@ -175,7 +175,11 @@ body:has(.dashboard) .app {
 
 /* Database sentence stream: one vetted slot moves while the sentence stays put. */
 .hero-database-block {
-  --hero-japanese-row-height: 4.05rem;
+  /* Full sentences now vary a lot in length (whole-sentence generator swap
+     instead of a single-word rotation), so this reserves room for up to two
+     wrapped lines. Sizing it once and holding it fixed — rather than letting
+     it grow/shrink per sentence — is what keeps swaps from visibly resizing. */
+  --hero-japanese-row-height: 6.5rem;
   --hero-database-slot-height: 2.08em;
   --hero-rotater-height: calc(var(--hero-japanese-row-height) + 3.08rem);
   height: var(--hero-rotater-height);
@@ -187,11 +191,20 @@ body:has(.dashboard) .app {
 }
 
 .hero-database-line {
-  font-size: clamp(1.18rem, 2.7vw, 1.82rem);
+  font-size: clamp(1.08rem, 2.5vw, 1.6rem);
   opacity: 1;
   gap: 0;
   overflow: visible;
   padding: 0.28rem 0.65rem 0.1rem;
+}
+
+/* .hero-sentence-line (declared below, same specificity) sets nowrap for the
+   legacy word-reel line — this compound selector out-specifies it so the
+   database line, whose full-sentence swaps need to wrap, actually wins. */
+.hero-sentence-line.hero-database-line {
+  white-space: normal;
+  flex-wrap: wrap;
+  align-content: center;
 }
 
 .hero-database-english {
@@ -264,27 +277,32 @@ body:has(.dashboard) .app {
 
 .hero-database-swap-stack,
 .hero-database-frame-stack {
-  display: inline-grid;
-  place-items: end center;
+  display: grid;
+  place-items: center;
   width: 100%;
-  height: var(--hero-database-slot-height);
-  overflow: hidden;
+  /* Grid stacking (not a fixed slot height) lets the box size itself to
+     whichever of the two overlaid sentences is taller, so mismatched lengths
+     never force a resize — the wrapper already reserves generous vertical
+     room in .hero-database-block for this to settle without clipping. */
+  overflow: visible;
 }
 
-/* A real handoff: old text exits below while the replacement enters above. */
-.hero-database-swap-stack {
-  /* Static and animated slots deliberately share the same box.  This is what
-     prevents the baseline from hopping when the stack is mounted. */
-  height: var(--hero-database-slot-height);
-}
-
-.hero-database-word,
-.hero-database-frame {
+.hero-database-word {
   grid-area: 1 / 1;
   display: inline-flex;
   align-items: flex-end;
   justify-content: center;
   white-space: nowrap;
+}
+
+.hero-database-frame {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  white-space: normal;
+  width: 100%;
 }
 
 .hero-database-word.is-outgoing {
@@ -295,15 +313,16 @@ body:has(.dashboard) .app {
   animation: hero-database-roll-in var(--hero-database-swap-duration, 1650ms) cubic-bezier(0.22, 0.75, 0.3, 1) both;
 }
 
+/* Full-sentence swaps cross-fade in place instead of rolling — a vertical
+   slide reads as a "bump" once the two sentences are different lengths, a
+   plain fade does not. */
 .hero-database-frame.is-outgoing {
-  animation: hero-database-roll-down var(--hero-database-swap-duration, 1650ms) cubic-bezier(0.22, 0.75, 0.3, 1) both;
+  animation: hero-database-frame-fade-out var(--hero-database-swap-duration, 1650ms) cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .hero-database-frame.is-incoming {
-  animation: hero-database-roll-in var(--hero-database-swap-duration, 1650ms) cubic-bezier(0.22, 0.75, 0.3, 1) both;
+  animation: hero-database-frame-fade-in var(--hero-database-swap-duration, 1650ms) cubic-bezier(0.4, 0, 0.2, 1) both;
 }
-
-.hero-database-frame-stack { width: max-content; max-width: 100%; }
 
 .hero-story-block .hero-database-line {
   font-size: clamp(1.08rem, 2.28vw, 1.5rem);
@@ -336,6 +355,16 @@ body:has(.dashboard) .app {
 @keyframes hero-database-roll-in {
   from { opacity: 0; transform: translate3d(0, -1.18em, 0); }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes hero-database-frame-fade-out {
+  0%, 40% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes hero-database-frame-fade-in {
+  0%, 40% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 @keyframes hero-database-english-blur-out {
@@ -1919,7 +1948,11 @@ body:has(.dashboard) .app {
   color: var(--text);
   font: 700 0.6rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
-  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 100ms ease;
+}
+
+.control-play:active {
+  transform: scale(0.94);
 }
 
 .control-play-icon {
@@ -1956,12 +1989,16 @@ body:has(.dashboard) .app {
   color: var(--text-muted);
   font: 700 0.72rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
-  transition: color 160ms ease, background 160ms ease;
+  transition: color 140ms ease, background 140ms ease, transform 100ms ease;
 }
 
 .control-stepper button:hover:not(:disabled) {
   color: var(--text);
   background: color-mix(in srgb, var(--kyogre) 16%, transparent);
+}
+
+.control-stepper button:active:not(:disabled) {
+  transform: scale(0.9);
 }
 
 .control-stepper button:disabled {
@@ -1990,7 +2027,11 @@ body:has(.dashboard) .app {
   font: 600 0.58rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
   white-space: nowrap;
-  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 100ms ease;
+}
+
+.control-chip:active {
+  transform: scale(0.94);
 }
 
 .control-chip-jp {
@@ -2028,7 +2069,11 @@ body:has(.dashboard) .app {
   color: var(--text-muted);
   font: 700 0.6rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
-  transition: color 160ms ease, background 160ms ease;
+  transition: color 140ms ease, background 140ms ease, transform 100ms ease;
+}
+
+.control-segment:active {
+  transform: scale(0.92);
 }
 
 .control-segment + .control-segment {
@@ -2136,6 +2181,7 @@ body:has(.dashboard) .app {
   font: 600 0.58rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
   outline: none;
+  transition: border-color 140ms ease, color 140ms ease;
 }
 
 .control-select:hover {
