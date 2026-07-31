@@ -212,12 +212,8 @@ body:has(.dashboard) .app {
   flex-wrap: wrap;
   align-content: center;
   gap: 0;
-  /* Left-anchored for the same reason as the English row below: centering a
-     whole swapped-in sentence just re-anchors around a new midpoint every
-     time, which reads as sideways motion even when nothing is actually
-     "wrong" — pinning the start point removes that entirely. */
-  justify-content: flex-start;
-  text-align: left;
+  justify-content: center;
+  text-align: center;
 }
 
 .hero-database-english {
@@ -230,17 +226,21 @@ body:has(.dashboard) .app {
   color: var(--kyogre-light);
   font: 500 0.76rem/var(--hero-database-english-row-height) 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.012em;
-  /* Left-anchored, not centered: a whole-sentence swap has no fixed-length
-     word to center around, so centering just meant every swap re-anchored
-     around a different midpoint and the text appeared to slide sideways. */
-  text-align: left;
+  text-align: center;
   overflow: hidden;
 }
 
 .hero-database-english-stack {
   display: inline-grid;
   align-items: center;
-  justify-items: start;
+  /* justify-items must stay "stretch" (the grid default), not "center": see
+     the matching note on .hero-database-frame-stack above — centering the
+     item lets the column shrink-wrap to the widest of the two overlaid
+     translations, which silently re-widens the box (and re-centers the
+     still-visible outgoing text) the instant a swap starts. Stretching pins
+     the column to the row's own 100% width in both phases, and the text
+     itself is then centered within that stable width via text-align. */
+  justify-items: stretch;
   width: 100%;
   height: var(--hero-database-english-row-height);
 }
@@ -253,12 +253,15 @@ body:has(.dashboard) .app {
   white-space: nowrap;
 }
 
+/* Same duration and easing as the Japanese frame's fade below, and the same
+   0-40% hold before transitioning, so the two lines swap in lockstep instead
+   of the English drifting ahead of the Japanese. */
 .hero-database-english.is-swapping .hero-database-english-text.is-outgoing {
-  animation: hero-database-english-blur-out var(--hero-database-swap-duration, 1650ms) cubic-bezier(0.22, 0.75, 0.3, 1) both;
+  animation: hero-database-english-blur-out var(--hero-database-swap-duration, 1650ms) cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .hero-database-english.is-swapping .hero-database-english-text.is-incoming {
-  animation: hero-database-english-blur-in var(--hero-database-swap-duration, 1650ms) cubic-bezier(0.22, 0.75, 0.3, 1) both;
+  animation: hero-database-english-blur-in var(--hero-database-swap-duration, 1650ms) cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .hero-database-segment {
@@ -326,7 +329,7 @@ body:has(.dashboard) .app {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  justify-content: flex-start;
+  justify-content: center;
   white-space: normal;
   width: 100%;
 }
@@ -394,13 +397,13 @@ body:has(.dashboard) .app {
 }
 
 @keyframes hero-database-english-blur-out {
-  from { opacity: 1; filter: blur(0); }
-  to { opacity: 0; filter: blur(7px); }
+  0%, 40% { opacity: 1; filter: blur(0); }
+  100% { opacity: 0; filter: blur(7px); }
 }
 
 @keyframes hero-database-english-blur-in {
-  from { opacity: 0; filter: blur(7px); }
-  to { opacity: 1; filter: blur(0); }
+  0%, 40% { opacity: 0; filter: blur(7px); }
+  100% { opacity: 1; filter: blur(0); }
 }
 
 .hero-sentence-line {

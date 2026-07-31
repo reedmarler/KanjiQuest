@@ -67,9 +67,9 @@ function DashboardHeroSentence({
 const HERO_ROTATIONS_PER_SPEED_BUMP = 50
 
 function savedPlaybackRate(): HeroPlaybackRate {
-  if (typeof window === 'undefined') return 0.5
+  if (typeof window === 'undefined') return 0.3
   const stored = Number(window.localStorage.getItem(HERO_SPEED_STORAGE_KEY))
-  return HERO_PLAYBACK_RATES.includes(stored as HeroPlaybackRate) ? stored as HeroPlaybackRate : 0.5
+  return HERO_PLAYBACK_RATES.includes(stored as HeroPlaybackRate) ? stored as HeroPlaybackRate : 0.3
 }
 
 interface DashboardProps {
@@ -184,7 +184,7 @@ export function Dashboard({
                 type="button"
                 className="control-stepper-value"
                 aria-label={`Sentence speed ${playbackRate} times, tap to reset`}
-                onClick={() => setPlaybackRate(0.5)}
+                onClick={() => setPlaybackRate(0.3)}
               >
                 {playbackRate}×
               </button>
