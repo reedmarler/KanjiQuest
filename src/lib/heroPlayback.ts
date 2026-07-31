@@ -1,6 +1,11 @@
-// 1x was reduced 40% (to 0.6x) and every other step scaled by that same
-// 0.6 factor, so the whole ladder shifted down proportionally rather than
-// just the one value.
-export const HERO_PLAYBACK_RATES = [0.06, 0.12, 0.18, 0.24, 0.3, 0.45, 0.6, 0.75, 0.9] as const
+// 1x is a normal video-speed-picker baseline: below it steps in flat 0.1
+// intervals down to 0.1x, above it widens out (1.25/1.5/2/3x). What "1x"
+// actually *feels* like is not the original 1x, though: it's defined in
+// RotatingHeroSentence's base duration constants as (old 1x) * 0.6 — i.e.
+// as slow as the old 0.6x step used to be — with every other step's
+// real-world speed scaled off that same redefined baseline.
+export const HERO_PLAYBACK_RATES = [
+  0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 2, 3,
+] as const
 export type HeroPlaybackRate = typeof HERO_PLAYBACK_RATES[number]
 export const HERO_SPEED_STORAGE_KEY = 'kanji-quest-hero-playback-rate-v2'
