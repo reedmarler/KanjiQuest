@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
-import { GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
+import { complexityDetails, GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
 import { HERO_STORY_DEFINITIONS, HERO_STORY_LEVELS, getHeroStoriesForLevel } from '../data/heroStories'
 import {
   HERO_PLAYBACK_RATES,
@@ -223,17 +223,24 @@ export function Dashboard({
 
         <div className="hero-controls-row">
           <div className="control-group control-group-levels">
-            <span className="control-group-label" id="hero-level-label">Level</span>
-            <div className="control-segmented" role="group" aria-labelledby="hero-level-label">
+            <span className="control-group-label" id="hero-level-label">Level <span className="control-group-label-hint">easier → harder</span></span>
+            <div className="control-segmented control-segmented-difficulty" role="group" aria-labelledby="hero-level-label">
               {GENERATION_COMPLEXITIES.map((level) => (
                 <button
                   key={level}
                   type="button"
+                  data-difficulty={level}
                   className={`control-segment${complexity === level ? ' is-active' : ''}`}
                   onClick={() => setComplexity(level)}
                   aria-pressed={complexity === level}
-                  aria-label={`Generation complexity level ${level}`}
+                  aria-label={`Generation complexity level ${level}: ${complexityDetails[level].description}`}
+                  title={complexityDetails[level].description}
                 >
+                  <span className="control-segment-bars" aria-hidden="true">
+                    {GENERATION_COMPLEXITIES.map((bar) => (
+                      <span key={bar} className={`control-segment-bar${bar <= level ? ' is-filled' : ''}`} />
+                    ))}
+                  </span>
                   {level}
                 </button>
               ))}

@@ -1896,6 +1896,14 @@ body:has(.dashboard) .app {
   white-space: nowrap;
 }
 
+.control-group-label-hint {
+  margin-left: 0.3rem;
+  color: color-mix(in srgb, var(--text-muted) 70%, transparent);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
 /* Shared pill sizing keeps every control on the same 1.6rem baseline. */
 .control-play,
 .control-chip,
@@ -2041,6 +2049,68 @@ body:has(.dashboard) .app {
 .control-segment.is-active {
   color: var(--kyogre-light);
   background: color-mix(in srgb, var(--kyogre) 26%, transparent);
+}
+
+/* Difficulty ramps blue (easy) to red (hard) so L5 visibly reads as harder. */
+.control-segmented-difficulty {
+  height: auto;
+}
+
+.control-segmented-difficulty .control-segment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.16rem;
+  padding: 0.2rem 0.3rem 0.16rem;
+}
+
+.control-segment-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.09rem;
+  height: 0.42rem;
+}
+
+.control-segment-bar {
+  width: 0.14rem;
+  height: 20%;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--text-muted) 45%, transparent);
+}
+
+.control-segment-bar:nth-child(1) { height: 20%; }
+.control-segment-bar:nth-child(2) { height: 40%; }
+.control-segment-bar:nth-child(3) { height: 60%; }
+.control-segment-bar:nth-child(4) { height: 80%; }
+.control-segment-bar:nth-child(5) { height: 100%; }
+
+.control-segment-bar.is-filled {
+  background: color-mix(in srgb, var(--text-muted) 85%, transparent);
+}
+
+.control-segment[data-difficulty="4"].is-active,
+.control-segment[data-difficulty="5"].is-active {
+  color: var(--groudon-light);
+  background: color-mix(in srgb, var(--groudon) 24%, transparent);
+}
+
+.control-segment[data-difficulty="3"].is-active {
+  color: var(--rayquaza-light);
+  background: color-mix(in srgb, var(--rayquaza) 22%, transparent);
+}
+
+.control-segment[data-difficulty="4"].is-active .control-segment-bar.is-filled,
+.control-segment[data-difficulty="5"].is-active .control-segment-bar.is-filled {
+  background: var(--groudon-light);
+}
+
+.control-segment[data-difficulty="3"].is-active .control-segment-bar.is-filled {
+  background: var(--rayquaza-light);
+}
+
+.control-segment.is-active .control-segment-bar.is-filled {
+  background: var(--kyogre-light);
 }
 
 /* Story keeps the green accent so content selection stays visually distinct. */
