@@ -161,6 +161,7 @@ export function Dashboard({
 
       <section className="stats-grid stats-compact">
         <div className={`stat-card stat-card-playback${paused ? ' is-paused' : ''}`}>
+          <span className="stat-group-label">Playback</span>
           <div className="playback-speed-row" aria-label="Sentence speed controls">
             <button
               type="button"
@@ -198,6 +199,7 @@ export function Dashboard({
         </div>
 
         <div className="stat-card stat-card-language" role="group" aria-label="Sentence display toggles">
+          <span className="stat-group-label stat-group-label-span2">Display</span>
           <button
             type="button"
             className={`language-toggle-btn${furiganaActive ? ' is-active' : ''}`}
@@ -221,6 +223,7 @@ export function Dashboard({
         </div>
 
         <div className="stat-card stat-card-levels">
+          <span className="stat-group-label">Levels</span>
           <div className="hero-level-grid" role="group" aria-label="Sentence complexity">
             {GENERATION_COMPLEXITIES.map((level) => (
               <button
@@ -238,6 +241,7 @@ export function Dashboard({
         </div>
 
         <div className={`stat-card stat-card-story${storyMode ? ' is-active' : ''}`}>
+          <span className="stat-group-label">Story</span>
           <button
             type="button"
             className="story-mode-toggle"
