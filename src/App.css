@@ -3664,6 +3664,44 @@ body:has(.dashboard) .app {
   .reading-sentence { font-size: 1.55rem; }
   .kanji-mode-grid { grid-template-columns: 1fr; }
   .kanji-learn-char { font-size: 4.5rem; }
+
+  /* Wrapped database sentences on phones: give the wrapped lines room to
+     breathe so a word's furigana (positioned above it) doesn't crowd into
+     the line below it, and keep the fixed-height rotater box tall enough
+     to hold that extra spacing without clipping. */
+  .hero-database-block {
+    --hero-japanese-row-height: 7.6rem;
+  }
+  .hero-sentence-line.hero-database-line {
+    row-gap: 0.95em;
+    padding-top: 0.9rem;
+  }
+
+  /* Fill more of the phone screen: bigger panels, bigger type. */
+  .five-minute-study {
+    padding: 1.05rem;
+  }
+  .practice-grid {
+    gap: 0.65rem;
+    grid-template-rows: repeat(2, minmax(4.9rem, auto));
+  }
+  .practice-card {
+    min-height: 6.4rem;
+    padding: 0.7rem;
+  }
+  .practice-emoji {
+    font-size: 1.7rem;
+    margin-bottom: 0.3rem;
+  }
+  .practice-card-grammar .practice-emoji {
+    font-size: 1.35rem;
+  }
+  .practice-card-vocab-practice .practice-emoji {
+    font-size: 1.4rem;
+  }
+  .practice-label {
+    font-size: 0.95rem;
+  }
 }
 
 /* Kanji Lab */
