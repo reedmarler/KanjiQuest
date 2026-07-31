@@ -198,13 +198,26 @@ body:has(.dashboard) .app {
   padding: 0.28rem 0.65rem 0.1rem;
 }
 
-/* .hero-sentence-line (declared below, same specificity) sets nowrap for the
-   legacy word-reel line — this compound selector out-specifies it so the
-   database line, whose full-sentence swaps need to wrap, actually wins. */
+/* .hero-sentence-line (declared below, same specificity) sets nowrap and a
+   0.05em gap for the legacy word-reel line — this compound selector
+   out-specifies it so the database line, whose full-sentence swaps need to
+   wrap with zero gap, actually wins. The gap matters more than it looks:
+   .hero-database-frame (mounted only during a swap) never had a gap set, so
+   while this lost the cascade the rest-phase segments sat 0.05em apart from
+   each other while the mid-swap frame's segments sat flush — a real, if
+   small, difference in total row width that re-centered the still-fully-
+   visible outgoing text a few pixels the instant a swap began. */
 .hero-sentence-line.hero-database-line {
   white-space: normal;
   flex-wrap: wrap;
   align-content: center;
+  gap: 0;
+  /* Left-anchored for the same reason as the English row below: centering a
+     whole swapped-in sentence just re-anchors around a new midpoint every
+     time, which reads as sideways motion even when nothing is actually
+     "wrong" — pinning the start point removes that entirely. */
+  justify-content: flex-start;
+  text-align: left;
 }
 
 .hero-database-english {
@@ -217,13 +230,17 @@ body:has(.dashboard) .app {
   color: var(--kyogre-light);
   font: 500 0.76rem/var(--hero-database-english-row-height) 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.012em;
-  text-align: center;
+  /* Left-anchored, not centered: a whole-sentence swap has no fixed-length
+     word to center around, so centering just meant every swap re-anchored
+     around a different midpoint and the text appeared to slide sideways. */
+  text-align: left;
   overflow: hidden;
 }
 
 .hero-database-english-stack {
   display: inline-grid;
-  place-items: center;
+  align-items: center;
+  justify-items: start;
   width: 100%;
   height: var(--hero-database-english-row-height);
 }
@@ -278,7 +295,16 @@ body:has(.dashboard) .app {
 .hero-database-swap-stack,
 .hero-database-frame-stack {
   display: grid;
-  place-items: center;
+  grid-template-columns: 1fr;
+  align-items: center;
+  /* justify-items must stay "stretch" (the grid default), not "center":
+     centering the grid items lets the single implicit column shrink-to-fit
+     the widest overlaid sentence, which silently re-widens the whole stack
+     — and re-centers the still-fully-visible outgoing text — the instant
+     the swap phase mounts the (invisible, but still layout-affecting)
+     incoming frame. Stretching keeps the column pinned to the line's own
+     100% width in both phases, so nothing moves until the cross-fade itself
+     actually starts changing what's visible. */
   width: 100%;
   /* Grid stacking (not a fixed slot height) lets the box size itself to
      whichever of the two overlaid sentences is taller, so mismatched lengths
@@ -300,7 +326,7 @@ body:has(.dashboard) .app {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-start;
   white-space: normal;
   width: 100%;
 }
