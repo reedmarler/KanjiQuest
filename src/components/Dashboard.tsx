@@ -110,6 +110,7 @@ export function Dashboard({
   const storiesAtLevel = useMemo(() => getHeroStoriesForLevel(storyLevel), [storyLevel])
   const [paused, setPaused] = useState(false)
   const [playbackRate, setPlaybackRate] = useState<HeroPlaybackRate>(savedPlaybackRate)
+  const [additionalOpen, setAdditionalOpen] = useState(false)
 
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
   const furiganaActive = furiganaOn
@@ -319,33 +320,38 @@ export function Dashboard({
       </section>
 
       <section className="dashboard-additional" aria-labelledby="dashboard-additional-title">
-        <div className="dashboard-additional-heading">
-          <h2 id="dashboard-additional-title">Additional</h2>
-          <p>Browse, save, and shape your study library.</p>
-        </div>
-        <div className="dashboard-additional-actions">
-          <button type="button" onClick={onOpenVocabList}>
-            <span className="dashboard-additional-mark" aria-hidden="true">語</span>
-            <span><b>Vocab List</b><small>Browse every word by level</small></span>
-          </button>
-          <button type="button" onClick={onOpenFavoriteSentences}>
-            <span className="dashboard-additional-mark" aria-hidden="true">★</span>
-            <span><b>Favorite Sentences</b><small>Come back to saved sentences</small></span>
-          </button>
-          <button type="button" onClick={onOpenContentStudio}>
-            <span className="dashboard-additional-mark" aria-hidden="true">編</span>
-            <span><b>Content Studio</b><small>Add and organize your own content</small></span>
-          </button>
-        </div>
-      </section>
-
-      <section className="sentence-testing-launch">
-        <div>
-          <span>NEW · COMPLEXITY LEVELS 1–5</span>
-          <h2>Sentence Testing</h2>
-          <p>Generate 15 sentences from the complexity level you choose.</p>
-        </div>
-        <button type="button" className="btn btn-primary" onClick={onOpenSentenceTesting}>Open →</button>
+        <button
+          type="button"
+          className="dashboard-additional-toggle"
+          onClick={() => setAdditionalOpen((open) => !open)}
+          aria-expanded={additionalOpen}
+        >
+          <div className="dashboard-additional-heading">
+            <h2 id="dashboard-additional-title">Additional</h2>
+            <p>Browse, save, and shape your study library.</p>
+          </div>
+          <span className={`dashboard-additional-chevron${additionalOpen ? ' is-open' : ''}`} aria-hidden="true">▾</span>
+        </button>
+        {additionalOpen && (
+          <div className="dashboard-additional-actions">
+            <button type="button" onClick={onOpenVocabList}>
+              <span className="dashboard-additional-mark" aria-hidden="true">語</span>
+              <span><b>Vocab List</b><small>Browse every word by level</small></span>
+            </button>
+            <button type="button" onClick={onOpenFavoriteSentences}>
+              <span className="dashboard-additional-mark" aria-hidden="true">★</span>
+              <span><b>Favorite Sentences</b><small>Come back to saved sentences</small></span>
+            </button>
+            <button type="button" onClick={onOpenContentStudio}>
+              <span className="dashboard-additional-mark" aria-hidden="true">編</span>
+              <span><b>Content Studio</b><small>Add and organize your own content</small></span>
+            </button>
+            <button type="button" onClick={onOpenSentenceTesting}>
+              <span className="dashboard-additional-mark" aria-hidden="true">験</span>
+              <span><b>Sentence Testing</b><small>Generate 15 sentences by complexity level</small></span>
+            </button>
+          </div>
+        )}
       </section>
     </div>
   )

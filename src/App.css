@@ -2267,41 +2267,12 @@ body:has(.dashboard) .app {
   font-size: 0.72rem;
 }
 
-.sentence-testing-launch {
-  margin-top: 0.6rem;
-  padding: 0.72rem 0.8rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.85rem;
-  border: 1px solid rgba(110, 176, 224, 0.42);
-  border-radius: var(--radius);
-  background: linear-gradient(110deg, rgba(26, 61, 102, 0.44), rgba(36, 35, 54, 0.88));
-}
-
-.sentence-testing-launch span,
 .sentence-testing-kicker {
   display: block;
   color: var(--kyogre-light);
   font-size: 0.55rem;
   font-weight: 800;
   letter-spacing: 0.09em;
-}
-
-.sentence-testing-launch h2 {
-  margin-top: 0.12rem;
-  font-size: 0.95rem;
-}
-
-.sentence-testing-launch p {
-  margin-top: 0.1rem;
-  color: var(--text-muted);
-  font-size: 0.65rem;
-}
-
-.sentence-testing-launch .btn {
-  flex: 0 0 auto;
-  font-size: 0.65rem;
 }
 
 .sentence-testing {
@@ -5582,6 +5553,32 @@ body:has(.dashboard) .app {
   background: linear-gradient(135deg, color-mix(in srgb, var(--kyogre) 6%, transparent), transparent 54%), var(--surface);
 }
 
+.dashboard-additional-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dashboard-additional-chevron {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  transition: transform 160ms ease;
+}
+
+.dashboard-additional-chevron.is-open {
+  transform: rotate(180deg);
+}
+
 .dashboard-additional-heading {
   display: flex;
   align-items: baseline;
@@ -5603,7 +5600,7 @@ body:has(.dashboard) .app {
 
 .dashboard-additional-actions {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.38rem;
 }
 
