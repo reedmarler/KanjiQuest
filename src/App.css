@@ -3674,6 +3674,7 @@ body:has(.dashboard) .app {
   }
   .hero-sentence-line.hero-database-line {
     row-gap: 0.95em;
+    column-gap: 0.4em;
     padding-top: 0.9rem;
   }
 
