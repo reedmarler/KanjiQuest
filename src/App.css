@@ -1852,305 +1852,233 @@ body:has(.dashboard) .app {
     color 0.55s var(--hero-ease, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.45rem;
-  margin-bottom: 0.5rem;
-  align-items: stretch;
-}
-
-.stats-compact .stat-card {
-  padding: 0.4rem 0.35rem 0.35rem;
-  min-height: 3.4rem;
+/* Sentence controls: one deck, two rows — transport/display, then content. */
+.hero-controls {
   display: flex;
   flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.55rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--surface);
+}
+
+.hero-controls-row {
+  display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.hero-controls-row + .hero-controls-row {
+  padding-top: 0.4rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.control-group-levels {
+  gap: 0.4rem;
+}
+
+.control-group-label {
+  color: var(--text-muted);
+  font: 700 0.55rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Shared pill sizing keeps every control on the same 1.6rem baseline. */
+.control-play,
+.control-chip,
+.control-stepper,
+.control-segmented,
+.control-select {
+  height: 1.6rem;
   box-sizing: border-box;
 }
 
-.stat-group-label {
-  width: 100%;
-  margin-bottom: 0.22rem;
-  color: var(--text-muted);
-  font-family: 'Outfit', system-ui, sans-serif;
+.control-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 40%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--kyogre) 14%, var(--surface-2));
+  color: var(--text);
+  font: 700 0.6rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.control-play-icon {
   font-size: 0.5rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-align: center;
-  text-transform: uppercase;
-  opacity: 0.7;
-}
-
-.stat-group-label-span2 {
-  grid-column: 1 / -1;
-}
-
-.stats-compact .stat-value {
-  font-size: 1.15rem;
-  margin-bottom: 0.1rem;
-}
-
-.stats-compact .stat-label {
-  font-size: 0.58rem;
-}
-
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-  text-align: center;
-}
-
-.stat-card-studio .stat-value {
-  color: var(--groudon-light);
-}
-
-.stat-card-btn {
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-  width: 100%;
-  border-width: 1px;
-  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
-}
-
-.stat-card-btn.is-active {
-  border-width: 1px;
-  border-color: color-mix(in srgb, var(--kyogre-light) 55%, transparent);
-  background: color-mix(in srgb, var(--kyogre) 10%, var(--surface));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kyogre-light) 35%, transparent);
-}
-
-.stat-card-btn:hover {
-  border-color: color-mix(in srgb, var(--kyogre-light) 35%, var(--border));
-  color: var(--text);
-}
-
-.stat-card-btn.is-active .stat-value {
+  letter-spacing: -0.05em;
   color: var(--kyogre-light);
 }
 
-.stat-card-btn.is-active .stat-label {
-  color: var(--text-muted);
+.control-play:hover {
+  border-color: color-mix(in srgb, var(--kyogre-light) 62%, transparent);
+  background: color-mix(in srgb, var(--kyogre) 22%, var(--surface-2));
 }
 
-.stat-value-jp {
-  font-family: 'Noto Sans JP', sans-serif;
-  font-weight: 600;
+.control-play.is-paused {
+  border-color: color-mix(in srgb, var(--kyogre-light) 62%, transparent);
+  background: color-mix(in srgb, var(--kyogre) 24%, var(--surface-2));
 }
 
-.stat-card-language {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.22rem;
+/* Stepper reads as one connected unit rather than three floating buttons. */
+.control-stepper {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  overflow: hidden;
 }
 
-.language-toggle-btn {
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.24rem 0.1rem;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
-}
-
-.language-toggle-btn .stat-value {
-  font-size: 0.9rem;
-  margin-bottom: 0.05rem;
-  white-space: nowrap;
-}
-
-.language-toggle-btn .stat-label {
-  font-size: 0.52rem;
-  white-space: nowrap;
-}
-
-.language-toggle-btn.is-active {
-  border-color: color-mix(in srgb, var(--kyogre-light) 55%, transparent);
-  background: color-mix(in srgb, var(--kyogre) 10%, var(--surface));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kyogre-light) 35%, transparent);
-}
-
-.language-toggle-btn:hover {
-  border-color: color-mix(in srgb, var(--kyogre-light) 35%, var(--border));
-  color: var(--text);
-}
-
-.language-toggle-btn.is-active .stat-value {
-  color: var(--kyogre-light);
-}
-
-.language-toggle-btn.is-active .stat-label {
-  color: var(--text-muted);
-}
-
-.stat-card-levels {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-level-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.22rem;
-  width: 100%;
-}
-
-.hero-level-btn {
-  font-family: 'Outfit', system-ui, sans-serif;
-  font-size: 0.66rem;
-  font-weight: 600;
-  padding: 0.24rem 0.2rem;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
-  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
-  color: var(--text-muted);
-  cursor: pointer;
-  line-height: 1;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-}
-
-.hero-level-btn:hover {
-  color: var(--text);
-  border-color: color-mix(in srgb, var(--kyogre-light) 35%, var(--border));
-}
-
-.hero-level-btn.is-active {
-  color: var(--kyogre-light);
-  border-color: color-mix(in srgb, var(--kyogre-light) 55%, transparent);
-  background: color-mix(in srgb, var(--kyogre) 12%, var(--surface-2));
-}
-
-.stat-card-story {
-  gap: 0.18rem;
-  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-}
-
-.stat-card-story.is-active {
-  border-color: color-mix(in srgb, var(--rayquaza-light) 62%, transparent);
-  background: color-mix(in srgb, var(--rayquaza) 9%, var(--surface));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rayquaza-light) 28%, transparent);
-}
-
-.story-mode-toggle {
-  width: 100%;
+.control-stepper button {
+  min-width: 1.5rem;
+  padding: 0 0.2rem;
   border: 0;
   background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.stat-card-story.is-active .stat-value {
-  color: var(--rayquaza-light);
-}
-
-.story-level-row {
-  display: flex;
-  gap: 0.16rem;
-  width: 100%;
-}
-
-.story-level-btn {
-  flex: 1 1 0;
-  font-family: 'Outfit', system-ui, sans-serif;
-  font-size: 0.52rem;
-  font-weight: 600;
-  padding: 0.14rem 0.1rem;
-  border-radius: 6px;
-  border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
-  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
   color: var(--text-muted);
+  font: 700 0.72rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
-  line-height: 1;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  transition: color 160ms ease, background 160ms ease;
 }
 
-.story-level-btn:hover {
+.control-stepper button:hover:not(:disabled) {
   color: var(--text);
-  border-color: color-mix(in srgb, var(--rayquaza-light) 35%, var(--border));
+  background: color-mix(in srgb, var(--kyogre) 16%, transparent);
 }
 
-.story-level-btn.is-active {
-  color: var(--rayquaza-light);
-  border-color: color-mix(in srgb, var(--rayquaza-light) 55%, transparent);
-  background: color-mix(in srgb, var(--rayquaza) 12%, var(--surface-2));
-}
-
-.stat-card-story select {
-  width: 100%;
-  min-width: 0;
-  height: 1rem;
-  border: 1px solid color-mix(in srgb, var(--text-muted) 22%, transparent);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
-  color: var(--text-muted);
-  font: 600 0.5rem/1 'Outfit', system-ui, sans-serif;
-  padding: 0 0.34rem;
-  outline: none;
-  cursor: pointer;
-}
-
-.stat-card-story select:focus-visible,
-.story-mode-toggle:focus-visible {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--kyogre-light) 55%, transparent);
-}
-
-.stat-card-playback {
-  gap: 0.22rem;
-}
-
-.stat-card-playback.is-paused {
-  border-color: color-mix(in srgb, var(--kyogre-light) 55%, transparent);
-  background: color-mix(in srgb, var(--kyogre) 9%, var(--surface));
-}
-
-.playback-speed-row {
-  display: grid;
-  grid-template-columns: 1fr 1.45fr 1fr;
-  gap: 0.16rem;
-  width: 100%;
-}
-
-.playback-speed-row button,
-.playback-toggle {
-  height: 1.05rem;
-  border: 1px solid color-mix(in srgb, var(--text-muted) 22%, transparent);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
-  color: var(--text-muted);
-  font: 700 0.52rem/1 'Outfit', system-ui, sans-serif;
-  cursor: pointer;
-  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
-}
-
-.playback-speed-row button:hover:not(:disabled),
-.playback-toggle:hover,
-.stat-card-playback.is-paused .playback-toggle {
-  border-color: color-mix(in srgb, var(--kyogre-light) 48%, transparent);
-  background: color-mix(in srgb, var(--kyogre) 13%, var(--surface-2));
-  color: var(--text);
-}
-
-.playback-speed-row button:disabled {
-  opacity: 0.35;
+.control-stepper button:disabled {
+  opacity: 0.3;
   cursor: default;
 }
 
-.playback-toggle {
-  width: 100%;
+.control-stepper-value {
+  min-width: 2.1rem !important;
+  color: var(--text) !important;
+  font-size: 0.6rem !important;
+  border-left: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent) !important;
+  border-right: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent) !important;
+}
+
+/* Display toggles: glyph carries the meaning, word label confirms it. */
+.control-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  color: var(--text-muted);
+  font: 600 0.58rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.control-chip-jp {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.control-chip:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--kyogre-light) 40%, var(--border));
+}
+
+.control-chip.is-active {
+  color: var(--kyogre-light);
+  border-color: color-mix(in srgb, var(--kyogre-light) 58%, transparent);
+  background: color-mix(in srgb, var(--kyogre) 16%, var(--surface-2));
+}
+
+/* Levels sit in a single 5-across segmented control — no orphaned row. */
+.control-segmented {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  overflow: hidden;
+}
+
+.control-segment {
+  min-width: 1.9rem;
+  padding: 0 0.3rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: 700 0.6rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease;
+}
+
+.control-segment + .control-segment {
+  border-left: 1px solid color-mix(in srgb, var(--text-muted) 16%, transparent);
+}
+
+.control-segment:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--kyogre) 12%, transparent);
+}
+
+.control-segment.is-active {
+  color: var(--kyogre-light);
+  background: color-mix(in srgb, var(--kyogre) 26%, transparent);
+}
+
+/* Story keeps the green accent so content selection stays visually distinct. */
+.control-chip-story.is-active {
+  color: var(--rayquaza-light);
+  border-color: color-mix(in srgb, var(--rayquaza-light) 60%, transparent);
+  background: color-mix(in srgb, var(--rayquaza) 16%, var(--surface-2));
+}
+
+.control-group-story.is-active .control-segment.is-active {
+  color: var(--rayquaza-light);
+  background: color-mix(in srgb, var(--rayquaza) 26%, transparent);
+}
+
+.control-select {
+  max-width: 8rem;
+  padding: 0 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  color: var(--text-muted);
+  font: 600 0.58rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  outline: none;
+}
+
+.control-select:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--rayquaza-light) 40%, var(--border));
+}
+
+.control-play:focus-visible,
+.control-chip:focus-visible,
+.control-select:focus-visible,
+.control-segment:focus-visible,
+.control-stepper button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--kyogre-light) 55%, transparent);
 }
 
 .stat-value {
@@ -3572,7 +3500,12 @@ body:has(.dashboard) .app {
 
 @media (max-width: 720px) {
   .hero h1 { font-size: 2rem; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-controls-row { justify-content: center; }
+  .control-group-levels { width: 100%; justify-content: center; }
+  .control-group-story { width: 100%; justify-content: center; }
+  .control-segmented { flex: 1 1 auto; }
+  .control-segment { flex: 1 1 0; min-width: 0; }
+  .control-select { flex: 1 1 auto; max-width: none; }
   .dashboard-additional-actions { grid-template-columns: 1fr; }
   .dashboard-additional-heading,
   .five-minute-study-heading { align-items: flex-start; flex-direction: column; }

@@ -129,11 +129,13 @@ export function FocusedVocabPractice({ onBack }: FocusedVocabPracticeProps) {
               {example && (
                 <div className={'focused-vocab-example' + (revealed ? ' is-revealed' : '')} aria-hidden={!revealed}>
                   <span className="focused-vocab-example-en">{example.english}</span>
-                  <span className="focused-vocab-example-jp" lang="ja">
-                    {example.segments.map((segment, index) => (
-                      <FuriganaSegment key={index} text={segment.text} reading={segment.reading} />
-                    ))}
-                  </span>
+                  <div className="focused-vocab-example-jp-wrap">
+                    <span className="focused-vocab-example-jp" lang="ja">
+                      {example.segments.map((segment, index) => (
+                        <FuriganaSegment key={index} text={segment.text} reading={segment.reading} />
+                      ))}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
@@ -199,11 +201,13 @@ export function FocusedVocabPractice({ onBack }: FocusedVocabPracticeProps) {
             {example && (
               <div className={'focused-vocab-example' + (revealed ? ' is-visible' : '')} aria-hidden={!revealed}>
                 <span className="focused-vocab-example-en">{example.english}</span>
-                <span className="focused-vocab-example-jp" lang="ja">
-                  {example.segments.map((segment, index) => (
-                    <FuriganaSegment key={index} text={segment.text} reading={segment.reading} />
-                  ))}
-                </span>
+                <div className="focused-vocab-example-jp-wrap">
+                  <span className="focused-vocab-example-jp" lang="ja">
+                    {example.segments.map((segment, index) => (
+                      <FuriganaSegment key={index} text={segment.text} reading={segment.reading} />
+                    ))}
+                  </span>
+                </div>
               </div>
             )}
             <button

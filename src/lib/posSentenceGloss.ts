@@ -94,6 +94,12 @@ function sayEn(subject: string): string {
   return usesBaseVerb(subject) ? 'say' : 'says'
 }
 
+/** The auto-derived noun gloss is sometimes bare-plural (e.g. "hats", tuned
+ * for object-of-verb phrasing like "buys hats") — match the copula to it. */
+function isAreEn(nounPhrase: string): string {
+  return /s$/.test(nounPhrase.trim()) ? 'are' : 'is'
+}
+
 const PRONOUN_EN: Record<string, string> = {
   '私': 'I',
   '君': 'you',
@@ -381,8 +387,8 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
   if (label.includes(' させる')) return `${p} makes ${n} ${v}.`
   if (label.includes(' られる')) return `${p} is ${v}ed by ${n}.`
   if (label.includes(' れる') && label.includes('に [V]')) return `${p} can ${v} ${n}.`
-  if (label.includes('[I-Adj] と 思う')) return `${p} ${usesBaseVerb(p) ? 'think' : 'thinks'} ${n} is ${iAdj}.`
-  if (label.includes('[Na-Adj] だ と 思う')) return `${p} ${usesBaseVerb(p) ? 'think' : 'thinks'} ${n} is ${naAdj}.`
+  if (label.includes('[I-Adj] と 思う')) return `${p} ${usesBaseVerb(p) ? 'think' : 'thinks'} ${n} ${isAreEn(n)} ${iAdj}.`
+  if (label.includes('[Na-Adj] だ と 思う')) return `${p} ${usesBaseVerb(p) ? 'think' : 'thinks'} ${n} ${isAreEn(n)} ${naAdj}.`
   if (label.includes('と 思う')) return `${p} thinks ${n} ${verbFor(p, v)}.`
   if (label.includes('と 言う')) return `${p} says ${n} ${verbFor(p, v)}.`
   if (label.includes('か どうか')) return `${p} checks whether ${n} ${verbFor(p, v)}.`
@@ -422,10 +428,10 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
     return `${p} made ${n} more ${iAdj}.`
   }
   if (label.includes('が [I-Adj]') && !label.includes('[V]')) {
-    return `${p} ${sayEn(p)} ${n} is ${adv ? `${adv} ` : ''}${iAdj}.`
+    return `${p} ${sayEn(p)} ${n} ${isAreEn(n)} ${adv ? `${adv} ` : ''}${iAdj}.`
   }
   if (label.includes('が [Na-Adj]') && !label.includes('[V]')) {
-    return `${p} ${sayEn(p)} ${n} is ${adv ? `${adv} ` : ''}${naAdj}.`
+    return `${p} ${sayEn(p)} ${n} ${isAreEn(n)} ${adv ? `${adv} ` : ''}${naAdj}.`
   }
   if (label.includes('たい')) {
     const advBit = adv ? `${adv} ` : ''
@@ -447,8 +453,8 @@ export function getPosEnglish(frame: HeroSentenceFrame): string {
     if (label.includes('に [V]')) return `${p} ${advBit}${verbFor(p, v)} at ${n}.`
     if (label.includes('で [V]')) return `${p} ${advBit}${verbFor(p, v)} at ${n}.`
     if (label.includes('と [V]')) return `${p} ${advBit}${verbFor(p, v)} with ${n}.`
-    if (label.includes('が [I-Adj]')) return `${p} ${sayEn(p)} ${n} is ${iAdj}.`
-    if (label.includes('が [Na-Adj]')) return `${p} ${sayEn(p)} ${n} is ${naAdj}.`
+    if (label.includes('が [I-Adj]')) return `${p} ${sayEn(p)} ${n} ${isAreEn(n)} ${iAdj}.`
+    if (label.includes('が [Na-Adj]')) return `${p} ${sayEn(p)} ${n} ${isAreEn(n)} ${naAdj}.`
     return `${p} ${advBit}${verbFor(p, v)} ${n}.`
   }
   if (label.includes('でしょう')) {

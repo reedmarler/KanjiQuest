@@ -159,127 +159,127 @@ export function Dashboard({
         />
       </header>
 
-      <section className="stats-grid stats-compact">
-        <div className={`stat-card stat-card-playback${paused ? ' is-paused' : ''}`}>
-          <span className="stat-group-label">Playback</span>
-          <div className="playback-speed-row" aria-label="Sentence speed controls">
+      <section className="hero-controls" aria-label="Sentence controls">
+        <div className="hero-controls-row">
+          <div className="control-group" role="group" aria-label="Playback">
             <button
               type="button"
-              aria-label="Slow down sentence"
-              disabled={speedIndex === 0}
-              onClick={() => setPlaybackRate(HERO_PLAYBACK_RATES[speedIndex - 1]!)}
+              className={`control-play${paused ? ' is-paused' : ''}`}
+              onClick={() => setPaused((value) => !value)}
+              aria-pressed={paused}
             >
-              −
+              <span className="control-play-icon" aria-hidden="true">{paused ? '▶' : '❚❚'}</span>
+              {paused ? 'Play' : 'Pause'}
             </button>
-            <button
-              type="button"
-              className="playback-rate"
-              aria-label={`Sentence speed ${playbackRate} times`}
-              onClick={() => setPlaybackRate(0.5)}
-            >
-              {playbackRate}×
-            </button>
-            <button
-              type="button"
-              aria-label="Speed up sentence"
-              disabled={speedIndex === HERO_PLAYBACK_RATES.length - 1}
-              onClick={() => setPlaybackRate(HERO_PLAYBACK_RATES[speedIndex + 1]!)}
-            >
-              +
-            </button>
-          </div>
-          <button
-            type="button"
-            className="playback-toggle"
-            onClick={() => setPaused((value) => !value)}
-            aria-pressed={paused}
-          >
-            {paused ? 'Play' : 'Pause'}
-          </button>
-        </div>
-
-        <div className="stat-card stat-card-language" role="group" aria-label="Sentence display toggles">
-          <span className="stat-group-label stat-group-label-span2">Display</span>
-          <button
-            type="button"
-            className={`language-toggle-btn${furiganaActive ? ' is-active' : ''}`}
-            onClick={toggleFurigana}
-            aria-pressed={furiganaActive}
-            aria-label="Toggle furigana"
-          >
-            <span className="stat-value stat-value-jp">ふり</span>
-            <span className="stat-label">Furigana</span>
-          </button>
-          <button
-            type="button"
-            className={`language-toggle-btn${englishOn ? ' is-active' : ''}`}
-            onClick={toggleEnglish}
-            aria-pressed={englishOn}
-            aria-label="Toggle English translation"
-          >
-            <span className="stat-value stat-value-jp">EN</span>
-            <span className="stat-label">English</span>
-          </button>
-        </div>
-
-        <div className="stat-card stat-card-levels">
-          <span className="stat-group-label">Levels</span>
-          <div className="hero-level-grid" role="group" aria-label="Sentence complexity">
-            {GENERATION_COMPLEXITIES.map((level) => (
+            <div className="control-stepper" role="group" aria-label="Sentence speed">
               <button
-                key={level}
                 type="button"
-                className={`hero-level-btn${complexity === level ? ' is-active' : ''}`}
-                onClick={() => setComplexity(level)}
-                aria-pressed={complexity === level}
-                aria-label={`Generation complexity level ${level}`}
+                aria-label="Slow down sentence"
+                disabled={speedIndex === 0}
+                onClick={() => setPlaybackRate(HERO_PLAYBACK_RATES[speedIndex - 1]!)}
               >
-                L{level}
+                −
               </button>
-            ))}
+              <button
+                type="button"
+                className="control-stepper-value"
+                aria-label={`Sentence speed ${playbackRate} times, tap to reset`}
+                onClick={() => setPlaybackRate(0.5)}
+              >
+                {playbackRate}×
+              </button>
+              <button
+                type="button"
+                aria-label="Speed up sentence"
+                disabled={speedIndex === HERO_PLAYBACK_RATES.length - 1}
+                onClick={() => setPlaybackRate(HERO_PLAYBACK_RATES[speedIndex + 1]!)}
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div className="control-group" role="group" aria-label="Display">
+            <button
+              type="button"
+              className={`control-chip${furiganaActive ? ' is-active' : ''}`}
+              onClick={toggleFurigana}
+              aria-pressed={furiganaActive}
+            >
+              <span className="control-chip-jp" aria-hidden="true">ふり</span>
+              Furigana
+            </button>
+            <button
+              type="button"
+              className={`control-chip${englishOn ? ' is-active' : ''}`}
+              onClick={toggleEnglish}
+              aria-pressed={englishOn}
+            >
+              <span className="control-chip-jp" aria-hidden="true">EN</span>
+              English
+            </button>
           </div>
         </div>
 
-        <div className={`stat-card stat-card-story${storyMode ? ' is-active' : ''}`}>
-          <span className="stat-group-label">Story</span>
-          <button
-            type="button"
-            className="story-mode-toggle"
-            onClick={() => setStoryMode((enabled) => !enabled)}
-            aria-pressed={storyMode}
-          >
-            <span className="stat-value stat-value-jp" aria-hidden="true">物</span>
-            <span className="stat-label">Story</span>
-          </button>
-          {HERO_STORY_LEVELS.length > 1 && (
-            <div className="story-level-row" role="group" aria-label="Story level">
-              {HERO_STORY_LEVELS.map((level) => (
+        <div className="hero-controls-row">
+          <div className="control-group control-group-levels">
+            <span className="control-group-label" id="hero-level-label">Level</span>
+            <div className="control-segmented" role="group" aria-labelledby="hero-level-label">
+              {GENERATION_COMPLEXITIES.map((level) => (
                 <button
                   key={level}
                   type="button"
-                  className={`story-level-btn${level === storyLevel ? ' is-active' : ''}`}
-                  aria-pressed={level === storyLevel}
-                  onClick={() => setStoryLevel(level)}
+                  className={`control-segment${complexity === level ? ' is-active' : ''}`}
+                  onClick={() => setComplexity(level)}
+                  aria-pressed={complexity === level}
+                  aria-label={`Generation complexity level ${level}`}
                 >
                   {level}
                 </button>
               ))}
             </div>
-          )}
-          <select
-            value={storyId}
-            onChange={(event) => {
-              setStoryId(event.target.value)
-              setStoryMode(true)
-            }}
-            aria-label="Choose story"
-          >
-            {storiesAtLevel.map((story) => (
-              <option key={story.id} value={story.id}>{story.shortTitle}</option>
-            ))}
-          </select>
-        </div>
+          </div>
 
+          <div className={`control-group control-group-story${storyMode ? ' is-active' : ''}`}>
+            <button
+              type="button"
+              className={`control-chip control-chip-story${storyMode ? ' is-active' : ''}`}
+              onClick={() => setStoryMode((enabled) => !enabled)}
+              aria-pressed={storyMode}
+            >
+              <span className="control-chip-jp" aria-hidden="true">物</span>
+              Story
+            </button>
+            {HERO_STORY_LEVELS.length > 1 && (
+              <div className="control-segmented control-segmented-story" role="group" aria-label="Story level">
+                {HERO_STORY_LEVELS.map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    className={`control-segment${level === storyLevel ? ' is-active' : ''}`}
+                    aria-pressed={level === storyLevel}
+                    onClick={() => setStoryLevel(level)}
+                  >
+                    {level}
+                  </button>
+                ))}
+              </div>
+            )}
+            <select
+              className="control-select"
+              value={storyId}
+              onChange={(event) => {
+                setStoryId(event.target.value)
+                setStoryMode(true)
+              }}
+              aria-label="Choose story"
+            >
+              {storiesAtLevel.map((story) => (
+                <option key={story.id} value={story.id}>{story.shortTitle}</option>
+              ))}
+            </select>
+          </div>
+        </div>
       </section>
 
       <section className="progress-section progress-compact">
