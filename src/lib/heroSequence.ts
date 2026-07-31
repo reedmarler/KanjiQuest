@@ -1,18 +1,19 @@
 import { HERO_SLOT_WIDTHS, type HeroSentenceFrame, type HeroStep } from '../data/heroSentences'
-import { swappableSlotsInTemplate } from '../data/heroPosTemplates'
-import {
-  compileSegments,
-  fillTemplate,
-  getChangedSegmentKeys,
-  HERO_POS_TEMPLATES_BY_LEVEL,
-  rotateFill,
-} from './posSentenceEngine'
+import { patternsForComplexity, type GenerationComplexity } from './generationComplexity'
+import { generatePreviewSentence, type GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import type { JlptLevel } from './types'
 import type { WrongPool } from './wrongPool'
 
-const RUNS_PER_LEVEL = 24
-const ROTATIONS_PER_RUN = 9
+const STEPS_PER_LEVEL = 40
+const GENERATION_ATTEMPTS_PER_STEP = 6
 const STEPS_CACHE = new Map<string, HeroStep[]>()
+
+// The dashboard's complexity buttons (L1-L5) drive JLPT level everywhere else
+// in the app; the category-sentence generator groups patterns by grammatical
+// complexity instead, so map back to that axis here.
+const JLPT_TO_COMPLEXITY: Record<JlptLevel, GenerationComplexity> = {
+  N5: 1, N4: 2, N3: 3, N2: 4, N1: 5,
+}
 
 if (typeof window !== 'undefined') {
   window.addEventListener('kanji-quest-content-database-change', () => STEPS_CACHE.clear())
@@ -22,16 +23,17 @@ export function clearHeroStepsCache(): void {
   STEPS_CACHE.clear()
 }
 
-function frameFor(templateId: number, fills: Parameters<typeof compileSegments>[1]): HeroSentenceFrame {
+function categoryFrameFor(sentence: GeneratedPreviewSentence): HeroSentenceFrame {
   return {
-    templateId,
-    fills,
-    segments: compileSegments(
-      HERO_POS_TEMPLATES_BY_LEVEL.All.find((template) => template.id === templateId)
-        ?? HERO_POS_TEMPLATES_BY_LEVEL.All[0]!,
-      fills,
-    ),
-    generatedPatternId: `database-${templateId}`,
+    generatedEnglish: sentence.english,
+    generatedReading: sentence.reading,
+    generatedPatternId: `category-${sentence.frameId}`,
+    segments: sentence.furigana.map((part, index) => ({
+      key: part.slot ?? `lit-${index}`,
+      text: part.text,
+      reading: part.reading,
+      swappable: false,
+    })),
     prefix: '',
     subject: '',
     topicParticle: '',
@@ -44,54 +46,53 @@ function frameFor(templateId: number, fills: Parameters<typeof compileSegments>[
 }
 
 /**
- * A hero run is deliberately a single grammar frame.  Each next state is
- * admitted only after the sentence validator accepts it, so one word (or a
- * verb ending) can change without making the surrounding sentence nonsense.
+ * Each step is a complete, independently generated sentence from the same
+ * hand-authored generator behind Sentence Testing — its English gloss is
+ * written together with each grammar pattern rather than composed generically,
+ * so unlike the old per-slot rotation there is no way for the translation to
+ * drift out of sync with a rotated verb ending or adverb. The tradeoff is the
+ * animation: every step is a full-sentence swap rather than a single word
+ * sliding into place.
  */
 function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number): HeroStep[] {
-  const templates = HERO_POS_TEMPLATES_BY_LEVEL[level]
-  if (!templates.length) return []
+  const complexity = JLPT_TO_COMPLEXITY[level]
+  const patterns = patternsForComplexity(complexity)
+  if (!patterns.length) return []
 
-  const start = Math.abs(sequenceSeed) % templates.length
-  const selected = Array.from({ length: RUNS_PER_LEVEL }, (_, index) => (
-    // 17 walks through the template bank without clustering neighboring grammar.
-    templates[(start + index * 17) % templates.length]!
-  ))
-
+  const start = Math.abs(sequenceSeed) % patterns.length
   const steps: HeroStep[] = []
+  const seen = new Set<string>()
 
-  selected.forEach((template, templateIndex) => {
-    let fills = fillTemplate(template, sequenceSeed + 1409 + templateIndex * 113)
-    let current = frameFor(template.id, fills)
-    const slots = swappableSlotsInTemplate(template)
+  for (let index = 0; index < STEPS_PER_LEVEL; index++) {
+    // 13 walks through the pattern bank without clustering neighboring grammar.
+    const pattern = patterns[(start + index * 13) % patterns.length]!
+    let sentence: GeneratedPreviewSentence | null = null
 
+    for (let attempt = 0; attempt < GENERATION_ATTEMPTS_PER_STEP; attempt++) {
+      const seed = sequenceSeed + 4001 + index * 97 + attempt * 733
+      try {
+        const candidate = generatePreviewSentence(pattern.jlpt, seed, undefined, pattern.id, true)
+        if (!candidate.japanese) continue
+        if (!sentence) sentence = candidate
+        if (!seen.has(candidate.japanese)) {
+          sentence = candidate
+          break
+        }
+      } catch {
+        // The pattern's semantic/tag rules can rule out every combination
+        // for a given seed; just try the next seed.
+      }
+    }
+
+    if (!sentence) continue
+    seen.add(sentence.japanese)
     steps.push({
-      frame: current,
+      frame: categoryFrameFor(sentence),
       changed: [],
       slotWidths: HERO_SLOT_WIDTHS,
       templateRefresh: true,
     })
-
-    for (let turn = 0; turn < Math.max(ROTATIONS_PER_RUN, slots.length); turn++) {
-      const slot = slots[turn % slots.length]
-      const nextFills = rotateFill(fills, slot!, sequenceSeed + 3001 + templateIndex * 97 + turn * 19, template)
-      const next = frameFor(template.id, nextFills)
-      const changed = getChangedSegmentKeys(current.segments ?? [], next.segments ?? [])
-
-      // A failed validation can return the existing fills. Do not create a
-      // fake animation in that case.
-      if (changed.length !== 1) continue
-
-      steps.push({
-        frame: next,
-        changed,
-        slotWidths: HERO_SLOT_WIDTHS,
-        templateRefresh: false,
-      })
-      fills = nextFills
-      current = next
-    }
-  })
+  }
 
   return steps
 }
@@ -117,5 +118,3 @@ export function auditPosSteps(level: JlptLevel): number {
     .filter((step) => !(step.frame.segments?.map((segment) => segment.text).join('')))
     .length
 }
-
-export const ROTATIONS_PER_SENTENCE = ROTATIONS_PER_RUN
