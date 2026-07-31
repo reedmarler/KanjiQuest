@@ -223,7 +223,7 @@ export function Dashboard({
 
         <div className="hero-controls-row">
           <div className="control-group control-group-levels">
-            <span className="control-group-label" id="hero-level-label">Level <span className="control-group-label-hint">easier → harder</span></span>
+            <span className="control-group-label" id="hero-level-label">Level</span>
             <div className="control-segmented control-segmented-difficulty" role="group" aria-labelledby="hero-level-label">
               {GENERATION_COMPLEXITIES.map((level) => (
                 <button
