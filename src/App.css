@@ -3683,6 +3683,14 @@ body:has(.dashboard) .app {
     );
   }
 
+  /* At mobile font sizes, the desktop's ~0.04em furigana-to-kanji overlap
+     reads as the reading crowding/touching the character it labels instead
+     of sitting cleanly above it — give it real clearance here. This only
+     changes the vertical offset of the reading itself, not word spacing. */
+  .hero-sentence-line .hero-furigana .furigana-ruby rt {
+    bottom: calc(100% + 0.35em);
+  }
+
   .hero-controls-row { justify-content: center; }
   .control-group-levels { width: 100%; justify-content: center; }
   .control-group-story { width: 100%; justify-content: center; }
