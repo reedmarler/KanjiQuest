@@ -177,15 +177,7 @@ function App() {
         <Suspense fallback={<RouteLoading label="Study Library" />}>
           <LibraryPanel
             initialTab={libraryTab}
-            favorites={favoriteSentences}
             onBack={() => setView('dashboard')}
-            onRemove={(favorite) => {
-              setFavoriteSentences((current) => {
-                const next = current.filter((item) => item.japanese !== favorite.japanese)
-                saveFavoriteSentences(next)
-                return next
-              })
-            }}
           />
         </Suspense>
       </div>
@@ -309,8 +301,8 @@ function App() {
         onOpenVocabPractice={() => setView('vocab-practice')}
         onOpenContentStudio={() => setView('content-studio')}
         onOpenKanji={() => setView('kanji')}
-        onOpenFavoriteSentences={() => {
-          setLibraryTab('favorites')
+        onOpenWordCategories={() => {
+          setLibraryTab('categories')
           setView('library')
         }}
         onOpenSentenceTesting={() => setView('sentence-testing')}

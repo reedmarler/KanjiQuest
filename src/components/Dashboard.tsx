@@ -83,7 +83,7 @@ interface DashboardProps {
   onOpenVocabPractice: () => void
   onOpenKanji: () => void
   onOpenContentStudio: () => void
-  onOpenFavoriteSentences: () => void
+  onOpenWordCategories: () => void
   onOpenSentenceTesting: () => void
 }
 
@@ -96,7 +96,7 @@ export function Dashboard({
   onOpenVocabPractice,
   onOpenKanji,
   onOpenContentStudio,
-  onOpenFavoriteSentences,
+  onOpenWordCategories,
   onOpenSentenceTesting,
   wrongPool,
   progress,
@@ -349,9 +349,9 @@ export function Dashboard({
               <span className="dashboard-additional-mark" aria-hidden="true">語</span>
               <span><b>Vocab List</b><small>Browse every word by level</small></span>
             </button>
-            <button type="button" onClick={onOpenFavoriteSentences}>
-              <span className="dashboard-additional-mark" aria-hidden="true">★</span>
-              <span><b>Favorite Sentences</b><small>Come back to saved sentences</small></span>
+            <button type="button" onClick={onOpenWordCategories}>
+              <span className="dashboard-additional-mark" aria-hidden="true">動</span>
+              <span><b>Word Categories</b><small>Browse verbs, adjectives, nouns, and more</small></span>
             </button>
             <button type="button" onClick={onOpenContentStudio}>
               <span className="dashboard-additional-mark" aria-hidden="true">編</span>

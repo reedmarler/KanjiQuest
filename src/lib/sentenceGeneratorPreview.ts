@@ -435,7 +435,15 @@ function english(frame: PreviewFrame, slots: Record<string, FilledSlot>) {
   return 'Generated sentence.'
 }
 
+// This is the last-resort fallback when the real generator can't produce a
+// sentence for a requested pattern/seed — `pattern.meaning` is a grammar
+// description ("leaving or exiting from a source..."), never a translation,
+// so every id shown here needs its own real English gloss or it leaks that
+// description straight to the user (as happened with n5-29 / 部屋から出る).
 const catalogEnglish: Record<string, string> = {
+  'n5-17': 'This book is interesting.',
+  'n5-26': 'I live in Tokyo.',
+  'n5-29': 'I leave the room.',
   'n4-01': 'I want to read a book.', 'n4-02': 'I am reading a book.', 'n4-03': 'I read a book.', 'n4-04': 'I do not read a book.', 'n4-05': 'I have to study.', 'n4-06': 'You may eat.', 'n4-07': 'You must not enter.', 'n4-08': 'I have been to Japan.', 'n4-09': 'I study while listening to music.', 'n4-10': 'I begin studying.',
   'n3-01': 'I make a point of studying every day.', 'n3-02': 'I have decided to go to Japan.', 'n3-03': 'I become able to read kanji.', 'n3-04': 'I accidentally forget my homework.', 'n3-05': 'I make a reservation in advance.', 'n3-06': 'If it rains, I will not go.', 'n3-07': 'If I have time, I will go.', 'n3-08': 'Although I studied, I forgot it.', 'n3-09': 'Because it is raining, I stay home.', 'n3-10': 'I study in order to go to Japan.',
   'n2-01': 'It is not that I dislike it.', 'n2-02': 'I cannot allow myself to go.', 'n2-03': 'It was decided that I would be transferred.', 'n2-04': 'There is no need to worry.', 'n2-05': 'He must be the culprit.', 'n2-06': 'He should come.', 'n2-07': 'Life is difficult.', 'n2-08': "A voice like a bird's.", 'n2-09': 'I write it down so I do not forget.', 'n2-10': 'I am just about to go home.',

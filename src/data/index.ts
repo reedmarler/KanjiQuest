@@ -5,6 +5,9 @@ import { vocabBulkHeroCards } from './vocabBulkHero'
 import { vocabBulkListCards } from './vocabBulkList'
 import { vocabTop1000Cards } from './vocabTop1000'
 import { vocabCoreExpansionCards } from './vocabCoreExpansion'
+import { vocabAdverbCards } from './vocabAdverbs'
+import { vocabVerbCards } from './vocabVerbs'
+import { vocabAdjectiveCards } from './vocabAdjectives'
 import { vocabFocusCards } from './vocabFocusSets'
 import { userAddedVocabCards } from './userAddedVocab'
 import { kanjiCards } from './kanji'
@@ -28,6 +31,9 @@ export const allCards: StudyCard[] = [
   ...vocabBulkListCards,
   ...vocabTop1000Cards,
   ...vocabCoreExpansionCards,
+  ...vocabAdverbCards,
+  ...vocabVerbCards,
+  ...vocabAdjectiveCards,
   ...vocabFocusCards,
   ...additionalVocabularySenseCards,
   ...userAddedVocabCards,
