@@ -39,6 +39,9 @@ const mailableTags = new Set(['book', 'document', 'notebook', 'magazine', 'newsp
 const sukunaiCompatibleWords = new Set(['人', '人々', '時間', 'お金', '問題', '機会', '車', '木'])
 const animalHoshiiTags = new Set(['food', 'fruit', 'vegetable', 'meat', 'seafood', 'fish', 'rice', 'bread', 'noodles', 'soup', 'dessert', 'snack', 'candy', 'ice-cream', 'edible', 'drink', 'drinkable', 'beverage', 'water', 'bone', 'toy', 'pet-toy'])
 const animalSubjectTags = new Set(['animal', 'dog', 'cat', 'bird', 'fish', 'pet'])
+const studySubjects = new Set(['日本語', '英語', '中国語', '外国語', '漢字', '単語', '語彙', '文法', '発音', '数学', '歴史', '科学'])
+const sendableItems = new Set(['手紙', 'はがき', '小包', '荷物', '箱', '書類', '資料', 'メール'])
+const findableLostItems = new Set(['鍵', '財布', '手紙', '切符', 'チケット', '携帯電話', '電話', 'かばん', '傘'])
 
 function tags(sentence: GeneratedPreviewSentence, slotName: string): Set<string> {
   return new Set(sentence.slots[slotName]?.tags ?? [])
@@ -110,6 +113,22 @@ function checkSentence(sentence: GeneratedPreviewSentence, complexity: Generatio
 
   if (verb?.dictionaryForm === '送る' && sentence.slots.object && !hasAny(tags(sentence, 'object'), mailableTags)) {
     addViolation(violations, sentence, complexity, seed, '送る object is not mailable/shippable')
+  }
+
+  if (verb?.dictionaryForm === '勉強する' && sentence.slots.object && !studySubjects.has(sentence.slots.object.dictionaryForm)) {
+    addViolation(violations, sentence, complexity, seed, '勉強する object is not a field of study')
+  }
+
+  if (verb?.dictionaryForm === '送る' && sentence.slots.object && !sendableItems.has(sentence.slots.object.dictionaryForm)) {
+    addViolation(violations, sentence, complexity, seed, '送る object is outside the reviewed sendable-item set')
+  }
+
+  if (verb?.dictionaryForm === '見つける' && sentence.slots.object && !findableLostItems.has(sentence.slots.object.dictionaryForm)) {
+    addViolation(violations, sentence, complexity, seed, '見つける object is not a plausible lost item')
+  }
+
+  if (/\bgo(?:es)? to the inside\b/i.test(sentence.english)) {
+    addViolation(violations, sentence, complexity, seed, 'English movement gloss has an invalid "to the inside" phrase')
   }
 
   if (sentence.slots.adjective?.dictionaryForm === '少ない') {

@@ -700,15 +700,15 @@ function definite(value: string) {
 // missing article reads as broken English, while these read as broken only if
 // one is added.
 const uncountableGlosses = new Set([
-  'water','rice','bread','milk','tea','coffee','juice','alcohol','sake','beer','wine','soup','ramen','sushi','udon','soba','pasta',
+  'water','rice','bread','milk','tea','coffee','juice','alcohol','sake','beer','wine','soup','miso soup','ramen','sushi','udon','soba','pasta',
   'meat','beef','pork','chicken','fish','seafood','fruit','food','sugar','salt','oil','butter','cheese','ice cream',
   'money','music','information','news','homework','work','weather','clothing','furniture','luggage','advice','anime','paper','mail',
   // These foods are generally treated as substances when eaten.
-  'pizza','curry','salad','chocolate','candy','cereal','yogurt',
+  'pizza','curry','salad','chocolate','candy','cereal','yogurt','tofu',
   // Language names take no article as a study/speech object: “speaks Japanese”, not “speaks a Japanese”.
   'japanese','english','chinese','french','spanish','german','korean',
   // Academic subjects read as a field of study, not a countable item: “studied math”, not “studied a math”.
-  'math','mathematics','history','grammar','pronunciation','science','literature','philosophy',
+  'math','mathematics','history','grammar','pronunciation','science','literature','philosophy','kanji','lunch',
 ])
 // テレビ is the set when you want one and the medium when you watch it, so the
 // article depends on the verb rather than on the noun.
@@ -793,6 +793,7 @@ function englishPhrase(word: WordRecord, slot: string) {
     return objectPronouns[phrase] ?? phrase
   }
   if (slot === 'object' && word.japanese === '果物') return 'fruit'
+  if (slot === 'object' && word.japanese === '意味') return definite(gloss)
   if (slot === 'object') {
     // A person as a direct object ("waits for you") still needs object-case
     // pronouns, not the indefinite article objectEnglish() adds to nouns.
@@ -801,9 +802,11 @@ function englishPhrase(word: WordRecord, slot: string) {
     return objectEnglish(gloss)
   }
   if (slot === 'location') {
+    if (/^(?:inside|in front of|behind|next to)\b/i.test(gloss)) return gloss
     if (word.japanese === '床' || tags.has('floor')) return 'on the floor'
     if (tags.has('home') && ['家','うち','自宅'].includes(word.japanese)) return 'at home'
-    if ([...tags].some(tag=>['country','city','town','village','neighborhood','island'].includes(tag))) return `in ${/^[A-Z]/.test(gloss) ? gloss : definite(gloss)}`
+    if (tags.has('island')) return `on ${/^[A-Z]/.test(gloss) ? gloss : indefinite(gloss)}`
+    if ([...tags].some(tag=>['country','city','town','village','neighborhood'].includes(tag))) return `in ${/^[A-Z]/.test(gloss) ? gloss : definite(gloss)}`
     if ([...tags].some(tag => ['room','kitchen','bathroom','bedroom','living-room','classroom','house'].includes(tag))) return `in ${definite(gloss)}`
     if (tags.has('school') && /^school$/i.test(gloss)) return 'at school'
     return `at ${definite(gloss)}`
@@ -814,6 +817,9 @@ function englishPhrase(word: WordRecord, slot: string) {
     if ([...tags].some(tag => ['country','city','town','village','island'].includes(tag))) return /^[A-Z]/.test(gloss) ? gloss : indefinite(gloss)
   }
   if (slot === 'time') {
+    const monthEnglish: Record<string,string> = { 一月:'January', 二月:'February', 三月:'March', 四月:'April', 五月:'May', 六月:'June', 七月:'July', 八月:'August', 九月:'September', 十月:'October', 十一月:'November', 十二月:'December' }
+    if (monthEnglish[word.japanese]) return `in ${monthEnglish[word.japanese]}`
+    if (tags.has('month') || /^[一二三四五六七八九十]+月$/.test(word.japanese)) return `in ${gloss}`
     if (tags.has('morning')) return `in ${definite(gloss)}`
     if (tags.has('afternoon') || tags.has('evening')) return `in ${definite(gloss)}`
     if (tags.has('night') || tags.has('noon') || tags.has('midnight')) return `at ${gloss}`
@@ -956,6 +962,9 @@ function appendForm(form: VerbForm, ending: string): VerbForm {
 
 function n4SurfaceForm(patternId: string, verb: VerbUsageRecord): VerbForm | null {
   const forms=n4VerbForms(verb)
+  // 眠り始める is grammatical, but 寝始める is the natural expression for
+  // starting to sleep / going to sleep.
+  if (patternId === 'n4-10' && verb.id === 'nemuru-time') return { japanese:'寝始めます', reading:'ねはじめます' }
   const byPattern: Record<string,VerbForm> = {
     'n4-01':appendForm(forms.masuStem,'たいです'),
     'n4-02':appendForm(forms.te,'います'),
@@ -1000,6 +1009,16 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
     if (verb.id === 'yomu-adverb' && slot === 'object') pool=pool.filter(word=>!tagSet(word).has('news')&&word.japanese!=='ニュース')
     if (verb.japanese === '読む' && slot === 'object') pool=pool.filter(word=>!unreadableObjectWords.has(word.japanese))
     if (verb.id === 'hirou-basic' && slot === 'object') pool=pool.filter(word=>!['光','電気','音','熱','空気','影'].includes(word.japanese))
+    // 見つける is most natural in these context-free examples when the thing
+    // plausibly went missing; a television or washing machine needs a story.
+    if (verb.id === 'mitsukeru-basic' && slot === 'object') {
+      const findableLostItems = new Set(['鍵','財布','手紙','切符','チケット','携帯電話','電話','かばん','傘'])
+      pool=pool.filter(word=>findableLostItems.has(word.japanese))
+    }
+    if (verb.id === 'ukeru-basic' && slot === 'object') {
+      const receivableItems = new Set(['手紙','メール','荷物','賞','招待状','通知','電話'])
+      pool=pool.filter(word=>receivableItems.has(word.japanese))
+    }
     if (verb.id === 'narau-basic' && slot === 'object') pool=pool.filter(word=>narauCompatibleWords.has(word.japanese))
     // The classifier files any verb gloss under Activity right alongside real
     // する-compatible nouns like 買い物/料理/相談, and not every verb entry in
@@ -1068,6 +1087,30 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
         && !tags.has('question-word')
         && !tags.has('interrogative')
     })
+    // A professional driver drinking alcohol is an especially misleading
+    // default scenario in a beginner sentence generator.
+    if (slot === 'object' && verb.id === 'nomu-basic' && filled.subject?.japanese === '運転手') {
+      pool=pool.filter(word=>word.japanese !== '酒')
+    }
+    // 残す + 電話 means leaving a telephone behind, not leaving a message.
+    // Keep phone out of this generic object slot until the generator has a
+    // dedicated "leave a message" construction.
+    if (slot === 'object' && verb.id === 'nokosu-basic') {
+      pool=pool.filter(word=>!['電話','携帯電話'].includes(word.japanese))
+    }
+    // 集まる describes a group gathering; a single companion is not enough.
+    if (slot === 'subject' && verb.id === 'atsumaru-basic') {
+      pool=pool.filter(word=>['人々','家族','両親','仲間たち'].includes(word.japanese))
+    }
+    if (slot === 'subject' && verb.id === 'aru-existence' && filled.location) {
+      const location=filled.location.japanese
+      // Cars belong in a parking area or garage, not literally in a library.
+      pool=pool.filter(word=>!['車','自動車'].includes(word.japanese) || ['駐車場','車庫','家'].includes(location))
+      // These combinations are grammatical but too arbitrary to teach as
+      // standalone examples.
+      if (location === '美容院') pool=pool.filter(word=>word.japanese !== '切手')
+      if (location === '消防署') pool=pool.filter(word=>word.japanese !== '本')
+    }
     if (slot === 'companion' && filled.subject) pool=pool.filter(word=>word.id!==filled.subject.id)
     if (slot === 'companion' && verb.id === 'asobu-companion' && filled.subject) {
       const subjectTags=tagSet(filled.subject)
@@ -1183,7 +1226,7 @@ const portableObjectTags = new Set(normalizeTags([
   ...edibleTags,...drinkableTags,...readableTags,'portable','light','book','document','paper','notebook','magazine','newspaper','letter',
   'phone','camera','bottle','cup','box','bag','wallet','clothing','shirt','coat','hat','shoes','tool','pen','pencil','lunch','food',
 ]))
-const mailableObjectTags = new Set(normalizeTags([...readableTags,'book','document','notebook','magazine','newspaper','letter','box','bag','package','parcel']))
+const mailableObjectTags = new Set(normalizeTags(['letter','postcard','package','parcel','box','document','mail','shipping']))
 const showableObjectTags = new Set(normalizeTags([...readableTags,...watchableTags,'picture','photo','phone','camera','book','document','newspaper','letter','magazine']))
 // Phenomena, substances, and qualities read as concrete because every Object is
 // tagged `concrete`, but none of them is a thing that sits somewhere or gets
@@ -1280,7 +1323,9 @@ export const adjectiveRules = [
   { id:'semai',japanese:'狭い',reading:'せまい',english:'cramped',categories:['Building','Room','Place','Furniture'] as SentenceCategory[] },
   { id:'chikai',japanese:'近い',reading:'ちかい',english:'nearby',categories:['Place','Building'] as SentenceCategory[] },
   { id:'tooi',japanese:'遠い',reading:'とおい',english:'far',categories:['Place','Building'] as SentenceCategory[] },
-  { id:'hayai-early',japanese:'早い',reading:'はやい',english:'early',categories:['Time'] as SentenceCategory[] },
+  // 早い describes an arrival, event, vehicle, or person.  A duration such as
+  // 二年 is not itself "early" without additional context.
+  { id:'hayai-early',japanese:'早い',reading:'はやい',english:'early',categories:['Person','Vehicle','Event'] as SentenceCategory[] },
   { id:'osoi',japanese:'遅い',reading:'おそい',english:'late',categories:['Person','Vehicle','Event'] as SentenceCategory[] },
   { id:'hayai-fast',japanese:'速い',reading:'はやい',english:'fast',categories:['Vehicle','Technology','Animal'] as SentenceCategory[] },
   // physicalOnly: weight is a property of a thing you can pick up. Without it
@@ -1651,7 +1696,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} came from ${originEnglish(origin)}.`,{subject,origin},{verb:verbSlot('verb-kuru-origin','来ました','来る','きました','come',['movement','origin'])},['Origin is a city, country, town, village, or island.'])
   }
   if (patternId === 'n5-16') {
-    const walkablePlaces=places.filter(word=>![...tagSet(word)].some(tag=>walkingIncompatibleTags.has(tag)))
+    const walkablePlaces=places.filter(word=>![...tagSet(word)].some(tag=>walkingIncompatibleTags.has(tag)) && !['山','売り場'].includes(word.japanese))
     const subject=pick(humans,161),endpoint=pick(walkablePlaces,162)
     if (!subject || !endpoint) return null
     const subjectEnglish=englishPhrase(subject,'subject'),walks=subjectUsesBaseVerb(subjectEnglish)?'walk':'walks'
@@ -1674,6 +1719,9 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
       : adjectiveRules
     const adjective=pick(describingAdjectives.length?describingAdjectives:adjectiveRules,171)
     if (!adjective) return null
+    // 普通 needs a comparison or a concrete context (e.g. この服は普通です);
+    // it is not useful as an unqualified generated predicate.
+    if (adjective.id === 'futsuu') return null
     // 必要だ is exempted from the normal category+tag pool: its curated
     // allow-list crosses several classifier categories (time, money, tools,
     // documents), and a couple of its words (経験, 知識, 協力) fall through
@@ -1698,7 +1746,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
             ? pick(vocabulary.filter(word=>linearDimensionWords.has(word.japanese) && hasUsableMeaning(word)),172)
           : adjective.id==='daijoubu'
             ? pick([...validHumanPool(vocabulary),...validInanimatePool(vocabulary,['Object']).filter(isPhysicalObject)],172)
-            : adjective.id==='osoi'
+            : adjective.id==='osoi' || adjective.id==='hayai-early'
               ? pick([...validHumanPool(vocabulary),...validInanimatePool(vocabulary,['Vehicle','Event'])],172)
               : adjective.categories.length===1 && adjective.categories[0]==='Person'
                 ? pick(validHumanPool(vocabulary),172)
@@ -1738,7 +1786,10 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const subject=pick(givingVerb?.fixedRecipient ? humans.filter(word=>!firstPersonWords.has(word.japanese)) : humans,191)
     const recipient=givingVerb?.fixedRecipient ? speaker : pick(namedRecipients(humans).filter(word=>word.id!==subject?.id),192)
     if (!givingVerb || !subject || !recipient) return null
-    const eligible=inanimate.filter(word=>[...tagSet(word)].some(tag=>givingVerb.objectTags.has(tag)) && !workplaceDocumentWords.has(word.japanese))
+    const sendableWords = new Set(['手紙','はがき','小包','荷物','箱','書類','資料','メール'])
+    const eligible=inanimate.filter(word=>[...tagSet(word)].some(tag=>givingVerb.objectTags.has(tag))
+      && !workplaceDocumentWords.has(word.japanese)
+      && (givingVerb.id !== 'okuru-gift' || sendableWords.has(word.japanese)))
     const object=pick(eligible,193)
     if (!object) return null
     const subjectEnglish=englishPhrase(subject,'subject'),verbEnglish=subjectUsesBaseVerb(subjectEnglish)?givingVerb.base:givingVerb.baseThird
@@ -1764,10 +1815,13 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
       const tags=tagSet(word)
       return isPhysicalObject(word)
         && !tags.has('rare')
+        && word.japanese !== '番組'
         && !['電車','列車','新幹線'].includes(word.japanese)
         && !tags.has('train')
         && !tags.has('railway')
         && (!animalSubject || [...tags].some(tag=>animalHoshiiTags.has(tag)))
+        // 餌 is animal feed, not a natural possession request for a human.
+        && (animalSubject || word.japanese !== '餌')
     })
     const object=pick(objects,212)
     if (!subject || !object) return null
@@ -1780,7 +1834,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     // 階段/廊下/玄関 etc. are sub-building structural parts, not places on their
     // own scale — pairing one with a broad area like 近所 skips the building
     // that would actually contain it and breaks the route's spatial logic.
-    const walkablePlaces=places.filter(word=>![...tagSet(word)].some(tag=>walkingIncompatibleTags.has(tag)) && !subBuildingStructureWords.has(word.japanese))
+    const walkablePlaces=places.filter(word=>![...tagSet(word)].some(tag=>walkingIncompatibleTags.has(tag)) && !subBuildingStructureWords.has(word.japanese) && !['山','売り場'].includes(word.japanese))
     const subject=pick(humans,221),origin=pick(walkablePlaces,222)
     const destination=pick(walkablePlaces.filter(word=>word.japanese!==origin?.japanese),223)
     if (!subject || !origin || !destination) return null
@@ -1827,7 +1881,14 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     slots:{...generatedWordSlots(filled,{}),...extraSlots},furigana,grammar:[{pattern:patternId,meaning:'Reviewed N4 sentence template',jlpt:'N4'}],validation,
   })
   const destinationEnglish=(word: WordRecord)=>({家:'home',学校:'school',大学:'university',高校:'high school'}[word.japanese]??englishPhrase(word,'destination'))
-  const movementDestination=(word: WordRecord)=>word.japanese==='家'?'home':`to ${destinationEnglish(word)}`
+  const movementDestination=(word: WordRecord)=> {
+    const destination = destinationEnglish(word)
+    if (word.japanese === '家') return 'home'
+    // 店内 is naturally "into the store," never "to the inside the store."
+    if (word.japanese === '店内' || destination.includes('inside the store')) return 'into the store'
+    if (destination.startsWith('inside ')) return `into ${destination.slice('inside '.length)}`
+    return `to ${destination}`
+  }
   const studyLocationEnglish=(word: WordRecord)=>({家:'at home',学校:'at school',大学:'at university',高校:'at high school'}[word.japanese]??englishPhrase(word,'location'))
   const directActionVerbs=verbs.filter(verb=>['taberu-basic','nomu-basic','yomu-basic','miru-basic'].includes(verb.id))
   const pickDirectVerb=(salt: number) => options.verbId
@@ -1855,7 +1916,7 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
   }
 
   if (patternId==='n4-11') {
-    const studyPlaces=new Set(['図書館','学校','大学','高校','教室','家','カフェ'])
+    const studyPlaces=new Set(['図書館','学校','大学','教室','家','カフェ'])
     const studySubjectTags=new Set(normalizeTags(['student','teacher','child','teenager','boy','girl','son','daughter','pupil','classmate']))
     const place=pick(places.filter(word=>studyPlaces.has(word.japanese)),411)
     const ageMismatchTags=place?.japanese==='大学'?new Set(normalizeTags(['baby','child','boy','girl'])):place?.japanese==='高校'?new Set(normalizeTags(['baby','child'])):new Set<string>()
@@ -2630,7 +2691,8 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
       furigana:[wordPart(dislikeObject,'object'),literalPart('が'),literalPart('嫌い','きらい','predicate'),literalPart('な'),literalPart('わけではありません。')],
       filled:{object:dislikeObject},english:`It is not that I dislike ${englishPhrase(dislikeObject,'object')}.`,
     })
-    const habitVerb = pick(smallVerbPool, 832)
+    // 話す without a listener or topic is incomplete in this standalone pattern.
+    const habitVerb = pick(smallVerbPool.filter(verb => verb.id !== 'hanasu-companion'), 832)
     // "always"/"constantly" read naturally before the verb; "every day/week/year"
     // read naturally after it — English frequency adverbs don't share one slot.
     const habitualFrequencies = [
@@ -2656,7 +2718,9 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n2-02') {
-    const reason = pick(exact(['試験','仕事','会議','約束','責任','予定','計画']), 841)
+    // Bare 約束 and 責任 need context (which appointment? what responsibility?),
+    // so do not turn them into a generic reason for an unrelated refusal.
+    const reason = pick(exact(['試験','仕事','会議','予定','計画']), 841)
     // 話す needs a topic or listener to make sense as something a reason blocks —
     // "there's a promise, so I can't afford to talk" doesn't say about what or
     // to whom. It only reads naturally when the reason is itself inherently
@@ -2665,9 +2729,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     const declinableReasonToVerbIds: Record<string,string[]> = {
       '試験':['iku-e','hanasu-companion','asobu-companion','kaeru-destination'],
       '仕事':['iku-e','asobu-companion','kaeru-destination'],
-      '会議':['iku-e','hanasu-companion','asobu-companion','kaeru-destination'],
-      '約束':['iku-e','asobu-companion','kaeru-destination'],
-      '責任':['iku-e','asobu-companion','kaeru-destination'],
+      '会議':['iku-e','asobu-companion','kaeru-destination'],
       '予定':['iku-e','asobu-companion','kaeru-destination'],
       '計画':['iku-e','asobu-companion','kaeru-destination'],
     }
@@ -2775,11 +2837,14 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n3-16') {
-    const subject = pick(humans, 901)
+    // A customer or a lost child becoming generally "skilled" gives neither a
+    // natural learner nor a skill. Keep this practice-result frame focused on
+    // ordinary learners.
+    const subject = pick(humans.filter(word=>['子供','学生','生徒','友人'].includes(word.japanese)), 901)
     const scene = pick([
       { cause:'先生', causeReading:'せんせい', causeEnglish:'the teacher', result:'合格しました', resultReading:'ごうかくしました', resultEnglish:'passed' },
       { cause:'努力', causeReading:'どりょく', causeEnglish:'the effort', result:'成功しました', resultReading:'せいこうしました', resultEnglish:'succeeded' },
-      { cause:'練習', causeReading:'れんしゅう', causeEnglish:'the practice', result:'上手になりました', resultReading:'じょうずになりました', resultEnglish:'became skilled' },
+      { cause:'練習', causeReading:'れんしゅう', causeEnglish:'practice', result:'日本語が上手になりました', resultReading:'にほんごがじょうずになりました', resultEnglish:'became good at Japanese' },
     ], 902)
     if (!subject || !scene) return null
     const subjectEnglish = englishPhrase(subject,'subject')
@@ -2843,7 +2908,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     const studyObject = pick(exact(['漢字','単語','文法','発音','歴史','数学']), 951)
     if (studyObject) variants.push({
       furigana:[wordPart(studyObject,'object'),literalPart('を'),literalPart('勉強した','べんきょうした','clause'),literalPart('ものの、'),literalPart('忘れました','わすれました','result')],
-      filled:{object:studyObject},english:`Although I studied ${englishPhrase(studyObject,'object')}, I forgot it.`,
+      filled:{object:studyObject},english:`Although I studied ${englishPhrase(studyObject,'object')}, I forgot ${studyObject.japanese === '漢字' || studyObject.japanese === '単語' ? 'them' : 'it'}.`,
     })
     const umbrella = pick(exact(['傘']), 952), rain = pick(exact(['雨']), 953)
     if (umbrella && rain) variants.push({
@@ -2909,7 +2974,9 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n1-11') {
-    const destination = pick(validPlacePool(vocabulary).filter(word => ['日本','東京','大阪','学校','大学','図書館','公園','駅','病院'].includes(word.japanese)), 1011)
+    // A long-distance trip makes the following need for money, preparation, or
+    // time meaningful; ordinary trips to a station or library do not.
+    const destination = pick(validPlacePool(vocabulary).filter(word => ['日本','東京','大阪'].includes(word.japanese)), 1011)
     const requirement = pick([
       { surface:'お金', reading:'おかね', english:'money' },
       { surface:'準備', reading:'じゅんび', english:'preparation' },
@@ -2935,7 +3002,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   if (patternId === 'n1-13') {
     const scene = pick([
       { clause:'高いものがいい', clauseReading:'たかいものがいい', english:'Expensive things are not necessarily good.' },
-      { clause:'有名な店がおいしい', clauseReading:'ゆうめいなみせがおいしい', english:'A famous restaurant is not necessarily delicious.' },
+      { clause:'有名な店の料理がおいしい', clauseReading:'ゆうめいなみせのりょうりがおいしい', english:'The food at a famous restaurant is not necessarily delicious.' },
       { clause:'頭がいい人が成功する', clauseReading:'あたまがいいひとがせいこうする', english:'Smart people do not necessarily succeed.' },
     ], 1031)
     if (!scene) return null
@@ -2963,9 +3030,9 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
 
   if (patternId === 'n1-06') {
     const scene = pick([
-      { start:'子供', startReading:'こども', end:'大人', endReading:'おとな', result:'みんな知っています', resultReading:'みんなしっています', english:'From children to adults, everyone knows it.' },
+      { start:'子供', startReading:'こども', end:'大人', endReading:'おとな', result:'みんながその規則を知っています', resultReading:'みんながそのきそくをしっています', english:'From children to adults, everyone knows the rule.' },
       { start:'朝', startReading:'あさ', end:'夜', endReading:'よる', result:'休みなく働きます', resultReading:'やすみなくはたらきます', english:'From morning to night, they work without rest.' },
-      { start:'初心者', startReading:'しょしんしゃ', end:'上級者', endReading:'じょうきゅうしゃ', result:'誰でも楽しめます', resultReading:'だれでもたのしめます', english:'From beginners to advanced learners, anyone can enjoy it.' },
+      { start:'初心者', startReading:'しょしんしゃ', end:'上級者', endReading:'じょうきゅうしゃ', result:'誰でも日本語の勉強を楽しめます', resultReading:'だれでもにほんごのべんきょうをたのしめます', english:'From beginners to advanced learners, anyone can enjoy studying Japanese.' },
     ], 1061)
     if (!scene) return null
     const furigana=[literalPart(scene.start,scene.startReading,'reason'),literalPart('から'),literalPart(scene.end,scene.endReading,'object'),literalPart('に至るまで、','にいたるまで、'),literalPart(scene.result,scene.resultReading,'result')]
@@ -2996,7 +3063,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
 
   if (patternId === 'n1-09') {
     const scene = pick([
-      { topic:'問題', topicReading:'もんだい', result:'議論します', resultReading:'ぎろんします', english:'discuss concerning the issue' },
+      { topic:'問題', topicReading:'もんだい', result:'議論します', resultReading:'ぎろんします', english:'discuss the issue' },
       { topic:'予算', topicReading:'よさん', result:'対立します', resultReading:'たいりつします', english:'clash over the budget' },
       { topic:'契約', topicReading:'けいやく', result:'交渉します', resultReading:'こうしょうします', english:'negotiate concerning the contract' },
     ], 1091)
@@ -3053,7 +3120,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
       { topic:'方法', topicReading:'ほうほう', predicate:'単純な', predicateReading:'たんじゅんな', english:'A method is simple.' },
       { topic:'規則', topicReading:'きそく', predicate:'必要な', predicateReading:'ひつような', english:'Rules are necessary.' },
       { topic:'計画', topicReading:'けいかく', predicate:'大切な', predicateReading:'たいせつな', english:'A plan is important.' },
-      { topic:'問題', topicReading:'もんだい', predicate:'複雑な', predicateReading:'ふくざつな', english:'A problem can be complicated.' },
+      { topic:'問題', topicReading:'もんだい', predicate:'複雑な', predicateReading:'ふくざつな', english:'A problem is a complex thing.' },
     ], 1141)
     if (!scene) return null
     const furigana=[literalPart(scene.topic,scene.topicReading,'subject'),literalPart('は','わ'),literalPart(scene.predicate,scene.predicateReading,'object'),literalPart('ものだ。')]
@@ -3329,7 +3396,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     const companion = pick(thirdPersonSingular.filter(word => word.id !== subject?.id), 1342)
     const scene = pick([
       { activity:'寝て', activityReading:'ねて', result:'家事をしていました', resultReading:'かじをしていました', companionVerb:'slept', resultEnglish:'was doing housework' },
-      { activity:'話して', activityReading:'はなして', result:'ずっと聞いていました', resultReading:'ずっときいていました', companionVerb:'talked', resultEnglish:'was listening the whole time' },
+      { activity:'話して', activityReading:'はなして', result:'ずっと聞いていました', resultReading:'ずっときいていました', companionVerb:'was talking', resultEnglish:'listened the whole time' },
       { activity:'勉強して', activityReading:'べんきょうして', result:'テレビを見ていました', resultReading:'てれびをみていました', companionVerb:'studied', resultEnglish:'was watching television' },
     ], 1343)
     if (!subject || !companion || !scene) return null
@@ -3730,12 +3797,16 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
     // "知り始めた" are all attested, unlike "出発し始めた").
     'n4-10':new Set([
       'okiru-time','tatsu-basic','tatsu-location','shuppatsu-suru','odoroku-basic','kotowaru-basic',
-      'mitsukeru-basic','nakunaru-basic','seikou-suru','touchaku-suru','shippai-suru','kimeru-basic',
+      'mitsukeru-basic','wasureru-basic','nakunaru-basic','seikou-suru','touchaku-suru','shippai-suru','kimeru-basic',
       'umareru-basic','wakareru-companion','kesu-basic','tsukeru-basic','deau-companion','kandou-suru',
     ]),
     // 疑う (doubt) is an involuntary mental state — nobody intentionally "wants
     // to" feel suspicious the way ～たい implies deliberate desire.
-    'n4-01':new Set(['utagau-basic']),
+    'n4-01':new Set(['utagau-basic','nakunaru-basic']),
+    // Permission and an ongoing-state frame are the wrong default treatment
+    // for death in a standalone learner sentence.
+    'n4-02':new Set(['nakunaru-basic']),
+    'n4-06':new Set(['nakunaru-basic']),
   }
   const excluded=incompatibleVerbs[patternId]
   if (excluded) verbPool=verbPool.filter(verb=>!excluded.has(verb.id))

@@ -373,6 +373,14 @@ function conjugate(item: PreviewVocabItem, form?: PreviewSlotSpec['conjugation']
 
 function compatible(object?: PreviewVocabItem, verb?: PreviewVocabItem) {
   if (!object || !verb || verb.transitivity !== 'transitive' || !verb.objectTags?.length) return true
+  // 勉強する takes a field of study, not a physical reading item.  Both can
+  // carry the broad `study_item` tag (a textbook is useful for studying), so
+  // retain a small semantic distinction here instead of teaching "study a
+  // textbook/newspaper" as the default construction.
+  if (verb.surface === '勉強する') {
+    return new Set(['日本語', '英語', '中国語', '外国語', '漢字', '単語', '語彙', '文法', '発音', '数学', '歴史', '科学'])
+      .has(object.surface)
+  }
   return object.tags.some((tag) => verb.objectTags?.includes(tag))
 }
 

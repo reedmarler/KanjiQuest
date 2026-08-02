@@ -24,6 +24,7 @@ const patterns = sentencePatternCatalog.map(pattern => pattern.slots)
 const QUEUE_KEY = 'kanji-quest-content-draft-queue-v1'
 const APPROVED_KEY = 'kanji-quest-content-approved-v1'
 const REJECTED_KEY = 'kanji-quest-content-rejected-v1'
+const QA_FEEDBACK_KEY = 'kanji-quest-content-qa-feedback-v1'
 const VOCABULARY_TEMPLATE = [
   'Japanese:',
   'Reading:',
@@ -78,6 +79,21 @@ type TemplateValidation = {
   entry?: TemplateVocabularyEntry
   errors: string[]
   warnings: string[]
+}
+
+type QaFeedbackBatch = {
+  id: string
+  createdAt: string
+  feedback: string
+}
+
+type CandidateWord = {
+  japanese: string
+  reading: string
+  english: string
+  preferredTranslation: string
+  jlpt: string
+  tags: string
 }
 
 /**
@@ -179,6 +195,36 @@ function inferCategory(english: string) {
   if (/particle|conjunction|pronoun|auxiliary|expression/.test(value)) return 'Function Words'
   if (/adjective|adverb|happy|sad|fast|slow|beautiful|difficult/.test(value)) return 'Descriptors'
   return 'Objects'
+}
+
+/** A deliberately small, copy-friendly format for candidate vocabulary. */
+function parseCandidateWords(value: string) {
+  const words: CandidateWord[] = []
+  const problems: string[] = []
+  value.split(/\r?\n/).forEach((raw, index) => {
+    const line = raw.trim()
+    if (!line || line.startsWith('#')) return
+    const [japanese = '', reading = '', english = '', preferredTranslation = '', jlpt = '', tags = ''] = line.split('|').map(part => part.trim())
+    if (!japanese || !reading || !english) {
+      problems.push(`Line ${index + 1} needs Japanese | reading | dictionary meaning.`)
+      return
+    }
+    words.push({ japanese, reading, english, preferredTranslation, jlpt, tags })
+  })
+  return { words, problems }
+}
+
+function candidateWordsToTemplates(words: CandidateWord[]) {
+  return words.map(word => [
+    `Japanese: ${word.japanese}`,
+    `Reading: ${word.reading}`,
+    `Dictionary meaning: ${word.english}`,
+    `Preferred sentence translation: ${word.preferredTranslation}`,
+    `Category: ${inferCategory(word.english)}`,
+    `JLPT level: ${['N5', 'N4', 'N3', 'N2', 'N1'].includes(word.jlpt) ? word.jlpt : 'N5'}`,
+    `Tags: ${word.tags}`,
+    'Notes:',
+  ].join('\n')).join('\n\n')
 }
 
 function inferVerbClass(japanese: string) {
@@ -308,6 +354,10 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
   const [bulkReviewReport, setBulkReviewReport] = useState('')
   const [vocabTemplateDraft, setVocabTemplateDraft] = useState(VOCABULARY_TEMPLATE)
   const [vocabImportDraft, setVocabImportDraft] = useState(VOCABULARY_TEMPLATE)
+  const [candidateWordDraft, setCandidateWordDraft] = useState('')
+  const [qaBatchSeed, setQaBatchSeed] = useState(0)
+  const [qaFeedbackDraft, setQaFeedbackDraft] = useState('')
+  const [qaFeedbackBatches, setQaFeedbackBatches] = useState<QaFeedbackBatch[]>(() => loadJson(QA_FEEDBACK_KEY, []))
   const [database, setDatabase] = useState<ContentRecord[]>(() => loadContentDatabase())
   const allCategoryWords = useMemo(() => {
     // Both values invalidate this view after local vocabulary or tag storage changes.
@@ -346,6 +396,23 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
     const start=(testBatchSeed+1)*100
     return Array.from({length:10},(_,index)=>generateTestSentence(testComplexities,start+index))
   },[testBatchSeed,database,testComplexities])
+  const qaSentences = useMemo(() => {
+    void database
+    const start = 5000 + qaBatchSeed * 30
+    return Array.from({ length: 20 }, (_, index) => generateTestSentence([1, 2, 3, 4, 5], start + index))
+  }, [qaBatchSeed, database])
+  const qaPacket = useMemo(() => [
+    '# Kanji Quest sentence QA batch',
+    '# Check Japanese naturalness, English, semantic compatibility, and repetition.',
+    '# Reply with the sentence number plus a short issue and suggested fix. Leave good sentences out.',
+    '',
+    ...qaSentences.flatMap((sentence, index) => [
+      `${String(index + 1).padStart(2, '0')}. ${sentence.japanese}`,
+      `English: ${sentence.english}`,
+      `Pattern: ${sentence.frameId} · ${sentence.level}`,
+      '',
+    ]),
+  ].join('\n'), [qaSentences])
   const allVocabularyTags = useMemo(() => {
     void tagRevision
     const grouped = TAG_GROUPS.map(group => `${group.name}: ${getTagGroupTags(group.name).join(', ')}`)
@@ -382,6 +449,7 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
   useEffect(() => window.localStorage.setItem(QUEUE_KEY, JSON.stringify(drafts)), [drafts])
   useEffect(() => window.localStorage.setItem(APPROVED_KEY, JSON.stringify(approvedIds)), [approvedIds])
   useEffect(() => window.localStorage.setItem(REJECTED_KEY, JSON.stringify(rejectedIds)), [rejectedIds])
+  useEffect(() => window.localStorage.setItem(QA_FEEDBACK_KEY, JSON.stringify(qaFeedbackBatches.slice(0, 12))), [qaFeedbackBatches])
   useEffect(() => subscribeToContentDatabase(setDatabase), [])
   useEffect(() => {
     const recordsToSave = allCategoryWords.flatMap(word => {
@@ -490,6 +558,25 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
       ? current.length === 1 ? current : current.filter(item => item !== complexity)
       : [...current, complexity])
     setSample(value => value + 1)
+  }
+
+  function prepareCandidateImport() {
+    const { words, problems } = parseCandidateWords(candidateWordDraft)
+    if (!words.length) {
+      toast(problems[0] ?? 'Paste at least one candidate word first')
+      return
+    }
+    setVocabImportDraft(candidateWordsToTemplates(words))
+    setView('vocab')
+    toast(`Prepared ${words.length} candidate ${words.length === 1 ? 'word' : 'words'} for validation${problems.length ? ` · ${problems.length} line${problems.length === 1 ? '' : 's'} skipped` : ''}`)
+  }
+
+  function saveQaFeedback() {
+    const feedback = qaFeedbackDraft.trim()
+    if (!feedback) { toast('Paste the correction feedback first'); return }
+    setQaFeedbackBatches(current => [{ id: `${Date.now()}`, createdAt: new Date().toISOString(), feedback }, ...current].slice(0, 12))
+    setQaFeedbackDraft('')
+    toast('Correction batch saved in this browser')
   }
 
   function saveVocabulary(event: React.FormEvent<HTMLFormElement>) {
@@ -645,6 +732,14 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
 
       {view === 'dashboard' && <div className="cs-page"><section className="cs-hero"><div><small>REVIEW-FIRST SENTENCE DATA</small><h2>Let the system draft.<br /><em>You make it trustworthy.</em></h2><p>Generate structured content in batches, review uncertain fields, then publish only approved records to the sentence engine.</p><button onClick={() => setView('review')}>Review {drafts.length} drafts →</button></div><div className="cs-paper"><small>GENERATED DRAFT</small><b>届ける</b><span>とどける · to deliver</span><Slots items={patterns[2]} /><p><i>Confidence</i><strong>94%</strong></p></div></section>
         <section className="cs-stats">{[['動','148','Verbs'],['語','623','Vocabulary'],['文',String(sentencePatternCatalog.length),'Templates'],['✓',String(drafts.length),'To review']].map((x,i) => <button key={x[2]} onClick={() => setView((['verbs','vocab','patterns','review'] as View[])[i])}><i>{x[0]}</i><strong>{x[1]}</strong><span>{x[2]}</span></button>)}</section>
+        <section className="cs-pipeline" aria-label="Content pipeline">
+          <div className="cs-pipeline-heading"><small className="eyebrow">CONTENT PIPELINE</small><h3>Paste candidates. Review a batch. Keep the corrections.</h3><p>This turns your existing ChatGPT → Kanji Quest → ChatGPT review loop into three repeatable steps.</p></div>
+          <div className="pipeline-grid">
+            <article className="cs-card pipeline-card"><span className="pipeline-step">01</span><small className="eyebrow">CANDIDATE WORDS</small><h3>Paste a compact list</h3><p>One line: <code>Japanese | reading | meaning | preferred English | JLPT | tags</code></p><textarea value={candidateWordDraft} onChange={event=>setCandidateWordDraft(event.target.value)} placeholder={'資料 | しりょう | materials / documents | documents | N3 | document, readable\n薬局 | やっきょく | pharmacy | pharmacy | N4 | place, medical'} spellCheck={false} rows={5} /><div className="pipeline-actions"><button className="primary" type="button" onClick={prepareCandidateImport}>Prepare for validation →</button></div></article>
+            <article className="cs-card pipeline-card"><span className="pipeline-step">02</span><small className="eyebrow">SENTENCE QA</small><h3>Copy a review packet</h3><p>Twenty numbered sentences with English and pattern details, ready to paste into your reviewer chat.</p><div className="pipeline-preview"><b>{qaSentences[0]?.japanese}</b><span>{qaSentences[0]?.english}</span></div><div className="pipeline-actions"><button className="ghost" type="button" onClick={()=>copyText(qaPacket,'20-sentence QA packet copied')}>Copy 20 sentences</button><button className="primary" type="button" onClick={()=>setQaBatchSeed(seed=>seed+1)}>New batch ↻</button></div></article>
+            <article className="cs-card pipeline-card"><span className="pipeline-step">03</span><small className="eyebrow">CORRECTION INTAKE</small><h3>Keep reviewer feedback</h3><p>Paste the corrections back here so each batch is preserved and easy to send with the next generator update.</p><textarea value={qaFeedbackDraft} onChange={event=>setQaFeedbackDraft(event.target.value)} placeholder={'01. Japanese is fine. English: “It’s hot today.”\n07. Block driver + sake pairing.'} spellCheck={false} rows={5} /><div className="pipeline-actions"><button className="ghost" type="button" onClick={()=>copyText(qaFeedbackDraft,'Correction feedback copied')}>Copy for Codex</button><button className="primary" type="button" onClick={saveQaFeedback}>Save feedback</button></div>{qaFeedbackBatches[0]&&<div className="pipeline-saved"><span>Last saved {new Date(qaFeedbackBatches[0].createdAt).toLocaleDateString()} · {qaFeedbackBatches.length} batch{qaFeedbackBatches.length===1?'':'es'} kept locally</span><button className="ghost" type="button" onClick={()=>copyText(qaFeedbackBatches[0].feedback,'Last saved feedback copied')}>Copy last saved</button></div>}</article>
+          </div>
+        </section>
         <section className="cs-two"><article className="cs-card"><small className="eyebrow">RECOMMENDED WORKFLOW</small><h3>Collect once, generate many</h3><ol><li><b>Seed trusted words</b><span>Start with existing JLPT lists and your curated vocabulary.</span></li><li><b>Generate structured drafts</b><span>Pre-fill readings, verb classes, conjugations, categories, and templates.</span></li><li><b>Review exceptions</b><span>Approve, edit, or reject records with confidence and source notes.</span></li><li><b>Test combinations</b><span>Audit generated sentences before adding them to practice.</span></li></ol></article><article className="cs-card cs-ready"><small className="eyebrow">READY TO REVIEW</small><h3>{drafts.length} generated records</h3><p>{approvedIds.length} approved so far. Decisions are remembered on this device.</p><button onClick={() => setView('review')}>Open Draft Review</button></article></section>
       </div>}
 

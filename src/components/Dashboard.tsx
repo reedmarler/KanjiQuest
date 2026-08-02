@@ -64,7 +64,7 @@ function DashboardHeroSentence({
   )
 }
 
-const HERO_ROTATIONS_PER_SPEED_BUMP = 50
+const HERO_ROTATIONS_PER_SPEED_BUMP = 150
 
 function savedPlaybackRate(): HeroPlaybackRate {
   if (typeof window === 'undefined') return 1

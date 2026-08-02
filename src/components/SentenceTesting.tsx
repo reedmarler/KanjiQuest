@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { sentencePatternCatalog } from '../data/sentencePatternCatalog'
 import { generatePreviewSentence, type GeneratedPreviewSentence } from '../lib/sentenceGeneratorPreview'
+import { selectMostDiverse, SentenceDiversityTracker } from '../lib/sentenceDiversity'
 import {
   complexityDetails,
   complexityForPattern,
@@ -15,12 +16,20 @@ const BATCH_SIZE_OPTIONS = [15, 100] as const
 type BatchSize = typeof BATCH_SIZE_OPTIONS[number]
 
 function makeBatch(levels: readonly GenerationComplexity[], seed: number, batchSize: BatchSize): GeneratedPreviewSentence[] {
+  const tracker = new SentenceDiversityTracker()
   return Array.from({ length: batchSize }, (_, index) => {
     const complexity = levels[index % levels.length]!
     const patterns = patternsForComplexity(complexity)
     const pattern = patterns[(Math.floor(index / levels.length) + seed) % patterns.length]
     if (!pattern) throw new Error(`No templates are mapped to generation complexity ${complexity}`)
-    return generatePreviewSentence(pattern.jlpt, seed * batchSize + index + 1, undefined, pattern.id, true)
+    const baseSeed = seed * batchSize + index + 1
+    const candidates = Array.from({ length: 10 }, (_, attempt) =>
+      generatePreviewSentence(pattern.jlpt, baseSeed + attempt * 997, undefined, pattern.id, true),
+    )
+    const sentence = selectMostDiverse(candidates, tracker)
+    if (!sentence) throw new Error(`Could not generate a sentence for ${pattern.id}`)
+    tracker.add(sentence)
+    return sentence
   })
 }
 
