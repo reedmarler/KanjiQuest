@@ -22,6 +22,8 @@ function DashboardHeroSentence({
   paused,
   playbackRate,
   onRotate,
+  rewindSignal,
+  onCanRewindChange,
 }: {
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
@@ -33,17 +35,9 @@ function DashboardHeroSentence({
   paused: boolean
   playbackRate: HeroPlaybackRate
   onRotate?: () => void
+  rewindSignal: number
+  onCanRewindChange: (canRewind: boolean) => void
 }) {
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    // Let the dashboard controls paint before the sentence data is requested.
-    const timer = window.setTimeout(() => setReady(true), 900)
-    return () => window.clearTimeout(timer)
-  }, [])
-
-  if (!ready) return <div className="hero-sentence-loading" aria-hidden="true" />
-
   return (
     <Suspense fallback={<div className="hero-sentence-loading" aria-hidden="true" />}>
       <RotatingHeroSentence
@@ -59,6 +53,8 @@ function DashboardHeroSentence({
         paused={paused}
         playbackRate={playbackRate}
         onRotate={onRotate}
+        rewindSignal={rewindSignal}
+        onCanRewindChange={onCanRewindChange}
       />
     </Suspense>
   )
@@ -111,6 +107,8 @@ export function Dashboard({
   const [paused, setPaused] = useState(false)
   const [playbackRate, setPlaybackRate] = useState<HeroPlaybackRate>(savedPlaybackRate)
   const [additionalOpen, setAdditionalOpen] = useState(false)
+  const [rewindSignal, setRewindSignal] = useState(0)
+  const [canRewindSentence, setCanRewindSentence] = useState(false)
 
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
   const furiganaActive = furiganaOn
@@ -156,12 +154,24 @@ export function Dashboard({
           paused={paused}
           playbackRate={playbackRate}
           onRotate={handleRotate}
+          rewindSignal={rewindSignal}
+          onCanRewindChange={setCanRewindSentence}
         />
       </header>
 
       <section className="hero-controls" aria-label="Sentence controls">
         <div className="hero-controls-row">
           <div className="control-group" role="group" aria-label="Playback">
+            <button
+              type="button"
+              className="control-icon-button"
+              onClick={() => setRewindSignal((value) => value + 1)}
+              disabled={!canRewindSentence}
+              aria-label="Go back to previous sentence"
+              title="Previous sentence"
+            >
+              ←
+            </button>
             <button
               type="button"
               className={`control-play${paused ? ' is-paused' : ''}`}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { charLength, type HeroSentenceFrame } from '../data/heroSentences'
 import { buildHeroStorySteps } from '../data/heroStories'
 import { getSegmentReading } from '../lib/heroSentenceGloss'
@@ -44,6 +44,14 @@ export interface RotatingHeroSentenceProps {
   paused: boolean
   playbackRate: HeroPlaybackRate
   onRotate?: () => void
+  rewindSignal?: number
+  onCanRewindChange?: (canRewind: boolean) => void
+}
+
+type HeroHistoryEntry = {
+  sequenceSeed: number
+  activeLevel: JlptLevel
+  index: number
 }
 
 function SegmentText({ segment, furiganaOn, delayedFurigana }: {
@@ -76,6 +84,8 @@ export function RotatingHeroSentence({
   paused,
   playbackRate,
   onRotate,
+  rewindSignal = 0,
+  onCanRewindChange,
 }: RotatingHeroSentenceProps) {
   const [sequenceSeed, setSequenceSeed] = useState(newSequenceSeed)
   const effectiveStoryLevel = storyLevel ?? 'N5'
@@ -84,6 +94,8 @@ export function RotatingHeroSentence({
   // keep rotating the current stream until the next scheduled swap rather
   // than cutting away mid-sentence — see the pending-level handling below.
   const [activeLevel, setActiveLevel] = useState(jlptLevel)
+  const [history, setHistory] = useState<HeroHistoryEntry[]>([])
+  const lastRewindSignalRef = useRef(rewindSignal)
   const steps = useMemo(
     () => storyId ? buildHeroStorySteps(storyId, effectiveStoryLevel) : buildHeroSteps(wrongPool, progress, activeLevel, sequenceSeed),
     [wrongPool, progress, activeLevel, sequenceSeed, storyId, effectiveStoryLevel],
@@ -92,10 +104,29 @@ export function RotatingHeroSentence({
   const [phase, setPhase] = useState<StreamPhase>('rest')
 
   useEffect(() => {
+    onCanRewindChange?.(history.length > 0)
+  }, [history.length, onCanRewindChange])
+
+  useEffect(() => {
     setSequenceSeed(newSequenceSeed())
     setIndex(0)
     setPhase('rest')
+    setHistory([])
   }, [storyId, effectiveStoryLevel])
+
+  useEffect(() => {
+    if (rewindSignal === lastRewindSignalRef.current) return
+    lastRewindSignalRef.current = rewindSignal
+    setHistory((items) => {
+      const previous = items[items.length - 1]
+      if (!previous) return items
+      setSequenceSeed(previous.sequenceSeed)
+      setActiveLevel(previous.activeLevel)
+      setIndex(previous.index)
+      setPhase('rest')
+      return items.slice(0, -1)
+    })
+  }, [rewindSignal])
 
   const safeLength = Math.max(steps.length, 1)
   const step = steps[index % safeLength]
@@ -138,6 +169,10 @@ export function RotatingHeroSentence({
       if (phase === 'rest') setPhase('highlight')
       else if (phase === 'highlight') setPhase('swap')
       else {
+        setHistory((items) => [
+          ...items.slice(-4),
+          { sequenceSeed, activeLevel, index },
+        ])
         if (pendingSteps) {
           // The incoming frame already came from pendingSteps[0], so adopting
           // that same level/seed here does not create a second visual jump.
