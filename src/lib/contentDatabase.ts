@@ -76,7 +76,11 @@ function seedRecords(): ContentRecord[] {
 }
 
 export function loadContentDatabase(): ContentRecord[] {
-  if (!storageAvailable()) return []
+  // Outside the browser (build scripts such as generate:vocab-examples) there
+  // is no localStorage, but the committed seed file still holds the reviewed
+  // records. Returning it here is what lets offline generation see the same
+  // approved vocabulary the app does, instead of falling back to bare defaults.
+  if (!storageAvailable()) return seedRecords()
   try {
     const stored = window.localStorage.getItem(DATABASE_KEY)
     if (!stored) {

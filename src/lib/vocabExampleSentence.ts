@@ -12,6 +12,7 @@ import {
   segmentsToJapanese,
   type PosFills,
 } from './posSentenceEngine'
+import { GENERATED_VOCAB_EXAMPLES } from '../data/vocabExamples.generated'
 import { posFillsAreValid } from './posSentenceVet'
 import { sentenceIsViable } from './sentenceViability'
 import { getHeroEnglish, getSegmentReading } from './heroSentenceGloss'
@@ -116,7 +117,17 @@ export function getVocabExampleSentence(card: StudyCard): VocabExampleSentence |
   const cached = cache.get(card.id)
   if (cached !== undefined) return cached ?? undefined
 
-  const result = buildExample(card)
+  // categorySentenceEngine is the richer model — it enforces the per-word
+  // semantic compatibility rules (what can be eaten, who can flee where, which
+  // adjective describes what) that this module's POS templates have no notion
+  // of, so its sentences are preferred wherever it can produce one. Generating
+  // them at render time is far too slow in bulk, so they are precomputed into
+  // GENERATED_VOCAB_EXAMPLES and looked up here. The POS-template builder still
+  // covers the words the engine has no rules for yet; as vocabulary gains
+  // curated category/tag data, more words move to the shared engine on the next
+  // `npm run generate:vocab-examples`.
+  const generated = GENERATED_VOCAB_EXAMPLES[card.front]
+  const result = generated ? { ...generated } : buildExample(card)
   cache.set(card.id, result ?? null)
   return result
 }

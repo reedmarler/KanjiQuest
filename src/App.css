@@ -7149,6 +7149,10 @@ body:has(.dashboard) .app {
 .vocab-philosophy-grid span{font-size:.61rem;color:#69756e;line-height:1.45}
 .vocab-workbench{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .vocab-template-card{min-width:0}
+.bulk-review-card{margin-top:16px}
+.bulk-review-card p{color:var(--c-muted);font-size:.66rem;line-height:1.6;margin:0 0 10px}
+.bulk-review-card code{background:#f1f4f0;border-radius:4px;padding:1px 5px;font-size:.62rem}
+.bulk-review-report{margin:12px 0 0;padding:10px 11px;border:1px solid #dce7de;background:#f5f9f5;border-radius:7px;color:#31543c;font:500 .62rem/1.6 'Outfit',sans-serif;white-space:pre-wrap;max-height:220px;overflow:auto}
 .vocab-template-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
 .vocab-template-card h3{font:600 .92rem 'Outfit';margin-top:3px}
 .vocab-template-card textarea{width:100%;min-height:220px;border:1px solid #d8dbd5;background:#fbfbf8;border-radius:8px;padding:11px;font:500 .66rem/1.55 'Outfit',sans-serif;color:#25342b;resize:vertical;outline:none}

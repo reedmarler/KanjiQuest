@@ -1,0 +1,679 @@
+# Words the sentence generator will not use until reviewed.
+# Format: word | category | tags        (# ... is a comment and is ignored)
+# The category and tags below are the classifier's UNVERIFIED guess — correct them.
+# Paste finished lines into Content Studio -> Category Editor -> "Paste many words at once".
+
+欠席 | Object | noun, unclassified, concrete, n5   # absence
+留守 | Building | building, concrete, n5   # absence; not at home
+事故 | Event | n5   # accident
+正確 | Object | noun, unclassified, concrete, n2   # accurate
+達成 | Object | noun, unclassified, concrete, n2   # achievement
+習得 | Object | noun, unclassified, concrete, n3   # acquisition; mastery
+向かい | Object | i-adjective, concrete, n3   # across from
+実際に | Object | noun, unclassified, concrete, n3   # actually; in fact
+住所 | Object | noun, unclassified, concrete, n5   # address
+午後 | Time | afternoon, time, n5   # afternoon; p.m.
+同意 | Object | noun, unclassified, concrete, n2   # agreement
+飛行機 | Object | airplane, aircraft, vehicle, transportation, travel, n5   # airplane
+警報 | Object | noun, unclassified, concrete, n2   # alarm; warning
+ずっと | Adverb | continuously, time, adverb, n4   # all the way; much more
+全部 | Adverb | all, entirety, quantity, adverb, n4   # all; everything
+救急車 | Object | noun, unclassified, concrete, n5   # ambulance
+分析 | Activity | analysis, research, science, suru-verb, n2   # analysis
+餌 | Animal | animal, concrete, n3   # animal feed; bait
+記念日 | Time | anniversary, celebration, event, n3   # anniversary
+答え | Object | noun, unclassified, concrete, n5   # answer
+答え | Object | noun, unclassified, concrete, n5   # answer
+予約 | Activity | reserve, planning, travel, suru-verb, n5   # appointment; reservation
+適切 | Object | noun, unclassified, concrete, n2   # appropriate
+約 | Object | noun, unclassified, concrete, n3   # approximately
+広さ | Place | concrete, n3   # area; width
+到着 | Object | noun, unclassified, concrete, n4   # arrival
+美術館 | Place | museum, art, culture, tourism, indoor, public, n5   # art museum
+選手 | Person | athlete, player, sport, occupation, n5   # athlete; player
+出席 | Object | noun, unclassified, concrete, n5   # attendance
+注意 | Object | noun, unclassified, concrete, n4   # attention; caution
+秋 | Time | autumn, season, time, n5   # autumn
+平均 | Object | noun, unclassified, concrete, n3   # average
+背景 | Object | noun, unclassified, concrete, n1   # background
+袋 | Object | noun, unclassified, concrete, n5   # bag
+銀行 | Place | bank, finance, money, public, service, business, n5   # bank
+紙幣 | Object | noun, unclassified, concrete, n5   # banknote
+牛肉 | Food | meat, concrete, n5   # beef
+後ろ | Place | behind, back, position, direction, n5   # behind
+遅刻 | Activity | be-late, school, work, suru-verb, n4   # being late
+感動 | Object | inspiration, emotion, abstract, n5   # being moved
+自転車 | Vehicle | vehicle, concrete, n5   # bicycle
+大きい | Adverb | large, size, i-adjective, n5   # big
+会計 | Object | noun, unclassified, concrete, n5   # bill; checkout
+伝票 | Object | noun, unclassified, concrete, n3   # bill; slip
+鳥 | Person | bird, animal, living, n5   # bird
+誕生 | Object | noun, unclassified, concrete, n3   # birth
+苦い | Object | i-adjective, concrete, n5   # bitter
+黒い | Object | i-adjective, concrete, n5   # black
+紅茶 | Drink | drink, tea, concrete, n5   # black tea
+黒板 | Object | noun, unclassified, concrete, n5   # blackboard
+毛布 | Object | noun, unclassified, concrete, n5   # blanket
+青い | Object | i-adjective, concrete, n5   # blue
+体 | Person | body, human, health, n5   # body
+盆踊り | Object | noun, unclassified, concrete, n2   # bon dance
+上司 | Object | noun, unclassified, concrete, n5   # boss; supervisor
+花束 | Object | noun, unclassified, concrete, n2   # bouquet
+休憩 | Object | noun, unclassified, concrete, n5   # break
+故障 | Object | noun, unclassified, concrete, n5   # breakdown; malfunction
+朝ご飯 | Food | concrete, n5   # breakfast
+明るい | Adverb | bright, cheerful, positive, i-adjective, n5   # bright
+予算 | Object | noun, unclassified, concrete, n2   # budget
+バス | Object | bus, vehicle, transportation, public-transport, n5, loanword   # bus
+出張 | Object | noun, unclassified, concrete, business, n5   # business trip
+忙しい | Adverb | busy, time, state, i-adjective, n5   # busy
+車 | Object | car, vehicle, transportation, n5   # car
+場合 | Object | case, situation, abstract, n4   # case; situation
+現金 | Money | currency, n4   # cash
+現金 | Money | currency, n5   # cash
+猫 | Person | cat, animal, pet, mammal, n5   # cat
+原因 | Object | noun, unclassified, concrete, n3   # cause
+必ず | Adverb | certainly, always, frequency, adverb, n4   # certainly; always
+確かに | Object | noun, unclassified, concrete, n3   # certainly; indeed
+椅子 | Furniture | furniture, concrete, n5   # chair
+優勝 | Object | noun, unclassified, concrete, n3   # championship win
+変化 | Object | noun, unclassified, concrete, n3   # change
+お釣り | Object | noun, unclassified, concrete, n5   # change
+変更 | Object | noun, unclassified, concrete, n5   # change; alteration
+充電 | Object | noun, unclassified, concrete, n5   # charging
+安い | Adverb | cheap, price, i-adjective, n5   # cheap
+応援 | Object | noun, unclassified, concrete, n5   # cheering
+鶏肉 | Animal | animal, concrete, n5   # chicken
+選択 | Object | noun, unclassified, concrete, n3   # choice; selection
+箸 | Object | noun, unclassified, concrete, n5   # chopsticks
+市役所 | Room | room, city, concrete, n5   # city hall
+主張 | Activity | claim, opinion, communication, suru-verb, n1   # claim; assertion
+授業 | Object | class, lesson, education, n5   # class; lesson
+清潔 | Object | noun, unclassified, concrete, n3   # clean; tidy
+掃除 | Activity | cleaning, abstract, n5   # cleaning
+明確 | Object | noun, unclassified, concrete, n1   # clear; definite
+時計 | Object | clock, watch, time, personal-item, n5   # clock; watch
+服 | Object | clothing, wearable, n5   # clothes
+服 | Object | clothing, wearable, n5   # clothes
+雲 | Weather | n5   # cloud
+曇り | Weather | n5   # cloudy weather
+監督 | Person | person, occupation, concrete, n3   # coach; manager
+海岸 | Object | noun, unclassified, concrete, n5   # coast
+小銭 | Object | na-adjective, concrete, n5   # coins; small change
+仲間 | Person | companion, friend, group, n5   # companion; group member
+会社 | Place | company, office, business, workplace, n5   # company
+企業 | Object | company, business, organization, n2   # company; corporation
+全く | Language | degree, completely, adverb, n3   # completely; not at all
+結論 | Object | noun, unclassified, concrete, n1   # conclusion
+具体的 | Object | noun, unclassified, concrete, n2   # concrete; specific
+条件 | Object | condition, requirement, abstract, n3   # condition
+確認 | Activity | confirm, check, suru-verb, n3   # confirmation
+かなり | Adverb | degree, quite, adverb, n3   # considerably; quite
+相談 | Activity | consult, communication, suru-verb, n4   # consultation
+相談 | Activity | consult, communication, suru-verb, n4   # consultation; advice
+連絡 | Activity | contact, communication, suru-verb, n5   # contact
+連絡先 | Object | noun, unclassified, concrete, n3   # contact information
+連絡 | Activity | contact, communication, suru-verb, n4   # contact; message
+内容 | Object | content, information, abstract, n3   # content; details
+連続 | Object | noun, unclassified, concrete, n3   # continuation; series
+貢献 | Object | noun, unclassified, concrete, n1   # contribution
+コンビニ | Building | building, store, concrete, n5, loanword   # convenience store
+都合 | Object | noun, unclassified, concrete, n5   # convenience; circumstances
+便利 | Adverb | convenient, useful, positive, na-adjective, n4   # convenient
+ご飯 | Food | rice, meal, staple-food, edible, n5   # cooked rice; meal
+料理 | Activity | cooking, food, suru-verb, n5   # cooking; cuisine
+料理 | Activity | cooking, food, suru-verb, n5   # cooking; dish
+協力 | Activity | cooperate, teamwork, social, suru-verb, n3   # cooperation
+角 | Object | noun, unclassified, concrete, n5   # corner
+牛 | Animal | animal, concrete, n5   # cow
+同僚 | Object | noun, unclassified, concrete, n5   # coworker
+横断歩道 | Object | noun, unclassified, concrete, n5   # crosswalk
+文化 | Object | culture, society, tradition, n3   # culture
+現状 | Object | noun, unclassified, concrete, n2   # current situation
+生活 | Object | noun, unclassified, concrete, n3   # daily life
+危険 | Adverb | dangerous, risk, negative, na-adjective, n5   # danger
+危険 | Adverb | dangerous, risk, negative, na-adjective, n4   # dangerous
+暗い | Adverb | dark, gloomy, i-adjective, n5   # dark
+休日 | Time | day, holiday, n5   # day off; holiday
+締め切り | Object | noun, unclassified, concrete, n5   # deadline
+決定 | Object | noun, unclassified, concrete, n5   # decision
+程度 | Object | degree, level, amount, abstract, n3   # degree; extent
+需要 | Object | noun, unclassified, concrete, n2   # demand
+出発 | Object | noun, unclassified, concrete, n4   # departure
+机 | Furniture | furniture, concrete, n5   # desk
+目的地 | Object | noun, unclassified, concrete, n5   # destination
+辞書 | Object | dictionary, book, education, reference, n5   # dictionary
+晩ご飯 | Food | concrete, n5   # dinner
+方向 | Object | direction, orientation, abstract, n3   # direction
+道順 | Object | noun, unclassified, concrete, n5   # directions; route
+直接 | Adverb | directly, direct, adverb, n3   # directly
+失望 | Object | noun, unclassified, concrete, n5   # disappointment
+割引 | Object | noun, unclassified, concrete, n5   # discount
+発見 | Object | noun, unclassified, concrete, n3   # discovery
+離婚 | Object | noun, unclassified, concrete, n2   # divorce
+医者 | Person | doctor, occupation, medical, human, n5   # doctor
+犬 | Person | dog, animal, pet, mammal, living, n5   # dog
+ドア | Object | door, building, structure, n5, loanword   # door
+引き分け | Object | noun, unclassified, concrete, n3   # draw; tie
+運転手 | Object | noun, unclassified, concrete, n5   # driver
+耳 | Object | ear, body-part, human, n5   # ear
+早く | Adverb | adverb, abstract, n4   # early; quickly
+地震 | Object | noun, unclassified, concrete, n5   # earthquake
+経済 | Object | economy, finance, society, n3   # economy
+教育 | Object | education, learning, school, n3   # education
+効果 | Object | effect, result, abstract, n3   # effect; result
+効果的 | Object | noun, unclassified, concrete, n2   # effective
+努力 | Activity | effort, work, suru-verb, n3   # effort
+卵 | Food | egg, ingredient, protein, edible, n5   # egg
+象 | Object | noun, unclassified, concrete, n3   # elephant
+メール | Object | email, communication, technology, n5, loanword   # email
+非常口 | Object | noun, unclassified, concrete, n3   # emergency exit
+社員 | Person | person, occupation, concrete, n5   # employee
+十分 | Adverb | enough, sufficient, quantity, na-adjective, n4   # enough; sufficient
+入口 | Room | room, concrete, n5   # entrance
+玄関 | Object | noun, unclassified, concrete, n5   # entryway
+玄関 | Object | noun, unclassified, concrete, n5   # entryway
+環境 | Object | environment, nature, surroundings, n3   # environment
+用事 | Object | noun, unclassified, concrete, business, n4   # errand; business
+特に | Adverb | especially, degree, adverb, n4   # especially
+特に | Adverb | especially, degree, adverb, n3   # especially
+避難 | Object | noun, unclassified, concrete, n3   # evacuation
+評価 | Activity | evaluation, judgment, suru-verb, n2   # evaluation
+夕方 | Time | evening, n5   # evening
+行事 | Event | n3   # event; function
+毎日 | Time | every-day, frequency, time, n5   # every day
+毎週 | Time | week, n5   # every week
+証拠 | Object | noun, unclassified, concrete, n1   # evidence
+試験 | Object | exam, education, assessment, n5   # exam
+以外 | Object | noun, unclassified, concrete, n4   # except; besides
+運動 | Activity | abstract, n5   # exercise
+出口 | Object | noun, unclassified, concrete, n5   # exit
+拡大 | Activity | expand, growth, suru-verb, n2   # expansion
+費用 | Money | currency, n2   # expense; cost
+経験 | Object | experience, memory, abstract, n4   # experience
+説明 | Activity | explain, communication, education, suru-verb, n4   # explanation
+説明 | Activity | explain, communication, education, suru-verb, n5   # explanation
+極めて | Object | noun, unclassified, concrete, n1   # extremely
+目 | Object | noun, unclassified, concrete, n5   # eye
+顔 | Object | face, body-part, human, n5   # face
+不合格 | Event | n5   # failing an exam
+失敗 | Object | failure, mistake, negative, abstract, n3   # failure
+遠い | Object | i-adjective, concrete, n5   # far
+遠い | Object | i-adjective, concrete, n5   # far
+流行 | Object | noun, unclassified, concrete, n3   # fashion; trend
+料金 | Money | currency, n4   # fee; fare
+気分 | Object | mood, feeling, emotion, n3   # feeling; mood
+祭り | Event | n5   # festival
+熱 | Object | noun, unclassified, concrete, n5   # fever
+分野 | Place | concrete, n1   # field; area
+就職 | Object | noun, unclassified, concrete, n3   # finding employment
+火事 | Object | noun, unclassified, concrete, n5   # fire
+消防署 | Building | building, station, concrete, n5   # fire station
+消防車 | Vehicle | vehicle, concrete, n5   # fire truck
+花火 | Object | noun, unclassified, concrete, n4   # fireworks
+応急手当 | Number | number, n1   # first aid
+最初 | Time | first, beginning, sequence, n4   # first; beginning
+魚 | Food | fish, seafood, animal, edible, n5   # fish
+花 | Person | flower, plant, nature, n5   # flower
+花見 | Plant | plant, flower, concrete, n3   # flower viewing
+足 | Object | foot, leg, body-part, human, n5   # foot; leg
+しばらく | Time | short-while, duration, time, n4   # for a while
+例えば | Object | noun, unclassified, concrete, n3   # for example
+森 | Place | forest, nature, outdoor, n5   # forest
+自由 | Adverb | freedom, free, na-adjective, n4   # freedom; free
+冷凍庫 | Object | noun, unclassified, concrete, n5   # freezer
+友人 | Person | friend, relationship, human, n5   # friend
+前 | Time | before, front, time, position, n5   # front
+果物 | Food | fruit, healthy, sweet, edible, n5   # fruit
+満腹 | Object | noun, unclassified, concrete, n5   # full; satisfied
+満席 | Object | noun, unclassified, concrete, n3   # fully booked
+楽しい | Adverb | fun, positive, emotion, i-adjective, n5   # fun; enjoyable
+葬式 | Event | n2   # funeral
+布団 | Object | noun, unclassified, concrete, n5   # futon
+将来 | Time | future, time, life, n3   # future
+一般的 | Object | noun, unclassified, concrete, n2   # general; common
+贈り物 | Object | noun, unclassified, concrete, n3   # gift
+眼鏡 | Object | glasses, wearable, accessory, n5   # glasses
+成績 | Object | noun, unclassified, concrete, n5   # grades; results
+卒業 | Object | noun, unclassified, concrete, n5   # graduation
+孫 | Object | noun, unclassified, concrete, n3   # grandchild
+祖父 | Object | noun, unclassified, concrete, n4   # grandfather
+祖母 | Object | noun, unclassified, concrete, n4   # grandmother
+草 | Plant | plant, concrete, n5   # grass
+感謝 | Object | noun, unclassified, concrete, n5   # gratitude
+根拠 | Object | evidence, logic, abstract, n1   # grounds; basis
+成長 | Object | noun, unclassified, concrete, n3   # growth
+案内 | Object | noun, unclassified, concrete, n4   # guidance; guide
+習慣 | Object | habit, daily-life, behavior, n4   # habit
+美容院 | Object | noun, unclassified, concrete, n5   # hair salon
+髪型 | Object | noun, unclassified, concrete, n3   # hairstyle
+半分 | Time | half, fraction, quantity, n5   # half
+手 | Object | hand, body-part, human, n5   # hand
+帽子 | Object | hat, clothing, wearable, n5   # hat
+帽子 | Object | hat, clothing, wearable, n5   # hat
+頭 | Object | head, body-part, human, n5   # head
+健康 | Adverb | healthy, health, positive, na-adjective, n3   # health
+高さ | Object | noun, unclassified, concrete, n3   # height
+助けて | Object | noun, unclassified, concrete, n5   # help!
+宿題 | Object | homework, education, school, n5   # homework
+宿題 | Object | homework, education, school, n5   # homework
+馬 | Person | horse, animal, mammal, farm-animal, rideable, n5   # horse
+病院 | Place | hospital, medical, health, emergency, public, n5   # hospital
+実施 | Object | noun, unclassified, concrete, n2   # implementation
+大切 | Adverb | important, precious, positive, na-adjective, n4   # important; precious
+改善 | Activity | improve, change, suru-verb, n3   # improvement
+不便 | Object | noun, unclassified, concrete, n4   # inconvenient
+必然的 | Object | noun, unclassified, concrete, n1   # inevitable
+影響力 | Object | noun, unclassified, concrete, n2   # influence
+影響 | Object | influence, abstract, cause, n3   # influence; effect
+影響 | Object | influence, abstract, cause, n1   # influence; effect
+情報 | Object | information, data, communication, abstract, n3   # information
+案内所 | Furniture | furniture, concrete, n5   # information desk
+虫 | Animal | animal, insect, concrete, n5   # insect
+店内 | Building | building, store, concrete, n3   # inside the store
+交差点 | Place | concrete, n5   # intersection
+調査 | Object | noun, unclassified, concrete, n2   # investigation; survey
+招待 | Object | noun, unclassified, concrete, n3   # invitation
+島 | Place | island, nature, geography, n5   # island
+冗談 | Object | noun, unclassified, concrete, n3   # joke
+判断 | Object | noun, unclassified, concrete, n3   # judgment
+ジュース | Drink | drink, concrete, n5, loanword   # juice
+漢字 | Language | abstract, n5   # kanji
+台所 | Room | room, concrete, n5   # kitchen
+湖 | Place | concrete, n5   # lake
+目印 | Object | noun, unclassified, concrete, n2   # landmark; mark
+先週 | Time | week, n5   # last week
+去年 | Time | last-year, past, time, n5   # last year
+最後 | Time | last, end, sequence, n4   # last; end
+遅く | Adverb | adverb, abstract, n4   # late; slowly
+洗濯 | Object | noun, unclassified, concrete, n5   # laundry
+葉 | Plant | plant, concrete, n5   # leaf
+左 | Object | noun, unclassified, concrete, n5   # left
+長さ | Number | number, n3   # length
+手紙 | Object | letter, communication, document, n5   # letter
+図書館 | Place | library, book, study, education, public, n5   # library
+電気 | Object | na-adjective, concrete, n5   # light; electricity
+位置 | Object | noun, unclassified, concrete, n3   # location; position
+迷子 | Person | person, concrete, n3   # lost child
+忘れ物 | Object | noun, unclassified, concrete, n5   # lost item
+荷物 | Object | luggage, travel, belongings, n5   # luggage
+昼ご飯 | Food | concrete, n5   # lunch
+維持 | Activity | maintain, management, suru-verb, n2   # maintenance
+化粧 | Object | noun, unclassified, concrete, n3   # makeup
+管理 | Object | noun, unclassified, concrete, n3   # management
+地図 | Object | map, navigation, travel, n5   # map
+地図 | Object | map, navigation, travel, n5   # map
+市場 | Place | market, shopping, business, n5   # market
+結婚 | Activity | marriage, relationship, suru-verb, n5   # marriage
+夫婦 | Object | noun, unclassified, concrete, n5   # married couple
+試合 | Object | match, sport, competition, n5   # match; game
+資料 | Object | material, document, reference, information, n5   # materials; document
+意味 | Language | abstract, n5   # meaning
+措置 | Object | noun, unclassified, concrete, n1   # measure; action
+対策 | Object | noun, unclassified, concrete, n2   # measure; countermeasure
+薬 | Food | medicine, health, medical, n5   # medicine
+会議 | Event | n5   # meeting
+会議室 | Room | room, concrete, n5   # meeting room
+メニュー | Document | document, concrete, n5, loanword   # menu
+方法 | Object | method, process, abstract, n4   # method
+牛乳 | Drink | drink, concrete, n5   # milk
+鏡 | Object | noun, unclassified, concrete, n5   # mirror
+味噌汁 | Food | concrete, n5   # miso soup
+誤解 | Object | noun, unclassified, concrete, n2   # misunderstanding
+携帯電話 | Technology | electronic, concrete, n5   # mobile phone
+もっと | Language | comparison, more, n4   # more
+朝 | Time | morning, time, n5   # morning
+午前 | Time | morning, am, time, n5   # morning; a.m.
+山 | Place | mountain, nature, outdoor, n5   # mountain
+口 | Object | mouth, body-part, human, n5   # mouth
+映画 | Object | movie, entertainment, media, n5   # movie
+引っ越し | Activity | move-house, housing, suru-verb, n4   # moving house
+筋肉 | Object | noun, unclassified, concrete, n3   # muscle
+音楽 | Object | music, entertainment, art, n5   # music
+名前 | Object | name, identity, personal-information, n5   # name
+祝日 | Time | day, holiday, n4   # national holiday
+近い | Adverb | near, distance, i-adjective, n5   # near
+近い | Adverb | near, distance, i-adjective, n5   # near
+必要 | Adverb | necessity, requirement, na-adjective, n4   # necessary
+近所 | Place | neighborhood, local-area, residence, nearby, n4   # neighborhood
+近所 | Place | neighborhood, local-area, residence, nearby, n5   # neighborhood
+緊張 | Adverb | nervous, emotion, state, suru-noun, n5   # nervousness
+新しい | Adverb | new, age, positive, i-adjective, n5   # new
+正月 | Time | year, n4   # New Year
+ニュース | Object | new, media, information, n5, loanword   # news
+新聞 | Object | newspaper, media, reading, n5   # newspaper
+来月 | Time | month, n5   # next month
+隣 | Object | noun, unclassified, concrete, n5   # next to
+来週 | Time | week, n5   # next week
+来年 | Time | year, n5   # next year
+夜 | Time | night, time, n5   # night
+禁煙 | Object | noun, unclassified, concrete, n5   # no smoking
+昼 | Object | noun, unclassified, concrete, n5   # noon; daytime
+普通 | Adverb | normal, common, na-adjective, n4   # normal; ordinary
+必ずしも | Adverb | adverb, abstract, n3   # not always
+ノート | Object | noun, unclassified, concrete, n5, loanword   # notebook
+数 | Time | number, quantity, amount, n5   # number; count
+看護師 | Person | person, occupation, concrete, n5   # nurse
+油 | Object | noun, unclassified, concrete, n5   # oil
+古い | Adverb | old, age, i-adjective, n5   # old
+途中 | Time | middle, during, time, n4   # on the way
+片道 | Object | noun, unclassified, concrete, n5   # one way
+意見 | Object | opinion, communication, abstract, n4   # opinion
+意見 | Object | opinion, communication, abstract, n3   # opinion
+機会 | Object | opportunity, chance, occasion, abstract, n4   # opportunity
+反対 | Object | noun, unclassified, concrete, n4   # opposition
+以下 | Language | maximum, limit, comparison, formal, n4   # or less
+以上 | Language | minimum, comparison, quantity, limit, formal, n4   # or more
+注文 | Object | noun, unclassified, concrete, n5   # order
+組織 | Object | noun, unclassified, concrete, n2   # organization
+残業 | Object | noun, unclassified, concrete, n5   # overtime
+痛み | Emotion | abstract, n5   # pain
+親 | Person | parent, family, human, n5   # parent
+両親 | Person | parent, family, n4   # parents
+公園 | Place | park, nature, recreation, outdoor, n5   # park
+駐車場 | Object | noun, unclassified, concrete, n5   # parking lot
+参加 | Activity | participate, group, suru-verb, n3   # participation
+合格 | Event | n5   # passing an exam
+消極的 | Object | noun, unclassified, concrete, n2   # passive; negative
+期間 | Object | noun, unclassified, concrete, n5   # period; duration
+許可 | Object | permission, authority, abstract, n3   # permission
+視点 | Object | noun, unclassified, concrete, n1   # perspective
+薬局 | Object | noun, unclassified, concrete, n4   # pharmacy
+薬局 | Object | noun, unclassified, concrete, n5   # pharmacy
+現象 | Object | phenomenon, science, observation, n1   # phenomenon
+電話番号 | Technology | electronic, concrete, n5   # phone number
+写真 | Object | photo, media, memory, n5   # photo
+写真 | Object | photo, media, memory, n5   # photograph
+体力 | Object | noun, unclassified, concrete, n3   # physical strength
+豚 | Animal | animal, concrete, n3   # pig
+予定 | Object | schedule, plan, time, n4   # plan; schedule
+予定 | Object | schedule, plan, time, n5   # plan; schedule
+皿 | Object | noun, unclassified, concrete, n5   # plate
+ホーム | Object | noun, unclassified, concrete, n5, loanword   # platform
+論点 | Object | noun, unclassified, concrete, n1   # point at issue
+交番 | Person | person, concrete, n5   # police box
+警察署 | Person | person, concrete, n5   # police station
+政策 | Object | noun, unclassified, concrete, n2   # policy
+方針 | Object | noun, unclassified, concrete, n1   # policy; direction
+敬語 | Language | abstract, n3   # polite/honorific language
+政治 | Object | politics, government, society, n3   # politics
+池 | Object | noun, unclassified, concrete, n5   # pond
+豚肉 | Food | meat, concrete, n5   # pork
+積極的 | Object | noun, unclassified, concrete, n2   # positive; proactive
+郵便局 | Place | post-office, mail, government, service, public, n5   # post office
+郵便局 | Place | post-office, mail, government, service, public, n5   # post office
+切手 | Object | noun, unclassified, concrete, n5   # postage stamp
+練習 | Activity | practice, learning, sport, suru-verb, n5   # practice
+練習 | Activity | practice, learning, sport, suru-verb, n5   # practice
+前提 | Object | noun, unclassified, concrete, n1   # premise; assumption
+支度 | Object | noun, unclassified, concrete, n4   # preparation
+準備 | Activity | prepare, planning, suru-verb, n4   # preparation
+予習 | Object | noun, unclassified, concrete, n5   # preparation for a lesson
+発表 | Object | noun, unclassified, concrete, n3   # presentation; announcement
+値段 | Money | currency, n5   # price
+誇り | Object | noun, unclassified, concrete, n5   # pride
+印刷 | Object | noun, unclassified, concrete, n5   # printing
+たぶん | Adverb | probably, probability, adverb, n4   # probably
+問題 | Object | problem, issue, abstract, n4   # problem; question
+過程 | Object | noun, unclassified, concrete, n1   # process
+商品 | Object | product, good, shopping, business, n5   # product; item
+利益 | Object | noun, unclassified, concrete, n2   # profit; benefit
+番組 | Media | concrete, n5   # program; show
+禁止 | Object | noun, unclassified, concrete, n3   # prohibition
+約束 | Object | promise, agreement, social, n5   # promise
+約束 | Object | promise, agreement, social, n4   # promise; appointment
+割合 | Object | ratio, percentage, measurement, n2   # proportion; ratio
+提案 | Object | noun, unclassified, concrete, n3   # proposal
+提案 | Object | noun, unclassified, concrete, n3   # proposal
+目的 | Object | purpose, goal, abstract, n3   # purpose
+量 | Object | quantity, amount, measurement, n3   # quantity
+分量 | Number | number, n2   # quantity; amount
+質問 | Object | noun, unclassified, concrete, n5   # question
+質問 | Object | noun, unclassified, concrete, n5   # question
+静か | Adverb | quiet, calm, na-adjective, n5   # quiet
+雨 | Object | rain, weather, nature, n5   # rain
+範囲 | Object | noun, unclassified, concrete, n2   # range; scope
+理由 | Object | reason, abstract, logic, n4   # reason
+領収書 | Object | noun, unclassified, concrete, n5   # receipt
+最近 | Time | recent, time, n4   # recently
+最近 | Time | recent, time, n3   # recently
+受付 | Furniture | furniture, concrete, n4   # reception desk
+レシピ | Object | noun, unclassified, concrete, n5, loanword   # recipe
+記録 | Document | document, concrete, n5   # record
+赤い | Object | i-adjective, concrete, n5   # red
+削減 | Activity | reduce, change, suru-verb, n2   # reduction
+審判 | Object | noun, unclassified, concrete, n2   # referee
+冷蔵庫 | Object | noun, unclassified, concrete, n4   # refrigerator
+地域 | Place | region, area, geography, administrative, n2   # region; area
+関係 | Object | relationship, abstract, social, n3   # relationship; connection
+親戚 | Object | noun, unclassified, concrete, n3   # relatives
+安心 | Adverb | relief, positive, emotion, suru-noun, n5   # relief; peace of mind
+著しい | Adverb | remarkable, significant, degree, i-adjective, n1   # remarkable; significant
+返信 | Object | noun, unclassified, concrete, n5   # reply
+報告 | Document | document, concrete, n3   # report
+通報 | Document | document, concrete, n2   # report (to authorities)
+予約 | Activity | reserve, planning, travel, suru-verb, n4   # reservation
+資源 | Object | noun, unclassified, concrete, n2   # resource
+対応 | Activity | respond, handle, communication, suru-verb, n3   # response; handling
+責任 | Object | responsibility, duty, work, abstract, n3   # responsibility
+結果 | Object | result, outcome, abstract, n3   # result
+退職 | Object | noun, unclassified, concrete, n2   # retirement
+返品 | Object | noun, unclassified, concrete, n5   # returning an item
+復習 | Object | noun, unclassified, concrete, n5   # review
+茶碗 | Food | rice, grain, concrete, n5   # rice bowl
+豊か | Object | noun, unclassified, concrete, n2   # rich; abundant
+右 | Place | right-side, direction, position, n5   # right
+指輪 | Object | noun, unclassified, concrete, n3   # ring
+川 | Place | river, nature, water, n5   # river
+道 | Place | road, transportation, outdoor, n5   # road; way
+部屋 | Place | room, indoor, residence, n5   # room
+往復 | Object | noun, unclassified, concrete, n5   # round trip
+安全 | Object | noun, unclassified, concrete, n4   # safe
+安全 | Object | noun, unclassified, concrete, n5   # safety
+給料 | Money | currency, n4   # salary
+売り場 | Object | noun, unclassified, concrete, n5   # sales floor
+塩 | Food | spice, concrete, n5   # salt
+塩 | Food | spice, concrete, n5   # salt
+保存 | Object | noun, unclassified, concrete, n5   # save; storage
+予定表 | Object | noun, unclassified, concrete, n5   # schedule
+入学 | Building | building, school, concrete, n4   # school enrollment
+画面 | Object | noun, unclassified, concrete, n5   # screen
+海 | Place | ocean, sea, nature, water, outdoor, n5   # sea
+検索 | Object | noun, unclassified, concrete, n5   # search
+季節 | Time | season, n4   # season
+調味料 | Object | noun, unclassified, concrete, n2   # seasoning
+お代わり | Time | n5   # second helping
+棚 | Furniture | furniture, concrete, n5   # shelf
+船 | Object | ship, boat, vehicle, transportation, n5   # ship; boat
+靴 | Object | shoes, clothing, wearable, n5   # shoes
+靴 | Object | shoes, clothing, wearable, n5   # shoes
+店 | Place | store, shopping, business, shop, n5   # shop; store
+買い物 | Activity | shopping, commerce, suru-verb, n4   # shopping
+商店街 | Place | concrete, shopping, n5   # shopping street
+兄弟 | Object | noun, unclassified, concrete, n5   # siblings
+歩道 | Object | noun, unclassified, concrete, n5   # sidewalk
+空 | Place | sky, nature, outdoor, n5   # sky
+小さい | Adverb | small, size, i-adjective, n5   # small
+取り皿 | Object | na-adjective, concrete, n3   # small serving plate
+喫煙 | Object | noun, unclassified, concrete, n5   # smoking
+雪 | Object | snow, weather, nature, n5   # snow
+石けん | Object | noun, unclassified, concrete, n5   # soap
+社会 | Object | society, culture, n3   # society
+解決 | Activity | solve, problem-solving, suru-verb, n2   # solution
+特別 | Object | noun, unclassified, concrete, n4   # special
+辛い | Object | i-adjective, concrete, n5   # spicy
+割り勘 | Object | noun, unclassified, concrete, n3   # splitting the bill
+春 | Time | spring, season, time, n5   # spring
+段階 | Object | stage, step, level, abstract, n1   # stage; step
+階段 | Object | noun, unclassified, concrete, n5   # stairs
+基準 | Object | noun, unclassified, concrete, n2   # standard; criterion
+状態 | Object | state, condition, abstract, n3   # state; condition
+店員 | Building | building, store, concrete, n5   # store clerk
+真っ直ぐ | Object | noun, unclassified, concrete, n4   # straight ahead
+厳しい | Adverb | strict, severe, i-adjective, n2   # strict; severe
+提出 | Object | noun, unclassified, concrete, n5   # submission
+成功 | Object | success, achievement, positive, n3   # success
+急に | Adverb | adverb, abstract, n4   # suddenly
+砂糖 | Food | concrete, n5   # sugar
+砂糖 | Food | concrete, n5   # sugar
+夏 | Time | summer, season, time, n5   # summer
+晴れ | Weather | n5   # sunny weather
+スーパー | Object | noun, unclassified, concrete, n5, loanword   # supermarket
+供給 | Object | noun, unclassified, concrete, n2   # supply
+甘い | Food | candy, concrete, n5   # sweet
+制度 | Object | system, government, society, n2   # system; institution
+尻尾 | Object | noun, unclassified, concrete, n3   # tail
+持ち帰り | Object | noun, unclassified, concrete, n3   # takeout
+課題 | Object | noun, unclassified, concrete, n2   # task; issue
+味 | Object | taste, flavor, food, n5   # taste; flavor
+税込み | Object | noun, unclassified, concrete, n5   # tax included
+お茶 | Drink | drink, tea, concrete, n5   # tea
+技術 | Object | technology, engineering, science, n3   # technology; skill
+温度 | Weather | n5   # temperature
+傾向 | Object | trend, pattern, abstract, n1   # tendency
+教科書 | Book | book, concrete, n5   # textbook
+盗難 | Object | noun, unclassified, concrete, n2   # theft
+今月 | Language | demonstrative, abstract, n5   # this month
+今週 | Language | demonstrative, abstract, n5   # this week
+雷 | Object | noun, unclassified, concrete, n5   # thunder
+改札 | Document | document, concrete, n5   # ticket gate
+片付け | Object | noun, unclassified, concrete, n5   # tidying up
+時間 | Time | time, duration, common, abstract, n5   # time; hour
+倍 | Object | noun, unclassified, concrete, n4   # times; -fold
+謝る | Activity | verb, ichidan, abstract, n3   # to apologize
+吠える | Activity | verb, ichidan, abstract, n2   # to bark
+間に合う | Activity | verb, godan, abstract, n5   # to be in time
+遅れる | Activity | verb, ichidan, abstract, n5   # to be late
+困る | Activity | be-troubled, difficulty, godan, intransitive, n4   # to be troubled
+始める | Activity | begin, start, ichidan, transitive, n4   # to begin
+始まる | Activity | begin, start, godan, intransitive, n5   # to begin
+沸かす | Activity | verb, godan, abstract, n3   # to boil (liquid)
+磨く | Activity | verb, godan, abstract, n4   # to brush; polish
+祝う | Activity | verb, godan, abstract, n3   # to celebrate
+変更する | Activity | verb, suru-verb, abstract, n3   # to change
+着替える | Activity | verb, ichidan, abstract, n4   # to change clothes
+調べる | Activity | investigate, check, research, ichidan, transitive, n4   # to check; investigate
+選ぶ | Activity | choose, decision, godan, transitive, n4   # to choose
+選択する | Activity | verb, mental-verb, suru-verb, abstract, n3   # to choose
+選ぶ | Activity | choose, decision, godan, transitive, n5   # to choose
+登る | Activity | verb, motion-verb, movement, ichidan, abstract, n4   # to climb
+閉まる | Activity | verb, ichidan, abstract, n4   # to close
+比べる | Activity | compare, analysis, ichidan, transitive, n4   # to compare
+比較する | Activity | verb, suru-verb, abstract, n3   # to compare
+確認する | Activity | verb, suru-verb, abstract, n3   # to confirm
+相談する | Activity | verb, suru-verb, abstract, n3   # to consult
+連絡する | Activity | verb, suru-verb, abstract, n3   # to contact
+続ける | Activity | continue, persist, ichidan, transitive, n4   # to continue
+続ける | Activity | continue, persist, ichidan, transitive, n3   # to continue
+続く | Activity | continue, last, duration, godan, intransitive, n5   # to continue
+伝える | Activity | tell, convey, communication, ichidan, transitive, n4   # to convey
+伝える | Activity | tell, convey, communication, ichidan, transitive, n4   # to convey; tell
+切る | Activity | cut, end, godan, transitive, n5   # to cut
+決める | Activity | decide, decision, planning, ichidan, transitive, n4   # to decide
+決定する | Activity | verb, suru-verb, abstract, n3   # to decide
+飾る | Activity | verb, ichidan, abstract, n3   # to decorate
+減る | Activity | decrease, decline, godan, intransitive, n4   # to decrease
+減少する | Activity | verb, suru-verb, abstract, n3   # to decrease
+終わる | Activity | finish, end, completion, godan, intransitive, n5   # to end
+説明する | Activity | verb, communication-verb, communication, suru-verb, abstract, n3   # to explain
+失敗する | Activity | verb, suru-verb, abstract, n3   # to fail
+終える | Activity | verb, ichidan, abstract, n4   # to finish
+直す | Activity | verb, godan, abstract, n4   # to fix; correct
+忘れる | Activity | forget, memory, mental, ichidan, transitive, n4   # to forget
+集まる | Activity | gather, assemble, godan, intransitive, n4   # to gather
+汚れる | Activity | verb, ichidan, abstract, n3   # to get dirty
+焼く | Activity | bake, grill, burn, cooking, godan, transitive, n5   # to grill; bake
+手伝う | Activity | verb, godan, abstract, n4   # to help
+助ける | Activity | verb, ichidan, abstract, n5   # to help; save
+急ぐ | Activity | verb, godan, abstract, n4   # to hurry
+含む | Activity | include, contain, godan, transitive, n2   # to include
+増える | Activity | increase, growth, ichidan, intransitive, n4   # to increase
+増加する | Activity | verb, suru-verb, abstract, n3   # to increase
+判断する | Activity | verb, suru-verb, abstract, n3   # to judge
+飼う | Activity | keep-pet, raise-animal, godan, transitive, n4   # to keep a pet
+冷ます | Activity | verb, godan, abstract, n3   # to let cool
+負ける | Activity | lose, competition, sport, ichidan, intransitive, n5   # to lose
+維持する | Activity | verb, suru-verb, abstract, n1   # to maintain
+間違える | Activity | verb, creating, ichidan, abstract, n4   # to make a mistake
+覚える | Activity | remember, memorize, learning, mental, ichidan, transitive, n5   # to memorize
+混ぜる | Activity | verb, ichidan, abstract, n5   # to mix
+動く | Activity | move, motion, godan, intransitive, n4   # to move
+開く | Activity | open, begin, godan, intransitive, n4   # to open
+参加する | Activity | verb, suru-verb, abstract, n3   # to participate
+支払う | Activity | verb, godan, abstract, n5   # to pay
+準備する | Activity | verb, suru-verb, abstract, n3   # to prepare
+防ぐ | Activity | verb, godan, abstract, n2   # to prevent
+促進する | Activity | verb, suru-verb, abstract, n1   # to promote
+育てる | Activity | raise, grow, educate, ichidan, transitive, n3   # to raise (a child)
+達する | Activity | verb, suru-verb, abstract, n1   # to reach; attain
+認める | Activity | recognize, approve, accept, ichidan, transitive, n2   # to recognize; admit
+断る | Activity | verb, ichidan, abstract, n3   # to refuse
+残る | Activity | remain, stay, godan, intransitive, n4   # to remain
+報告する | Activity | verb, suru-verb, abstract, n5   # to report
+頼む | Activity | request, communication, godan, transitive, n3   # to request; ask a favor
+似ている | Activity | verb, ichidan, abstract, n3   # to resemble
+休む | Activity | verb, godan, abstract, n5   # to rest
+求める | Activity | seek, request, demand, ichidan, transitive, n2   # to seek; demand
+煮る | Activity | verb, ichidan, abstract, n3   # to simmer
+泊まる | Activity | verb, ichidan, abstract, n4   # to stay overnight
+蒸す | Activity | verb, godan, abstract, n3   # to steam
+炒める | Activity | verb, ichidan, abstract, n3   # to stir-fry
+止まる | Activity | stop, halt, godan, intransitive, n4   # to stop
+成功する | Activity | verb, suru-verb, abstract, n3   # to succeed
+似合う | Activity | verb, perception-verb, godan, abstract, n3   # to suit; look good on
+脱ぐ | Activity | verb, godan, abstract, n4   # to take off
+連れる | Activity | bring-along, companion, ichidan, transitive, n4   # to take someone along
+破れる | Activity | verb, ichidan, abstract, n2   # to tear; rip
+片付ける | Activity | verb, ichidan, abstract, n4   # to tidy up
+乗り換える | Activity | verb, ichidan, abstract, n4   # to transfer
+曲がる | Activity | verb, ichidan, abstract, n5   # to turn
+理解する | Activity | verb, perception-verb, mental-verb, suru-verb, abstract, n5   # to understand
+利用する | Activity | verb, suru-verb, abstract, n3   # to use
+洗う | Activity | verb, godan, abstract, n4   # to wash
+着る | Activity | wear, clothing, ichidan, transitive, n5   # to wear
+迎える | Activity | welcome, meet, receive, ichidan, transitive, n4   # to welcome; pick up
+勝つ | Activity | win, competition, sport, godan, intransitive, n5   # to win
+本日のおすすめ | Time | day, n3   # today's special
+豆腐 | Object | noun, unclassified, concrete, n5   # tofu
+歯ブラシ | Object | noun, unclassified, concrete, n5   # toothbrush
+合計 | Object | noun, unclassified, concrete, n3   # total
+大会 | Object | noun, unclassified, concrete, n4   # tournament
+町 | Place | town, municipality, urban, n5   # town
+伝統 | Object | tradition, culture, society, n3   # tradition
+信号 | Object | na-adjective, concrete, n5   # traffic light
+路線 | Vehicle | vehicle, concrete, n5   # train line; route
+乗車券 | Vehicle | vehicle, concrete, n5   # train ticket
+ゴミ箱 | Object | noun, unclassified, concrete, n5   # trash can
+木 | Person | tree, plant, nature, living, n5   # tree
+旅行 | Activity | travel, vacation, suru-verb, n5   # trip; travel
+信頼 | Object | trust, relationship, abstract, n5   # trust
+試着 | Clothing | clothing, concrete, n5   # trying on clothes
+台風 | Weather | n5   # typhoon
+傘 | Object | umbrella, weather, personal-item, n5   # umbrella
+単位 | Object | noun, unclassified, concrete, n2   # unit (of measure)
+利用 | Object | noun, unclassified, concrete, n3   # use; utilization
+たいてい | Adverb | adverb, abstract, n4   # usually
+掃除機 | Object | noun, unclassified, concrete, n4   # vacuum cleaner
+価値 | Object | value, philosophy, abstract, n2   # value
+野菜 | Food | vegetable, healthy, ingredient, edible, n5   # vegetables
+獣医 | Object | noun, unclassified, concrete, n2   # veterinarian
+動画 | Media | concrete, n5   # video
+観点 | Object | noun, unclassified, concrete, n1   # viewpoint
+村 | Place | village, rural, n5   # village
+財布 | Object | wallet, money, personal-item, n5   # wallet
+財布 | Object | wallet, money, personal-item, n5   # wallet
+洗濯機 | Technology | electronic, concrete, n4   # washing machine
+洗面所 | Object | noun, unclassified, concrete, n5   # washroom
+水 | Drink | water, drink, n5   # water
+天気 | Object | weather, nature, n5   # weather
+週末 | Object | noun, unclassified, concrete, n5   # weekend
+重さ | Number | number, n3   # weight
+白い | Adverb | white, color, i-adjective, n5   # white
+野生 | Object | noun, unclassified, concrete, n3   # wild; wildlife
+風 | Object | wind, nature, weather, n5   # wind
+窓 | Object | window, building, structure, n5   # window
+冬 | Time | winter, season, time, n5   # winter
+言葉 | Object | word, language, communication, n5   # word; language
+仕事 | Activity | work, job, business, suru-verb, n3   # work; job
+心配 | Adverb | worry, emotion, state, suru-noun, n5   # worry
+動物園 | Place | zoo, animal, family, tourism, n5   # zoo

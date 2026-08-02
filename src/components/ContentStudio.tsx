@@ -8,7 +8,7 @@ import type { JlptLevel } from '../lib/types'
 import { loadActiveSentencePatternIds, saveActiveSentencePatternIds, sentencePatternCatalog } from '../data/sentencePatternCatalog'
 import { addTagToGroup, formatTagLabel, getTagGroupTags, getUniversalTags, getWordTagGroup, normalizeTag, normalizeTags, saveWordTagGroup, suggestedTagsForWord, TAG_GROUPS } from '../data/tagTaxonomy'
 import type { TagGroupName } from '../data/tagTaxonomy'
-import { getAllCategoryWords, getSavedCategoryWordTags, saveCategoryWordTags } from '../lib/categorySentenceEngine'
+import { getAllCategoryWords, getPendingReviewWords, getSavedCategoryWordTags, saveCategoryWordTags } from '../lib/categorySentenceEngine'
 import type { CategoryWordRecord } from '../lib/categorySentenceEngine'
 import { getVocabularyMetadata } from '../data/vocabularySenseOverrides'
 import { inferPreferredTranslation } from '../data/preferredVocabularyTranslations'
@@ -33,6 +33,15 @@ const VOCABULARY_TEMPLATE = [
   'JLPT level:',
   'Tags:',
   'Notes:',
+].join('\n')
+
+const BULK_REVIEW_EXAMPLE = [
+  '# word | category | tags',
+  '交番 | Places | Building, Public',
+  '机 | Objects | Furniture, Desk',
+  '牛乳 | Food & Drink | Drink, Milk',
+  '看護師 | People & Living Things | Person, Occupation, Nurse',
+  '自転車 | Objects | Vehicle, Bicycle',
 ].join('\n')
 
 const VOCABULARY_PHILOSOPHY = [
@@ -295,6 +304,8 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
   const [sample, setSample] = useState(0)
   const [testBatchOpen, setTestBatchOpen] = useState(false)
   const [testBatchSeed, setTestBatchSeed] = useState(0)
+  const [bulkReviewDraft, setBulkReviewDraft] = useState('')
+  const [bulkReviewReport, setBulkReviewReport] = useState('')
   const [vocabTemplateDraft, setVocabTemplateDraft] = useState(VOCABULARY_TEMPLATE)
   const [vocabImportDraft, setVocabImportDraft] = useState(VOCABULARY_TEMPLATE)
   const [database, setDatabase] = useState<ContentRecord[]>(() => loadContentDatabase())
@@ -302,7 +313,12 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
     // Both values invalidate this view after local vocabulary or tag storage changes.
     void database
     void tagRevision
-    return getAllCategoryWords()
+    // Pending-review words are appended so the study-only decks can actually be
+    // reviewed here. They are excluded from the generator until approved, which
+    // is the point: this screen is how they get in.
+    const admitted = getAllCategoryWords()
+    const admittedKeys = new Set(admitted.map(wordKey))
+    return [...admitted, ...getPendingReviewWords().filter(word => !admittedKeys.has(wordKey(word)))]
   }, [database, tagRevision])
   const reviewedKeys = useMemo(() => new Set(database
     .filter(record => record.kind === 'vocabulary' && Boolean(record.reviewedAt))
@@ -405,6 +421,42 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
     toast(`${record.japanese} saved to Reviewed Words ✓`)
   }
 
+  /**
+   * Bulk equivalent of reviewing words one row at a time. Reviewing 700+ words
+   * through individual forms is the real barrier, so this accepts the same
+   * decisions pasted as lines: `word | category | tag, tag, tag`. Everything
+   * routes through saveReviewedWord, so a pasted review is indistinguishable
+   * from a hand-reviewed one.
+   */
+  function applyBulkReview() {
+    const known = new Map(allCategoryWords.map(word => [word.japanese, word]))
+    const groupNames = TAG_GROUPS.map(group => group.name as TagGroupName)
+    const applied: string[] = []
+    const problems: string[] = []
+
+    for (const rawLine of bulkReviewDraft.split('\n')) {
+      const line = rawLine.trim()
+      if (!line || line.startsWith('#')) continue
+      const [japanese, categoryText, tagText] = line.split('|').map(part => part.trim())
+      if (!japanese || !categoryText) { problems.push(`${line} — needs "word | category | tags"`); continue }
+      const word = known.get(japanese)
+      if (!word) { problems.push(`${japanese} — not a word in this deck`); continue }
+      const group = groupNames.find(name => name.toLowerCase() === categoryText.toLowerCase())
+      if (!group) { problems.push(`${japanese} — unknown category "${categoryText}"`); continue }
+      const tags = (tagText ?? '').split(',').map(tag => tag.trim()).filter(Boolean)
+      if (!tags.length) { problems.push(`${japanese} — no tags given`); continue }
+      saveReviewedWord(word, tags, group, word.preferredTranslation)
+      applied.push(japanese)
+    }
+
+    setBulkReviewReport(
+      problems.length
+        ? `Saved ${applied.length}. Skipped ${problems.length}:\n${problems.join('\n')}`
+        : `Saved all ${applied.length} words ✓`,
+    )
+    if (applied.length) setBulkReviewDraft('')
+  }
+
   function generateBatch() {
     const queuedIds = drafts.flatMap(d => d.sourceId ? [d.sourceId] : [])
     const unavailable = new Set([...approvedIds, ...rejectedIds, ...queuedIds])
@@ -488,6 +540,25 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
     anchor.click()
     URL.revokeObjectURL(url)
     toast(`Exported ${vocabulary.size} vocabulary words`)
+  }
+
+  /**
+   * Writes the reviewed database out in the shape src/data/seedContentDatabase.json
+   * expects. Reviewed words otherwise live only in one browser's localStorage,
+   * which means they are invisible to other machines and to build scripts such
+   * as generate:vocab-examples. Saving this file into the repo makes the review
+   * work portable and version-controlled.
+   */
+  function exportSeedDatabase() {
+    const records = database.filter(record => record.status === 'approved' || record.reviewedAt)
+    const json = JSON.stringify({ version: 1, records }, null, 2)
+    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }))
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = 'seedContentDatabase.json'
+    anchor.click()
+    URL.revokeObjectURL(url)
+    toast(`Exported ${records.length} records — save as src/data/seedContentDatabase.json`)
   }
 
   async function addTemplateVocabulary() {
@@ -589,7 +660,7 @@ export function ContentStudio({ onBack }: { onBack: () => void }) {
 
       {view === 'vocab' && <section className="cs-page cs-narrow vocab-bottom-tools"><article className="cs-card vocab-import-card"><header><div><small className="eyebrow">VALIDATE + ADD</small><h3>Paste, check, and add to the database</h3><p>Paste one or more completed templates. Duplicates against the entire database are flagged automatically. Fix errors, review warnings, then add every valid entry straight to the live database.</p></div><button className="ghost" type="button" onClick={()=>copyText(VOCABULARY_TEMPLATE,'Template copied')}>Copy template</button></header><textarea aria-label="Vocabulary templates to import" value={vocabImportDraft} onChange={event=>setVocabImportDraft(event.target.value)} spellCheck={false} /><div className="vocab-validation-summary"><b>{readyToStageEntries.length} ready to add</b><span>{vocabularyValidation.reduce((total,item)=>total+item.errors.length,0)} errors · {vocabularyValidation.reduce((total,item)=>total+item.warnings.length,0)} warnings</span></div>{vocabularyValidation.length>0&&<div className="vocab-validation-list">{vocabularyValidation.map(result=><article key={`${result.input.index}-${result.input.japanese}-${result.input.reading}`} className={result.errors.length?'has-errors':''}><b>Entry {result.input.index}{result.input.japanese?` · ${result.input.japanese}`:''}</b>{[...result.errors,...result.warnings].map(issue=><span key={issue} className={result.errors.includes(issue)?'error':'warning'}>{issue}</span>)}{!result.errors.length&&!result.warnings.length&&<span className="pass">Ready to add.</span>}</article>)}</div>}<footer><span>Errors block adding (duplicates and missing required fields). Warnings are informational: defaults, duplicate logic, and custom tags to review.</span><button className="primary" type="button" disabled={!readyToStageEntries.length} onClick={() => { void addTemplateVocabulary() }}>Add {readyToStageEntries.length || ''} {readyToStageEntries.length === 1 ? 'word' : 'words'} to database</button></footer></article><article className="cs-card vocab-staging-card"><header><div><small className="eyebrow">STAGING QUEUE</small><h3>Review before publishing</h3><p>Words saved one at a time from the entry form land here for review. Pasted templates above are added directly, so they skip this queue.</p></div><div className="vocab-staging-actions"><span>{stagedVocabulary.length} staged</span>{stagedVocabulary.length>0&&<button className="primary" type="button" onClick={approveAllStagedVocabulary}>Approve all</button>}</div></header>{stagedVocabulary.length?<div className="vocab-staging-list">{stagedVocabulary.map(record=><article key={record.id}><div><b>{record.japanese}</b><span>{record.reading} · {record.preferredTranslation || record.english}</span><small>{record.category} · {record.jlpt} · {record.tags.map(formatTagLabel).join(', ') || 'no tags'}</small></div><div><button className="ghost" type="button" onClick={()=>disableContentRecord(record.id)}>Remove</button><button className="primary" type="button" onClick={()=>approveStagedVocabulary(record)}>Approve live</button></div></article>)}</div>:<div className="vocab-staging-empty">Nothing staged yet. Words saved individually from the entry form appear here for review.</div>}</article></section>}
 
-      {view === 'categories' && !managedTagGroup && <div className="cs-page cs-narrow"><div className="cs-intro"><div><h2>Word category editor</h2><p>Review each word once. Saving its category and tags moves the complete word record into the reviewed database.</p></div><div className="category-review-actions"><span className="pill">{unreviewedWords.length} left to review</span><button className="primary" onClick={()=>{setManagedTagGroup('reviewed');setReviewedCategory('All');setCategorySearch('')}}>Reviewed Words ({reviewedWords.length})</button></div></div><div className="cs-category-list tag-group-list">{TAG_GROUPS.map((group,index)=>{const tags=getTagGroupTags(group.name);const wordCount=unreviewedWords.filter(word=>getWordTagGroup(word)===group.name).length;return <article key={group.name}><i>{String(index+1).padStart(2,'0')}</i><div><b>{group.name}</b><span>{tags.length} category tags · {wordCount} waiting for review</span></div><span>{tags.slice(0,3).map(formatTagLabel).join(' · ')}{tags.length>3?'…':''}</span><button onClick={()=>{setManagedTagGroup(group.name);setCategorySearch('')}}>Manage</button></article>})}</div></div>}
+      {view === 'categories' && !managedTagGroup && <div className="cs-page cs-narrow"><div className="cs-intro"><div><h2>Word category editor</h2><p>Review each word once. Saving its category and tags moves the complete word record into the reviewed database.</p></div><div className="category-review-actions"><span className="pill">{unreviewedWords.length} left to review</span><button className="ghost" type="button" onClick={exportSeedDatabase}>Export database file</button><button className="primary" onClick={()=>{setManagedTagGroup('reviewed');setReviewedCategory('All');setCategorySearch('')}}>Reviewed Words ({reviewedWords.length})</button></div></div><div className="cs-category-list tag-group-list">{TAG_GROUPS.map((group,index)=>{const tags=getTagGroupTags(group.name);const wordCount=unreviewedWords.filter(word=>getWordTagGroup(word)===group.name).length;return <article key={group.name}><i>{String(index+1).padStart(2,'0')}</i><div><b>{group.name}</b><span>{tags.length} category tags · {wordCount} waiting for review</span></div><span>{tags.slice(0,3).map(formatTagLabel).join(' · ')}{tags.length>3?'…':''}</span><button onClick={()=>{setManagedTagGroup(group.name);setCategorySearch('')}}>Manage</button></article>})}</div><section className="cs-card vocab-template-card bulk-review-card"><header><div><small className="eyebrow">BULK REVIEW</small><h3>Paste many words at once</h3></div><button className="ghost" type="button" onClick={()=>copyText(BULK_REVIEW_EXAMPLE,'Example copied')}>Copy example</button></header><p>One word per line: <code>word | category | tag, tag, tag</code>. Lines starting with <code>#</code> are ignored. Categories are the eight groups above; tags decide which sentences the word may appear in.</p><textarea value={bulkReviewDraft} onChange={event=>setBulkReviewDraft(event.target.value)} placeholder={BULK_REVIEW_EXAMPLE} spellCheck={false} rows={10} /><div className="cs-actions"><button className="primary" type="button" onClick={applyBulkReview} disabled={!bulkReviewDraft.trim()}>Apply to reviewed words</button></div>{bulkReviewReport && <pre className="bulk-review-report">{bulkReviewReport}</pre>}</section></div>}
 
       {view === 'categories' && managedTagGroup && managedTagGroup !== 'reviewed' && <div className="cs-page cs-narrow category-detail"><button className="category-back" onClick={()=>{setManagedTagGroup(null);setCategorySearch('')}}>← All categories</button><div className="cs-intro"><div><span className="category-kicker">TO REVIEW</span><h2>{managedTagGroup}</h2><p>{getTagGroupTags(managedTagGroup).length} category tags · {unreviewedWords.filter(word=>getWordTagGroup(word)===managedTagGroup).length} words remaining. Saving a word moves its full card into Reviewed Words.</p></div><label className="category-search"><span>Search words or tags</span><input value={categorySearch} onChange={event=>setCategorySearch(event.target.value)} placeholder={`Search ${managedTagGroup.toLowerCase()}…`} /></label></div><div className="category-word-header"><span>{managedWords.length} {managedWords.length===1?'word':'words'} shown</span><span>Review category and suggested tags</span></div>{managedWords.length ? <div className="category-word-list">{managedWords.map(word=><CategoryWordTagRow key={word.id} word={word} onTaxonomyChange={()=>setTagRevision(value=>value+1)} onSave={saveReviewedWord} />)}</div> : <div className="cs-empty">This category is fully reviewed. You can edit its saved words in Reviewed Words.</div>}</div>}
 

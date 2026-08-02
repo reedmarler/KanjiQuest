@@ -4,7 +4,7 @@ import { normalizeTags } from '../data/tagTaxonomy'
 import { allCards } from '../data'
 import { classifyVocabularyCard } from './vocabularyClassifier'
 import { inferPreferredTranslation } from '../data/preferredVocabularyTranslations'
-import type { JlptLevel } from './types'
+import type { JlptLevel, StudyCard } from './types'
 import { toHiragana } from 'wanakana'
 
 export const SENTENCE_CATEGORIES = [
@@ -109,6 +109,14 @@ export interface CategorySentenceOptions {
   slotSeeds?: Partial<Record<string,number>>
   /** Force one verb usage so callers can inspect its compatible vocabulary. */
   verbId?: string
+  /**
+   * Force this exact Japanese word into whichever slot it legitimately fits,
+   * so callers can build an example sentence *for* a specific word. The word
+   * still has to pass that slot's normal category/tag rules — this narrows the
+   * candidate pool, it never bypasses a compatibility check. Generation fails
+   * (returns null) rather than producing a sentence without the word.
+   */
+  requiredWord?: string
 }
 
 const words: WordRecord[] = [
@@ -127,19 +135,44 @@ let catalogWordCache: WordRecord[] | null = null
 
 function catalogWords(): WordRecord[] {
   if (catalogWordCache) return catalogWordCache
-  // The large study-only core expansion deliberately has no hand-reviewed
-  // generator tags yet. Keeping it out of this pool lets Vocab and Kanji Lab
-  // grow without weakening the sentence generator's semantic constraints.
+  // The study-only core-expansion and focus decks have no reviewed generator
+  // tags, so they stay out: admitting them weakens the semantic constraints the
+  // rest of this file exists to enforce.
+  //
+  // Admitting them by the classifier's own "high confidence" was tried and
+  // reverted. That confidence only means a keyword matched the English gloss,
+  // which misfires badly on compound nouns — 交番 "police box" matched `police`
+  // and became a *person* ("a police box may boil tea"), and 留守 "absence; not
+  // at home" matched `home` and became a place you can walk from. Widening this
+  // pool safely needs per-word review, not a confidence heuristic.
   catalogWordCache = allCards.filter(card =>
-    card.type === 'vocab'
-    && !card.id.startsWith('vocab-core-expansion-')
-    && !card.id.startsWith('vocab-focus-'),
-  ).map(card => {
-    const classification = classifyVocabularyCard(card)
-    const english = card.back || card.english || 'Meaning needed'
-    return { id:`catalog-${card.id}`, japanese:card.front, reading:card.reading ?? 'Reading needed', english, preferredTranslation:inferPreferredTranslation(card.front,english,card.reading), jlpt:card.jlpt, categories:[classification.category], tags:classification.tags, source:'built-in' }
-  })
+    card.type === 'vocab' && !isStudyOnlyDeck(card.id),
+  ).map(toCategoryWordRecord)
   return catalogWordCache
+}
+
+function isStudyOnlyDeck(id: string) {
+  return id.startsWith('vocab-core-expansion-') || id.startsWith('vocab-focus-')
+}
+
+function toCategoryWordRecord(card: StudyCard): WordRecord {
+  const classification = classifyVocabularyCard(card)
+  const english = card.back || card.english || 'Meaning needed'
+  return { id:`catalog-${card.id}`, japanese:card.front, reading:card.reading ?? 'Reading needed', english, preferredTranslation:inferPreferredTranslation(card.front,english,card.reading), jlpt:card.jlpt, categories:[classification.category], tags:classification.tags, source:'built-in' }
+}
+
+/**
+ * The study-only words the generator refuses to use until a human has checked
+ * their category and tags, carrying the classifier's unverified guess so a
+ * reviewer has somewhere to start. Approving one in Content Studio stores a
+ * reviewed record, which `approvedWords()` then feeds into the generator — the
+ * per-word path that the rejected confidence heuristic was standing in for.
+ */
+export function getPendingReviewWords(): CategoryWordRecord[] {
+  return allCards
+    .filter(card => card.type === 'vocab' && isStudyOnlyDeck(card.id))
+    .map(toCategoryWordRecord)
+    .sort((a, b) => a.english.localeCompare(b.english))
 }
 
 // `ingredient` is deliberately absent: sugar, flour, and oil are what a dish is
@@ -232,8 +265,14 @@ const fleeingDestinationTags = ['building','house','home','apartment','room','fo
 // pattern teaches.
 const readingMannerTags = ['slowly','leisurely','quickly','carefully','quietly','silently','aloud','fluently','adverbial-manner']
 const wakeTimeTags = ['clock-time','hour','morning','dawn','sunrise','wake-time']
+// Time expressions that take に generally, not just the wake-up ones. 起きる
+// still restricts itself to wakeTimeTags through its own slot rule, so this
+// wider set only affects patterns where any point in time is fine.
+const generalTimeTags = [...wakeTimeTags,'afternoon','evening','night','noon','season','spring','summer','autumn','fall','winter','month','year','date','day','weekday','holiday','birthday']
 const niIncompatibleTimeTags = new Set(normalizeTags(['today','tonight','tomorrow','yesterday','morning','this-morning','this-evening','this-time','frequency','daily','weekly','monthly','yearly','every-morning','every-evening','every-night','every-day']))
-const niIncompatibleTimeWords = new Set(['今朝','今晩','今日','明日','昨日','毎朝','毎晩','毎日'])
+// Relative time words name a period by its distance from now, and Japanese
+// attaches them directly ("来週行きます"), so に reads wrong on them.
+const niIncompatibleTimeWords = new Set(['今朝','今晩','今日','明日','昨日','毎朝','毎晩','毎日','今週','来週','先週','今月','来月','先月','今年','来年','去年','今','最近'])
 // 床, 壁, and 天井 are parts of a place rather than places you travel between:
 // walking from the floor to the library names no starting point.
 // 国 names no particular place — “goes to a country” says nothing a learner can
@@ -530,6 +569,45 @@ function editorWords(): WordRecord[] {
 function seededPick<T>(items: T[], seed: number, salt: number) {
   const mixed = (Math.imul(seed + salt * 101, 0x9e3779b1) >>> 0)
   return items[mixed % items.length]!
+}
+
+/**
+ * Builds the slot picker a pattern generator uses, biased so that a
+ * caller-required word wins the first slot it legitimately fits. Each pool has
+ * already been through that pattern's own category/tag filtering, so preferring
+ * a member of it can never bypass a compatibility rule — it only decides which
+ * of the already-valid candidates is chosen. Pools hold either vocabulary
+ * records or small literal `{surface}` objects depending on the pattern, so
+ * both shapes are recognised.
+ */
+function requiredWordPicker(seed: number, requiredWord?: string) {
+  let pending = Boolean(requiredWord)
+  const surfaceOf = (item: unknown) => {
+    if (!item || typeof item !== 'object') return undefined
+    const record = item as { japanese?: string; surface?: string }
+    return record.japanese ?? record.surface
+  }
+  return <T>(pool: T[], salt: number): T | null => {
+    if (!pool.length) return null
+    if (pending) {
+      const match = pool.find(item => surfaceOf(item) === requiredWord)
+      if (match !== undefined) {
+        pending = false
+        return match
+      }
+    }
+    return seededPick(pool, seed, salt)
+  }
+}
+
+/**
+ * A generator can legitimately produce a sentence without the required word
+ * (the word may fit no slot in that particular pattern). Callers asked for a
+ * sentence *containing* the word, so treat that as a miss rather than a result.
+ */
+function enforceRequiredWord(sentence: GeneratedPreviewSentence | null, options: CategorySentenceOptions) {
+  if (!options.requiredWord || !sentence) return sentence
+  return sentence.japanese.includes(options.requiredWord) ? sentence : null
 }
 
 // One entry per godan row. i/a are the ます-stem and ない-stem kana; te/ta are
@@ -896,6 +974,7 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
   const filled: Record<string,WordRecord> = {}
   const slotTagMatches: Record<string,string[]> = {}
   let salt=startingSalt
+  let requiredWordPending=Boolean(options.requiredWord)
   for (const [slot,rule] of Object.entries(verb.slots)) {
     // A composite entry like "町／街" is two words joined by a slash in the
     // source data, not one usable word — the generator must pick one, not
@@ -1002,9 +1081,19 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
     // meeting rather than a chance one — 会う fits those roles, not 出会う.
     if (slot === 'companion' && verb.id === 'deau-companion') pool=pool.filter(word=>!['人','人々','個人','客','お客様','患者'].includes(word.japanese))
     if (!pool.length) return null
-    filled[slot]=seededPick(pool,options.slotSeeds?.[slot]??seed,salt++)
+    // The required word is chosen from the *filtered* pool, so it only lands in
+    // a slot it genuinely qualifies for — every category, tag, and per-verb
+    // compatibility rule above has already been applied to `pool`.
+    const required = requiredWordPending
+      ? pool.find(word=>word.japanese===options.requiredWord)
+      : undefined
+    if (required) requiredWordPending=false
+    filled[slot]=required ?? seededPick(pool,options.slotSeeds?.[slot]??seed,salt++)
     slotTagMatches[slot]=matchingTags(filled[slot],rule.tags)
   }
+  // Asked for a sentence containing a specific word but no slot could take it:
+  // fail rather than quietly return a sentence that doesn't use it.
+  if (requiredWordPending) return null
   return { filled,slotTagMatches }
 }
 
@@ -1194,8 +1283,10 @@ export const adjectiveRules = [
   { id:'hayai-early',japanese:'早い',reading:'はやい',english:'early',categories:['Time'] as SentenceCategory[] },
   { id:'osoi',japanese:'遅い',reading:'おそい',english:'late',categories:['Person','Vehicle','Event'] as SentenceCategory[] },
   { id:'hayai-fast',japanese:'速い',reading:'はやい',english:'fast',categories:['Vehicle','Technology','Animal'] as SentenceCategory[] },
-  { id:'omoi',japanese:'重い',reading:'おもい',english:'heavy',categories:['Object','Furniture','Vehicle'] as SentenceCategory[] },
-  { id:'karui',japanese:'軽い',reading:'かるい',english:'light',categories:['Object','Furniture','Vehicle'] as SentenceCategory[] },
+  // physicalOnly: weight is a property of a thing you can pick up. Without it
+  // the broad Object bucket yields "a movie is heavy".
+  { id:'omoi',japanese:'重い',reading:'おもい',english:'heavy',categories:['Object','Furniture','Vehicle'] as SentenceCategory[],physicalOnly:true },
+  { id:'karui',japanese:'軽い',reading:'かるい',english:'light',categories:['Object','Furniture','Vehicle'] as SentenceCategory[],physicalOnly:true },
   { id:'tsuyoi',japanese:'強い',reading:'つよい',english:'strong',categories:['Person','Animal'] as SentenceCategory[] },
   { id:'yowai',japanese:'弱い',reading:'よわい',english:'weak',categories:['Person','Animal'] as SentenceCategory[] },
   // Weather and temperature — split by whether the thing is felt in the air
@@ -1276,8 +1367,11 @@ export const adjectiveRules = [
   { id:'kanzen',japanese:'完全',reading:'かんぜん',english:'complete',categories:['Document'] as SentenceCategory[] },
   { id:'jiyuu',japanese:'自由',reading:'じゆう',english:'free',categories:['Person'] as SentenceCategory[] },
   { id:'daijoubu',japanese:'大丈夫',reading:'だいじょうぶ',english:'okay',categories:['Person','Object'] as SentenceCategory[] },
-  { id:'suki',japanese:'好き',reading:'すき',english:'likable',categories:['Food','Media','Person'] as SentenceCategory[] },
-  { id:'kirai',japanese:'嫌い',reading:'きらい',english:'disliked',categories:['Food','Media','Person'] as SentenceCategory[] },
+  // Person is excluded: 好き/嫌い are experiencer adjectives, so "母は好きです"
+  // reads as "mother likes (it)" rather than "mother is liked" — the sentence
+  // is ambiguous exactly when the topic is a person.
+  { id:'suki',japanese:'好き',reading:'すき',english:'likable',categories:['Food','Media'] as SentenceCategory[] },
+  { id:'kirai',japanese:'嫌い',reading:'きらい',english:'disliked',categories:['Food','Media'] as SentenceCategory[] },
   { id:'jouzu',japanese:'上手',reading:'じょうず',english:'skillful',categories:['Person'] as SentenceCategory[] },
   { id:'heta',japanese:'下手',reading:'へた',english:'unskillful',categories:['Person'] as SentenceCategory[] },
   // Additional temperature/texture and person-trait words.
@@ -1302,16 +1396,19 @@ export const adjectiveRules = [
   // Abstract quality/evaluation words — Document/Object here follows the same
   // pattern as 複雑/単純/必要/大切 above: Object's abstract fallback bucket is
   // exactly the pool these evaluative words are meant to describe.
-  { id:'tekisetsu',japanese:'適切',reading:'てきせつ',english:'appropriate',categories:['Document','Object'] as SentenceCategory[] },
-  { id:'futekisetsu',japanese:'不適切',reading:'ふてきせつ',english:'inappropriate',categories:['Document','Object'] as SentenceCategory[] },
-  { id:'koukateki',japanese:'効果的',reading:'こうかてき',english:'effective',categories:['Document','Object'] as SentenceCategory[] },
-  { id:'seikaku-accurate',japanese:'正確',reading:'せいかく',english:'accurate',categories:['Document','Object'] as SentenceCategory[] },
-  { id:'gutaiteki',japanese:'具体的',reading:'ぐたいてき',english:'concrete',categories:['Document','Object'] as SentenceCategory[] },
-  { id:'genjitsuteki',japanese:'現実的',reading:'げんじつてき',english:'realistic',categories:['Document','Object'] as SentenceCategory[] },
-  { id:'ippanteki',japanese:'一般的',reading:'いっぱんてき',english:'general',categories:['Document','Object'] as SentenceCategory[] },
-  { id:'shinkoku',japanese:'深刻',reading:'しんこく',english:'serious',categories:['Object','Event'] as SentenceCategory[] },
-  { id:'kanou',japanese:'可能',reading:'かのう',english:'possible',categories:['Document','Object'] as SentenceCategory[] },
-  { id:'fukanou',japanese:'不可能',reading:'ふかのう',english:'impossible',categories:['Document','Object'] as SentenceCategory[] },
+  // Document only, deliberately: these judge a plan, method, or piece of
+  // information, never a physical thing — "a train is appropriate" and "shoes
+  // are realistic" are what the broader Object category produced.
+  { id:'tekisetsu',japanese:'適切',reading:'てきせつ',english:'appropriate',categories:['Document'] as SentenceCategory[] },
+  { id:'futekisetsu',japanese:'不適切',reading:'ふてきせつ',english:'inappropriate',categories:['Document'] as SentenceCategory[] },
+  { id:'koukateki',japanese:'効果的',reading:'こうかてき',english:'effective',categories:['Document'] as SentenceCategory[] },
+  { id:'seikaku-accurate',japanese:'正確',reading:'せいかく',english:'accurate',categories:['Document'] as SentenceCategory[] },
+  { id:'gutaiteki',japanese:'具体的',reading:'ぐたいてき',english:'concrete',categories:['Document'] as SentenceCategory[] },
+  { id:'genjitsuteki',japanese:'現実的',reading:'げんじつてき',english:'realistic',categories:['Document'] as SentenceCategory[] },
+  { id:'ippanteki',japanese:'一般的',reading:'いっぱんてき',english:'general',categories:['Document'] as SentenceCategory[] },
+  { id:'shinkoku',japanese:'深刻',reading:'しんこく',english:'serious',categories:['Event'] as SentenceCategory[] },
+  { id:'kanou',japanese:'可能',reading:'かのう',english:'possible',categories:['Document'] as SentenceCategory[] },
+  { id:'fukanou',japanese:'不可能',reading:'ふかのう',english:'impossible',categories:['Document'] as SentenceCategory[] },
 ]
 
 function hasCompositeSurface(word: WordRecord) {
@@ -1323,7 +1420,33 @@ function hasUsableMeaning(word: WordRecord) {
   return Boolean(meaning) && !/^(?:meaning|reading) needed$/i.test(meaning)
 }
 
-function validHumanPool(vocabulary: WordRecord[]) {
+/**
+ * The pool helpers below scan the whole ~2,000-word vocabulary and are called
+ * on every single generation, which dominated generation cost. Results depend
+ * only on the vocabulary array, so they are memoized against its identity —
+ * `editorWords()` returns a new array whenever the content database changes,
+ * which invalidates these automatically.
+ */
+function memoizePool<A extends unknown[]>(
+  build: (vocabulary: WordRecord[], ...args: A) => WordRecord[],
+) {
+  let sourceVocabulary: WordRecord[] | null = null
+  let byKey = new Map<string, WordRecord[]>()
+  return (vocabulary: WordRecord[], ...args: A): WordRecord[] => {
+    if (sourceVocabulary !== vocabulary) {
+      sourceVocabulary = vocabulary
+      byKey = new Map()
+    }
+    const key = args.length ? JSON.stringify(args) : ''
+    const cached = byKey.get(key)
+    if (cached) return cached
+    const built = build(vocabulary, ...args)
+    byKey.set(key, built)
+    return built
+  }
+}
+
+const validHumanPool = memoizePool(function validHumanPool(vocabulary: WordRecord[]) {
   return vocabulary.filter(word=>{
     const tags=tagSet(word)
     return !hasCompositeSurface(word)
@@ -1341,14 +1464,14 @@ function validHumanPool(vocabulary: WordRecord[]) {
       && !tags.has('question-word')
       && !tags.has('requires-modifier')
   })
-}
+})
 
 /** Recipients of calling and showing must identify someone, not just a human. */
 function namedRecipients(humans: WordRecord[]) {
   return humans.filter(word=>!genericRecipientWords.has(word.japanese))
 }
 
-function validPlacePool(vocabulary: WordRecord[]) {
+const validPlacePool = memoizePool(function validPlacePool(vocabulary: WordRecord[]) {
   return vocabulary.filter(word=>{
     const tags=tagSet(word)
     return !hasCompositeSurface(word)
@@ -1359,19 +1482,19 @@ function validPlacePool(vocabulary: WordRecord[]) {
       && !destinationIncompatibleWords.has(word.japanese)
       && ![...tags].some(tag=>destinationIncompatibleTags.has(tag))
   })
-}
+})
 
-function validTimePool(vocabulary: WordRecord[]) {
+const validTimePool = memoizePool(function validTimePool(vocabulary: WordRecord[]) {
   return vocabulary.filter(word=>{
     const tags=tagSet(word)
     return word.categories.includes('Time')
-      && matchingTags(word,wakeTimeTags).length>0
+      && matchingTags(word,generalTimeTags).length>0
       && !niIncompatibleTimeWords.has(word.japanese)
       && ![...tags].some(tag=>niIncompatibleTimeTags.has(tag))
   })
-}
+})
 
-function validInanimatePool(vocabulary: WordRecord[],categories=inanimateCategories) {
+const validInanimatePool = memoizePool<[categories?: SentenceCategory[]]>(function validInanimatePool(vocabulary: WordRecord[],categories: SentenceCategory[]=inanimateCategories) {
   return vocabulary.filter(word=>{
     const tags=tagSet(word)
     const meaning=primaryEnglishGloss(word.preferredTranslation || word.english)
@@ -1385,11 +1508,60 @@ function validInanimatePool(vocabulary: WordRecord[],categories=inanimateCategor
       && !/^(?:meaning|reading) needed$/i.test(meaning)
       && ![...tags].some(tag=>disallowedPhysicalObjectTags.has(tag) || invalidObjectLexicalTags.has(tag))
   })
-}
+})
 
 function isPhysicalObject(word: WordRecord) {
   if (categoryMatch(word,['Food','Drink','Furniture','Tool','Vehicle','Clothing','Book','Document'])) return true
   return [...tagSet(word)].some(tag=>physicalObjectTags.has(tag))
+}
+
+let slotIndexCache: Set<string> | null = null
+
+if (typeof window !== 'undefined') {
+  window.addEventListener(CONTENT_DATABASE_EVENT,()=>{ slotIndexCache=null })
+}
+
+/**
+ * Every word that clears the category/tag gate of at least one slot anywhere in
+ * the generator. Deciding a word fits *nowhere* otherwise costs a scan of every
+ * pattern (over a second), which is far too slow for screens that build many
+ * example sentences in one render — this answers that question with a lookup.
+ *
+ * Membership means "worth attempting", not "guaranteed to work": a word can
+ * still be rejected later by a per-verb rule or a cross-slot check. The set is
+ * deliberately built from the same pool helpers the generators use, so it can
+ * never exclude a word those generators would have accepted.
+ */
+function slotEligibleWords(): Set<string> {
+  if (slotIndexCache) return slotIndexCache
+  const vocabulary = editorWords()
+  const eligible = new Set<string>()
+
+  for (const verb of verbs) {
+    eligible.add(verb.japanese)
+    for (const rule of Object.values(verb.slots)) {
+      for (const word of vocabulary) {
+        if (!categoryMatch(word,rule.categories)) continue
+        if (rule.tags?.length && matchingTags(word,rule.tags).length === 0) continue
+        eligible.add(word.japanese)
+      }
+    }
+  }
+
+  // Pattern generators outside the verb-slot path draw from these curated pools
+  // directly, so their members are reachable even when no verb slot accepts them.
+  for (const pool of [
+    validHumanPool(vocabulary),
+    validPlacePool(vocabulary),
+    validTimePool(vocabulary),
+    validInanimatePool(vocabulary),
+  ]) {
+    for (const word of pool) eligible.add(word.japanese)
+  }
+  for (const rule of adjectiveRules) eligible.add(rule.japanese)
+
+  slotIndexCache = eligible
+  return eligible
 }
 
 function originEnglish(word: WordRecord) {
@@ -1407,7 +1579,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   const objectExistencePlaces=localizedPlaces.filter(word=>[...tagSet(word)].some(tag=>objectExistenceLocationTags.includes(tag)))
   const times=validTimePool(vocabulary)
   const inanimate=validInanimatePool(vocabulary)
-  const pick=(pool: WordRecord[],salt: number)=>pool.length ? seededPick(pool,seed,salt) : null
+  const pick=requiredWordPicker(seed,options.requiredWord)
   const placesForObject=(object: WordRecord)=> {
     const objectTags=tagSet(object)
     if (object.categories.includes('Clothing') || ['靴','靴下','帽子','服','上着','コート'].includes(object.japanese) || objectTags.has('clothing')) {
@@ -1487,7 +1659,21 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${walks} to ${englishPhrase(endpoint,'destination')}.`,{subject,endpoint},{verb:verbSlot('verb-aruku-endpoint','歩きます','歩く','あるきます','walk',['movement','endpoint'])},['歩く is a movement verb.','Endpoint is a valid destination.'])
   }
   if (patternId === 'n5-17') {
-    const adjective=seededPick(adjectiveRules,seed,171)
+    // Routed through `pick` rather than seededPick so that asking for an
+    // example sentence for an adjective selects that adjective, instead of
+    // hoping a random one matches.
+    // When the required word is a *noun* instead, the adjective has to be
+    // chosen to suit it: the object pool below is filtered by the adjective's
+    // categories, so picking blind here would usually exclude the very word
+    // the sentence is being built for.
+    const requiredRecord = options.requiredWord && !adjectiveRules.some(rule=>rule.japanese===options.requiredWord)
+      ? vocabulary.find(word=>word.japanese===options.requiredWord)
+      : undefined
+    const describingAdjectives = requiredRecord
+      ? adjectiveRules.filter(rule=>categoryMatch(requiredRecord,rule.categories as SentenceCategory[]))
+      : adjectiveRules
+    const adjective=pick(describingAdjectives.length?describingAdjectives:adjectiveRules,171)
+    if (!adjective) return null
     // 必要だ is exempted from the normal category+tag pool: its curated
     // allow-list crosses several classifier categories (time, money, tools,
     // documents), and a couple of its words (経験, 知識, 協力) fall through
@@ -1629,7 +1815,7 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
   const vocabulary=editorWords()
   const humans=validHumanPool(vocabulary)
   const places=validPlacePool(vocabulary)
-  const pick=<T>(pool: T[],salt: number)=>pool.length ? seededPick(pool,seed,salt) : null
+  const pick=requiredWordPicker(seed,options.requiredWord)
   const exact=(japanese: string[])=>vocabulary.filter(word=>japanese.includes(word.japanese) && hasUsableMeaning(word))
   const wordPart=(word: WordRecord,slot: string)=>({text:word.japanese,reading:kanaReading(word.reading,word.japanese),slot})
   const literalPart=(text: string,reading=text,slot?: string)=>({text,reading,slot})
@@ -1830,12 +2016,12 @@ const n3PatternMeanings: Record<string,string> = {
   'n3-06':'conditional if','n3-07':'conditional when or if','n3-08':'although or despite','n3-09':'because or since','n3-10':'in order to',
 }
 
-function generateN3CategorySentence(seed: number,patternId: string): GeneratedPreviewSentence | null {
+function generateN3CategorySentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!n3PatternIds.has(patternId)) return null
   const vocabulary=editorWords()
   const humans=validHumanPool(vocabulary)
   const places=validPlacePool(vocabulary)
-  const pick=<T>(pool: T[],salt: number)=>pool.length?seededPick(pool,seed,salt):null
+  const pick=requiredWordPicker(seed,options.requiredWord)
   const exact=(japanese: string[])=>vocabulary.filter(word=>japanese.includes(word.japanese)&&hasUsableMeaning(word))
   const wordPart=(word: WordRecord,slot: string)=>({text:word.japanese,reading:kanaReading(word.reading,word.japanese),slot})
   const literalPart=(text: string,reading=text,slot?: string)=>({text,reading,slot})
@@ -3592,20 +3778,26 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
 export function generateCategorySentence(seed: number, requestedPatternId?: string, level: 'N5'|'N4'|'N3'|'N2'|'N1'='N5',options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (requestedPatternId && advancedPatternIds.has(requestedPatternId)) return generateAdvancedCategorySentence(seed,requestedPatternId)
   if (level==='N2'||level==='N1') return null
-  if (level==='N3'||requestedPatternId?.startsWith('n3-')) return requestedPatternId?generateN3CategorySentence(seed,requestedPatternId):null
-  if (requestedPatternId && additionalN4PatternIds.has(requestedPatternId)) return additionalN4Sentence(seed,requestedPatternId,options)
-  if (level === 'N4' || requestedPatternId?.startsWith('n4-')) return generateN4CategorySentence(seed,requestedPatternId,options)
-  if (requestedPatternId && additionalN5PatternIds.has(requestedPatternId)) return additionalN5Sentence(seed,requestedPatternId,options)
+  if (level==='N3'||requestedPatternId?.startsWith('n3-')) return requestedPatternId?enforceRequiredWord(generateN3CategorySentence(seed,requestedPatternId,options),options):null
+  if (requestedPatternId && additionalN4PatternIds.has(requestedPatternId)) return enforceRequiredWord(additionalN4Sentence(seed,requestedPatternId,options),options)
+  if (level === 'N4' || requestedPatternId?.startsWith('n4-')) return enforceRequiredWord(generateN4CategorySentence(seed,requestedPatternId,options),options)
+  if (requestedPatternId && additionalN5PatternIds.has(requestedPatternId)) return enforceRequiredWord(additionalN5Sentence(seed,requestedPatternId,options),options)
   // A requested pattern limits the eligible records, but the executable unit is
   // still the verb: once chosen, its own pattern and slot rules drive the rest.
-  const verbPool = requestedPatternId ? verbs.filter(verb => verb.sentencePattern === requestedPatternId && !contextNeedyBareVerbIds.has(verb.id)) : verbs.filter(verb=>!contextNeedyBareVerbIds.has(verb.id))
+  let verbPool = requestedPatternId ? verbs.filter(verb => verb.sentencePattern === requestedPatternId && !contextNeedyBareVerbIds.has(verb.id)) : verbs.filter(verb=>!contextNeedyBareVerbIds.has(verb.id))
+  // A required word can be the verb itself rather than one of its slot fillers.
+  // Narrowing the verb pool satisfies the requirement here, so the slot filler
+  // below must not also demand it — hence `slotOptions` drops requiredWord.
+  const requiredWordIsVerb = Boolean(options.requiredWord) && verbPool.some(verb => verb.japanese === options.requiredWord)
+  if (requiredWordIsVerb) verbPool = verbPool.filter(verb => verb.japanese === options.requiredWord)
+  const slotOptions = requiredWordIsVerb ? { ...options, requiredWord: undefined } : options
   if (!verbPool.length) return null
   const verb = options.verbId
     ? verbPool.find(candidate => candidate.id === options.verbId)
     : seededPick(verbPool, seed, 1)
   if (!verb) return null
   const vocabulary = editorWords()
-  const result = fillVerbSlots(verb,vocabulary,seed,2,options)
+  const result = fillVerbSlots(verb,vocabulary,seed,2,slotOptions)
   if (!result) return null
   const { filled,slotTagMatches } = result
   const polite = conjugate(verb)
@@ -3619,4 +3811,55 @@ export function generateCategorySentence(seed: number, requestedPatternId?: stri
   const renderedEnglish=renderTranslation(verb.translationTemplate,verb,filled)
   const english=renderedEnglish.charAt(0).toUpperCase()+renderedEnglish.slice(1)
   return { frameId:verb.sentencePattern, level:'N5', japanese, reading, english, slots, furigana, grammar:[{pattern:verb.sentencePattern,meaning:'Verb-selected category and tag pattern',jlpt:'N5'}], validation:[`Verb selected first: ${verb.japanese}.`,`Verb selected pattern: ${verb.sentencePattern.toUpperCase()}.`,`Slots matched allowed categories${semanticChecks.length ? ` and semantic tags (${semanticChecks.join('; ')})` : ''}.`,`Supported forms: ${verb.supportedGrammarForms.join(', ')}.`] }
+}
+
+/**
+ * Patterns worth trying when building an example sentence for one specific
+ * word. Ordered cheapest-first: the base verb path honours `requiredWord`
+ * directly, while the rest are scanned because their generators pick their own
+ * slot fillers. Advanced (N2/N1) patterns are excluded — they use fixed curated
+ * phrasing rather than open vocabulary slots, so they can't feature an
+ * arbitrary word.
+ */
+const WORD_EXAMPLE_PATTERN_IDS = [
+  ...additionalN5PatternIds,
+  ...Object.keys(n4PatternMeanings),
+  ...additionalN4PatternIds,
+]
+
+// Low on purpose: now that `requiredWord` reaches each generator's slot picker,
+// a pattern that can host the word succeeds on the first attempt or two. Extra
+// attempts mostly add cost to words that fit nowhere, which is the slow case.
+const SEEDS_PER_PATTERN = 3
+
+/**
+ * Builds one example sentence that actually contains `word`, using the same
+ * generator — and therefore the same word-compatibility rules — as ordinary
+ * practice sentences. Returns null when no pattern can accommodate the word,
+ * which is the correct answer for particles, interjections, and words whose
+ * category has no matching slot anywhere.
+ */
+export function generateSentenceForWord(word: string, seed = 1): GeneratedPreviewSentence | null {
+  // Scanning every pattern for a word that clears no slot's category/tag gate
+  // costs seconds and can only ever fail, so rule that out with a lookup.
+  if (!slotEligibleWords().has(word)) return null
+
+  const direct = (() => {
+    for (let attempt = 0; attempt < SEEDS_PER_PATTERN; attempt += 1) {
+      const sentence = generateCategorySentence(seed + attempt, undefined, 'N5', { requiredWord: word })
+      if (sentence) return sentence
+    }
+    return null
+  })()
+  if (direct) return direct
+
+  for (const patternId of WORD_EXAMPLE_PATTERN_IDS) {
+    for (let attempt = 0; attempt < SEEDS_PER_PATTERN; attempt += 1) {
+      const candidateSeed = seed + attempt * 37
+      const level = patternId.startsWith('n4-') ? 'N4' : 'N5'
+      const sentence = generateCategorySentence(candidateSeed, patternId, level, { requiredWord: word })
+      if (sentence) return sentence
+    }
+  }
+  return null
 }
