@@ -8,8 +8,14 @@ import { sentencePatternCatalog } from '../data/sentencePatternCatalog'
 import type { JlptLevel } from './types'
 import type { WrongPool } from './wrongPool'
 
-const STEPS_PER_LEVEL = 40
-const GENERATION_ATTEMPTS_PER_STEP = 16
+// The hero needs only the current and next sentences immediately. Building a
+// 40-sentence stream with 16 candidates each made the dashboard wait on up to
+// 640 full generation passes before it could render. A 20-step, 10-candidate
+// stream still walks a broad range of grammar patterns and uses the same
+// naturalness/diversity selection, while making the initial dashboard load
+// roughly three times lighter.
+const STEPS_PER_LEVEL = 20
+const GENERATION_ATTEMPTS_PER_STEP = 10
 const STEPS_CACHE = new Map<string, HeroStep[]>()
 
 // These are the common endings the category engine can safely apply to the
@@ -164,7 +170,7 @@ function levelAppropriateFormVariants(level: JlptLevel, sentence: GeneratedPrevi
  * animation: every step is a full-sentence swap rather than a single word
  * sliding into place.
  */
-function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number): HeroStep[] {
+function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCount: number): HeroStep[] {
   const complexity = JLPT_TO_COMPLEXITY[level]
   const patterns = patternsForComplexity(complexity)
   if (!patterns.length) return []
@@ -175,7 +181,7 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number): HeroSte
   const tracker = new SentenceDiversityTracker()
   let pendingFormVariants: GeneratedPreviewSentence[] = []
 
-  for (let index = 0; index < STEPS_PER_LEVEL; index++) {
+  for (let index = 0; index < stepCount; index++) {
     // A coprime stride walks through every available pattern before repeating.
     const pattern = patterns[(start + index * stride) % patterns.length]!
     const candidates: GeneratedPreviewSentence[] = []
@@ -234,12 +240,13 @@ export function buildHeroSteps(
   _progress: Record<string, unknown> = {},
   level: JlptLevel,
   sequenceSeed = 0,
+  stepCount = STEPS_PER_LEVEL,
 ): HeroStep[] {
-  const cacheKey = `${level}:${sequenceSeed}`
+  const cacheKey = `${level}:${sequenceSeed}:${stepCount}`
   const cached = STEPS_CACHE.get(cacheKey)
   if (cached) return cached
 
-  const steps = buildDatabaseHeroSteps(level, sequenceSeed)
+  const steps = buildDatabaseHeroSteps(level, sequenceSeed, stepCount)
   STEPS_CACHE.set(cacheKey, steps)
   return steps
 }
