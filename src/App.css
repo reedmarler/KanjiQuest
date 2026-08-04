@@ -109,7 +109,7 @@ body:has(.dashboard) .app {
 
 /* Dashboard */
 .dashboard::before {
-  content: "3";
+  content: "4";
   position: fixed;
   top: 0.4rem;
   left: 0.45rem;

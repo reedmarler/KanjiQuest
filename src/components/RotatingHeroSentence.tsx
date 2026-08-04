@@ -319,7 +319,7 @@ export function RotatingHeroSentence({
       } as CSSProperties}
     >
       <p className={`hero-sentence-line hero-database-line${phase === 'swap' && isFrameChange ? ' is-frame-swapping' : ''}`} aria-live="polite">
-        {phase === 'rest' ? renderFullSentence(frame) : phase === 'swap' && isFrameChange ? (
+        {phase !== 'swap' ? renderFullSentence(frame) : isFrameChange ? (
           <span className="hero-database-frame-stack">
             <span className="hero-database-frame is-outgoing">{renderSegments(frame)}</span>
             <span className="hero-database-frame is-incoming">{renderSegments(nextFrame, true)}</span>
