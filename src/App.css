@@ -96,6 +96,11 @@ body:has(.kanji-lab) .app {
   padding-bottom: 1.4rem;
 }
 
+body:has(.quest-hub) .app {
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
 /* Dashboard is sized to fit a single screen without scrolling. */
 body:has(.dashboard) .app {
   padding-top: 0.5rem;
@@ -2292,6 +2297,59 @@ body:has(.dashboard) .app {
   margin-bottom: 1.25rem;
 }
 
+.dashboard-quest-button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  align-items: center;
+  gap: 0.55rem;
+  margin: -0.1rem 0 0.5rem;
+  padding: 0.42rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--sakura-light) 34%, var(--border));
+  border-radius: 12px;
+  background: linear-gradient(100deg, color-mix(in srgb, var(--sakura) 10%, var(--surface)), var(--surface));
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+}
+
+.dashboard-quest-button:hover {
+  border-color: var(--sakura);
+  background: linear-gradient(100deg, color-mix(in srgb, var(--sakura) 16%, var(--surface)), var(--surface));
+  transform: translateY(-1px);
+}
+
+.dashboard-quest-mark {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  aspect-ratio: 1;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--sakura) 16%, var(--surface-2));
+  color: var(--sakura-light);
+  font: 700 1.1rem/1 'Noto Sans JP', sans-serif;
+}
+
+.dashboard-quest-button > span:last-child {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: 0.45rem;
+}
+
+.dashboard-quest-button small {
+  grid-column: 1 / -1;
+  color: var(--sakura-light);
+  font-size: 0.47rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+
+.dashboard-quest-button b { font-size: 0.74rem; }
+.dashboard-quest-button em { color: var(--text-muted); font-size: 0.56rem; font-style: normal; }
+
 .progress-compact {
   margin-bottom: 0.6rem;
 }
@@ -3002,11 +3060,241 @@ body:has(.dashboard) .app {
   overflow: hidden;
 }
 
+.progress-bar-quest {
+  --runner-size: 28px;
+  position: relative;
+  height: 18px;
+  margin-top: 0.42rem;
+  overflow: visible;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.58), rgba(255,255,255,0) 46%),
+    #e8ded1;
+  border: 1px solid rgba(94, 72, 44, 0.18);
+  box-shadow: inset 0 1px 2px rgba(77, 53, 33, 0.12);
+}
+
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--kyogre), var(--rayquaza), var(--sakura));
   border-radius: 99px;
   transition: width 0.4s ease;
+}
+
+.progress-bar-quest .progress-fill {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      -28deg,
+      rgba(255,255,255,.18) 0 7px,
+      rgba(255,255,255,0) 7px 15px
+    ),
+    linear-gradient(90deg, #6f3d2c, #c35e42 56%, #ef9d72);
+}
+
+.progress-bar-quest .progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: auto 8px 3px 8px;
+  height: 2px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.38);
+}
+
+.progress-samurai {
+  position: absolute;
+  z-index: 3;
+  left: clamp(10px, var(--progress-pct), calc(100% - 42px));
+  bottom: 8px;
+  width: var(--runner-size);
+  height: var(--runner-size);
+  transform: translateX(-50%);
+  filter: drop-shadow(0 3px 2px rgba(69, 45, 28, .18));
+  animation: samurai-run-bob .32s ease-in-out infinite alternate;
+}
+
+.samurai-head,
+.samurai-body,
+.samurai-arm,
+.samurai-sword,
+.samurai-leg,
+.samurai-speed {
+  position: absolute;
+  display: block;
+}
+
+.samurai-head {
+  left: 12px;
+  top: 2px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #352419;
+  border-radius: 50%;
+  background: #f4be82;
+}
+
+.samurai-head::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: -4px;
+  width: 13px;
+  height: 7px;
+  border-radius: 9px 9px 2px 2px;
+  background: #2f241e;
+}
+
+.samurai-head::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: 3px;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #2f241e;
+}
+
+.samurai-body {
+  left: 10px;
+  top: 12px;
+  width: 13px;
+  height: 11px;
+  border: 2px solid #352419;
+  border-radius: 6px 6px 4px 4px;
+  background: linear-gradient(135deg, #354f89 0 50%, #d84d3e 51%);
+  transform: rotate(-9deg);
+}
+
+.samurai-body::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: -1px;
+  width: 3px;
+  height: 12px;
+  border-radius: 99px;
+  background: #f3d36c;
+  transform: rotate(16deg);
+}
+
+.samurai-arm {
+  left: 6px;
+  top: 14px;
+  width: 13px;
+  height: 4px;
+  border-radius: 99px;
+  background: #352419;
+  transform-origin: right center;
+  animation: samurai-arm-swing .32s ease-in-out infinite alternate;
+}
+
+.samurai-sword {
+  left: -4px;
+  top: 11px;
+  width: 17px;
+  height: 3px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #f8fbff, #9db5c1);
+  transform: rotate(-24deg);
+}
+
+.samurai-sword::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  top: -2px;
+  width: 5px;
+  height: 7px;
+  border-radius: 2px;
+  background: #6f3d2c;
+}
+
+.samurai-leg {
+  left: 12px;
+  top: 22px;
+  width: 13px;
+  height: 4px;
+  border-radius: 99px;
+  background: #352419;
+  transform-origin: left center;
+}
+
+.samurai-leg-front {
+  transform: rotate(32deg);
+  animation: samurai-front-leg .32s ease-in-out infinite alternate;
+}
+
+.samurai-leg-back {
+  transform: rotate(150deg);
+  animation: samurai-back-leg .32s ease-in-out infinite alternate;
+}
+
+.samurai-speed {
+  left: -10px;
+  height: 2px;
+  border-radius: 99px;
+  background: rgba(111, 61, 44, .35);
+  animation: samurai-speed-lines .32s ease-in-out infinite alternate;
+}
+
+.samurai-speed-one {
+  top: 9px;
+  width: 10px;
+}
+
+.samurai-speed-two {
+  top: 18px;
+  width: 15px;
+  animation-delay: .08s;
+}
+
+.progress-fuji {
+  position: absolute;
+  z-index: 2;
+  right: -2px;
+  bottom: 12px;
+  width: 38px;
+  height: 25px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: linear-gradient(135deg, #5d83b4 0 50%, #3f689e 51%);
+  filter: drop-shadow(0 2px 1px rgba(69, 45, 28, .14));
+}
+
+.fuji-snow {
+  position: absolute;
+  left: 10px;
+  top: 4px;
+  width: 18px;
+  height: 11px;
+  clip-path: polygon(50% 0, 100% 100%, 65% 76%, 49% 100%, 32% 75%, 0 100%);
+  background: #fff8ec;
+}
+
+@keyframes samurai-run-bob {
+  from { transform: translate(-50%, 1px) rotate(-2deg); }
+  to { transform: translate(-50%, -2px) rotate(3deg); }
+}
+
+@keyframes samurai-arm-swing {
+  from { transform: rotate(-36deg); }
+  to { transform: rotate(18deg); }
+}
+
+@keyframes samurai-front-leg {
+  from { transform: rotate(28deg); }
+  to { transform: rotate(72deg); }
+}
+
+@keyframes samurai-back-leg {
+  from { transform: rotate(150deg); }
+  to { transform: rotate(112deg); }
+}
+
+@keyframes samurai-speed-lines {
+  from { opacity: .25; transform: translateX(3px); }
+  to { opacity: .8; transform: translateX(-2px); }
 }
 
 .foundation-note {
@@ -3708,6 +3996,23 @@ body:has(.dashboard) .app {
       calc(1.08rem - max(0px, (var(--hero-database-char-count, 0) - 32) * 0.15px)),
       1.6rem
     );
+    align-items: center;
+    padding-inline: 0;
+  }
+
+  .hero-sentence-line.hero-database-line {
+    width: min(100%, 21rem);
+    margin-inline: auto;
+  }
+
+  .hero-slot-full-sentence,
+  .hero-full-sentence-mount {
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-database-english {
+    padding-inline: 0.35rem;
   }
 
   /* At mobile font sizes, the desktop's ~0.04em furigana-to-kanji overlap
@@ -7240,3 +7545,20 @@ body:has(.dashboard) .app {
 .category-word-english label{display:flex;flex-direction:column;gap:3px;margin-top:8px;color:#607068;font-size:.52rem;font-weight:600}.category-word-english label span{font-size:.5rem}.category-word-english input,.draft-meaning input{width:100%;border:1px solid #d8dbd5;background:#fbfbf8;border-radius:6px;padding:6px 8px;font:500 .62rem inherit;color:#294737;outline:none}.category-word-english input:focus,.draft-meaning input:focus{border-color:#56816b;box-shadow:0 0 0 3px rgba(86,129,107,.1)}.draft-meaning label{display:flex;flex-direction:column;gap:3px;margin-top:6px}.draft-meaning label span{font-weight:600;color:#607068}
 
 .practice-loading{min-height:calc(66.6667vh - 2.15rem)}.practice-loading-card{max-width:31rem;margin:12vh auto 0;padding:1.25rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:var(--shadow);text-align:center}.practice-loading-mark{display:block;color:var(--gold);font:600 2rem 'Noto Sans JP',sans-serif}.practice-loading-card h1{margin-top:.28rem;font-size:1.1rem}.practice-loading-card p{margin-top:.32rem;color:var(--text-muted);font-size:.74rem}.practice-loading-bar{height:5px;margin-top:1rem;overflow:hidden;border-radius:3px;background:var(--surface-2)}.practice-loading-bar span{display:block;height:100%;border-radius:inherit;background:var(--gold);transition:width .2s ease}.practice-loading-bar .is-indeterminate{width:42%;animation:practice-loading-sweep 1s ease-in-out infinite}@keyframes practice-loading-sweep{from{transform:translateX(-110%)}to{transform:translateX(270%)}}
+
+/* Quest campaign: a calm, structured home for the guided learning path. */
+.quest-hub{width:min(100%,58rem);margin:0 auto;color:var(--text)}
+.quest-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;color:var(--text-muted);font-size:.62rem}
+.quest-hero{position:relative;display:grid;grid-template-columns:1fr 10rem;gap:1.5rem;align-items:center;min-height:13rem;padding:1.7rem 2rem;overflow:hidden;border:1px solid color-mix(in srgb,var(--sakura-light) 25%,var(--border));border-radius:18px;background:radial-gradient(circle at 94% 9%,color-mix(in srgb,var(--sakura) 20%,transparent),transparent 30%),linear-gradient(125deg,color-mix(in srgb,var(--kyogre) 18%,var(--surface)),var(--surface) 62%);box-shadow:var(--shadow)}
+.quest-hero:after{content:'道';position:absolute;right:-.1em;bottom:-.58em;color:color-mix(in srgb,var(--text) 4%,transparent);font:700 9.5rem/1 'Noto Sans JP',sans-serif;pointer-events:none}
+.quest-eyebrow,.quest-section-heading>div>span,.quest-current-intro>span,.quest-journey-heading span{display:block;color:var(--sakura-light);font-size:.53rem;font-weight:800;letter-spacing:.14em}
+.quest-hero h1{position:relative;z-index:1;margin:.45rem 0 .65rem;font:500 clamp(1.8rem,4vw,2.8rem)/1.06 Georgia,serif;letter-spacing:-.035em}.quest-hero h1 em{color:var(--kyogre-light);font-style:normal}.quest-hero p{position:relative;z-index:1;max-width:32rem;color:var(--text-muted);font-size:.76rem;line-height:1.55}
+.quest-hero-mark{position:relative;z-index:1;display:grid;justify-items:center;gap:.5rem;color:var(--sakura-light)}.quest-hero-mark span{display:grid;place-items:center;width:5.7rem;aspect-ratio:1;border:1px solid color-mix(in srgb,var(--sakura-light) 45%,transparent);border-radius:50%;background:color-mix(in srgb,var(--surface) 48%,transparent);box-shadow:0 0 30px color-mix(in srgb,var(--sakura) 18%,transparent);font:700 2.8rem/1 'Noto Sans JP',sans-serif}.quest-hero-mark small{font-size:.48rem;font-weight:800;letter-spacing:.13em}
+.quest-journey{margin:1rem 0;padding:1rem 1.2rem;border:1px solid var(--border);border-radius:14px;background:var(--surface)}.quest-journey-heading{display:flex;align-items:end;justify-content:space-between;margin-bottom:1.05rem}.quest-journey-heading div{display:grid;gap:.18rem}.quest-journey-heading b{font-size:.8rem}.quest-journey-heading small{color:var(--text-muted);font-size:.62rem}
+.quest-road{position:relative;display:flex;align-items:center;justify-content:space-between;min-height:2.3rem;padding:0 .3rem}.quest-road-line{position:absolute;right:.9rem;left:.9rem;height:2px;background:linear-gradient(90deg,var(--sakura-light),color-mix(in srgb,var(--kyogre-light) 64%,var(--border)))}.quest-road-stop{position:relative;z-index:1;display:grid;place-items:center;width:1.4rem;aspect-ratio:1;border:1px solid var(--border);border-radius:50%;background:var(--surface-2);color:var(--text-muted);font-size:.52rem}.quest-road-stop.is-current{border-color:var(--sakura-light);background:var(--sakura);color:#fff;box-shadow:0 0 0 4px color-mix(in srgb,var(--sakura) 13%,transparent)}.quest-road-stop.is-locked{opacity:.58}.quest-traveler{position:absolute;z-index:2;left:calc(var(--quest-position) + .15rem);top:-1.15rem;display:grid;place-items:center;width:2rem;aspect-ratio:1;border:1px solid color-mix(in srgb,var(--sakura-light) 46%,var(--border));border-radius:50%;background:var(--surface);color:var(--sakura-light);font:700 1.05rem/1 'Noto Sans JP',sans-serif;transform:translateX(-20%);box-shadow:0 4px 13px rgba(0,0,0,.2)}.quest-destination{position:absolute;z-index:1;right:-.15rem;top:-1.05rem;color:var(--gold);font:700 1.28rem/1 'Noto Sans JP',sans-serif}
+.quest-current{display:grid;grid-template-columns:1.25fr .75fr;gap:1rem;padding:1.25rem;border:1px solid color-mix(in srgb,var(--kyogre-light) 28%,var(--border));border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--kyogre) 8%,var(--surface)),var(--surface))}.quest-current-intro h2{margin:.3rem 0;font-size:1.28rem}.quest-current-intro p{color:var(--text-muted);font-size:.72rem}.quest-grammar-chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.8rem}.quest-grammar-chips span{padding:.3rem .5rem;border:1px solid color-mix(in srgb,var(--kyogre-light) 30%,var(--border));border-radius:999px;background:color-mix(in srgb,var(--kyogre) 8%,transparent);color:var(--kyogre-light);font-size:.57rem}.quest-scene{display:grid;align-content:center;gap:.4rem;padding:1rem 1.1rem;border:1px solid color-mix(in srgb,var(--text-muted) 20%,var(--border));border-radius:11px;background:color-mix(in srgb,var(--surface-2) 70%,transparent)}.quest-scene>span{color:var(--sakura-light);font-size:.52rem;font-weight:800;letter-spacing:.08em}.quest-scene strong{font:500 1.05rem/1.45 'Noto Sans JP',sans-serif}.quest-scene small{color:var(--text-muted);font-size:.62rem;line-height:1.35}
+.quest-steps,.quest-map{margin-top:1rem;padding:1.2rem;border:1px solid var(--border);border-radius:14px;background:var(--surface)}.quest-section-heading{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:.9rem}.quest-section-heading h2{margin:.15rem 0 0;font-size:1rem}.quest-section-heading .btn{white-space:nowrap;font-size:.62rem}.quest-step-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.48rem}.quest-step{display:grid;align-content:start;gap:.3rem;min-height:7.25rem;padding:.72rem;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);color:var(--text);font:inherit;text-align:left}.quest-step:not(div){cursor:pointer;transition:transform 150ms ease,border-color 150ms ease,background 150ms ease}.quest-step:not(div):hover{border-color:var(--kyogre-light);background:color-mix(in srgb,var(--kyogre) 8%,var(--surface-2));transform:translateY(-2px)}.quest-step.is-next{border-color:color-mix(in srgb,var(--sakura-light) 48%,var(--border));background:linear-gradient(145deg,color-mix(in srgb,var(--sakura) 13%,var(--surface-2)),var(--surface-2))}.quest-step>span{color:var(--sakura-light);font-size:.51rem;font-weight:800;letter-spacing:.1em}.quest-step b{font-size:.68rem}.quest-step small{color:var(--text-muted);font-size:.56rem;line-height:1.35}.quest-step-checkpoint{opacity:.68}
+.quest-map ol{display:grid;grid-template-columns:repeat(2,1fr);gap:.45rem;list-style:none}.quest-map li{display:grid;grid-template-columns:1.55rem 1fr auto;align-items:center;gap:.55rem;padding:.6rem .7rem;border:1px solid color-mix(in srgb,var(--text-muted) 18%,var(--border));border-radius:9px;background:var(--surface-2)}.quest-map li.is-current{border-color:color-mix(in srgb,var(--sakura-light) 48%,var(--border));background:color-mix(in srgb,var(--sakura) 9%,var(--surface-2))}.quest-map li>span{color:var(--sakura-light);font-size:.55rem;font-weight:800}.quest-map li b,.quest-map li small{display:block}.quest-map li b{font-size:.66rem}.quest-map li small{margin-top:.08rem;color:var(--text-muted);font-size:.53rem}.quest-map li em{color:var(--text-muted);font-size:.5rem;font-style:normal}.quest-map li.is-current em{color:var(--sakura-light)}
+@media(max-width:720px){.quest-hub{width:100%}.quest-hero{grid-template-columns:1fr 5.5rem;min-height:0;padding:1.35rem}.quest-hero h1{font-size:1.72rem}.quest-hero-mark span{width:3.5rem;font-size:1.8rem}.quest-hero-mark small{display:none}.quest-current{grid-template-columns:1fr}.quest-step-grid{grid-template-columns:1fr 1fr}.quest-step{min-height:5.9rem}.quest-step:last-child{grid-column:1/-1;min-height:auto}.quest-map ol{grid-template-columns:1fr}.quest-road{padding:0}.quest-destination{right:-.55rem}.quest-journey{padding:.9rem}.quest-section-heading{align-items:flex-start;flex-direction:column}.quest-section-heading .btn{width:100%}}
+
+.quest-scene-reader{width:min(100%,46rem);margin:0 auto}.quest-scene-reader-card{padding:1.6rem 1.8rem;border:1px solid color-mix(in srgb,var(--sakura-light) 28%,var(--border));border-radius:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--sakura) 8%,var(--surface)),var(--surface));box-shadow:var(--shadow)}.quest-scene-reader-card>span{display:block;color:var(--sakura-light);font-size:.53rem;font-weight:800;letter-spacing:.13em}.quest-scene-reader-card h1{margin:.35rem 0;font-size:1.5rem}.quest-scene-reader-card>p{color:var(--text-muted);font-size:.7rem}.quest-scene-reader-card ol{display:grid;gap:.5rem;list-style:none;margin:1.2rem 0}.quest-scene-reader-card li{display:grid;grid-template-columns:1.45rem 1fr;column-gap:.6rem;padding:.75rem;border:1px solid color-mix(in srgb,var(--text-muted) 18%,var(--border));border-radius:10px;background:color-mix(in srgb,var(--surface-2) 70%,transparent)}.quest-scene-reader-card li>small{grid-row:1/3;color:var(--sakura-light);font-size:.52rem;font-weight:800}.quest-scene-reader-card li strong{font:500 1.02rem/1.5 'Noto Sans JP',sans-serif}.quest-scene-reader-card li em{margin-top:.18rem;color:var(--kyogre-light);font-size:.66rem;font-style:normal;opacity:0;transform:translateY(-2px);transition:opacity 180ms ease,transform 180ms ease}.quest-scene-reader-card li em.is-visible{opacity:1;transform:none}
