@@ -109,7 +109,7 @@ body:has(.dashboard) .app {
 
 /* Dashboard */
 .dashboard::before {
-  content: "2";
+  content: "3";
   position: fixed;
   top: 0.4rem;
   left: 0.45rem;
@@ -299,23 +299,28 @@ body:has(.dashboard) .app {
   white-space: normal;
 }
 
-.hero-database-full-sentence .hero-furigana {
-  display: inline;
-}
-
-.hero-database-full-sentence .furigana-ruby {
+.hero-database-full-run {
   display: inline-block;
   position: relative;
+  white-space: nowrap;
 }
 
-.hero-database-full-sentence .furigana-ruby rt {
-  display: block;
+.hero-database-full-reading {
   position: absolute;
   left: 50%;
   bottom: calc(100% + 0.22em);
   width: max-content;
+  color: var(--kyogre-light);
+  font-size: 0.42em;
+  font-weight: 500;
   line-height: 1;
+  letter-spacing: 0;
+  pointer-events: none;
   transform: translateX(-50%);
+}
+
+.hero-database-full-text {
+  display: inline;
 }
 
 .hero-database-segment.is-swappable {
@@ -4072,18 +4077,8 @@ body:has(.dashboard) .app {
     transform: none;
   }
 
-  .hero-sentence-line.hero-database-line .hero-database-full-sentence .furigana-ruby {
-    display: inline-block;
-    position: relative;
-  }
-
-  .hero-sentence-line.hero-database-line .hero-database-full-sentence .furigana-ruby rt {
-    display: block;
-    position: absolute;
-    left: 50%;
-    bottom: calc(100% + 0.22em);
-    width: max-content;
-    transform: translateX(-50%);
+  .hero-sentence-line.hero-database-line .hero-database-full-reading {
+    bottom: calc(100% + 0.28em);
   }
 
   .hero-controls {

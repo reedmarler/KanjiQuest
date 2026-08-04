@@ -8,7 +8,7 @@ import type { HeroPlaybackRate } from '../lib/heroPlayback'
 import type { HeroSegment } from '../lib/posSentenceEngine'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
-import { FuriganaSegment } from './FuriganaText'
+import { getFuriganaRuns } from './FuriganaText'
 import { HeroText } from './HeroText'
 
 type HeroDisplayMode = 'sentence' | 'word'
@@ -291,14 +291,19 @@ export function RotatingHeroSentence({
     const segments = targetFrame.segments ?? []
     const text = segments.map((segment) => segment.text).join('')
     const reading = segments.map((segment) => segment.reading ?? getSegmentReading(segment.text)).join('')
+    const runs = getFuriganaRuns(text, furiganaOn ? reading : undefined)
 
     return (
       <span className="hero-database-full-sentence">
-        <FuriganaSegment
-          text={text}
-          reading={furiganaOn ? reading : undefined}
-          className="hero-furigana"
-        />
+        {runs.map((run, index) => (
+          <span
+            key={`${run.text}-${index}`}
+            className={`hero-database-full-run${run.reading ? ' has-reading' : ''}`}
+          >
+            {run.reading && <span className="hero-database-full-reading">{run.reading}</span>}
+            <span className="hero-database-full-text">{run.text}</span>
+          </span>
+        ))}
       </span>
     )
   }
