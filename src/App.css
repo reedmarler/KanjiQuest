@@ -108,6 +108,16 @@ body:has(.dashboard) .app {
 }
 
 /* Dashboard */
+.dashboard::before {
+  content: "1";
+  position: fixed;
+  top: 0.4rem;
+  left: 0.45rem;
+  z-index: 1000;
+  color: #fff;
+  font: 800 1.1rem/1 'Outfit', system-ui, sans-serif;
+}
+
 .hero {
   text-align: center;
   margin-bottom: 1.5rem;
