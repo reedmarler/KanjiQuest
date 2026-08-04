@@ -109,7 +109,7 @@ body:has(.dashboard) .app {
 
 /* Dashboard */
 .dashboard::before {
-  content: "8";
+  content: "9";
   position: fixed;
   top: 0.4rem;
   left: 0.45rem;
@@ -296,14 +296,14 @@ body:has(.dashboard) .app {
   display: inline-block;
   max-width: 100%;
   text-align: center;
-  line-height: 1.72;
+  line-height: 1.86;
   white-space: normal;
 }
 
 .hero-database-full-run {
   display: inline-block;
   position: relative;
-  line-height: 1.72;
+  line-height: 1.86;
   vertical-align: baseline;
   white-space: nowrap;
 }
