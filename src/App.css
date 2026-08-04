@@ -109,7 +109,7 @@ body:has(.dashboard) .app {
 
 /* Dashboard */
 .dashboard::before {
-  content: "10";
+  content: "11";
   position: fixed;
   top: 0.4rem;
   left: 0.45rem;
@@ -4061,8 +4061,8 @@ body:has(.dashboard) .app {
      down to a 0.78rem floor, so it keeps fitting in 2 lines. */
   .hero-database-line {
     font-size: clamp(
-      0.98rem,
-      calc(1.35rem - max(0px, (var(--hero-database-char-count, 0) - 32) * 0.13px)),
+      0.72rem,
+      calc(1.35rem - max(0px, (var(--hero-database-char-count, 0) - 28) * 0.26px)),
       2rem
     );
     align-items: center;
@@ -4070,7 +4070,7 @@ body:has(.dashboard) .app {
   }
 
   .hero-sentence-line.hero-database-line {
-    width: min(100%, 21rem);
+    width: min(100%, 22rem);
     margin-inline: auto;
     justify-content: center;
   }
