@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { charLength, type HeroSentenceFrame } from '../data/heroSentences'
+import { charLength, type HeroSentenceFrame, type HeroStep } from '../data/heroSentences'
 import { buildHeroStorySteps } from '../data/heroStories'
 import { getSegmentReading } from '../lib/heroSentenceGloss'
 import { getHeroEnglish } from '../lib/heroSentenceGloss'
@@ -21,6 +21,7 @@ type StreamPhase = 'rest' | 'highlight' | 'swap'
 const HERO_REST_MS = 2250
 const HERO_HIGHLIGHT_MS = 1917
 const HERO_SWAP_MS = 2750
+const STARTER_STEP_COUNT = 2
 
 function newSequenceSeed() {
   return Math.floor(Math.random() * 1_000_000_000)
@@ -52,6 +53,11 @@ type HeroHistoryEntry = {
   sequenceSeed: number
   activeLevel: JlptLevel
   index: number
+}
+
+type PreparedStream = {
+  key: string
+  steps: HeroStep[]
 }
 
 function SegmentText({ segment, furiganaOn, delayedFurigana }: {
@@ -96,12 +102,41 @@ export function RotatingHeroSentence({
   const [activeLevel, setActiveLevel] = useState(jlptLevel)
   const [history, setHistory] = useState<HeroHistoryEntry[]>([])
   const lastRewindSignalRef = useRef(rewindSignal)
-  const steps = useMemo(
-    () => storyId ? buildHeroStorySteps(storyId, effectiveStoryLevel) : buildHeroSteps(wrongPool, progress, activeLevel, sequenceSeed),
+  const streamKey = `${storyId ?? 'database'}:${effectiveStoryLevel}:${activeLevel}:${sequenceSeed}`
+  // Build just enough of the database stream to render the current sentence
+  // and its successor. The complete queue is prepared after the browser has
+  // had a chance to paint those first two sentences.
+  const starterSteps = useMemo(
+    () => storyId
+      ? buildHeroStorySteps(storyId, effectiveStoryLevel)
+      : buildHeroSteps(wrongPool, progress, activeLevel, sequenceSeed, STARTER_STEP_COUNT),
     [wrongPool, progress, activeLevel, sequenceSeed, storyId, effectiveStoryLevel],
   )
+  const [preparedStream, setPreparedStream] = useState<PreparedStream | null>(null)
+  const steps = preparedStream?.key === streamKey ? preparedStream.steps : starterSteps
   const [index, setIndex] = useState(0)
   const [phase, setPhase] = useState<StreamPhase>('rest')
+
+  useEffect(() => {
+    if (storyId) return
+
+    let cancelled = false
+    let timer: number | undefined
+    // requestAnimationFrame guarantees the tiny starter stream gets painted
+    // before the longer, quality-filtered queue uses the main thread.
+    const paintFrame = window.requestAnimationFrame(() => {
+      timer = window.setTimeout(() => {
+        const completeSteps = buildHeroSteps(wrongPool, progress, activeLevel, sequenceSeed)
+        if (!cancelled) setPreparedStream({ key: streamKey, steps: completeSteps })
+      }, 0)
+    })
+
+    return () => {
+      cancelled = true
+      window.cancelAnimationFrame(paintFrame)
+      if (timer !== undefined) window.clearTimeout(timer)
+    }
+  }, [wrongPool, progress, activeLevel, sequenceSeed, storyId, streamKey])
 
   useEffect(() => {
     onCanRewindChange?.(history.length > 0)
@@ -133,7 +168,9 @@ export function RotatingHeroSentence({
   const isStreamRollover = index + 1 >= steps.length
   const rolloverSeed = nextSequenceSeed(sequenceSeed)
   const rolloverSteps = useMemo(
-    () => storyId ? buildHeroStorySteps(storyId, effectiveStoryLevel) : buildHeroSteps(wrongPool, progress, activeLevel, rolloverSeed),
+    () => storyId
+      ? buildHeroStorySteps(storyId, effectiveStoryLevel)
+      : buildHeroSteps(wrongPool, progress, activeLevel, rolloverSeed, STARTER_STEP_COUNT),
     [wrongPool, progress, activeLevel, rolloverSeed, storyId, effectiveStoryLevel],
   )
 
@@ -147,7 +184,7 @@ export function RotatingHeroSentence({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const pendingSeed = useMemo(() => newSequenceSeed(), [jlptLevel])
   const pendingSteps = useMemo(
-    () => levelIsPending ? buildHeroSteps(wrongPool, progress, jlptLevel, pendingSeed) : null,
+    () => levelIsPending ? buildHeroSteps(wrongPool, progress, jlptLevel, pendingSeed, STARTER_STEP_COUNT) : null,
     [levelIsPending, wrongPool, progress, jlptLevel, pendingSeed],
   )
 
@@ -193,7 +230,11 @@ export function RotatingHeroSentence({
     return () => window.clearTimeout(timer)
   }, [displayMode, index, isStreamRollover, jlptLevel, onRotate, paused, pendingSeed, pendingSteps, phase, playbackRate, rolloverSeed, steps.length])
 
-  if (!frame || !nextFrame) return <div className="hero-sentence-loading" aria-hidden="true" />
+  // Keep the dashboard header at its final height even if a rare generator
+  // pass has not produced its first pair of usable sentences yet.
+  if (!frame || !nextFrame) {
+    return <div className="hero-sentence-block hero-database-block hero-sentence-loading" aria-hidden="true" />
+  }
 
   const isFrameChange = isStreamRollover || nextStep.templateRefresh
   const activeKey = isFrameChange ? null : nextStep.changed[0] ?? null
@@ -215,7 +256,7 @@ export function RotatingHeroSentence({
       const nextSegment = nextByKey.get(segment.key)
       const swapping = phase === 'swap' && isActive && nextSegment && !isIncoming
       const currentWidth = charLength(segment.text)
-      const reservedWidth = isActive && phase !== 'rest' && nextSegment
+      const reservedWidth = swapping
         ? Math.max(currentWidth, charLength(nextSegment.text))
         : currentWidth
 

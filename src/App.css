@@ -4023,12 +4023,37 @@ body:has(.dashboard) .app {
     bottom: calc(100% + 0.35em);
   }
 
-  .hero-controls-row { justify-content: center; }
+  .hero-controls {
+    overflow: hidden;
+  }
+  .hero-controls-row {
+    width: 100%;
+    justify-content: center;
+  }
+  .hero-controls-row:first-child {
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+  .hero-controls-row:first-child .control-group {
+    width: 100%;
+    justify-content: center;
+  }
+  .control-group {
+    max-width: 100%;
+  }
   .control-group-levels { width: 100%; justify-content: center; }
-  .control-group-story { width: 100%; justify-content: center; }
+  .control-group-story {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.45fr);
+    width: 100%;
+  }
   .control-segmented { flex: 1 1 auto; }
   .control-segment { flex: 1 1 0; min-width: 0; }
-  .control-select { flex: 1 1 auto; max-width: none; }
+  .control-select {
+    flex: 1 1 auto;
+    max-width: none;
+    min-width: 0;
+  }
   .dashboard-additional-actions { grid-template-columns: 1fr; }
   .dashboard-additional-heading,
   .five-minute-study-heading { align-items: flex-start; flex-direction: column; }
