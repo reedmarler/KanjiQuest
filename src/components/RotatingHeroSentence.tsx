@@ -234,7 +234,7 @@ export function RotatingHeroSentence({
     const segments = targetFrame.segments ?? []
     const text = segments.map((segment) => segment.text).join('')
     const reading = segments.map((segment) => segment.reading ?? getSegmentReading(segment.text)).join('')
-    const runs = getFuriganaRuns(text, furiganaOn ? reading : undefined)
+    const runs = getFuriganaRuns(text, reading)
 
     return (
       <span className="hero-database-full-sentence">
@@ -243,7 +243,7 @@ export function RotatingHeroSentence({
             key={`${run.text}-${index}`}
             className={`hero-database-full-run${run.reading ? ' has-reading' : ''}`}
           >
-            {run.reading && <span className="hero-database-full-reading">{run.reading}</span>}
+            {furiganaOn && run.reading && <span className="hero-database-full-reading">{run.reading}</span>}
             <span className="hero-database-full-text">{run.text}</span>
           </span>
         ))}
