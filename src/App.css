@@ -109,7 +109,7 @@ body:has(.dashboard) .app {
 
 /* Dashboard */
 .dashboard::before {
-  content: "7";
+  content: "8";
   position: fixed;
   top: 0.4rem;
   left: 0.45rem;
@@ -194,7 +194,7 @@ body:has(.dashboard) .app {
      instead of a single-word rotation), so this reserves room for up to two
      wrapped lines. Sizing it once and holding it fixed — rather than letting
      it grow/shrink per sentence — is what keeps swaps from visibly resizing. */
-  --hero-japanese-row-height: 6.5rem;
+  --hero-japanese-row-height: 7.1rem;
   --hero-database-slot-height: 2.08em;
   --hero-rotater-height: calc(var(--hero-japanese-row-height) + 3.08rem);
   height: var(--hero-rotater-height);
@@ -296,13 +296,14 @@ body:has(.dashboard) .app {
   display: inline-block;
   max-width: 100%;
   text-align: center;
+  line-height: 1.72;
   white-space: normal;
 }
 
 .hero-database-full-run {
   display: inline-block;
   position: relative;
-  line-height: 1.15;
+  line-height: 1.72;
   vertical-align: baseline;
   white-space: nowrap;
 }
@@ -310,7 +311,7 @@ body:has(.dashboard) .app {
 .hero-database-full-reading {
   position: absolute;
   left: 50%;
-  top: -0.92em;
+  top: -0.74em;
   width: max-content;
   color: var(--kyogre-light);
   font-size: 0.42em;
@@ -4060,9 +4061,9 @@ body:has(.dashboard) .app {
      down to a 0.78rem floor, so it keeps fitting in 2 lines. */
   .hero-database-line {
     font-size: clamp(
-      0.78rem,
-      calc(1.08rem - max(0px, (var(--hero-database-char-count, 0) - 32) * 0.15px)),
-      1.6rem
+      0.98rem,
+      calc(1.35rem - max(0px, (var(--hero-database-char-count, 0) - 32) * 0.13px)),
+      2rem
     );
     align-items: center;
     padding-inline: 0;
@@ -4107,7 +4108,7 @@ body:has(.dashboard) .app {
   }
 
   .hero-sentence-line.hero-database-line .hero-database-full-reading {
-    top: -0.98em;
+    top: -0.76em;
   }
 
   .hero-controls {
