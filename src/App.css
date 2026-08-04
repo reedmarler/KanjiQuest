@@ -4033,6 +4033,18 @@ body:has(.dashboard) .app {
     bottom: calc(100% + 0.35em);
   }
 
+  .hero-sentence-line.hero-database-line .hero-furigana .furigana-ruby {
+    display: ruby;
+    position: static;
+  }
+
+  .hero-sentence-line.hero-database-line .hero-furigana .furigana-ruby rt {
+    display: ruby-text;
+    position: static;
+    width: auto;
+    transform: none;
+  }
+
   .hero-controls {
     overflow: hidden;
   }

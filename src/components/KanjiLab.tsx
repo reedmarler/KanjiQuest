@@ -1,11 +1,15 @@
 import { useMemo, useState } from 'react'
 import { kanjiReadings } from '../data/kanjiReadings.generated'
 import { kanjiFocusSets, type KanjiFocusSet } from '../data/kanjiFocusSets'
+import { getQuestById } from '../data/questCampaign'
+import { vocabFocusSets } from '../data/vocabFocusSets'
 import { kanjiLabEntries, type KanjiLabEntry } from '../lib/kanjiLabCatalog'
 import type { JlptLevel } from '../lib/types'
 
 interface KanjiLabProps {
   onBack: () => void
+  questId?: string
+  onQuestComplete?: () => void
 }
 
 const levels: JlptLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1']
@@ -52,21 +56,45 @@ function entriesForPath(path: KanjiFocusSet) {
   }))
 }
 
-export function KanjiLab({ onBack }: KanjiLabProps) {
+function entriesForQuest(questId?: string) {
+  const quest = getQuestById(questId)
+  const vocabulary = vocabFocusSets.find((set) => set.id === quest?.vocabularySetId)
+  if (!quest || !vocabulary) return []
+
+  const seenCharacters = new Set<string>()
+  return vocabulary.cards.flatMap((word) => [...word.front].flatMap((character) => {
+    if (seenCharacters.has(character)) return []
+    const source = kanjiLabEntries.find((entry) => entry.character === character)
+    if (!source) return []
+    seenCharacters.add(character)
+    return [{
+      ...source,
+      example: { word: word.front, reading: word.reading, meaning: word.back },
+    }]
+  }))
+}
+
+export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
+  const quest = getQuestById(questId)
+  const questEntries = useMemo(() => entriesForQuest(questId), [questId])
+  const questMode = Boolean(quest && questEntries.length)
   const [mode, setMode] = useState<KanjiStudyMode>('paths')
   const [path, setPath] = useState(() => shuffled(kanjiFocusSets)[0]!)
   const [level, setLevel] = useState<JlptLevel>('N5')
-  const [entries, setEntries] = useState(() => entriesForPath(path))
+  const [entries, setEntries] = useState(() => questEntries.length ? questEntries : entriesForPath(path))
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
   const [exampleOffset, setExampleOffset] = useState(0)
+  const [completed, setCompleted] = useState(false)
   const entry = entries[index % entries.length]
   const card = entry?.card
   const characterReadings = entry ? kanjiReadings[entry.character] : undefined
   const allExamples = useMemo(() => {
     if (!entry) return []
-    return kanjiLabEntries.filter((candidate) => candidate.character === entry.character)
-  }, [entry])
+    return questMode
+      ? questEntries.filter((candidate) => candidate.character === entry.character)
+      : kanjiLabEntries.filter((candidate) => candidate.character === entry.character)
+  }, [entry, questEntries, questMode])
   const relatedExamples = useMemo(() => {
     if (!entry || !allExamples.length) return []
     const currentExample = allExamples.findIndex((candidate) => candidate.example.word === entry.example.word)
@@ -102,6 +130,17 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
   }
 
   function nextCard(knewIt = false) {
+    if (questMode) {
+      if (index + 1 >= entries.length) {
+        setCompleted(true)
+        return
+      }
+      setIndex((current) => current + 1)
+      setRevealed(false)
+      setExampleOffset(0)
+      return
+    }
+
     if (!knewIt && entry) {
       const currentIndex = index % entries.length
       const desiredInsertAt = currentIndex + retryDistance
@@ -129,14 +168,29 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
 
   if (!card || !entry) return null
 
+  if (questMode && completed) {
+    return (
+      <div className="grammar-practice-view kanji-lab kanji-lab-paths">
+        <div className="study-top grammar-study-top"><button type="button" className="btn btn-ghost" onClick={onBack}>← Quest</button></div>
+        <main className="focused-vocab-complete">
+          <span className="focused-vocab-complete-mark">漢</span>
+          <h2>Kanji step complete</h2>
+          <p>You read the kanji from the {quest?.vocabularyTheme} word set.</p>
+          <button type="button" className="btn btn-primary" onClick={onQuestComplete ?? onBack}>Use the grammar →</button>
+          <button type="button" className="btn btn-ghost" onClick={() => { setIndex(0); setCompleted(false); setRevealed(false) }}>Study these kanji again</button>
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className={'grammar-practice-view kanji-lab' + (mode === 'paths' ? ' kanji-lab-paths' : '')}>
       <div className="study-top grammar-study-top">
         <button type="button" className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
         <span className="study-progress">{index + 1} / {entries.length}</span>
         <span className="study-type-badge">
-          <span>Kanji</span>
-          <span className="jlpt-badge">{mode === 'paths' ? 'Path' : level}</span>
+          <span>{questMode ? 'Quest Kanji' : 'Kanji'}</span>
+          <span className="jlpt-badge">{questMode ? quest?.level : mode === 'paths' ? 'Path' : level}</span>
         </span>
       </div>
       <div className="study-progress-bar">
@@ -144,6 +198,11 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
       </div>
 
       <section className="kanji-study-navigation">
+        {questMode ? (
+          <div className="kanji-path-heading">
+            <div><span>QUEST KANJI</span><h2>{quest?.title}</h2><p>{quest?.vocabularyTheme} — only the kanji from this quest’s vocabulary.</p></div>
+          </div>
+        ) : (<>
         <div className="kanji-study-mode-tabs" role="tablist" aria-label="Kanji study mode">
           <button type="button" role="tab" aria-selected={mode === 'paths'} className={mode === 'paths' ? 'active' : ''} onClick={() => choosePath(path)}>
             Kanji Paths
@@ -169,7 +228,7 @@ export function KanjiLab({ onBack }: KanjiLabProps) {
               </button>
             ))}
           </div>
-        )}
+        )}</>)}
       </section>
 
       <main className={'grammar-choice-card kanji-learning-card' + (revealed ? ' is-revealed' : '')}>

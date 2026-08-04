@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useLayoutEffect, useMemo, useState } from 'react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -34,6 +34,8 @@ const LibraryPanel = lazy(() => import('./components/LibraryPanel').then((module
 const SentenceBuilderView = lazy(() => import('./components/SentenceBuilderView').then((module) => ({ default: module.SentenceBuilderView })))
 const SentenceTesting = lazy(() => import('./components/SentenceTesting').then((module) => ({ default: module.SentenceTesting })))
 const FocusedVocabPractice = lazy(() => import('./components/FocusedVocabPractice').then((module) => ({ default: module.FocusedVocabPractice })))
+const QuestHub = lazy(() => import('./components/QuestHub').then((module) => ({ default: module.QuestHub })))
+const QuestScene = lazy(() => import('./components/QuestScene').then((module) => ({ default: module.QuestScene })))
 
 type View =
   | 'dashboard'
@@ -46,6 +48,8 @@ type View =
   | 'grammar'
   | 'kanji'
   | 'sentence-testing'
+  | 'quests'
+  | 'quest-scene'
 
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
@@ -62,6 +66,16 @@ function App() {
   const [infiniteBuilderMode, setInfiniteBuilderMode] = useState(false)
   const [favoriteSentences, setFavoriteSentences] = useState<FavoriteSentence[]>(() => loadFavoriteSentences())
   const [libraryTab, setLibraryTab] = useState<LibraryTab>('vocab')
+  const [questVocabTopicId, setQuestVocabTopicId] = useState<string | undefined>()
+  const [activeQuestId, setActiveQuestId] = useState<string | undefined>()
+  const [practiceReturnView, setPracticeReturnView] = useState<View>('dashboard')
+
+  // This is a single-page app, so route changes otherwise retain whatever
+  // scroll offset the previous screen left behind. Run before paint so each
+  // quest step opens at its intended top position, without a visible jump.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [view])
 
   const learnedCount = useMemo(
     () => Object.values(progress).filter((item) => isLearned(item)).length,
@@ -188,7 +202,16 @@ function App() {
     return (
       <div className="app">
         <Suspense fallback={<RouteLoading label="Kanji Lab" />}>
-          <KanjiLab onBack={() => setView('dashboard')} />
+          <KanjiLab
+            questId={activeQuestId}
+            onBack={() => setView(practiceReturnView)}
+            onQuestComplete={activeQuestId
+              ? () => {
+                  setPracticeReturnView('quests')
+                  setView('grammar')
+                }
+              : undefined}
+          />
         </Suspense>
       </div>
     )
@@ -198,7 +221,16 @@ function App() {
     return (
       <div className="app">
         <Suspense fallback={<RouteLoading label="Vocab" />}>
-          <FocusedVocabPractice onBack={() => setView('dashboard')} />
+          <FocusedVocabPractice
+            initialTopicId={questVocabTopicId}
+            onBack={() => setView(practiceReturnView)}
+            onQuestComplete={questVocabTopicId
+              ? () => {
+                  setPracticeReturnView('quests')
+                  setView('kanji')
+                }
+              : undefined}
+          />
         </Suspense>
       </div>
     )
@@ -209,6 +241,43 @@ function App() {
       <Suspense fallback={<RouteLoading label="Content Studio" />}>
         <ContentStudio onBack={() => setView('dashboard')} />
       </Suspense>
+    )
+  }
+
+  if (view === 'quests') {
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Quests" />}>
+          <QuestHub
+            onBack={() => setView('dashboard')}
+            onOpenVocab={(topicId) => {
+              setQuestVocabTopicId(topicId)
+              setActiveQuestId('first-morning')
+              setPracticeReturnView('quests')
+              setView('vocab-practice')
+            }}
+            onOpenKanji={() => {
+              setPracticeReturnView('quests')
+              setView('kanji')
+            }}
+            onOpenGrammar={() => {
+              setPracticeReturnView('quests')
+              setView('grammar')
+            }}
+            onOpenScene={() => setView('quest-scene')}
+          />
+        </Suspense>
+      </div>
+    )
+  }
+
+  if (view === 'quest-scene') {
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Quest Scene" />}>
+          <QuestScene questId={activeQuestId} onBack={() => setView('quests')} />
+        </Suspense>
+      </div>
     )
   }
 
@@ -227,9 +296,11 @@ function App() {
       <div className="app">
         <Suspense fallback={<RouteLoading label="Grammar" />}>
           <GrammarPractice
-            onBack={() => setView('dashboard')}
+            onBack={() => setView(practiceReturnView)}
             isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
             onToggleFavorite={toggleDrillFavorite}
+            questId={activeQuestId}
+            onQuestComplete={activeQuestId ? () => setView('quest-scene') : undefined}
           />
         </Suspense>
       </div>
@@ -293,14 +364,31 @@ function App() {
         learnedCount={learnedCount}
         totalCards={CARD_TOTAL}
         onOpenSentencePractice={() => startSentenceMode()}
-        onOpenGrammar={() => setView('grammar')}
+        onOpenGrammar={() => {
+          setActiveQuestId(undefined)
+          setPracticeReturnView('dashboard')
+          setView('grammar')
+        }}
         onOpenVocabList={() => {
           setLibraryTab('vocab')
           setView('library')
         }}
-        onOpenVocabPractice={() => setView('vocab-practice')}
+        onOpenVocabPractice={() => {
+          setQuestVocabTopicId(undefined)
+          setActiveQuestId(undefined)
+          setPracticeReturnView('dashboard')
+          setView('vocab-practice')
+        }}
         onOpenContentStudio={() => setView('content-studio')}
-        onOpenKanji={() => setView('kanji')}
+        onOpenKanji={() => {
+          setActiveQuestId(undefined)
+          setPracticeReturnView('dashboard')
+          setView('kanji')
+        }}
+        onOpenQuests={() => {
+          setActiveQuestId('first-morning')
+          setView('quests')
+        }}
         onOpenWordCategories={() => {
           setLibraryTab('categories')
           setView('library')

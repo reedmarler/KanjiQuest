@@ -35,12 +35,16 @@ export interface ChoiceDrillProps {
   finishNoun: string
   /** Namespaces the saved preferences so each drill remembers its own settings. */
   storagePrefix: string
+  /** Restrict a focused sequence to the grammar levels it actually teaches. */
+  availableLevels?: readonly GenerationComplexity[]
   /** Vocab/Grammar can generate a fresh set when an endless pass ends, or when
    * the level selection changes — called with the levels that set should cover. */
   onLoadNextPool?: (levels: readonly GenerationComplexity[]) => Promise<DrillExercise[]>
   isFavorite: (exercise: DrillExercise) => boolean
   onToggleFavorite: (exercise: DrillExercise) => void
   onBack: () => void
+  onFinishAction?: () => void
+  finishActionLabel?: string
 }
 
 function loadBooleanPreference(key: string, fallback: boolean) {
@@ -146,10 +150,13 @@ export function ChoiceDrill({
   finishTitle,
   finishNoun,
   storagePrefix,
+  availableLevels: suppliedAvailableLevels,
   onLoadNextPool,
   isFavorite,
   onToggleFavorite,
   onBack,
+  onFinishAction,
+  finishActionLabel,
 }: ChoiceDrillProps) {
   const furiganaKey = `${storagePrefix}-show-furigana-v1`
   const levelsKey = `${storagePrefix}-levels-v1`
@@ -160,7 +167,7 @@ export function ChoiceDrill({
   // all five are always selectable — the pool itself is intentionally
   // filtered to just the selected level(s) for load-time reasons, so it can
   // no longer be used to detect which levels exist.
-  const availableLevels = GENERATION_COMPLEXITIES
+  const availableLevels = suppliedAvailableLevels?.length ? suppliedAvailableLevels : GENERATION_COMPLEXITIES
 
   const [levels, setLevels] = useState<GenerationComplexity[]>(() => initialAvailableLevels(levelsKey, availableLevels))
   const [pendingLevels, setPendingLevels] = useState<GenerationComplexity[]>(levels)
@@ -421,7 +428,7 @@ export function ChoiceDrill({
           <h1>{finishTitle}</h1>
           <p>You got <strong>{correctCount}</strong> of {exercises.length} {finishNoun} right.</p>
           <div className="grammar-finish-actions">
-            <button className="btn btn-primary" onClick={restart}>Practice again</button>
+            <button className="btn btn-primary" onClick={onFinishAction ?? restart}>{finishActionLabel ?? 'Practice again'}</button>
             <button className="btn btn-secondary" onClick={onBack}>Dashboard</button>
           </div>
         </section>

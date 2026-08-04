@@ -5,6 +5,8 @@ import { FuriganaSegment } from './FuriganaText'
 
 interface FocusedVocabPracticeProps {
   onBack: () => void
+  initialTopicId?: string
+  onQuestComplete?: () => void
 }
 
 /** Matches the app's other mobile breakpoints (e.g. Kanji Lab's phone layout). */
@@ -32,7 +34,9 @@ function shuffled<T>(items: readonly T[]) {
   return copy
 }
 
-function newSession(previousTopicId?: string) {
+function newSession(previousTopicId?: string, initialTopicId?: string) {
+  const requestedTopic = initialTopicId ? vocabFocusSets.find((topic) => topic.id === initialTopicId) : undefined
+  if (requestedTopic) return { topic: requestedTopic, cards: shuffled(requestedTopic.cards) }
   const topics = shuffled(vocabFocusSets)
   if (previousTopicId && topics[0]?.id === previousTopicId && topics.length > 1) {
     ;[topics[0], topics[1]] = [topics[1]!, topics[0]!]
@@ -41,9 +45,9 @@ function newSession(previousTopicId?: string) {
   return { topic, cards: shuffled(topic.cards) }
 }
 
-export function FocusedVocabPractice({ onBack }: FocusedVocabPracticeProps) {
+export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete }: FocusedVocabPracticeProps) {
   const isMobile = useIsMobile()
-  const [session, setSession] = useState(() => newSession())
+  const [session, setSession] = useState(() => newSession(undefined, initialTopicId))
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
   const [known, setKnown] = useState(0)
@@ -110,7 +114,9 @@ export function FocusedVocabPractice({ onBack }: FocusedVocabPracticeProps) {
             <span className="focused-vocab-complete-mark">語</span>
             <h2>Set complete</h2>
             <p>You got through all 15 words in {session.topic.title}. {known} felt easy.</p>
-            <button type="button" className="btn btn-primary" onClick={loadNextTopic}>New topic →</button>
+            <button type="button" className="btn btn-primary" onClick={onQuestComplete ?? loadNextTopic}>
+              {onQuestComplete ? 'Read the kanji →' : 'New topic →'}
+            </button>
             <button type="button" className="btn btn-ghost" onClick={replayTopic}>Replay this set</button>
           </main>
         ) : card ? (
@@ -180,7 +186,9 @@ export function FocusedVocabPractice({ onBack }: FocusedVocabPracticeProps) {
           <span className="focused-vocab-complete-mark">語</span>
           <h2>Set complete</h2>
           <p>You got through all 15 words in {session.topic.title}. {known} felt easy.</p>
-          <button type="button" className="btn btn-primary" onClick={loadNextTopic}>New topic →</button>
+          <button type="button" className="btn btn-primary" onClick={onQuestComplete ?? loadNextTopic}>
+            {onQuestComplete ? 'Read the kanji →' : 'New topic →'}
+          </button>
           <button type="button" className="btn btn-ghost" onClick={replayTopic}>Replay this set</button>
         </section>
       ) : card ? (

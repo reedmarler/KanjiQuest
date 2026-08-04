@@ -2,18 +2,43 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { DrillExercise } from '../lib/drillExercises'
 import { createGeneratedGrammarDrillBatch } from '../lib/generatedPracticeDrills'
 import type { GenerationComplexity } from '../lib/generationComplexity'
+import { getQuestById } from '../data/questCampaign'
 import { ChoiceDrill, loadLevelPreference } from './ChoiceDrill'
 
 interface GrammarPracticeProps {
   onBack: () => void
   isFavorite: (exercise: DrillExercise) => boolean
   onToggleFavorite: (exercise: DrillExercise) => void
+  questId?: string
+  onQuestComplete?: () => void
 }
 
 const GRAMMAR_BATCH_COUNT = 5
 const GRAMMAR_LEVELS_KEY = 'kanji-quest-generated-grammar-practice-levels-v1'
 
-export function GrammarPractice({ onBack, isFavorite, onToggleFavorite }: GrammarPracticeProps) {
+export function GrammarPractice({ onBack, isFavorite, onToggleFavorite, questId, onQuestComplete }: GrammarPracticeProps) {
+  const quest = getQuestById(questId)
+
+  if (quest?.grammarDrills.length) {
+    return (
+      <ChoiceDrill
+        pool={[...quest.grammarDrills]}
+        badgeLabel="Quest Grammar"
+        eyebrow={`${quest.title} · choose the form that completes this quest’s scene`}
+        finishMark="文法"
+        finishTitle="Grammar step complete"
+        finishNoun="quest grammar choices"
+        storagePrefix={`kanji-quest-${quest.id}-grammar`}
+        availableLevels={[1]}
+        isFavorite={isFavorite}
+        onToggleFavorite={onToggleFavorite}
+        onBack={onBack}
+        onFinishAction={onQuestComplete}
+        finishActionLabel="Read the scene →"
+      />
+    )
+  }
+
   const [pool, setPool] = useState<DrillExercise[] | null>(null)
   const [completedBatches, setCompletedBatches] = useState(0)
   const nextBatchSeed = useRef(Math.floor(Date.now() / 1000))

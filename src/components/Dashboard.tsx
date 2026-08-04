@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
 import { complexityDetails, GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
@@ -39,7 +39,11 @@ function DashboardHeroSentence({
   onCanRewindChange: (canRewind: boolean) => void
 }) {
   return (
-    <Suspense fallback={<div className="hero-sentence-loading" aria-hidden="true" />}>
+    <Suspense
+      fallback={(
+        <div className="hero-sentence-block hero-database-block hero-sentence-loading" aria-hidden="true" />
+      )}
+    >
       <RotatingHeroSentence
         wrongPool={wrongPool}
         progress={progress}
@@ -78,6 +82,7 @@ interface DashboardProps {
   onOpenVocabList: () => void
   onOpenVocabPractice: () => void
   onOpenKanji: () => void
+  onOpenQuests: () => void
   onOpenContentStudio: () => void
   onOpenWordCategories: () => void
   onOpenSentenceTesting: () => void
@@ -91,6 +96,7 @@ export function Dashboard({
   onOpenVocabList,
   onOpenVocabPractice,
   onOpenKanji,
+  onOpenQuests,
   onOpenContentStudio,
   onOpenWordCategories,
   onOpenSentenceTesting,
@@ -304,10 +310,31 @@ export function Dashboard({
           <span>Progress</span>
           <span>{progressPct}%</span>
         </div>
-        <div className="progress-bar">
+        <div
+          className="progress-bar progress-bar-quest"
+          style={{ '--progress-pct': `${progressPct}%` } as CSSProperties}
+        >
           <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+          <span className="progress-samurai" aria-hidden="true">
+            <span className="samurai-speed samurai-speed-one" />
+            <span className="samurai-speed samurai-speed-two" />
+            <span className="samurai-head" />
+            <span className="samurai-body" />
+            <span className="samurai-arm" />
+            <span className="samurai-sword" />
+            <span className="samurai-leg samurai-leg-front" />
+            <span className="samurai-leg samurai-leg-back" />
+          </span>
+          <span className="progress-fuji" aria-hidden="true">
+            <span className="fuji-snow" />
+          </span>
         </div>
       </section>
+
+      <button type="button" className="dashboard-quest-button" onClick={onOpenQuests}>
+        <span className="dashboard-quest-mark" aria-hidden="true">侍</span>
+        <span><small>GUIDED LEARNING</small><b>Quests</b><em>Follow your next Japanese story →</em></span>
+      </button>
 
       <section className="five-minute-study" aria-labelledby="five-minute-study-title">
         <div className="five-minute-study-heading">
