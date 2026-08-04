@@ -79,8 +79,9 @@ export default defineConfig(() => ({
   base: '/',
   plugins: [react(), userVocabPersistencePlugin()],
   server: {
+    port: 5174,
     watch: {
-      ignored: ['**/scripts/**'],
+      ignored: ['**/scripts/**', '**/.tmp-chrome-preview/**'],
     },
   },
 }))

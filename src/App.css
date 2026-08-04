@@ -109,7 +109,7 @@ body:has(.dashboard) .app {
 
 /* Dashboard */
 .dashboard::before {
-  content: "11";
+  content: "12";
   position: fixed;
   top: 0.4rem;
   left: 0.45rem;
@@ -194,7 +194,7 @@ body:has(.dashboard) .app {
      instead of a single-word rotation), so this reserves room for up to two
      wrapped lines. Sizing it once and holding it fixed — rather than letting
      it grow/shrink per sentence — is what keeps swaps from visibly resizing. */
-  --hero-japanese-row-height: 7.1rem;
+  --hero-japanese-row-height: 8.52rem;
   --hero-database-slot-height: 2.08em;
   --hero-rotater-height: calc(var(--hero-japanese-row-height) + 3.08rem);
   height: var(--hero-rotater-height);
@@ -206,7 +206,7 @@ body:has(.dashboard) .app {
 }
 
 .hero-database-line {
-  font-size: clamp(1.08rem, 2.5vw, 1.6rem);
+  font-size: clamp(1.56rem, 3.6vw, 2.304rem);
   opacity: 1;
   gap: 0;
   overflow: visible;
@@ -243,7 +243,7 @@ body:has(.dashboard) .app {
   margin: 0.46rem 0 0.35rem;
   padding-inline: 0.75rem;
   color: var(--kyogre-light);
-  font: 500 0.76rem/var(--hero-database-english-row-height) 'Outfit', system-ui, sans-serif;
+  font: 500 0.84rem/var(--hero-database-english-row-height) 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.012em;
   text-align: center;
   overflow: hidden;
