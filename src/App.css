@@ -109,7 +109,7 @@ body:has(.dashboard) .app {
 
 /* Dashboard */
 .dashboard::before {
-  content: "5";
+  content: "6";
   position: fixed;
   top: 0.4rem;
   left: 0.45rem;
@@ -302,13 +302,15 @@ body:has(.dashboard) .app {
 .hero-database-full-run {
   display: inline-block;
   position: relative;
+  line-height: 1.15;
+  vertical-align: baseline;
   white-space: nowrap;
 }
 
 .hero-database-full-reading {
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 0.22em);
+  top: -0.92em;
   width: max-content;
   color: var(--kyogre-light);
   font-size: 0.42em;
@@ -4080,7 +4082,7 @@ body:has(.dashboard) .app {
   }
 
   .hero-sentence-line.hero-database-line .hero-database-full-reading {
-    bottom: calc(100% + 0.28em);
+    top: -0.98em;
   }
 
   .hero-controls {

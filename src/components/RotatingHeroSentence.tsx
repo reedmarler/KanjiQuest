@@ -5,11 +5,9 @@ import { getSegmentReading } from '../lib/heroSentenceGloss'
 import { getHeroEnglish } from '../lib/heroSentenceGloss'
 import { buildHeroSteps } from '../lib/heroSequence'
 import type { HeroPlaybackRate } from '../lib/heroPlayback'
-import type { HeroSegment } from '../lib/posSentenceEngine'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
 import { getFuriganaRuns } from './FuriganaText'
-import { HeroText } from './HeroText'
 
 type HeroDisplayMode = 'sentence' | 'word'
 type StreamPhase = 'rest' | 'highlight' | 'swap'
@@ -61,22 +59,6 @@ type PreparedStream = {
   steps: HeroStep[]
 }
 
-function SegmentText({ segment, furiganaOn, delayedFurigana }: {
-  segment: HeroSegment
-  furiganaOn: boolean
-  delayedFurigana: boolean
-}) {
-  return (
-    <HeroText
-      text={segment.text}
-      reading={segment.reading ?? getSegmentReading(segment.text)}
-      showFurigana={furiganaOn}
-      delayedFuriganaMs={delayedFurigana ? 700 : undefined}
-      reveal="base"
-    />
-  )
-}
-
 /** One small, staged animation: rest → highlight the outgoing slot → swap → settle. */
 export function RotatingHeroSentence({
   wrongPool,
@@ -84,7 +66,6 @@ export function RotatingHeroSentence({
   displayMode,
   furiganaOn,
   englishOn,
-  delayedFurigana,
   jlptLevel,
   storyId,
   storyLevel,
@@ -238,11 +219,9 @@ export function RotatingHeroSentence({
   }
 
   const isFrameChange = isStreamRollover || nextStep.templateRefresh
-  const activeKey = isFrameChange ? null : nextStep.changed[0] ?? null
   const english = getHeroEnglish(frame)
   const nextEnglish = getHeroEnglish(nextFrame)
   const englishIsSwapping = phase === 'swap' && english !== nextEnglish
-  const nextByKey = new Map((nextFrame.segments ?? []).map((segment) => [segment.key, segment]))
 
   // Longer sentences risk wrapping to a cramped 3rd line on narrow phones —
   // taking the longer of the outgoing/incoming frame keeps this stable
@@ -250,42 +229,6 @@ export function RotatingHeroSentence({
   const frameCharCount = (targetFrame: HeroSentenceFrame) =>
     (targetFrame.segments ?? []).reduce((sum, segment) => sum + charLength(segment.text), 0)
   const heroCharCount = Math.max(frameCharCount(frame), frameCharCount(nextFrame))
-
-  function renderSegments(targetFrame: HeroSentenceFrame, isIncoming = false) {
-    return (targetFrame.segments ?? []).map((segment) => {
-      const isActive = segment.key === activeKey
-      const nextSegment = nextByKey.get(segment.key)
-      const swapping = phase === 'swap' && isActive && nextSegment && !isIncoming
-      const currentWidth = charLength(segment.text)
-      const reservedWidth = swapping
-        ? Math.max(currentWidth, charLength(nextSegment.text))
-        : currentWidth
-
-      return (
-        <span
-          key={segment.key}
-          className={[
-            'hero-database-segment',
-            segment.swappable ? 'is-swappable' : '',
-            isActive && phase === 'highlight' ? 'is-highlighted' : '',
-            swapping ? 'is-swapping' : '',
-          ].filter(Boolean).join(' ')}
-          style={segment.swappable
-            ? ({ '--hero-database-slot-width': `${reservedWidth}em` } as CSSProperties)
-            : undefined}
-        >
-          {swapping ? (
-            <span className="hero-database-swap-stack">
-              <span className="hero-database-word is-outgoing"><SegmentText segment={segment} furiganaOn={furiganaOn} delayedFurigana={delayedFurigana} /></span>
-              <span className="hero-database-word is-incoming"><SegmentText segment={nextSegment} furiganaOn={furiganaOn} delayedFurigana={delayedFurigana} /></span>
-            </span>
-          ) : (
-            <span className="hero-database-segment-content"><SegmentText segment={segment} furiganaOn={furiganaOn} delayedFurigana={delayedFurigana} /></span>
-          )}
-        </span>
-      )
-    })
-  }
 
   function renderFullSentence(targetFrame: HeroSentenceFrame) {
     const segments = targetFrame.segments ?? []
@@ -319,12 +262,7 @@ export function RotatingHeroSentence({
       } as CSSProperties}
     >
       <p className={`hero-sentence-line hero-database-line${phase === 'swap' && isFrameChange ? ' is-frame-swapping' : ''}`} aria-live="polite">
-        {phase !== 'swap' ? renderFullSentence(frame) : isFrameChange ? (
-          <span className="hero-database-frame-stack">
-            <span className="hero-database-frame is-outgoing">{renderSegments(frame)}</span>
-            <span className="hero-database-frame is-incoming">{renderSegments(nextFrame, true)}</span>
-          </span>
-        ) : renderSegments(frame)}
+        {renderFullSentence(frame)}
       </p>
 
       {englishOn && (
