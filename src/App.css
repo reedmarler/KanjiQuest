@@ -109,7 +109,7 @@ body:has(.dashboard) .app {
 
 /* Dashboard */
 .dashboard::before {
-  content: "4";
+  content: "5";
   position: fixed;
   top: 0.4rem;
   left: 0.45rem;
@@ -4066,15 +4066,17 @@ body:has(.dashboard) .app {
   }
 
   .hero-sentence-line.hero-database-line .hero-furigana .furigana-ruby {
-    display: ruby;
-    position: static;
+    display: inline-block;
+    position: relative;
   }
 
   .hero-sentence-line.hero-database-line .hero-furigana .furigana-ruby rt {
-    display: ruby-text;
-    position: static;
-    width: auto;
-    transform: none;
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 0.28em);
+    width: max-content;
+    transform: translateX(-50%);
   }
 
   .hero-sentence-line.hero-database-line .hero-database-full-reading {
