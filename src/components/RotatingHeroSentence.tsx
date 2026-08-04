@@ -8,6 +8,7 @@ import type { HeroPlaybackRate } from '../lib/heroPlayback'
 import type { HeroSegment } from '../lib/posSentenceEngine'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
+import { FuriganaSegment } from './FuriganaText'
 import { HeroText } from './HeroText'
 
 type HeroDisplayMode = 'sentence' | 'word'
@@ -286,6 +287,22 @@ export function RotatingHeroSentence({
     })
   }
 
+  function renderFullSentence(targetFrame: HeroSentenceFrame) {
+    const segments = targetFrame.segments ?? []
+    const text = segments.map((segment) => segment.text).join('')
+    const reading = segments.map((segment) => segment.reading ?? getSegmentReading(segment.text)).join('')
+
+    return (
+      <span className="hero-database-full-sentence">
+        <FuriganaSegment
+          text={text}
+          reading={furiganaOn ? reading : undefined}
+          className="hero-furigana"
+        />
+      </span>
+    )
+  }
+
   return (
     <div
       className={`hero-sentence-block hero-database-block${storyId ? ' hero-story-block' : ''}`}
@@ -297,7 +314,7 @@ export function RotatingHeroSentence({
       } as CSSProperties}
     >
       <p className={`hero-sentence-line hero-database-line${phase === 'swap' && isFrameChange ? ' is-frame-swapping' : ''}`} aria-live="polite">
-        {phase === 'swap' && isFrameChange ? (
+        {phase === 'rest' ? renderFullSentence(frame) : phase === 'swap' && isFrameChange ? (
           <span className="hero-database-frame-stack">
             <span className="hero-database-frame is-outgoing">{renderSegments(frame)}</span>
             <span className="hero-database-frame is-incoming">{renderSegments(nextFrame, true)}</span>

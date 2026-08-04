@@ -292,6 +292,17 @@ body:has(.dashboard) .app {
   line-height: inherit;
 }
 
+.hero-database-full-sentence {
+  display: inline-block;
+  max-width: 100%;
+  text-align: center;
+  white-space: normal;
+}
+
+.hero-database-full-sentence .hero-furigana {
+  display: inline;
+}
+
 .hero-database-segment.is-swappable {
   width: var(--hero-database-slot-width);
   transition: width var(--hero-database-space-duration, 1150ms) cubic-bezier(0.22, 0.75, 0.3, 1);
@@ -4013,6 +4024,7 @@ body:has(.dashboard) .app {
   .hero-sentence-line.hero-database-line {
     width: min(100%, 21rem);
     margin-inline: auto;
+    justify-content: center;
   }
 
   .hero-slot-full-sentence,
@@ -4033,11 +4045,13 @@ body:has(.dashboard) .app {
     bottom: calc(100% + 0.35em);
   }
 
+  .hero-sentence-line.hero-database-line .hero-database-full-sentence .furigana-ruby,
   .hero-sentence-line.hero-database-line .hero-furigana .furigana-ruby {
     display: ruby;
     position: static;
   }
 
+  .hero-sentence-line.hero-database-line .hero-database-full-sentence .furigana-ruby rt,
   .hero-sentence-line.hero-database-line .hero-furigana .furigana-ruby rt {
     display: ruby-text;
     position: static;
