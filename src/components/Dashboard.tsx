@@ -1,6 +1,9 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
+import type { AchievementMetrics } from '../lib/achievementProgress'
+import type { QuestProgress } from '../lib/questProgress'
+import { buildAchievements } from '../data/achievements'
 import { complexityDetails, GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
 import { HERO_STORY_DEFINITIONS, HERO_STORY_LEVELS, getHeroStoriesForLevel } from '../data/heroStories'
 import {
@@ -10,6 +13,161 @@ import {
 } from '../lib/heroPlayback'
 
 const RotatingHeroSentence = lazy(() => import('./RotatingHeroSentence').then((module) => ({ default: module.RotatingHeroSentence })))
+
+function ProgressRunnerVideo() {
+  const loopStartSeconds = 3
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const animationRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    const context = canvas?.getContext('2d', { willReadFrequently: true })
+    if (!video || !canvas || !context) return
+    const runnerCanvas = canvas
+    const runnerContext = context
+
+    const cachedFrames: HTMLCanvasElement[] = []
+    let playbackIndex = 0
+    let loopRestartIndex = 0
+    let playbackTick = 0
+    let captureComplete = false
+
+    function keyBlackToAlpha(frame: ImageData) {
+      const data = frame.data
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i] ?? 0
+        const g = data[i + 1] ?? 0
+        const b = data[i + 2] ?? 0
+        if (r < 34 && g < 34 && b < 38) {
+          data[i + 3] = 0
+        } else if (r < 64 && g < 64 && b < 70) {
+          data[i + 3] = Math.round(((Math.max(r, g, b) - 34) / 30) * 255)
+        }
+      }
+      return frame
+    }
+
+    function frameDifference(a: HTMLCanvasElement, b: HTMLCanvasElement) {
+      const sampleSize = 20
+      const sampleA = document.createElement('canvas')
+      const sampleB = document.createElement('canvas')
+      sampleA.width = sampleSize
+      sampleA.height = sampleSize
+      sampleB.width = sampleSize
+      sampleB.height = sampleSize
+      const ctxA = sampleA.getContext('2d')
+      const ctxB = sampleB.getContext('2d')
+      if (!ctxA || !ctxB) return Number.POSITIVE_INFINITY
+
+      ctxA.drawImage(a, 0, 0, sampleSize, sampleSize)
+      ctxB.drawImage(b, 0, 0, sampleSize, sampleSize)
+      const dataA = ctxA.getImageData(0, 0, sampleSize, sampleSize).data
+      const dataB = ctxB.getImageData(0, 0, sampleSize, sampleSize).data
+      let diff = 0
+      for (let i = 0; i < dataA.length; i += 4) {
+        diff += Math.abs((dataA[i] ?? 0) - (dataB[i] ?? 0))
+          + Math.abs((dataA[i + 1] ?? 0) - (dataB[i + 1] ?? 0))
+          + Math.abs((dataA[i + 2] ?? 0) - (dataB[i + 2] ?? 0))
+          + Math.abs((dataA[i + 3] ?? 0) - (dataB[i + 3] ?? 0))
+      }
+      return diff
+    }
+
+    function findBestRestartFrame() {
+      const lastFrame = cachedFrames[cachedFrames.length - 1]
+      if (!lastFrame || cachedFrames.length < 8) return 0
+
+      let bestIndex = 0
+      let bestScore = Number.POSITIVE_INFINITY
+      const latestCandidate = Math.max(0, cachedFrames.length - 6)
+      for (let i = 0; i < latestCandidate; i += 1) {
+        const candidate = cachedFrames[i]
+        if (!candidate) continue
+        const score = frameDifference(lastFrame, candidate)
+        if (score < bestScore) {
+          bestScore = score
+          bestIndex = i
+        }
+      }
+      return bestIndex
+    }
+
+    function paintCachedFrame() {
+      const frame = cachedFrames[playbackIndex]
+      if (!frame) return
+
+      runnerContext.clearRect(0, 0, runnerCanvas.width, runnerCanvas.height)
+      runnerContext.drawImage(frame, 0, 0, runnerCanvas.width, runnerCanvas.height)
+
+      playbackTick += 1
+      if (playbackTick % 2 === 0) {
+        playbackIndex += 1
+        if (playbackIndex >= cachedFrames.length) playbackIndex = loopRestartIndex
+      }
+    }
+
+    function drawFrame() {
+      if (!video || !canvas || !context) return
+
+      if (captureComplete) {
+        paintCachedFrame()
+        animationRef.current = window.requestAnimationFrame(drawFrame)
+        return
+      }
+
+      if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        const width = video.videoWidth || canvas.width
+        const height = video.videoHeight || canvas.height
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width
+          canvas.height = height
+        }
+
+        context.clearRect(0, 0, canvas.width, canvas.height)
+        context.drawImage(video, 0, 0, canvas.width, canvas.height)
+        const frame = keyBlackToAlpha(context.getImageData(0, 0, canvas.width, canvas.height))
+        context.putImageData(frame, 0, 0)
+
+        const cachedFrame = document.createElement('canvas')
+        cachedFrame.width = canvas.width
+        cachedFrame.height = canvas.height
+        cachedFrame.getContext('2d')?.putImageData(frame, 0, 0)
+        cachedFrames.push(cachedFrame)
+
+        if (video.duration && video.currentTime >= video.duration - 0.04) {
+          video.pause()
+          captureComplete = cachedFrames.length > 1
+          loopRestartIndex = findBestRestartFrame()
+          playbackIndex = loopRestartIndex
+        }
+      }
+
+      animationRef.current = window.requestAnimationFrame(drawFrame)
+    }
+
+    const startAtLoopPoint = () => {
+      if (video.duration > loopStartSeconds) video.currentTime = loopStartSeconds
+      void video.play()
+    }
+
+    video.addEventListener('loadedmetadata', startAtLoopPoint)
+    animationRef.current = window.requestAnimationFrame(drawFrame)
+
+    return () => {
+      video.removeEventListener('loadedmetadata', startAtLoopPoint)
+      if (animationRef.current !== null) window.cancelAnimationFrame(animationRef.current)
+    }
+  }, [loopStartSeconds])
+
+  return (
+    <>
+      <video ref={videoRef} src="/running-ninja.mp4" muted playsInline preload="auto" />
+      <canvas ref={canvasRef} />
+    </>
+  )
+}
 
 function DashboardHeroSentence({
   wrongPool,
@@ -83,6 +241,10 @@ interface DashboardProps {
   onOpenVocabPractice: () => void
   onOpenKanji: () => void
   onOpenQuests: () => void
+  onOpenAchievements: () => void
+  achievementMetrics: AchievementMetrics
+  questProgress: QuestProgress
+  favoriteSentenceCount: number
   onOpenContentStudio: () => void
   onOpenWordCategories: () => void
   onOpenSentenceTesting: () => void
@@ -97,6 +259,10 @@ export function Dashboard({
   onOpenVocabPractice,
   onOpenKanji,
   onOpenQuests,
+  onOpenAchievements,
+  achievementMetrics,
+  questProgress,
+  favoriteSentenceCount,
   onOpenContentStudio,
   onOpenWordCategories,
   onOpenSentenceTesting,
@@ -117,6 +283,8 @@ export function Dashboard({
   const [canRewindSentence, setCanRewindSentence] = useState(false)
 
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
+  const achievements = buildAchievements({ learnedCards: learnedCount, favoriteSentences: favoriteSentenceCount, questProgress, metrics: achievementMetrics })
+  const unlockedAchievements = achievements.filter((achievement) => achievement.progress >= achievement.target).length
   const furiganaActive = furiganaOn
 
   function toggleFurigana() {
@@ -316,14 +484,7 @@ export function Dashboard({
         >
           <div className="progress-fill" style={{ width: `${progressPct}%` }} />
           <span className="progress-samurai" aria-hidden="true">
-            <span className="samurai-speed samurai-speed-one" />
-            <span className="samurai-speed samurai-speed-two" />
-            <span className="samurai-head" />
-            <span className="samurai-body" />
-            <span className="samurai-arm" />
-            <span className="samurai-sword" />
-            <span className="samurai-leg samurai-leg-front" />
-            <span className="samurai-leg samurai-leg-back" />
+            <ProgressRunnerVideo />
           </span>
           <span className="progress-fuji" aria-hidden="true">
             <span className="fuji-snow" />
@@ -331,10 +492,16 @@ export function Dashboard({
         </div>
       </section>
 
-      <button type="button" className="dashboard-quest-button" onClick={onOpenQuests}>
-        <span className="dashboard-quest-mark" aria-hidden="true">侍</span>
-        <span><small>GUIDED LEARNING</small><b>Quests</b><em>Follow your next Japanese story →</em></span>
-      </button>
+      <div className="dashboard-journey-actions">
+        <button type="button" className="dashboard-quest-button" onClick={onOpenQuests}>
+          <span className="dashboard-quest-mark" aria-hidden="true">侍</span>
+          <span><small>GUIDED LEARNING</small><b>Quests</b><em>Continue the yōkai road →</em></span>
+        </button>
+        <button type="button" className="dashboard-achievement-button" onClick={onOpenAchievements}>
+          <span className="dashboard-achievement-mark" aria-hidden="true">誉</span>
+          <span><small>ACHIEVEMENTS</small><b>{unlockedAchievements} / {achievements.length}</b><em>View your legend →</em></span>
+        </button>
+      </div>
 
       <section className="five-minute-study" aria-labelledby="five-minute-study-title">
         <div className="five-minute-study-heading">

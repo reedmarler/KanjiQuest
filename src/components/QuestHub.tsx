@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { QUESTS } from '../data/questCampaign'
+import { completedQuestSteps, isQuestComplete, QUEST_STEPS, type QuestProgress, type QuestStep } from '../lib/questProgress'
 
 interface QuestHubProps {
   onBack: () => void
@@ -7,58 +8,82 @@ interface QuestHubProps {
   onOpenKanji: () => void
   onOpenGrammar: () => void
   onOpenScene: () => void
+  onOpenCheckpoint: () => void
+  progress: QuestProgress
 }
 
-export function QuestHub({ onBack, onOpenVocab, onOpenKanji, onOpenGrammar, onOpenScene }: QuestHubProps) {
+const STEP_DETAILS: ReadonlyArray<{ id: QuestStep; number: string; title: string; description: string }> = [
+  { id: 'vocab', number: '01', title: 'Prepare', description: '15 words for this morning.' },
+  { id: 'kanji', number: '02', title: 'Read kanji', description: 'Kanji from those same words.' },
+  { id: 'grammar', number: '03', title: 'Use grammar', description: 'Forms inside this morning’s scene.' },
+  { id: 'scene', number: '04', title: 'Read scene', description: 'Read the story you prepared for.' },
+  { id: 'checkpoint', number: '05', title: 'Guardian battle', description: 'Prove mastery and break the seal.' },
+]
+
+export function QuestHub({ onBack, onOpenVocab, onOpenKanji, onOpenGrammar, onOpenScene, onOpenCheckpoint, progress }: QuestHubProps) {
   const currentQuest = QUESTS[0]!
+  const completed = completedQuestSteps(progress, currentQuest.id)
+  const finished = isQuestComplete(progress, currentQuest.id)
+  const nextStep = QUEST_STEPS.find((step) => !progress[currentQuest.id]?.[step]) ?? 'checkpoint'
+  const openStep = (step: QuestStep) => {
+    if (step === 'vocab') onOpenVocab(currentQuest.vocabularySetId)
+    else if (step === 'kanji') onOpenKanji()
+    else if (step === 'grammar') onOpenGrammar()
+    else if (step === 'scene') onOpenScene()
+    else onOpenCheckpoint()
+  }
 
   return (
     <main className="quest-hub">
       <header className="quest-topbar">
         <button type="button" className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
-        <span>Guided learning</span>
+        <span>Campaign I · The Inkbound Road</span>
       </header>
 
-      <section className="quest-hero" aria-labelledby="quest-title">
-        <div>
-          <span className="quest-eyebrow">CAMPAIGN I · EVERYDAY JAPAN</span>
-          <h1 id="quest-title">Follow a path.<br /><em>Use Japanese for something.</em></h1>
-          <p>Every step uses the same focused words, kanji, grammar, and story scene.</p>
-        </div>
-        <div className="quest-hero-mark" aria-hidden="true"><span>侍</span><small>YOUR JOURNEY</small></div>
+      <section className="quest-campaign-bar" aria-labelledby="quest-title">
+        <div><span>YOUR STORY</span><h1 id="quest-title">The Inkbound Road</h1><p>Yōkai have stolen six language seals. Recover them before the guardians learn to speak beyond you.</p></div>
+        <div className="quest-campaign-progress"><span>侍</span><b>{completed} / {QUEST_STEPS.length}</b><small>steps complete</small></div>
       </section>
 
-      <section className="quest-journey" aria-label="Campaign progress">
-        <div className="quest-journey-heading"><div><span>JOURNEY</span><b>Everyday Japan</b></div><small>Quest 1 of {QUESTS.length}</small></div>
-        <div className="quest-road" style={{ '--quest-position': '0%' } as CSSProperties}>
+      <section className="quest-journey quest-journey-compact" aria-label="Campaign progress">
+        <div className="quest-road" style={{ '--quest-position': `${(completed / QUEST_STEPS.length) * 100}%` } as CSSProperties}>
           <span className="quest-road-line" aria-hidden="true" />
           {QUESTS.map((quest, index) => <span key={quest.id} className={`quest-road-stop${index === 0 ? ' is-current' : ''}${index > 0 ? ' is-locked' : ''}`}>{quest.number}</span>)}
           <span className="quest-traveler" aria-label="Current position">侍</span><span className="quest-destination" aria-label="Campaign destination">鳥居</span>
         </div>
       </section>
 
-      <section className="quest-current" aria-labelledby="current-quest-title">
+      <section className="quest-current quest-current-compact" aria-labelledby="current-quest-title">
         <div className="quest-current-intro">
-          <span>YOUR NEXT QUEST · {currentQuest.level}</span><h2 id="current-quest-title">Quest {currentQuest.number}: {currentQuest.title}</h2><p>{currentQuest.subtitle}</p>
+          <span>QUEST {String(currentQuest.number).padStart(2, '0')} · {currentQuest.level}</span>
+          <h2 id="current-quest-title">{currentQuest.title}</h2><p>{currentQuest.subtitle}</p>
           <div className="quest-grammar-chips" aria-label="Grammar targets">{currentQuest.grammar.map((item) => <span key={item}>{item}</span>)}</div>
+          <div className={`quest-earned-reward-preview${finished ? ' is-earned' : ''}`}>
+            <span className="quest-earned-reward-mark" aria-hidden="true">{currentQuest.reward.mark}</span>
+            <div><small>{finished ? 'RELIC EARNED · ACTIVE' : 'QUEST REWARD'}</small><b>{currentQuest.reward.name}</b><p><strong>{currentQuest.reward.perkTitle}:</strong> {currentQuest.reward.perkDescription}</p></div>
+          </div>
         </div>
-        <aside className="quest-scene"><span>{currentQuest.storyTitle}</span><strong lang="ja">{currentQuest.storyJapanese}</strong><small>{currentQuest.storyEnglish}</small></aside>
+        <aside className="quest-guardian-card">
+          <span>QUEST GUARDIAN</span>
+          {currentQuest.guardian.portrait
+            ? <img src={currentQuest.guardian.portrait} alt={`${currentQuest.guardian.name}, ${currentQuest.guardian.title}`} />
+            : <strong>{currentQuest.guardian.mark}</strong>}
+          <b>{currentQuest.guardian.name}</b>
+          <small>{currentQuest.guardian.title}</small>
+          <em>{finished ? 'Defeated' : 'Defeat to claim relic'}</em>
+        </aside>
       </section>
 
-      <section className="quest-steps" aria-labelledby="quest-steps-title">
-        <div className="quest-section-heading"><div><span>QUEST LOOP</span><h2 id="quest-steps-title">Build the scene, then understand it.</h2></div><button type="button" className="btn btn-primary" onClick={() => onOpenVocab(currentQuest.vocabularySetId)}>Continue quest →</button></div>
+      <section className="quest-steps quest-steps-compact" aria-labelledby="quest-steps-title">
+        <div className="quest-section-heading"><div><span>QUEST STEPS</span><h2 id="quest-steps-title">{finished ? 'Quest complete' : `Next: ${STEP_DETAILS.find((step) => step.id === nextStep)?.title}`}</h2></div><button type="button" className="btn btn-primary" onClick={() => openStep(nextStep)}>{finished ? 'Review quest' : 'Continue →'}</button></div>
         <div className="quest-step-grid">
-          <button type="button" className="quest-step is-next" onClick={() => onOpenVocab(currentQuest.vocabularySetId)}><span>01</span><b>Prepare</b><small>Learn 15 words: {currentQuest.vocabularyTheme}.</small></button>
-          <button type="button" className="quest-step" onClick={onOpenKanji}><span>02</span><b>Read the kanji</b><small>Only kanji from this 15-word set.</small></button>
-          <button type="button" className="quest-step" onClick={onOpenGrammar}><span>03</span><b>Use the grammar</b><small>Use these words in this quest’s grammar.</small></button>
-          <button type="button" className="quest-step" onClick={onOpenScene}><span>04</span><b>Read the scene</b><small>Read the connected scene you prepared for.</small></button>
-          <div className="quest-step quest-step-checkpoint"><span>05</span><b>Checkpoint</b><small>Coming next: a mixed review that completes the quest.</small></div>
+          {STEP_DETAILS.map((step) => {
+            const isDone = Boolean(progress[currentQuest.id]?.[step.id])
+            const isNext = !finished && step.id === nextStep
+            const isAvailable = isDone || isNext
+            return <button key={step.id} type="button" disabled={!isAvailable} className={`quest-step${isDone ? ' is-done' : ''}${isNext ? ' is-next' : ''}`} onClick={() => openStep(step.id)}><span>{isDone ? '✓' : step.number}</span><b>{step.title}</b><small>{isDone ? 'Complete' : isAvailable ? step.description : 'Complete the previous step first.'}</small></button>
+          })}
         </div>
-      </section>
-
-      <section className="quest-map" aria-labelledby="quest-map-title">
-        <div className="quest-section-heading"><div><span>CAMPAIGN MAP</span><h2 id="quest-map-title">What comes next</h2></div></div>
-        <ol>{QUESTS.map((quest, index) => <li key={quest.id} className={index === 0 ? 'is-current' : ''}><span>{String(quest.number).padStart(2, '0')}</span><div><b>{quest.title}</b><small>{quest.vocabularyTheme} · {quest.grammar[0]}</small></div><em>{index === 0 ? 'Current' : 'Locked'}</em></li>)}</ol>
       </section>
     </main>
   )

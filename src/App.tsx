@@ -3,6 +3,9 @@ import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
 import { loadProgress } from './lib/storage'
+import { completeQuestStep, isQuestComplete, loadQuestProgress, type QuestStep } from './lib/questProgress'
+import { loadAchievementMetrics, recordBossBattle, recordQuestScene } from './lib/achievementProgress'
+import { getQuestById } from './data/questCampaign'
 import {
   favoriteFromExercise,
   favoriteFromDrillExercise,
@@ -36,6 +39,8 @@ const SentenceTesting = lazy(() => import('./components/SentenceTesting').then((
 const FocusedVocabPractice = lazy(() => import('./components/FocusedVocabPractice').then((module) => ({ default: module.FocusedVocabPractice })))
 const QuestHub = lazy(() => import('./components/QuestHub').then((module) => ({ default: module.QuestHub })))
 const QuestScene = lazy(() => import('./components/QuestScene').then((module) => ({ default: module.QuestScene })))
+const QuestCheckpoint = lazy(() => import('./components/QuestCheckpoint').then((module) => ({ default: module.QuestCheckpoint })))
+const AchievementsPanel = lazy(() => import('./components/AchievementsPanel').then((module) => ({ default: module.AchievementsPanel })))
 
 type View =
   | 'dashboard'
@@ -50,6 +55,8 @@ type View =
   | 'sentence-testing'
   | 'quests'
   | 'quest-scene'
+  | 'quest-checkpoint'
+  | 'achievements'
 
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
@@ -68,6 +75,8 @@ function App() {
   const [libraryTab, setLibraryTab] = useState<LibraryTab>('vocab')
   const [questVocabTopicId, setQuestVocabTopicId] = useState<string | undefined>()
   const [activeQuestId, setActiveQuestId] = useState<string | undefined>()
+  const [questProgress, setQuestProgress] = useState(loadQuestProgress)
+  const [achievementMetrics, setAchievementMetrics] = useState(loadAchievementMetrics)
   const [practiceReturnView, setPracticeReturnView] = useState<View>('dashboard')
 
   // This is a single-page app, so route changes otherwise retain whatever
@@ -81,6 +90,12 @@ function App() {
     () => Object.values(progress).filter((item) => isLearned(item)).length,
     [progress],
   )
+  const activeQuest = getQuestById(activeQuestId)
+
+  const finishQuestStep = useCallback((step: QuestStep) => {
+    if (!activeQuestId) return
+    setQuestProgress((current) => completeQuestStep(current, activeQuestId, step))
+  }, [activeQuestId])
 
   const updateWrongPool = useCallback((pool: typeof wrongPool) => {
     setWrongPool(pool)
@@ -207,6 +222,7 @@ function App() {
             onBack={() => setView(practiceReturnView)}
             onQuestComplete={activeQuestId
               ? () => {
+                  finishQuestStep('kanji')
                   setPracticeReturnView('quests')
                   setView('grammar')
                 }
@@ -223,9 +239,11 @@ function App() {
         <Suspense fallback={<RouteLoading label="Vocab" />}>
           <FocusedVocabPractice
             initialTopicId={questVocabTopicId}
+            questTitle={activeQuest?.title}
             onBack={() => setView(practiceReturnView)}
             onQuestComplete={questVocabTopicId
               ? () => {
+                  finishQuestStep('vocab')
                   setPracticeReturnView('quests')
                   setView('kanji')
                 }
@@ -250,6 +268,7 @@ function App() {
         <Suspense fallback={<RouteLoading label="Quests" />}>
           <QuestHub
             onBack={() => setView('dashboard')}
+            progress={questProgress}
             onOpenVocab={(topicId) => {
               setQuestVocabTopicId(topicId)
               setActiveQuestId('first-morning')
@@ -265,6 +284,23 @@ function App() {
               setView('grammar')
             }}
             onOpenScene={() => setView('quest-scene')}
+            onOpenCheckpoint={() => setView('quest-checkpoint')}
+          />
+        </Suspense>
+      </div>
+    )
+  }
+
+  if (view === 'achievements') {
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Achievements" />}>
+          <AchievementsPanel
+            onBack={() => setView('dashboard')}
+            learnedCards={learnedCount}
+            favoriteSentences={favoriteSentences.length}
+            questProgress={questProgress}
+            metrics={achievementMetrics}
           />
         </Suspense>
       </div>
@@ -275,7 +311,36 @@ function App() {
     return (
       <div className="app">
         <Suspense fallback={<RouteLoading label="Quest Scene" />}>
-          <QuestScene questId={activeQuestId} onBack={() => setView('quests')} />
+          <QuestScene
+            questId={activeQuestId}
+            onBack={() => setView('quests')}
+            onContinue={(furiganaFree) => {
+              if (activeQuestId) setAchievementMetrics((current) => recordQuestScene(current, activeQuestId, furiganaFree))
+              finishQuestStep('scene')
+              setView('quest-checkpoint')
+            }}
+          />
+        </Suspense>
+      </div>
+    )
+  }
+
+  if (view === 'quest-checkpoint') {
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Quest Checkpoint" />}>
+          <QuestCheckpoint
+            questId={activeQuestId}
+            onBack={() => setView('quests')}
+            hasDawnGuard={isQuestComplete(questProgress, 'first-morning')}
+            onBattleResult={({ won, perfect }) => {
+              if (activeQuestId) setAchievementMetrics((current) => recordBossBattle(current, activeQuestId, won, perfect))
+            }}
+            onComplete={() => {
+              finishQuestStep('checkpoint')
+              setView('quests')
+            }}
+          />
         </Suspense>
       </div>
     )
@@ -300,7 +365,10 @@ function App() {
             isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
             onToggleFavorite={toggleDrillFavorite}
             questId={activeQuestId}
-            onQuestComplete={activeQuestId ? () => setView('quest-scene') : undefined}
+            onQuestComplete={activeQuestId ? () => {
+              finishQuestStep('grammar')
+              setView('quest-scene')
+            } : undefined}
           />
         </Suspense>
       </div>
@@ -389,6 +457,10 @@ function App() {
           setActiveQuestId('first-morning')
           setView('quests')
         }}
+        onOpenAchievements={() => setView('achievements')}
+        achievementMetrics={achievementMetrics}
+        questProgress={questProgress}
+        favoriteSentenceCount={favoriteSentences.length}
         onOpenWordCategories={() => {
           setLibraryTab('categories')
           setView('library')

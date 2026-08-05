@@ -7,6 +7,7 @@ interface FocusedVocabPracticeProps {
   onBack: () => void
   initialTopicId?: string
   onQuestComplete?: () => void
+  questTitle?: string
 }
 
 /** Matches the app's other mobile breakpoints (e.g. Kanji Lab's phone layout). */
@@ -45,7 +46,7 @@ function newSession(previousTopicId?: string, initialTopicId?: string) {
   return { topic, cards: shuffled(topic.cards) }
 }
 
-export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete }: FocusedVocabPracticeProps) {
+export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, questTitle }: FocusedVocabPracticeProps) {
   const isMobile = useIsMobile()
   const [session, setSession] = useState(() => newSession(undefined, initialTopicId))
   const [index, setIndex] = useState(0)
@@ -101,11 +102,11 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete }
         <section className="kanji-study-navigation">
           <div className="kanji-path-heading">
             <div>
-              <span>15-WORD PATH</span>
-              <h2>{session.topic.title}</h2>
-              <p>{session.topic.description}</p>
+              <span>{questTitle ? 'QUEST VOCABULARY' : '15-WORD PATH'}</span>
+              <h2>{questTitle ?? session.topic.title}</h2>
+              <p>{questTitle ? `${session.topic.cards.length} words for this quest’s story.` : session.topic.description}</p>
             </div>
-            <button type="button" onClick={loadNextTopic}>New topic</button>
+            {!questTitle && <button type="button" onClick={loadNextTopic}>New topic</button>}
           </div>
         </section>
 
@@ -171,14 +172,14 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete }
     <div className="grammar-practice-view focused-vocab-practice">
       <header className="focused-vocab-top">
         <button type="button" className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
-        <span>Focused vocab</span>
-        <button type="button" className="focused-vocab-change-topic" onClick={loadNextTopic}>New topic</button>
+        <span>{questTitle ?? 'Focused vocab'}</span>
+        {!questTitle && <button type="button" className="focused-vocab-change-topic" onClick={loadNextTopic}>New topic</button>}
       </header>
 
       <section className="focused-vocab-topic" aria-labelledby="focused-vocab-topic-title">
-        <span>15-WORD PATH</span>
-        <h1 id="focused-vocab-topic-title">{session.topic.title}</h1>
-        <p>{session.topic.description}</p>
+        <span>{questTitle ? 'QUEST VOCABULARY' : '15-WORD PATH'}</span>
+        <h1 id="focused-vocab-topic-title">{questTitle ?? session.topic.title}</h1>
+        <p>{questTitle ? `${session.topic.cards.length} words for this quest’s story.` : session.topic.description}</p>
       </section>
 
       {completed ? (

@@ -17,6 +17,8 @@ const retryDistance = 5
 type KanjiStudyMode = 'paths' | 'levels'
 
 function ContextWord({ word, character }: { word: string; character: string }) {
+  if (word === character) return <span className="kanji-learning-word-target">{word}</span>
+
   return (
     <>
       {[...word].map((part, partIndex) => (
@@ -56,22 +58,31 @@ function entriesForPath(path: KanjiFocusSet) {
   }))
 }
 
-function entriesForQuest(questId?: string) {
+function entriesForQuest(questId?: string): KanjiLabEntry[] {
   const quest = getQuestById(questId)
   const vocabulary = vocabFocusSets.find((set) => set.id === quest?.vocabularySetId)
   if (!quest || !vocabulary) return []
 
-  const seenCharacters = new Set<string>()
-  return vocabulary.cards.flatMap((word) => [...word.front].flatMap((character) => {
-    if (seenCharacters.has(character)) return []
-    const source = kanjiLabEntries.find((entry) => entry.character === character)
+  // A Quest reinforces vocabulary words. A compound such as 玄関 stays one
+  // card with one reading instead of being split into separate 玄 and 関 cards.
+  return vocabulary.cards.flatMap((word) => {
+    const source = [...word.front]
+      .map((character) => kanjiLabEntries.find((entry) => entry.character === character))
+      .find(Boolean)
     if (!source) return []
-    seenCharacters.add(character)
     return [{
       ...source,
-      example: { word: word.front, reading: word.reading, meaning: word.back },
+      character: word.front,
+      card: {
+        ...source.card,
+        id: `quest-kanji-${quest.id}-${word.id}`,
+        front: word.front,
+        reading: word.reading ?? '',
+        back: word.back,
+      },
+      example: { word: word.front, reading: word.reading ?? '', meaning: word.back },
     }]
-  }))
+  })
 }
 
 export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
@@ -88,7 +99,7 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
   const [completed, setCompleted] = useState(false)
   const entry = entries[index % entries.length]
   const card = entry?.card
-  const characterReadings = entry ? kanjiReadings[entry.character] : undefined
+  const characterReadings = !questMode && entry ? kanjiReadings[entry.character] : undefined
   const allExamples = useMemo(() => {
     if (!entry) return []
     return questMode
@@ -245,8 +256,12 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
         </div>
         <p className="kanji-learning-character" lang="ja">{card.front}</p>
         <p className={'kanji-learning-character-reading' + (revealed ? ' is-revealed' : '')} lang="ja" aria-hidden={!revealed}>
-          {characterReadings?.on.length ? <span>{characterReadings.on.join('・')}</span> : null}
-          {characterReadings?.kun.length ? <span>{characterReadings.kun.join('・')}</span> : null}
+          {questMode
+            ? <span>{entry.example.reading}</span>
+            : <>
+                {characterReadings?.on.length ? <span>{characterReadings.on.join('・')}</span> : null}
+                {characterReadings?.kun.length ? <span>{characterReadings.kun.join('・')}</span> : null}
+              </>}
         </p>
         <div className="kanji-learning-divider" aria-hidden="true" />
 

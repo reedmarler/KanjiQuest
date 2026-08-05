@@ -18,27 +18,7 @@ const GRAMMAR_LEVELS_KEY = 'kanji-quest-generated-grammar-practice-levels-v1'
 
 export function GrammarPractice({ onBack, isFavorite, onToggleFavorite, questId, onQuestComplete }: GrammarPracticeProps) {
   const quest = getQuestById(questId)
-
-  if (quest?.grammarDrills.length) {
-    return (
-      <ChoiceDrill
-        pool={[...quest.grammarDrills]}
-        badgeLabel="Quest Grammar"
-        eyebrow={`${quest.title} · choose the form that completes this quest’s scene`}
-        finishMark="文法"
-        finishTitle="Grammar step complete"
-        finishNoun="quest grammar choices"
-        storagePrefix={`kanji-quest-${quest.id}-grammar`}
-        availableLevels={[1]}
-        isFavorite={isFavorite}
-        onToggleFavorite={onToggleFavorite}
-        onBack={onBack}
-        onFinishAction={onQuestComplete}
-        finishActionLabel="Read the scene →"
-      />
-    )
-  }
-
+  const questMode = Boolean(quest?.grammarDrills.length)
   const [pool, setPool] = useState<DrillExercise[] | null>(null)
   const [completedBatches, setCompletedBatches] = useState(0)
   const nextBatchSeed = useRef(Math.floor(Date.now() / 1000))
@@ -61,6 +41,7 @@ export function GrammarPractice({ onBack, isFavorite, onToggleFavorite, questId,
   }, [])
 
   useEffect(() => {
+    if (questMode) return
     let cancelled = false
 
     async function buildSession() {
@@ -73,7 +54,27 @@ export function GrammarPractice({ onBack, isFavorite, onToggleFavorite, questId,
 
     void buildSession()
     return () => { cancelled = true }
-  }, [buildFreshPool])
+  }, [buildFreshPool, questMode])
+
+  if (quest?.grammarDrills.length) {
+    return (
+      <ChoiceDrill
+        pool={[...quest.grammarDrills]}
+        badgeLabel="Grammar"
+        eyebrow={quest.title}
+        finishMark="文法"
+        finishTitle="Grammar step complete"
+        finishNoun="quest grammar choices"
+        storagePrefix={`kanji-quest-${quest.id}-grammar`}
+        availableLevels={[1]}
+        isFavorite={isFavorite}
+        onToggleFavorite={onToggleFavorite}
+        onBack={onBack}
+        onFinishAction={onQuestComplete}
+        finishActionLabel="Read the scene →"
+      />
+    )
+  }
 
   if (!pool) {
     const progress = (completedBatches / GRAMMAR_BATCH_COUNT) * 100
