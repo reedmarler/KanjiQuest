@@ -35,6 +35,16 @@ function shuffled<T>(items: readonly T[]) {
   return copy
 }
 
+function VocabBackButton({ onBack, questMode, hasPrevious }: { onBack: () => void; questMode: boolean; hasPrevious: boolean }) {
+  const destination = questMode ? 'Quest' : 'Dashboard'
+  const label = hasPrevious ? 'Previous word' : `Back to ${destination}`
+  return (
+    <button type="button" className="vocab-back-arrow" onClick={onBack} aria-label={label} title={label}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+    </button>
+  )
+}
+
 function newSession(previousTopicId?: string, initialTopicId?: string) {
   const requestedTopic = initialTopicId ? vocabFocusSets.find((topic) => topic.id === initialTopicId) : undefined
   if (requestedTopic) return { topic: requestedTopic, cards: shuffled(requestedTopic.cards) }
@@ -66,6 +76,20 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
     setRevealed(false)
   }
 
+  function previousCard() {
+    if (completed) {
+      setCompleted(false)
+      setRevealed(false)
+      return
+    }
+    if (index > 0) {
+      setIndex((current) => current - 1)
+      setRevealed(false)
+      return
+    }
+    onBack()
+  }
+
   function loadNextTopic() {
     setSession(newSession(session.topic.id))
     setIndex(0)
@@ -88,7 +112,7 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
     return (
       <div className="grammar-practice-view kanji-lab kanji-lab-paths focused-vocab-practice-mobile">
         <div className="study-top grammar-study-top">
-          <button type="button" className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+          <VocabBackButton onBack={previousCard} questMode={Boolean(questTitle)} hasPrevious={completed || index > 0} />
           <span className="study-progress">{Math.min(index + 1, session.cards.length)} / {session.cards.length}</span>
           <span className="study-type-badge">
             <span>Vocab</span>
@@ -171,7 +195,7 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
   return (
     <div className="grammar-practice-view focused-vocab-practice">
       <header className="focused-vocab-top">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        <VocabBackButton onBack={previousCard} questMode={Boolean(questTitle)} hasPrevious={completed || index > 0} />
         <span>{questTitle ?? 'Focused vocab'}</span>
         {!questTitle && <button type="button" className="focused-vocab-change-topic" onClick={loadNextTopic}>New topic</button>}
       </header>

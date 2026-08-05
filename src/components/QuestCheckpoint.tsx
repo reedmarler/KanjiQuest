@@ -22,6 +22,7 @@ export function QuestCheckpoint({ questId, onBack, onComplete, hasDawnGuard, onB
   const [guardianHealth, setGuardianHealth] = useState(MAX_HEALTH)
   const [missed, setMissed] = useState<DrillExercise[]>([])
   const [lastHitCorrect, setLastHitCorrect] = useState(false)
+  const [lastStrikeUltimate, setLastStrikeUltimate] = useState(false)
   const [lastHitBlocked, setLastHitBlocked] = useState(false)
   const [dawnGuardUsed, setDawnGuardUsed] = useState(false)
   const [attempt, setAttempt] = useState(1)
@@ -37,6 +38,7 @@ export function QuestCheckpoint({ questId, onBack, onComplete, hasDawnGuard, onB
     setGuardianHealth(MAX_HEALTH)
     setMissed([])
     setLastHitCorrect(false)
+    setLastStrikeUltimate(false)
     setLastHitBlocked(false)
     setDawnGuardUsed(false)
     setPhase('question')
@@ -45,8 +47,10 @@ export function QuestCheckpoint({ questId, onBack, onComplete, hasDawnGuard, onB
   function strike() {
     if (!selected || phase !== 'question') return
     const correct = selected === exercise.answer
+    const ultimate = correct && guardianHealth === 1
     const blocked = !correct && hasDawnGuard && !dawnGuardUsed
     setLastHitCorrect(correct)
+    setLastStrikeUltimate(ultimate)
     setLastHitBlocked(blocked)
     if (correct) setGuardianHealth((health) => Math.max(0, health - 1))
     else {
@@ -83,18 +87,28 @@ export function QuestCheckpoint({ questId, onBack, onComplete, hasDawnGuard, onB
     <main className="quest-checkpoint quest-battle-page">
       <header className="quest-topbar">
         <button type="button" className="btn btn-ghost" onClick={onBack}>← Quest</button>
-        <span>{phase === 'intro' ? 'Guardian gate' : `Battle · Attempt ${attempt}`}</span>
+        {phase !== 'intro' && <span>{`Battle · Attempt ${attempt}`}</span>}
       </header>
 
       {phase === 'intro' && (
-        <section className="quest-checkpoint-card quest-battle-intro">
-          <span>QUEST {String(quest.number).padStart(2, '0')} · GUARDIAN</span>
-          <div className="quest-guardian-seal" aria-hidden="true">{quest.guardian.mark}</div>
-          <p className="quest-guardian-japanese" lang="ja">{quest.guardian.japanese}</p>
-          <h1>{quest.guardian.name}</h1><strong>{quest.guardian.title}</strong>
-          <p>{quest.guardian.lore}</p>
-          <div className="quest-battle-rules"><span>Correct answer = strike</span><span>Wrong answer = take damage</span><span>3 strikes = victory</span></div>
-          {hasDawnGuard && <div className="quest-equipped-relic"><b>灯 Morning Lantern equipped</b><span>Blocks the first wrong answer in this guardian battle.</span></div>}
+        <section className="quest-checkpoint-card quest-battle-intro quest-gate-intro">
+          <span>QUEST {String(quest.number).padStart(2, '0')} · THE GUARDIAN GATE</span>
+          <div className="quest-gate-scene" aria-label={`${quest.guardian.name} waits beyond the gate`}>
+            <img className="quest-gate-art" src="/quest-guardian-gate.png" alt="The Kanji Quest samurai faces the guardian beyond a shrine gate" />
+          </div>
+          <div className={`quest-gate-brief${hasDawnGuard ? '' : ' has-no-relic'}`}>
+            <div className="quest-gate-identity">
+              <small>GUARDIAN</small>
+              <strong><span lang="ja">{quest.guardian.japanese}</span> {quest.guardian.name}</strong>
+              <em>{quest.guardian.title}</em>
+            </div>
+            <p className="quest-gate-objective"><small>YOUR OBJECTIVE</small><span>{quest.guardian.lore}</span></p>
+            {hasDawnGuard && <div className="quest-equipped-relic"><span>灯</span><div><small>ACTIVE RELIC</small><b>Morning Lantern</b><em>Blocks one mistake</em></div></div>}
+          </div>
+          <div className="quest-gate-battle-guide">
+            <small>BREAK THE SEAL</small>
+            <div><span><b>1</b> Correct → strike</span><span><b>2</b> Wrong → counter</span><span><b>3</b> Land 3 strikes</span></div>
+          </div>
           <button type="button" className="btn btn-primary" onClick={beginBattle}>Draw your blade →</button>
         </section>
       )}
@@ -108,23 +122,22 @@ export function QuestCheckpoint({ questId, onBack, onComplete, hasDawnGuard, onB
               portrait="/quest-mascot-battle.png"
               health={playerHealth}
               side="player"
-              state={phase === 'feedback' ? lastHitCorrect ? 'attacking' : lastHitBlocked ? 'guarded' : 'hit' : undefined}
+              state={phase === 'feedback' ? lastStrikeUltimate ? 'ultimate' : lastHitCorrect ? 'attacking' : lastHitBlocked ? 'guarded' : 'hit' : undefined}
             />
-            <div className={`quest-battle-clash${phase === 'feedback' ? lastHitCorrect ? ' player-strike' : ' guardian-strike' : ''}`}>対</div>
+            <div className={`quest-battle-clash${phase === 'feedback' ? lastStrikeUltimate ? ' kanji-ultimate' : lastHitCorrect ? ' player-strike' : ' guardian-strike' : ''}`}>対</div>
             <Fighter
               name={quest.guardian.name}
               mark={quest.guardian.mark}
               portrait={quest.guardian.portrait}
               health={guardianHealth}
               side="guardian"
-              state={phase === 'feedback' ? lastHitCorrect ? 'hit' : 'attacking' : undefined}
+              state={phase === 'feedback' ? lastStrikeUltimate ? 'ultimate-hit' : lastHitCorrect ? 'hit' : 'attacking' : undefined}
             />
           </div>
 
           {hasDawnGuard && <div className={`quest-active-relic${dawnGuardUsed ? ' is-spent' : ''}`}><span>灯</span><b>Dawn Guard</b><small>{dawnGuardUsed ? 'Used this battle' : 'Ready · blocks one mistake'}</small></div>}
 
           <div className="quest-battle-question">
-            <header><span>KNOWLEDGE STRIKE {index + 1}</span><small>Choose, then attack.</small></header>
             <p className="quest-checkpoint-clue">“{exercise.english}”</p>
             <p className="quest-checkpoint-prompt" lang="ja">{exercise.prompt}</p>
             <div className="quest-checkpoint-options">
@@ -135,14 +148,21 @@ export function QuestCheckpoint({ questId, onBack, onComplete, hasDawnGuard, onB
                 return <button key={option} type="button" className={state} disabled={phase === 'feedback'} onClick={() => setSelected(option)}>{option}</button>
               })}
             </div>
-            {phase === 'question' ? (
-              <button type="button" className="btn btn-primary quest-checkpoint-next" disabled={!selected} onClick={strike}>Attack</button>
-            ) : (
-              <div className={`quest-checkpoint-result${lastHitCorrect ? ' is-correct' : lastHitBlocked ? ' is-blocked' : ' is-wrong'}`}>
-                <span>{lastHitCorrect ? 'Clean strike. The guardian’s seal cracks.' : lastHitBlocked ? `The Morning Lantern blocks the counter. The correct form was ${exercise.answer}.` : `The guardian counters. The correct form was ${exercise.answer}.`}</span>
-                <button type="button" className="btn btn-primary" onClick={continueBattle}>Continue →</button>
-              </div>
-            )}
+            <div className={`quest-battle-action-slot${phase === 'feedback' ? ' is-feedback' : ''}`}>
+              {phase === 'feedback' && (
+                <span className={`quest-battle-action-message${lastHitCorrect ? ' is-correct' : lastHitBlocked ? ' is-blocked' : ' is-wrong'}`}>
+                  {lastStrikeUltimate ? 'KANJI SLASH! The final seal shatters.' : lastHitCorrect ? 'Clean strike. The guardian’s seal cracks.' : lastHitBlocked ? `The Morning Lantern blocks the counter. The correct form was ${exercise.answer}.` : `The guardian counters. The correct form was ${exercise.answer}.`}
+                </span>
+              )}
+              <button
+                type="button"
+                className={`btn btn-primary quest-checkpoint-next${phase === 'question' && guardianHealth === 1 ? ' is-ultimate-ready' : ''}`}
+                disabled={phase === 'question' && !selected}
+                onClick={phase === 'question' ? strike : continueBattle}
+              >
+                {phase === 'question' ? guardianHealth === 1 ? 'Kanji Slash' : 'Attack' : lastStrikeUltimate ? 'Claim victory →' : 'Continue →'}
+              </button>
+            </div>
           </div>
         </section>
       )}
@@ -179,14 +199,21 @@ export function QuestCheckpoint({ questId, onBack, onComplete, hasDawnGuard, onB
   )
 }
 
-function Fighter({ name, mark, portrait, health, side, state }: { name: string; mark: string; portrait?: string; health: number; side: 'player' | 'guardian'; state?: 'attacking' | 'hit' | 'guarded' }) {
+function Fighter({ name, mark, portrait, health, side, state }: { name: string; mark: string; portrait?: string; health: number; side: 'player' | 'guardian'; state?: 'attacking' | 'hit' | 'guarded' | 'ultimate' | 'ultimate-hit' }) {
   return (
     <div className={`quest-fighter quest-fighter-${side}${state ? ` is-${state}` : ''}`}>
       <div className="quest-fighter-name"><b>{name}</b><span>{health} / {MAX_HEALTH}</span></div>
       <div className="quest-health"><span style={{ width: `${(health / MAX_HEALTH) * 100}%` }} /></div>
       {portrait
-        ? <div className="quest-fighter-portrait-shell"><img className="quest-fighter-portrait" src={portrait} alt="" /></div>
+        ? <div className="quest-fighter-portrait-shell">
+            <img className="quest-fighter-portrait" src={portrait} alt="" />
+            {side === 'guardian' && state === 'ultimate-hit' && <KanjiSlashEffect />}
+          </div>
         : <div className="quest-fighter-mark" aria-hidden="true">{mark}</div>}
     </div>
   )
+}
+
+function KanjiSlashEffect() {
+  return <div className="quest-kanji-slash" aria-hidden="true"><i className="slash-one" /><i className="slash-two" /><b>斬</b><i className="slash-final" /><span /><span /><span /><span /></div>
 }

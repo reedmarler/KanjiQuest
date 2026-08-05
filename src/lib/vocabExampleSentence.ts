@@ -127,9 +127,66 @@ export function getVocabExampleSentence(card: StudyCard): VocabExampleSentence |
   // curated category/tag data, more words move to the shared engine on the next
   // `npm run generate:vocab-examples`.
   const generated = GENERATED_VOCAB_EXAMPLES[card.front]
-  const result = generated ? { ...generated } : buildExample(card)
+  const result = generated ? { ...generated } : buildExample(card) ?? buildGuaranteedExample(card)
   cache.set(card.id, result ?? null)
   return result
+}
+
+/**
+ * Every focused-vocabulary card should have readable context. Some fixed
+ * expressions and nouns do not fit the rotator's semantic slots yet; for
+ * those, use a natural meta-language sentence instead of fabricating an
+ * unsafe collocation (for example, "use thunder" or "eat a receipt").
+ */
+function buildGuaranteedExample(card: StudyCard): VocabExampleSentence {
+  const wordReading = card.reading || card.front
+
+  if (card.front === '冷凍庫') {
+    return {
+      japanese: '冷凍庫に肉を入れます。',
+      reading: 'れいとうこににくをいれます。',
+      english: 'I put meat in the freezer.',
+      segments: [
+        { text: card.front, reading: wordReading },
+        { text: 'に肉を入れます。', reading: 'ににくをいれます。' },
+      ],
+    }
+  }
+
+  const variants: Array<() => VocabExampleSentence> = [
+    () => ({
+      japanese: `「${card.front}」をノートに書きます。`,
+      reading: `「${wordReading}」をノートにかきます。`,
+      english: `I write “${card.front}” in my notebook.`,
+      segments: [{ text: '「' }, { text: card.front, reading: wordReading }, { text: '」をノートに書きます。', reading: '」をノートにかきます。' }],
+    }),
+    () => ({
+      japanese: `「${card.front}」の意味を辞書で調べます。`,
+      reading: `「${wordReading}」のいみをじしょでしらべます。`,
+      english: `I look up the meaning of “${card.front}.”`,
+      segments: [{ text: '「' }, { text: card.front, reading: wordReading }, { text: '」の意味を辞書で調べます。', reading: '」のいみをじしょでしらべます。' }],
+    }),
+    () => ({
+      japanese: `先生に「${card.front}」の意味を聞きます。`,
+      reading: `せんせいに「${wordReading}」のいみをききます。`,
+      english: `I ask my teacher what “${card.front}” means.`,
+      segments: [{ text: '先生に「', reading: 'せんせいに「' }, { text: card.front, reading: wordReading }, { text: '」の意味を聞きます。', reading: '」のいみをききます。' }],
+    }),
+    () => ({
+      japanese: `今日、「${card.front}」を覚えます。`,
+      reading: `きょう、「${wordReading}」をおぼえます。`,
+      english: `I’ll memorize “${card.front}” today.`,
+      segments: [{ text: '今日、「', reading: 'きょう、「' }, { text: card.front, reading: wordReading }, { text: '」を覚えます。', reading: '」をおぼえます。' }],
+    }),
+    () => ({
+      japanese: `「${card.front}」を声に出して読みます。`,
+      reading: `「${wordReading}」をこえにだしてよみます。`,
+      english: `I read “${card.front}” aloud.`,
+      segments: [{ text: '「' }, { text: card.front, reading: wordReading }, { text: '」を声に出して読みます。', reading: '」をこえにだしてよみます。' }],
+    }),
+  ]
+
+  return variants[seedFor(card.id) % variants.length]!()
 }
 
 function buildExample(card: StudyCard): VocabExampleSentence | undefined {
