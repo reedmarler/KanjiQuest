@@ -273,6 +273,9 @@ const niIncompatibleTimeTags = new Set(normalizeTags(['today','tonight','tomorro
 // Relative time words name a period by its distance from now, and Japanese
 // attaches them directly ("来週行きます"), so に reads wrong on them.
 const niIncompatibleTimeWords = new Set(['今朝','今晩','今日','明日','昨日','毎朝','毎晩','毎日','今週','来週','先週','今月','来月','先月','今年','来年','去年','今','最近'])
+// A bare duration noun names a span, not a point on the calendar, so it cannot
+// host an event with に — 年に来ます is as broken as the English "comes year".
+const durationOnlyTimeWords = new Set(['年','月','週','日','一日','時間','分','秒','世紀','年間','週間'])
 // 床, 壁, and 天井 are parts of a place rather than places you travel between:
 // walking from the floor to the library names no starting point.
 // 国 names no particular place — “goes to a country” says nothing a learner can
@@ -709,6 +712,8 @@ const uncountableGlosses = new Set([
   'japanese','english','chinese','french','spanish','german','korean',
   // Academic subjects read as a field of study, not a countable item: “studied math”, not “studied a math”.
   'math','mathematics','history','grammar','pronunciation','science','literature','philosophy','kanji','lunch',
+  // Eaten as a substance in these frames — "only eats cake", not "eats a cake".
+  'cake','feed','animal feed',
 ])
 // テレビ is the set when you want one and the medium when you watch it, so the
 // article depends on the verb rather than on the noun.
@@ -728,6 +733,11 @@ function objectEnglish(gloss: string) {
   // which language, so a suffix check catches every gloss the vocab data uses
   // without needing to enumerate every language by name.
   if (uncountableGlosses.has(lower) || /\blanguage$/.test(lower)) return gloss
+  // A modified mass noun stays a mass noun — "black tea", "green tea",
+  // "fruit juice" are all as article-less as their head word is, so match on
+  // the head instead of enumerating every modifier the vocab data may use.
+  const head = lower.split(' ').pop()!
+  if (head !== lower && uncountableGlosses.has(head)) return gloss
   return indefinite(gloss)
 }
 
@@ -824,6 +834,8 @@ function englishPhrase(word: WordRecord, slot: string) {
     if (tags.has('afternoon') || tags.has('evening')) return `in ${definite(gloss)}`
     if (tags.has('night') || tags.has('noon') || tags.has('midnight')) return `at ${gloss}`
     if ((tags.has('clock-time') || tags.has('hour')) && !/^at\b/i.test(gloss)) return `at ${gloss}`
+    if (tags.has('season') || ['春','夏','秋','冬'].includes(word.japanese)) return `in ${gloss}`
+    if (tags.has('weekday') || tags.has('day-of-week') || /曜日$/.test(word.japanese)) return `on ${gloss}`
   }
   return gloss
 }
@@ -874,6 +886,19 @@ function contextualSubjectEnglish(word: WordRecord,verb: VerbUsageRecord,filled:
     return [...placeTags].some(tag=>['hotel','house','home'].includes(tag)) ? 'a guest' : 'a visitor'
   }
   return 'a guest'
+}
+
+/**
+ * Subject pronoun for a second mention of the same subject in one sentence —
+ * "while a lover is young, they study" rather than repeating the noun phrase.
+ * The vocabulary pools carry no gender, so a third-person noun takes they/them
+ * instead of guessing he or she.
+ */
+function subjectPronoun(subjectEnglish: string) {
+  const lower = subjectEnglish.toLowerCase()
+  if (lower === 'i') return 'I'
+  if (['you','we','they','he','she','it'].includes(lower)) return lower
+  return 'they'
 }
 
 function subjectUsesBaseVerb(subject: string) {
@@ -1083,6 +1108,10 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
     if (slot === 'object') pool=pool.filter(word=>{
       const tags=tagSet(word)
       return !politeSubjectIncompatibleWords.has(word.japanese)
+        // Verb object pools are built straight from the vocabulary rather than
+        // through validInanimatePool, so they need the same standalone-object
+        // exclusions that pool applies (税込み, こと, もの…).
+        && !invalidStandaloneObjectWords.has(word.japanese)
         && !tags.has('question')
         && !tags.has('question-word')
         && !tags.has('interrogative')
@@ -1091,6 +1120,11 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
     // default scenario in a beginner sentence generator.
     if (slot === 'object' && verb.id === 'nomu-basic' && filled.subject?.japanese === '運転手') {
       pool=pool.filter(word=>word.japanese !== '酒')
+    }
+    // 餌 is what a person feeds an animal, not what they eat. The vocab data
+    // tags it as food, which otherwise lets it fill any human eating slot.
+    if (slot === 'object' && verb.tags.includes('eating')) {
+      pool=pool.filter(word=>word.japanese !== '餌')
     }
     // 残す + 電話 means leaving a telephone behind, not leaving a message.
     // Keep phone out of this generic object slot until the generator has a
@@ -1242,9 +1276,12 @@ const disallowedPhysicalObjectTags = new Set(normalizeTags([
 const utilitySupplyWords = new Set(['電気','電力','水道','ガス','熱','蒸気','煙','電波'])
 // Vehicles that cannot be inside the buildings the existence patterns use. Cars
 // and bicycles stay: they park at a company or a library.
-const indoorIncompatibleWords = new Set(['電車','船','飛行機','バス','トラック','地下鉄','ヘリコプター'])
+const indoorIncompatibleWords = new Set(['電車','船','飛行機','バス','トラック','地下鉄','ヘリコプター','救急車','消防車','パトカー','タクシー','自動車'])
 const invalidObjectLexicalTags = new Set(normalizeTags(['verb','auxiliary-verb','particle','expression','adverb','i-adjective','na-adjective','requires-modifier','unclassified','pronoun','question-word','demonstrative','number','conjunction','interjection']))
-const invalidStandaloneObjectWords = new Set(['事','こと','もの','物','てしまう','てくださる','てくれる','ほど','など','等','くらい','ぐらい','しか','だけ','だから','ので','のに','けれど','しかし','そして','それで'])
+// 税込み and friends are price notations printed on a label, not things a
+// person can hold, hand over, or pick up — they read as nouns to the tagger but
+// never work as a concrete direct object.
+const invalidStandaloneObjectWords = new Set(['事','こと','もの','物','てしまう','てくださる','てくれる','ほど','など','等','くらい','ぐらい','しか','だけ','だから','ので','のに','けれど','しかし','そして','それで','税込み','税抜き','消費税'])
 // 必要だ ("is necessary") reads naturally for things worth wanting — time,
 // money, permission, information, tools — but not for an arbitrary
 // Object-category noun like trash or a hat ("the garbage is necessary" is
@@ -1534,6 +1571,9 @@ const validTimePool = memoizePool(function validTimePool(vocabulary: WordRecord[
     const tags=tagSet(word)
     return word.categories.includes('Time')
       && matchingTags(word,generalTimeTags).length>0
+      // A composite entry like 日/陽 is two alternatives joined by a slash in
+      // the source data, never a usable surface on its own.
+      && !hasCompositeSurface(word)
       && !niIncompatibleTimeWords.has(word.japanese)
       && ![...tags].some(tag=>niIncompatibleTimeTags.has(tag))
   })
@@ -1667,7 +1707,16 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     return finish(furigana,`There ${isPluralPhrase(existingEnglish)?'are':'is'} ${existingEnglish} ${englishPhrase(place,'location')}.`,{place,object},{verb:verbSlot('verb-aru','あります','ある','あります','exist',['existence','inanimate'])},['Object is inanimate.','Place supports an existence location.'])
   }
   if (patternId === 'n5-13') {
-    const time=pick(times,131),subject=pick(humans,132)
+    // The catalog constrains this pattern to times that naturally accept に.
+    // validTimePool alone does not enforce that, so apply the same relative-time
+    // and duration exclusions the verb-driven slot filler uses.
+    const niCompatibleTimes=times.filter(word=>{
+      const tags=tagSet(word)
+      return !niIncompatibleTimeWords.has(word.japanese)
+        && !durationOnlyTimeWords.has(word.japanese)
+        && ![...tags].some(tag=>niIncompatibleTimeTags.has(tag))
+    })
+    const time=pick(niCompatibleTimes,131),subject=pick(humans,132)
     if (!time || !subject) return null
     const subjectEnglish=englishPhrase(subject,'subject'),comes=subjectUsesBaseVerb(subjectEnglish)?'come':'comes'
     const furigana=[wordPart(time,'time'),literalPart('に'),wordPart(subject,'subject'),literalPart('が'),{text:'来ます',reading:'きます',slot:'verb'}]
@@ -1752,11 +1801,21 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
                 ? pick(validHumanPool(vocabulary),172)
             : pick(validInanimatePool(vocabulary,adjective.categories).filter(word=>!adjective.physicalOnly || isPhysicalObject(word)),172)
     if (!object) return null
-    const objectPhrase=objectEnglish(primaryEnglishGloss(object.preferredTranslation || object.english))
     const topicPredicate=(adjective.categories as SentenceCategory[]).includes('Person')
+    // A person filling this slot needs subject-case English. objectEnglish()
+    // stamps an indefinite article on whatever it is given, which turns the
+    // pronoun pool into "an I is free" / "a he is free".
+    const objectPhrase=topicPredicate
+      ? englishPhrase(object,'subject')
+      : objectEnglish(primaryEnglishGloss(object.preferredTranslation || object.english))
+    // subjectUsesBaseVerb covers I/you/we/they plus plural noun phrases; "I" is
+    // the one subject among them whose copula is neither is nor are.
+    const copula=objectPhrase==='I'
+      ? 'am'
+      : subjectUsesBaseVerb(objectPhrase) ? 'are' : 'is'
     const furigana=[wordPart(object,'object'),literalPart(topicPredicate?'は':'が',topicPredicate?'わ':'が'),{text:`${adjective.japanese}です`,reading:`${adjective.reading}です`,slot:'adjective'}]
     const adjectiveSlot={id:`adjective-${adjective.id}`,surface:`${adjective.japanese}です`,dictionaryForm:adjective.japanese,reading:`${adjective.reading}です`,english:adjective.english,pos:'i_adjective' as const,jlpt:'N5' as const,tags:['adjective','compatible-predicate']}
-    return finish(furigana,`${objectPhrase.charAt(0).toUpperCase()+objectPhrase.slice(1)} ${isPluralPhrase(objectPhrase)?'are':'is'} ${adjective.english}.`,{object},{adjective:adjectiveSlot},['Adjective selected from a reviewed noun-compatibility rule.'])
+    return finish(furigana,`${objectPhrase.charAt(0).toUpperCase()+objectPhrase.slice(1)} ${copula} ${adjective.english}.`,{object},{adjective:adjectiveSlot},['Adjective selected from a reviewed noun-compatibility rule.'])
   }
   if (patternId === 'n5-18') {
     const subject=pick(humans,181)
@@ -2066,7 +2125,8 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     }
     const negative=appendForm(forms.aStem,'なくてもいいです')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),literalPart(negative.japanese,negative.reading,'verb')]
-    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} does not have to ${base} ${englishPhrase(object,'object')}.`,{subject,object},{verb:grammarSlot(`verb-${verb.id}-nakute`,negative.japanese,verb.japanese,negative.reading,verb.english,['not-required','nakute-mo-ii'])},['Verb selected first and supplied the object rule.','なくてもいい expresses that the action is not required.'])
+    const notRequired=subjectUsesBaseVerb(subjectEnglish)?'do not have to':'does not have to'
+    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${notRequired} ${base} ${englishPhrase(object,'object')}.`,{subject,object},{verb:grammarSlot(`verb-${verb.id}-nakute`,negative.japanese,verb.japanese,negative.reading,verb.english,['not-required','nakute-mo-ii'])},['Verb selected first and supplied the object rule.','なくてもいい expresses that the action is not required.'])
   }
   return null
 }
@@ -2808,9 +2868,10 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     if (!subject || !scene) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const beVerb = subjectEnglish==='I' ? 'am' : subjectUsesBaseVerb(subjectEnglish) ? 'are' : 'is'
-    const resultVerb = subjectEnglish==='I' || subjectUsesBaseVerb(subjectEnglish) ? scene.resultBase : scene.resultThird
+    const secondMention = subjectPronoun(subjectEnglish)
+    const resultVerb = subjectUsesBaseVerb(secondMention) ? scene.resultBase : scene.resultThird
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.condition,scene.conditionReading,'condition'),literalPart('うちに、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,`While ${subjectEnglish} ${beVerb} still ${scene.english}, ${subjectEnglish==='I'?'I':subjectEnglish} ${resultVerb}.`,{subject},{},'うちに marks a window that closes, so the action must happen before it does.')
+    return finish(furigana,`While ${subjectEnglish} ${beVerb} still ${scene.english}, ${secondMention} ${resultVerb}.`,{subject},{},'うちに marks a window that closes, so the action must happen before it does.')
   }
 
   const objectVerbPairs = [
@@ -3351,9 +3412,9 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     // someone else, and it keeps the fixed English predicates ("is bad at it", "wants
     // to teach") in agreement without per-person conjugation.
     const scene = pick([
-      { trait:'下手な', traitReading:'へたな', result:'教えたがります', resultReading:'おしえたがります', copula:'is', predicate:'bad at it', clause:'wants to teach' },
-      { trait:'知らない', traitReading:'しらない', result:'説明します', resultReading:'せつめいします', copula:"doesn't", predicate:'know it', clause:'explains anyway' },
-      { trait:'子供の', traitReading:'こどもの', result:'偉そうです', resultReading:'えらそうです', copula:'is', predicate:'just a child', clause:'acts important' },
+      { trait:'下手な', traitReading:'へたな', result:'教えたがります', resultReading:'おしえたがります', copula:'is', predicate:'bad at it', clause:'wants to teach', clauseBase:'want to teach' },
+      { trait:'知らない', traitReading:'しらない', result:'説明します', resultReading:'せつめいします', copula:"doesn't", predicate:'know it', clause:'explains anyway', clauseBase:'explain anyway' },
+      { trait:'子供の', traitReading:'こどもの', result:'偉そうです', resultReading:'えらそうです', copula:'is', predicate:'just a child', clause:'acts important', clauseBase:'act important' },
     ], 1322)
     const eligibleSubjects = humans.filter(word => {
       if (['私','俺','僕','私自身','我々','私たち','あなた','君'].includes(word.japanese) || isPluralPhrase(englishPhrase(word,'subject'))) return false
@@ -3374,7 +3435,9 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     if (!subject || !scene) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.trait,scene.traitReading,'reason'),literalPart('くせに、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,`Even though ${subjectEnglish} ${scene.copula} ${scene.predicate}, ${subjectEnglish} ${scene.clause}.`,{subject},{},'くせに adds a critical, blaming tone to a contrast — "even though, and shouldn\'t."')
+    const secondMention = subjectPronoun(subjectEnglish)
+    const clause = subjectUsesBaseVerb(secondMention) ? scene.clauseBase : scene.clause
+    return finish(furigana,`Even though ${subjectEnglish} ${scene.copula} ${scene.predicate}, ${secondMention} ${clause}.`,{subject},{},'くせに adds a critical, blaming tone to a contrast — "even though, and shouldn\'t."')
   }
 
   if (patternId === 'n2-21') {
@@ -3396,13 +3459,13 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     const companion = pick(thirdPersonSingular.filter(word => word.id !== subject?.id), 1342)
     const scene = pick([
       { activity:'寝て', activityReading:'ねて', result:'家事をしていました', resultReading:'かじをしていました', companionVerb:'slept', resultEnglish:'was doing housework' },
-      { activity:'話して', activityReading:'はなして', result:'ずっと聞いていました', resultReading:'ずっときいていました', companionVerb:'was talking', resultEnglish:'listened the whole time' },
+      { activity:'話して', activityReading:'はなして', result:'ずっと聞いていました', resultReading:'ずっときいていました', companionVerb:'was talking', resultEnglish:'listened' },
       { activity:'勉強して', activityReading:'べんきょうして', result:'テレビを見ていました', resultReading:'てれびをみていました', companionVerb:'studied', resultEnglish:'was watching television' },
     ], 1343)
     if (!subject || !companion || !scene) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const companionEnglish = englishPhrase(companion,'subject')
-    const furigana=[wordPart(companion,'companion'),literalPart('が'),literalPart(scene.activity,scene.activityReading,'reason'),literalPart('いる'),literalPart('間、'),wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.result,scene.resultReading,'result')]
+    const furigana=[wordPart(companion,'companion'),literalPart('が'),literalPart(scene.activity,scene.activityReading,'reason'),literalPart('いる'),literalPart('間、','あいだ、'),wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.result,scene.resultReading,'result')]
     return finish(furigana,capitalize(`for the whole time ${companionEnglish} ${scene.companionVerb}, ${subjectEnglish} ${scene.resultEnglish}.`),{subject,companion},{},'間 (without に) spans the entire duration of the background action, unlike 間に which picks one moment within it.')
   }
 
@@ -3414,7 +3477,9 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     const subject=result.filled.subject!,object=result.filled.object!
     const subjectEnglish = englishPhrase(subject,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:aStem.japanese,reading:aStem.reading,slot:'verb'},literalPart('なくなりました。')]
-    const verbEnglish = subjectEnglish==='I' || subjectUsesBaseVerb(subjectEnglish) ? verb.english : verb.englishThird
+    // translatedVerb carries the object-sensitive readings (見る is "look at" for
+    // a picture, "watch" for a film); verb.english alone would lose them.
+    const verbEnglish = translatedVerb(verb,result.filled,subjectUsesBaseVerb(subjectEnglish))
     return finish(furigana,`${capitalize(subjectEnglish)} no longer ${verbEnglish} ${englishPhrase(object,'object')}.`,{subject,object},{verb:grammarSlot(`verb-${verb.id}-nakunaru`,`${aStem.japanese}なくなりました`,verb.japanese,`${aStem.reading}なくなりました`,`no longer ${verb.english}`,['cessation','nakunaru'])},'なくなる attaches to the nai-stem and marks that an action or state has stopped happening.')
   }
 

@@ -102,10 +102,8 @@ function ProgressRunnerVideo() {
       runnerContext.drawImage(frame, 0, 0, runnerCanvas.width, runnerCanvas.height)
 
       playbackTick += 1
-      if (playbackTick % 2 === 0) {
-        playbackIndex += 1
-        if (playbackIndex >= cachedFrames.length) playbackIndex = loopRestartIndex
-      }
+      playbackIndex += 1
+      if (playbackIndex >= cachedFrames.length) playbackIndex = loopRestartIndex
     }
 
     function drawFrame() {

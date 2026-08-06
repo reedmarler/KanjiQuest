@@ -1,5 +1,4 @@
 import type { SentenceExercise } from '../data/sentenceExercises'
-import { generateCategorySentence } from './categorySentenceEngine'
 import { generatePreviewSentence, type GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import { shuffle } from './quiz'
 import { GENERATION_COMPLEXITIES, patternsForComplexity, type GenerationComplexity } from './generationComplexity'
@@ -54,9 +53,12 @@ function generatedExercise(complexity: GenerationComplexity, seed: number): Sent
   const patterns = patternsForComplexity(complexity)
   const pattern = patterns[seed % patterns.length]
   if (!pattern) throw new Error(`Could not find a Level ${complexity} template`)
-  const sentence = pattern.jlpt === 'N1' || pattern.jlpt === 'N2'
-    ? generatePreviewSentence(pattern.jlpt, seed, undefined, pattern.id, true)
-    : generateCategorySentence(seed, pattern.id, pattern.jlpt)
+  // generatePreviewSentence tries the category engine first and only falls back
+  // to its own frames or the catalog example when that returns nothing — which
+  // is what the dashboard uses for every pattern. Going through it here too
+  // keeps the handful of preview-only N5 patterns (好き, adjective and noun
+  // predicates, から-source) from being silently absent from builder drills.
+  const sentence = generatePreviewSentence(pattern.jlpt, seed, undefined, pattern.id, true)
   if (!sentence) {
     throw new Error(`Could not generate Level ${complexity} sentence-builder exercise`)
   }
