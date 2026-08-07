@@ -326,11 +326,17 @@ body:has(.dashboard) .app {
   display: inline;
 }
 
+/* Outgoing/incoming sentences can wrap to a different number of lines
+   (1 vs 2). Centering each independently — the grid default — re-centers the
+   shorter one relative to the taller as they cross-fade, visibly shifting
+   text vertically for the swap's whole duration. Anchoring both to the same
+   top edge (the same fix already applied to .hero-database-frame-stack for
+   per-word rotation) keeps the first line fixed regardless of wrap count. */
 .hero-database-full-sentence-stack {
   display: grid;
   grid-template-columns: 1fr;
   width: 100%;
-  align-items: center;
+  align-items: start;
   justify-items: center;
   overflow: visible;
 }

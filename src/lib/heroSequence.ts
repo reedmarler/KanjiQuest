@@ -134,10 +134,32 @@ function changedSegmentKeys(previous: HeroSentenceFrame, current: HeroSentenceFr
     .map((segment) => segment.key)
 }
 
-/** A rotation step is admissible only when exactly one visible slot moved. */
+/**
+ * Swappable segment keys in reading order (left to right), each appearing
+ * once. This drives the sweep — subject, then object, then whatever else the
+ * pattern fills, then the verb last — matching where each word actually sits
+ * in the sentence rather than an arbitrary object-key order.
+ */
+function orderedSwappableSlotKeys(sentence: GeneratedPreviewSentence): string[] {
+  const seen = new Set<string>()
+  const order: string[] = []
+  for (const part of sentence.furigana) {
+    if (!part.slot || !sentence.slots[part.slot] || seen.has(part.slot)) continue
+    seen.add(part.slot)
+    order.push(part.slot)
+  }
+  return order
+}
+
+/**
+ * A rotation step is admissible when exactly one visible segment's Japanese
+ * text moved. English is deliberately not required to differ — a polite ⟷
+ * plain register swap (食べます ⟷ 食べる) is a real, valid rotation whose
+ * English gloss is identical ("eats" either way); the renderer already leaves
+ * the English untouched when it doesn't change, so there is nothing to blur.
+ */
 function isSingleSlotNeighbor(previous: HeroSentenceFrame, current: HeroSentenceFrame) {
   return changedSegmentKeys(previous, current).length === 1
-    && previous.generatedEnglish !== current.generatedEnglish
 }
 
 /**
@@ -207,13 +229,6 @@ function levelAppropriateFormVariants(level: JlptLevel, sentence: GeneratedPrevi
   return linkedHigherLevelVariants(level, sentence, seed)
 }
 
-// A minimum, not a fixed count: the loop below keeps attempting slots (cycling
-// back through the same ones if needed) until this many rotations actually
-// land, rather than giving up after a fixed number of tries that may include
-// failures. MAX_ROTATION_ATTEMPTS bounds the cost when a sentence genuinely
-// has few — or few successful — rotatable slots.
-const MIN_ROTATIONS_PER_SENTENCE = 5
-const MAX_ROTATION_ATTEMPTS = 30
 const ROTATION_ATTEMPTS_PER_SLOT = 8
 
 /**
@@ -231,14 +246,28 @@ function rotateOneSlot(
   baseSeed: number,
   current: HeroSentenceFrame,
   slotSeeds: Record<string, number>,
+  avoidWords: Record<string, string>,
   slot: string,
   salt: number,
-): { seed: number; frame: HeroSentenceFrame } | null {
+): { seed: number; frame: HeroSentenceFrame; avoidWords: Record<string, string> } | null {
   // Excluding the word already on screen means the first candidate that
   // survives the natural-sentence and category checks is a genuine change —
   // without it, a small candidate pool (a handful of valid objects for a given
-  // verb) can spend every attempt re-picking the same word by chance.
-  const currentText = current.segments?.find((segment) => segment.key === slot)?.text
+  // verb) can spend every attempt re-picking the same word by chance. The
+  // 'ending' slot is a synthetic key with no segment of its own — the text it
+  // has to avoid is whatever the sentence's predicate segment currently shows
+  // (the 'verb' segment normally, or 'adjective' for a verbless adjective+
+  // copula predicate like n5-17's Xが好きです), since that's the conjugated
+  // ending's own surface form.
+  const endingAnchor = current.segments?.some((segment) => segment.key === 'adjective') ? 'adjective' : 'verb'
+  const currentText = current.segments?.find((segment) => segment.key === (slot === 'ending' ? endingAnchor : slot))?.text
+  // A slot's seeded pick is only reproducible if the candidate pool it was
+  // drawn from stays the same shape on every later call — and avoidWords
+  // filters that pool. Once a slot is locked in via slotSeeds, the avoidWords
+  // entry that was in effect when it was picked has to keep being passed on
+  // every subsequent rotation too, or a later call regenerates that "locked"
+  // slot against a differently-shaped pool and silently drifts to a new word.
+  const nextAvoidWords = currentText ? { ...avoidWords, [slot]: currentText } : avoidWords
   const candidates: Array<{ seed: number; frame: HeroSentenceFrame }> = []
   for (let attempt = 1; attempt <= ROTATION_ATTEMPTS_PER_SLOT; attempt++) {
     const candidateSeed = baseSeed + 17 + salt * 11 + attempt
@@ -246,7 +275,7 @@ function rotateOneSlot(
     try {
       candidate = generateCategorySentence(baseSeed, patternId, level, {
         slotSeeds: { ...slotSeeds, [slot]: candidateSeed },
-        avoidWords: currentText ? { [slot]: currentText } : undefined,
+        avoidWords: Object.keys(nextAvoidWords).length ? nextAvoidWords : undefined,
       })
     } catch {
       continue
@@ -256,7 +285,17 @@ function rotateOneSlot(
     if (!isSingleSlotNeighbor(current, frame)) continue
     candidates.push({ seed: candidateSeed, frame })
   }
-  return candidates.sort((a, b) => replacementLengthDelta(current, a.frame) - replacementLengthDelta(current, b.frame))[0] ?? null
+  // A real word swap prefers the least jarring width change, so nearest-length
+  // wins there. The 'ending' slot has no such visual reason to prefer one
+  // form over another — sorting it by length delta would make same-length
+  // forms (masu/nai, both plain-length) permanently out-compete the rest
+  // (masendeshita, ta, nakatta), since every attempt regenerates all 8 forms
+  // and the shortest-delta one always wins. Take it in attempt order instead
+  // so every conjugation gets a fair turn.
+  const best = slot === 'ending'
+    ? candidates[0]
+    : candidates.sort((a, b) => replacementLengthDelta(current, a.frame) - replacementLengthDelta(current, b.frame))[0]
+  return best ? { ...best, avoidWords: nextAvoidWords } : null
 }
 
 /**
@@ -279,6 +318,10 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
   const steps: HeroStep[] = []
   const tracker = new SentenceDiversityTracker()
   let pendingFormVariants: GeneratedPreviewSentence[] = []
+  // Alternates every sentence: left-to-right, then right-to-left, then back —
+  // seeded off the stream's own seed so two streams don't all start the same
+  // direction, but stable within one stream (no Math.random mid-render).
+  let sweepForward = Math.abs(sequenceSeed) % 2 === 0
 
   // Each pass appends a base sentence plus however many rotations that sentence
   // supports, so the bound is on emitted steps rather than on passes.
@@ -343,45 +386,36 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
       templateRefresh: true,
     })
 
-    // Rotate individual slots of this sentence before moving on. Any slot the
-    // pattern filled is a candidate; isSingleSlotNeighbor decides which ones
-    // actually yield a clean one-word change, so no hand-maintained list of
-    // rotatable slot names can fall out of date with the generator.
-    //
-    // 'subject' is Object.keys(sentence.slots)[0] for nearly every pattern, and
-    // the subject pool is large enough that a rotation attempt on it almost
-    // always succeeds. Always starting the cycle there would make subject the
-    // one slot with a guaranteed turn every sentence, at every other slot's
-    // expense — rotating the start position (deterministically, off the
-    // sentence's own seed) gives each slot an equal shot at going first.
-    const rotatableSlots = Object.keys(sentence.slots)
-    const rotationStart = Math.abs(seedBySentence.get(sentence) ?? 0) % rotatableSlots.length
+    // Sweep every visible slot in reading order — left to right, then right to
+    // left on the next sentence — rather than picking slots at random. This is
+    // what stops any one slot (subject, with its oversized pool) from
+    // dominating: every slot gets exactly one turn per pass, in the position
+    // it actually sits in the sentence. The sentence's final predicate — a
+    // verb, or an adjective+copula predicate for verbless patterns like
+    // n5-17's Xが好きです — gets a 3-step cluster of its own — a word swap
+    // plus two ending toggles — since it's both a normal rotatable slot and
+    // the seat of tense/polarity/register.
+    const positionalSlots = orderedSwappableSlotKeys(sentence)
+    const predicateSlot = positionalSlots.includes('verb') ? 'verb' : positionalSlots.includes('adjective') ? 'adjective' : null
+    const otherSlots = predicateSlot ? positionalSlots.filter((slot) => slot !== predicateSlot) : positionalSlots
+    const predicateCluster = predicateSlot ? [predicateSlot, 'ending', 'ending'] : []
+    // Forward reaches the predicate (sentence-final in Japanese) last, so its
+    // cluster leads with the word swap, then the two endings. Reversed reaches
+    // it first, so the endings come before the word swap — the mirror image.
+    const sweepQueue = sweepForward
+      ? [...otherSlots, ...predicateCluster]
+      : [...predicateCluster.slice().reverse(), ...otherSlots.slice().reverse()]
+    sweepForward = !sweepForward
+
     const baseSeed = seedBySentence.get(sentence)
     let slotSeeds: Record<string, number> = {}
-    let successCount = 0
-    // `rotation` counts attempts, not successes — a slot that fails (small
-    // pool, avoidWords exhausting the alternatives) must not eat into the
-    // minimum, so keep cycling through the slot list, wrapping around as many
-    // times as it takes, until MIN_ROTATIONS_PER_SENTENCE actually land or the
-    // attempt budget runs out.
-    for (
-      let rotation = 0;
-      baseSeed !== undefined && successCount < MIN_ROTATIONS_PER_SENTENCE
-        && rotation < MAX_ROTATION_ATTEMPTS && steps.length < stepCount;
-      rotation++
-    ) {
-      const slot = rotatableSlots[(rotationStart + rotation) % rotatableSlots.length]
-      if (!slot) break
-      // Subject's pool is unusually large and a rotation attempt on it nearly
-      // always succeeds, so even with a randomized start it still wins far
-      // more turns than any other slot. Deterministically skipping half of
-      // its turns lets object/verb/location/etc. surface roughly as often as
-      // their own (lower) success rate allows, instead of being crowded out.
-      if (slot === 'subject' && (baseSeed + rotation) % 2 === 0) continue
-      const next = rotateOneSlot(level, sentence.frameId, baseSeed, current, slotSeeds, slot, rotation)
+    let avoidWords: Record<string, string> = {}
+    for (let position = 0; baseSeed !== undefined && position < sweepQueue.length && steps.length < stepCount; position++) {
+      const slot = sweepQueue[position]!
+      const next = rotateOneSlot(level, sentence.frameId, baseSeed, current, slotSeeds, avoidWords, slot, position)
       if (!next) continue
       slotSeeds = { ...slotSeeds, [slot]: next.seed }
-      successCount++
+      avoidWords = next.avoidWords
       steps.push({
         frame: next.frame,
         changed: changedSegmentKeys(current, next.frame),
