@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { charLength, type HeroSentenceFrame, type HeroStep } from '../data/heroSentences'
+import { charLength, HERO_CHAR_WIDTH_EM, type HeroSentenceFrame, type HeroStep } from '../data/heroSentences'
 import { buildHeroStorySteps } from '../data/heroStories'
 import { getSegmentReading } from '../lib/heroSentenceGloss'
 import { getHeroEnglish } from '../lib/heroSentenceGloss'
 import { buildHeroSteps } from '../lib/heroSequence'
+import { heroSwapBlockChars } from '../lib/heroSlotResize'
 import type { HeroPlaybackRate } from '../lib/heroPlayback'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
@@ -230,6 +231,70 @@ export function RotatingHeroSentence({
     (targetFrame.segments ?? []).reduce((sum, segment) => sum + charLength(segment.text), 0)
   const heroCharCount = Math.max(frameCharCount(frame), frameCharCount(nextFrame))
 
+  // A rotation step changes exactly one slot, so the line can hold still and
+  // roll just that word. Anything else — a new pattern, a stream rollover, or a
+  // step that moved more than one segment — falls back to the whole-line fade.
+  const rotationKey = !isFrameChange && nextStep.changed.length === 1 ? nextStep.changed[0]! : null
+
+  function renderSegmentRuns(text: string, reading: string | undefined) {
+    return getFuriganaRuns(text, reading ?? getSegmentReading(text)).map((run, index) => (
+      <span
+        key={`${run.text}-${index}`}
+        className={`hero-database-full-run${run.reading ? ' has-reading' : ''}`}
+      >
+        {furiganaOn && run.reading && <span className="hero-database-full-reading">{run.reading}</span>}
+        <span className="hero-database-full-text">{run.text}</span>
+      </span>
+    ))
+  }
+
+  /**
+   * One-slot rotation: every segment stays put and the changed word rolls.
+   *
+   * `.hero-database-segment.is-swappable` has a CSS `width` transition, but a
+   * transition only animates between two explicit values — leaving width on
+   * its content-driven default snaps instantly the moment the DOM swaps in
+   * different text. Setting `--hero-database-slot-width` explicitly, sized to
+   * fit both the outgoing and incoming word while they're overlaid, gives the
+   * transition real start/end values so the segment eases into its new width
+   * (and any resulting line-wrap) instead of jumping.
+   */
+  function renderRotatingSentence(targetFrame: HeroSentenceFrame, incoming: HeroSentenceFrame, changedKey: string) {
+    const incomingByKey = new Map((incoming.segments ?? []).map((segment) => [segment.key, segment]))
+    return (
+      <span className="hero-database-full-sentence">
+        {(targetFrame.segments ?? []).map((segment) => {
+          const isChanging = segment.key === changedKey
+          const next = incomingByKey.get(segment.key)
+          const highlighted = isChanging && (phase === 'highlight' || phase === 'swap')
+          const isSwapping = isChanging && phase === 'swap' && Boolean(next)
+          const slotChars = isSwapping
+            ? heroSwapBlockChars(charLength(segment.text), charLength(next!.text))
+            : charLength(segment.text)
+          const style = segment.swappable
+            ? ({ '--hero-database-slot-width': `${slotChars * HERO_CHAR_WIDTH_EM}em` } as CSSProperties)
+            : undefined
+          return (
+            <span
+              key={segment.key}
+              className={`hero-database-segment${segment.swappable ? ' is-swappable' : ''}${highlighted ? ' is-highlighted' : ''}`}
+              style={style}
+            >
+              {isSwapping ? (
+                <span className="hero-database-swap-stack">
+                  <span className="hero-database-word is-outgoing">{renderSegmentRuns(segment.text, segment.reading)}</span>
+                  <span className="hero-database-word is-incoming">{renderSegmentRuns(next!.text, next!.reading)}</span>
+                </span>
+              ) : (
+                <span className="hero-database-segment-content">{renderSegmentRuns(segment.text, segment.reading)}</span>
+              )}
+            </span>
+          )
+        })}
+      </span>
+    )
+  }
+
   function renderFullSentence(targetFrame: HeroSentenceFrame) {
     const segments = targetFrame.segments ?? []
     const text = segments.map((segment) => segment.text).join('')
@@ -262,12 +327,13 @@ export function RotatingHeroSentence({
       } as CSSProperties}
     >
       <p className={`hero-sentence-line hero-database-line${phase === 'swap' && isFrameChange ? ' is-frame-swapping' : ''}`} aria-live="polite">
-        {phase === 'swap' ? (
-          <span className="hero-database-full-sentence-stack">
-            <span className="hero-database-full-sentence-frame is-outgoing">{renderFullSentence(frame)}</span>
-            <span className="hero-database-full-sentence-frame is-incoming">{renderFullSentence(nextFrame)}</span>
-          </span>
-        ) : renderFullSentence(frame)}
+        {rotationKey ? renderRotatingSentence(frame, nextFrame, rotationKey)
+          : phase === 'swap' ? (
+            <span className="hero-database-full-sentence-stack">
+              <span className="hero-database-full-sentence-frame is-outgoing">{renderFullSentence(frame)}</span>
+              <span className="hero-database-full-sentence-frame is-incoming">{renderFullSentence(nextFrame)}</span>
+            </span>
+          ) : renderFullSentence(frame)}
       </p>
 
       {englishOn && (

@@ -1,4 +1,4 @@
-import { HERO_SLOT_WIDTHS, type HeroSentenceFrame, type HeroStep } from '../data/heroSentences'
+import { charLength, HERO_SLOT_WIDTHS, type HeroSentenceFrame, type HeroStep } from '../data/heroSentences'
 import { patternsForComplexity, type GenerationComplexity } from './generationComplexity'
 import { generatePreviewSentence, type GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import { selectMostDiverse, SentenceDiversityTracker } from './sentenceDiversity'
@@ -87,16 +87,25 @@ export function clearHeroStepsCache(): void {
 }
 
 function categoryFrameFor(sentence: GeneratedPreviewSentence): HeroSentenceFrame {
+  // A slot name can appear twice in one sentence (two objects, two verbs in a
+  // たり…たり frame), so disambiguate by occurrence — otherwise both segments
+  // share a key and the rotation diff cannot tell which one moved.
+  const occurrences = new Map<string, number>()
   return {
     generatedEnglish: sentence.english,
     generatedReading: sentence.reading,
     generatedPatternId: `category-${sentence.frameId}`,
-    segments: sentence.furigana.map((part, index) => ({
-      key: part.slot ?? `lit-${index}`,
-      text: part.text,
-      reading: part.reading,
-      swappable: false,
-    })),
+    segments: sentence.furigana.map((part, index) => {
+      if (!part.slot) return { key: `lit-${index}`, text: part.text, reading: part.reading, swappable: false }
+      const occurrence = occurrences.get(part.slot) ?? 0
+      occurrences.set(part.slot, occurrence + 1)
+      return {
+        key: occurrence === 0 ? part.slot : `${part.slot}-${occurrence + 1}`,
+        text: part.text,
+        reading: part.reading,
+        swappable: true,
+      }
+    }),
     prefix: '',
     subject: '',
     topicParticle: '',
@@ -106,6 +115,43 @@ function categoryFrameFor(sentence: GeneratedPreviewSentence): HeroSentenceFrame
     bridge: '',
     predicate: '',
   }
+}
+
+/**
+ * Two frames are comparable only when they came from the same pattern and laid
+ * out the same segments — otherwise "one thing changed" is meaningless because
+ * the whole shape moved.
+ */
+function structureKey(frame: HeroSentenceFrame) {
+  return (frame.segments ?? []).map((segment) => `${segment.key}:${segment.swappable ? 'slot' : segment.text}`).join('|')
+}
+
+function changedSegmentKeys(previous: HeroSentenceFrame, current: HeroSentenceFrame) {
+  if (structureKey(previous) !== structureKey(current)) return []
+  const previousByKey = new Map((previous.segments ?? []).map((segment) => [segment.key, segment.text]))
+  return (current.segments ?? [])
+    .filter((segment) => segment.swappable && previousByKey.get(segment.key) !== segment.text)
+    .map((segment) => segment.key)
+}
+
+/** A rotation step is admissible only when exactly one visible slot moved. */
+function isSingleSlotNeighbor(previous: HeroSentenceFrame, current: HeroSentenceFrame) {
+  return changedSegmentKeys(previous, current).length === 1
+    && previous.generatedEnglish !== current.generatedEnglish
+}
+
+/**
+ * Prefer a replacement close in length to what it replaces: the reel animates a
+ * single word in place, and a large width change makes the rest of the line
+ * reflow around it.
+ */
+function replacementLengthDelta(previous: HeroSentenceFrame, current: HeroSentenceFrame) {
+  const changed = changedSegmentKeys(previous, current)
+  if (changed.length !== 1) return Number.POSITIVE_INFINITY
+  const key = changed[0]!
+  const before = (previous.segments ?? []).find((segment) => segment.key === key)?.text ?? ''
+  const after = (current.segments ?? []).find((segment) => segment.key === key)?.text ?? ''
+  return Math.abs(charLength(before) - charLength(after))
 }
 
 function greatestCommonDivisor(left: number, right: number): number {
@@ -161,14 +207,67 @@ function levelAppropriateFormVariants(level: JlptLevel, sentence: GeneratedPrevi
   return linkedHigherLevelVariants(level, sentence, seed)
 }
 
+// A minimum, not a fixed count: the loop below keeps attempting slots (cycling
+// back through the same ones if needed) until this many rotations actually
+// land, rather than giving up after a fixed number of tries that may include
+// failures. MAX_ROTATION_ATTEMPTS bounds the cost when a sentence genuinely
+// has few — or few successful — rotatable slots.
+const MIN_ROTATIONS_PER_SENTENCE = 5
+const MAX_ROTATION_ATTEMPTS = 30
+const ROTATION_ATTEMPTS_PER_SLOT = 8
+
 /**
- * Each step is a complete, independently generated sentence from the same
- * hand-authored generator behind Sentence Testing — its English gloss is
- * written together with each grammar pattern rather than composed generically,
- * so unlike the old per-slot rotation there is no way for the translation to
- * drift out of sync with a rotated verb ending or adverb. The tradeoff is the
- * animation: every step is a full-sentence swap rather than a single word
- * sliding into place.
+ * Rotate one slot of an already-approved sentence, holding every other slot
+ * fixed. Both the base and the rotation come out of the generator complete, so
+ * each carries its own hand-authored English — the caller can diff the two
+ * strings rather than composing a translation from parts.
+ *
+ * Returns the closest-in-length admissible neighbour, or null when this slot
+ * has no replacement that changes exactly one visible segment.
+ */
+function rotateOneSlot(
+  level: JlptLevel,
+  patternId: string,
+  baseSeed: number,
+  current: HeroSentenceFrame,
+  slotSeeds: Record<string, number>,
+  slot: string,
+  salt: number,
+): { seed: number; frame: HeroSentenceFrame } | null {
+  // Excluding the word already on screen means the first candidate that
+  // survives the natural-sentence and category checks is a genuine change —
+  // without it, a small candidate pool (a handful of valid objects for a given
+  // verb) can spend every attempt re-picking the same word by chance.
+  const currentText = current.segments?.find((segment) => segment.key === slot)?.text
+  const candidates: Array<{ seed: number; frame: HeroSentenceFrame }> = []
+  for (let attempt = 1; attempt <= ROTATION_ATTEMPTS_PER_SLOT; attempt++) {
+    const candidateSeed = baseSeed + 17 + salt * 11 + attempt
+    let candidate: GeneratedPreviewSentence | null = null
+    try {
+      candidate = generateCategorySentence(baseSeed, patternId, level, {
+        slotSeeds: { ...slotSeeds, [slot]: candidateSeed },
+        avoidWords: currentText ? { [slot]: currentText } : undefined,
+      })
+    } catch {
+      continue
+    }
+    if (!candidate?.japanese || !isDashboardSentenceNatural(candidate)) continue
+    const frame = categoryFrameFor(candidate)
+    if (!isSingleSlotNeighbor(current, frame)) continue
+    candidates.push({ seed: candidateSeed, frame })
+  }
+  return candidates.sort((a, b) => replacementLengthDelta(current, a.frame) - replacementLengthDelta(current, b.frame))[0] ?? null
+}
+
+/**
+ * A sentence is shown, then rotated one slot at a time — noun, verb, adverb —
+ * before the stream refreshes to a new pattern. Every step is a fully generated
+ * sentence, so its English is the generator's own rather than something
+ * composed from parts; the renderer diffs consecutive glosses to find what to
+ * animate, and falls back to a whole-line fade when more than one word moved.
+ *
+ * `templateRefresh` marks the steps that jump to a new pattern; the rest carry
+ * exactly one key in `changed`.
  */
 function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCount: number): HeroStep[] {
   const complexity = JLPT_TO_COMPLEXITY[level]
@@ -181,16 +280,28 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
   const tracker = new SentenceDiversityTracker()
   let pendingFormVariants: GeneratedPreviewSentence[] = []
 
-  for (let index = 0; index < stepCount; index++) {
+  // Each pass appends a base sentence plus however many rotations that sentence
+  // supports, so the bound is on emitted steps rather than on passes.
+  for (let index = 0; steps.length < stepCount; index++) {
     // A coprime stride walks through every available pattern before repeating.
     const pattern = patterns[(start + index * stride) % patterns.length]!
+    // A level whose patterns all fail to generate would otherwise spin forever
+    // now that the loop counts steps instead of passes.
+    if (index >= stepCount * 4) break
     const candidates: GeneratedPreviewSentence[] = []
+    // Rotation has to re-enter the generator on the *same* seed that produced
+    // the chosen sentence, holding every other slot fixed, so remember which
+    // seed each candidate came from.
+    const seedBySentence = new Map<GeneratedPreviewSentence, number>()
 
     for (let attempt = 0; attempt < GENERATION_ATTEMPTS_PER_STEP; attempt++) {
       const seed = sequenceSeed + 4001 + index * 97 + attempt * 733
       try {
         const candidate = generatePreviewSentence(pattern.jlpt, seed, undefined, pattern.id, true)
-        if (candidate.japanese) candidates.push(candidate)
+        if (candidate.japanese) {
+          candidates.push(candidate)
+          seedBySentence.set(candidate, seed)
+        }
       } catch {
         // The pattern's semantic/tag rules can rule out every combination
         // for a given seed; just try the next seed.
@@ -224,12 +335,61 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
         if (variants.length) pendingFormVariants = variants
       }
     }
+    let current = categoryFrameFor(sentence)
     steps.push({
-      frame: categoryFrameFor(sentence),
+      frame: current,
       changed: [],
       slotWidths: HERO_SLOT_WIDTHS,
       templateRefresh: true,
     })
+
+    // Rotate individual slots of this sentence before moving on. Any slot the
+    // pattern filled is a candidate; isSingleSlotNeighbor decides which ones
+    // actually yield a clean one-word change, so no hand-maintained list of
+    // rotatable slot names can fall out of date with the generator.
+    //
+    // 'subject' is Object.keys(sentence.slots)[0] for nearly every pattern, and
+    // the subject pool is large enough that a rotation attempt on it almost
+    // always succeeds. Always starting the cycle there would make subject the
+    // one slot with a guaranteed turn every sentence, at every other slot's
+    // expense — rotating the start position (deterministically, off the
+    // sentence's own seed) gives each slot an equal shot at going first.
+    const rotatableSlots = Object.keys(sentence.slots)
+    const rotationStart = Math.abs(seedBySentence.get(sentence) ?? 0) % rotatableSlots.length
+    const baseSeed = seedBySentence.get(sentence)
+    let slotSeeds: Record<string, number> = {}
+    let successCount = 0
+    // `rotation` counts attempts, not successes — a slot that fails (small
+    // pool, avoidWords exhausting the alternatives) must not eat into the
+    // minimum, so keep cycling through the slot list, wrapping around as many
+    // times as it takes, until MIN_ROTATIONS_PER_SENTENCE actually land or the
+    // attempt budget runs out.
+    for (
+      let rotation = 0;
+      baseSeed !== undefined && successCount < MIN_ROTATIONS_PER_SENTENCE
+        && rotation < MAX_ROTATION_ATTEMPTS && steps.length < stepCount;
+      rotation++
+    ) {
+      const slot = rotatableSlots[(rotationStart + rotation) % rotatableSlots.length]
+      if (!slot) break
+      // Subject's pool is unusually large and a rotation attempt on it nearly
+      // always succeeds, so even with a randomized start it still wins far
+      // more turns than any other slot. Deterministically skipping half of
+      // its turns lets object/verb/location/etc. surface roughly as often as
+      // their own (lower) success rate allows, instead of being crowded out.
+      if (slot === 'subject' && (baseSeed + rotation) % 2 === 0) continue
+      const next = rotateOneSlot(level, sentence.frameId, baseSeed, current, slotSeeds, slot, rotation)
+      if (!next) continue
+      slotSeeds = { ...slotSeeds, [slot]: next.seed }
+      successCount++
+      steps.push({
+        frame: next.frame,
+        changed: changedSegmentKeys(current, next.frame),
+        slotWidths: HERO_SLOT_WIDTHS,
+        templateRefresh: false,
+      })
+      current = next.frame
+    }
   }
 
   return steps

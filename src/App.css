@@ -467,13 +467,20 @@ body:has(.dashboard) .app {
   to { color: var(--rayquaza); filter: brightness(1.12); }
 }
 
+/* Opacity finishes at the halfway point (not the full duration) so the
+   outgoing and incoming words are never both substantially visible at once —
+   a linear 0%-to-100% fade on both overlapped for the entire swap, showing
+   two different words' furigana superimposed for most of the transition. The
+   vertical slide still runs the full duration for a smooth roll. */
 @keyframes hero-database-roll-down {
   from { opacity: 1; transform: translate3d(0, 0, 0); }
+  50% { opacity: 0; }
   to { opacity: 0; transform: translate3d(0, 1.18em, 0); }
 }
 
 @keyframes hero-database-roll-in {
   from { opacity: 0; transform: translate3d(0, -1.18em, 0); }
+  50% { opacity: 0; }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 

@@ -1,4 +1,4 @@
-import { getApprovedContentRecords } from './contentDatabase'
+﻿import { getApprovedContentRecords } from './contentDatabase'
 import type { GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import { normalizeTags } from '../data/tagTaxonomy'
 import { allCards } from '../data'
@@ -107,6 +107,14 @@ export interface VerbUsageRecord {
 export interface CategorySentenceOptions {
   /** Keep the sentence seed fixed while varying one eligible slot. */
   slotSeeds?: Partial<Record<string,number>>
+  /**
+   * Exclude the word currently shown in a slot from that slot's candidate
+   * pool. Re-seeding a slot with a small pool (a handful of valid objects for
+   * a given verb) often just re-picks the same word within a few attempts —
+   * excluding it outright means the very first candidate is a genuine change
+   * whenever the pool has more than one member.
+   */
+  avoidWords?: Partial<Record<string,string>>
   /** Force one verb usage so callers can inspect its compatible vocabulary. */
   verbId?: string
   /**
@@ -223,7 +231,6 @@ const animalSubjectTags = ['animal','dog','cat','bird','fish','pet']
 const humanSubjectTags = ['person','pronoun','speaker','man','woman','boy','girl','baby','child','teenager','adult','elderly','human','family','mother','father','wife','husband','brother','sister','grandparent','grandchild','relative','friend','partner','classmate','coworker','neighbor','customer','boss','employee','occupation','teacher','student','doctor','nurse']
 const standaloneDestinationTags = ['country','city','town','village','neighborhood','building','house','home','apartment','school','education','university','office','store','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','river','lake','beach','ocean','island','platform','parking-lot','room','kitchen','bathroom','bedroom','classroom','public','transport','destination']
 const workplaceLocationTags = ['company','office','store','shop','school','education','university','hospital','bank','restaurant','cafe','library','museum','station','airport','hotel','post-office','movie-theater']
-const standingLocationTags = ['room','classroom','office','store','shop','station','platform']
 const crowdedPlaceTags = ['city','town','village','neighborhood','park','restaurant','cafe','station','market','festival','event','downtown','public']
 const pushableObjectTags = ['button','door','box','bag','cart','chair','table','furniture','switch','key','tool']
 const pullableObjectTags = ['door','drawer','cart','rope','string','handle','bag','box','chair','table','furniture']
@@ -242,7 +249,10 @@ const eatingLocationTags = ['restaurant','cafe','cafeteria','house','home','kitc
 // one-off destinations like a museum or airport — 通う reads as habitual,
 // so "commutes to the airport" is as odd in English as it is in Japanese.
 const routineAttendanceDestinationTags = ['school','education','university','office','hospital','workplace']
-const residenceLocationTags = ['country','city','town','village','neighborhood','island','house','home','apartment','room','bedroom','residence']
+// 住む takes a dwelling or a locality, never a room inside one — 洗面所 and
+// 玄関 both carry the 'room' tag, which is how "lives in the washroom" and
+// "lives in the entryway" were getting generated.
+const residenceLocationTags = ['country','city','town','village','neighborhood','island','house','home','apartment','residence']
 // いる existence ("X is at Y") reads fine for ordinary indoor/public places
 // but odd for wide-open nature — "there's a daughter in the forest" needs a
 // story to make sense, while "there's a daughter at home" doesn't.
@@ -352,7 +362,7 @@ const verbs: VerbUsageRecord[] = [
   { id:'noboru-destination', japanese:'登る', reading:'のぼる', english:'climb', englishThird:'climbs', verbClass:'godan-ru', sentencePattern:'n5-02', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:['mountain']} } },
   { id:'yasumu-time', japanese:'休む', reading:'やすむ', english:'rest', englishThird:'rests', verbClass:'godan-mu', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
   { id:'kuru-destination', japanese:'来る', reading:'くる', english:'come', englishThird:'comes', verbClass:'irregular', sentencePattern:'n5-02', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','irregular','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
-  { id:'hataraku-location', japanese:'働く', reading:'はたらく', english:'work', englishThird:'works', verbClass:'godan-ku', sentencePattern:'n5-25', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','occupation','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
+  { id:'hataraku-location', japanese:'働く', reading:'はたらく', english:'work', englishThird:'works', verbClass:'godan-ku', sentencePattern:'n5-25', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','occupation','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:workplaceLocationTags} } },
   { id:'sumu-location', japanese:'住む', reading:'すむ', english:'live', englishThird:'lives', verbClass:'godan-mu', sentencePattern:'n5-26', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','living','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:residenceLocationTags} } },
   { id:'tomaru-location', japanese:'泊まる', reading:'とまる', english:'stay', englishThird:'stays', verbClass:'godan-ru', sentencePattern:'n5-26', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','lodging','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:['hotel','house','home','apartment']} } },
   { id:'erabu-basic', japanese:'選ぶ', reading:'えらぶ', english:'choose', englishThird:'chooses', verbClass:'godan-bu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:usableToolTags} } },
@@ -407,7 +417,6 @@ const verbs: VerbUsageRecord[] = [
   { id:'nigeru-destination', japanese:'逃げる', reading:'にげる', english:'flee', englishThird:'flees', verbClass:'ichidan', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:fleeingDestinationTags} } },
   { id:'mukau-destination', japanese:'向かう', reading:'むかう', english:'head', englishThird:'heads', verbClass:'godan-u', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
   { id:'suwaru-location', japanese:'座る', reading:'すわる', english:'sit', englishThird:'sits', verbClass:'godan-ru', sentencePattern:'n5-26', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','body','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Furniture'],tags:['chair','bench','sofa','stool']} } },
-  { id:'tatsu-location', japanese:'立つ', reading:'たつ', english:'stand', englishThird:'stands', verbClass:'godan-tsu', sentencePattern:'n5-25', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','body','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:standingLocationTags} } },
   { id:'nemuru-time', japanese:'眠る', reading:'ねむる', english:'sleep', englishThird:'sleeps', verbClass:'godan-ru', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
   { id:'suru-basic', japanese:'する', reading:'する', english:'do', englishThird:'does', verbClass:'irregular', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Activity'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','irregular','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Activity']} } },
   { id:'iru-existence', japanese:'いる', reading:'いる', english:'are', englishThird:'is', verbClass:'ichidan', sentencePattern:'n5-27', subjectCategories:['Person','Animal'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','existence','ichidan','intransitive'], slots:{ location:{categories:['Place','Building','Room'],tags:personExistenceLocationTags}, subject:{categories:['Person','Animal'],tags:[...humanSubjectTags,...animalSubjectTags]} } },
@@ -583,23 +592,32 @@ function seededPick<T>(items: T[], seed: number, salt: number) {
  * records or small literal `{surface}` objects depending on the pattern, so
  * both shapes are recognised.
  */
-function requiredWordPicker(seed: number, requiredWord?: string) {
+function requiredWordPicker(seed: number, requiredWord?: string, options: CategorySentenceOptions = {}) {
   let pending = Boolean(requiredWord)
   const surfaceOf = (item: unknown) => {
     if (!item || typeof item !== 'object') return undefined
     const record = item as { japanese?: string; surface?: string }
     return record.japanese ?? record.surface
   }
-  return <T>(pool: T[], salt: number): T | null => {
-    if (!pool.length) return null
+  // A pick tagged with a slot name can be re-seeded and have its current word
+  // excluded independently of the rest of the sentence — the same mechanism
+  // the base N5/N4 generator gets from fillVerbSlots, extended to the
+  // hand-templated N5/N4/N3 generators that pick their own slots directly.
+  return <T>(pool: T[], salt: number, slot?: string): T | null => {
+    let candidatePool = pool
+    if (slot && options.avoidWords?.[slot]) {
+      const avoided = candidatePool.filter(item => surfaceOf(item) !== options.avoidWords![slot])
+      if (avoided.length) candidatePool = avoided
+    }
+    if (!candidatePool.length) return null
     if (pending) {
-      const match = pool.find(item => surfaceOf(item) === requiredWord)
+      const match = candidatePool.find(item => surfaceOf(item) === requiredWord)
       if (match !== undefined) {
         pending = false
         return match
       }
     }
-    return seededPick(pool, seed, salt)
+    return seededPick(candidatePool, slot ? options.slotSeeds?.[slot] ?? seed : seed, salt)
   }
 }
 
@@ -822,6 +840,9 @@ function englishPhrase(word: WordRecord, slot: string) {
     return `at ${definite(gloss)}`
   }
   if (slot === 'destination' || slot === 'source') {
+    // 店内 already glosses as "inside the store" — prepending an article gives
+    // "to the inside the store". Same guard the location slot applies.
+    if (/^(?:inside|outside|in front of|behind|next to)\b/i.test(gloss)) return gloss
     if (tags.has('home') && ['家','うち','自宅'].includes(word.japanese)) return 'the house'
     if ([...tags].some(tag => definitePlaceTags.has(tag))) return definite(gloss)
     if ([...tags].some(tag => ['country','city','town','village','island'].includes(tag))) return /^[A-Z]/.test(gloss) ? gloss : indefinite(gloss)
@@ -901,6 +922,16 @@ function subjectPronoun(subjectEnglish: string) {
   return 'they'
 }
 
+/**
+ * The copula agreeing with a subject phrase. "I" is the one subject that takes
+ * neither is nor are, which is the trap in writing this inline: subjectUsesBaseVerb
+ * returns true for "I", so the obvious `usesBase ? 'are' : 'is'` yields "I are".
+ */
+function copulaFor(subjectEnglish: string) {
+  if (subjectEnglish === 'I') return 'am'
+  return subjectUsesBaseVerb(subjectEnglish) ? 'are' : 'is'
+}
+
 function subjectUsesBaseVerb(subject: string) {
   // A possessive can sit in front of the noun — “my parents” is still plural —
   // so plurality is decided by the head noun, not by the first word.
@@ -927,7 +958,13 @@ function translatedVerb(verb: VerbUsageRecord, filled: Record<string,WordRecord>
 
 function renderTranslation(template: string, verb: VerbUsageRecord, filled: Record<string,WordRecord>, verbOverride?: string) {
   const subject = filled.subject ? contextualSubjectEnglish(filled.subject,verb,filled) : ''
-  const englishVerb = verbOverride ?? translatedVerb(verb, filled, subjectUsesBaseVerb(subject))
+  const rawVerb = verbOverride ?? translatedVerb(verb, filled, subjectUsesBaseVerb(subject))
+  // 感動する and friends store their English as a bare copula phrase ("be
+  // moved") so modal frames can say "must be moved". A plain declarative has to
+  // conjugate it — otherwise the template renders "I be moved".
+  const englishVerb = /^be\b/.test(rawVerb)
+    ? rawVerb.replace(/^be\b/, subject === 'I' ? 'am' : subjectUsesBaseVerb(subject) ? 'are' : 'is')
+    : rawVerb
   const values: Record<string,string> = { Verb:englishVerb }
   for (const [slot,word] of Object.entries(filled)) {
     values[slot.charAt(0).toUpperCase()+slot.slice(1)] = slot==='subject' ? subject : contextualSlotEnglish(slot,word,filled,verb)
@@ -1099,9 +1136,6 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
         return tags.has('occupation') || tags.has('employee') || tags.has('worker') || tags.has('teacher') || tags.has('doctor') || tags.has('nurse') || tags.has('student')
       })
     }
-    if (slot === 'subject' && verb.id === 'tatsu-location') {
-      pool=pool.filter(word=>!['家族','両親','人々'].includes(word.japanese))
-    }
     // Interrogative pronouns (誰/だれ/どなた) leak in as Person-category words
     // for who-question patterns elsewhere, but they read as nonsense objects
     // in plain declarative sentences ("introduces a who"), so exclude them here too.
@@ -1157,6 +1191,14 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
     // implies a pre-existing service relationship, which reads as a planned
     // meeting rather than a chance one — 会う fits those roles, not 出会う.
     if (slot === 'companion' && verb.id === 'deau-companion') pool=pool.filter(word=>!['人','人々','個人','客','お客様','患者'].includes(word.japanese))
+    // Rotation asks for a *different* word in this slot. Dropping the current
+    // one from the pool up front means the very next pick is a genuine change
+    // instead of relying on a random re-roll to eventually miss it — the pools
+    // for many verb+slot combinations are only a handful of words wide.
+    if (options.avoidWords?.[slot]) {
+      const avoided=pool.filter(word=>word.japanese!==options.avoidWords![slot])
+      if (avoided.length) pool=avoided
+    }
     if (!pool.length) return null
     // The required word is chosen from the *filtered* pool, so it only lands in
     // a slot it genuinely qualifies for — every category, tag, and per-verb
@@ -1198,25 +1240,45 @@ function baseFurigana(verb: VerbUsageRecord, filled: Record<string,WordRecord>, 
 function presentParticiple(phrase: string) {
   const [head,...rest]=phrase.split(' ')
   const irregular: Record<string,string> = { eat:'eating',drink:'drinking',read:'reading',watch:'watching',look:'looking',go:'going',talk:'talking',wake:'waking',forget:'forgetting',be:'being',get:'getting',put:'putting',run:'running',sit:'sitting',begin:'beginning',stop:'stopping' }
-  const transformed=irregular[head!] ?? (head!.endsWith('e') ? `${head!.slice(0,-1)}ing` : `${head}ing`)
+  const transformed=irregular[head!]
+    ?? (head!.endsWith('e') ? `${head!.slice(0,-1)}ing`
+      : doublesFinalConsonant(head!) ? `${head}${head!.slice(-1)}ing`
+      : `${head}ing`)
   return [transformed,...rest].join(' ')
+}
+
+/**
+ * English doubles a final consonant before -ed/-ing when the last syllable is
+ * stressed. Stress is not recoverable from spelling, but single-syllable verbs
+ * are always stressed on their only syllable, so restricting the rule to those
+ * gets drop/dropped and wrap/wrapped right without breaking visit/visited.
+ */
+function doublesFinalConsonant(head: string) {
+  const vowelGroups = head.match(/[aeiou]+/gi)
+  if (!vowelGroups || vowelGroups.length !== 1) return false
+  // Consonant-vowel-consonant, where the final consonant is not w/x/y — those
+  // never double ("show" → "showed", "fix" → "fixed", "play" → "played").
+  return /[^aeiou][aeiou][^aeiouwxy]$/i.test(head)
 }
 
 function regularPast(head: string) {
   if (head.endsWith('e')) return `${head}d`
   if (/[^aeiou]y$/i.test(head)) return `${head.slice(0,-1)}ied`
+  if (doublesFinalConsonant(head)) return `${head}${head.slice(-1)}ed`
   return `${head}ed`
 }
 
 function pastParticiple(phrase: string) {
   const [head,...rest]=phrase.split(' ')
-  const irregular: Record<string,string> = { be:'been',break:'broken',choose:'chosen',eat:'eaten',drink:'drunk',forget:'forgotten',give:'given',read:'read',watch:'watched',look:'looked',go:'gone',come:'come',get:'gotten',run:'run',hold:'held',have:'had',sit:'sat',sleep:'slept',spread:'spread',invite:'invited',save:'saved',dislike:'disliked',talk:'talked',wake:'woken',buy:'bought',make:'made',use:'used',write:'written',meet:'met',fight:'fought',lend:'lent' }
+  const irregular: Record<string,string> = { be:'been',break:'broken',choose:'chosen',eat:'eaten',drink:'drunk',forget:'forgotten',give:'given',read:'read',watch:'watched',look:'looked',go:'gone',come:'come',get:'gotten',run:'run',hold:'held',have:'had',sit:'sat',sleep:'slept',spread:'spread',invite:'invited',save:'saved',dislike:'disliked',talk:'talked',wake:'woken',buy:'bought',make:'made',use:'used',write:'written',meet:'met',fight:'fought',lend:'lent',
+    find:'found',feel:'felt',lose:'lost',send:'sent',spend:'spent',teach:'taught',catch:'caught',bring:'brought',think:'thought',sell:'sold',tell:'told',leave:'left',win:'won',wear:'worn',take:'taken',see:'seen',know:'known',grow:'grown',throw:'thrown',ride:'ridden',drive:'driven',fall:'fallen',feed:'fed',hear:'heard',keep:'kept',stand:'stood',understand:'understood',begin:'begun',swim:'swum',sing:'sung',speak:'spoken',steal:'stolen',pay:'paid',say:'said',become:'become',build:'built',mean:'meant',fly:'flown',cut:'cut',put:'put',hit:'hit',set:'set',let:'let',hurt:'hurt',shut:'shut',lie:'lain',rise:'risen',wash:'washed',forgive:'forgiven' }
   return [irregular[head!] ?? regularPast(head!),...rest].join(' ')
 }
 
 function simplePast(phrase: string) {
   const [head,...rest]=phrase.split(' ')
-  const irregular: Record<string,string> = { be:'was',break:'broke',choose:'chose',eat:'ate',drink:'drank',forget:'forgot',give:'gave',read:'read',watch:'watched',look:'looked',go:'went',come:'came',get:'got',run:'ran',sit:'sat',hold:'held',have:'had',sleep:'slept',spread:'spread',invite:'invited',save:'saved',dislike:'disliked',compete:'competed',talk:'talked',wake:'woke',buy:'bought',make:'made',use:'used',write:'wrote',meet:'met',fight:'fought',lend:'lent' }
+  const irregular: Record<string,string> = { be:'was',break:'broke',choose:'chose',eat:'ate',drink:'drank',forget:'forgot',give:'gave',read:'read',watch:'watched',look:'looked',go:'went',come:'came',get:'got',run:'ran',sit:'sat',hold:'held',have:'had',sleep:'slept',spread:'spread',invite:'invited',save:'saved',dislike:'disliked',compete:'competed',talk:'talked',wake:'woke',buy:'bought',make:'made',use:'used',write:'wrote',meet:'met',fight:'fought',lend:'lent',
+    find:'found',feel:'felt',lose:'lost',send:'sent',spend:'spent',teach:'taught',catch:'caught',bring:'brought',think:'thought',sell:'sold',tell:'told',leave:'left',win:'won',wear:'wore',take:'took',see:'saw',know:'knew',grow:'grew',throw:'threw',ride:'rode',drive:'drove',fall:'fell',feed:'fed',hear:'heard',keep:'kept',stand:'stood',understand:'understood',begin:'began',swim:'swam',sing:'sang',speak:'spoke',steal:'stole',pay:'paid',say:'said',become:'became',build:'built',mean:'meant',fly:'flew',cut:'cut',put:'put',hit:'hit',set:'set',let:'let',hurt:'hurt',shut:'shut',lie:'lay',rise:'rose',wash:'washed',forgive:'forgave' }
   return [irregular[head!] ?? regularPast(head!),...rest].join(' ')
 }
 
@@ -1231,11 +1293,19 @@ function n4EnglishVerb(patternId: string,verb: VerbUsageRecord,filled: Record<st
   if (patternId === 'n4-08' && verb.japanese === '来る') return `${plural?'have':'has'} been to`
   if (patternId === 'n4-08' && (verb.id === 'iru-existence' || verb.id === 'aru-existence')) return `${plural?'have':'has'} been`
   if (patternId === 'n4-06' && (verb.id === 'iru-existence' || verb.id === 'aru-existence')) return 'may be'
+  // A copula-phrase base ("be troubled") reads fine after "to" or "must
+  // (not)" but breaks after bare "does/do not" — "does not be troubled" —
+  // the same fix the ending-rotation negation uses below.
+  const copula=subject==='I'?'am':plural?'are':'is'
+  const bareCopulaPhrase=/^be\b(.*)$/.exec(base)
+  const negatedBase=bareCopulaPhrase ? `${copula} not${bareCopulaPhrase[1]}`
+    : ['is','are','am'].includes(base) ? `${copula} not`
+    : `${plural?'do':'does'} not ${base}`
   const forms: Record<string,string> = {
     'n4-01':`${plural?'want':'wants'} to ${base}`,
     'n4-02':`${subject === 'I' ? 'am' : plural ? 'are' : 'is'} ${presentParticiple(base)}`,
     'n4-03':simplePast(base),
-    'n4-04':`${plural?'do':'does'} not ${base}`,
+    'n4-04':negatedBase,
     'n4-05':`must ${base}`,
     'n4-06':`may ${base}`,
     'n4-07':`must not ${base}`,
@@ -1664,7 +1734,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   const objectExistencePlaces=localizedPlaces.filter(word=>[...tagSet(word)].some(tag=>objectExistenceLocationTags.includes(tag)))
   const times=validTimePool(vocabulary)
   const inanimate=validInanimatePool(vocabulary)
-  const pick=requiredWordPicker(seed,options.requiredWord)
+  const pick=requiredWordPicker(seed,options.requiredWord,options)
   const placesForObject=(object: WordRecord)=> {
     const objectTags=tagSet(object)
     if (object.categories.includes('Clothing') || ['靴','靴下','帽子','服','上着','コート'].includes(object.japanese) || objectTags.has('clothing')) {
@@ -1686,12 +1756,12 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   })
 
   if (patternId === 'n5-11') {
-    const place=pick(personExistencePlaces,111)
+    const place=pick(personExistencePlaces,111,'location')
     const animatePool=vocabulary.filter(word=>word.categories.includes('Animal') && hasUsableMeaning(word)).concat(humans.filter(word=>{
       const tags=tagSet(word)
       return !['pronoun','speaker','second-person','demonstrative','question-word'].some(tag=>tags.has(tag))
     }))
-    const subject=pick(animatePool,112)
+    const subject=pick(animatePool,112,'subject')
     if (!place || !subject) return null
     const subjectEnglish=indefinite(primaryEnglishGloss(subject.preferredTranslation || subject.english))
     const plural=subjectUsesBaseVerb(subjectEnglish)
@@ -1699,7 +1769,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     return finish(furigana,`There ${plural?'are':'is'} ${subjectEnglish} ${englishPhrase(place,'location')}.`,{place,subject},{verb:verbSlot('verb-iru','います','いる','います','exist',['existence','animate'])},['Subject is animate.','Place supports an existence location.'])
   }
   if (patternId === 'n5-12') {
-    const object=pick(inanimate.filter(word=>isPhysicalObject(word) && !indoorIncompatibleWords.has(word.japanese)),122)
+    const object=pick(inanimate.filter(word=>isPhysicalObject(word) && !indoorIncompatibleWords.has(word.japanese)),122,'object')
     const place=object ? pick(placesForObject(object),121) : null
     if (!place || !object) return null
     const furigana=[wordPart(place,'place'),literalPart('に'),wordPart(object,'object'),literalPart('が'),{text:'あります',reading:'あります',slot:'verb'}]
@@ -1716,14 +1786,14 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
         && !durationOnlyTimeWords.has(word.japanese)
         && ![...tags].some(tag=>niIncompatibleTimeTags.has(tag))
     })
-    const time=pick(niCompatibleTimes,131),subject=pick(humans,132)
+    const time=pick(niCompatibleTimes,131,'time'),subject=pick(humans,132,'subject')
     if (!time || !subject) return null
     const subjectEnglish=englishPhrase(subject,'subject'),comes=subjectUsesBaseVerb(subjectEnglish)?'come':'comes'
     const furigana=[wordPart(time,'time'),literalPart('に'),wordPart(subject,'subject'),literalPart('が'),{text:'来ます',reading:'きます',slot:'verb'}]
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${comes} ${englishPhrase(time,'time')}.`,{time,subject},{verb:verbSlot('verb-kuru','来ます','来る','きます','come',['movement','arrival','time-compatible'])},['Time naturally accepts に.','来る supports the selected time frame.'])
   }
   if (patternId === 'n5-14') {
-    const object=pick(inanimate.filter(word=>isPhysicalObject(word) && !indoorIncompatibleWords.has(word.japanese)),141)
+    const object=pick(inanimate.filter(word=>isPhysicalObject(word) && !indoorIncompatibleWords.has(word.japanese)),141,'object')
     const place=object ? pick(placesForObject(object),142) : null
     if (!object || !place) return null
     const objectPhrase=object.categories.includes('Person')
@@ -1735,7 +1805,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   if (patternId === 'n5-15') {
     const origins=places.filter(word=>[...tagSet(word)].some(tag=>geographicOriginTags.has(tag)))
     const originSubjects=humans.filter(word=>![...tagSet(word)].some(tag=>originSubjectDisallowedTags.has(tag)))
-    const subject=pick(originSubjects.length?originSubjects:humans,151),origin=pick(origins,152)
+    const subject=pick(originSubjects.length?originSubjects:humans,151,'subject'),origin=pick(origins,152,'origin')
     if (!subject || !origin) return null
     const subjectEnglish=englishPhrase(subject,'subject')
     // Non-past 来ます/"comes from" reads as an unfinished habitual claim without
@@ -1746,7 +1816,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   }
   if (patternId === 'n5-16') {
     const walkablePlaces=places.filter(word=>![...tagSet(word)].some(tag=>walkingIncompatibleTags.has(tag)) && !['山','売り場'].includes(word.japanese))
-    const subject=pick(humans,161),endpoint=pick(walkablePlaces,162)
+    const subject=pick(humans,161,'subject'),endpoint=pick(walkablePlaces,162,'endpoint')
     if (!subject || !endpoint) return null
     const subjectEnglish=englishPhrase(subject,'subject'),walks=subjectUsesBaseVerb(subjectEnglish)?'walk':'walks'
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(endpoint,'endpoint'),literalPart('まで'),{text:'歩きます',reading:'あるきます',slot:'verb'}]
@@ -1818,8 +1888,8 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     return finish(furigana,`${objectPhrase.charAt(0).toUpperCase()+objectPhrase.slice(1)} ${copula} ${adjective.english}.`,{object},{adjective:adjectiveSlot},['Adjective selected from a reviewed noun-compatibility rule.'])
   }
   if (patternId === 'n5-18') {
-    const subject=pick(humans,181)
-    const recipient=pick(namedRecipients(humans).filter(word=>word.id!==subject?.id),182)
+    const subject=pick(humans,181,'subject')
+    const recipient=pick(namedRecipients(humans).filter(word=>word.id!==subject?.id),182,'recipient')
     if (!subject || !recipient) return null
     const subjectEnglish=englishPhrase(subject,'subject'),calls=subjectUsesBaseVerb(subjectEnglish)?'call':'calls'
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(recipient,'recipient'),literalPart('に'),{text:'電話します',reading:'でんわします',slot:'verb'}]
@@ -1842,23 +1912,23 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     // くれる's subject can't be any first-person pronoun — giving something to
     // yourself doesn't make sense — not just the specific word 私.
     const firstPersonWords=new Set(['私','私自身','俺','僕','我々','私たち'])
-    const subject=pick(givingVerb?.fixedRecipient ? humans.filter(word=>!firstPersonWords.has(word.japanese)) : humans,191)
+    const subject=pick(givingVerb?.fixedRecipient ? humans.filter(word=>!firstPersonWords.has(word.japanese)) : humans,191,'subject')
     const recipient=givingVerb?.fixedRecipient ? speaker : pick(namedRecipients(humans).filter(word=>word.id!==subject?.id),192)
     if (!givingVerb || !subject || !recipient) return null
     const sendableWords = new Set(['手紙','はがき','小包','荷物','箱','書類','資料','メール'])
     const eligible=inanimate.filter(word=>[...tagSet(word)].some(tag=>givingVerb.objectTags.has(tag))
       && !workplaceDocumentWords.has(word.japanese)
       && (givingVerb.id !== 'okuru-gift' || sendableWords.has(word.japanese)))
-    const object=pick(eligible,193)
+    const object=pick(eligible,193,'object')
     if (!object) return null
     const subjectEnglish=englishPhrase(subject,'subject'),verbEnglish=subjectUsesBaseVerb(subjectEnglish)?givingVerb.base:givingVerb.baseThird
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(recipient,'recipient'),literalPart('に'),wordPart(object,'object'),literalPart('を'),{text:givingVerb.japanese,reading:givingVerb.reading,slot:'verb'}]
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${verbEnglish} ${englishPhrase(object,'object')} ${givingVerb.preposition} ${relatedPersonEnglish('recipient',recipient,subject)}.`,{subject,recipient,object},{verb:verbSlot(`verb-${givingVerb.id}`,givingVerb.japanese,givingVerb.dictionary,givingVerb.reading,givingVerb.base,[...givingVerb.tags])},['Object matches the chosen verb\'s own transfer-object tags.','Recipient is a different person from the subject.'])
   }
   if (patternId === 'n5-20') {
-    const subject=pick(humans,201)
+    const subject=pick(humans,201,'subject')
     const portable=vocabulary.filter(word=>categoryMatch(word,possessableCategories) && [...tagSet(word)].some(tag=>portableObjectTags.has(tag)) && ![...tagSet(word)].some(tag=>disallowedPhysicalObjectTags.has(tag)))
-    const object=pick(portable,203)
+    const object=pick(portable,203,'object')
     const destination=object && categoryMatch(object,['Food','Drink'])
       ? pick(places.filter(word=>![...tagSet(word)].some(tag=>geographicOriginTags.has(tag))),202)
       : pick(places,202)
@@ -1868,7 +1938,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${takes} ${englishPhrase(object,'object')} to ${englishPhrase(destination,'destination')}.`,{subject,destination,object},{verb:verbSlot('verb-motte-iku','持って行きます','持って行く','もっていきます','take',['movement','carrying','portable-object'])},['Object has a portable semantic tag.','Destination is valid for movement.'])
   }
   if (patternId === 'n5-21') {
-    const subject=pick(humans,211)
+    const subject=pick(humans,211,'subject')
     const animalSubject=subject ? [...tagSet(subject)].some(tag=>animalSubjectTags.includes(tag)) : false
     const objects=validInanimatePool(vocabulary,possessableCategories).filter(word=>{
       const tags=tagSet(word)
@@ -1882,7 +1952,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
         // 餌 is animal feed, not a natural possession request for a human.
         && (animalSubject || word.japanese !== '餌')
     })
-    const object=pick(objects,212)
+    const object=pick(objects,212,'object')
     if (!subject || !object) return null
     const subjectEnglish=englishPhrase(subject,'subject'),wants=subjectUsesBaseVerb(subjectEnglish)?'want':'wants'
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('が'),{text:'ほしいです',reading:'ほしいです',slot:'predicate'}]
@@ -1894,8 +1964,8 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     // own scale — pairing one with a broad area like 近所 skips the building
     // that would actually contain it and breaks the route's spatial logic.
     const walkablePlaces=places.filter(word=>![...tagSet(word)].some(tag=>walkingIncompatibleTags.has(tag)) && !subBuildingStructureWords.has(word.japanese) && !['山','売り場'].includes(word.japanese))
-    const subject=pick(humans,221),origin=pick(walkablePlaces,222)
-    const destination=pick(walkablePlaces.filter(word=>word.japanese!==origin?.japanese),223)
+    const subject=pick(humans,221,'subject'),origin=pick(walkablePlaces,222,'origin')
+    const destination=pick(walkablePlaces.filter(word=>word.japanese!==origin?.japanese),223,'destination')
     if (!subject || !origin || !destination) return null
     const subjectEnglish=englishPhrase(subject,'subject'),walks=subjectUsesBaseVerb(subjectEnglish)?'walk':'walks'
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(origin,'origin'),literalPart('から'),wordPart(destination,'destination'),literalPart('まで'),{text:'歩きます',reading:'あるきます',slot:'verb'}]
@@ -1903,8 +1973,8 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   }
   if (patternId === 'n5-24') {
     const directVerbs=verbs.filter(verb=>['taberu-basic','nomu-basic','yomu-basic','miru-basic'].includes(verb.id))
-    const verb=options.verbId ? directVerbs.find(candidate=>candidate.id===options.verbId) : seededPick(directVerbs,seed,241)
-    const result=verb ? fillVerbSlots(verb,vocabulary,seed,242) : null
+    const verb=options.verbId ? directVerbs.find(candidate=>candidate.id===options.verbId) : seededPick(directVerbs,options.slotSeeds?.verb??seed,241)
+    const result=verb ? fillVerbSlots(verb,vocabulary,seed,242,options) : null
     if (!verb||!result) return null
     const negative=appendForm(n4VerbForms(verb).masuStem,'ません')
     const subject=result.filled.subject!,object=result.filled.object!
@@ -1914,7 +1984,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const verbSlotData={...verbSlot(`verb-${verb.id}-shika-nai`,negative.japanese,verb.japanese,negative.reading,verb.english,['only','negative-polite','shika-nai']),conjugation:'negative-polite'}
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} only ${englishVerb} ${englishPhrase(object,'object')}.`,{subject,object},{verb:verbSlotData},['Verb selected first and supplied the object rule.','しか is paired with a negative polite verb.'])
   }
-  const subject=pick(humans,231)
+  const subject=pick(humans,231,'subject')
   if (!subject) return null
   const subjectEnglish=englishPhrase(subject,'subject'),go=subjectUsesBaseVerb(subjectEnglish)?'go':'goes'
   const furigana=[wordPart(subject,'subject'),literalPart('も'),{text:'行きます',reading:'いきます',slot:'verb'}]
@@ -1928,7 +1998,7 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
   const vocabulary=editorWords()
   const humans=validHumanPool(vocabulary)
   const places=validPlacePool(vocabulary)
-  const pick=requiredWordPicker(seed,options.requiredWord)
+  const pick=requiredWordPicker(seed,options.requiredWord,options)
   const exact=(japanese: string[])=>vocabulary.filter(word=>japanese.includes(word.japanese) && hasUsableMeaning(word))
   const wordPart=(word: WordRecord,slot: string)=>({text:word.japanese,reading:kanaReading(word.reading,word.japanese),slot})
   const literalPart=(text: string,reading=text,slot?: string)=>({text,reading,slot})
@@ -1955,19 +2025,24 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     : seededPick(directActionVerbs,seed,salt)
   const actionPair=(salt: number) => {
     const firstVerb=pickDirectVerb(salt)
-    const firstResult=firstVerb ? fillVerbSlots(firstVerb,vocabulary,seed,salt+1) : null
+    // The furigana tags these two objects 'firstObject'/'mainObject', not
+    // fillVerbSlots' generic 'object' — remap so a rotation request for
+    // either one reaches the right call.
+    const firstOptions={...options,slotSeeds:{object:options.slotSeeds?.firstObject},avoidWords:{object:options.avoidWords?.firstObject}}
+    const mainOptions={...options,slotSeeds:{object:options.slotSeeds?.mainObject},avoidWords:{object:options.avoidWords?.mainObject}}
+    const firstResult=firstVerb ? fillVerbSlots(firstVerb,vocabulary,seed,salt+1,firstOptions) : null
     const mainVerb=pick(directActionVerbs.filter(verb=>verb.id!==firstVerb?.id),salt+2)
     if (!firstVerb||!firstResult||!mainVerb) return null
 
     let mainResult: ReturnType<typeof fillVerbSlots> = null
     for (let attempt=0;attempt<8;attempt+=1) {
-      const candidate=fillVerbSlots(mainVerb,vocabulary,seed+attempt,salt+3+attempt)
+      const candidate=fillVerbSlots(mainVerb,vocabulary,seed+attempt,salt+3+attempt,mainOptions)
       if (candidate && candidate.filled.object?.id!==firstResult.filled.object?.id) {
         mainResult=candidate
         break
       }
     }
-    const subject=pick(humans,salt+20)
+    const subject=pick(humans,salt+20,'subject')
     if (!mainResult||!subject) return null
     firstResult.filled.subject=subject
     mainResult.filled.subject=subject
@@ -1977,12 +2052,12 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
   if (patternId==='n4-11') {
     const studyPlaces=new Set(['図書館','学校','大学','教室','家','カフェ'])
     const studySubjectTags=new Set(normalizeTags(['student','teacher','child','teenager','boy','girl','son','daughter','pupil','classmate']))
-    const place=pick(places.filter(word=>studyPlaces.has(word.japanese)),411)
+    const place=pick(places.filter(word=>studyPlaces.has(word.japanese)),411,'place')
     const ageMismatchTags=place?.japanese==='大学'?new Set(normalizeTags(['baby','child','boy','girl'])):place?.japanese==='高校'?new Set(normalizeTags(['baby','child'])):new Set<string>()
     const subject=pick(humans.filter(word=>{
       const tags=tagSet(word)
       return [...tags].some(tag=>studySubjectTags.has(tag))&&![...tags].some(tag=>ageMismatchTags.has(tag))
-    }),412)
+    }),412,'subject')
     if (!place||!subject) return null
     const subjectEnglish=englishPhrase(subject,'subject')
     const studies=subjectEnglish==='I'?'am studying':subjectUsesBaseVerb(subjectEnglish)?'are studying':'is studying'
@@ -1992,8 +2067,8 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
   if (patternId==='n4-12') {
     const pastTimeWords=new Set(['昨日','昨夜','先週','先月','去年','一昨日','七時','八時'])
     const noParticleTimes=new Set(['昨日','昨夜','先週','先月','去年','一昨日'])
-    const time=pick(vocabulary.filter(word=>word.categories.includes('Time')&&pastTimeWords.has(word.japanese)),421)
-    const subject=pick(humans,422)
+    const time=pick(vocabulary.filter(word=>word.categories.includes('Time')&&pastTimeWords.has(word.japanese)),421,'time')
+    const subject=pick(humans,422,'subject')
     if (!time||!subject) return null
     const useNi=!noParticleTimes.has(time.japanese)
     const subjectEnglish=englishPhrase(subject,'subject')
@@ -2003,9 +2078,9 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
   if (patternId==='n4-13') {
     const activityVerb=pickDirectVerb(431)
     if (!activityVerb) return null
-    const activity=fillVerbSlots(activityVerb,vocabulary,seed,432)
+    const activity=fillVerbSlots(activityVerb,vocabulary,seed,432,options)
     const destinations=places.filter(word=>[...tagSet(word)].some(tag=>['school','university','library','office','store','park','station','home','house'].includes(tag)))
-    const destination=pick(destinations,433)
+    const destination=pick(destinations,433,'destination')
     if (!activity||!destination) return null
     const selectedObject=activity.filled.object!
     const subject=activity.filled.subject!
@@ -2026,7 +2101,7 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
       {id:'shop',stem:'買い物し',reading:'かいものし',dictionary:'買い物する',english:'do some shopping',placeTags:['store','shop','shopping']},
     ]
     const purpose=seededPick(purposes,seed,441)
-    const destination=pick(places.filter(word=>[...tagSet(word)].some(tag=>purpose.placeTags.includes(tag))),442)
+    const destination=pick(places.filter(word=>[...tagSet(word)].some(tag=>purpose.placeTags.includes(tag))),442,'destination')
     if (!destination) return null
     const purposeSurface=`${purpose.stem}に行きます`,purposeReading=`${purpose.reading}にいきます`
     const furigana=[wordPart(destination,'destination'),literalPart('へ','え'),literalPart(purposeSurface,purposeReading,'purposeVerb')]
@@ -2034,8 +2109,8 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
   }
   if (patternId==='n4-15') {
     const pluralBenefactors=new Set(['人々','我々','私たち','両親','家族'])
-    const benefactor=pick(humans.filter(word=>!pluralBenefactors.has(word.japanese)&&![...tagSet(word)].some(tag=>['speaker','first-person','second-person','pronoun'].includes(tag))),451)
-    const object=pick(exact(['本','記事','新聞','辞書','小説']),452)
+    const benefactor=pick(humans.filter(word=>!pluralBenefactors.has(word.japanese)&&![...tagSet(word)].some(tag=>['speaker','first-person','second-person','pronoun'].includes(tag))),451,'subject')
+    const object=pick(exact(['本','記事','新聞','辞書','小説']),452,'object')
     if (!benefactor||!object) return null
     const subjectEnglish=englishPhrase(benefactor,'subject')
     const lends=subjectUsesBaseVerb(subjectEnglish)?'lend':'lends'
@@ -2044,7 +2119,7 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
   }
   if (patternId==='n4-16') {
     const helpers=humans.filter(word=>[...tagSet(word)].some(tag=>['teacher','parent','friend','student','classmate'].includes(tag)))
-    const helper=pick(helpers,461),object=pick(exact(['日本語','英語','中国語','外国語']),462)
+    const helper=pick(helpers,461,'helper'),object=pick(exact(['日本語','英語','中国語','外国語']),462,'object')
     if (!helper||!object) return null
     const furigana=[wordPart(helper,'helper'),literalPart('に'),wordPart(object,'object'),literalPart('を'),literalPart('教えてもらいます','おしえてもらいます','verb')]
     const languageEnglish={日本語:'Japanese',英語:'English',中国語:'Chinese',外国語:'a foreign language'}[object.japanese]??primaryEnglishGloss(object.preferredTranslation||object.english)
@@ -2053,7 +2128,7 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
   }
   if (patternId==='n4-17') {
     const firstPersonRecipients=new Set(['私','俺','我々'])
-    const subject=pick(exact(['私','俺']),471),recipient=pick(humans.filter(word=>word.id!==subject?.id&&!firstPersonRecipients.has(word.japanese)),472),object=pick(exact(['本','記事','新聞','辞書','小説']),473)
+    const subject=pick(exact(['私','俺']),471,'subject'),recipient=pick(humans.filter(word=>word.id!==subject?.id&&!firstPersonRecipients.has(word.japanese)),472,'recipient'),object=pick(exact(['本','記事','新聞','辞書','小説']),473,'object')
     if (!subject||!recipient||!object) return null
     const subjectEnglish=englishPhrase(subject,'subject'),recipientEnglish=contextualSlotEnglish('companion',recipient,{subject}),lends=subjectUsesBaseVerb(subjectEnglish)?'lend':'lends'
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(recipient,'recipient'),literalPart('に'),wordPart(object,'object'),literalPart('を'),literalPart('貸してあげます','かしてあげます','verb')]
@@ -2080,7 +2155,7 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     return finish(furigana,pair.english,{}, {property1:grammarSlot('property-1',pair.one,pair.one,pair.oneReading,pair.oneEnglish,['shared-topic-property'],'i_adjective'),property2:grammarSlot('property-2',pair.two,pair.two.replace(/です$/,''),pair.twoReading,pair.twoEnglish,['shared-topic-property'],'na_adjective')},['Both properties describe the same implied topic.'])
   }
   if (patternId==='n4-20') {
-    const subject=pick(humans,501),object=pick(exact(['漢字','本','記事','新聞','小説','手紙']),502)
+    const subject=pick(humans,501,'subject'),object=pick(exact(['漢字','本','記事','新聞','小説','手紙']),502,'object')
     if (!subject||!object) return null
     const subjectEnglish=englishPhrase(subject,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('が'),literalPart('読めます','よめます','verb')]
@@ -2113,7 +2188,7 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
   }
   if (patternId==='n4-24' || patternId==='n4-25') {
     const verb=pickDirectVerb(541)
-    const result=verb ? fillVerbSlots(verb,vocabulary,seed,542) : null
+    const result=verb ? fillVerbSlots(verb,vocabulary,seed,542,options) : null
     if (!verb||!result) return null
     const subject=result.filled.subject!,object=result.filled.object!
     const subjectEnglish=englishPhrase(subject,'subject')
@@ -2142,7 +2217,7 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
   const vocabulary=editorWords()
   const humans=validHumanPool(vocabulary)
   const places=validPlacePool(vocabulary)
-  const pick=requiredWordPicker(seed,options.requiredWord)
+  const pick=requiredWordPicker(seed,options.requiredWord,options)
   const exact=(japanese: string[])=>vocabulary.filter(word=>japanese.includes(word.japanese)&&hasUsableMeaning(word))
   const wordPart=(word: WordRecord,slot: string)=>({text:word.japanese,reading:kanaReading(word.reading,word.japanese),slot})
   const literalPart=(text: string,reading=text,slot?: string)=>({text,reading,slot})
@@ -2159,17 +2234,17 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
   const languages=exact(['日本語','英語','中国語','外国語'])
 
   if (patternId==='n3-01') {
-    const subject=pick(firstPerson.length?firstPerson:humans,601)
+    const subject=pick(firstPerson.length?firstPerson:humans,601,'subject')
     if (!subject) return null
     const subjectEnglish=englishPhrase(subject,'subject'),make=subjectUsesBaseVerb(subjectEnglish)?'make':'makes'
     const habits: Array<{furigana: GeneratedPreviewSentence['furigana'];filled: Record<string,WordRecord>;extra: GeneratedPreviewSentence['slots'];english: string;rule: string}>=[]
-    const readingObject=pick(readable.filter(word=>word.japanese!=='辞書'),602)
+    const readingObject=pick(readable.filter(word=>word.japanese!=='辞書'),602,'object')
     if (readingObject) habits.push({
       furigana:[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('毎日','まいにち','time'),wordPart(readingObject,'object'),literalPart('を'),literalPart('読むようにします','よむようにします','verb')],
       filled:{subject,object:readingObject},extra:{time:grammarSlot('time-mainichi','毎日','毎日','まいにち','every day',['frequency','daily'],'noun'),verb:grammarSlot('verb-yomu-younisuru','読むようにします','読む','よむようにします','make a point of reading',['habit','youni-suru'])},
       english:`${capitalize(subjectEnglish)} ${make} a point of reading ${englishPhrase(readingObject,'object')} every day.`,rule:'Readable objects are paired with 読む.',
     })
-    const language=pick(languages,603)
+    const language=pick(languages,603,'object')
     if (language) habits.push({
       furigana:[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('毎日','まいにち','time'),wordPart(language,'object'),literalPart('を'),literalPart('勉強するようにします','べんきょうするようにします','verb')],
       filled:{subject,object:language},extra:{time:grammarSlot('time-mainichi-study','毎日','毎日','まいにち','every day',['frequency','daily'],'noun'),verb:grammarSlot('verb-benkyou-younisuru','勉強するようにします','勉強する','べんきょうするようにします','make a point of studying',['habit','learning','youni-suru'])},
@@ -2180,9 +2255,9 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
   }
 
   if (patternId==='n3-02') {
-    const subject=pick(firstPerson.length?firstPerson:humans,611)
+    const subject=pick(firstPerson.length?firstPerson:humans,611,'subject')
     const destinationPool=places.filter(word=>['日本','東京','大阪','学校','大学','図書館','公園','駅','病院'].includes(word.japanese))
-    const destination=pick(destinationPool,612)
+    const destination=pick(destinationPool,612,'destination')
     if (!subject||!destination) return null
     const subjectEnglish=englishPhrase(subject,'subject'),have=subjectUsesBaseVerb(subjectEnglish)?'have':'has'
     const destinationEnglish={学校:'school',大学:'university'}[destination.japanese]??englishPhrase(destination,'destination')
@@ -2193,7 +2268,7 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
 
   if (patternId==='n3-03') {
     const learnerSubjects=exact(['私','学生','生徒','子供','少年','少女','男の子','女の子']).filter(word=>word.categories.includes('Person'))
-    const subject=pick(learnerSubjects.length?learnerSubjects:humans,621),object=pick(readable.filter(word=>word.japanese!=='辞書'),622)
+    const subject=pick(learnerSubjects.length?learnerSubjects:humans,621,'subject'),object=pick(readable.filter(word=>word.japanese!=='辞書'),622,'object')
     if (!subject||!object) return null
     const subjectEnglish=englishPhrase(subject,'subject'),becomes=subjectUsesBaseVerb(subjectEnglish)?'become':'becomes'
     const abilityObjectEnglish={漢字:'kanji',本:'books',記事:'articles',新聞:'newspapers',小説:'novels',辞書:'dictionaries'}[object.japanese]??primaryEnglishGloss(object.preferredTranslation||object.english)
@@ -2202,7 +2277,7 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
   }
 
   if (patternId==='n3-04') {
-    const subject=pick(firstPerson.length?firstPerson:humans,631)
+    const subject=pick(firstPerson.length?firstPerson:humans,631,'subject')
     if (!subject) return null
     type RegretAction={object: WordRecord;surface: string;reading: string;dictionary: string;english: string;englishVerb: string;tags: string[]}
     const actions: RegretAction[]=[]
@@ -2221,7 +2296,7 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
   }
 
   if (patternId==='n3-05') {
-    const subject=pick(firstPerson.length?firstPerson:humans,641)
+    const subject=pick(firstPerson.length?firstPerson:humans,641,'subject')
     if (!subject) return null
     type Preparation={object: WordRecord;surface: string;reading: string;dictionary: string;english: string;englishVerb: string;objectEnglish?: string}
     const preparations: Preparation[]=[]
@@ -2242,9 +2317,9 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
   if (patternId==='n3-06') {
     type Conditional={furigana: GeneratedPreviewSentence['furigana'];filled: Record<string,WordRecord>;english: string;condition: string;conditionReading: string;result: string;resultReading: string;rule: string}
     const variants: Conditional[]=[]
-    const rain=pick(exact(['雨']),651),park=pick(exact(['公園']),652)
+    const rain=pick(exact(['雨']),651,'weather'),park=pick(exact(['公園']),652,'destination')
     if (rain&&park) variants.push({furigana:[wordPart(rain,'weather'),literalPart('が'),literalPart('降れば','ふれば','condition'),wordPart(park,'destination'),literalPart('へ','え'),literalPart('行きません','いきません','result')],filled:{weather:rain,destination:park},english:'If it rains, I will not go to the park.',condition:'雨が降れば',conditionReading:'あめがふれば',result:'公園へ行きません',resultReading:'こうえんへいきません',rule:'Rain logically changes the outdoor plan.'})
-    const time=pick(exact(['時間']),653),readingObject=pick(exact(['本','新聞','小説','記事']),654)
+    const time=pick(exact(['時間']),653,'time'),readingObject=pick(exact(['本','新聞','小説','記事']),654,'object')
     if (time&&readingObject) variants.push({furigana:[wordPart(time,'time'),literalPart('が'),literalPart('あれば','あれば','condition'),wordPart(readingObject,'object'),literalPart('を'),literalPart('読みます','よみます','result')],filled:{time,object:readingObject},english:`If I have time, I will read ${englishPhrase(readingObject,'object')}.`,condition:'時間があれば',conditionReading:'じかんがあれば',result:`${readingObject.japanese}を読みます`,resultReading:`${kanaReading(readingObject.reading,readingObject.japanese)}をよみます`,rule:'The result is an activity that requires available time.'})
     const variant=pick(variants,655)
     if (!variant) return null
@@ -2254,9 +2329,9 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
   if (patternId==='n3-07') {
     type TaraConditional={furigana: GeneratedPreviewSentence['furigana'];filled: Record<string,WordRecord>;english: string;condition: string;conditionReading: string;result: string;resultReading: string;rule: string}
     const variants: TaraConditional[]=[]
-    const time=pick(exact(['時間']),661),readingObject=pick(exact(['本','新聞','小説','記事']),662)
+    const time=pick(exact(['時間']),661,'time'),readingObject=pick(exact(['本','新聞','小説','記事']),662,'object')
     if (time&&readingObject) variants.push({furigana:[wordPart(time,'time'),literalPart('が'),literalPart('あったら','あったら','condition'),wordPart(readingObject,'object'),literalPart('を'),literalPart('読みます','よみます','result')],filled:{time,object:readingObject},english:`If I have time, I will read ${englishPhrase(readingObject,'object')}.`,condition:'時間があったら',conditionReading:'じかんがあったら',result:`${readingObject.japanese}を読みます`,resultReading:`${kanaReading(readingObject.reading,readingObject.japanese)}をよみます`,rule:'The result depends on having enough time.'})
-    const rain=pick(exact(['雨']),663),umbrella=pick(exact(['傘']),664)
+    const rain=pick(exact(['雨']),663,'weather'),umbrella=pick(exact(['傘']),664,'object')
     if (rain&&umbrella) variants.push({furigana:[wordPart(rain,'weather'),literalPart('が'),literalPart('降ったら','ふったら','condition'),wordPart(umbrella,'object'),literalPart('を'),literalPart('使います','つかいます','result')],filled:{weather:rain,object:umbrella},english:'If it rains, I will use an umbrella.',condition:'雨が降ったら',conditionReading:'あめがふったら',result:'傘を使います',resultReading:'かさをつかいます',rule:'An umbrella is appropriate when it rains.'})
     const variant=pick(variants,665)
     if (!variant) return null
@@ -2266,9 +2341,9 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
   if (patternId==='n3-08') {
     type Contrast={furigana: GeneratedPreviewSentence['furigana'];filled: Record<string,WordRecord>;english: string;clause: string;clauseReading: string;result: string;resultReading: string;rule: string}
     const variants: Contrast[]=[]
-    const studyObject=pick(exact(['漢字','単語']),671)
+    const studyObject=pick(exact(['漢字','単語']),671,'object')
     if (studyObject) variants.push({furigana:[wordPart(studyObject,'object'),literalPart('を'),literalPart('勉強した','べんきょうした','clause'),literalPart('のに'),literalPart('忘れました','わすれました','result')],filled:{object:studyObject},english:`Although I studied ${{漢字:'kanji',単語:'the words'}[studyObject.japanese]??primaryEnglishGloss(studyObject.preferredTranslation||studyObject.english)}, I forgot them.`,clause:`${studyObject.japanese}を勉強した`,clauseReading:`${kanaReading(studyObject.reading,studyObject.japanese)}をべんきょうした`,result:'忘れました',resultReading:'わすれました',rule:'Forgetting contrasts naturally with having studied.'})
-    const umbrella=pick(exact(['傘']),672),rain=pick(exact(['雨']),673)
+    const umbrella=pick(exact(['傘']),672,'object'),rain=pick(exact(['雨']),673,'weather')
     if (umbrella&&rain) variants.push({furigana:[wordPart(umbrella,'object'),literalPart('を'),literalPart('持って行った','もっていった','clause'),literalPart('のに'),wordPart(rain,'weather'),literalPart('が'),literalPart('降りませんでした','ふりませんでした','result')],filled:{object:umbrella,weather:rain},english:'Although I took an umbrella, it did not rain.',clause:'傘を持って行った',clauseReading:'かさをもっていった',result:'雨が降りませんでした',resultReading:'あめがふりませんでした',rule:'The unused precaution creates a natural contrast.'})
     const variant=pick(variants,674)
     if (!variant) return null
@@ -2278,9 +2353,9 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
   if (patternId==='n3-09') {
     type Reason={furigana: GeneratedPreviewSentence['furigana'];filled: Record<string,WordRecord>;english: string;clause: string;clauseReading: string;result: string;resultReading: string;rule: string}
     const variants: Reason[]=[]
-    const rain=pick(exact(['雨']),681),home=pick(exact(['家']),682)
+    const rain=pick(exact(['雨']),681,'weather'),home=pick(exact(['家']),682,'location')
     if (rain&&home) variants.push({furigana:[wordPart(rain,'weather'),literalPart('が'),literalPart('降っている','ふっている','reason'),literalPart('ので'),wordPart(home,'location'),literalPart('に'),literalPart('います','います','result')],filled:{weather:rain,location:home},english:'Because it is raining, I stay home.',clause:'雨が降っている',clauseReading:'あめがふっている',result:'家にいます',resultReading:'いえにいます',rule:'Staying home is a reasonable result of rain.'})
-    const illness=pick(exact(['病気']),683),hospital=pick(exact(['病院']),684)
+    const illness=pick(exact(['病気']),683,'state'),hospital=pick(exact(['病院']),684,'destination')
     if (illness&&hospital) variants.push({furigana:[wordPart(illness,'state'),literalPart('な'),literalPart('ので'),wordPart(hospital,'destination'),literalPart('へ','え'),literalPart('行きます','いきます','result')],filled:{state:illness,destination:hospital},english:'Because I am sick, I go to the hospital.',clause:'病気な',clauseReading:'びょうきな',result:'病院へ行きます',resultReading:'びょういんへいきます',rule:'Illness reasonably motivates a hospital visit.'})
     const variant=pick(variants,685)
     if (!variant) return null
@@ -2630,12 +2705,16 @@ function advancedPatternLevel(patternId: string): 'N4' | 'N3' | 'N2' | 'N1' {
   return 'N4'
 }
 
-function generateAdvancedCategorySentence(seed: number, patternId: string): GeneratedPreviewSentence | null {
+function generateAdvancedCategorySentence(seed: number, patternId: string, options: CategorySentenceOptions = {}): GeneratedPreviewSentence | null {
   if (!advancedPatternIds.has(patternId)) return null
   const level = advancedPatternLevel(patternId)
   const vocabulary = editorWords()
   const humans = validHumanPool(vocabulary)
-  const pick = <T>(pool: T[], salt: number) => pool.length ? seededPick(pool, seed, salt) : null
+  // A pick tagged with a slot name can be re-seeded on its own, which is what
+  // lets the hero rotator vary one word and hold the rest of the sentence
+  // still. Untagged picks always follow the sentence seed.
+  const pick = <T>(pool: T[], salt: number, slot?: string) =>
+    pool.length ? seededPick(pool, slot ? options.slotSeeds?.[slot] ?? seed : seed, salt) : null
   const exact = (japanese: string[]) => vocabulary.filter(word => japanese.includes(word.japanese) && hasUsableMeaning(word))
   const wordPart = (word: WordRecord, slot: string) => ({ text: word.japanese, reading: kanaReading(word.reading, word.japanese), slot })
   const literalPart = (text: string, reading = text, slot?: string) => ({ text, reading, slot })
@@ -2712,7 +2791,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
       { surface:'義務なので、', reading:'ぎむなので、', english:'Since it is a duty', compatibleVerbIds:['iku-e'] },
     ], 813)
     const verb = reason ? pick(compulsionVerbPool.filter(candidate => reason.compatibleVerbIds.includes(candidate.id)), 811) : null
-    const subject = pick(humans, 812)
+    const subject = pick(humans, 812, 'subject')
     if (!verb || !subject || !reason) return null
     const aStem = n4VerbForms(verb).aStem
     const subjectEnglish = englishPhrase(subject,'subject')
@@ -2801,8 +2880,8 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n3-13') {
-    const verb = pick(verbs.filter(candidate=>['kau-basic','tsukuru-basic','kaku-basic','taberu-basic','nomu-basic','yomu-basic','miru-basic'].includes(candidate.id)), 851)
-    const result = verb ? fillVerbSlots(verb,vocabulary,seed,852) : null
+    const verb = pick(verbs.filter(candidate=>['kau-basic','tsukuru-basic','kaku-basic','taberu-basic','nomu-basic','yomu-basic','miru-basic'].includes(candidate.id)), 851, 'verb')
+    const result = verb ? fillVerbSlots(verb,vocabulary,seed,852,options) : null
     if (!verb || !result) return null
     const ta = n4VerbForms(verb).ta
     const subject=result.filled.subject!,object=result.filled.object!
@@ -2812,20 +2891,20 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n2-10') {
-    const verb = pick(smallVerbPool, 861)
-    const subject = pick(humans, 862)
+    const verb = pick(smallVerbPool, 861, 'verb')
+    const subject = pick(humans, 862, 'subject')
     const aspect = pick(['about-to','ongoing','just-did'] as const, 863)
     if (!verb || !subject || !aspect) return null
     const forms = n4VerbForms(verb)
     const subjectEnglish = englishPhrase(subject,'subject')
     if (aspect === 'about-to') {
       const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('今から','いまから','time'),{text:verb.japanese,reading:verb.reading,slot:'verb'},literalPart('ところです。')]
-      const beAboutTo = subjectEnglish==='I'?'am':subjectUsesBaseVerb(subjectEnglish)?'are':'is'
+      const beAboutTo = copulaFor(subjectEnglish)
       return finish(furigana,`${capitalize(subjectEnglish)} ${beAboutTo} just about to ${verb.english}.`,{subject},{},'ところだ with a dictionary-form verb means about to do something.')
     }
     if (aspect === 'ongoing') {
       const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('今','いま','time'),{text:forms.te.japanese,reading:forms.te.reading,slot:'verb'},literalPart('いるところです。')]
-      const beOngoing = subjectEnglish==='I'?'am':subjectUsesBaseVerb(subjectEnglish)?'are':'is'
+      const beOngoing = copulaFor(subjectEnglish)
       return finish(furigana,`${capitalize(subjectEnglish)} ${beOngoing} in the middle of ${presentParticiple(verb.english)}.`,{subject},{},'ところだ with ている means currently in the middle of doing something.')
     }
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('今','いま','time'),{text:forms.ta.japanese,reading:forms.ta.reading,slot:'verb'},literalPart('ところです。')]
@@ -2843,8 +2922,8 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     const subjectPool = scene?.result.includes('家事')
       ? humans.filter(word => ![...tagSet(word)].some(tag=>nonHouseholdSubjectTags.has(tag)))
       : humans
-    const subject = pick(subjectPool.length ? subjectPool : humans, 871)
-    const companion = pick(humans.filter(word => word.id !== subject?.id), 872)
+    const subject = pick(subjectPool.length ? subjectPool : humans, 871, 'subject')
+    const companion = pick(humans.filter(word => word.id !== subject?.id), 872, 'companion')
     if (!subject || !companion || !scene) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const companionEnglish = englishPhrase(companion,'subject')
@@ -2860,7 +2939,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     // a collective noun like 家族/両親 isn't an individual with one life stage
     // ("the family is young" describes how recently it was formed, not youth).
     const genericSubjects = humans.filter(word => !tagSet(word).has('occupation') && !['家族','両親','人々'].includes(word.japanese))
-    const subject = pick(genericSubjects.length ? genericSubjects : humans, 881)
+    const subject = pick(genericSubjects.length ? genericSubjects : humans, 881, 'subject')
     const scene = pick([
       { condition:'若い', conditionReading:'わかい', result:'たくさん勉強します', resultReading:'たくさんべんきょうします', english:'young', resultBase:'study a lot', resultThird:'studies a lot' },
       { condition:'元気な', conditionReading:'げんきな', result:'旅行します', resultReading:'りょこうします', english:'healthy', resultBase:'travel', resultThird:'travels' },
@@ -2885,7 +2964,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     const pair = pick(pairPool, 891)
     const verb = pair ? verbs.find(candidate => candidate.id === pair.verbId) : null
     const object = pair ? pick(pair.objects, 892) : null
-    const subject = pick(humans, 893)
+    const subject = pick(humans, 893, 'subject')
     if (!verb || !object || !subject) return null
     const masuStem = n4VerbForms(verb).masuStem
     const subjectEnglish = englishPhrase(subject,'subject')
@@ -2901,7 +2980,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     // A customer or a lost child becoming generally "skilled" gives neither a
     // natural learner nor a skill. Keep this practice-result frame focused on
     // ordinary learners.
-    const subject = pick(humans.filter(word=>['子供','学生','生徒','友人'].includes(word.japanese)), 901)
+    const subject = pick(humans.filter(word=>['子供','学生','生徒','友人'].includes(word.japanese)), 901, 'subject')
     const scene = pick([
       { cause:'先生', causeReading:'せんせい', causeEnglish:'the teacher', result:'合格しました', resultReading:'ごうかくしました', resultEnglish:'passed' },
       { cause:'努力', causeReading:'どりょく', causeEnglish:'the effort', result:'成功しました', resultReading:'せいこうしました', resultEnglish:'succeeded' },
@@ -2914,7 +2993,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n3-17') {
-    const subject = pick(humans, 911)
+    const subject = pick(humans, 911, 'subject')
     const scene = pick([
       { cause:'雨', causeReading:'あめ', causeEnglish:'the rain', result:'遅れました', resultReading:'おくれました', resultEnglish:'was late' },
       { cause:'渋滞', causeReading:'じゅうたい', causeEnglish:'the traffic jam', result:'遅刻しました', resultReading:'ちこくしました', resultEnglish:'arrived late' },
@@ -2927,7 +3006,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n3-18') {
-    const subject = pick(humans, 921)
+    const subject = pick(humans, 921, 'subject')
     const scene = pick([
       { clause:'靴を履いた', clauseReading:'くつをはいた', result:'部屋に入りました', resultReading:'へやにはいりました', english:'entered the room with shoes still on' },
       { clause:'窓を開けた', clauseReading:'まどをあけた', result:'出かけました', resultReading:'でかけました', english:'went out leaving the window open' },
@@ -2942,7 +3021,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   if (patternId === 'n3-19') {
     const readable = exact(['漢字','本','新聞','小説','記事'])
     const readingTarget = pick(readable, 931)
-    const subject = pick(humans, 932)
+    const subject = pick(humans, 932, 'subject')
     const secondary = pick([
       { surface:'メモを取ります', reading:'めもをとります', base:'take notes', third:'takes notes' },
       { surface:'お茶を飲みます', reading:'おちゃをのみます', base:'drink tea', third:'drinks tea' },
@@ -2955,8 +3034,8 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n2-11') {
-    const verb = pick(smallVerbPool, 941)
-    const subject = pick(humans, 942)
+    const verb = pick(smallVerbPool, 941, 'verb')
+    const subject = pick(humans, 942, 'subject')
     if (!verb || !subject) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),{text:verb.japanese,reading:verb.reading,slot:'verb'},literalPart('べきです。')]
@@ -3003,7 +3082,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n2-13') {
-    const subject = pick(humans, 981)
+    const subject = pick(humans, 981, 'subject')
     const readingTarget = pick(vocabulary.filter(word => categoryMatch(word,['Object','Book','Document','Media']) && matchingTags(word,readableTags).length>0), 982)
     if (!subject || !readingTarget) return null
     const subjectEnglish = englishPhrase(subject,'subject')
@@ -3024,7 +3103,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
 
   if (patternId === 'n2-15') {
     const languageEnglish: Record<string,string> = { 日本語:'Japanese', 英語:'English', 中国語:'Chinese', 外国語:'a foreign language' }
-    const subject = pick(humans, 1001)
+    const subject = pick(humans, 1001, 'subject')
     const languages = exact(['日本語','英語','中国語','外国語'])
     const first = pick(languages, 1002)
     const second = pick(languages.filter(word => word.id !== first?.id), 1003)
@@ -3072,7 +3151,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n2-04') {
-    const verb = pick(smallVerbPool, 1041)
+    const verb = pick(smallVerbPool, 1041, 'verb')
     if (!verb) return null
     const furigana=[{text:verb.japanese,reading:verb.reading,slot:'verb'},literalPart('ことはありません。')]
     return finish(furigana,`There is no need to ${verb.english}.`,{},{verb:grammarSlot(`verb-${verb.id}-kotohanai`,`${verb.japanese}ことはありません`,verb.japanese,`${verb.reading}ことはありません`,`no need to ${verb.english}`,['no-need','koto-ha-nai'])},'ことはない attaches to the dictionary form and reassures that something is unnecessary.')
@@ -3167,12 +3246,12 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n2-06') {
-    const verb = pick(smallVerbPool, 1131)
-    const subject = pick(humans, 1132)
+    const verb = pick(smallVerbPool, 1131, 'verb')
+    const subject = pick(humans, 1132, 'subject')
     if (!verb || !subject) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),{text:verb.japanese,reading:verb.reading,slot:'verb'},literalPart('はずです。')]
-    const copula = subjectEnglish === 'I' ? 'am' : subjectUsesBaseVerb(subjectEnglish) ? 'are' : 'is'
+    const copula = copulaFor(subjectEnglish)
     return finish(furigana,`${capitalize(subjectEnglish)} ${copula} supposed to ${verb.english}.`,{subject},{verb:grammarSlot(`verb-${verb.id}-hazuda`,`${verb.japanese}はずです`,verb.japanese,`${verb.reading}はずです`,`supposed to ${verb.english}`,['expectation','hazuda'])},'はずだ expresses a confident expectation based on what the speaker already knows.')
   }
 
@@ -3200,8 +3279,8 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n2-16') {
-    const verb = pick(smallVerbPool, 1161)
-    const subject = pick(humans, 1162)
+    const verb = pick(smallVerbPool, 1161, 'verb')
+    const subject = pick(humans, 1162, 'subject')
     if (!verb || !subject) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),{text:verb.japanese,reading:verb.reading,slot:'verb'},literalPart('べきではありません。')]
@@ -3216,7 +3295,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n2-18') {
-    const verb = pick(smallVerbPool, 1181)
+    const verb = pick(smallVerbPool, 1181, 'verb')
     if (!verb) return null
     const masuStem = n4VerbForms(verb).masuStem
     const furigana=[{text:masuStem.japanese,reading:masuStem.reading,slot:'verb'},literalPart('かねます。')]
@@ -3282,8 +3361,8 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n3-25') {
-    const subject = pick(humans, 1241)
-    const other = pick(humans.filter(word => word.id !== subject?.id), 1242)
+    const subject = pick(humans, 1241, 'subject')
+    const other = pick(humans.filter(word => word.id !== subject?.id), 1242, 'object')
     // かっこいい is excluded: いい/良い negate irregularly (よくありません, not
     // かっこいくありません), unlike every other い-adjective here.
     // 好き/嫌い are excluded too: they are experiencer adjectives ("X likes/dislikes
@@ -3306,11 +3385,11 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     // full comparison rather than a dangling noun phrase.
     const otherEnglish = englishPhrase(other,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(other,'object'),literalPart('ほど'),literalPart(trait.surface,trait.reading,'predicate')]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${subjectUsesBaseVerb(subjectEnglish)?'are':'is'} not as ${adjective.english} as ${otherEnglish} ${subjectUsesBaseVerb(otherEnglish)?'are':'is'}.`,{subject,object:other},{},'ほど with a negative predicate sets an upper bound: not reaching that level.')
+    return finish(furigana,`${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} not as ${adjective.english} as ${otherEnglish} ${copulaFor(otherEnglish)}.`,{subject,object:other},{},'ほど with a negative predicate sets an upper bound: not reaching that level.')
   }
 
   if (patternId === 'n3-26') {
-    const subject = pick(humans, 1251)
+    const subject = pick(humans, 1251, 'subject')
     const drink = pick(vocabulary.filter(word => categoryMatch(word,['Food','Drink']) && matchingTags(word,drinkableTags).length>0), 1252)
     if (!subject || !drink) return null
     const subjectEnglish = englishPhrase(subject,'subject')
@@ -3364,7 +3443,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
       { surface:'みかん', reading:'みかん', english:'oranges' }, { surface:'ぶどう', reading:'ぶどう', english:'grapes' },
       { surface:'いちご', reading:'いちご', english:'strawberries' },
     ]
-    const subject = pick(humans, 1293)
+    const subject = pick(humans, 1293, 'subject')
     if (!subject) return null
     const firstIdx = Math.abs(seed + 1291) % fruits.length
     const first = fruits[firstIdx]!
@@ -3431,7 +3510,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
       if (scene?.trait === '子供の' && ['子供','子ども'].includes(word.japanese)) return false
       return scene?.trait !== '子供の' || childWords.has(word.japanese)
     })
-    const subject = pick(eligibleSubjects, 1321)
+    const subject = pick(eligibleSubjects, 1321, 'subject')
     if (!subject || !scene) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.trait,scene.traitReading,'reason'),literalPart('くせに、'),literalPart(scene.result,scene.resultReading,'result')]
@@ -3455,8 +3534,8 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
     // "was" only agrees with third-person singular, so both sides of this
     // sentence are drawn from a pool restricted to that (matches the n2-20 くせに fix below).
     const thirdPersonSingular = humans.filter(word => !subjectUsesBaseVerb(englishPhrase(word,'subject')))
-    const subject = pick(thirdPersonSingular, 1341)
-    const companion = pick(thirdPersonSingular.filter(word => word.id !== subject?.id), 1342)
+    const subject = pick(thirdPersonSingular, 1341, 'subject')
+    const companion = pick(thirdPersonSingular.filter(word => word.id !== subject?.id), 1342, 'companion')
     const scene = pick([
       { activity:'寝て', activityReading:'ねて', result:'家事をしていました', resultReading:'かじをしていました', companionVerb:'slept', resultEnglish:'was doing housework' },
       { activity:'話して', activityReading:'はなして', result:'ずっと聞いていました', resultReading:'ずっときいていました', companionVerb:'was talking', resultEnglish:'listened' },
@@ -3470,8 +3549,8 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n3-33') {
-    const verb = pick(verbs.filter(candidate=>['taberu-basic','nomu-basic','yomu-basic','miru-basic'].includes(candidate.id)), 1351)
-    const result = verb ? fillVerbSlots(verb,vocabulary,seed,1352) : null
+    const verb = pick(verbs.filter(candidate=>['taberu-basic','nomu-basic','yomu-basic','miru-basic'].includes(candidate.id)), 1351, 'verb')
+    const result = verb ? fillVerbSlots(verb,vocabulary,seed,1352,options) : null
     if (!verb || !result) return null
     const aStem = n4VerbForms(verb).aStem
     const subject=result.filled.subject!,object=result.filled.object!
@@ -3495,7 +3574,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n3-35') {
-    const subject = pick(humans, 1371)
+    const subject = pick(humans, 1371, 'subject')
     const pair = pick([
       { object: pick(exact(['ケーキ','パン','肉']), 1372), verb:'食べて', verbReading:'たべて', base:'eat', third:'eats' },
       { object: pick(exact(['お茶','コーヒー']), 1373), verb:'飲んで', verbReading:'のんで', base:'drink', third:'drinks' },
@@ -3519,7 +3598,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n3-37') {
-    const subject = pick(humans, 1391)
+    const subject = pick(humans, 1391, 'subject')
     const quote = pick([
       { surface:'頑張って', reading:'がんばって', english:'"Do your best"' },
       { surface:'ありがとう', reading:'ありがとう', english:'"Thank you"' },
@@ -3546,7 +3625,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n3-39') {
-    const verb = pick(smallVerbPool, 1411)
+    const verb = pick(smallVerbPool, 1411, 'verb')
     if (!verb) return null
     const aStem = n4VerbForms(verb).aStem
     const furigana=[{text:aStem.japanese,reading:aStem.reading,slot:'verb'},literalPart('ないでください。')]
@@ -3697,7 +3776,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string): Gene
   }
 
   if (patternId === 'n2-35') {
-    const subject = pick(humans, 1551)
+    const subject = pick(humans, 1551, 'subject')
     const object = pick(exact(['名前','漢字','日本語','英語','住所','電話番号','答え','理由','意味']), 1552)
     if (!subject || !object) return null
     const subjectEnglish = englishPhrase(subject,'subject')
@@ -3749,7 +3828,14 @@ function alignN4CrossSlotContext(
   vocabulary: WordRecord[],
   result: { filled: Record<string,WordRecord>; slotTagMatches: Record<string,string[]> },
   seed: number,
+  options: CategorySentenceOptions = {},
 ) {
+  const withoutAvoided = (pool: WordRecord[], slot: string) => {
+    const avoid = options.avoidWords?.[slot]
+    if (!avoid) return pool
+    const filtered = pool.filter(word => word.japanese !== avoid)
+    return filtered.length ? filtered : pool
+  }
   if (patternId === 'n4-05' && verb.id === 'okiru-time') {
     const timeRule=verb.slots.time
     const candidates=vocabulary.filter(word=>{
@@ -3759,8 +3845,9 @@ function alignN4CrossSlotContext(
         && !niIncompatibleTimeWords.has(word.japanese)
         && ![...tags].some(tag=>niIncompatibleTimeTags.has(tag))
     })
-    if (!candidates.length) return false
-    result.filled.time=seededPick(candidates,seed,95)
+    const timePool=withoutAvoided(candidates,'time')
+    if (!timePool.length) return false
+    result.filled.time=seededPick(timePool,options.slotSeeds?.time??seed,95)
     result.slotTagMatches.time=matchingTags(result.filled.time,timeRule.tags)
   }
   if (patternId === 'n4-06' && verb.id === 'taberu-location') {
@@ -3769,8 +3856,9 @@ function alignN4CrossSlotContext(
       const tags=tagSet(word)
       return categoryMatch(word,locationRule.categories) && [...tags].some(tag=>permissionEatingLocationTags.has(tag))
     })
-    if (!candidates.length) return false
-    result.filled.location=seededPick(candidates,seed,96)
+    const locationPool=withoutAvoided(candidates,'location')
+    if (!locationPool.length) return false
+    result.filled.location=seededPick(locationPool,options.slotSeeds?.location??seed,96)
     result.slotTagMatches.location=matchingTags(result.filled.location,locationRule.tags)
   }
   if (patternId !== 'n4-10' || !verb.id.startsWith('iku-') || !result.filled.destination) return true
@@ -3789,17 +3877,23 @@ function alignN4CrossSlotContext(
       && [...tags].some(tag=>allowedSubjectTags.has(tag))
       && !politeSubjectIncompatibleWords.has(word.japanese)
   })
-  if (!candidates.length) return false
-  result.filled.subject=seededPick(candidates,seed,97)
+  const subjectPool=withoutAvoided(candidates,'subject')
+  if (!subjectPool.length) return false
+  result.filled.subject=seededPick(subjectPool,options.slotSeeds?.subject??seed,97)
   result.slotTagMatches.subject=matchingTags(result.filled.subject,subjectRule.tags)
   return true
 }
 
-function generateN4Nagara(seed: number,vocabulary: WordRecord[]): GeneratedPreviewSentence | null {
+function generateN4Nagara(seed: number,vocabulary: WordRecord[],options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   const activityVerb=seededPick(verbs.filter(verb=>['taberu-basic','nomu-basic'].includes(verb.id)),seed,71)
   const mainVerb=seededPick(verbs.filter(verb=>['yomu-basic','miru-basic'].includes(verb.id)),seed,72)
-  const mainResult=fillVerbSlots(mainVerb,vocabulary,seed,73)
-  const activityResult=fillVerbSlots(activityVerb,vocabulary,seed,83)
+  // 'subject' is shared between both verb fills, so its slot-seed/avoid-word
+  // request has to reach both calls; 'object' and 'activityObject' are each
+  // owned by one call, so only that one needs the raw options passed through.
+  const mainOptions={...options,slotSeeds:{subject:options.slotSeeds?.subject,object:options.slotSeeds?.object},avoidWords:{subject:options.avoidWords?.subject,object:options.avoidWords?.object}}
+  const activityOptions={...options,slotSeeds:{subject:options.slotSeeds?.subject,object:options.slotSeeds?.activityObject},avoidWords:{subject:options.avoidWords?.subject,object:options.avoidWords?.activityObject}}
+  const mainResult=fillVerbSlots(mainVerb,vocabulary,seed,73,mainOptions)
+  const activityResult=fillVerbSlots(activityVerb,vocabulary,seed,83,activityOptions)
   if (!mainResult || !activityResult) return null
   activityResult.filled.subject=mainResult.filled.subject!
   const activityForm=appendForm(n4VerbForms(activityVerb).masuStem,'ながら')
@@ -3830,7 +3924,7 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
   const patternIds=Object.keys(n4PatternMeanings)
   const patternId=requestedPatternId && patternIds.includes(requestedPatternId) ? requestedPatternId : seededPick(patternIds,seed,61)
   const vocabulary=editorWords()
-  if (patternId === 'n4-09') return generateN4Nagara(seed,vocabulary)
+  if (patternId === 'n4-09') return generateN4Nagara(seed,vocabulary,options)
   // いる/ある (existence) fundamentally don't take these aspectual templates —
   // an inanimate "subject" (really the thing located) has no desire (～たい),
   // and none of ～ている/～た/～なければならない/～てもいい/... read coherently
@@ -3843,7 +3937,11 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
     // obligation patterns where it has a natural interpretation.
     'n4-07':new Set(['okiru-time']),
     'n4-03':new Set(['kirau-basic']),
-    'n4-08':new Set(['okiru-time','neru-time','nemuru-time','yasumu-time','shiru-basic','kirau-basic']),
+    // たことがある reports a notable experience the listener might not expect.
+    // Everyone has been tired, laughed, cried, and got angry, so claiming any of
+    // them as an experience reads as a joke rather than a sentence.
+    'n4-08':new Set(['okiru-time','neru-time','nemuru-time','yasumu-time','shiru-basic','kirau-basic',
+      'tsukareru-basic','warau-basic','naku-basic','okoru-basic','odoroku-basic','neru-basic','tatsu-basic']),
     // 出発する/驚く are instantaneous — you don't gradually "begin departing" or
     // "begin being surprised" the way you begin an ongoing activity like eating
     // or reading. 断る needs an object (a request, invitation...) that this
@@ -3861,7 +3959,7 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
     // repeated-attempt sense in real Japanese ("開け始めた", "怒り始めた",
     // "知り始めた" are all attested, unlike "出発し始めた").
     'n4-10':new Set([
-      'okiru-time','tatsu-basic','tatsu-location','shuppatsu-suru','odoroku-basic','kotowaru-basic',
+      'okiru-time','tatsu-basic','shuppatsu-suru','odoroku-basic','kotowaru-basic',
       'mitsukeru-basic','wasureru-basic','nakunaru-basic','seikou-suru','touchaku-suru','shippai-suru','kimeru-basic',
       'umareru-basic','wakareru-companion','kesu-basic','tsukeru-basic','deau-companion','kandou-suru',
     ]),
@@ -3877,11 +3975,19 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
   if (excluded) verbPool=verbPool.filter(verb=>!excluded.has(verb.id))
   if (options.verbId) verbPool=verbPool.filter(verb=>verb.id===options.verbId)
   if (!verbPool.length) return null
-  const verb=seededPick(verbPool,seed,62)
+  // The verb is chosen here, outside fillVerbSlots, so a 'verb' slot-seed or
+  // avoid-word request has to be applied at this pick too — same fix as the
+  // base N5 dispatcher above.
+  let verbSelectPool=verbPool
+  if (options.avoidWords?.verb) {
+    const avoided=verbSelectPool.filter(candidate=>candidate.japanese!==options.avoidWords!.verb)
+    if (avoided.length) verbSelectPool=avoided
+  }
+  const verb=seededPick(verbSelectPool,options.slotSeeds?.verb??seed,62)
   const result=fillVerbSlots(verb,vocabulary,seed,63,options)
   const form=n4SurfaceForm(patternId,verb)
   if (!result || !form) return null
-  if (!alignN4CrossSlotContext(patternId,verb,vocabulary,result,seed)) return null
+  if (!alignN4CrossSlotContext(patternId,verb,vocabulary,result,seed,options)) return null
   const objectlessEatingProhibition=patternId==='n4-07' && verb.id==='taberu-location'
   if (objectlessEatingProhibition) {
     delete result.filled.object
@@ -3912,7 +4018,7 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
 }
 
 export function generateCategorySentence(seed: number, requestedPatternId?: string, level: 'N5'|'N4'|'N3'|'N2'|'N1'='N5',options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
-  if (requestedPatternId && advancedPatternIds.has(requestedPatternId)) return generateAdvancedCategorySentence(seed,requestedPatternId)
+  if (requestedPatternId && advancedPatternIds.has(requestedPatternId)) return generateAdvancedCategorySentence(seed,requestedPatternId,options)
   if (level==='N2'||level==='N1') return null
   if (level==='N3'||requestedPatternId?.startsWith('n3-')) return requestedPatternId?enforceRequiredWord(generateN3CategorySentence(seed,requestedPatternId,options),options):null
   if (requestedPatternId && additionalN4PatternIds.has(requestedPatternId)) return enforceRequiredWord(additionalN4Sentence(seed,requestedPatternId,options),options)
@@ -3928,23 +4034,61 @@ export function generateCategorySentence(seed: number, requestedPatternId?: stri
   if (requiredWordIsVerb) verbPool = verbPool.filter(verb => verb.japanese === options.requiredWord)
   const slotOptions = requiredWordIsVerb ? { ...options, requiredWord: undefined } : options
   if (!verbPool.length) return null
+  // The verb itself is chosen here, outside fillVerbSlots, so a slot-seed or
+  // avoid-word request for 'verb' has to be applied at this pick too — without
+  // it, re-seeding options.slotSeeds.verb has no effect and rotation can never
+  // change the verb, only the words filling its slots.
+  let verbSelectPool = verbPool
+  if (options.avoidWords?.verb) {
+    const avoided = verbSelectPool.filter(candidate => candidate.japanese !== options.avoidWords!.verb)
+    if (avoided.length) verbSelectPool = avoided
+  }
   const verb = options.verbId
     ? verbPool.find(candidate => candidate.id === options.verbId)
-    : seededPick(verbPool, seed, 1)
+    : seededPick(verbSelectPool, options.slotSeeds?.verb ?? seed, 1)
   if (!verb) return null
   const vocabulary = editorWords()
   const result = fillVerbSlots(verb,vocabulary,seed,2,slotOptions)
   if (!result) return null
   const { filled,slotTagMatches } = result
-  const polite = conjugate(verb)
+  // The ending toggles affirmative/negative on the SAME verb — subject, object,
+  // and verb choice stay identical, so this always yields a genuine one-segment
+  // change (です ⟷ ではありません is the copula's version of this same swap).
+  // An explicit 'ending' request always wins; otherwise default to affirmative
+  // so every caller that doesn't ask for this stays byte-identical to before.
+  const endingVariants = [conjugate(verb), appendForm(n4VerbForms(verb).masuStem,'ません')] as const
+  let endingIndex = options.slotSeeds?.ending !== undefined ? Math.abs(options.slotSeeds.ending) % 2 : 0
+  if (options.avoidWords?.ending && endingVariants[endingIndex]!.japanese === options.avoidWords.ending) {
+    endingIndex = (endingIndex + 1) % 2
+  }
+  const polite = endingVariants[endingIndex]!
+  const isNegativeEnding = endingIndex === 1
   const furigana = baseFurigana(verb,filled,polite)
   if (!furigana) return null
   const japanese=furigana.map(part=>part.text).join('')
   const reading=furigana.map(part=>part.reading || part.text).join('')
   const slots: GeneratedPreviewSentence['slots'] = Object.fromEntries(Object.entries(filled).map(([name,word]) => [name,{ id:word.id, surface:word.japanese, dictionaryForm:word.japanese, reading:word.reading, english:word.preferredTranslation, pos:name==='subject'||name==='companion'?'pronoun':name==='time'||name==='adverb'?'time_expression':name==='destination'||name==='location'?'place_expression':'noun', jlpt:word.jlpt ?? 'N5', tags:[`category:${word.categories.join('|')}`,...word.tags,...slotTagMatches[name].map(tag=>`matched:${tag}`)] }]))
-  slots.verb = { id:`verb-${verb.id}`, surface:polite.japanese, dictionaryForm:verb.japanese, reading:polite.reading, english:verb.english, pos:'verb', jlpt:'N5', tags:[...verb.tags,`pattern:${verb.sentencePattern}`,`forms:${verb.supportedGrammarForms.join('|')}`], conjugation:'masu' }
+  slots.verb = { id:`verb-${verb.id}`, surface:polite.japanese, dictionaryForm:verb.japanese, reading:polite.reading, english:verb.english, pos:'verb', jlpt:'N5', tags:[...verb.tags,`pattern:${verb.sentencePattern}`,`forms:${verb.supportedGrammarForms.join('|')}`], conjugation:isNegativeEnding?'masu-negative':'masu' }
+  // A distinct 'ending' key (alongside 'verb') is what makes the hero rotator
+  // try toggling affirmative/negative in addition to swapping the verb word —
+  // Object.keys(sentence.slots) is what it reads to decide which slots are
+  // worth a rotation attempt. The furigana segment itself is still keyed
+  // 'verb', so the resulting text change is correctly reported against that
+  // segment either way.
+  slots.ending = { id:`ending-${isNegativeEnding?'negative':'affirmative'}`, surface:polite.japanese, dictionaryForm:verb.japanese, reading:polite.reading, english:isNegativeEnding?'negative':'affirmative', pos:'verb', jlpt:'N5', tags:['ending'], conjugation:isNegativeEnding?'masu-negative':'masu' }
   const semanticChecks = Object.entries(slotTagMatches).filter(([,tags])=>tags.length).map(([slot,tags])=>`${slot}: ${tags.join(', ')}`)
-  const renderedEnglish=renderTranslation(verb.translationTemplate,verb,filled)
+  const subjectEnglish=englishPhrase(filled.subject,'subject')
+  // Two verb families render as a copula in English rather than an action verb:
+  // いる/ある give the bare word "are"/"is" (see translatedVerb), and 感動する
+  // and friends store a "be X" phrase so modal frames can say "must be moved".
+  // Both need "is/are not[ X]", not "does not are"/"does not be moved".
+  const baseVerbEnglish=translatedVerb(verb,filled,true)
+  const copula=subjectEnglish==='I'?'am':subjectUsesBaseVerb(subjectEnglish)?'are':'is'
+  const bareCopulaPhrase=/^be\b(.*)$/.exec(baseVerbEnglish)
+  const negativeVerbEnglish=bareCopulaPhrase ? `${copula} not${bareCopulaPhrase[1]}`
+    : ['is','are','am'].includes(baseVerbEnglish) ? `${copula} not`
+    : `${subjectUsesBaseVerb(subjectEnglish)?'do':'does'} not ${baseVerbEnglish}`
+  const renderedEnglish=renderTranslation(verb.translationTemplate,verb,filled,isNegativeEnding?negativeVerbEnglish:undefined)
   const english=renderedEnglish.charAt(0).toUpperCase()+renderedEnglish.slice(1)
   return { frameId:verb.sentencePattern, level:'N5', japanese, reading, english, slots, furigana, grammar:[{pattern:verb.sentencePattern,meaning:'Verb-selected category and tag pattern',jlpt:'N5'}], validation:[`Verb selected first: ${verb.japanese}.`,`Verb selected pattern: ${verb.sentencePattern.toUpperCase()}.`,`Slots matched allowed categories${semanticChecks.length ? ` and semantic tags (${semanticChecks.join('; ')})` : ''}.`,`Supported forms: ${verb.supportedGrammarForms.join(', ')}.`] }
 }
