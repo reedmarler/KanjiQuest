@@ -1328,6 +1328,23 @@ function baseFurigana(verb: VerbUsageRecord, filled: Record<string,WordRecord>, 
   return builders[verb.sentencePattern]?.() ?? null
 }
 
+/**
+ * English marks the comparative with -er on short adjectives (big → bigger,
+ * busy → busier) but switches to "more X" once the word gets long or ends in
+ * a multi-syllable suffix (famous, energetic) — "more strong"/"more weak"
+ * reads as a learner mistake, not a stylistic choice.
+ */
+function comparativeForm(word: string): string {
+  const irregular: Record<string,string> = { good:'better', bad:'worse', far:'farther', little:'less', many:'more', much:'more' }
+  if (irregular[word]) return irregular[word]!
+  if (/[^aeiou]y$/.test(word)) return `${word.slice(0,-1)}ier`
+  if (word.endsWith('e')) return `${word}r`
+  if (word.length <= 6 && !/(?:ous|ful|ive|al|ing|ic)$/.test(word)) {
+    return doublesFinalConsonant(word) ? `${word}${word.slice(-1)}er` : `${word}er`
+  }
+  return `more ${word}`
+}
+
 function presentParticiple(phrase: string) {
   const [head,...rest]=phrase.split(' ')
   const irregular: Record<string,string> = { eat:'eating',drink:'drinking',read:'reading',watch:'watching',look:'looking',go:'going',talk:'talking',wake:'waking',forget:'forgetting',be:'being',get:'getting',put:'putting',run:'running',sit:'sitting',begin:'beginning',stop:'stopping' }
@@ -2932,7 +2949,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   const compulsionVerbPool = bareActionVerbPool.filter(verb => verb.id !== 'asobu-companion')
 
   if (patternId === 'n2-09') {
-    type Variant = { furigana: GeneratedPreviewSentence['furigana']; filled: Record<string,WordRecord>; english: string; note: string }
+    type Variant = { furigana: GeneratedPreviewSentence['furigana']; filled: Record<string,WordRecord>; english: string; note: string; extra: GeneratedPreviewSentence['slots'] }
     const variants: Variant[] = []
     const readable = exact(['漢字','本','新聞','小説','記事'])
     const readingTarget = pick(readable, 801)
@@ -2942,9 +2959,10 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
       { surface:'努力します', reading:'どりょくします', english:'make an effort' },
     ], 802)
     if (readingTarget && effort) variants.push({
-      furigana:[wordPart(readingTarget,'object'),literalPart('が'),literalPart('読める','よめる','ability'),literalPart('ように、'),literalPart('毎日','まいにち','time'),literalPart(effort.surface,effort.reading,'verb')],
+      furigana:[wordPart(readingTarget,'object'),literalPart('が'),literalPart('読める','よめる','ability'),literalPart('ように、'),literalPart('毎日','まいにち','time'),{text:effort.surface,reading:effort.reading,slot:'verb'}],
       filled:{object:readingTarget},english:`I ${effort.english} every day so that I can read ${englishPhrase(readingTarget,'object')}.`,
       note:'ように pairs a potential verb with the effort that achieves it.',
+      extra:{verb:grammarSlot(`n2-09-effort-${effort.english}`,effort.surface,effort.surface,effort.reading,effort.english,['effort'])},
     })
     const prevention = pick([
       { trigger:'忘れ',triggerReading:'わすれ',action:'メモします',actionReading:'めもします',english:['forget','take notes']},
@@ -2952,12 +2970,13 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
       { trigger:'風邪をひか',triggerReading:'かぜをひか',action:'気をつけます',actionReading:'きをつけます',english:['catch a cold','am careful']},
     ], 803)
     if (prevention) variants.push({
-      furigana:[literalPart(prevention.trigger,prevention.triggerReading,'verb'),literalPart('ないように、'),literalPart(prevention.action,prevention.actionReading,'result')],
+      furigana:[{text:prevention.trigger,reading:prevention.triggerReading,slot:'verb'},literalPart('ないように、'),literalPart(prevention.action,prevention.actionReading,'result')],
       filled:{},english:`I ${prevention.english[1]} so that I will not ${prevention.english[0]}.`,
       note:'ように pairs a negative verb with a deliberate preventive action.',
+      extra:{verb:grammarSlot(`n2-09-prevention-${prevention.trigger}`,prevention.trigger,prevention.trigger,prevention.triggerReading,prevention.english[0],['prevention'])},
     })
     const variant = pick(variants, 804)
-    return variant ? finish(variant.furigana, capitalize(variant.english), variant.filled, {}, variant.note) : null
+    return variant ? finish(variant.furigana, capitalize(variant.english), variant.filled, variant.extra, variant.note) : null
   }
 
   if (patternId === 'n1-01') {
@@ -3007,7 +3026,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
       { surface:'勝利', reading:'しょうり', english:'victory' },
       { surface:'発展', reading:'はってん', english:'development' },
       { surface:'成長', reading:'せいちょう', english:'growth' },
-    ], 821)
+    ], 821, 'subject')
     // All causes here must plausibly produce success/passing/victory/growth —
     // 信頼 (trust) is relational, not something success is "the result of".
     const cause = pick([
@@ -3015,21 +3034,26 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
       { surface:'準備', reading:'じゅんび', english:'preparation' },
       { surface:'練習', reading:'れんしゅう', english:'practice' },
       { surface:'経験', reading:'けいけん', english:'experience' },
-    ], 822)
-    const tail = pick([{ surface:'結果', reading:'けっか', english:'result' }, { surface:'成果', reading:'せいか', english:'fruit' }], 823)
+    ], 822, 'cause')
+    const tail = pick([{ surface:'結果', reading:'けっか', english:'result' }, { surface:'成果', reading:'せいか', english:'fruit' }], 823, 'object')
     if (!subject || !cause || !tail) return null
-    const furigana=[literalPart(subject.surface,subject.reading,'subject'),literalPart('は','わ'),literalPart(cause.surface,cause.reading,'cause'),literalPart('の'),literalPart(tail.surface,tail.reading,'object'),literalPart('にほかならない。')]
-    return finish(furigana,`${capitalize(subject.english)} is nothing other than the ${tail.english} of ${cause.english}.`,{},{},'にほかならない equates a result with its single true cause.')
+    const furigana=[{text:subject.surface,reading:subject.reading,slot:'subject'},literalPart('は','わ'),{text:cause.surface,reading:cause.reading,slot:'cause'},literalPart('の'),{text:tail.surface,reading:tail.reading,slot:'object'},literalPart('にほかならない。')]
+    return finish(furigana,`${capitalize(subject.english)} is nothing other than the ${tail.english} of ${cause.english}.`,{
+    },{
+      subject:grammarSlot(`n1-02-subject-${subject.surface}`,subject.surface,subject.surface,subject.reading,subject.english,['abstract']),
+      cause:grammarSlot(`n1-02-cause-${cause.surface}`,cause.surface,cause.surface,cause.reading,cause.english,['abstract']),
+      object:grammarSlot(`n1-02-object-${tail.surface}`,tail.surface,tail.surface,tail.reading,tail.english,['abstract']),
+    },'にほかならない equates a result with its single true cause.')
   }
 
   if (patternId === 'n2-01') {
-    type Variant = { furigana: GeneratedPreviewSentence['furigana']; filled: Record<string,WordRecord>; english: string }
+    type Variant = { furigana: GeneratedPreviewSentence['furigana']; filled: Record<string,WordRecord>; english: string; extra: GeneratedPreviewSentence['slots'] }
     const variants: Variant[] = []
     const dislikable = vocabulary.filter(word => categoryMatch(word,['Food']) && matchingTags(word,edibleTags).length>0)
     const dislikeObject = pick(dislikable, 831)
     if (dislikeObject) variants.push({
       furigana:[wordPart(dislikeObject,'object'),literalPart('が'),literalPart('嫌い','きらい','predicate'),literalPart('な'),literalPart('わけではありません。')],
-      filled:{object:dislikeObject},english:`It is not that I dislike ${englishPhrase(dislikeObject,'object')}.`,
+      filled:{object:dislikeObject},english:`It is not that I dislike ${englishPhrase(dislikeObject,'object')}.`,extra:{},
     })
     // 話す without a listener or topic is incomplete in this standalone pattern.
     const habitVerb = pick(smallVerbPool.filter(verb => verb.id !== 'hanasu-companion'), 832)
@@ -3051,10 +3075,11 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
       variants.push({
         furigana:[literalPart(frequency.japanese,frequency.reading,'time'),{text:te.japanese,reading:te.reading,slot:'verb'},literalPart('いるわけではありません。')],
         filled:{},english:`It is not that I ${englishPhraseText}.`,
+        extra:{verb:grammarSlot(`verb-${habitVerb.id}-wakedewanai`,`${te.japanese}いるわけではありません`,habitVerb.japanese,`${te.reading}いるわけではありません`,englishPhraseText,['habit','wake-dewa-nai']),time:grammarSlot(`n2-01-frequency-${frequency.id}`,frequency.japanese,frequency.japanese,frequency.reading,frequency.preposed??frequency.postposed!,['frequency'])},
       })
     }
     const variant = pick(variants, 834)
-    return variant ? finish(variant.furigana, capitalize(variant.english), variant.filled, {}, 'わけではない softens an assumed generalization.') : null
+    return variant ? finish(variant.furigana, capitalize(variant.english), variant.filled, variant.extra, 'わけではない softens an assumed generalization.') : null
   }
 
   if (patternId === 'n2-02') {
@@ -3323,25 +3348,37 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n1-04') {
-    const scene = pick([
+    const scenePool = [
       { cause:'無理をする', causeReading:'むりをする', result:'病気になり', resultReading:'びょうきになり', english:'Overdoing it might result in illness.' },
       { cause:'油断する', causeReading:'ゆだんする', result:'事故になり', resultReading:'じこになり', english:'Carelessness might result in an accident.' },
       { cause:'遅刻する', causeReading:'ちこくする', result:'信用を失い', resultReading:'しんようをうしない', english:'Being late might result in losing trust.' },
-    ], 961)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) {
+      const avoided = scenePickPool.filter(c => c.cause !== options.avoidWords!.reason)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 961)
     if (!scene) return null
-    const furigana=[literalPart(scene.cause,scene.causeReading,'reason'),literalPart('と、'),literalPart(scene.result,scene.resultReading,'result'),literalPart('かねません。')]
-    return finish(furigana,scene.english,{},{},'かねない attaches to the masu-stem and warns of a possible negative outcome.')
+    const furigana=[{text:scene.cause,reading:scene.causeReading,slot:'reason'},literalPart('と、'),literalPart(scene.result,scene.resultReading,'result'),literalPart('かねません。')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n1-04-scene-${scenePool.indexOf(scene)}`,scene.cause,scene.cause,scene.causeReading,scene.english,['warning'])},'かねない attaches to the masu-stem and warns of a possible negative outcome.')
   }
 
   if (patternId === 'n2-12') {
-    const scene = pick([
+    const scenePool = [
       { cause:'年を取る', causeReading:'としをとる', result:'体が弱くなります', resultReading:'からだがよわくなります', english:'As you get older, your body weakens.' },
       { cause:'練習する', causeReading:'れんしゅうする', result:'上手になります', resultReading:'じょうずになります', english:'As you practice, you get better.' },
       { cause:'勉強する', causeReading:'べんきょうする', result:'漢字が読めるようになります', resultReading:'かんじがよめるようになります', english:'As you study, you become able to read kanji.' },
-    ], 971)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) {
+      const avoided = scenePickPool.filter(c => c.cause !== options.avoidWords!.reason)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 971)
     if (!scene) return null
-    const furigana=[literalPart(scene.cause,scene.causeReading,'reason'),literalPart('につれて、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'につれて links two changes that progress together.')
+    const furigana=[{text:scene.cause,reading:scene.causeReading,slot:'reason'},literalPart('につれて、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-12-scene-${scenePool.indexOf(scene)}`,scene.cause,scene.cause,scene.causeReading,scene.english,['progression'])},'につれて links two changes that progress together.')
   }
 
   if (patternId === 'n2-13') {
@@ -3416,25 +3453,31 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n1-12') {
-    const scene = pick([
+    const scenePool = [
       { basis:'天気', basisReading:'てんき', result:'予定が変わります', resultReading:'よていがかわります', english:"Plans change according to the weather." },
       { basis:'成績', basisReading:'せいせき', result:'評価が決まります', resultReading:'ひょうかがきまります', english:"Evaluation is decided according to the grades." },
       { basis:'状況', basisReading:'じょうきょう', result:'対応が変わります', resultReading:'たいおうがかわります', english:"The response changes according to the situation." },
-    ], 1021)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.basis !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1021)
     if (!scene) return null
-    const furigana=[literalPart(scene.basis,scene.basisReading,'reason'),literalPart('に応じて、','におうじて、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'に応じて marks a basis that a result varies with.')
+    const furigana=[{text:scene.basis,reading:scene.basisReading,slot:'reason'},literalPart('に応じて、','におうじて、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n1-12-scene-${scenePool.indexOf(scene)}`,scene.basis,scene.basis,scene.basisReading,scene.english,['basis'])},'に応じて marks a basis that a result varies with.')
   }
 
   if (patternId === 'n1-13') {
-    const scene = pick([
+    const scenePool = [
       { clause:'高いものがいい', clauseReading:'たかいものがいい', english:'Expensive things are not necessarily good.' },
       { clause:'有名な店の料理がおいしい', clauseReading:'ゆうめいなみせのりょうりがおいしい', english:'The food at a famous restaurant is not necessarily delicious.' },
       { clause:'頭がいい人が成功する', clauseReading:'あたまがいいひとがせいこうする', english:'Smart people do not necessarily succeed.' },
-    ], 1031)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1031)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('とは','とわ'),literalPart('限りません。','かぎりません。')]
-    return finish(furigana,scene.english,{},{},'とは限らない denies that a general rule always holds.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('とは','とわ'),literalPart('限りません。','かぎりません。')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n1-13-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['generalization'])},'とは限らない denies that a general rule always holds.')
   }
 
   if (patternId === 'n2-04') {
@@ -3445,80 +3488,104 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n1-05') {
-    const scene = pick([
+    const scenePool = [
       { cause:'参加しない', causeReading:'さんかしない', result:'始まりません', resultReading:'はじまりません', english:'Unless you participate, it will not start.' },
       { cause:'試してみない', causeReading:'ためしてみない', result:'わかりません', resultReading:'わかりません', english:'Unless you try it, you will not know.' },
       { cause:'練習しない', causeReading:'れんしゅうしない', result:'上手になりません', resultReading:'じょうずになりません', english:'Unless you practice, you will not improve.' },
-    ], 1051)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.cause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1051)
     if (!scene) return null
-    const furigana=[literalPart(scene.cause,scene.causeReading,'reason'),literalPart('ことには、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'ないことには states that nothing else can happen until this precondition is met.')
+    const furigana=[{text:scene.cause,reading:scene.causeReading,slot:'reason'},literalPart('ことには、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n1-05-scene-${scenePool.indexOf(scene)}`,scene.cause,scene.cause,scene.causeReading,scene.english,['precondition'])},'ないことには states that nothing else can happen until this precondition is met.')
   }
 
   if (patternId === 'n1-06') {
-    const scene = pick([
+    const scenePool = [
       { start:'子供', startReading:'こども', end:'大人', endReading:'おとな', result:'みんながその規則を知っています', resultReading:'みんながそのきそくをしっています', english:'From children to adults, everyone knows the rule.' },
       { start:'朝', startReading:'あさ', end:'夜', endReading:'よる', result:'休みなく働きます', resultReading:'やすみなくはたらきます', english:'From morning to night, they work without rest.' },
       { start:'初心者', startReading:'しょしんしゃ', end:'上級者', endReading:'じょうきゅうしゃ', result:'誰でも日本語の勉強を楽しめます', resultReading:'だれでもにほんごのべんきょうをたのしめます', english:'From beginners to advanced learners, anyone can enjoy studying Japanese.' },
-    ], 1061)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.start !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1061)
     if (!scene) return null
-    const furigana=[literalPart(scene.start,scene.startReading,'reason'),literalPart('から'),literalPart(scene.end,scene.endReading,'object'),literalPart('に至るまで、','にいたるまで、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'に至るまで stretches a range out to an extreme endpoint.')
+    const furigana=[{text:scene.start,reading:scene.startReading,slot:'reason'},literalPart('から'),literalPart(scene.end,scene.endReading,'object'),literalPart('に至るまで、','にいたるまで、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n1-06-scene-${scenePool.indexOf(scene)}`,scene.start,scene.start,scene.startReading,scene.english,['range'])},'に至るまで stretches a range out to an extreme endpoint.')
   }
 
   if (patternId === 'n1-07') {
-    const scene = pick([
+    const scenePool = [
       { place:'日本', placeReading:'にほん', noun:'文化', nounReading:'ぶんか', english:'culture unique to Japan' },
       { place:'京都', placeReading:'きょうと', noun:'魅力', nounReading:'みりょく', english:'charm unique to Kyoto' },
       { place:'この店', placeReading:'このみせ', noun:'味', nounReading:'あじ', english:'a flavor unique to this restaurant' },
-    ], 1071)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.subject) { const avoided = scenePickPool.filter(c => c.place !== options.avoidWords!.subject); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.subject ?? seed, 1071)
     if (!scene) return null
-    const furigana=[literalPart(scene.place,scene.placeReading,'subject'),literalPart('ならではの'),literalPart(scene.noun,scene.nounReading,'object'),literalPart('です。')]
-    return finish(furigana,capitalize(`this is ${scene.english}.`),{},{},'ならでは marks something only possible because of that specific place or thing.')
+    const furigana=[{text:scene.place,reading:scene.placeReading,slot:'subject'},literalPart('ならではの'),literalPart(scene.noun,scene.nounReading,'object'),literalPart('です。')]
+    return finish(furigana,capitalize(`this is ${scene.english}.`),{},{subject:grammarSlot(`n1-07-scene-${scenePool.indexOf(scene)}`,scene.place,scene.place,scene.placeReading,scene.english,['uniqueness'])},'ならでは marks something only possible because of that specific place or thing.')
   }
 
   if (patternId === 'n1-08') {
-    const scene = pick([
+    const scenePool = [
       { basis:'現実', basisReading:'げんじつ', result:'考えます', resultReading:'かんがえます', english:'think in accordance with reality' },
       { basis:'事実', basisReading:'じじつ', result:'判断します', resultReading:'はんだんします', english:'judge in accordance with the facts' },
       { basis:'規則', basisReading:'きそく', result:'行動します', resultReading:'こうどうします', english:'act in accordance with the rules' },
-    ], 1081)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.basis !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1081)
     if (!scene) return null
-    const furigana=[literalPart(scene.basis,scene.basisReading,'reason'),literalPart('に即して、','にそくして、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,capitalize(`${scene.english}.`),{},{},'に即して means acting strictly on the basis of something concrete, not personal opinion.')
+    const furigana=[{text:scene.basis,reading:scene.basisReading,slot:'reason'},literalPart('に即して、','にそくして、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,capitalize(`${scene.english}.`),{},{reason:grammarSlot(`n1-08-scene-${scenePool.indexOf(scene)}`,scene.basis,scene.basis,scene.basisReading,scene.english,['basis'])},'に即して means acting strictly on the basis of something concrete, not personal opinion.')
   }
 
   if (patternId === 'n1-09') {
-    const scene = pick([
+    const scenePool = [
       { topic:'問題', topicReading:'もんだい', result:'議論します', resultReading:'ぎろんします', english:'discuss the issue' },
       { topic:'予算', topicReading:'よさん', result:'対立します', resultReading:'たいりつします', english:'clash over the budget' },
       { topic:'契約', topicReading:'けいやく', result:'交渉します', resultReading:'こうしょうします', english:'negotiate concerning the contract' },
-    ], 1091)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.object) { const avoided = scenePickPool.filter(c => c.topic !== options.avoidWords!.object); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.object ?? seed, 1091)
     if (!scene) return null
-    const furigana=[literalPart(scene.topic,scene.topicReading,'object'),literalPart('をめぐって、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,capitalize(`they ${scene.english}.`),{},{},'をめぐって marks the contested topic that an action revolves around.')
+    const furigana=[{text:scene.topic,reading:scene.topicReading,slot:'object'},literalPart('をめぐって、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,capitalize(`they ${scene.english}.`),{},{object:grammarSlot(`n1-09-scene-${scenePool.indexOf(scene)}`,scene.topic,scene.topic,scene.topicReading,scene.english,['contested-topic'])},'をめぐって marks the contested topic that an action revolves around.')
   }
 
   if (patternId === 'n1-10') {
-    const scene = pick([
+    const scenePool = [
       { event:'出発', eventReading:'しゅっぱつ', result:'挨拶します', resultReading:'あいさつします', english:'give a greeting on the occasion of departure' },
       { event:'卒業', eventReading:'そつぎょう', result:'感謝します', resultReading:'かんしゃします', english:'express gratitude on the occasion of graduation' },
       { event:'開会', eventReading:'かいかい', result:'演説します', resultReading:'えんぜつします', english:'give a speech on the occasion of the opening' },
-    ], 1101)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.event !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1101)
     if (!scene) return null
-    const furigana=[literalPart(scene.event,scene.eventReading,'reason'),literalPart('に際して、','にさいして、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,capitalize(`they ${scene.english}.`),{},{},'に際して marks a formal occasion that prompts the following action.')
+    const furigana=[{text:scene.event,reading:scene.eventReading,slot:'reason'},literalPart('に際して、','にさいして、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,capitalize(`they ${scene.english}.`),{},{reason:grammarSlot(`n1-10-scene-${scenePool.indexOf(scene)}`,scene.event,scene.event,scene.eventReading,scene.english,['occasion'])},'に際して marks a formal occasion that prompts the following action.')
   }
 
   if (patternId === 'n2-03') {
-    const scene = pick([
+    const scenePool = [
       { clause:'転勤する', clauseReading:'てんきんする', english:'It has been decided that I will be transferred.' },
       { clause:'引っ越す', clauseReading:'ひっこす', english:'It has been decided that I will move.' },
       { clause:'結婚する', clauseReading:'けっこんする', english:'It has been decided that we will get married.' },
-    ], 1111)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.verb) {
+      const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.verb)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.verb ?? seed, 1111)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'verb'),literalPart('ことになりました。')]
-    return finish(furigana,scene.english,{},{},'ことになる announces a decision or arrangement, often one made by someone else.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'verb'},literalPart('ことになりました。')]
+    return finish(furigana,scene.english,{},{verb:grammarSlot(`n2-03-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['decision'])},'ことになる announces a decision or arrangement, often one made by someone else.')
   }
 
   if (patternId === 'n2-05') {
@@ -3574,26 +3641,38 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n2-07') {
-    const scene = pick([
+    const scenePool = [
       { topic:'方法', topicReading:'ほうほう', predicate:'単純な', predicateReading:'たんじゅんな', english:'A method is simple.' },
       { topic:'規則', topicReading:'きそく', predicate:'必要な', predicateReading:'ひつような', english:'Rules are necessary.' },
       { topic:'計画', topicReading:'けいかく', predicate:'大切な', predicateReading:'たいせつな', english:'A plan is important.' },
       { topic:'問題', topicReading:'もんだい', predicate:'複雑な', predicateReading:'ふくざつな', english:'A problem is a complex thing.' },
-    ], 1141)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.subject) {
+      const avoided = scenePickPool.filter(c => c.topic !== options.avoidWords!.subject)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.subject ?? seed, 1141)
     if (!scene) return null
-    const furigana=[literalPart(scene.topic,scene.topicReading,'subject'),literalPart('は','わ'),literalPart(scene.predicate,scene.predicateReading,'object'),literalPart('ものだ。')]
-    return finish(furigana,scene.english,{},{},'ものだ states something as a natural or generally accepted truth.')
+    const furigana=[{text:scene.topic,reading:scene.topicReading,slot:'subject'},literalPart('は','わ'),literalPart(scene.predicate,scene.predicateReading,'object'),literalPart('ものだ。')]
+    return finish(furigana,scene.english,{},{subject:grammarSlot(`n2-07-scene-${scenePool.indexOf(scene)}`,scene.topic,scene.topic,scene.topicReading,scene.english,['truism'])},'ものだ states something as a natural or generally accepted truth.')
   }
 
   if (patternId === 'n2-08') {
-    const scene = pick([
+    const scenePool = [
       { thing:'声', thingReading:'こえ', compare:'鳥', compareReading:'とり', english:'a voice like a bird', plural:false },
       { thing:'心', thingReading:'こころ', compare:'天使', compareReading:'てんし', english:'a heart like an angel', plural:false },
       { thing:'目', thingReading:'め', compare:'宝石', compareReading:'ほうせき', english:'eyes like jewels', plural:true },
-    ], 1151)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.object) {
+      const avoided = scenePickPool.filter(c => c.compare !== options.avoidWords!.object)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.object ?? seed, 1151)
     if (!scene) return null
-    const furigana=[literalPart(scene.compare,scene.compareReading,'object'),literalPart('のような'),literalPart(scene.thing,scene.thingReading,'subject'),literalPart('だ。')]
-    return finish(furigana,capitalize(`${scene.plural?'these are':'this is'} ${scene.english}.`),{},{},'のような compares one noun to another to describe its quality.')
+    const furigana=[{text:scene.compare,reading:scene.compareReading,slot:'object'},literalPart('のような'),literalPart(scene.thing,scene.thingReading,'subject'),literalPart('だ。')]
+    return finish(furigana,capitalize(`${scene.plural?'these are':'this is'} ${scene.english}.`),{},{object:grammarSlot(`n2-08-scene-${scenePool.indexOf(scene)}`,scene.compare,scene.compare,scene.compareReading,scene.english,['simile'])},'のような compares one noun to another to describe its quality.')
   }
 
   if (patternId === 'n2-17') {
@@ -3639,14 +3718,18 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n3-24') {
-    const scene = pick([
-      { a:'犬', aReading:'いぬ', b:'猫', bReading:'ねこ', adjective:'大きい', adjectiveReading:'おおきい', english:'Dogs are bigger than cats.' },
-      { a:'日本語', aReading:'にほんご', b:'英語', bReading:'えいご', adjective:'難しい', adjectiveReading:'むずかしい', english:'Japanese is more difficult than English.' },
-      { a:'今日', aReading:'きょう', b:'昨日', bReading:'きのう', adjective:'暑い', adjectiveReading:'あつい', english:'Today is hotter than yesterday.' },
-    ], 1231)
-    if (!scene) return null
-    const furigana=[literalPart(scene.a,scene.aReading,'subject'),literalPart('は','わ'),literalPart(scene.b,scene.bReading,'object'),literalPart('より'),literalPart(scene.adjective,scene.adjectiveReading,'predicate'),literalPart('です。')]
-    return finish(furigana,scene.english,{},{},'より marks the thing being compared against — "more than B."')
+    // Was 3 fixed {a,b,adjective} triples — reuses n3-25's real subject/other/
+    // adjective pools (person-to-person comparison) instead of inventing a
+    // parallel fixed set, giving both compared parties and the trait their
+    // own rotatable slot.
+    const subject = pick(humans, 1231, 'subject')
+    const other = pick(humans.filter(word => word.id !== subject?.id), 1232, 'object')
+    const adjective = pick(adjectiveRules.filter(rule => rule.japanese.endsWith('い') && !['kirei','kirai','suki','kirai','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1233)
+    if (!subject || !other || !adjective) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const otherEnglish = englishPhrase(other,'subject')
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(other,'object'),literalPart('より'),{text:adjective.japanese,reading:adjective.reading,slot:'predicate'},literalPart('です。')]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} ${comparativeForm(adjective.english)} than ${otherEnglish}.`,{subject,object:other},{predicate:grammarSlot(`n3-24-adjective-${adjective.id}`,adjective.japanese,adjective.japanese,adjective.reading,adjective.english,['comparison'])},'より marks the thing being compared against — "more than B."')
   }
 
   if (patternId === 'n3-25') {
@@ -3703,14 +3786,20 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n3-28') {
-    const scene = pick([
+    const scenePool = [
       { cause:'春になる', causeReading:'はるになる', result:'桜が咲きます', resultReading:'さくらがさきます', english:'Whenever spring comes, the cherry blossoms bloom.' },
       { cause:'ボタンを押す', causeReading:'ぼたんをおす', result:'ドアが開きます', resultReading:'どあがあきます', english:'Whenever you press the button, the door opens.' },
       { cause:'夜になる', causeReading:'よるになる', result:'星が見えます', resultReading:'ほしがみえます', english:'Whenever night falls, the stars become visible.' },
-    ], 1271)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) {
+      const avoided = scenePickPool.filter(c => c.cause !== options.avoidWords!.reason)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1271)
     if (!scene) return null
     const furigana=[literalPart(scene.cause,scene.causeReading,'reason'),literalPart('と、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'と links a condition to an automatic, always-true result.')
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n3-28-scene-${scenePool.indexOf(scene)}`,scene.cause,scene.cause,scene.causeReading,scene.english,['reason'])},'と links a condition to an automatic, always-true result.')
   }
 
   if (patternId === 'n3-29') {
@@ -3719,11 +3808,14 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
       { surface:'ラーメン', reading:'ラーメン', english:'ramen' }, { surface:'うどん', reading:'うどん', english:'udon' },
       { surface:'そば', reading:'そば', english:'soba' }, { surface:'ケーキ', reading:'ケーキ', english:'cake' },
     ]
-    const firstIdx = Math.abs(seed + 1281) % foods.length
+    const firstIdx = Math.abs((options.slotSeeds?.object ?? seed) + 1281) % foods.length
     const first = foods[firstIdx]!
-    const second = foods[(firstIdx + 1 + (Math.abs(seed + 1282) % (foods.length - 1))) % foods.length]!
-    const furigana=[literalPart(first.surface,first.reading,'object'),literalPart('とか'),literalPart(second.surface,second.reading,'result'),literalPart('とか'),literalPart('が'),literalPart('好きです。','すきです。')]
-    return finish(furigana,`I like things like ${first.english} and ${second.english}.`,{},{},'とか lists a few informal examples out of a larger set.')
+    const second = foods[(firstIdx + 1 + (Math.abs((options.slotSeeds?.result ?? seed) + 1282) % (foods.length - 1))) % foods.length]!
+    const furigana=[{text:first.surface,reading:first.reading,slot:'object'},literalPart('とか'),{text:second.surface,reading:second.reading,slot:'result'},literalPart('とか'),literalPart('が'),literalPart('好きです。','すきです。')]
+    return finish(furigana,`I like things like ${first.english} and ${second.english}.`,{},{
+      object:grammarSlot(`n3-29-first-${firstIdx}`,first.surface,first.surface,first.reading,first.english,['food']),
+      result:grammarSlot(`n3-29-second-${second.surface}`,second.surface,second.surface,second.reading,second.english,['food']),
+    },'とか lists a few informal examples out of a larger set.')
   }
 
   if (patternId === 'n3-30') {
@@ -3765,25 +3857,37 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n2-19') {
-    const scene = pick([
+    const scenePool = [
       { clause:'雨', clauseReading:'あめ', result:'試合は続きました', resultReading:'しあいはつづきました', english:'Despite the rain, the match continued.' },
       { clause:'努力', clauseReading:'どりょく', result:'失敗しました', resultReading:'しっぱいしました', english:'Despite the effort, it ended in failure.' },
       { clause:'反対', clauseReading:'はんたい', result:'計画は進みました', resultReading:'けいかくはすすみました', english:'Despite the opposition, the plan moved forward.' },
-    ], 1311)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) {
+      const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1311)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('にもかかわらず、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'にもかかわらず marks a strong, formal contrast — the result defies the expectation.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('にもかかわらず、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-19-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['contrast'])},'にもかかわらず marks a strong, formal contrast — the result defies the expectation.')
   }
 
   if (patternId === 'n2-20') {
     // Third-person subjects only: くせに carries a blaming tone that fits describing
     // someone else, and it keeps the fixed English predicates ("is bad at it", "wants
     // to teach") in agreement without per-person conjugation.
-    const scene = pick([
+    const scenePool = [
       { trait:'下手な', traitReading:'へたな', result:'教えたがります', resultReading:'おしえたがります', copula:'is', predicate:'bad at it', clause:'wants to teach', clauseBase:'want to teach' },
       { trait:'知らない', traitReading:'しらない', result:'説明します', resultReading:'せつめいします', copula:"doesn't", predicate:'know it', clause:'explains anyway', clauseBase:'explain anyway' },
       { trait:'子供の', traitReading:'こどもの', result:'偉そうです', resultReading:'えらそうです', copula:'is', predicate:'just a child', clause:'acts important', clauseBase:'act important' },
-    ], 1322)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) {
+      const avoided = scenePickPool.filter(c => c.trait !== options.avoidWords!.reason)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1322)
     const eligibleSubjects = humans.filter(word => {
       if (['私','俺','僕','私自身','我々','私たち','あなた','君'].includes(word.japanese) || isPluralPhrase(englishPhrase(word,'subject'))) return false
       // くせに's blaming tone clashes with a respectful/honorific way of referring
@@ -3802,21 +3906,27 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     const subject = pick(eligibleSubjects, 1321, 'subject')
     if (!subject || !scene) return null
     const subjectEnglish = englishPhrase(subject,'subject')
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart(scene.trait,scene.traitReading,'reason'),literalPart('くせに、'),literalPart(scene.result,scene.resultReading,'result')]
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),{text:scene.trait,reading:scene.traitReading,slot:'reason'},literalPart('くせに、'),literalPart(scene.result,scene.resultReading,'result')]
     const secondMention = subjectPronoun(subjectEnglish)
     const clause = subjectUsesBaseVerb(secondMention) ? scene.clauseBase : scene.clause
-    return finish(furigana,`Even though ${subjectEnglish} ${scene.copula} ${scene.predicate}, ${secondMention} ${clause}.`,{subject},{},'くせに adds a critical, blaming tone to a contrast — "even though, and shouldn\'t."')
+    return finish(furigana,`Even though ${subjectEnglish} ${scene.copula} ${scene.predicate}, ${secondMention} ${clause}.`,{subject},{reason:grammarSlot(`n2-20-scene-${scenePool.indexOf(scene)}`,scene.trait,scene.trait,scene.traitReading,scene.predicate,['trait'])},'くせに adds a critical, blaming tone to a contrast — "even though, and shouldn\'t."')
   }
 
   if (patternId === 'n2-21') {
-    const scene = pick([
+    const scenePool = [
       { expectation:'上手', expectationReading:'じょうず', reality:'下手', realityReading:'へた', english:'Far from being skilled, he is bad at it.' },
       { expectation:'安い', expectationReading:'やすい', reality:'高い', realityReading:'たかい', english:'Far from being cheap, it is expensive.' },
       { expectation:'簡単', expectationReading:'かんたん', reality:'難しい', realityReading:'むずかしい', english:'Far from being easy, it is difficult.' },
-    ], 1331)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) {
+      const avoided = scenePickPool.filter(c => c.expectation !== options.avoidWords!.reason)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1331)
     if (!scene) return null
-    const furigana=[literalPart(scene.expectation,scene.expectationReading,'reason'),literalPart('どころか、'),literalPart(scene.reality,scene.realityReading,'result'),literalPart('です。')]
-    return finish(furigana,scene.english,{},{},'どころか rejects an expectation and asserts the opposite extreme.')
+    const furigana=[{text:scene.expectation,reading:scene.expectationReading,slot:'reason'},literalPart('どころか、'),literalPart(scene.reality,scene.realityReading,'result'),literalPart('です。')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-21-scene-${scenePool.indexOf(scene)}`,scene.expectation,scene.expectation,scene.expectationReading,scene.english,['contrast'])},'どころか rejects an expectation and asserts the opposite extreme.')
   }
 
   if (patternId === 'n3-32') {
@@ -3852,14 +3962,20 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n3-34') {
-    const scene = pick([
+    const scenePool = [
       { clause:'泣きたい', clauseReading:'なきたい', predicate:'嬉しいです', predicateReading:'うれしいです', english:'I am happy enough to cry.' },
       { clause:'死にたい', clauseReading:'しにたい', predicate:'疲れました', predicateReading:'つかれました', english:'I am tired enough to feel like dying.' },
       { clause:'涙が出る', clauseReading:'なみだがでる', predicate:'感動しました', predicateReading:'かんどうしました', english:'I was moved to the point of tears.' },
-    ], 1361)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) {
+      const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1361)
     if (!scene) return null
     const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('くらい'),literalPart(scene.predicate,scene.predicateReading,'result')]
-    return finish(furigana,scene.english,{},{},'くらい after an extreme example sets the degree of the feeling being described.')
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n3-34-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['degree'])},'くらい after an extreme example sets the degree of the feeling being described.')
   }
 
   if (patternId === 'n3-35') {
@@ -3876,14 +3992,20 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n3-36') {
-    const scene = pick([
+    const scenePool = [
       { cause:'嬉しさの', causeReading:'うれしさの', result:'泣いてしまいました', resultReading:'ないてしまいました', english:'I was so happy that I ended up crying.' },
       { cause:'驚きの', causeReading:'おどろきの', result:'声も出ませんでした', resultReading:'こえもでませんでした', english:'I was so surprised that I could not even speak.' },
       { cause:'悲しさの', causeReading:'かなしさの', result:'眠れませんでした', resultReading:'ねむれませんでした', english:'I was so sad that I could not sleep.' },
-    ], 1381)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) {
+      const avoided = scenePickPool.filter(c => c.cause !== options.avoidWords!.reason)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1381)
     if (!scene) return null
     const furigana=[literalPart(scene.cause,scene.causeReading,'reason'),literalPart('あまり、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'あまり links an extreme feeling to a result caused entirely by its intensity.')
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n3-36-scene-${scenePool.indexOf(scene)}`,scene.cause,scene.cause,scene.causeReading,scene.english,['degree'])},'あまり links an extreme feeling to a result caused entirely by its intensity.')
   }
 
   if (patternId === 'n3-37') {
@@ -3903,14 +4025,20 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n3-38') {
-    const scene = pick([
+    const scenePool = [
       { subject:'このケーキ', subjectReading:'このけーき', stem:'美味し', stemReading:'おいし', english:'This cake looks delicious.' },
       { subject:'あの映画', subjectReading:'あのえいが', stem:'面白', stemReading:'おもしろ', english:'That movie looks interesting.' },
       { subject:'この問題', subjectReading:'このもんだい', stem:'難し', stemReading:'むずかし', english:'This problem looks difficult.' },
-    ], 1401)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.subject) {
+      const avoided = scenePickPool.filter(c => c.subject !== options.avoidWords!.subject)
+      if (avoided.length) scenePickPool = avoided
+    }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.subject ?? seed, 1401)
     if (!scene) return null
-    const furigana=[literalPart(scene.subject,scene.subjectReading,'subject'),literalPart('は','わ'),literalPart(scene.stem,scene.stemReading,'predicate'),literalPart('そうです。')]
-    return finish(furigana,scene.english,{},{},'い-adjective stem + そう describes an appearance-based guess, unlike the hearsay そうだ that follows a full plain-form clause.')
+    const furigana=[{text:scene.subject,reading:scene.subjectReading,slot:'subject'},literalPart('は','わ'),literalPart(scene.stem,scene.stemReading,'predicate'),literalPart('そうです。')]
+    return finish(furigana,scene.english,{},{subject:grammarSlot(`n3-38-scene-${scenePool.indexOf(scene)}`,scene.subject,scene.subject,scene.subjectReading,scene.english,['appearance'])},'い-adjective stem + そう describes an appearance-based guess, unlike the hearsay そうだ that follows a full plain-form clause.')
   }
 
   if (patternId === 'n3-39') {
@@ -3922,146 +4050,185 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n2-22') {
-    const scene = pick([
+    const scenePool = [
       { clause:'家を出た', clauseReading:'いえをでた', result:'雨が降り出しました', resultReading:'あめがふりだしました', english:'The moment I left the house, it started to rain.' },
       { clause:'ドアを開けた', clauseReading:'どあをあけた', result:'猫が飛び出しました', resultReading:'ねこがとびだしました', english:'The moment I opened the door, the cat jumped out.' },
       { clause:'席に座った', clauseReading:'せきにすわった', result:'電話が鳴りました', resultReading:'でんわがなりました', english:'The moment I sat down, the phone rang.' },
-    ], 1421)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1421)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('とたん、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'とたん marks a second event that happens the instant the first one finishes, often catching the speaker off guard.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('とたん、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-22-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['instant'])},'とたん marks a second event that happens the instant the first one finishes, often catching the speaker off guard.')
   }
 
   if (patternId === 'n2-23') {
-    const scene = pick([
+    const scenePool = [
       { clause:'着き', clauseReading:'つき', result:'連絡します', resultReading:'れんらくします', english:'As soon as I arrive, I will contact you.' },
       { clause:'準備ができ', clauseReading:'じゅんびができ', result:'始めます', resultReading:'はじめます', english:'As soon as preparations are ready, we will begin.' },
       { clause:'分かり', clauseReading:'わかり', result:'お知らせします', resultReading:'おしらせします', english:'As soon as I find out, I will let you know.' },
-    ], 1431)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1431)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('次第、','しだい、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'次第 attaches to the masu-stem and means the result follows immediately once the first event happens.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('次第、','しだい、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-23-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['immediate'])},'次第 attaches to the masu-stem and means the result follows immediately once the first event happens.')
   }
 
   if (patternId === 'n2-24') {
-    const scene = pick([
+    const scenePool = [
       { clause:'日本に来て', clauseReading:'にほんにきて', result:'ずっと忙しいです', resultReading:'ずっといそがしいです', english:'Ever since I came to Japan, I have been busy the whole time.' },
       { clause:'引っ越して', clauseReading:'ひっこして', result:'会っていません', resultReading:'あっていません', english:'Ever since I moved, I have not seen them.' },
       { clause:'卒業して', clauseReading:'そつぎょうして', result:'連絡していません', resultReading:'れんらくしていません', english:'Ever since graduating, I have not been in touch.' },
-    ], 1441)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1441)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('以来、','いらい、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'て以来 marks a starting point for a state or situation that has continued ever since.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('以来、','いらい、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-24-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['since'])},'て以来 marks a starting point for a state or situation that has continued ever since.')
   }
 
   if (patternId === 'n2-25') {
-    const scene = pick([
+    const scenePool = [
       { clause:'よく考えた', clauseReading:'よくかんがえた', result:'決めます', resultReading:'きめます', english:'After thinking it over carefully, I will decide.' },
       { clause:'相談した', clauseReading:'そうだんした', result:'返事します', resultReading:'へんじします', english:'After consulting with others, I will reply.' },
       { clause:'確認した', clauseReading:'かくにんした', result:'送ります', resultReading:'おくります', english:'After confirming, I will send it.' },
-    ], 1451)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1451)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('うえで、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'うえで means the first action is completed as a deliberate basis before the second happens.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('うえで、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-25-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['basis'])},'うえで means the first action is completed as a deliberate basis before the second happens.')
   }
 
   if (patternId === 'n2-26') {
-    const scene = pick([
+    const scenePool = [
       { clause:'食事をしている', clauseReading:'しょくじをしている', result:'電話が鳴りました', resultReading:'でんわがなりました', english:'Right in the middle of eating, the phone rang.' },
       { clause:'会議をしている', clauseReading:'かいぎをしている', result:'地震がありました', resultReading:'じしんがありました', english:'Right in the middle of the meeting, there was an earthquake.' },
       { clause:'勉強をしている', clauseReading:'べんきょうをしている', result:'友達が来ました', resultReading:'ともだちがきました', english:'Right in the middle of studying, a friend came.' },
-    ], 1461)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1461)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('最中に、','さいちゅうに、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'最中に interrupts an action at its peak, right when it is most fully underway.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('最中に、','さいちゅうに、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-26-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['interruption'])},'最中に interrupts an action at its peak, right when it is most fully underway.')
   }
 
   if (patternId === 'n2-27') {
-    const scene = pick([
+    const scenePool = [
       { clause:'道が混んでいた', clauseReading:'みちがこんでいた', result:'遅れました', resultReading:'おくれました', english:'Because the road was congested, I was late.' },
       { clause:'急いでいた', clauseReading:'いそいでいた', result:'忘れ物をしました', resultReading:'わすれものをしました', english:'Because I was in a hurry, I forgot something.' },
       { clause:'眠かった', clauseReading:'ねむかった', result:'寝坊しました', resultReading:'ねぼうしました', english:'Because I was sleepy, I overslept.' },
-    ], 1471)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1471)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('ものだから、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'ものだから offers a reason with an excuse-making, self-justifying tone.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('ものだから、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-27-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['excuse'])},'ものだから offers a reason with an excuse-making, self-justifying tone.')
   }
 
   if (patternId === 'n2-28') {
-    const scene = pick([
+    const scenePool = [
       { clause:'台風が来る', clauseReading:'たいふうがくる', english:'There is a risk that a typhoon will come.' },
       { clause:'事故が起きる', clauseReading:'じこがおきる', english:'There is a risk that an accident will occur.' },
       { clause:'値段が上がる', clauseReading:'ねだんがあがる', english:'There is a risk that the price will rise.' },
-    ], 1481)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1481)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('おそれがあります。')]
-    return finish(furigana,scene.english,{},{},'おそれがある is a formal way to warn about a possible negative outcome.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('おそれがあります。')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-28-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['risk'])},'おそれがある is a formal way to warn about a possible negative outcome.')
   }
 
   if (patternId === 'n2-29') {
-    const scene = pick([
+    const scenePool = [
       { clause:'顔色が悪い', clauseReading:'かおいろがわるい', result:'体調が悪いと分かりました', resultReading:'たいちょうがわるいとわかりました', english:"Judging from his poor complexion, I could tell he wasn't feeling well." },
       { clause:'足跡がある', clauseReading:'あしあとがある', result:'誰かが来たと分かりました', resultReading:'だれかがきたとわかりました', english:'Judging from the footprints, I could tell someone had come.' },
       { clause:'電気がついている', clauseReading:'でんきがついている', result:'誰かがいると分かりました', resultReading:'だれかがいるとわかりました', english:'Judging from the light being on, I could tell someone was there.' },
-    ], 1491)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1491)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('ことから、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'ことから draws a conclusion from an observable piece of evidence.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('ことから、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-29-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['evidence'])},'ことから draws a conclusion from an observable piece of evidence.')
   }
 
   if (patternId === 'n2-30') {
-    const scene = pick([
+    const scenePool = [
       { clause:'安い', clauseReading:'やすい', result:'品質は良いです', resultReading:'ひんしつはいいです', english:'Though it is cheap, the quality is good.' },
       { clause:'難しい', clauseReading:'むずかしい', result:'挑戦する価値があります', resultReading:'ちょうせんするかちがあります', english:'Though it is difficult, it is worth attempting.' },
       { clause:'小さい', clauseReading:'ちいさい', result:'とても丈夫です', resultReading:'とてもじょうぶです', english:'Though it is small, it is very sturdy.' },
-    ], 1501)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1501)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('とはいえ、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'とはいえ concedes a point formally before pointing out that it does not change the outcome.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('とはいえ、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-30-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['concession'])},'とはいえ concedes a point formally before pointing out that it does not change the outcome.')
   }
 
   if (patternId === 'n2-31') {
-    const scene = pick([
+    const scenePool = [
       { clause:'狭い', clauseReading:'せまい', result:'楽しい家です', resultReading:'たのしいいえです', english:'Although it is small, it is a fun house.' },
       { clause:'安い', clauseReading:'やすい', result:'質の良い店です', resultReading:'しつのよいみせです', english:'Although it is cheap, it is a good-quality shop.' },
       { clause:'若い', clauseReading:'わかい', result:'とても頼りになります', resultReading:'とてもたよりになります', english:'Although young, they are very reliable.' },
-    ], 1511)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1511)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('ながらも、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'ながら(も) after an adjective concedes a quality while asserting something that seems to contradict it.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('ながらも、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-31-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['concession'])},'ながら(も) after an adjective concedes a quality while asserting something that seems to contradict it.')
   }
 
   if (patternId === 'n2-32') {
-    const scene = pick([
+    const scenePool = [
       { clause:'生きている', clauseReading:'いきている', result:'頑張ります', resultReading:'がんばります', english:'As long as I am alive, I will keep trying.' },
       { clause:'時間がある', clauseReading:'じかんがある', result:'手伝います', resultReading:'てつだいます', english:'As long as I have time, I will help.' },
       { clause:'ルールを守る', clauseReading:'るーるをまもる', result:'自由に遊べます', resultReading:'じゆうにあそべます', english:'As long as you follow the rules, you can play freely.' },
-    ], 1521)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.reason) { const avoided = scenePickPool.filter(c => c.clause !== options.avoidWords!.reason); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.reason ?? seed, 1521)
     if (!scene) return null
-    const furigana=[literalPart(scene.clause,scene.clauseReading,'reason'),literalPart('限り、','かぎり、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'限り sets an upper boundary: the result holds only within that condition.')
+    const furigana=[{text:scene.clause,reading:scene.clauseReading,slot:'reason'},literalPart('限り、','かぎり、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{reason:grammarSlot(`n2-32-scene-${scenePool.indexOf(scene)}`,scene.clause,scene.clause,scene.clauseReading,scene.english,['boundary'])},'限り sets an upper boundary: the result holds only within that condition.')
   }
 
   if (patternId === 'n2-33') {
-    const scene = pick([
+    const scenePool = [
       { a:'今年', aReading:'ことし', b:'去年', bReading:'きょねん', predicate:'暑いです', predicateReading:'あついです', english:'Compared with last year, this year is hot.' },
       { a:'この町', aReading:'このまち', b:'あの町', bReading:'あのまち', predicate:'静かです', predicateReading:'しずかです', english:'Compared with that town, this town is quiet.' },
       { a:'今回', aReading:'こんかい', b:'前回', bReading:'ぜんかい', predicate:'簡単でした', predicateReading:'かんたんでした', english:'Compared with last time, this time was easy.' },
-    ], 1531)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.subject) { const avoided = scenePickPool.filter(c => c.a !== options.avoidWords!.subject); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.subject ?? seed, 1531)
     if (!scene) return null
-    const furigana=[literalPart(scene.a,scene.aReading,'subject'),literalPart('は','わ'),literalPart(scene.b,scene.bReading,'object'),literalPart('に比べて、','にくらべて、'),literalPart(scene.predicate,scene.predicateReading,'result')]
-    return finish(furigana,scene.english,{},{},'に比べて sets up an explicit comparison baseline for the statement that follows.')
+    const furigana=[{text:scene.a,reading:scene.aReading,slot:'subject'},literalPart('は','わ'),literalPart(scene.b,scene.bReading,'object'),literalPart('に比べて、','にくらべて、'),literalPart(scene.predicate,scene.predicateReading,'result')]
+    return finish(furigana,scene.english,{},{subject:grammarSlot(`n2-33-scene-${scenePool.indexOf(scene)}`,scene.a,scene.a,scene.aReading,scene.english,['comparison'])},'に比べて sets up an explicit comparison baseline for the statement that follows.')
   }
 
   if (patternId === 'n2-34') {
-    const scene = pick([
+    const scenePool = [
       { topic:'その意見', topicReading:'そのいけん', result:'反対しました', resultReading:'はんたいしました', english:'They objected in response to that opinion.' },
       { topic:'新しい方針', topicReading:'あたらしいほうしん', result:'賛成しました', resultReading:'さんせいしました', english:'They agreed in response to the new policy.' },
       { topic:'その質問', topicReading:'そのしつもん', result:'丁寧に答えました', resultReading:'ていねいにこたえました', english:'They answered that question carefully.' },
-    ], 1541)
+    ]
+    let scenePickPool = scenePool
+    if (options.avoidWords?.object) { const avoided = scenePickPool.filter(c => c.topic !== options.avoidWords!.object); if (avoided.length) scenePickPool = avoided }
+    const scene = seededPick(scenePickPool, options.slotSeeds?.object ?? seed, 1541)
     if (!scene) return null
-    const furigana=[literalPart(scene.topic,scene.topicReading,'object'),literalPart('に対して、','にたいして、'),literalPart(scene.result,scene.resultReading,'result')]
-    return finish(furigana,scene.english,{},{},'に対して marks the specific target that a reaction or attitude is directed at.')
+    const furigana=[{text:scene.topic,reading:scene.topicReading,slot:'object'},literalPart('に対して、','にたいして、'),literalPart(scene.result,scene.resultReading,'result')]
+    return finish(furigana,scene.english,{},{object:grammarSlot(`n2-34-scene-${scenePool.indexOf(scene)}`,scene.topic,scene.topic,scene.topicReading,scene.english,['target'])},'に対して marks the specific target that a reaction or attitude is directed at.')
   }
 
   if (patternId === 'n2-35') {
@@ -4075,25 +4242,47 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n2-36') {
-    const scene = pick([
-      { subject:'彼', subjectReading:'かれ', verb:'来る', verbReading:'くる', english:'There is no way he is coming.' },
-      { subject:'彼女', subjectReading:'かのじょ', verb:'知っている', verbReading:'しっている', english:'There is no way she knows.' },
-      { subject:'あの人', subjectReading:'あのひと', verb:'間違える', verbReading:'まちがえる', english:'There is no way that person makes a mistake.' },
-    ], 1561)
-    if (!scene) return null
-    const furigana=[literalPart(scene.subject,scene.subjectReading,'subject'),literalPart('が'),literalPart(scene.verb,scene.verbReading,'verb'),literalPart('はずがありません。')]
-    return finish(furigana,scene.english,{},{},'はずがない firmly rules out a possibility as logically impossible.')
+    // Subject and verb were bundled as correlated {subject,verb} pairs, which
+    // would have changed both texts together on a "subject" rotation and
+    // failed the single-segment-change check the sweep enforces — decoupled
+    // to a real subject pool + an independently-seeded verb choice instead,
+    // so each is genuinely its own rotatable slot.
+    const subject = pick(humans, 1561, 'subject')
+    const verbPool = [
+      { verb:'来る', verbReading:'くる', base:'is coming', plural:'are coming' },
+      { verb:'知っている', verbReading:'しっている', base:'knows', plural:'know' },
+      { verb:'間違える', verbReading:'まちがえる', base:'makes a mistake', plural:'make a mistake' },
+      { verb:'忘れる', verbReading:'わすれる', base:'forgets', plural:'forget' },
+      { verb:'嘘をつく', verbReading:'うそをつく', base:'lies', plural:'lie' },
+    ]
+    let verbPickPool = verbPool
+    if (options.avoidWords?.verb) { const avoided = verbPickPool.filter(c => c.verb !== options.avoidWords!.verb); if (avoided.length) verbPickPool = avoided }
+    const verbChoice = seededPick(verbPickPool, options.slotSeeds?.verb ?? seed, 1562)
+    if (!subject || !verbChoice) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const gloss = subjectUsesBaseVerb(subjectEnglish) ? verbChoice.plural : verbChoice.base
+    const furigana=[wordPart(subject,'subject'),literalPart('が'),{text:verbChoice.verb,reading:verbChoice.verbReading,slot:'verb'},literalPart('はずがありません。')]
+    return finish(furigana,`There is no way ${subjectEnglish} ${gloss}.`,{subject},{verb:grammarSlot(`n2-36-verb-${verbPool.indexOf(verbChoice)}`,verbChoice.verb,verbChoice.verb,verbChoice.verbReading,gloss,['impossibility'])},'はずがない firmly rules out a possibility as logically impossible.')
   }
 
   if (patternId === 'n2-37') {
-    const scene = pick([
-      { subject:'子供', subjectReading:'こども', clause:'ドアを開けよう', clauseReading:'どあをあけよう', english:'The child tried to open the door.' },
-      { subject:'選手', subjectReading:'せんしゅ', clause:'記録を破ろう', clauseReading:'きろくをやぶろう', english:'The athlete tried to break the record.' },
-      { subject:'犬', subjectReading:'いぬ', clause:'逃げよう', clauseReading:'にげよう', english:'The dog tried to run away.' },
-    ], 1571)
-    if (!scene) return null
-    const furigana=[literalPart(scene.subject,scene.subjectReading,'subject'),literalPart('は','わ'),literalPart(scene.clause,scene.clauseReading,'verb'),literalPart('としました。')]
-    return finish(furigana,scene.english,{},{},'volitional + とする means to attempt or be on the verge of doing something.')
+    // Same decoupling as n2-36 — subject from a real pool, verb from an
+    // independently-seeded small pool, instead of correlated {subject,clause}
+    // pairs that would break the single-segment invariant on rotation.
+    const subject = pick(humans, 1571, 'subject')
+    const clausePool = [
+      { clause:'ドアを開けよう', clauseReading:'どあをあけよう', gloss:'open the door' },
+      { clause:'記録を破ろう', clauseReading:'きろくをやぶろう', gloss:'break the record' },
+      { clause:'逃げよう', clauseReading:'にげよう', gloss:'run away' },
+      { clause:'説明しよう', clauseReading:'せつめいしよう', gloss:'explain' },
+    ]
+    let clausePickPool = clausePool
+    if (options.avoidWords?.verb) { const avoided = clausePickPool.filter(c => c.clause !== options.avoidWords!.verb); if (avoided.length) clausePickPool = avoided }
+    const clauseChoice = seededPick(clausePickPool, options.slotSeeds?.verb ?? seed, 1572)
+    if (!subject || !clauseChoice) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),{text:clauseChoice.clause,reading:clauseChoice.clauseReading,slot:'verb'},literalPart('としました。')]
+    return finish(furigana,`${capitalize(subjectEnglish)} tried to ${clauseChoice.gloss}.`,{subject},{verb:grammarSlot(`n2-37-verb-${clausePool.indexOf(clauseChoice)}`,clauseChoice.clause,clauseChoice.clause,clauseChoice.clauseReading,clauseChoice.gloss,['attempt'])},'volitional + とする means to attempt or be on the verge of doing something.')
   }
 
   return null
