@@ -82,7 +82,7 @@ export function stopSpeaking() {
  * changes on a timer, so a backlog would quickly fall out of sync with what is
  * on screen.
  */
-export function speakJapanese(text: string, rate = 0.9) {
+export function speakJapanese(text: string, rate = 0.9, volume = 1) {
   if (!text.trim()) return
   const voice = japaneseVoice()
   if (!voice) return
@@ -92,5 +92,6 @@ export function speakJapanese(text: string, rate = 0.9) {
   utterance.voice = voice
   utterance.lang = voice.lang
   utterance.rate = rate
+  utterance.volume = volume
   window.speechSynthesis.speak(utterance)
 }

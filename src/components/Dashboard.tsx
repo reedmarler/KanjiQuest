@@ -15,13 +15,24 @@ import { canSpeakJapanese, speakJapanese, stopSpeaking, watchSpeechSupport } fro
 
 const HERO_SPEECH_STORAGE_KEY = 'kanji-quest-hero-speech-v1'
 const HERO_SPEECH_RATE_STORAGE_KEY = 'kanji-quest-hero-speech-rate-v1'
+const HERO_SPEECH_VOLUME_STORAGE_KEY = 'kanji-quest-hero-speech-volume-v1'
 /** Voice speeds, slowest to fastest. 1× is the engine's natural pace. */
 const HERO_SPEECH_RATES = [0.5, 0.75, 1, 1.25, 1.5] as const
 type HeroSpeechRate = typeof HERO_SPEECH_RATES[number]
 
+/** Volume levels the button cycles through, muted to full. */
+const HERO_SPEECH_VOLUMES = [0, 0.5, 1] as const
+type HeroSpeechVolume = typeof HERO_SPEECH_VOLUMES[number]
+const HERO_SPEECH_VOLUME_ICONS: Record<HeroSpeechVolume, string> = { 0: '🔇', 0.5: '🔉', 1: '🔊' }
+
 function savedSpeechRate(): HeroSpeechRate {
   const stored = Number(window.localStorage.getItem(HERO_SPEECH_RATE_STORAGE_KEY))
   return HERO_SPEECH_RATES.find((rate) => rate === stored) ?? 1
+}
+
+function savedSpeechVolume(): HeroSpeechVolume {
+  const stored = Number(window.localStorage.getItem(HERO_SPEECH_VOLUME_STORAGE_KEY))
+  return HERO_SPEECH_VOLUMES.find((volume) => volume === stored) ?? 1
 }
 
 const RotatingHeroSentence = lazy(() => import('./RotatingHeroSentence').then((module) => ({ default: module.RotatingHeroSentence })))
@@ -298,10 +309,13 @@ export function Dashboard({
   const [speechSupported, setSpeechSupported] = useState(canSpeakJapanese)
   const [spokenSentence, setSpokenSentence] = useState('')
   const [speechRate, setSpeechRate] = useState<HeroSpeechRate>(savedSpeechRate)
-  // Lets the speak-on-new-sentence effect read the current rate without taking
-  // it as a dependency (see that effect for why).
+  const [speechVolume, setSpeechVolume] = useState<HeroSpeechVolume>(savedSpeechVolume)
+  // Lets the speak-on-new-sentence effect read the current rate/volume without
+  // taking them as a dependency (see that effect for why).
   const speechRateRef = useRef(speechRate)
   speechRateRef.current = speechRate
+  const speechVolumeRef = useRef(speechVolume)
+  speechVolumeRef.current = speechVolume
 
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
   const achievements = buildAchievements({ learnedCards: learnedCount, favoriteSentences: favoriteSentenceCount, questProgress, metrics: achievementMetrics })
@@ -334,7 +348,19 @@ export function Dashboard({
   function changeSpeechRate(rate: HeroSpeechRate) {
     setSpeechRate(rate)
     window.localStorage.setItem(HERO_SPEECH_RATE_STORAGE_KEY, String(rate))
-    if (speechOn && spokenSentence) speakJapanese(spokenSentence, rate)
+    if (speechOn && spokenSentence) speakJapanese(spokenSentence, rate, speechVolumeRef.current)
+  }
+
+  /**
+   * Cycles muted → half → full, replaying the current sentence at the new
+   * volume so the change is audible immediately, same as the rate control.
+   */
+  function cycleSpeechVolume() {
+    const currentIndex = HERO_SPEECH_VOLUMES.indexOf(speechVolume)
+    const volume = HERO_SPEECH_VOLUMES[(currentIndex + 1) % HERO_SPEECH_VOLUMES.length]!
+    setSpeechVolume(volume)
+    window.localStorage.setItem(HERO_SPEECH_VOLUME_STORAGE_KEY, String(volume))
+    if (speechOn && spokenSentence) speakJapanese(spokenSentence, speechRateRef.current, volume)
   }
 
   // Voices arrive asynchronously, so a Japanese voice can appear after first
@@ -346,7 +372,7 @@ export function Dashboard({
   // time on every adjustment.
   useEffect(() => {
     if (!speechOn || !spokenSentence) return
-    speakJapanese(spokenSentence, speechRateRef.current)
+    speakJapanese(spokenSentence, speechRateRef.current, speechVolumeRef.current)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [speechOn, spokenSentence])
 
@@ -475,6 +501,18 @@ export function Dashboard({
               <span className="control-chip-jp" aria-hidden="true">{speechOn ? '🔊' : '🔈'}</span>
               Speak
             </button>
+            {speechSupported && (
+              <button
+                type="button"
+                className="control-chip"
+                onClick={cycleSpeechVolume}
+                aria-label={`Voice volume ${Math.round(speechVolume * 100)}%, tap to change`}
+                title="Cycle voice volume"
+              >
+                <span className="control-chip-jp" aria-hidden="true">{HERO_SPEECH_VOLUME_ICONS[speechVolume]}</span>
+                Volume
+              </button>
+            )}
             {speechSupported && (
               // Stays visible while speech is off so the speed can be set
               // before turning it on, rather than appearing only afterwards.
