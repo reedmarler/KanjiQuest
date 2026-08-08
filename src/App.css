@@ -112,7 +112,7 @@ body:has(.dashboard) .app {
 
 /* Dashboard */
 .dashboard::before {
-  content: "13";
+  content: "14";
   position: fixed;
   top: calc(0.4rem + env(safe-area-inset-top));
   left: calc(0.45rem + env(safe-area-inset-left));
