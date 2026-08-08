@@ -112,7 +112,7 @@ body:has(.dashboard) .app {
 
 /* Dashboard */
 .dashboard::before {
-  content: "15";
+  content: "16";
   position: fixed;
   top: calc(0.4rem + env(safe-area-inset-top));
   left: calc(0.45rem + env(safe-area-inset-left));
@@ -2191,6 +2191,14 @@ body:has(.dashboard) .app {
   border-right: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent) !important;
 }
 
+/* The volume toggle shares the voice-speed pill; a divider keeps the two
+   functions visually distinct without the width cost of a second pill. */
+.control-voice-group button:first-child {
+  min-width: 1.5rem;
+  font-size: 0.68rem;
+  border-right: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent);
+}
+
 /* Display toggles: glyph carries the meaning, word label confirms it. */
 .control-chip {
   display: inline-flex;
@@ -4212,6 +4220,15 @@ body:has(.dashboard) .app {
   .hero-controls-row:first-child .control-group {
     width: 100%;
     justify-content: space-between;
+  }
+  /* The display group (Furigana/English/Speak + voice pill) has one more
+     item than fits on a single narrow row; wrapping it centered avoids the
+     overflow/cropping that space-between causes once it breaks onto a
+     second line. */
+  .hero-controls-row:first-child .control-group[aria-label="Display"] {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.4rem;
   }
   .control-group {
     max-width: 100%;

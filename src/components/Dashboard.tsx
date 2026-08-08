@@ -502,21 +502,17 @@ export function Dashboard({
               Speak
             </button>
             {speechSupported && (
-              <button
-                type="button"
-                className="control-chip"
-                onClick={cycleSpeechVolume}
-                aria-label={`Voice volume ${Math.round(speechVolume * 100)}%, tap to change`}
-                title="Cycle voice volume"
-              >
-                <span className="control-chip-jp" aria-hidden="true">{HERO_SPEECH_VOLUME_ICONS[speechVolume]}</span>
-                Volume
-              </button>
-            )}
-            {speechSupported && (
-              // Stays visible while speech is off so the speed can be set
-              // before turning it on, rather than appearing only afterwards.
-              <div className="control-stepper" role="group" aria-label="Voice speed">
+              // Icon-only and grouped with the speed stepper as one "voice"
+              // unit — a fourth full chip here was overflowing on phones.
+              <div className="control-stepper control-voice-group" role="group" aria-label="Voice settings">
+                <button
+                  type="button"
+                  onClick={cycleSpeechVolume}
+                  aria-label={`Voice volume ${Math.round(speechVolume * 100)}%, tap to change`}
+                  title="Cycle voice volume"
+                >
+                  {HERO_SPEECH_VOLUME_ICONS[speechVolume]}
+                </button>
                 <button
                   type="button"
                   aria-label="Slow down the voice"
