@@ -28,9 +28,17 @@ function matchingKanaRunLength(remaining: string, text: string, start = 0): numb
   return normalizedText.length
 }
 
+/**
+ * Finds where the next literal kana run starts within `remaining`. The search
+ * starts at index 1, not 0: this is only ever called to locate the literal
+ * that follows a kanji run, and a kanji run always contributes at least one
+ * kana of its own reading — starting at 0 lets a stray は/わ (or へ/え) match
+ * inside the kanji's own reading and swallow it, e.g. 私 (わたし) followed by
+ * は matching the わ in わたし itself instead of the real particle after it.
+ */
 function kanaRunIndex(remaining: string, text: string): number {
   const normalizedRemaining = katakanaToHiragana(remaining)
-  for (let index = 0; index < normalizedRemaining.length; index += 1) {
+  for (let index = 1; index < normalizedRemaining.length; index += 1) {
     if (matchingKanaRunLength(remaining, text, index) !== null) return index
   }
   return -1
