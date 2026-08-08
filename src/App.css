@@ -112,7 +112,7 @@ body:has(.dashboard) .app {
 
 /* Dashboard */
 .dashboard::before {
-  content: "16";
+  content: "17";
   position: fixed;
   top: calc(0.4rem + env(safe-area-inset-top));
   left: calc(0.45rem + env(safe-area-inset-left));
@@ -4215,16 +4215,17 @@ body:has(.dashboard) .app {
     flex-direction: column;
     gap: 0.55rem;
   }
-  /* Push the playback and display controls out to the screen edges rather than
-     bunching them in the middle, so they sit under the thumbs on a phone. */
+  /* Mirror the desktop control bar: buttons stay clustered together at their
+     natural gap instead of stretching apart, they just wrap onto their own
+     centered row (playback, then display) since both groups together are
+     wider than a phone screen. */
   .hero-controls-row:first-child .control-group {
     width: 100%;
-    justify-content: space-between;
+    justify-content: center;
   }
   /* The display group (Furigana/English/Speak + voice pill) has one more
      item than fits on a single narrow row; wrapping it centered avoids the
-     overflow/cropping that space-between causes once it breaks onto a
-     second line. */
+     overflow/cropping a forced single line would cause. */
   .hero-controls-row:first-child .control-group[aria-label="Display"] {
     flex-wrap: wrap;
     justify-content: center;
