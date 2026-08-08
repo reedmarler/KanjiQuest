@@ -2183,12 +2183,24 @@ body:has(.dashboard) .app {
   cursor: default;
 }
 
+.control-stepper button.is-active {
+  background: color-mix(in srgb, var(--kyogre) 26%, transparent);
+  opacity: 1;
+}
+
 .control-stepper-value {
   min-width: 2.1rem !important;
   color: var(--text) !important;
   font-size: 0.6rem !important;
   border-left: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent) !important;
   border-right: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent) !important;
+}
+
+.control-stepper-icon {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.3rem;
+  font-size: 0.68rem;
 }
 
 /* The volume toggle shares the voice-speed pill; a divider keeps the two

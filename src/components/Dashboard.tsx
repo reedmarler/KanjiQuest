@@ -11,7 +11,15 @@ import {
   HERO_SPEED_STORAGE_KEY,
   type HeroPlaybackRate,
 } from '../lib/heroPlayback'
-import { canSpeakJapanese, speakJapanese, stopSpeaking, watchSpeechSupport } from '../lib/speech'
+import {
+  canSpeakJapanese,
+  savedVoiceGender,
+  setVoiceGender,
+  speakJapanese,
+  stopSpeaking,
+  watchSpeechSupport,
+  type SpeechVoiceGender,
+} from '../lib/speech'
 
 const HERO_SPEECH_STORAGE_KEY = 'kanji-quest-hero-speech-v1'
 const HERO_SPEECH_RATE_STORAGE_KEY = 'kanji-quest-hero-speech-rate-v1'
@@ -20,10 +28,15 @@ const HERO_SPEECH_VOLUME_STORAGE_KEY = 'kanji-quest-hero-speech-volume-v1'
 const HERO_SPEECH_RATES = [0.5, 0.75, 1, 1.25, 1.5] as const
 type HeroSpeechRate = typeof HERO_SPEECH_RATES[number]
 
-/** Volume levels the button cycles through, muted to full. */
-const HERO_SPEECH_VOLUMES = [0, 0.5, 1] as const
+/** Voice volume steps, muted to full, in 10% increments. */
+const HERO_SPEECH_VOLUMES = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] as const
 type HeroSpeechVolume = typeof HERO_SPEECH_VOLUMES[number]
-const HERO_SPEECH_VOLUME_ICONS: Record<HeroSpeechVolume, string> = { 0: '🔇', 0.5: '🔉', 1: '🔊' }
+
+function speechVolumeIcon(volume: number): string {
+  if (volume === 0) return '🔇'
+  if (volume < 0.5) return '🔉'
+  return '🔊'
+}
 
 function savedSpeechRate(): HeroSpeechRate {
   const stored = Number(window.localStorage.getItem(HERO_SPEECH_RATE_STORAGE_KEY))
@@ -310,6 +323,7 @@ export function Dashboard({
   const [spokenSentence, setSpokenSentence] = useState('')
   const [speechRate, setSpeechRate] = useState<HeroSpeechRate>(savedSpeechRate)
   const [speechVolume, setSpeechVolume] = useState<HeroSpeechVolume>(savedSpeechVolume)
+  const [voiceGender, setVoiceGenderState] = useState<SpeechVoiceGender>(savedVoiceGender)
   // Lets the speak-on-new-sentence effect read the current rate/volume without
   // taking them as a dependency (see that effect for why).
   const speechRateRef = useRef(speechRate)
@@ -351,16 +365,24 @@ export function Dashboard({
     if (speechOn && spokenSentence) speakJapanese(spokenSentence, rate, speechVolumeRef.current)
   }
 
-  /**
-   * Cycles muted → half → full, replaying the current sentence at the new
-   * volume so the change is audible immediately, same as the rate control.
+/**
+   * Sets the voice volume, replaying the current sentence at the new volume
+   * so the change is audible immediately, same as the rate control.
    */
-  function cycleSpeechVolume() {
-    const currentIndex = HERO_SPEECH_VOLUMES.indexOf(speechVolume)
-    const volume = HERO_SPEECH_VOLUMES[(currentIndex + 1) % HERO_SPEECH_VOLUMES.length]!
+  function changeSpeechVolume(volume: HeroSpeechVolume) {
     setSpeechVolume(volume)
     window.localStorage.setItem(HERO_SPEECH_VOLUME_STORAGE_KEY, String(volume))
     if (speechOn && spokenSentence) speakJapanese(spokenSentence, speechRateRef.current, volume)
+  }
+
+  /**
+   * Switches the TTS voice and replays the current sentence in the new
+   * voice, same as the rate/volume controls.
+   */
+  function changeVoiceGender(gender: SpeechVoiceGender) {
+    setVoiceGenderState(gender)
+    setVoiceGender(gender)
+    if (speechOn && spokenSentence) speakJapanese(spokenSentence, speechRateRef.current, speechVolumeRef.current)
   }
 
   // Voices arrive asynchronously, so a Japanese voice can appear after first
@@ -385,6 +407,7 @@ export function Dashboard({
 
   const speedIndex = HERO_PLAYBACK_RATES.indexOf(playbackRate)
   const speechRateIndex = HERO_SPEECH_RATES.indexOf(speechRate)
+  const speechVolumeIndex = HERO_SPEECH_VOLUMES.indexOf(speechVolume)
 
   const rotationCountRef = useRef(0)
   const handleRotate = useCallback(() => {
@@ -502,17 +525,38 @@ export function Dashboard({
               Speak
             </button>
             {speechSupported && (
-              // Icon-only and grouped with the speed stepper as one "voice"
-              // unit — a fourth full chip here was overflowing on phones.
-              <div className="control-stepper control-voice-group" role="group" aria-label="Voice settings">
+              <div className="control-stepper control-voice-group" role="group" aria-label="Voice volume">
+                <span className="control-stepper-icon" aria-hidden="true">{speechVolumeIcon(speechVolume)}</span>
                 <button
                   type="button"
-                  onClick={cycleSpeechVolume}
-                  aria-label={`Voice volume ${Math.round(speechVolume * 100)}%, tap to change`}
-                  title="Cycle voice volume"
+                  aria-label="Lower voice volume"
+                  disabled={speechVolumeIndex === 0}
+                  onClick={() => changeSpeechVolume(HERO_SPEECH_VOLUMES[speechVolumeIndex - 1]!)}
                 >
-                  {HERO_SPEECH_VOLUME_ICONS[speechVolume]}
+                  −
                 </button>
+                <button
+                  type="button"
+                  className="control-stepper-value"
+                  aria-label={`Voice volume ${Math.round(speechVolume * 100)}%, tap to reset`}
+                  onClick={() => changeSpeechVolume(1)}
+                >
+                  {Math.round(speechVolume * 100)}%
+                </button>
+                <button
+                  type="button"
+                  aria-label="Raise voice volume"
+                  disabled={speechVolumeIndex === HERO_SPEECH_VOLUMES.length - 1}
+                  onClick={() => changeSpeechVolume(HERO_SPEECH_VOLUMES[speechVolumeIndex + 1]!)}
+                >
+                  +
+                </button>
+              </div>
+            )}
+            {speechSupported && (
+              // Grouped with the volume stepper as one "voice" unit — a
+              // fourth full chip here was overflowing on phones.
+              <div className="control-stepper control-voice-group" role="group" aria-label="Voice speed">
                 <button
                   type="button"
                   aria-label="Slow down the voice"
@@ -536,6 +580,28 @@ export function Dashboard({
                   onClick={() => changeSpeechRate(HERO_SPEECH_RATES[speechRateIndex + 1]!)}
                 >
                   +
+                </button>
+              </div>
+            )}
+            {speechSupported && (
+              <div className="control-stepper control-voice-group" role="group" aria-label="Voice gender">
+                <button
+                  type="button"
+                  className={voiceGender === 'girl' ? 'is-active' : ''}
+                  aria-pressed={voiceGender === 'girl'}
+                  aria-label="Girl voice"
+                  onClick={() => changeVoiceGender('girl')}
+                >
+                  👧
+                </button>
+                <button
+                  type="button"
+                  className={voiceGender === 'boy' ? 'is-active' : ''}
+                  aria-pressed={voiceGender === 'boy'}
+                  aria-label="Boy voice"
+                  onClick={() => changeVoiceGender('boy')}
+                >
+                  👦
                 </button>
               </div>
             )}
