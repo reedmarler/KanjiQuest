@@ -47,6 +47,8 @@ export interface RotatingHeroSentenceProps {
   onRotate?: () => void
   rewindSignal?: number
   onCanRewindChange?: (canRewind: boolean) => void
+  /** Fires with the plain Japanese of the sentence currently on screen. */
+  onSentenceChange?: (japanese: string) => void
 }
 
 type HeroHistoryEntry = {
@@ -75,6 +77,7 @@ export function RotatingHeroSentence({
   onRotate,
   rewindSignal = 0,
   onCanRewindChange,
+  onSentenceChange,
 }: RotatingHeroSentenceProps) {
   const [sequenceSeed, setSequenceSeed] = useState(newSequenceSeed)
   const effectiveStoryLevel = storyLevel ?? 'N5'
@@ -176,6 +179,15 @@ export function RotatingHeroSentence({
   const frame = step?.frame
   const nextFrame = nextStep?.frame
 
+  // The plain Japanese of whatever is currently on screen, reported upward so
+  // the dashboard can read it aloud. Derived from the same segments the view
+  // renders, so speech can never describe a different sentence than the one
+  // being shown.
+  const visibleJapanese = (frame?.segments ?? []).map((segment) => segment.text).join('')
+  useEffect(() => {
+    if (visibleJapanese) onSentenceChange?.(visibleJapanese)
+  }, [visibleJapanese, onSentenceChange])
+
   useEffect(() => {
     if (displayMode !== 'sentence' || steps.length < 2 || paused) return
 
@@ -242,7 +254,7 @@ export function RotatingHeroSentence({
         key={`${run.text}-${index}`}
         className={`hero-database-full-run${run.reading ? ' has-reading' : ''}`}
       >
-        {furiganaOn && run.reading && <span className="hero-database-full-reading">{run.reading}</span>}
+        {furiganaOn && run.reading && <span className="hero-database-full-reading" aria-hidden="true">{run.reading}</span>}
         <span className="hero-database-full-text">{run.text}</span>
       </span>
     ))
@@ -268,7 +280,14 @@ export function RotatingHeroSentence({
           const next = incomingByKey.get(segment.key)
           const highlighted = isChanging && (phase === 'highlight' || phase === 'swap')
           const isSwapping = isChanging && phase === 'swap' && Boolean(next)
-          const slotChars = isSwapping
+          // Reserving the combined width only during the swap phase crammed a
+          // big length change (a short ending growing into a long one, or the
+          // reverse) into one short window — the box visibly snapped instead
+          // of gliding. Starting the reservation at the highlight phase gives
+          // a large delta the full highlight+swap duration to grow or shrink,
+          // instead of only the swap phase's slice of it.
+          const reservesSwapWidth = isChanging && (phase === 'highlight' || phase === 'swap') && Boolean(next)
+          const slotChars = reservesSwapWidth
             ? heroSwapBlockChars(charLength(segment.text), charLength(next!.text))
             : charLength(segment.text)
           const style = segment.swappable
@@ -308,7 +327,7 @@ export function RotatingHeroSentence({
             key={`${run.text}-${index}`}
             className={`hero-database-full-run${run.reading ? ' has-reading' : ''}`}
           >
-            {furiganaOn && run.reading && <span className="hero-database-full-reading">{run.reading}</span>}
+            {furiganaOn && run.reading && <span className="hero-database-full-reading" aria-hidden="true">{run.reading}</span>}
             <span className="hero-database-full-text">{run.text}</span>
           </span>
         ))}
@@ -321,7 +340,12 @@ export function RotatingHeroSentence({
       className={`hero-sentence-block hero-database-block${storyId ? ' hero-story-block' : ''}`}
       style={{
         '--hero-database-highlight-duration': `${HERO_HIGHLIGHT_MS / playbackRate}ms`,
-        '--hero-database-space-duration': `${HERO_HIGHLIGHT_MS / playbackRate}ms`,
+        // The changing segment now reserves its swapped-in width starting at
+        // the highlight phase (see reservesSwapWidth above), not just during
+        // the swap phase — so the width transition needs the combined
+        // highlight+swap duration to actually finish by the time the swap
+        // animation does, instead of racing ahead and sitting idle.
+        '--hero-database-space-duration': `${(HERO_HIGHLIGHT_MS + HERO_SWAP_MS) / playbackRate}ms`,
         '--hero-database-swap-duration': `${HERO_SWAP_MS / playbackRate}ms`,
         '--hero-database-char-count': heroCharCount,
       } as CSSProperties}

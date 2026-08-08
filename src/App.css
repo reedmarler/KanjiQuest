@@ -195,7 +195,12 @@ body:has(.dashboard) .app {
      wrapped lines. Sizing it once and holding it fixed — rather than letting
      it grow/shrink per sentence — is what keeps swaps from visibly resizing. */
   --hero-japanese-row-height: 8.52rem;
-  --hero-database-slot-height: 2.08em;
+  /* Matches .hero-database-full-sentence's line-height (1.86) exactly — a
+     word-rotation step and a plain rendered sentence show the same text
+     through two different DOM structures (segment-wrapped vs. plain runs),
+     and a mismatched box height here shifted the baseline by the difference
+     the instant a step's render path switched between them. */
+  --hero-database-slot-height: 1.86em;
   --hero-rotater-height: calc(var(--hero-japanese-row-height) + 3.08rem);
   height: var(--hero-rotater-height);
   min-height: var(--hero-rotater-height);
@@ -320,6 +325,14 @@ body:has(.dashboard) .app {
   letter-spacing: 0;
   pointer-events: none;
   transform: translateX(-50%);
+  /* This is a real DOM text node (absolutely positioned, not semantic
+     ruby/rt), so without this a copy-paste or select-all concatenates the
+     reading with the kanji it sits above — "私" (text) preceded by its own
+     reading node produces "わたし私" in the copied string, or "転勤"'s
+     reading producing "てんきん転勤". aria-hidden on the element (in the
+     component) keeps screen readers from double-announcing it; this keeps
+     it out of anything copied from the page. */
+  user-select: none;
 }
 
 .hero-database-full-text {
@@ -4191,9 +4204,11 @@ body:has(.dashboard) .app {
     flex-direction: column;
     gap: 0.55rem;
   }
+  /* Push the playback and display controls out to the screen edges rather than
+     bunching them in the middle, so they sit under the thumbs on a phone. */
   .hero-controls-row:first-child .control-group {
     width: 100%;
-    justify-content: center;
+    justify-content: space-between;
   }
   .control-group {
     max-width: 100%;

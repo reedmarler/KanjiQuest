@@ -11,6 +11,18 @@ import {
   HERO_SPEED_STORAGE_KEY,
   type HeroPlaybackRate,
 } from '../lib/heroPlayback'
+import { canSpeakJapanese, speakJapanese, stopSpeaking, watchSpeechSupport } from '../lib/speech'
+
+const HERO_SPEECH_STORAGE_KEY = 'kanji-quest-hero-speech-v1'
+const HERO_SPEECH_RATE_STORAGE_KEY = 'kanji-quest-hero-speech-rate-v1'
+/** Voice speeds, slowest to fastest. 1× is the engine's natural pace. */
+const HERO_SPEECH_RATES = [0.5, 0.75, 1, 1.25, 1.5] as const
+type HeroSpeechRate = typeof HERO_SPEECH_RATES[number]
+
+function savedSpeechRate(): HeroSpeechRate {
+  const stored = Number(window.localStorage.getItem(HERO_SPEECH_RATE_STORAGE_KEY))
+  return HERO_SPEECH_RATES.find((rate) => rate === stored) ?? 1
+}
 
 const RotatingHeroSentence = lazy(() => import('./RotatingHeroSentence').then((module) => ({ default: module.RotatingHeroSentence })))
 
@@ -180,6 +192,7 @@ function DashboardHeroSentence({
   onRotate,
   rewindSignal,
   onCanRewindChange,
+  onSentenceChange,
 }: {
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
@@ -193,6 +206,7 @@ function DashboardHeroSentence({
   onRotate?: () => void
   rewindSignal: number
   onCanRewindChange: (canRewind: boolean) => void
+  onSentenceChange: (japanese: string) => void
 }) {
   return (
     <Suspense
@@ -215,6 +229,7 @@ function DashboardHeroSentence({
         onRotate={onRotate}
         rewindSignal={rewindSignal}
         onCanRewindChange={onCanRewindChange}
+        onSentenceChange={onSentenceChange}
       />
     </Suspense>
   )
@@ -279,6 +294,14 @@ export function Dashboard({
   const [additionalOpen, setAdditionalOpen] = useState(false)
   const [rewindSignal, setRewindSignal] = useState(0)
   const [canRewindSentence, setCanRewindSentence] = useState(false)
+  const [speechOn, setSpeechOn] = useState(() => window.localStorage.getItem(HERO_SPEECH_STORAGE_KEY) === 'true')
+  const [speechSupported, setSpeechSupported] = useState(canSpeakJapanese)
+  const [spokenSentence, setSpokenSentence] = useState('')
+  const [speechRate, setSpeechRate] = useState<HeroSpeechRate>(savedSpeechRate)
+  // Lets the speak-on-new-sentence effect read the current rate without taking
+  // it as a dependency (see that effect for why).
+  const speechRateRef = useRef(speechRate)
+  speechRateRef.current = speechRate
 
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
   const achievements = buildAchievements({ learnedCards: learnedCount, favoriteSentences: favoriteSentenceCount, questProgress, metrics: achievementMetrics })
@@ -293,11 +316,49 @@ export function Dashboard({
     setEnglishOn((on) => !on)
   }
 
+  function toggleSpeech() {
+    setSpeechOn((on) => {
+      const next = !on
+      window.localStorage.setItem(HERO_SPEECH_STORAGE_KEY, String(next))
+      // Turning it off should silence the sentence already being read, not just
+      // stop the next one.
+      if (!next) stopSpeaking()
+      return next
+    })
+  }
+
+  /**
+   * A rate change re-speaks the current sentence rather than waiting for the
+   * next one, so the new speed is audible while the user is still adjusting it.
+   */
+  function changeSpeechRate(rate: HeroSpeechRate) {
+    setSpeechRate(rate)
+    window.localStorage.setItem(HERO_SPEECH_RATE_STORAGE_KEY, String(rate))
+    if (speechOn && spokenSentence) speakJapanese(spokenSentence, rate)
+  }
+
+  // Voices arrive asynchronously, so a Japanese voice can appear after first
+  // paint — this keeps the button from staying disabled when one exists.
+  useEffect(() => watchSpeechSupport(setSpeechSupported), [])
+
+  // Deliberately not depending on speechRate: changeSpeechRate already replays
+  // at the new speed, and re-running here would restart the sentence a second
+  // time on every adjustment.
+  useEffect(() => {
+    if (!speechOn || !spokenSentence) return
+    speakJapanese(spokenSentence, speechRateRef.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speechOn, spokenSentence])
+
+  // Leaving the dashboard mid-sentence should not keep talking.
+  useEffect(() => stopSpeaking, [])
+
   useEffect(() => {
     window.localStorage.setItem(HERO_SPEED_STORAGE_KEY, String(playbackRate))
   }, [playbackRate])
 
   const speedIndex = HERO_PLAYBACK_RATES.indexOf(playbackRate)
+  const speechRateIndex = HERO_SPEECH_RATES.indexOf(speechRate)
 
   const rotationCountRef = useRef(0)
   const handleRotate = useCallback(() => {
@@ -328,6 +389,7 @@ export function Dashboard({
           onRotate={handleRotate}
           rewindSignal={rewindSignal}
           onCanRewindChange={setCanRewindSentence}
+          onSentenceChange={setSpokenSentence}
         />
       </header>
 
@@ -400,6 +462,49 @@ export function Dashboard({
               <span className="control-chip-jp" aria-hidden="true">EN</span>
               English
             </button>
+            <button
+              type="button"
+              className={`control-chip${speechOn ? ' is-active' : ''}`}
+              onClick={toggleSpeech}
+              aria-pressed={speechOn}
+              disabled={!speechSupported}
+              title={speechSupported
+                ? (speechOn ? 'Stop reading sentences aloud' : 'Read each new sentence aloud')
+                : 'No Japanese voice is installed on this device'}
+            >
+              <span className="control-chip-jp" aria-hidden="true">{speechOn ? '🔊' : '🔈'}</span>
+              Speak
+            </button>
+            {speechSupported && (
+              // Stays visible while speech is off so the speed can be set
+              // before turning it on, rather than appearing only afterwards.
+              <div className="control-stepper" role="group" aria-label="Voice speed">
+                <button
+                  type="button"
+                  aria-label="Slow down the voice"
+                  disabled={speechRateIndex === 0}
+                  onClick={() => changeSpeechRate(HERO_SPEECH_RATES[speechRateIndex - 1]!)}
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  className="control-stepper-value"
+                  aria-label={`Voice speed ${speechRate} times, tap to reset`}
+                  onClick={() => changeSpeechRate(1)}
+                >
+                  {speechRate}×
+                </button>
+                <button
+                  type="button"
+                  aria-label="Speed up the voice"
+                  disabled={speechRateIndex === HERO_SPEECH_RATES.length - 1}
+                  onClick={() => changeSpeechRate(HERO_SPEECH_RATES[speechRateIndex + 1]!)}
+                >
+                  +
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

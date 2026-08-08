@@ -42,6 +42,8 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N5','Location に Subject が いる/ある',['Location','に','Subject','が','Verb'],'公園に子供がいる','existence of a person, animal, or thing at a location','いる/ある',true],
   ['N5','Subject は Verb',['Subject','は','Verb'],'子供が泣く','a bare state or action verb with no object, destination, or location','dictionary',true],
   ['N5','Subject は Source から Verb',['Subject','は','Source','から','Verb'],'私は部屋から出る','leaving or exiting from a source, the opposite of a destination','dictionary',true],
+  ['N5','Subject は BodyPart が痛い',['Subject','は','BodyPart','が','痛い'],'私は頭が痛い','a body part hurts — the が-marked part inside a は-topic, the standard health-complaint frame','predicate',true],
+  ['N5','Subject は Vehicle に乗る',['Subject','は','Vehicle','に','乗る'],'私は電車に乗る','riding or boarding a vehicle','dictionary',true],
 
   ['N4','Subject は Object を Verbたい',['Subject','は','Object','を','Verbたい'],'本を読みたい','desire to do','masu-stem + たい',true],
   ['N4','Subject は Object を Verbている',['Subject','は','Object','を','Verbている'],'本を読んでいる','ongoing or resulting state','te-form + いる',true],

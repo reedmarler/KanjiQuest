@@ -11,6 +11,15 @@ const findableLostItems = new Set(['鍵', '財布', '手紙', '切符', 'チケ�
  * vocabulary or grammar available elsewhere in the app.
  */
 export function isDashboardSentenceNatural(sentence: GeneratedPreviewSentence): boolean {
+  // A bare catalog reference example (generatePreviewSentence's last-resort
+  // fallback when the real generator fails for a seed) skips furigana/reading
+  // entirely and carries no slots — it's meant for a "browse grammar
+  // patterns" list, not for display as a live generated sentence. Every real
+  // generator path always computes a non-empty reading, so this is a safe,
+  // general way to catch that fallback wherever it leaks in (e.g. through the
+  // linked-form feature) without special-casing each caller.
+  if (!sentence.reading) return false
+
   const verb = sentence.slots.verb?.dictionaryForm
   const object = sentence.slots.object?.dictionaryForm
 
