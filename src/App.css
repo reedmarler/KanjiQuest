@@ -2032,13 +2032,14 @@ body:has(.dashboard) .app {
     color 0.55s var(--hero-ease, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-/* Sentence controls: one deck, two rows — transport/display, then content. */
+/* Sentence controls: primary actions first, optional tuning second, content last. */
 .hero-controls {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.55rem;
   margin-bottom: 0.55rem;
-  padding: 0.5rem;
+  padding: 0.65rem;
   border: 1px solid var(--border);
   border-radius: calc(var(--radius) + 2px);
   background: var(--surface);
@@ -2049,12 +2050,31 @@ body:has(.dashboard) .app {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: 0.65rem;
 }
 
-.hero-controls-row + .hero-controls-row {
-  padding-top: 0.4rem;
+.hero-controls-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.75rem;
+}
+
+.hero-settings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(14rem, 0.7fr);
+  min-width: 0;
   border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 46%, transparent);
+}
+
+.hero-controls-primary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
 }
 
 .control-group {
@@ -2064,31 +2084,81 @@ body:has(.dashboard) .app {
   min-width: 0;
 }
 
+.control-group-primary-options {
+  justify-self: start;
+  flex-wrap: wrap;
+}
+.hero-controls-primary .control-transport { justify-self: center; }
+.hero-controls-primary .control-group-audio { justify-self: end; }
+
+.control-group-audio.has-story-name {
+  position: static;
+}
+
+.control-audio-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+}
+
 .control-group-levels {
-  gap: 0.4rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.55rem;
+  width: 100%;
+  transition: opacity 140ms ease, filter 140ms ease;
+}
+
+.control-group-levels.is-disabled {
+  opacity: 0.42;
+  filter: grayscale(0.3);
+}
+
+.control-group-levels.is-disabled .control-segmented-difficulty {
+  border-color: color-mix(in srgb, var(--text-muted) 18%, transparent);
+  background: color-mix(in srgb, var(--text-muted) 8%, var(--surface-2));
+}
+
+.control-group-levels.is-disabled .control-segment {
+  color: color-mix(in srgb, var(--text-muted) 72%, transparent);
+  cursor: default;
+}
+
+.control-group-levels.is-disabled .control-segment.is-active {
+  background: color-mix(in srgb, var(--text-muted) 14%, transparent);
+}
+
+.control-group-levels.is-disabled .control-level-code,
+.control-group-levels.is-disabled .control-level-name {
+  color: color-mix(in srgb, var(--text-muted) 72%, transparent);
+}
+
+.hero-controls-content .control-group-display {
+  display: none;
 }
 
 .control-group-label {
   color: var(--text-muted);
-  font: 700 0.55rem/1 'Outfit', system-ui, sans-serif;
+  font: 800 0.55rem/1 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-/* Shared pill sizing keeps every control on the same 1.6rem baseline. */
+/* Shared sizing keeps controls aligned and gives each action a comfortable target. */
 .control-play,
 .control-icon-button,
 .control-chip,
 .control-stepper,
 .control-segmented,
 .control-select {
-  height: 1.6rem;
+  height: 2rem;
   box-sizing: border-box;
 }
 
 .control-icon-button {
-  width: 1.6rem;
+  width: 2rem;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
   border-radius: 999px;
@@ -2097,6 +2167,85 @@ body:has(.dashboard) .app {
   font: 800 0.9rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
   transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 100ms ease, opacity 140ms ease;
+}
+
+.control-nav-button {
+  display: grid;
+  place-items: center;
+  width: 2.55rem;
+  min-width: 2.55rem;
+  height: 2.35rem;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.control-nav-chevron {
+  display: grid;
+  place-items: center;
+  width: 1em;
+  height: 1em;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1;
+  transform: translateY(-0.04em);
+}
+
+.control-speaker-button {
+  width: 2.35rem;
+  min-width: 2.35rem;
+  border-radius: 0.55rem;
+}
+
+.control-story-name-button {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.5rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.34rem;
+  width: max-content;
+  max-width: 9.5rem;
+  height: 2rem;
+  padding: 0 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--rayquaza-light) 34%, var(--border));
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--rayquaza) 12%, var(--surface-2));
+  color: var(--rayquaza-light);
+  font: 700 0.58rem/1 'Outfit', system-ui, sans-serif;
+  cursor: default;
+}
+
+.control-story-name-button:disabled {
+  opacity: 1;
+}
+
+.control-story-name-mark {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 0.32rem;
+  background: color-mix(in srgb, var(--rayquaza) 28%, transparent);
+  color: var(--text);
+  font: 800 0.7rem/1 'Noto Sans JP', sans-serif;
+}
+
+.control-story-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.control-group-audio .control-icon-button,
+.control-group-audio .control-chip-compact,
+.control-group-primary-options .control-chip-compact {
+  width: 2.2rem;
+  min-width: 2.2rem;
+  padding: 0;
+  justify-content: center;
+  border-radius: 0.55rem;
 }
 
 .control-icon-button:hover:not(:disabled) {
@@ -2117,15 +2266,29 @@ body:has(.dashboard) .app {
 .control-play {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.3rem;
-  padding: 0 0.6rem;
+  width: 4.85rem;
+  padding: 0 0.75rem;
   border: 1px solid color-mix(in srgb, var(--kyogre-light) 40%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--kyogre) 14%, var(--surface-2));
   color: var(--text);
-  font: 700 0.6rem/1 'Outfit', system-ui, sans-serif;
+  font: 700 0.65rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
   transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 100ms ease;
+}
+
+.control-play-label {
+  display: inline-block;
+  width: 2.2rem;
+  text-align: center;
+}
+
+.control-transport {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .control-play:active {
@@ -2133,9 +2296,11 @@ body:has(.dashboard) .app {
 }
 
 .control-play-icon {
-  font-size: 0.5rem;
+  width: 0.7rem;
+  font-size: 0.56rem;
   letter-spacing: -0.05em;
   color: var(--kyogre-light);
+  text-align: center;
 }
 
 .control-play:hover {
@@ -2159,7 +2324,9 @@ body:has(.dashboard) .app {
 }
 
 .control-stepper button {
-  min-width: 1.5rem;
+  display: grid;
+  place-items: center;
+  min-width: 1.8rem;
   padding: 0 0.2rem;
   border: 0;
   background: transparent;
@@ -2216,12 +2383,12 @@ body:has(.dashboard) .app {
   display: inline-flex;
   align-items: center;
   gap: 0.28rem;
-  padding: 0 0.55rem;
+  padding: 0 0.68rem;
   border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface-2) 82%, transparent);
   color: var(--text-muted);
-  font: 600 0.58rem/1 'Outfit', system-ui, sans-serif;
+  font: 600 0.62rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
   white-space: nowrap;
   transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 100ms ease;
@@ -2248,7 +2415,52 @@ body:has(.dashboard) .app {
   background: color-mix(in srgb, var(--kyogre) 16%, var(--surface-2));
 }
 
-/* Levels sit in a single 5-across segmented control — no orphaned row. */
+.control-settings-button.is-active {
+  color: var(--kyogre-light);
+  border-color: color-mix(in srgb, var(--kyogre-light) 58%, transparent);
+  background: color-mix(in srgb, var(--kyogre) 18%, var(--surface-2));
+}
+
+.control-icon-button.is-active {
+  color: var(--kyogre-light);
+  border-color: color-mix(in srgb, var(--kyogre-light) 58%, transparent);
+  background: color-mix(in srgb, var(--kyogre) 18%, var(--surface-2));
+}
+
+.voice-settings-panel {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.75rem;
+  border-left: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.voice-setting {
+  display: grid;
+  grid-template-columns: minmax(4.6rem, 0.75fr) minmax(4rem, 1.25fr) 2rem;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  color: var(--text-muted);
+  font: 600 0.6rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.voice-setting input[type="range"] {
+  min-width: 0;
+  width: 100%;
+  accent-color: var(--kyogre-light);
+  cursor: pointer;
+}
+
+.voice-setting output {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Connected controls share one quiet surface. */
 .control-segmented {
   display: inline-flex;
   align-items: stretch;
@@ -2287,42 +2499,49 @@ body:has(.dashboard) .app {
   background: color-mix(in srgb, var(--kyogre) 26%, transparent);
 }
 
-/* Difficulty ramps blue (easy) to red (hard) so L5 visibly reads as harder. */
-.control-segmented-difficulty {
-  height: auto;
+/* Difficulty is a compact set of labeled tabs rather than an abstract meter. */
+.control-segmented-difficulty,
+.control-segmented-story {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  height: 2.75rem;
+  border-radius: 0.55rem;
 }
 
-.control-segmented-difficulty .control-segment {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.control-segmented-difficulty .control-segment,
+.control-segmented-story .control-segment {
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: center;
   justify-content: center;
-  gap: 0.16rem;
-  padding: 0.2rem 0.3rem 0.16rem;
+  gap: 0.12rem;
+  min-width: 0;
+  padding: 0.25rem 0.18rem;
+  overflow: hidden;
 }
 
-.control-segment-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.09rem;
-  height: 0.42rem;
+.control-level-code {
+  color: var(--text);
+  font-size: 0.61rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.control-segment-bar {
-  width: 0.14rem;
-  height: 20%;
-  border-radius: 1px;
-  background: color-mix(in srgb, var(--text-muted) 45%, transparent);
+.control-level-name {
+  display: block;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.42rem;
+  font-weight: 600;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.control-segment-bar:nth-child(1) { height: 20%; }
-.control-segment-bar:nth-child(2) { height: 40%; }
-.control-segment-bar:nth-child(3) { height: 60%; }
-.control-segment-bar:nth-child(4) { height: 80%; }
-.control-segment-bar:nth-child(5) { height: 100%; }
-
-.control-segment-bar.is-filled {
-  background: color-mix(in srgb, var(--text-muted) 85%, transparent);
+.control-segmented-difficulty .control-segment.is-active .control-level-code,
+.control-segmented-story .control-segment.is-active .control-level-code {
+  color: inherit;
 }
 
 .control-segment[data-difficulty="1"].is-active,
@@ -2342,18 +2561,196 @@ body:has(.dashboard) .app {
   background: color-mix(in srgb, var(--groudon) 24%, transparent);
 }
 
-.control-segment[data-difficulty="1"].is-active .control-segment-bar.is-filled,
-.control-segment[data-difficulty="2"].is-active .control-segment-bar.is-filled {
+.control-segmented-difficulty .control-segment.is-active .control-level-name,
+.control-segmented-story .control-segment.is-active .control-level-name {
+  color: color-mix(in srgb, currentColor 78%, var(--text));
+}
+
+.control-segmented-story .control-segment.is-active {
+  color: var(--rayquaza-light);
+  background: color-mix(in srgb, var(--rayquaza) 26%, transparent);
+}
+
+.control-segmented-story .control-segment.is-unavailable,
+.control-segmented-story .control-segment:disabled {
+  color: color-mix(in srgb, var(--text-muted) 58%, transparent);
+  background: color-mix(in srgb, var(--text-muted) 6%, transparent);
+  cursor: default;
+}
+
+.control-segmented-story .control-segment.is-unavailable .control-level-code,
+.control-segmented-story .control-segment.is-unavailable .control-level-name,
+.control-segmented-story .control-segment:disabled .control-level-code,
+.control-segmented-story .control-segment:disabled .control-level-name {
+  color: color-mix(in srgb, var(--text-muted) 58%, transparent);
+}
+
+.control-story-panel {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+  padding-top: 0.55rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 54%, transparent);
+}
+
+.control-story-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.control-story-heading > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.control-story-heading b {
+  color: var(--text);
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+.control-story-heading small {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.45rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.control-story-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.control-story-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 4rem;
+  height: 1.7rem;
+  padding: 0 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  color: var(--text-muted);
+  font: 700 0.48rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.control-toggle-track {
+  display: flex;
+  align-items: center;
+  width: 1.35rem;
+  height: 0.72rem;
+  padding: 0.1rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 34%, transparent);
+  transition: background 140ms ease;
+}
+
+.control-toggle-track > span {
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transform: translateX(0);
+  transition: background 140ms ease, transform 140ms ease;
+}
+
+.control-story-toggle.is-active {
+  color: var(--rayquaza-light);
+  border-color: color-mix(in srgb, var(--rayquaza-light) 54%, transparent);
+  background: color-mix(in srgb, var(--rayquaza) 16%, var(--surface-2));
+}
+
+.control-story-toggle.is-active .control-toggle-track {
+  background: color-mix(in srgb, var(--rayquaza) 52%, transparent);
+}
+
+.control-story-toggle.is-active .control-toggle-track > span {
   background: var(--rayquaza-light);
+  transform: translateX(0.63rem);
 }
 
-.control-segment[data-difficulty="3"].is-active .control-segment-bar.is-filled,
-.control-segment[data-difficulty="4"].is-active .control-segment-bar.is-filled {
-  background: var(--amber-light);
+.control-story-action {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--text-muted) 8%, var(--surface-2));
+  color: color-mix(in srgb, var(--text-muted) 78%, transparent);
+  font: 700 0.78rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease, opacity 140ms ease;
 }
 
-.control-segment[data-difficulty="5"].is-active .control-segment-bar.is-filled {
-  background: var(--groudon-light);
+.control-story-action:hover:not(:disabled) {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--text-muted) 52%, transparent);
+}
+
+.control-story-action.is-active:not(:disabled) {
+  color: color-mix(in srgb, var(--text) 72%, var(--text-muted));
+  border-color: color-mix(in srgb, var(--text-muted) 48%, transparent);
+  background: color-mix(in srgb, var(--text-muted) 18%, var(--surface-2));
+}
+
+.control-story-action:disabled {
+  opacity: 0.34;
+  cursor: default;
+}
+
+.control-story-options {
+  display: grid;
+  gap: 0.38rem;
+  min-width: 0;
+  transition: opacity 140ms ease, filter 140ms ease;
+}
+
+.control-story-options.is-disabled {
+  opacity: 0.42;
+  filter: grayscale(0.25);
+}
+
+.control-story-setting {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.control-story-setting:first-child {
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 0.55rem;
+}
+
+.control-story-setting > span {
+  color: var(--text-muted);
+  font: 800 0.55rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.control-story-setting .control-segmented,
+.control-story-setting .control-select {
+  width: 100%;
+  max-width: none;
+}
+
+.control-story-setting .control-segmented-story {
+  min-width: 0;
 }
 
 /* Story keeps the green accent so content selection stays visually distinct. */
@@ -2381,6 +2778,22 @@ body:has(.dashboard) .app {
   transition: border-color 140ms ease, color 140ms ease;
 }
 
+.control-story-options.is-disabled .control-segmented,
+.control-story-options.is-disabled .control-select {
+  border-color: color-mix(in srgb, var(--text-muted) 18%, transparent);
+  background: color-mix(in srgb, var(--text-muted) 8%, var(--surface-2));
+}
+
+.control-story-options.is-disabled .control-segment,
+.control-story-options.is-disabled .control-select {
+  color: color-mix(in srgb, var(--text-muted) 72%, transparent);
+  cursor: default;
+}
+
+.control-story-options.is-disabled .control-segment.is-active {
+  background: color-mix(in srgb, var(--text-muted) 14%, transparent);
+}
+
 .control-select:hover {
   color: var(--text);
   border-color: color-mix(in srgb, var(--rayquaza-light) 40%, var(--border));
@@ -2389,6 +2802,8 @@ body:has(.dashboard) .app {
 .control-play:focus-visible,
 .control-icon-button:focus-visible,
 .control-chip:focus-visible,
+.control-story-toggle:focus-visible,
+.control-story-action:focus-visible,
 .control-select:focus-visible,
 .control-segment:focus-visible,
 .control-stepper button:focus-visible {
@@ -4217,36 +4632,72 @@ body:has(.dashboard) .app {
   }
 
   .hero-controls {
-    overflow: hidden;
+    padding: 0.65rem 0.55rem;
   }
   .hero-controls-row {
     width: 100%;
     justify-content: center;
   }
-  .hero-controls-row:first-child {
-    flex-direction: column;
+  .hero-controls-primary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.55rem;
   }
-  /* Mirror the desktop control bar: buttons stay clustered together at their
-     natural gap instead of stretching apart, they just wrap onto their own
-     centered row (playback, then display) since both groups together are
-     wider than a phone screen. */
-  .hero-controls-row:first-child .control-group {
-    width: 100%;
+  .hero-controls-primary .control-group {
     justify-content: center;
   }
-  /* The display group (Furigana/English/Speak + voice pill) has one more
-     item than fits on a single narrow row; wrapping it centered avoids the
-     overflow/cropping a forced single line would cause. */
-  .hero-controls-row:first-child .control-group[aria-label="Display"] {
+  .hero-controls-primary .control-transport {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .hero-controls-primary .control-group-primary-options {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+    justify-content: flex-start;
+  }
+  .hero-controls-primary .control-group-audio {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    justify-content: flex-end;
     flex-wrap: wrap;
-    justify-content: center;
-    row-gap: 0.4rem;
+  }
+  .voice-settings-panel {
+    gap: 0.75rem;
+    padding: 0.75rem 0.25rem 0.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+    border-left: 0;
+  }
+  .voice-setting {
+    grid-template-columns: 5.2rem minmax(4rem, 1fr) 2.2rem;
+  }
+  .hero-settings-layout {
+    grid-template-columns: minmax(0, 1fr);
   }
   .control-group {
     max-width: 100%;
   }
-  .control-group-levels { width: 100%; justify-content: center; }
+  .hero-controls-content {
+    padding: 0.65rem 0.25rem;
+  }
+  .control-group-levels {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+  .control-story-setting,
+  .control-story-setting:first-child {
+    grid-template-columns: 1fr;
+  }
+  .control-story-options {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    padding-left: 0;
+  }
+  .control-story-options .control-segmented,
+  .control-story-options .control-select {
+    width: 100%;
+  }
   .control-group-story {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.45fr);

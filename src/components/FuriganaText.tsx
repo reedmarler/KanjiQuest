@@ -1,4 +1,4 @@
-const KANJI_RE = /[\u4E00-\u9FFF\u3400-\u4DBF]/
+const KANJI_RE = /[\u4E00-\u9FFF\u3400-\u4DBF\u3005]/
 
 export function hasKanji(text: string): boolean {
   return KANJI_RE.test(text)

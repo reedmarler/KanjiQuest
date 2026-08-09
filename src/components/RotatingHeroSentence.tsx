@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { charLength, HERO_CHAR_WIDTH_EM, type HeroSentenceFrame, type HeroStep } from '../data/heroSentences'
 import { buildHeroStorySteps } from '../data/heroStories'
 import { getSegmentReading } from '../lib/heroSentenceGloss'
@@ -42,13 +42,16 @@ export interface RotatingHeroSentenceProps {
   jlptLevel: JlptLevel
   storyId?: string | null
   storyLevel?: JlptLevel
+  storyRolloverId?: string | null
+  onStoryRollover?: (storyId: string) => void
   paused: boolean
   playbackRate: HeroPlaybackRate
   onRotate?: () => void
   rewindSignal?: number
+  advanceSignal?: number
   onCanRewindChange?: (canRewind: boolean) => void
-  /** Fires with the plain Japanese of the sentence currently on screen. */
-  onSentenceChange?: (japanese: string) => void
+  /** Fires with the verified spoken reading of the sentence on screen. */
+  onSentenceChange?: (speechText: string) => void
 }
 
 type HeroHistoryEntry = {
@@ -72,10 +75,13 @@ export function RotatingHeroSentence({
   jlptLevel,
   storyId,
   storyLevel,
+  storyRolloverId,
+  onStoryRollover,
   paused,
   playbackRate,
   onRotate,
   rewindSignal = 0,
+  advanceSignal = 0,
   onCanRewindChange,
   onSentenceChange,
 }: RotatingHeroSentenceProps) {
@@ -88,6 +94,7 @@ export function RotatingHeroSentence({
   const [activeLevel, setActiveLevel] = useState(jlptLevel)
   const [history, setHistory] = useState<HeroHistoryEntry[]>([])
   const lastRewindSignalRef = useRef(rewindSignal)
+  const lastAdvanceSignalRef = useRef(advanceSignal)
   const streamKey = `${storyId ?? 'database'}:${effectiveStoryLevel}:${activeLevel}:${sequenceSeed}`
   // Build just enough of the database stream to render the current sentence
   // and its successor. The complete queue is prepared after the browser has
@@ -153,11 +160,12 @@ export function RotatingHeroSentence({
   const step = steps[index % safeLength]
   const isStreamRollover = index + 1 >= steps.length
   const rolloverSeed = nextSequenceSeed(sequenceSeed)
+  const effectiveStoryRolloverId = storyRolloverId ?? storyId
   const rolloverSteps = useMemo(
     () => storyId
-      ? buildHeroStorySteps(storyId, effectiveStoryLevel)
+      ? buildHeroStorySteps(effectiveStoryRolloverId ?? storyId, effectiveStoryLevel)
       : buildHeroSteps(wrongPool, progress, activeLevel, rolloverSeed, STARTER_STEP_COUNT),
-    [wrongPool, progress, activeLevel, rolloverSeed, storyId, effectiveStoryLevel],
+    [wrongPool, progress, activeLevel, rolloverSeed, storyId, effectiveStoryLevel, effectiveStoryRolloverId],
   )
 
   // A level change previews on its own seed as soon as it's requested, so the
@@ -174,19 +182,47 @@ export function RotatingHeroSentence({
     [levelIsPending, wrongPool, progress, jlptLevel, pendingSeed],
   )
 
+  const advanceSentence = useCallback(() => {
+    setHistory((items) => [
+      ...items.slice(-4),
+      { sequenceSeed, activeLevel, index },
+    ])
+    if (pendingSteps) {
+      setActiveLevel(jlptLevel)
+      setSequenceSeed(pendingSeed)
+      setIndex(0)
+    } else if (isStreamRollover) {
+      if (storyId && effectiveStoryRolloverId && effectiveStoryRolloverId !== storyId) {
+        onStoryRollover?.(effectiveStoryRolloverId)
+      }
+      setSequenceSeed(rolloverSeed)
+      setIndex(0)
+    } else {
+      setIndex((current) => current + 1)
+    }
+    setPhase('rest')
+    onRotate?.()
+  }, [activeLevel, effectiveStoryRolloverId, index, isStreamRollover, jlptLevel, onRotate, onStoryRollover, pendingSeed, pendingSteps, rolloverSeed, sequenceSeed, storyId])
+
+  useEffect(() => {
+    if (advanceSignal === lastAdvanceSignalRef.current) return
+    lastAdvanceSignalRef.current = advanceSignal
+    advanceSentence()
+  }, [advanceSignal, advanceSentence])
+
   const nextStep = pendingSteps?.[0]
     ?? (isStreamRollover ? rolloverSteps[0] : steps[(index + 1) % safeLength])
   const frame = step?.frame
   const nextFrame = nextStep?.frame
 
-  // The plain Japanese of whatever is currently on screen, reported upward so
-  // the dashboard can read it aloud. Derived from the same segments the view
-  // renders, so speech can never describe a different sentence than the one
-  // being shown.
-  const visibleJapanese = (frame?.segments ?? []).map((segment) => segment.text).join('')
+  // Read the generator's verified kana aloud instead of asking each browser
+  // voice to guess ambiguous kanji readings such as 七時 (しちじ).
+  const visibleSpeechText = (frame?.segments ?? [])
+    .map((segment) => segment.reading ?? getSegmentReading(segment.text) ?? segment.text)
+    .join('')
   useEffect(() => {
-    if (visibleJapanese) onSentenceChange?.(visibleJapanese)
-  }, [visibleJapanese, onSentenceChange])
+    if (visibleSpeechText) onSentenceChange?.(visibleSpeechText)
+  }, [visibleSpeechText, onSentenceChange])
 
   useEffect(() => {
     if (displayMode !== 'sentence' || steps.length < 2 || paused) return
@@ -200,30 +236,11 @@ export function RotatingHeroSentence({
     const timer = window.setTimeout(() => {
       if (phase === 'rest') setPhase('highlight')
       else if (phase === 'highlight') setPhase('swap')
-      else {
-        setHistory((items) => [
-          ...items.slice(-4),
-          { sequenceSeed, activeLevel, index },
-        ])
-        if (pendingSteps) {
-          // The incoming frame already came from pendingSteps[0], so adopting
-          // that same level/seed here does not create a second visual jump.
-          setActiveLevel(jlptLevel)
-          setSequenceSeed(pendingSeed)
-          setIndex(0)
-        } else if (isStreamRollover) {
-          setSequenceSeed(rolloverSeed)
-          setIndex(0)
-        } else {
-          setIndex((current) => current + 1)
-        }
-        setPhase('rest')
-        onRotate?.()
-      }
+      else advanceSentence()
     }, duration)
 
     return () => window.clearTimeout(timer)
-  }, [displayMode, index, isStreamRollover, jlptLevel, onRotate, paused, pendingSeed, pendingSteps, phase, playbackRate, rolloverSeed, steps.length])
+  }, [advanceSentence, displayMode, paused, phase, playbackRate, steps.length])
 
   // Keep the dashboard header at its final height even if a rare generator
   // pass has not produced its first pair of usable sentences yet.

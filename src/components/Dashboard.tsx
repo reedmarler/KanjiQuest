@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+﻿import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
 import type { AchievementMetrics } from '../lib/achievementProgress'
@@ -13,29 +13,43 @@ import {
 } from '../lib/heroPlayback'
 import {
   canSpeakJapanese,
-  savedVoiceGender,
-  setVoiceGender,
   speakJapanese,
   stopSpeaking,
   watchSpeechSupport,
-  type SpeechVoiceGender,
 } from '../lib/speech'
 
 const HERO_SPEECH_STORAGE_KEY = 'kanji-quest-hero-speech-v1'
 const HERO_SPEECH_RATE_STORAGE_KEY = 'kanji-quest-hero-speech-rate-v1'
 const HERO_SPEECH_VOLUME_STORAGE_KEY = 'kanji-quest-hero-speech-volume-v1'
-/** Voice speeds, slowest to fastest. 1× is the engine's natural pace. */
+/** Voice speeds, slowest to fastest. 1x is the engine's natural pace. */
 const HERO_SPEECH_RATES = [0.5, 0.75, 1, 1.25, 1.5] as const
 type HeroSpeechRate = typeof HERO_SPEECH_RATES[number]
 
 /** Voice volume steps, muted to full, in 10% increments. */
 const HERO_SPEECH_VOLUMES = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] as const
 type HeroSpeechVolume = typeof HERO_SPEECH_VOLUMES[number]
+type StoryPlaybackMode = 'repeat' | 'shuffle'
+
+const COMPLEXITY_DISPLAY: Record<GenerationComplexity, { level: string; name: string }> = {
+  1: { level: 'L1', name: 'Basics' },
+  2: { level: 'L2', name: 'Pairs' },
+  3: { level: 'L3', name: 'Chains' },
+  4: { level: 'L4', name: 'Logic' },
+  5: { level: 'L5', name: 'Expert' },
+}
+
+const STORY_LEVEL_DISPLAY: Array<{ level: JlptLevel; name: string }> = [
+  { level: 'N5', name: 'Intro' },
+  { level: 'N4', name: 'Elementary' },
+  { level: 'N3', name: 'Intermediate' },
+  { level: 'N2', name: 'Upper' },
+  { level: 'N1', name: 'Advanced' },
+]
 
 function speechVolumeIcon(volume: number): string {
-  if (volume === 0) return '🔇'
-  if (volume < 0.5) return '🔉'
-  return '🔊'
+  if (volume === 0) return '\uD83D\uDD07'
+  if (volume < 0.5) return '\uD83D\uDD09'
+  return '\uD83D\uDD0A'
 }
 
 function savedSpeechRate(): HeroSpeechRate {
@@ -211,10 +225,13 @@ function DashboardHeroSentence({
   jlptLevel,
   storyId,
   storyLevel,
+  storyRolloverId,
+  onStoryRollover,
   paused,
   playbackRate,
   onRotate,
   rewindSignal,
+  advanceSignal,
   onCanRewindChange,
   onSentenceChange,
 }: {
@@ -225,12 +242,15 @@ function DashboardHeroSentence({
   jlptLevel: ReturnType<typeof heroJlptForComplexity>
   storyId: string | null
   storyLevel: JlptLevel
+  storyRolloverId: string | null
+  onStoryRollover: (storyId: string) => void
   paused: boolean
   playbackRate: HeroPlaybackRate
   onRotate?: () => void
   rewindSignal: number
+  advanceSignal: number
   onCanRewindChange: (canRewind: boolean) => void
-  onSentenceChange: (japanese: string) => void
+  onSentenceChange: (speechText: string) => void
 }) {
   return (
     <Suspense
@@ -248,10 +268,13 @@ function DashboardHeroSentence({
         jlptLevel={jlptLevel}
         storyId={storyId}
         storyLevel={storyLevel}
+        storyRolloverId={storyRolloverId}
+        onStoryRollover={onStoryRollover}
         paused={paused}
         playbackRate={playbackRate}
         onRotate={onRotate}
         rewindSignal={rewindSignal}
+        advanceSignal={advanceSignal}
         onCanRewindChange={onCanRewindChange}
         onSentenceChange={onSentenceChange}
       />
@@ -312,18 +335,26 @@ export function Dashboard({
   const [storyMode, setStoryMode] = useState(false)
   const [storyId, setStoryId] = useState(HERO_STORY_DEFINITIONS[0]?.id ?? '')
   const [storyLevel, setStoryLevel] = useState<JlptLevel>(HERO_STORY_LEVELS[0] ?? 'N5')
+  const [storyPlaybackMode, setStoryPlaybackMode] = useState<StoryPlaybackMode>('repeat')
   const storiesAtLevel = useMemo(() => getHeroStoriesForLevel(storyLevel), [storyLevel])
+  const selectedStoryTitle = storiesAtLevel.find((story) => story.id === storyId)?.shortTitle ?? 'Guided reading'
+  const storyRolloverId = useMemo(() => {
+    if (!storyMode || storyPlaybackMode === 'repeat' || storiesAtLevel.length < 2) return storyId
+    const alternatives = storiesAtLevel.filter((story) => story.id !== storyId)
+    return alternatives[Math.floor(Math.random() * alternatives.length)]?.id ?? storyId
+  }, [storyId, storyMode, storyPlaybackMode, storiesAtLevel])
   const [paused, setPaused] = useState(false)
   const [playbackRate, setPlaybackRate] = useState<HeroPlaybackRate>(savedPlaybackRate)
   const [additionalOpen, setAdditionalOpen] = useState(false)
   const [rewindSignal, setRewindSignal] = useState(0)
+  const [advanceSignal, setAdvanceSignal] = useState(0)
   const [canRewindSentence, setCanRewindSentence] = useState(false)
   const [speechOn, setSpeechOn] = useState(() => window.localStorage.getItem(HERO_SPEECH_STORAGE_KEY) === 'true')
   const [speechSupported, setSpeechSupported] = useState(canSpeakJapanese)
   const [spokenSentence, setSpokenSentence] = useState('')
   const [speechRate, setSpeechRate] = useState<HeroSpeechRate>(savedSpeechRate)
   const [speechVolume, setSpeechVolume] = useState<HeroSpeechVolume>(savedSpeechVolume)
-  const [voiceGender, setVoiceGenderState] = useState<SpeechVoiceGender>(savedVoiceGender)
+  const [settingsExpanded, setSettingsExpanded] = useState(true)
   // Lets the speak-on-new-sentence effect read the current rate/volume without
   // taking them as a dependency (see that effect for why).
   const speechRateRef = useRef(speechRate)
@@ -335,6 +366,11 @@ export function Dashboard({
   const achievements = buildAchievements({ learnedCards: learnedCount, favoriteSentences: favoriteSentenceCount, questProgress, metrics: achievementMetrics })
   const unlockedAchievements = achievements.filter((achievement) => achievement.progress >= achievement.target).length
   const furiganaActive = furiganaOn
+
+  useEffect(() => {
+    if (storiesAtLevel.some((story) => story.id === storyId)) return
+    setStoryId(storiesAtLevel[0]?.id ?? '')
+  }, [storiesAtLevel, storyId])
 
   function toggleFurigana() {
     setFuriganaOn((on) => !on)
@@ -355,43 +391,22 @@ export function Dashboard({
     })
   }
 
-  /**
-   * A rate change re-speaks the current sentence rather than waiting for the
-   * next one, so the new speed is audible while the user is still adjusting it.
-   */
   function changeSpeechRate(rate: HeroSpeechRate) {
     setSpeechRate(rate)
     window.localStorage.setItem(HERO_SPEECH_RATE_STORAGE_KEY, String(rate))
-    if (speechOn && spokenSentence) speakJapanese(spokenSentence, rate, speechVolumeRef.current)
   }
 
-/**
-   * Sets the voice volume, replaying the current sentence at the new volume
-   * so the change is audible immediately, same as the rate control.
-   */
   function changeSpeechVolume(volume: HeroSpeechVolume) {
     setSpeechVolume(volume)
     window.localStorage.setItem(HERO_SPEECH_VOLUME_STORAGE_KEY, String(volume))
-    if (speechOn && spokenSentence) speakJapanese(spokenSentence, speechRateRef.current, volume)
-  }
-
-  /**
-   * Switches the TTS voice and replays the current sentence in the new
-   * voice, same as the rate/volume controls.
-   */
-  function changeVoiceGender(gender: SpeechVoiceGender) {
-    setVoiceGenderState(gender)
-    setVoiceGender(gender)
-    if (speechOn && spokenSentence) speakJapanese(spokenSentence, speechRateRef.current, speechVolumeRef.current)
   }
 
   // Voices arrive asynchronously, so a Japanese voice can appear after first
-  // paint — this keeps the button from staying disabled when one exists.
+  // paint; this keeps the button from staying disabled when one exists.
   useEffect(() => watchSpeechSupport(setSpeechSupported), [])
 
-  // Deliberately not depending on speechRate: changeSpeechRate already replays
-  // at the new speed, and re-running here would restart the sentence a second
-  // time on every adjustment.
+  // Rate and volume are read through refs so adjusting either setting does not
+  // restart the sentence currently being spoken.
   useEffect(() => {
     if (!speechOn || !spokenSentence) return
     speakJapanese(spokenSentence, speechRateRef.current, speechVolumeRef.current)
@@ -433,247 +448,272 @@ export function Dashboard({
           jlptLevel={heroJlptForComplexity(complexity)}
           storyId={storyMode ? storyId : null}
           storyLevel={storyLevel}
+          storyRolloverId={storyMode ? storyRolloverId : null}
+          onStoryRollover={setStoryId}
           paused={paused}
           playbackRate={playbackRate}
           onRotate={handleRotate}
           rewindSignal={rewindSignal}
+          advanceSignal={advanceSignal}
           onCanRewindChange={setCanRewindSentence}
           onSentenceChange={setSpokenSentence}
         />
       </header>
 
       <section className="hero-controls" aria-label="Sentence controls">
-        <div className="hero-controls-row">
-          <div className="control-group" role="group" aria-label="Playback">
+        <div className="hero-controls-row hero-controls-primary">
+          <div className="control-group control-group-primary-options" role="group" aria-label="Display options">
             <button
               type="button"
-              className="control-icon-button"
-              onClick={() => setRewindSignal((value) => value + 1)}
-              disabled={!canRewindSentence}
-              aria-label="Go back to previous sentence"
-              title="Previous sentence"
-            >
-              ←
-            </button>
-            <button
-              type="button"
-              className={`control-play${paused ? ' is-paused' : ''}`}
-              onClick={() => setPaused((value) => !value)}
-              aria-pressed={paused}
-            >
-              <span className="control-play-icon" aria-hidden="true">{paused ? '▶' : '❚❚'}</span>
-              {paused ? 'Play' : 'Pause'}
-            </button>
-            <div className="control-stepper" role="group" aria-label="Sentence speed">
-              <button
-                type="button"
-                aria-label="Slow down sentence"
-                disabled={speedIndex === 0}
-                onClick={() => setPlaybackRate(HERO_PLAYBACK_RATES[speedIndex - 1]!)}
-              >
-                −
-              </button>
-              <button
-                type="button"
-                className="control-stepper-value"
-                aria-label={`Sentence speed ${playbackRate} times, tap to reset`}
-                onClick={() => setPlaybackRate(1)}
-              >
-                {playbackRate}×
-              </button>
-              <button
-                type="button"
-                aria-label="Speed up sentence"
-                disabled={speedIndex === HERO_PLAYBACK_RATES.length - 1}
-                onClick={() => setPlaybackRate(HERO_PLAYBACK_RATES[speedIndex + 1]!)}
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className="control-group" role="group" aria-label="Display">
-            <button
-              type="button"
-              className={`control-chip${furiganaActive ? ' is-active' : ''}`}
+              className={`control-chip control-chip-compact${furiganaActive ? ' is-active' : ''}`}
               onClick={toggleFurigana}
               aria-pressed={furiganaActive}
+              aria-label="Toggle furigana"
+              title="Furigana"
             >
-              <span className="control-chip-jp" aria-hidden="true">ふり</span>
-              Furigana
+              &#12405;&#12426;
             </button>
             <button
               type="button"
-              className={`control-chip${englishOn ? ' is-active' : ''}`}
+              className={`control-chip control-chip-compact${englishOn ? ' is-active' : ''}`}
               onClick={toggleEnglish}
               aria-pressed={englishOn}
+              aria-label="Toggle English translation"
+              title="English"
             >
-              <span className="control-chip-jp" aria-hidden="true">EN</span>
-              English
+              EN
             </button>
-            <button
-              type="button"
-              className={`control-chip${speechOn ? ' is-active' : ''}`}
-              onClick={toggleSpeech}
-              aria-pressed={speechOn}
-              disabled={!speechSupported}
-              title={speechSupported
-                ? (speechOn ? 'Stop reading sentences aloud' : 'Read each new sentence aloud')
-                : 'No Japanese voice is installed on this device'}
-            >
-              <span className="control-chip-jp" aria-hidden="true">{speechOn ? '🔊' : '🔈'}</span>
-              Speak
-            </button>
-            {speechSupported && (
-              <div className="control-stepper control-voice-group" role="group" aria-label="Voice volume">
-                <span className="control-stepper-icon" aria-hidden="true">{speechVolumeIcon(speechVolume)}</span>
-                <button
-                  type="button"
-                  aria-label="Lower voice volume"
-                  disabled={speechVolumeIndex === 0}
-                  onClick={() => changeSpeechVolume(HERO_SPEECH_VOLUMES[speechVolumeIndex - 1]!)}
-                >
-                  −
-                </button>
-                <button
-                  type="button"
-                  className="control-stepper-value"
-                  aria-label={`Voice volume ${Math.round(speechVolume * 100)}%, tap to reset`}
-                  onClick={() => changeSpeechVolume(1)}
-                >
-                  {Math.round(speechVolume * 100)}%
-                </button>
-                <button
-                  type="button"
-                  aria-label="Raise voice volume"
-                  disabled={speechVolumeIndex === HERO_SPEECH_VOLUMES.length - 1}
-                  onClick={() => changeSpeechVolume(HERO_SPEECH_VOLUMES[speechVolumeIndex + 1]!)}
-                >
-                  +
-                </button>
-              </div>
-            )}
-            {speechSupported && (
-              // Grouped with the volume stepper as one "voice" unit — a
-              // fourth full chip here was overflowing on phones.
-              <div className="control-stepper control-voice-group" role="group" aria-label="Voice speed">
-                <button
-                  type="button"
-                  aria-label="Slow down the voice"
-                  disabled={speechRateIndex === 0}
-                  onClick={() => changeSpeechRate(HERO_SPEECH_RATES[speechRateIndex - 1]!)}
-                >
-                  −
-                </button>
-                <button
-                  type="button"
-                  className="control-stepper-value"
-                  aria-label={`Voice speed ${speechRate} times, tap to reset`}
-                  onClick={() => changeSpeechRate(1)}
-                >
-                  {speechRate}×
-                </button>
-                <button
-                  type="button"
-                  aria-label="Speed up the voice"
-                  disabled={speechRateIndex === HERO_SPEECH_RATES.length - 1}
-                  onClick={() => changeSpeechRate(HERO_SPEECH_RATES[speechRateIndex + 1]!)}
-                >
-                  +
-                </button>
-              </div>
-            )}
-            {speechSupported && (
-              <div className="control-stepper control-voice-group" role="group" aria-label="Voice gender">
-                <button
-                  type="button"
-                  className={voiceGender === 'girl' ? 'is-active' : ''}
-                  aria-pressed={voiceGender === 'girl'}
-                  aria-label="Girl voice"
-                  onClick={() => changeVoiceGender('girl')}
-                >
-                  👧
-                </button>
-                <button
-                  type="button"
-                  className={voiceGender === 'boy' ? 'is-active' : ''}
-                  aria-pressed={voiceGender === 'boy'}
-                  aria-label="Boy voice"
-                  onClick={() => changeVoiceGender('boy')}
-                >
-                  👦
-                </button>
-              </div>
-            )}
           </div>
-        </div>
 
-        <div className="hero-controls-row">
-          <div className="control-group control-group-levels">
-            <span className="control-group-label" id="hero-level-label">Level</span>
-            <div className="control-segmented control-segmented-difficulty" role="group" aria-labelledby="hero-level-label">
-              {GENERATION_COMPLEXITIES.map((level) => (
-                <button
-                  key={level}
-                  type="button"
-                  data-difficulty={level}
-                  className={`control-segment${complexity === level ? ' is-active' : ''}`}
-                  onClick={() => setComplexity(level)}
-                  aria-pressed={complexity === level}
-                  aria-label={`Generation complexity level ${level}: ${complexityDetails[level].description}`}
-                  title={complexityDetails[level].description}
-                >
-                  <span className="control-segment-bars" aria-hidden="true">
-                    {GENERATION_COMPLEXITIES.map((bar) => (
-                      <span key={bar} className={`control-segment-bar${bar <= level ? ' is-filled' : ''}`} />
-                    ))}
-                  </span>
-                  {level}
-                </button>
-              ))}
+          <div className="control-transport" role="group" aria-label="Sentence navigation">
+              <button
+                type="button"
+                className="control-icon-button control-nav-button"
+                onClick={() => setRewindSignal((value) => value + 1)}
+                disabled={!canRewindSentence}
+                aria-label="Go back to previous sentence"
+                title="Previous sentence"
+              >
+                <span className="control-nav-chevron" aria-hidden="true">&#8249;</span>
+              </button>
+              <button
+                type="button"
+                className={`control-play${paused ? ' is-paused' : ''}`}
+                onClick={() => setPaused((value) => !value)}
+                aria-pressed={paused}
+              >
+                <span className="control-play-icon" aria-hidden="true">{paused ? '\u25B6' : '\u275A\u275A'}</span>
+                <span className="control-play-label">{paused ? 'Play' : 'Pause'}</span>
+              </button>
+              <button
+                type="button"
+                className="control-icon-button control-nav-button"
+                onClick={() => setAdvanceSignal((value) => value + 1)}
+                aria-label="Go to next sentence"
+                title="Next sentence"
+              >
+                <span className="control-nav-chevron" aria-hidden="true">&#8250;</span>
+              </button>
+          </div>
+
+          <div className={`control-group control-group-audio${storyMode ? ' has-story-name' : ''}`} role="group" aria-label="Display and audio options">
+            {storyMode && (
+              <button
+                type="button"
+                className="control-story-name-button"
+                aria-label={`Current story: ${selectedStoryTitle}`}
+                title={`Current story: ${selectedStoryTitle}`}
+                disabled
+              >
+                <span className="control-story-name-mark" aria-hidden="true">&#29289;</span>
+                <span className="control-story-name-text">{selectedStoryTitle}</span>
+              </button>
+            )}
+            <div className="control-audio-buttons">
+              <button
+                type="button"
+                className={`control-icon-button control-speaker-button${speechOn ? ' is-active' : ''}`}
+                onClick={toggleSpeech}
+                aria-pressed={speechOn}
+                disabled={!speechSupported}
+                aria-label={speechOn ? 'Stop reading sentences aloud' : 'Read each new sentence aloud'}
+                title={speechSupported
+                  ? (speechOn ? 'Stop reading sentences aloud' : 'Read each new sentence aloud')
+                  : 'No Japanese voice is installed on this device'}
+              >
+                <span className="control-chip-jp" aria-hidden="true">{speechOn ? '\uD83D\uDD0A' : '\uD83D\uDD08'}</span>
+              </button>
+              <button
+                type="button"
+                className={`control-icon-button control-settings-button${settingsExpanded ? ' is-active' : ''}`}
+                onClick={() => setSettingsExpanded((expanded) => !expanded)}
+                aria-expanded={settingsExpanded}
+                aria-controls="hero-voice-settings hero-content-settings"
+                aria-label={settingsExpanded ? 'Hide settings' : 'Show settings'}
+                title={settingsExpanded ? 'Hide settings' : 'Show settings'}
+              >
+                <span aria-hidden="true">&#9881;</span>
+              </button>
             </div>
           </div>
-
-          <div className={`control-group control-group-story${storyMode ? ' is-active' : ''}`}>
-            <button
-              type="button"
-              className={`control-chip control-chip-story${storyMode ? ' is-active' : ''}`}
-              onClick={() => setStoryMode((enabled) => !enabled)}
-              aria-pressed={storyMode}
-            >
-              <span className="control-chip-jp" aria-hidden="true">物</span>
-              Story
-            </button>
-            {HERO_STORY_LEVELS.length > 1 && (
-              <div className="control-segmented control-segmented-story" role="group" aria-label="Story level">
-                {HERO_STORY_LEVELS.map((level) => (
-                  <button
-                    key={level}
-                    type="button"
-                    className={`control-segment${level === storyLevel ? ' is-active' : ''}`}
-                    aria-pressed={level === storyLevel}
-                    onClick={() => setStoryLevel(level)}
-                  >
-                    {level}
-                  </button>
-                ))}
-              </div>
-            )}
-            <select
-              className="control-select"
-              value={storyId}
-              onChange={(event) => {
-                setStoryId(event.target.value)
-                setStoryMode(true)
-              }}
-              aria-label="Choose story"
-            >
-              {storiesAtLevel.map((story) => (
-                <option key={story.id} value={story.id}>{story.shortTitle}</option>
-              ))}
-            </select>
-          </div>
         </div>
+
+        {settingsExpanded && (
+          <div className="hero-settings-layout">
+            <div className="hero-controls-content" id="hero-content-settings">
+              <div className={`control-group control-group-levels${storyMode ? ' is-disabled' : ''}`} aria-disabled={storyMode}>
+                <span className="control-group-label" id="hero-level-label">Sentence difficulty</span>
+                <div className="control-segmented control-segmented-difficulty" role="group" aria-labelledby="hero-level-label">
+                  {GENERATION_COMPLEXITIES.map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      data-difficulty={level}
+                      className={`control-segment${complexity === level ? ' is-active' : ''}`}
+                      onClick={() => setComplexity(level)}
+                      aria-pressed={complexity === level}
+                      aria-label={`${COMPLEXITY_DISPLAY[level].level} ${complexityDetails[level].label}: ${complexityDetails[level].description}`}
+                      title={complexityDetails[level].description}
+                      disabled={storyMode}
+                    >
+                      <span className="control-level-code">{COMPLEXITY_DISPLAY[level].level}</span>
+                      <span className="control-level-name">{COMPLEXITY_DISPLAY[level].name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={`control-story-panel${storyMode ? ' is-active' : ''}`}>
+                <div className="control-story-heading">
+                  <span>
+                    <b><span aria-hidden="true">&#29289;</span> Story mode</b>
+                    {storyMode && <small>{selectedStoryTitle}</small>}
+                  </span>
+                  <div className="control-story-actions">
+                    <button
+                      type="button"
+                      className={`control-story-toggle${storyMode ? ' is-active' : ''}`}
+                      onClick={() => setStoryMode((enabled) => !enabled)}
+                      role="switch"
+                      aria-checked={storyMode}
+                      aria-label="Enable Story mode"
+                    >
+                      <span className="control-toggle-track" aria-hidden="true"><span /></span>
+                      <span>{storyMode ? 'On' : 'Off'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`control-story-action${storyPlaybackMode === 'repeat' ? ' is-active' : ''}`}
+                      onClick={() => setStoryPlaybackMode('repeat')}
+                      aria-pressed={storyPlaybackMode === 'repeat'}
+                      aria-label="Repeat selected story"
+                      title="Repeat selected story"
+                      disabled={!storyMode}
+                    >
+                      <span aria-hidden="true">&#8734;</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`control-story-action${storyPlaybackMode === 'shuffle' ? ' is-active' : ''}`}
+                      onClick={() => setStoryPlaybackMode('shuffle')}
+                      aria-pressed={storyPlaybackMode === 'shuffle'}
+                      aria-label="Shuffle stories"
+                      title="Shuffle stories"
+                      disabled={!storyMode}
+                    >
+                      <span aria-hidden="true">&#10536;</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className={`control-story-options${storyMode ? '' : ' is-disabled'}`} aria-disabled={!storyMode}>
+                    <div className="control-story-setting">
+                      <span>Story difficulty</span>
+                      <div className="control-segmented control-segmented-story" role="group" aria-label="Story difficulty">
+                        {STORY_LEVEL_DISPLAY.map(({ level, name }) => {
+                          const hasStories = getHeroStoriesForLevel(level).length > 0
+                          return (
+                            <button
+                              key={level}
+                              type="button"
+                              data-story-level={level}
+                              className={`control-segment${level === storyLevel ? ' is-active' : ''}${hasStories ? '' : ' is-unavailable'}`}
+                              aria-pressed={level === storyLevel}
+                              aria-label={`${level} ${name}${hasStories ? '' : ': coming soon'}`}
+                              title={hasStories ? `${level} ${name}` : `${level} ${name} coming soon`}
+                              onClick={() => setStoryLevel(level)}
+                              disabled={!storyMode || !hasStories}
+                            >
+                              <span className="control-level-code">{level}</span>
+                              <span className="control-level-name">{name}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    <label className="control-story-setting">
+                      <span>Story</span>
+                      <select
+                        className="control-select"
+                        value={storyId}
+                        onChange={(event) => setStoryId(event.target.value)}
+                        aria-label="Choose story"
+                        disabled={!storyMode}
+                      >
+                        {storiesAtLevel.map((story) => (
+                          <option key={story.id} value={story.id}>{story.shortTitle}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+              </div>
+            </div>
+
+            <div className="voice-settings-panel" id="hero-voice-settings" aria-label="Playback settings">
+                <label className="voice-setting">
+                  <span>Sentence speed</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max={HERO_PLAYBACK_RATES.length - 1}
+                    step="1"
+                    value={speedIndex}
+                    onChange={(event) => setPlaybackRate(HERO_PLAYBACK_RATES[Number(event.target.value)]!)}
+                  />
+                  <output>{playbackRate}x</output>
+                </label>
+                {speechSupported && (
+                  <>
+                    <label className="voice-setting">
+                      <span>Voice speed</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max={HERO_SPEECH_RATES.length - 1}
+                        step="1"
+                        value={speechRateIndex}
+                        onChange={(event) => changeSpeechRate(HERO_SPEECH_RATES[Number(event.target.value)]!)}
+                      />
+                      <output>{speechRate}x</output>
+                    </label>
+                    <label className="voice-setting">
+                      <span>{speechVolumeIcon(speechVolume)} Volume</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max={HERO_SPEECH_VOLUMES.length - 1}
+                        step="1"
+                        value={speechVolumeIndex}
+                        onChange={(event) => changeSpeechVolume(HERO_SPEECH_VOLUMES[Number(event.target.value)]!)}
+                      />
+                      <output>{Math.round(speechVolume * 100)}%</output>
+                    </label>
+                  </>
+                )}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="progress-section progress-compact">
@@ -697,11 +737,11 @@ export function Dashboard({
 
       <div className="dashboard-journey-actions">
         <button type="button" className="dashboard-quest-button" onClick={onOpenQuests}>
-          <span className="dashboard-quest-mark" aria-hidden="true">侍</span>
-          <span><small>GUIDED LEARNING</small><b>Quests</b><em>Continue the yōkai road →</em></span>
+          <span className="dashboard-quest-mark" aria-hidden="true">&#20365;</span>
+          <span><small>GUIDED LEARNING</small><b>Quests</b><em>Continue the yokai road →</em></span>
         </button>
         <button type="button" className="dashboard-achievement-button" onClick={onOpenAchievements}>
-          <span className="dashboard-achievement-mark" aria-hidden="true">誉</span>
+          <span className="dashboard-achievement-mark" aria-hidden="true">&#35465;</span>
           <span><small>ACHIEVEMENTS</small><b>{unlockedAchievements} / {achievements.length}</b><em>View your legend →</em></span>
         </button>
       </div>
@@ -715,11 +755,11 @@ export function Dashboard({
         </div>
         <div className="practice-grid">
           <button type="button" className="practice-card" onClick={onOpenSentencePractice}>
-            <span className="practice-emoji">文</span>
+            <span className="practice-emoji">&#25991;</span>
             <span className="practice-label">Sentences</span>
           </button>
           <button type="button" className="practice-card practice-card-grammar" onClick={onOpenGrammar}>
-            <span className="practice-emoji">文法</span>
+            <span className="practice-emoji">&#25991;&#27861;</span>
             <span className="practice-label">Grammar</span>
           </button>
           <button
@@ -727,11 +767,11 @@ export function Dashboard({
             className="practice-card practice-card-vocab-practice"
             onClick={onOpenVocabPractice}
           >
-            <span className="practice-emoji">語彙</span>
+            <span className="practice-emoji">&#35486;&#24409;</span>
             <span className="practice-label">Vocab</span>
           </button>
           <button type="button" className="practice-card practice-card-kanji" onClick={onOpenKanji}>
-            <span className="practice-emoji">漢</span>
+            <span className="practice-emoji">&#28450;</span>
             <span className="practice-label">Kanji</span>
           </button>
         </div>
@@ -753,19 +793,19 @@ export function Dashboard({
         {additionalOpen && (
           <div className="dashboard-additional-actions">
             <button type="button" onClick={onOpenVocabList}>
-              <span className="dashboard-additional-mark" aria-hidden="true">語</span>
+              <span className="dashboard-additional-mark" aria-hidden="true">&#35486;</span>
               <span><b>Vocab List</b><small>Browse every word by level</small></span>
             </button>
             <button type="button" onClick={onOpenWordCategories}>
-              <span className="dashboard-additional-mark" aria-hidden="true">動</span>
+              <span className="dashboard-additional-mark" aria-hidden="true">&#21205;</span>
               <span><b>Word Categories</b><small>Browse verbs, adjectives, nouns, and more</small></span>
             </button>
             <button type="button" onClick={onOpenContentStudio}>
-              <span className="dashboard-additional-mark" aria-hidden="true">編</span>
+              <span className="dashboard-additional-mark" aria-hidden="true">&#32232;</span>
               <span><b>Content Studio</b><small>Add and organize your own content</small></span>
             </button>
             <button type="button" onClick={onOpenSentenceTesting}>
-              <span className="dashboard-additional-mark" aria-hidden="true">験</span>
+              <span className="dashboard-additional-mark" aria-hidden="true">&#39443;</span>
               <span><b>Sentence Testing</b><small>Generate 15 sentences by complexity level</small></span>
             </button>
           </div>

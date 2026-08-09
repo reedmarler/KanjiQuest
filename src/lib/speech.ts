@@ -1,11 +1,9 @@
 /**
  * Japanese text-to-speech for the dashboard's rotating sentence.
  *
- * Calls the local Style-BERT-VITS2 service (backend/tts_service) instead of
- * the browser's built-in speechSynthesis, for far more natural Japanese
- * speech. The service must be running at TTS_SERVER_URL — when it isn't
- * reachable, speech is skipped entirely rather than falling back to a
- * robotic voice.
+ * Uses the local Style-BERT-VITS2 service when it is running, then falls back
+ * to the browser's built-in speechSynthesis so dashboard audio still works on
+ * other devices and deployments.
  */
 
 const TTS_SERVER_URL = 'http://127.0.0.1:8001'
@@ -17,15 +15,12 @@ const VOICE_IDS: Record<SpeechVoiceGender, string> = {
   boy: 'not-anime-lightfire',
 }
 
-let serverAvailable = true
+let serverAvailable = false
 let currentAudio: HTMLAudioElement | null = null
-// Bumped on every speakJapanese call so a slow, stale request that resolves
-// after a newer one can tell it's obsolete and skip playing instead of
-// stacking audio on top of whatever's already playing.
 let speechGeneration = 0
 
 export function canSpeakJapanese() {
-  return serverAvailable
+  return serverAvailable || canUseBrowserSpeech()
 }
 
 export function savedVoiceGender(): SpeechVoiceGender {
@@ -37,34 +32,70 @@ export function setVoiceGender(gender: SpeechVoiceGender) {
   window.localStorage.setItem(VOICE_STORAGE_KEY, gender)
 }
 
+function canUseBrowserSpeech() {
+  return 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window
+}
+
+function findJapaneseBrowserVoice() {
+  if (!canUseBrowserSpeech()) return undefined
+
+  const voices = window.speechSynthesis.getVoices()
+  return voices.find((voice) => voice.lang.toLowerCase().startsWith('ja'))
+    ?? voices.find((voice) => voice.name.toLowerCase().includes('japanese'))
+}
+
+function speakWithBrowserVoice(text: string, rate: number, volume: number, generation: number) {
+  if (!canUseBrowserSpeech() || generation !== speechGeneration) return
+
+  window.speechSynthesis.cancel()
+  const utterance = new SpeechSynthesisUtterance(text)
+  const japaneseVoice = findJapaneseBrowserVoice()
+  utterance.lang = 'ja-JP'
+  utterance.rate = rate
+  utterance.volume = volume
+  if (japaneseVoice) utterance.voice = japaneseVoice
+  window.speechSynthesis.speak(utterance)
+}
+
 /**
- * Reports whether the TTS server is reachable, now and whenever that
- * changes. Optimistic on the first call so the UI doesn't hide the speak
- * button while the check is in flight; corrected once the check resolves.
+ * Reports whether any dashboard speech route is available. Browser voices can
+ * arrive asynchronously, so listen for both local-server and browser changes.
  */
 export function watchSpeechSupport(listener: (supported: boolean) => void) {
   let cancelled = false
-  listener(serverAvailable)
+  const report = () => {
+    if (!cancelled) listener(canSpeakJapanese())
+  }
+
+  report()
 
   fetch(`${TTS_SERVER_URL}/voices`, { method: 'GET' })
     .then((res) => {
       if (cancelled) return
       serverAvailable = res.ok
-      listener(serverAvailable)
+      report()
     })
     .catch(() => {
       if (cancelled) return
       serverAvailable = false
-      listener(false)
+      report()
     })
+
+  if (canUseBrowserSpeech()) {
+    window.speechSynthesis.addEventListener('voiceschanged', report)
+  }
 
   return () => {
     cancelled = true
+    if (canUseBrowserSpeech()) {
+      window.speechSynthesis.removeEventListener('voiceschanged', report)
+    }
   }
 }
 
 export function stopSpeaking() {
   speechGeneration++
+  if (canUseBrowserSpeech()) window.speechSynthesis.cancel()
   if (currentAudio) {
     currentAudio.pause()
     currentAudio.currentTime = 0
@@ -73,14 +104,18 @@ export function stopSpeaking() {
 }
 
 /**
- * Speaks one sentence, replacing anything already playing — the hero
- * sentence changes on a timer, so a backlog would quickly fall out of sync
- * with what is on screen.
+ * Speaks one sentence, replacing anything already playing. The hero sentence
+ * changes on a timer, so a backlog would quickly fall out of sync.
  */
 export function speakJapanese(text: string, rate = 0.9, volume = 1) {
   if (!text.trim()) return
   stopSpeaking()
   const generation = ++speechGeneration
+
+  if (!serverAvailable) {
+    speakWithBrowserVoice(text, rate, volume, generation)
+    return
+  }
 
   fetch(`${TTS_SERVER_URL}/speak`, {
     method: 'POST',
@@ -93,8 +128,6 @@ export function speakJapanese(text: string, rate = 0.9, volume = 1) {
       return res.blob()
     })
     .then((blob) => {
-      // A newer call already fired (or stopSpeaking was called) while this
-      // request was in flight — don't stack audio on top of it.
       if (generation !== speechGeneration) return
       const audio = new Audio(URL.createObjectURL(blob))
       audio.volume = volume
@@ -103,5 +136,6 @@ export function speakJapanese(text: string, rate = 0.9, volume = 1) {
     })
     .catch(() => {
       serverAvailable = false
+      speakWithBrowserVoice(text, rate, volume, generation)
     })
 }

@@ -4915,7 +4915,11 @@ export function generateCategorySentence(seed: number, requestedPatternId?: stri
       ? (isBareCopula ? `${copula} not` : bareCopulaPhrase ? `${copula} not${bareCopulaPhrase[1]}` : `${subjectUsesBaseVerb(subjectEnglish)?'do':'does'} not ${baseVerbEnglish}`)
       : undefined)
   const renderedEnglish=renderTranslation(verb.translationTemplate,verb,filled,verbOverride)
-  const timeAdjunctEnglish=filled.time ? frontedTimeAdjunctEnglish[filled.time.japanese] ?? englishPhrase(filled.time,'time') : null
+  // Only n5-01 adds an optional fronted time adjunct. In time-governed frames
+  // such as Subject は Time に 起きる, {Time} is already in the template.
+  const timeAdjunctEnglish=verb.sentencePattern === 'n5-01' && filled.time
+    ? frontedTimeAdjunctEnglish[filled.time.japanese] ?? englishPhrase(filled.time,'time')
+    : null
   const english=timeAdjunctEnglish
     ? `${timeAdjunctEnglish.charAt(0).toUpperCase()}${timeAdjunctEnglish.slice(1)}, ${renderedEnglish.charAt(0).toLowerCase()}${renderedEnglish.slice(1)}`
     : renderedEnglish.charAt(0).toUpperCase()+renderedEnglish.slice(1)
