@@ -32,7 +32,7 @@ const patternsByComplexity: Record<GenerationComplexity, readonly string[]> = {
     'n3-13', 'n2-10', 'n2-11', 'n1-04', 'n2-13', 'n2-14', 'n2-04',
     'n2-06', 'n2-16', 'n2-18', 'n2-03', 'n2-08',
     'n3-20', 'n3-21', 'n3-22', 'n3-23', 'n3-26', 'n3-29', 'n3-30',
-    'n3-33', 'n3-34', 'n3-35', 'n3-37', 'n3-38', 'n3-39',
+    'n3-33', 'n3-34', 'n3-35', 'n3-37', 'n3-38', 'n3-39', 'n3-40', 'n3-41',
     'n2-35', 'n2-36', 'n2-37',
   ],
   // Two interacting verbs in one sentence.

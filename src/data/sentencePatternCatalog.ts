@@ -110,6 +110,8 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N3','Subject は 「Quote」と言う',['Subject','は','「Quote」と言う'],'先生は「頑張って」と言った','say that (quotation)','quote + と言う',true],
   ['N3','Object は Adjective-stemそうだ',['Object','は','Adjective-stem','そうだ'],'このケーキは美味しそうだ','looks like (appearance)','i-adjective stem + そう',true],
   ['N3','Subject は Verbないでください',['Subject','は','Verbないでください'],'心配しないでください','please do not','nai-stem + ないでください',true],
+  ['N3','Time Subject は Object を Verbてきました',['Time','Subject','は','Object','を','Verbてきました'],'ずっと日本語を勉強してきました','a state or action that has continued up to now','te-form + くる',true],
+  ['N3','Subject は Object を Verbていきます',['Subject','は','Object','を','Verbていきます'],'これからも日本語を勉強していきます','a state or action that will continue from now on','te-form + いく',true],
 
   ['N2','Clause わけではない',['Clause','わけではない'],'嫌いなわけではない','it does not mean that','plain form + わけではない',true],
   ['N2','Clause わけにはいかない',['Clause','わけにはいかない'],'行くわけにはいかない','cannot reasonably or socially do','dictionary form + わけにはいかない',true],
