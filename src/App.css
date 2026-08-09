@@ -50,6 +50,7 @@ html {
   font-size: 18px;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -110,15 +111,14 @@ body:has(.dashboard) .app {
   padding-bottom: 0.4rem;
 }
 
+body:has(.dashboard) {
+  overflow-y: scroll;
+}
+
 /* Dashboard */
-.dashboard::before {
-  content: "17";
-  position: fixed;
-  top: calc(0.4rem + env(safe-area-inset-top));
-  left: calc(0.45rem + env(safe-area-inset-left));
-  z-index: 1000;
-  color: #fff;
-  font: 800 1.1rem/1 'Outfit', system-ui, sans-serif;
+.dashboard {
+  position: relative;
+  padding-top: 1.9rem;
 }
 
 .hero {
@@ -133,7 +133,8 @@ body:has(.dashboard) .app {
 .hero-compact h1 {
   font-size: 1.85rem;
   font-weight: 700;
-  line-height: 1.05;
+  line-height: 1.18;
+  padding-bottom: 0.06em;
   background: linear-gradient(135deg, var(--kyogre-light), var(--sakura));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -2039,7 +2040,7 @@ body:has(.dashboard) .app {
   flex-direction: column;
   gap: 0.55rem;
   margin-bottom: 0.55rem;
-  padding: 0.65rem;
+  padding: 0.5rem;
   border: 1px solid var(--border);
   border-radius: calc(var(--radius) + 2px);
   background: var(--surface);
@@ -2091,8 +2092,22 @@ body:has(.dashboard) .app {
 .hero-controls-primary .control-transport { justify-self: center; }
 .hero-controls-primary .control-group-audio { justify-self: end; }
 
-.control-group-audio.has-story-name {
-  position: static;
+.control-story-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.28rem;
+  pointer-events: none;
+}
+
+.control-story-quick-select {
+  position: relative;
+  pointer-events: auto;
 }
 
 .control-audio-buttons {
@@ -2175,18 +2190,27 @@ body:has(.dashboard) .app {
   width: 2.55rem;
   min-width: 2.55rem;
   height: 2.35rem;
-  font-size: 1.55rem;
+  font-size: 2.25rem;
   line-height: 1;
 }
 
 .control-nav-chevron {
-  display: grid;
-  place-items: center;
-  width: 1em;
-  height: 1em;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  line-height: 1;
-  transform: translateY(-0.04em);
+  display: block;
+  width: 0.54rem;
+  height: 0.54rem;
+  border-style: solid;
+  border-color: currentColor;
+  border-width: 0.18rem 0.18rem 0 0;
+  font-size: 0;
+  line-height: 0;
+}
+
+.control-transport .control-nav-button:first-child .control-nav-chevron {
+  transform: translateX(0.08rem) rotate(-135deg);
+}
+
+.control-transport .control-nav-button:last-child .control-nav-chevron {
+  transform: translateX(-0.08rem) rotate(45deg);
 }
 
 .control-speaker-button {
@@ -2196,56 +2220,186 @@ body:has(.dashboard) .app {
 }
 
 .control-story-name-button {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 0.5rem);
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.34rem;
-  width: max-content;
-  max-width: 9.5rem;
-  height: 2rem;
-  padding: 0 0.65rem;
+  width: fit-content;
+  min-width: 0;
+  max-width: 7.25rem;
+  height: 1.7rem;
+  box-sizing: border-box;
+  padding: 0 0.32rem;
   border: 1px solid color-mix(in srgb, var(--rayquaza-light) 34%, var(--border));
   border-radius: 0.55rem;
   background: color-mix(in srgb, var(--rayquaza) 12%, var(--surface-2));
   color: var(--rayquaza-light);
   font: 700 0.58rem/1 'Outfit', system-ui, sans-serif;
-  cursor: default;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
 }
 
-.control-story-name-button:disabled {
-  opacity: 1;
+.control-story-top-toggle {
+  pointer-events: auto;
+  min-width: 3.65rem;
+  height: 1.2rem;
+  padding: 0 0.38rem;
+  border-radius: 0.55rem;
+  font-size: 0.5rem;
+}
+
+.control-story-top-toggle .control-toggle-track {
+  width: 1.12rem;
+  height: 0.6rem;
+  padding: 0.08rem;
+}
+
+.control-story-top-toggle .control-toggle-track > span {
+  width: 0.44rem;
+  height: 0.44rem;
+}
+
+.control-story-top-toggle.is-active .control-toggle-track > span {
+  transform: translateX(0.52rem);
+}
+
+.control-story-name-button:hover,
+.control-story-name-button.is-open {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 58%, var(--border));
+  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface-2));
+  color: color-mix(in srgb, var(--rayquaza-light) 86%, white);
 }
 
 .control-story-name-mark {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 0.85rem;
+  height: 0.85rem;
   border-radius: 0.32rem;
   background: color-mix(in srgb, var(--rayquaza) 28%, transparent);
   color: var(--text);
-  font: 800 0.7rem/1 'Noto Sans JP', sans-serif;
+  font: 800 0.58rem/1 'Noto Sans JP', sans-serif;
 }
 
 .control-story-name-text {
   min-width: 0;
   overflow: hidden;
+  font-size: 0.54rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.control-group-audio .control-icon-button,
-.control-group-audio .control-chip-compact,
-.control-group-primary-options .control-chip-compact {
+.control-story-name-chevron {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  transition: transform 140ms ease;
+}
+
+.control-story-name-button.is-open .control-story-name-chevron {
+  transform: rotate(180deg);
+}
+
+.control-story-quick-menu {
+  position: absolute;
+  z-index: 20;
+  top: 1.45rem;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem;
+  width: clamp(18rem, 34vw, 22rem);
+  max-height: none;
+  padding: 0.4rem;
+  overflow: visible;
+  border: 1px solid color-mix(in srgb, var(--rayquaza-light) 34%, var(--border));
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--surface-2) 96%, black);
+  box-shadow: 0 0.75rem 1.8rem rgba(0, 0, 0, 0.38);
+}
+
+.control-story-quick-menu button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 0.75rem;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  min-height: 2rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--text-muted);
+  font: 650 0.56rem/1.15 'Outfit', system-ui, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+
+.control-story-quick-menu button > span:first-child {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.control-story-quick-menu button > span + span {
+  color: var(--rayquaza-light);
+  text-align: center;
+}
+
+.control-story-quick-menu button:hover,
+.control-story-quick-menu button:focus-visible {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 30%, transparent);
+  background: color-mix(in srgb, var(--rayquaza) 14%, transparent);
+  color: var(--text);
+  outline: none;
+}
+
+.control-story-quick-menu button.is-active {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 38%, transparent);
+  background: color-mix(in srgb, var(--rayquaza) 20%, transparent);
+  color: var(--rayquaza-light);
+}
+
+.control-group-audio .control-chip-compact {
   width: 2.2rem;
   min-width: 2.2rem;
   padding: 0;
   justify-content: center;
   border-radius: 0.55rem;
+}
+
+.control-group-primary-options {
+  transform: none;
+}
+
+.control-group-primary-options .control-chip-compact {
+  width: 3.475rem;
+  min-width: 3.475rem;
+  padding: 0;
+  justify-content: center;
+  border-radius: 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.control-audio-buttons {
+  transform: none;
+}
+
+.control-group-audio .control-icon-button {
+  width: 3.475rem;
+  min-width: 3.475rem;
+  padding: 0;
+  justify-content: center;
+  border-radius: 0.55rem;
+  font-size: 1.02rem;
+}
+
+.control-group-audio .control-icon-button .control-chip-jp {
+  font-size: 1.02rem;
+  line-height: 1;
 }
 
 .control-icon-button:hover:not(:disabled) {
@@ -2608,9 +2762,11 @@ body:has(.dashboard) .app {
 }
 
 .control-story-heading b {
-  color: var(--text);
-  font-size: 0.62rem;
+  color: var(--text-muted);
+  font: 800 0.55rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.08em;
   line-height: 1;
+  text-transform: uppercase;
 }
 
 .control-story-heading small {
@@ -2872,14 +3028,18 @@ body:has(.dashboard) .app {
   column-gap: 0.45rem;
 }
 
-.dashboard-quest-button small {
+.dashboard-quest-button small,
+.dashboard-achievement-button small,
+.five-minute-study-heading small,
+.dashboard-additional-heading small {
   grid-column: 1 / -1;
-  color: var(--sakura-light);
   font-size: 0.47rem;
   font-weight: 800;
   letter-spacing: 0.11em;
+  text-transform: uppercase;
 }
 
+.dashboard-quest-button small { color: var(--sakura-light); }
 .dashboard-quest-button b { font-size: 0.74rem; }
 .dashboard-quest-button em { color: var(--text-muted); font-size: 0.56rem; font-style: normal; }
 
@@ -2926,7 +3086,7 @@ body:has(.dashboard) .app {
 }
 
 .dashboard-achievement-button > span:last-child { display: grid; grid-template-columns: auto 1fr; align-items: baseline; column-gap: .4rem; }
-.dashboard-achievement-button small { grid-column: 1/-1; color: var(--gold); font-size: .47rem; font-weight: 800; letter-spacing: .1em; }
+.dashboard-achievement-button small { color: var(--gold); }
 .dashboard-achievement-button b { font-size: .7rem; }
 .dashboard-achievement-button em { color: var(--text-muted); font-size: .54rem; font-style: normal; }
 
@@ -2934,7 +3094,30 @@ body:has(.dashboard) .app {
   margin-bottom: 0.6rem;
 }
 
-.five-minute-study {
+.dashboard-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: -0.1rem 0 0.6rem;
+}
+
+.dashboard-action-grid > .dashboard-quest-button,
+.dashboard-action-grid > .dashboard-achievement-button,
+.dashboard-action-grid > .dashboard-tool-button,
+.dashboard-action-grid > .dashboard-additional {
+  min-height: 6.9rem;
+  margin: 0;
+}
+
+.dashboard-action-grid > .dashboard-quest-button,
+.dashboard-action-grid > .dashboard-achievement-button,
+.dashboard-action-grid > .dashboard-tool-button {
+  align-content: center;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+}
+
+.five-minute-study,
+.dashboard-tool-button {
   margin-top: 0.1rem;
   padding: 0.72rem;
   border: 1px solid color-mix(in srgb, var(--rayquaza-light) 24%, var(--border));
@@ -2944,12 +3127,51 @@ body:has(.dashboard) .app {
     var(--surface);
 }
 
+.dashboard-tool-button {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  min-height: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+}
+
+.dashboard-tool-button:hover {
+  border-color: var(--rayquaza);
+  transform: translateY(-1px);
+}
+
+.study-tools-mark {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  aspect-ratio: 1;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--rayquaza) 16%, var(--surface-2));
+  color: var(--rayquaza-light);
+  font: 700 1.1rem/1 'Noto Sans JP', sans-serif;
+}
+
 .five-minute-study-heading {
   display: flex;
   align-items: end;
   justify-content: space-between;
   gap: 0.8rem;
-  margin: 0.02rem 0.08rem 0.55rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.study-tools-panel.is-open .five-minute-study-heading {
+  margin-bottom: 0.55rem;
+}
+
+.study-tools-copy {
+  min-width: 0;
 }
 
 .five-minute-study-heading h2 {
@@ -2957,10 +3179,32 @@ body:has(.dashboard) .app {
   line-height: 1;
 }
 
-.five-minute-study-heading p {
+.five-minute-study-heading b,
+.dashboard-additional-heading b {
+  display: block;
+  color: var(--text);
+  font-size: 0.74rem;
+  line-height: 1;
+}
+
+.five-minute-study-heading p,
+.five-minute-study-heading em,
+.dashboard-additional-heading em {
   color: var(--text-muted);
-  font-size: 0.62rem;
-  text-align: right;
+  font-size: 0.56rem;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.five-minute-study-heading small,
+.five-minute-study-heading em,
+.dashboard-additional-heading em {
+  display: block;
+  margin-top: 0.28rem;
+}
+
+.five-minute-study-heading small {
+  color: var(--rayquaza-light);
 }
 
 .practice-grid {
@@ -4631,8 +4875,45 @@ body:has(.dashboard) .app {
     top: -0.76em;
   }
 
+  .control-story-topbar {
+    top: 0;
+    gap: 0.32rem;
+  }
+  .control-story-topbar:has(.control-story-quick-select) {
+    justify-content: space-between;
+  }
+  .control-story-quick-select {
+    min-width: 0;
+    max-width: calc(100% - 4.5rem);
+  }
+  .control-story-name-button {
+    max-width: min(10.75rem, calc(100vw - 6rem));
+    height: 1.45rem;
+    padding: 0 0.34rem;
+    gap: 0.28rem;
+  }
+  .control-story-name-text {
+    font-size: 0.5rem;
+  }
+  .control-story-name-mark {
+    width: 0.78rem;
+    height: 0.78rem;
+    font-size: 0.52rem;
+  }
+  .control-story-quick-menu {
+    left: 0;
+    right: auto;
+    width: min(calc(100vw - 2rem), 20rem);
+    max-height: min(18rem, calc(100dvh - 7rem));
+    overflow-y: auto;
+  }
+  .control-story-quick-menu button > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .hero-controls {
-    padding: 0.65rem 0.55rem;
+    padding: 0.45rem;
   }
   .hero-controls-row {
     width: 100%;
@@ -4640,8 +4921,9 @@ body:has(.dashboard) .app {
   }
   .hero-controls-primary {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.55rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 0.38rem;
+    row-gap: 0.55rem;
   }
   .hero-controls-primary .control-group {
     justify-content: center;
@@ -4649,19 +4931,67 @@ body:has(.dashboard) .app {
   .hero-controls-primary .control-transport {
     grid-column: 1 / -1;
     grid-row: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+    width: 100%;
+    gap: 0.34rem;
   }
   .hero-controls-primary .control-group-primary-options {
-    grid-column: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-column: 1 / 3;
     grid-row: 2;
-    justify-self: start;
-    justify-content: flex-start;
+    width: 100%;
+    gap: 0.38rem;
+    justify-self: stretch;
+    justify-content: stretch;
   }
   .hero-controls-primary .control-group-audio {
-    grid-column: 2;
+    grid-column: 3 / 5;
     grid-row: 2;
-    justify-self: end;
-    justify-content: flex-end;
-    flex-wrap: wrap;
+    width: 100%;
+    justify-self: stretch;
+    justify-content: stretch;
+  }
+  .hero-controls-primary .control-audio-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 0.38rem;
+  }
+  .hero-controls-primary .control-chip-compact,
+  .hero-controls-primary .control-group-audio .control-icon-button {
+    width: 100%;
+    min-width: 0;
+    height: 2.4rem;
+  }
+  .hero-controls-primary .control-nav-button {
+    justify-self: center;
+    width: 2.58rem;
+    min-width: 2.58rem;
+    height: 2.58rem;
+    border-radius: 999px;
+    font-size: 2rem;
+  }
+  .hero-controls-primary .control-nav-chevron {
+    width: 0.62rem;
+    height: 0.62rem;
+    border-width: 0.2rem 0.2rem 0 0;
+  }
+  .hero-controls-primary .control-nav-button:first-child .control-nav-chevron {
+    transform: translateX(0.08rem) rotate(-135deg);
+  }
+  .hero-controls-primary .control-nav-button:last-child .control-nav-chevron {
+    transform: translateX(-0.08rem) rotate(45deg);
+  }
+  .hero-controls-primary .control-play {
+    width: 100%;
+    height: 2.58rem;
+    border-radius: 999px;
+  }
+  .hero-controls-primary .control-play-label {
+    width: auto;
+    min-width: 2.15rem;
   }
   .voice-settings-panel {
     gap: 0.75rem;
@@ -6731,11 +7061,12 @@ body:has(.dashboard) .app {
 }
 
 .dashboard-additional-toggle {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.7rem;
+  gap: 0.55rem;
   width: 100%;
+  min-height: 100%;
   padding: 0;
   border: none;
   background: none;
@@ -6743,6 +7074,17 @@ body:has(.dashboard) .app {
   color: inherit;
   cursor: pointer;
   text-align: left;
+}
+
+.dashboard-additional-mark-main {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  aspect-ratio: 1;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--kyogre) 16%, var(--surface-2));
+  color: var(--kyogre-light);
+  font: 700 1.1rem/1 'Noto Sans JP', sans-serif;
 }
 
 .dashboard-additional-chevron {
@@ -6757,11 +7099,16 @@ body:has(.dashboard) .app {
 }
 
 .dashboard-additional-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.7rem;
-  margin: 0.02rem 0.08rem 0.55rem;
+  display: grid;
+  align-items: center;
+  justify-content: stretch;
+  gap: 0.28rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.dashboard-additional:has(.dashboard-additional-actions) .dashboard-additional-heading {
+  margin-bottom: 0.55rem;
 }
 
 .dashboard-additional-heading h2 {
@@ -6769,10 +7116,14 @@ body:has(.dashboard) .app {
   line-height: 1;
 }
 
+.dashboard-additional-heading small {
+  color: var(--kyogre-light);
+}
+
 .dashboard-additional-heading p {
   color: var(--text-muted);
-  font-size: 0.6rem;
-  text-align: right;
+  font-size: 0.56rem;
+  text-align: left;
 }
 
 .dashboard-additional-actions {
@@ -6828,6 +7179,92 @@ body:has(.dashboard) .app {
   font-size: 0.5rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.tool-menu-page {
+  display: grid;
+  gap: 0.8rem;
+  width: min(100%, 34rem);
+  margin: 0 auto;
+}
+
+.tool-menu-heading {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.9rem 0.15rem 0.15rem;
+  text-align: center;
+}
+
+.tool-menu-heading small {
+  color: var(--kyogre-light);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.tool-menu-heading h1 {
+  color: var(--text);
+  font-size: 1.55rem;
+  line-height: 1.05;
+}
+
+.tool-menu-heading p {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.tool-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.tool-menu-card {
+  display: grid;
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 6.4rem;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 24%, var(--border));
+  border-radius: calc(var(--radius) + 2px);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--kyogre) 7%, transparent), transparent 54%), var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.tool-menu-card:hover {
+  border-color: var(--kyogre-light);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--kyogre) 12%, transparent), transparent 54%), var(--surface);
+  transform: translateY(-1px);
+}
+
+.tool-menu-mark {
+  display: grid;
+  place-items: center;
+  width: 2.45rem;
+  aspect-ratio: 1;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--kyogre) 16%, var(--surface-2));
+  color: var(--kyogre-light);
+  font: 700 1.1rem/1 'Noto Sans JP', sans-serif;
+}
+
+.tool-menu-card b {
+  display: block;
+  font-size: 0.86rem;
+  line-height: 1.1;
+}
+
+.tool-menu-card small {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.58rem;
+  line-height: 1.35;
 }
 
 /* Focused vocabulary: a fixed 15-word thematic path rather than a mixed list. */
@@ -8332,6 +8769,59 @@ body:has(.dashboard) .app {
 @media(max-width:720px){.quest-campaign-bar{padding:.8rem}.quest-current-compact{grid-template-columns:1fr}.quest-reward{grid-template-columns:auto 1fr;justify-items:start;text-align:left}.quest-reward>span{grid-column:2}.quest-reward>strong{grid-row:1/4;grid-column:1}.quest-reward>b,.quest-reward small{grid-column:2}.quest-steps-compact{padding:.9rem}.quest-checkpoint-card{padding:1.05rem}.quest-checkpoint-options{grid-template-columns:1fr}.quest-campaign-progress{display:none}}
 @media(max-width:720px){.dashboard-journey-actions{grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr)}.dashboard-quest-button em,.dashboard-achievement-button em{display:none}.achievements-hero{grid-template-columns:3.35rem 1fr auto;padding:.9rem}.achievements-crest{width:3.35rem}.achievement-grid{grid-template-columns:1fr}.achievement-filters{overflow-x:auto;padding-bottom:.15rem}.achievement-filters button{flex:0 0 auto}.quest-battle-rules{flex-wrap:wrap;justify-content:center}.quest-battle-arena{min-height:6.5rem;padding:.55rem}.quest-fighter-mark{width:3rem}.quest-battle-question{padding-inline:0}.quest-battle-question>header small{display:none}}
 @media(max-width:430px){.dashboard-journey-actions{grid-template-columns:1fr 1fr}.dashboard-quest-button,.dashboard-achievement-button{grid-template-columns:1.85rem 1fr;padding:.4rem}.dashboard-quest-mark,.dashboard-achievement-mark{width:1.8rem}.dashboard-quest-button small,.dashboard-achievement-button small{font-size:.4rem}.achievements-hero>strong{display:none}.achievements-hero{grid-template-columns:3.2rem 1fr}.quest-battle-arena{grid-template-columns:1fr 1.5rem 1fr}.quest-fighter-name span{display:none}.quest-checkpoint-clue{font-size:.72rem}.quest-battle-intro h1{font-size:1.3rem}.quest-kanji-card-label small{display:none}.quest-kanji-word-answer{align-items:center;flex-direction:column;gap:.05rem}.quest-kanji-part-examples{flex-wrap:wrap}.quest-book-page{min-height:16.5rem;padding:1.4rem 1rem 1rem}.quest-gate-scene{height:10rem}.quest-gate-figure{width:7.2rem;height:7.2rem}.quest-torii{width:5.4rem;height:6.5rem}.quest-torii:before{width:7rem}.quest-gate-seal{top:3rem;width:2.45rem}.quest-gate-seal span{font-size:1rem}.quest-gate-copy>p:last-child{max-width:19rem}.quest-battle-rules span{font-size:.43rem}}
+
+@media(max-width:720px){
+  .dashboard-action-grid {
+    grid-auto-rows: 8.45rem;
+  }
+  .dashboard-action-grid > .dashboard-quest-button,
+  .dashboard-action-grid > .dashboard-achievement-button,
+  .dashboard-action-grid > .dashboard-tool-button,
+  .dashboard-action-grid > .dashboard-additional {
+    min-height: 0;
+    height: 100%;
+  }
+  .dashboard-action-grid > .dashboard-quest-button,
+  .dashboard-action-grid > .dashboard-achievement-button,
+  .dashboard-action-grid > .dashboard-tool-button {
+    align-content: center;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    padding: 0.56rem;
+  }
+  .dashboard-action-grid .five-minute-study-heading,
+  .dashboard-action-grid .dashboard-additional-heading {
+    align-items: center;
+    width: 100%;
+    margin: 0;
+  }
+  .dashboard-action-grid .dashboard-additional-heading p {
+    text-align: left;
+  }
+  .dashboard-action-grid .dashboard-quest-mark,
+  .dashboard-action-grid .dashboard-achievement-mark,
+  .dashboard-action-grid .study-tools-mark,
+  .dashboard-action-grid .dashboard-additional-mark-main {
+    width: 1.95rem;
+  }
+}
+
+@media(max-width:430px){
+  .dashboard-action-grid {
+    grid-auto-rows: 7.25rem;
+  }
+  .dashboard-action-grid > .dashboard-quest-button,
+  .dashboard-action-grid > .dashboard-achievement-button,
+  .dashboard-action-grid > .dashboard-tool-button,
+  .dashboard-action-grid > .dashboard-additional {
+    min-height: 0;
+  }
+  .tool-menu-grid {
+    grid-template-columns: 1fr;
+  }
+  .tool-menu-card {
+    min-height: 5.4rem;
+  }
+}
 @media(max-width:720px){.quest-battle-arena{min-height:8.5rem;padding:.5rem .6rem 0}.quest-fighter-portrait-shell{height:5.9rem}.quest-fighter-portrait{width:7.3rem;height:7.3rem}.quest-battle-question .quest-checkpoint-clue{font-size:.9rem}.quest-battle-question .quest-checkpoint-prompt{font-size:1.2rem}.quest-battle-question .quest-checkpoint-options button{min-height:3.35rem;font-size:1rem}}
 @media(max-width:720px){.quest-guardian-card{grid-template-columns:4.5rem 1fr;justify-items:start;align-content:center;text-align:left}.quest-guardian-card img{grid-column:1;grid-row:1/6;width:4.25rem;height:4.25rem;margin:0}.quest-guardian-card>span,.quest-guardian-card>b,.quest-guardian-card>small,.quest-guardian-card>em{grid-column:2}.quest-earned-reward-preview>div{grid-template-columns:1fr}.quest-earned-reward-preview p{grid-column:1}.quest-active-relic small{display:none}}
 @media(max-width:430px){.quest-fighter-portrait-shell{height:5.1rem}.quest-fighter-portrait{bottom:-.3rem;width:6.3rem;height:6.3rem}.quest-fighter-player .quest-fighter-portrait{left:-.55rem}.quest-fighter-guardian .quest-fighter-portrait{right:-.55rem}.quest-fighter-name{font-size:.56rem}.quest-battle-question .quest-checkpoint-options{grid-template-columns:repeat(2,1fr)}.quest-battle-question .quest-checkpoint-options button{padding:.55rem .35rem;font-size:.92rem}}

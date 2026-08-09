@@ -57,6 +57,8 @@ type View =
   | 'quest-scene'
   | 'quest-checkpoint'
   | 'achievements'
+  | 'study-tools'
+  | 'additional-tools'
 
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
@@ -307,6 +309,63 @@ function App() {
     )
   }
 
+  if (view === 'study-tools') {
+    return (
+      <div className="app">
+        <ToolMenuPage
+          title="Study tools"
+          eyebrow="STUDY MODES"
+          description="Choose a focused drill."
+          onBack={() => setView('dashboard')}
+          tools={[
+            { mark: '文', title: 'Sentences', detail: 'Build Japanese sentence order.', onClick: () => startSentenceMode('study-tools') },
+            { mark: '文法', title: 'Grammar', detail: 'Practice patterns and particles.', onClick: () => {
+              setActiveQuestId(undefined)
+              setPracticeReturnView('study-tools')
+              setView('grammar')
+            } },
+            { mark: '語彙', title: 'Vocab', detail: 'Drill focused word groups.', onClick: () => {
+              setQuestVocabTopicId(undefined)
+              setActiveQuestId(undefined)
+              setPracticeReturnView('study-tools')
+              setView('vocab-practice')
+            } },
+            { mark: '漢', title: 'Kanji', detail: 'Study kanji readings and forms.', onClick: () => {
+              setActiveQuestId(undefined)
+              setPracticeReturnView('study-tools')
+              setView('kanji')
+            } },
+          ]}
+        />
+      </div>
+    )
+  }
+
+  if (view === 'additional-tools') {
+    return (
+      <div className="app">
+        <ToolMenuPage
+          title="Additional"
+          eyebrow="STUDY LIBRARY"
+          description="Manage saved content and practice tools."
+          onBack={() => setView('dashboard')}
+          tools={[
+            { mark: '語', title: 'Vocab List', detail: 'Browse every word by level.', onClick: () => {
+              setLibraryTab('vocab')
+              setView('library')
+            } },
+            { mark: '動', title: 'Word Categories', detail: 'Browse verbs, adjectives, nouns, and more.', onClick: () => {
+              setLibraryTab('categories')
+              setView('library')
+            } },
+            { mark: '編', title: 'Content Studio', detail: 'Add and organize your own content.', onClick: () => setView('content-studio') },
+            { mark: '験', title: 'Sentence Testing', detail: 'Generate sentences by complexity level.', onClick: () => setView('sentence-testing') },
+          ]}
+        />
+      </div>
+    )
+  }
+
   if (view === 'quest-scene') {
     return (
       <div className="app">
@@ -431,45 +490,63 @@ function App() {
       <Dashboard
         learnedCount={learnedCount}
         totalCards={CARD_TOTAL}
-        onOpenSentencePractice={() => startSentenceMode()}
-        onOpenGrammar={() => {
-          setActiveQuestId(undefined)
-          setPracticeReturnView('dashboard')
-          setView('grammar')
-        }}
-        onOpenVocabList={() => {
-          setLibraryTab('vocab')
-          setView('library')
-        }}
-        onOpenVocabPractice={() => {
-          setQuestVocabTopicId(undefined)
-          setActiveQuestId(undefined)
-          setPracticeReturnView('dashboard')
-          setView('vocab-practice')
-        }}
-        onOpenContentStudio={() => setView('content-studio')}
-        onOpenKanji={() => {
-          setActiveQuestId(undefined)
-          setPracticeReturnView('dashboard')
-          setView('kanji')
-        }}
         onOpenQuests={() => {
           setActiveQuestId('first-morning')
           setView('quests')
         }}
         onOpenAchievements={() => setView('achievements')}
+        onOpenStudyTools={() => setView('study-tools')}
+        onOpenAdditionalTools={() => setView('additional-tools')}
         achievementMetrics={achievementMetrics}
         questProgress={questProgress}
         favoriteSentenceCount={favoriteSentences.length}
-        onOpenWordCategories={() => {
-          setLibraryTab('categories')
-          setView('library')
-        }}
-        onOpenSentenceTesting={() => setView('sentence-testing')}
         wrongPool={wrongPool}
         progress={progress}
       />
     </div>
+  )
+}
+
+type ToolMenuItem = {
+  mark: string
+  title: string
+  detail: string
+  onClick: () => void
+}
+
+function ToolMenuPage({
+  title,
+  eyebrow,
+  description,
+  tools,
+  onBack,
+}: {
+  title: string
+  eyebrow: string
+  description: string
+  tools: ToolMenuItem[]
+  onBack: () => void
+}) {
+  return (
+    <main className="tool-menu-page">
+      <button type="button" className="back-button" onClick={onBack}>← Back</button>
+      <section className="tool-menu-heading">
+        <small>{eyebrow}</small>
+        <h1>{title}</h1>
+        <p>{description}</p>
+      </section>
+      <div className="tool-menu-grid">
+        {tools.map((tool) => (
+          <button key={tool.title} type="button" className="tool-menu-card" onClick={tool.onClick}>
+            <span className="tool-menu-mark" aria-hidden="true">{tool.mark}</span>
+            <span>
+              <b>{tool.title}</b>
+              <small>{tool.detail}</small>
+            </span>
+          </button>
+        ))}
+      </div>
+    </main>
   )
 }
 

@@ -21,9 +21,35 @@ import {
 const HERO_SPEECH_STORAGE_KEY = 'kanji-quest-hero-speech-v1'
 const HERO_SPEECH_RATE_STORAGE_KEY = 'kanji-quest-hero-speech-rate-v1'
 const HERO_SPEECH_VOLUME_STORAGE_KEY = 'kanji-quest-hero-speech-volume-v1'
+const HERO_SETTINGS_EXPANDED_STORAGE_KEY = 'kanji-quest-hero-settings-expanded-v1'
 /** Voice speeds, slowest to fastest. 1x is the engine's natural pace. */
-const HERO_SPEECH_RATES = [0.5, 0.75, 1, 1.25, 1.5] as const
+const HERO_SPEECH_RATES = [
+  0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1, 1.25, 1.5, 1.75, 2, 2.5, 3,
+] as const
 type HeroSpeechRate = typeof HERO_SPEECH_RATES[number]
+
+// One full rest/highlight/swap cycle in RotatingHeroSentence at 1x.
+const HERO_SENTENCE_CYCLE_MS = 2250 + 1917 + 2750
+const COMBINING_SMALL_KANA = new Set([
+  'ぁ', 'ぃ', 'ぅ', 'ぇ', 'ぉ', 'ゃ', 'ゅ', 'ょ', 'ゎ',
+  'ァ', 'ィ', 'ゥ', 'ェ', 'ォ', 'ャ', 'ュ', 'ョ', 'ヮ',
+])
+
+function minimumSpeechRateForSentence(text: string, playbackRate: HeroPlaybackRate): HeroSpeechRate {
+  const spokenCharacters = Array.from(text).filter((character) => /[\p{L}\p{N}ー]/u.test(character))
+  const moraCount = spokenCharacters.reduce(
+    (total, character) => total + (COMBINING_SMALL_KANA.has(character) ? 0 : 1),
+    0,
+  )
+  const pauseCount = (text.match(/[、。！？,.!?]/g) ?? []).length
+  // Roughly 5.25 mora per second at 1x, with room for voice startup and pauses.
+  const estimatedReadingMs = 300 + (moraCount * 190) + (pauseCount * 220)
+  const availableMs = HERO_SENTENCE_CYCLE_MS / playbackRate
+  const requiredRate = estimatedReadingMs / availableMs
+
+  return HERO_SPEECH_RATES.find((rate) => rate >= requiredRate)
+    ?? HERO_SPEECH_RATES[HERO_SPEECH_RATES.length - 1]
+}
 
 /** Voice volume steps, muted to full, in 10% increments. */
 const HERO_SPEECH_VOLUMES = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] as const
@@ -295,37 +321,25 @@ interface DashboardProps {
   totalCards: number
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
-  onOpenSentencePractice: () => void
-  onOpenGrammar: () => void
-  onOpenVocabList: () => void
-  onOpenVocabPractice: () => void
-  onOpenKanji: () => void
   onOpenQuests: () => void
   onOpenAchievements: () => void
+  onOpenStudyTools: () => void
+  onOpenAdditionalTools: () => void
   achievementMetrics: AchievementMetrics
   questProgress: QuestProgress
   favoriteSentenceCount: number
-  onOpenContentStudio: () => void
-  onOpenWordCategories: () => void
-  onOpenSentenceTesting: () => void
 }
 
 export function Dashboard({
   learnedCount,
   totalCards,
-  onOpenSentencePractice,
-  onOpenGrammar,
-  onOpenVocabList,
-  onOpenVocabPractice,
-  onOpenKanji,
   onOpenQuests,
   onOpenAchievements,
+  onOpenStudyTools,
+  onOpenAdditionalTools,
   achievementMetrics,
   questProgress,
   favoriteSentenceCount,
-  onOpenContentStudio,
-  onOpenWordCategories,
-  onOpenSentenceTesting,
   wrongPool,
   progress,
 }: DashboardProps) {
@@ -336,6 +350,8 @@ export function Dashboard({
   const [storyId, setStoryId] = useState(HERO_STORY_DEFINITIONS[0]?.id ?? '')
   const [storyLevel, setStoryLevel] = useState<JlptLevel>(HERO_STORY_LEVELS[0] ?? 'N5')
   const [storyPlaybackMode, setStoryPlaybackMode] = useState<StoryPlaybackMode>('repeat')
+  const [storyQuickSelectOpen, setStoryQuickSelectOpen] = useState(false)
+  const storyQuickSelectRef = useRef<HTMLDivElement | null>(null)
   const storiesAtLevel = useMemo(() => getHeroStoriesForLevel(storyLevel), [storyLevel])
   const selectedStoryTitle = storiesAtLevel.find((story) => story.id === storyId)?.shortTitle ?? 'Guided reading'
   const storyRolloverId = useMemo(() => {
@@ -345,7 +361,6 @@ export function Dashboard({
   }, [storyId, storyMode, storyPlaybackMode, storiesAtLevel])
   const [paused, setPaused] = useState(false)
   const [playbackRate, setPlaybackRate] = useState<HeroPlaybackRate>(savedPlaybackRate)
-  const [additionalOpen, setAdditionalOpen] = useState(false)
   const [rewindSignal, setRewindSignal] = useState(0)
   const [advanceSignal, setAdvanceSignal] = useState(0)
   const [canRewindSentence, setCanRewindSentence] = useState(false)
@@ -354,13 +369,18 @@ export function Dashboard({
   const [spokenSentence, setSpokenSentence] = useState('')
   const [speechRate, setSpeechRate] = useState<HeroSpeechRate>(savedSpeechRate)
   const [speechVolume, setSpeechVolume] = useState<HeroSpeechVolume>(savedSpeechVolume)
-  const [settingsExpanded, setSettingsExpanded] = useState(true)
-  // Lets the speak-on-new-sentence effect read the current rate/volume without
-  // taking them as a dependency (see that effect for why).
-  const speechRateRef = useRef(speechRate)
-  speechRateRef.current = speechRate
+  const [settingsExpanded, setSettingsExpanded] = useState(
+    () => window.localStorage.getItem(HERO_SETTINGS_EXPANDED_STORAGE_KEY) === 'true',
+  )
+  // Lets the speak-on-new-sentence effect read current settings without taking
+  // them as dependencies, so slider changes do not restart active speech.
   const speechVolumeRef = useRef(speechVolume)
   speechVolumeRef.current = speechVolume
+  const minimumSpeechRate = minimumSpeechRateForSentence(spokenSentence, playbackRate)
+  const effectiveSpeechRate = Math.max(speechRate, minimumSpeechRate) as HeroSpeechRate
+  const effectiveSpeechRateRef = useRef(effectiveSpeechRate)
+  effectiveSpeechRateRef.current = effectiveSpeechRate
+  const speechRateIsAutomatic = effectiveSpeechRate > speechRate
 
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
   const achievements = buildAchievements({ learnedCards: learnedCount, favoriteSentences: favoriteSentenceCount, questProgress, metrics: achievementMetrics })
@@ -371,6 +391,26 @@ export function Dashboard({
     if (storiesAtLevel.some((story) => story.id === storyId)) return
     setStoryId(storiesAtLevel[0]?.id ?? '')
   }, [storiesAtLevel, storyId])
+
+  useEffect(() => {
+    if (!storyQuickSelectOpen) return
+
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (!storyQuickSelectRef.current?.contains(event.target as Node)) {
+        setStoryQuickSelectOpen(false)
+      }
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setStoryQuickSelectOpen(false)
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsidePointer)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePointer)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [storyQuickSelectOpen])
 
   function toggleFurigana() {
     setFuriganaOn((on) => !on)
@@ -401,15 +441,30 @@ export function Dashboard({
     window.localStorage.setItem(HERO_SPEECH_VOLUME_STORAGE_KEY, String(volume))
   }
 
+  function toggleSettingsExpanded() {
+    setSettingsExpanded((expanded) => {
+      const next = !expanded
+      window.localStorage.setItem(HERO_SETTINGS_EXPANDED_STORAGE_KEY, String(next))
+      return next
+    })
+  }
+
   // Voices arrive asynchronously, so a Japanese voice can appear after first
   // paint; this keeps the button from staying disabled when one exists.
   useEffect(() => watchSpeechSupport(setSpeechSupported), [])
+
+  // Keep the physical voice slider in sync when sentence timing requires a
+  // faster reading. Automatic safety bumps do not replace the saved preference.
+  useEffect(() => {
+    if (!speechRateIsAutomatic) return
+    setSpeechRate(effectiveSpeechRate)
+  }, [effectiveSpeechRate, speechRateIsAutomatic])
 
   // Rate and volume are read through refs so adjusting either setting does not
   // restart the sentence currently being spoken.
   useEffect(() => {
     if (!speechOn || !spokenSentence) return
-    speakJapanese(spokenSentence, speechRateRef.current, speechVolumeRef.current)
+    speakJapanese(spokenSentence, effectiveSpeechRateRef.current, speechVolumeRef.current)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [speechOn, spokenSentence])
 
@@ -438,6 +493,67 @@ export function Dashboard({
 
   return (
     <div className="dashboard">
+      <div className="control-story-topbar">
+        {storyMode && (
+          <div className="control-story-quick-select" ref={storyQuickSelectRef}>
+            <button
+              type="button"
+              className={`control-story-name-button${storyQuickSelectOpen ? ' is-open' : ''}`}
+              onClick={() => setStoryQuickSelectOpen((open) => !open)}
+              aria-label={`Choose story. Current story: ${selectedStoryTitle}`}
+              aria-haspopup="menu"
+              aria-expanded={storyQuickSelectOpen}
+              aria-controls="story-quick-select-menu"
+              title="Quick-select story"
+            >
+              <span className="control-story-name-mark" aria-hidden="true">&#29289;</span>
+              <span className="control-story-name-text">{selectedStoryTitle}</span>
+              <span className="control-story-name-chevron" aria-hidden="true">&#9662;</span>
+            </button>
+            {storyQuickSelectOpen && (
+              <div
+                className="control-story-quick-menu"
+                id="story-quick-select-menu"
+                role="menu"
+                aria-label={`${storyLevel} stories`}
+              >
+                {storiesAtLevel.map((story) => (
+                  <button
+                    key={story.id}
+                    type="button"
+                    className={story.id === storyId ? 'is-active' : ''}
+                    role="menuitemradio"
+                    aria-checked={story.id === storyId}
+                    onClick={() => {
+                      setStoryId(story.id)
+                      setStoryQuickSelectOpen(false)
+                    }}
+                  >
+                    <span>{story.title}</span>
+                    {story.id === storyId && <span aria-hidden="true">&#10003;</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <button
+          type="button"
+          className={`control-story-toggle control-story-top-toggle${storyMode ? ' is-active' : ''}`}
+          onClick={() => setStoryMode((enabled) => {
+            if (enabled) setStoryQuickSelectOpen(false)
+            return !enabled
+          })}
+          role="switch"
+          aria-checked={storyMode}
+          aria-label={storyMode ? 'Return to normal sentences' : 'Enable Story mode'}
+          title={storyMode ? 'Return to normal sentences' : 'Enable Story mode'}
+        >
+          <span className="control-toggle-track" aria-hidden="true"><span /></span>
+          <span>Story</span>
+        </button>
+      </div>
+
       <header className="hero hero-compact">
         <h1>Kanji Quest</h1>
         <DashboardHeroSentence
@@ -516,19 +632,7 @@ export function Dashboard({
               </button>
           </div>
 
-          <div className={`control-group control-group-audio${storyMode ? ' has-story-name' : ''}`} role="group" aria-label="Display and audio options">
-            {storyMode && (
-              <button
-                type="button"
-                className="control-story-name-button"
-                aria-label={`Current story: ${selectedStoryTitle}`}
-                title={`Current story: ${selectedStoryTitle}`}
-                disabled
-              >
-                <span className="control-story-name-mark" aria-hidden="true">&#29289;</span>
-                <span className="control-story-name-text">{selectedStoryTitle}</span>
-              </button>
-            )}
+          <div className="control-group control-group-audio" role="group" aria-label="Display and audio options">
             <div className="control-audio-buttons">
               <button
                 type="button"
@@ -546,7 +650,7 @@ export function Dashboard({
               <button
                 type="button"
                 className={`control-icon-button control-settings-button${settingsExpanded ? ' is-active' : ''}`}
-                onClick={() => setSettingsExpanded((expanded) => !expanded)}
+                onClick={toggleSettingsExpanded}
                 aria-expanded={settingsExpanded}
                 aria-controls="hero-voice-settings hero-content-settings"
                 aria-label={settingsExpanded ? 'Hide settings' : 'Show settings'}
@@ -593,10 +697,13 @@ export function Dashboard({
                     <button
                       type="button"
                       className={`control-story-toggle${storyMode ? ' is-active' : ''}`}
-                      onClick={() => setStoryMode((enabled) => !enabled)}
+                      onClick={() => setStoryMode((enabled) => {
+                        if (enabled) setStoryQuickSelectOpen(false)
+                        return !enabled
+                      })}
                       role="switch"
                       aria-checked={storyMode}
-                      aria-label="Enable Story mode"
+                      aria-label={storyMode ? 'Disable Story mode' : 'Enable Story mode'}
                     >
                       <span className="control-toggle-track" aria-hidden="true"><span /></span>
                       <span>{storyMode ? 'On' : 'Off'}</span>
@@ -641,7 +748,10 @@ export function Dashboard({
                               aria-pressed={level === storyLevel}
                               aria-label={`${level} ${name}${hasStories ? '' : ': coming soon'}`}
                               title={hasStories ? `${level} ${name}` : `${level} ${name} coming soon`}
-                              onClick={() => setStoryLevel(level)}
+                              onClick={() => {
+                                setStoryLevel(level)
+                                setStoryQuickSelectOpen(false)
+                              }}
                               disabled={!storyMode || !hasStories}
                             >
                               <span className="control-level-code">{level}</span>
@@ -695,7 +805,7 @@ export function Dashboard({
                         value={speechRateIndex}
                         onChange={(event) => changeSpeechRate(HERO_SPEECH_RATES[Number(event.target.value)]!)}
                       />
-                      <output>{speechRate}x</output>
+                      <output aria-label={`${effectiveSpeechRate} times speed`}>{effectiveSpeechRate}x</output>
                     </label>
                     <label className="voice-setting">
                       <span>{speechVolumeIcon(speechVolume)} Volume</span>
@@ -716,101 +826,58 @@ export function Dashboard({
         )}
       </section>
 
-      <section className="progress-section progress-compact">
-        <div className="progress-header">
-          <span>Progress</span>
-          <span>{progressPct}%</span>
-        </div>
-        <div
-          className="progress-bar progress-bar-quest"
-          style={{ '--progress-pct': `${progressPct}%` } as CSSProperties}
-        >
-          <div className="progress-fill" style={{ width: `${progressPct}%` }} />
-          <span className="progress-samurai" aria-hidden="true">
-            <ProgressRunnerVideo />
-          </span>
-          <span className="progress-fuji" aria-hidden="true">
-            <span className="fuji-snow" />
-          </span>
-        </div>
-      </section>
+      {false && (
+        <section className="progress-section progress-compact">
+          <div className="progress-header">
+            <span>Progress</span>
+            <span>{progressPct}%</span>
+          </div>
+          <div
+            className="progress-bar progress-bar-quest"
+            style={{ '--progress-pct': `${progressPct}%` } as CSSProperties}
+          >
+            <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+            <span className="progress-samurai" aria-hidden="true">
+              <ProgressRunnerVideo />
+            </span>
+            <span className="progress-fuji" aria-hidden="true">
+              <span className="fuji-snow" />
+            </span>
+          </div>
+        </section>
+      )}
 
-      <div className="dashboard-journey-actions">
+      <div className="dashboard-action-grid">
         <button type="button" className="dashboard-quest-button" onClick={onOpenQuests}>
           <span className="dashboard-quest-mark" aria-hidden="true">&#20365;</span>
-          <span><small>GUIDED LEARNING</small><b>Quests</b><em>Continue the yokai road →</em></span>
+          <span><small>STUDY PATH</small><b>Quests</b><em>Follow your guided story</em></span>
         </button>
+
+        <button type="button" className="dashboard-tool-button study-tools-panel" onClick={onOpenStudyTools}>
+          <span className="study-tools-mark" aria-hidden="true">&#25991;</span>
+          <span className="five-minute-study-heading">
+            <span className="study-tools-copy">
+              <small>STUDY MODES</small>
+              <b>Study tools</b>
+              <em>Pick a focused drill</em>
+            </span>
+          </span>
+        </button>
+
         <button type="button" className="dashboard-achievement-button" onClick={onOpenAchievements}>
           <span className="dashboard-achievement-mark" aria-hidden="true">&#35465;</span>
-          <span><small>ACHIEVEMENTS</small><b>{unlockedAchievements} / {achievements.length}</b><em>View your legend →</em></span>
+          <span><small>STUDY RECORD</small><b>Achievements</b><em>{unlockedAchievements} / {achievements.length} unlocked</em></span>
+        </button>
+
+        <button type="button" className="dashboard-tool-button dashboard-additional" onClick={onOpenAdditionalTools}>
+          <span className="dashboard-additional-mark-main" aria-hidden="true">&#20182;</span>
+          <span className="dashboard-additional-heading">
+            <small>STUDY LIBRARY</small>
+            <b>Additional</b>
+            <em>Manage saved content</em>
+          </span>
         </button>
       </div>
-
-      <section className="five-minute-study" aria-labelledby="five-minute-study-title">
-        <div className="five-minute-study-heading">
-          <div>
-            <h2 id="five-minute-study-title">5-minute study</h2>
-          </div>
-          <p>Choose one quick focused session.</p>
-        </div>
-        <div className="practice-grid">
-          <button type="button" className="practice-card" onClick={onOpenSentencePractice}>
-            <span className="practice-emoji">&#25991;</span>
-            <span className="practice-label">Sentences</span>
-          </button>
-          <button type="button" className="practice-card practice-card-grammar" onClick={onOpenGrammar}>
-            <span className="practice-emoji">&#25991;&#27861;</span>
-            <span className="practice-label">Grammar</span>
-          </button>
-          <button
-            type="button"
-            className="practice-card practice-card-vocab-practice"
-            onClick={onOpenVocabPractice}
-          >
-            <span className="practice-emoji">&#35486;&#24409;</span>
-            <span className="practice-label">Vocab</span>
-          </button>
-          <button type="button" className="practice-card practice-card-kanji" onClick={onOpenKanji}>
-            <span className="practice-emoji">&#28450;</span>
-            <span className="practice-label">Kanji</span>
-          </button>
-        </div>
-      </section>
-
-      <section className="dashboard-additional" aria-labelledby="dashboard-additional-title">
-        <button
-          type="button"
-          className="dashboard-additional-toggle"
-          onClick={() => setAdditionalOpen((open) => !open)}
-          aria-expanded={additionalOpen}
-        >
-          <div className="dashboard-additional-heading">
-            <h2 id="dashboard-additional-title">Additional</h2>
-            <p>Browse, save, and shape your study library.</p>
-          </div>
-          <span className={`dashboard-additional-chevron${additionalOpen ? ' is-open' : ''}`} aria-hidden="true">▾</span>
-        </button>
-        {additionalOpen && (
-          <div className="dashboard-additional-actions">
-            <button type="button" onClick={onOpenVocabList}>
-              <span className="dashboard-additional-mark" aria-hidden="true">&#35486;</span>
-              <span><b>Vocab List</b><small>Browse every word by level</small></span>
-            </button>
-            <button type="button" onClick={onOpenWordCategories}>
-              <span className="dashboard-additional-mark" aria-hidden="true">&#21205;</span>
-              <span><b>Word Categories</b><small>Browse verbs, adjectives, nouns, and more</small></span>
-            </button>
-            <button type="button" onClick={onOpenContentStudio}>
-              <span className="dashboard-additional-mark" aria-hidden="true">&#32232;</span>
-              <span><b>Content Studio</b><small>Add and organize your own content</small></span>
-            </button>
-            <button type="button" onClick={onOpenSentenceTesting}>
-              <span className="dashboard-additional-mark" aria-hidden="true">&#39443;</span>
-              <span><b>Sentence Testing</b><small>Generate 15 sentences by complexity level</small></span>
-            </button>
-          </div>
-        )}
-      </section>
     </div>
   )
 }
