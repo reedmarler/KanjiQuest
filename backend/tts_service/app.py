@@ -10,8 +10,10 @@ Web Speech API today, just async over HTTP instead of synchronous in-browser.
 from __future__ import annotations
 
 import logging
+import time
+from collections import defaultdict, deque
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
@@ -23,13 +25,36 @@ logger = logging.getLogger("tts_service")
 
 app = FastAPI(title="Kanji Quest TTS Service")
 
-# Dev server origins; tighten this before deploying anywhere shared.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5174"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+        "https://bunou.app",
+        "https://www.bunou.app",
+    ],
     allow_methods=["POST"],
     allow_headers=["*"],
 )
+
+# Naive in-memory per-IP rate limit — this is a free CPU-bound public
+# endpoint, so an unlimited /speak would let anyone run up compute for free.
+# Good enough for a hobby app's traffic; swap for something Redis-backed if
+# this ever runs on more than one instance.
+RATE_LIMIT_REQUESTS = 20
+RATE_LIMIT_WINDOW_SECONDS = 60
+_request_log: dict[str, deque[float]] = defaultdict(deque)
+
+
+def _check_rate_limit(client_ip: str) -> None:
+    now = time.monotonic()
+    log = _request_log[client_ip]
+    while log and now - log[0] > RATE_LIMIT_WINDOW_SECONDS:
+        log.popleft()
+    if len(log) >= RATE_LIMIT_REQUESTS:
+        raise HTTPException(status_code=429, detail="Too many requests, slow down.")
+    log.append(now)
 
 synthesizer: SpeechSynthesizer | None = None
 
@@ -60,8 +85,10 @@ def list_voices() -> dict[str, list[str]]:
 
 
 @app.post("/speak")
-def speak(req: SpeakRequest) -> Response:
+def speak(req: SpeakRequest, request: Request) -> Response:
     assert synthesizer is not None, "synthesizer not initialized"
+    client_ip = request.client.host if request.client else "unknown"
+    _check_rate_limit(client_ip)
     try:
         wav_bytes = synthesizer.synthesize(
             req.text,

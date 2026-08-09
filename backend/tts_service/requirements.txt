@@ -9,3 +9,4 @@ numba<0.60
 pyworld-prebuilt==0.3.4.1
 torch==2.2.2
 transformers<4.44
+huggingface_hub

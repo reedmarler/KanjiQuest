@@ -66,7 +66,7 @@ VOICES: dict[str, VoiceConfig] = {
         voice_id="not-anime", model_file="NotAnimeJPManySpeaker_e120_s22200.safetensors", speaker_id=4
     ),
 }
-DEFAULT_VOICE = "jvnv-F1"
+DEFAULT_VOICE = "not-anime-calm"
 
 
 class SpeechSynthesizer:
