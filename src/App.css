@@ -485,6 +485,37 @@ body:has(.dashboard) {
   text-wrap: balance;
 }
 
+/* Story sentences translate to English that runs well past what the
+   single-line database English row was sized for (measured up to ~190
+   characters), so a fixed two-line clamp still clips the longest ones.
+   Story mode instead lets the row grow to however many lines the current
+   translation needs, with the block's own fixed height traded for a min
+   height so the rest of the panel doesn't jump on every short sentence. */
+.hero-story-block {
+  height: auto;
+  min-height: var(--hero-rotater-height);
+  max-height: none;
+  flex-basis: auto;
+}
+
+.hero-story-block .hero-database-english {
+  height: auto;
+  min-height: calc(var(--hero-database-english-row-height) * 2);
+  max-height: none;
+  overflow: visible;
+  white-space: normal;
+}
+
+.hero-story-block .hero-database-english-stack {
+  height: auto;
+  min-height: calc(var(--hero-database-english-row-height) * 2);
+}
+
+.hero-story-block .hero-database-english-text {
+  white-space: normal;
+  line-height: 1.3;
+}
+
 @keyframes hero-database-highlight {
   from { color: var(--text-muted); filter: brightness(1); }
   to { color: var(--rayquaza); filter: brightness(1.12); }
