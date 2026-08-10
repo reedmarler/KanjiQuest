@@ -2054,22 +2054,28 @@ body:has(.dashboard) {
   gap: 0.65rem;
 }
 
-.hero-controls-content {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-  gap: 0.55rem;
-  min-width: 0;
-  padding: 0.75rem;
-}
-
 .hero-settings-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(14rem, 0.7fr);
+  grid-template-areas: "difficulty voice" "story voice";
+  align-items: start;
+  gap: 0.55rem;
   min-width: 0;
+  padding: 0.75rem;
   border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   background: color-mix(in srgb, var(--surface-2) 46%, transparent);
+}
+
+.hero-settings-layout .control-group-levels {
+  grid-area: difficulty;
+}
+
+.hero-settings-layout .control-story-panel {
+  grid-area: story;
+}
+
+.hero-settings-layout .voice-settings-panel {
+  grid-area: voice;
 }
 
 .hero-controls-primary {
@@ -5004,12 +5010,10 @@ body:has(.dashboard) {
   }
   .hero-settings-layout {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "difficulty" "voice" "story";
   }
   .control-group {
     max-width: 100%;
-  }
-  .hero-controls-content {
-    padding: 0.65rem 0.25rem;
   }
   .control-group-levels {
     grid-template-columns: 1fr;

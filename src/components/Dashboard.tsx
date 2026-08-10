@@ -663,8 +663,7 @@ export function Dashboard({
         </div>
 
         {settingsExpanded && (
-          <div className="hero-settings-layout">
-            <div className="hero-controls-content" id="hero-content-settings">
+          <div className="hero-settings-layout" id="hero-content-settings">
               <div className={`control-group control-group-levels${storyMode ? ' is-disabled' : ''}`} aria-disabled={storyMode}>
                 <span className="control-group-label" id="hero-level-label">Sentence difficulty</span>
                 <div className="control-segmented control-segmented-difficulty" role="group" aria-labelledby="hero-level-label">
@@ -778,7 +777,6 @@ export function Dashboard({
                     </label>
                   </div>
               </div>
-            </div>
 
             <div className="voice-settings-panel" id="hero-voice-settings" aria-label="Playback settings">
                 <label className="voice-setting">
