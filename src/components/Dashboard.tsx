@@ -451,6 +451,12 @@ export function Dashboard({
     window.localStorage.setItem(HERO_SPEECH_VOLUME_STORAGE_KEY, String(volume))
   }
 
+  function resetSliders() {
+    setPlaybackRate(1)
+    changeSpeechRate(1)
+    changeSpeechVolume(0.5)
+  }
+
   function toggleSettingsExpanded() {
     setSettingsExpanded((expanded) => {
       const next = !expanded
@@ -797,6 +803,17 @@ export function Dashboard({
               </div>
 
             <div className="voice-settings-panel" id="hero-voice-settings" aria-label="Playback settings">
+                <div className="voice-settings-header">
+                  <span className="control-group-label">Playback</span>
+                  <button
+                    type="button"
+                    className="voice-settings-reset"
+                    onClick={resetSliders}
+                    title="Reset sliders to 1x, 1x, 50%"
+                  >
+                    Reset
+                  </button>
+                </div>
                 <label className="voice-setting">
                   <span>Sentence speed</span>
                   <input

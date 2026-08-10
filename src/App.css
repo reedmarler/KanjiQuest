@@ -2634,6 +2634,36 @@ body:has(.dashboard) {
   border-left: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
 }
 
+.voice-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.1rem;
+}
+
+.voice-settings-reset {
+  padding: 0.22rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font: 700 0.55rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+}
+
+.voice-settings-reset:hover {
+  border-color: color-mix(in srgb, var(--kyogre-light) 42%, var(--border));
+  color: var(--text);
+  background: color-mix(in srgb, var(--kyogre) 12%, var(--surface-2));
+}
+
+.voice-settings-reset:active {
+  transform: scale(0.96);
+}
+
 .voice-setting {
   display: grid;
   grid-template-columns: minmax(4.6rem, 0.75fr) minmax(4rem, 1.25fr) 2rem;
