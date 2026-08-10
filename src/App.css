@@ -2410,8 +2410,14 @@ body:has(.dashboard) {
 
 .control-icon-button:hover:not(:disabled) {
   color: var(--text);
-  border-color: color-mix(in srgb, var(--kyogre-light) 42%, var(--border));
-  background: color-mix(in srgb, var(--kyogre) 14%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--text-muted) 46%, var(--border));
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+}
+
+.control-icon-button.is-active:hover:not(:disabled) {
+  color: var(--kyogre-light);
+  border-color: color-mix(in srgb, var(--kyogre-light) 68%, transparent);
+  background: color-mix(in srgb, var(--kyogre) 22%, var(--surface-2));
 }
 
 .control-icon-button:active:not(:disabled) {
