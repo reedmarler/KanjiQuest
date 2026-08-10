@@ -4969,7 +4969,7 @@ body:has(.dashboard) {
   .hero-controls-primary .control-group-audio .control-icon-button {
     width: 100%;
     min-width: 0;
-    height: 2.76rem;
+    height: 2.4rem;
   }
   .hero-controls-primary .control-nav-button {
     justify-self: center;
