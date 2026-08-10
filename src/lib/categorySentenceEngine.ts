@@ -137,6 +137,25 @@ const words: WordRecord[] = [
   ['eiga','映画','えいが','a movie',['Media'],['film']], ['anime','アニメ','アニメ','anime',['Media'],['animation']], ['terebi','テレビ','テレビ','television',['Media','Technology'],['video']],
   ['shichiji','七時','しちじ','at seven',['Time'],['clock-time']], ['hachiji','八時','はちじ','at eight',['Time'],['clock-time']],
   ['yukkuri','ゆっくり','ゆっくり','slowly',['Adverb'],['adverb','manner']],
+
+  // N5 words previously absent from every generation pool (audited against
+  // the full N5 vocab list — see the vocab-coverage report). Concrete,
+  // unambiguous nouns only; verbs and adjectives need their own slot
+  // machinery and are left for a follow-up pass.
+  ['san','三','さん','three',['Number'],['number']], ['go','五','ご','five',['Number'],['number']], ['roku','六','ろく','six',['Number'],['number']], ['futari','二人','ふたり','two people',['Number'],['number','people']],
+  ['gozen','午前','ごぜん','the morning',['Time'],['clock-time']], ['gogo','午後','ごご','the afternoon',['Time'],['clock-time']], ['yuugata','夕方','ゆうがた','evening',['Time'],['clock-time']],
+  ['yuki','雪','ゆき','snow',['Weather'],['cold','precipitation']], ['kumo','雲','くも','a cloud',['Weather'],['sky']], ['kaminari','雷','かみなり','thunder',['Weather'],['storm']], ['hare','晴れ','はれ','sunny weather',['Weather'],['clear']], ['kumori','曇り','くもり','cloudy weather',['Weather'],['overcast']],
+  ['kusa','草','くさ','grass',['Plant'],['outdoor']], ['ha','葉','は','a leaf',['Plant'],['outdoor']],
+  ['uma','馬','うま','a horse',['Animal'],['farm']],
+  ['ike','池','いけ','a pond',['Place'],['outdoor','water']], ['mizuumi','湖','みずうみ','a lake',['Place'],['outdoor','water']], ['mukou','向こう','むこう','over there',['Place'],['direction']], ['kousaten','交差点','こうさてん','the intersection',['Place'],['street']], ['oudanhodou','横断歩道','おうだんほどう','the crosswalk',['Place'],['street']],
+  ['suupaa','スーパー','すーぱー','the supermarket',['Building'],['shopping']], ['konbini','コンビニ','こんびに','the convenience store',['Building'],['shopping']],
+  ['toriniku','鶏肉','とりにく','chicken',['Food'],['meat']], ['shio','塩','しお','salt',['Food'],['condiment']],
+  ['kagami','鏡','かがみ','a mirror',['Object'],['household']], ['haburashi','歯ブラシ','はぶらし','a toothbrush',['Object'],['household']], ['sekken','石けん','せっけん','soap',['Object'],['household']],
+  ['moufu','毛布','もうふ','a blanket',['Furniture'],['bedroom']],
+  ['megane','眼鏡','めがね','glasses',['Clothing'],['accessory']],
+  ['jugyou','授業','じゅぎょう','class',['Activity'],['school']], ['supootsu','スポーツ','すぽーつ','sports',['Activity'],['hobby']], ['souji','掃除','そうじ','cleaning',['Activity'],['chore']],
+  ['matsuri','祭り','まつり','a festival',['Event'],['seasonal']], ['kaji','火事','かじ','a fire',['Event'],['emergency']],
+  ['genkin','現金','げんきん','cash',['Money'],['payment']], ['otsuri','お釣り','おつり','change',['Money'],['payment']],
 ].map(([id,japanese,reading,english,categories,tags]) => ({ id, japanese, reading, english, preferredTranslation:inferPreferredTranslation(String(japanese),String(english),String(reading)), categories, tags, source: 'built-in' })) as WordRecord[]
 
 let catalogWordCache: WordRecord[] | null = null
