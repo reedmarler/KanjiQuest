@@ -146,7 +146,7 @@ const words: WordRecord[] = [
   ['gozen','午前','ごぜん','the morning',['Time'],['clock-time']], ['gogo','午後','ごご','the afternoon',['Time'],['clock-time']], ['yuugata','夕方','ゆうがた','evening',['Time'],['clock-time']],
   ['yuki','雪','ゆき','snow',['Weather'],['cold','precipitation']], ['kumo','雲','くも','a cloud',['Weather'],['sky']], ['kaminari','雷','かみなり','thunder',['Weather'],['storm']], ['hare','晴れ','はれ','sunny weather',['Weather'],['clear']], ['kumori','曇り','くもり','cloudy weather',['Weather'],['overcast']],
   ['kusa','草','くさ','grass',['Plant'],['outdoor']], ['ha','葉','は','a leaf',['Plant'],['outdoor']],
-  ['uma','馬','うま','a horse',['Animal'],['farm']],
+  ['uma','馬','うま','a horse',['Animal'],['animal']],
   ['ike','池','いけ','a pond',['Place'],['outdoor','water']], ['mizuumi','湖','みずうみ','a lake',['Place'],['outdoor','water']], ['mukou','向こう','むこう','over there',['Place'],['direction']], ['kousaten','交差点','こうさてん','the intersection',['Place'],['street']], ['oudanhodou','横断歩道','おうだんほどう','the crosswalk',['Place'],['street']],
   ['suupaa','スーパー','すーぱー','the supermarket',['Building'],['shopping']], ['konbini','コンビニ','こんびに','the convenience store',['Building'],['shopping']],
   ['toriniku','鶏肉','とりにく','chicken',['Food'],['meat']], ['shio','塩','しお','salt',['Food'],['condiment']],
@@ -155,7 +155,18 @@ const words: WordRecord[] = [
   ['megane','眼鏡','めがね','glasses',['Clothing'],['accessory']],
   ['jugyou','授業','じゅぎょう','class',['Activity'],['school']], ['supootsu','スポーツ','すぽーつ','sports',['Activity'],['hobby']], ['souji','掃除','そうじ','cleaning',['Activity'],['chore']],
   ['matsuri','祭り','まつり','a festival',['Event'],['seasonal']], ['kaji','火事','かじ','a fire',['Event'],['emergency']],
-  ['genkin','現金','げんきん','cash',['Money'],['payment']], ['otsuri','お釣り','おつり','change',['Money'],['payment']],
+  ['genkin','現金','げんきん','cash',['Money'],['money','currency']], ['otsuri','お釣り','おつり','change',['Money'],['money']],
+
+  // N4-N1 words from the study-only core-expansion/focus decks that were
+  // never admitted into the generator (see the catalogWords() comment above
+  // for why those decks stay excluded by default). Concrete nouns only,
+  // hand-reviewed the same way as the N5 batch above; verbs and highly
+  // abstract N2/N1 discourse vocabulary (制度/傾向/根拠/...) need dedicated
+  // sentence patterns rather than a pool entry and are left for later.
+  ['kisetsu','季節','きせつ','a season',['Time'],['calendar']], ['kyuuryou','給料','きゅうりょう','a salary',['Money'],['money','currency']], ['yakkyoku','薬局','やっきょく','the pharmacy',['Building'],['shopping']], ['bai','倍','ばい','times/-fold',['Number'],['number']], ['hanabi','花火','はなび','fireworks',['Event'],['seasonal']], ['shukujitsu','祝日','しゅくじつ','a national holiday',['Event'],['calendar']], ['massugu','真っ直ぐ','まっすぐ','straight ahead',['Adverb'],['adverb','manner']], ['sentakuki','洗濯機','せんたくき','a washing machine',['Furniture'],['household','machine']], ['soujiki','掃除機','そうじき','a vacuum cleaner',['Furniture'],['household','machine']], ['touchaku','到着','とうちゃく','arrival',['Event'],['travel']], ['hikkoshi','引っ越し','ひっこし','moving house',['Event'],['home']], ['uketsuke','受付','うけつけ','the reception desk',['Place'],['workplace']],
+  ['kibun','気分','きぶん','a feeling',['Emotion'],['mood']], ['torizara','取り皿','とりざら','a small serving plate',['Object'],['kitchenware']], ['mochikaeri','持ち帰り','もちかえり','takeout',['Activity'],['restaurant']], ['denpyou','伝票','でんぴょう','a bill',['Document'],['receipt']], ['kantoku','監督','かんとく','the coach',['Person'],['occupation']], ['hikiwake','引き分け','ひきわけ','a draw',['Event'],['sports']], ['yuushou','優勝','ゆうしょう','a championship win',['Event'],['sports']], ['buta','豚','ぶた','a pig',['Animal'],['animal']], ['zou','象','ぞう','an elephant',['Animal'],['animal']], ['yubiwa','指輪','ゆびわ','a ring',['Clothing'],['accessory']], ['keshou','化粧','けしょう','makeup',['Object'],['accessory']], ['hinan','避難','ひなん','evacuation',['Event'],['emergency']], ['hijouguchi','非常口','ひじょうぐち','the emergency exit',['Place'],['building']], ['tanjou','誕生','たんじょう','a birth',['Event'],['family']], ['shuushoku','就職','しゅうしょく','finding employment',['Event'],['work']], ['goukei','合計','ごうけい','a total',['Number'],['number']], ['keigo','敬語','けいご','polite language',['Language'],['japanese']], ['hanami','花見','はなみ','flower viewing',['Event'],['seasonal']], ['okurimono','贈り物','おくりもの','a gift',['Object'],['present']], ['shoutai','招待','しょうたい','an invitation',['Event'],['social']], ['kinenbi','記念日','きねんび','an anniversary',['Event'],['calendar']],
+  ['shinpan','審判','しんぱん','the referee',['Person'],['occupation']], ['juui','獣医','じゅうい','the veterinarian',['Person'],['occupation']], ['mejirushi','目印','めじるし','a landmark',['Object'],['direction']], ['choumiryou','調味料','ちょうみりょう','seasoning',['Food'],['condiment']], ['tsuuhou','通報','つうほう','a report to authorities',['Event'],['emergency']], ['tounan','盗難','とうなん','theft',['Event'],['emergency']], ['rikon','離婚','りこん','a divorce',['Event'],['family']], ['taishoku','退職','たいしょく','retirement',['Event'],['work']], ['soushiki','葬式','そうしき','a funeral',['Event'],['family']], ['hanataba','花束','はなたば','a bouquet',['Object'],['present']], ['bonodori','盆踊り','ぼんおどり','a bon dance',['Event'],['seasonal']],
+  ['oukyuuteate','応急手当','おうきゅうてあて','first aid',['Activity'],['emergency']],
 ].map(([id,japanese,reading,english,categories,tags]) => ({ id, japanese, reading, english, preferredTranslation:inferPreferredTranslation(String(japanese),String(english),String(reading)), categories, tags, source: 'built-in' })) as WordRecord[]
 
 let catalogWordCache: WordRecord[] | null = null
