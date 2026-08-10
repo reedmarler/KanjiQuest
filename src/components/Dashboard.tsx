@@ -260,6 +260,7 @@ function DashboardHeroSentence({
   advanceSignal,
   onCanRewindChange,
   onSentenceChange,
+  autoAdvance,
 }: {
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
@@ -277,6 +278,7 @@ function DashboardHeroSentence({
   advanceSignal: number
   onCanRewindChange: (canRewind: boolean) => void
   onSentenceChange: (speechText: string) => void
+  autoAdvance: boolean
 }) {
   return (
     <Suspense
@@ -303,6 +305,7 @@ function DashboardHeroSentence({
         advanceSignal={advanceSignal}
         onCanRewindChange={onCanRewindChange}
         onSentenceChange={onSentenceChange}
+        autoAdvance={autoAdvance}
       />
     </Suspense>
   )
@@ -376,11 +379,18 @@ export function Dashboard({
   // them as dependencies, so slider changes do not restart active speech.
   const speechVolumeRef = useRef(speechVolume)
   speechVolumeRef.current = speechVolume
-  const minimumSpeechRate = minimumSpeechRateForSentence(spokenSentence, playbackRate)
+  // Read by the speech-end handler below so a beat that finishes reading
+  // while paused doesn't force an advance the pause was meant to prevent.
+  const pausedRef = useRef(paused)
+  pausedRef.current = paused
+  // Story mode no longer rotates sentences on a fixed clock (see the
+  // advanceSignal-on-speech-end effect below), so there is nothing for the
+  // voice to race to finish before — it reads at the user's chosen rate.
+  const minimumSpeechRate = storyMode ? speechRate : minimumSpeechRateForSentence(spokenSentence, playbackRate)
   const effectiveSpeechRate = Math.max(speechRate, minimumSpeechRate) as HeroSpeechRate
   const effectiveSpeechRateRef = useRef(effectiveSpeechRate)
   effectiveSpeechRateRef.current = effectiveSpeechRate
-  const speechRateIsAutomatic = effectiveSpeechRate > speechRate
+  const speechRateIsAutomatic = !storyMode && effectiveSpeechRate > speechRate
 
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
   const achievements = buildAchievements({ learnedCards: learnedCount, favoriteSentences: favoriteSentenceCount, questProgress, metrics: achievementMetrics })
@@ -464,9 +474,16 @@ export function Dashboard({
   // restart the sentence currently being spoken.
   useEffect(() => {
     if (!speechOn || !spokenSentence) return
-    speakJapanese(spokenSentence, effectiveSpeechRateRef.current, speechVolumeRef.current)
+    // Story mode drives its own advance off this completion instead of the
+    // rest/highlight/swap timer (autoAdvance={false} above), so the sentence
+    // stays up exactly as long as the voice takes to read it. A beat that
+    // finishes while paused should not force the story forward.
+    const onEnd = storyMode
+      ? () => { if (!pausedRef.current) setAdvanceSignal((value) => value + 1) }
+      : undefined
+    speakJapanese(spokenSentence, effectiveSpeechRateRef.current, speechVolumeRef.current, onEnd)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [speechOn, spokenSentence])
+  }, [speechOn, spokenSentence, storyMode])
 
   // Leaving the dashboard mid-sentence should not keep talking.
   useEffect(() => stopSpeaking, [])
@@ -573,6 +590,7 @@ export function Dashboard({
           advanceSignal={advanceSignal}
           onCanRewindChange={setCanRewindSentence}
           onSentenceChange={setSpokenSentence}
+          autoAdvance={!(storyMode && speechOn)}
         />
       </header>
 
