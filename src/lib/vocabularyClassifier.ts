@@ -81,6 +81,10 @@ const CATEGORY_REFINEMENTS: Array<{ from: SentenceCategory; to: SentenceCategory
   // arriving as a Person and needing to be filtered back out by hand.
   { from:'Person', to:'Animal', tags:['animal','pet','dog','cat','bird','fish','insect','horse','cow','pig','chicken','rabbit'] },
   { from:'Person', to:'Plant', tags:['plant','tree','flower','grass','bush','crop'] },
+  // 薬 arrives in the Food & Drink bucket, which is both why the Medicine
+  // category was empty and why medicine was one tag away from being eaten.
+  { from:'Food', to:'Medicine', tags:['medicine'] },
+  { from:'Drink', to:'Medicine', tags:['medicine'] },
   // "Objects" is the largest bucket and hides the most categories.
   { from:'Object', to:'Medicine', tags:['medicine'] },
   { from:'Object', to:'Clothing', tags:['clothing','shirt','pants','shoes','hat','coat','dress','gloves','wearable'] },

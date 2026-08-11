@@ -258,7 +258,10 @@ export function getPendingReviewWords(): CategoryWordRecord[] {
 // `ingredient` is deliberately absent: sugar, flour, and oil are what a dish is
 // made of, not what someone sits down and eats.
 const edibleTags = [CANONICAL_CATEGORY_TAGS.Food,'fruit','vegetable','meat','seafood','fish','rice','bread','noodles','soup','dessert','snack','candy','ice-cream','edible']
-const drinkableTags = [CANONICAL_CATEGORY_TAGS.Drink,'drinkable','beverage','water','tea','coffee','juice','soda','alcohol','milk','dairy']
+// `medicine` rides along because 薬 is drunk rather than eaten in Japanese.
+// It doubles as the guard that keeps medicine out of 食べる, which excludes
+// anything drinkable that carries no solid-food tag.
+const drinkableTags = [CANONICAL_CATEGORY_TAGS.Drink,CANONICAL_CATEGORY_TAGS.Medicine,'drinkable','beverage','water','tea','coffee','juice','soda','alcohol','milk','dairy']
 // Solid foods that also carry a drink tag — ice cream and yogurt are dairy but
 // are eaten, so these tags override drinkability.
 const solidFoodTags = ['dessert','snack','candy','ice-cream','yogurt','cheese','butter','fruit','vegetable','meat','seafood','fish','rice','bread','noodles','egg','protein','staple-food','meal','grain']
@@ -431,7 +434,10 @@ const preferLongerFormWords = new Set(['子'])
 
 const verbs: VerbUsageRecord[] = [
   { id:'taberu-basic', japanese:'食べる', reading:'たべる', english:'eat', englishThird:'eats', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','eating','ichidan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
-  { id:'nomu-basic', japanese:'飲む', reading:'のむ', english:'drink', englishThird:'drinks', verbClass:'godan-mu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food','Drink'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','drinking','godan','transitive','drink'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food','Drink'],tags:drinkableTags} } },
+  // Medicine belongs here because Japanese takes medicine by drinking it
+  // (薬を飲む), which is also the only slot that consumes the Medicine
+  // category — without it, splitting 薬 out of Food would leave it stranded.
+  { id:'nomu-basic', japanese:'飲む', reading:'のむ', english:'drink', englishThird:'drinks', verbClass:'godan-mu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food','Drink','Medicine'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','drinking','godan','transitive','drink'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food','Drink','Medicine'],tags:drinkableTags} } },
   { id:'yomu-basic', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags} } },
   { id:'miru-basic', japanese:'見る', reading:'みる', english:'watch', englishThird:'watches', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Media','Technology'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','perception','watching','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Media','Technology'],tags:watchableTags} } },
   { id:'iku-ni', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-02', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
@@ -855,6 +861,8 @@ const uncountableGlosses = new Set([
   'water','rice','bread','milk','tea','coffee','juice','alcohol','sake','beer','wine','soup','miso soup','ramen','sushi','udon','soba','pasta',
   'meat','beef','pork','chicken','fish','seafood','fruit','food','sugar','salt','oil','butter','cheese','ice cream',
   'money','music','information','news','homework','work','weather','clothing','furniture','luggage','advice','anime','paper','mail',
+  // "takes medicine", never "takes a medicine".
+  'medicine',
   // These foods are generally treated as substances when eaten.
   'pizza','curry','salad','chocolate','candy','cereal','yogurt','tofu',
   // Language names take no article as a study/speech object: “speaks Japanese”, not “speaks a Japanese”.
@@ -1093,6 +1101,11 @@ function translatedVerb(verb: VerbUsageRecord, filled: Record<string,WordRecord>
   }
   if (verb.japanese === '見る' && (objectTags.has('picture') || objectTags.has('photo'))) {
     return useBase ? 'look at' : 'looks at'
+  }
+  // Japanese drinks medicine; English takes it. 薬を飲む is the reason the
+  // Medicine category reaches 飲む at all, so the gloss has to follow.
+  if (verb.japanese === '飲む' && objectTags.has('medicine')) {
+    return useBase ? 'take' : 'takes'
   }
   // "are" is the base form for I/you/we/they everywhere else, but the copula
   // is the one English verb where "I" alone still needs its own form ("am").
