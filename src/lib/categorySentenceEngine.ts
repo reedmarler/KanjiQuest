@@ -300,6 +300,28 @@ const watchableTags = ['movie','film','television','tv','video','anime','animati
 // 'household'/'machine' cover genuinely bulky appliances (冷蔵庫, 掃除機) that
 // you operate rather than hold — fine for 使う (use), excluded from 持つ below.
 const usableToolTags = [CANONICAL_CATEGORY_TAGS.Tool,CANONICAL_CATEGORY_TAGS.Vehicle,'knife','scissors','electronics','computer','laptop','phone','tablet','camera','television','tv','pen','pencil','instrument','household','machine','bicycle','kitchenware','ball','sport','equipment','personal-item','wearable','accessory']
+// Abstractions — ideas, feelings, situations. They share the Object category
+// with physical things but no physical-object slot will ever take them: you do
+// not read a tendency or carry a responsibility around. They were the single
+// largest block of unreachable vocabulary until the topic patterns below gave
+// them frames of their own.
+// 'state', 'condition' and 'information' are deliberately absent even though
+// they look abstract: the imported taxonomy hangs them on weather (曇り, 晴れ)
+// and on concrete carriers of information (写真, 電話番号), which produced
+// "explains the cloudy weather". Every genuinely abstract word that carried one
+// of them also carries 'abstract', so nothing is lost by dropping them.
+const abstractTopicTags = ['abstract','emotion','feeling','philosophy','thought','ideology','psychology','logic','society','relationship','situation','reason','result','outcome','method','process','opinion','belief','value','goal','problem','communication','experience','memory','plan','purpose','trend','pattern','responsibility','duty','ethics','reality','ideal']
+// Body parts, weather and other concrete nouns pick up 'state' or 'condition'
+// from the imported taxonomy, and a handful of words carry an abstract tag
+// beside a thoroughly physical gloss. Naming them is cheaper and safer than
+// trying to out-tag the source data.
+// 中心 is included for a different reason: it is genuinely abstract, but its
+// gloss is the bare "center", and "explains the center" reads as a missing
+// noun rather than an idea.
+const nonAbstractTopicWords = new Set(['体','声','目','眼','顔','手','足','頭','心臓','実','点','気','水','空','風','雨','雪','雲','熱','色','形','音','中心',
+  // 話 glosses as "talk", which collides with the verb of the について frame:
+  // "he talks about the talk".
+  '話'])
 const portablePhysicalObjectTags = [...genericObjectTags,'toy','ball','key','money','currency','wallet']
 // 持つ normally describes something a person can comfortably carry or hold.
 // Keep bulky electronics/appliances (television, refrigerator, vacuum) out
@@ -992,6 +1014,28 @@ function objectEnglish(gloss: string) {
   if (head !== lower && uncountableGlosses.has(head)) return gloss
   return indefinite(gloss)
 }
+
+/**
+ * An abstract noun in a topic slot. The default is "the", which is the mirror
+ * of the reasoning behind `objectEnglish`: half these glosses are countable
+ * ("the reason", "the result", "the problem") and a bare countable noun is
+ * outright broken, whereas a definite mass noun ("the experience") is at worst
+ * slightly narrower than intended. Japanese topic nouns in these frames are
+ * contextually definite anyway, so "the" is usually the better reading. Glosses
+ * already known to be uncountable keep taking no article at all.
+ */
+function abstractTopicEnglish(gloss: string) {
+  const lower = gloss.toLowerCase()
+  if (uncountableGlosses.has(lower) || abstractMassGlosses.has(lower)) return gloss
+  return `the ${gloss}`
+}
+
+// Abstractions that name a whole domain rather than an instance of one. These
+// are the cases where the definite article is not merely narrow but wrong:
+// "talks about life", never "talks about the life".
+const abstractMassGlosses = new Set([
+  'life','death','nature','society','culture','freedom','happiness','love','trust','permission','responsibility','experience','knowledge','ethics','reality','nostalgia','jealousy','hope','peace','justice','honesty','patience','courage','luck','fate','progress','growth','health','beauty','truth','power','strength','confidence','pride','respect','stress','sleep','fun','trouble','damage','demand','supply','evidence',
+])
 
 function tagSet(word: WordRecord) {
   return new Set(normalizeTags(word.tags))
@@ -2014,6 +2058,22 @@ const validTimePool = memoizePool(function validTimePool(vocabulary: WordRecord[
   })
 })
 
+/**
+ * Abstractions eligible for the topic patterns (n4-26 … n4-28).
+ *
+ * Defined here rather than inline in the generator so the reachability audit
+ * can see it. A pool that only exists inside a generator is invisible to the
+ * audit, which then reports its members as unreachable — the same mistake that
+ * hid the curated adverb list until it moved onto `VerbSlotRule.words`.
+ */
+const abstractTopicPool = memoizePool(function abstractTopicPool(vocabulary: WordRecord[]) {
+  return vocabulary.filter(word=>
+    categoryMatch(word,['Object'])
+    && hasUsableMeaning(word)
+    && !nonAbstractTopicWords.has(word.japanese)
+    && [...tagSet(word)].some(tag=>abstractTopicTags.includes(tag)))
+})
+
 const validInanimatePool = memoizePool<[categories?: SentenceCategory[]]>(function validInanimatePool(vocabulary: WordRecord[],categories: SentenceCategory[]=inanimateCategories) {
   return vocabulary.filter(word=>{
     const tags=tagSet(word)
@@ -2076,6 +2136,7 @@ function slotEligibleWords(): Set<string> {
     validPlacePool(vocabulary),
     validTimePool(vocabulary),
     validInanimatePool(vocabulary),
+    abstractTopicPool(vocabulary),
   ]) {
     for (const word of pool) eligible.add(word.japanese)
   }
@@ -2136,6 +2197,7 @@ export function auditWordReachability(): WordReachability[] {
     // slot; slotEligibleWords counts them, so this has to as well or the audit
     // reports the entire adjective vocabulary as unreachable.
     ['adjective', new Set(adjectiveRules.map(rule => rule.japanese))],
+    ['abstract-topic', new Set(abstractTopicPool(vocabulary).map(word => word.japanese))],
   ]
 
   return vocabulary.map(word => {
@@ -2572,7 +2634,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${go} too.`,{subject},{verb:verbSlot('verb-iku-mo','行きます','行く','いきます','go',['movement','additive-topic','context-dependent'])},['も marks an additional subject.','This template assumes prior discourse context.'])
 }
 
-const additionalN4PatternIds = new Set(Array.from({length:15},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
+const additionalN4PatternIds = new Set(Array.from({length:18},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
 
 function additionalN4Sentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!additionalN4PatternIds.has(patternId)) return null
@@ -2789,6 +2851,53 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),literalPart(negative.japanese,negative.reading,'verb')]
     const notRequired=subjectUsesBaseVerb(subjectEnglish)?'do not have to':'does not have to'
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${notRequired} ${base} ${englishPhrase(object,'object')}.`,{subject,object},{verb:grammarSlot(`verb-${verb.id}-nakute`,negative.japanese,verb.japanese,negative.reading,verb.english,['not-required','nakute-mo-ii'])},['Verb selected first and supplied the object rule.','なくてもいい expresses that the action is not required.'])
+  }
+  // ---- Abstract-noun topics (n4-26 … n4-28) ----
+  // Ideas, feelings and situations had no frame at all: every Object slot in
+  // the engine wants something physical. These three take an abstract noun as
+  // the thing discussed, judged or explained, which is how such nouns actually
+  // appear in Japanese.
+  if (patternId==='n4-26' || patternId==='n4-27' || patternId==='n4-28') {
+    const topic=pick(abstractTopicPool(vocabulary),seed+560,'topic')
+    if (!topic) return null
+    const topicEnglish=abstractTopicEnglish(primaryEnglishGloss(topic.preferredTranslation||topic.english))
+
+    if (patternId==='n4-27') {
+      // 〜は大切です — a judgement about the topic, with no subject at all, so
+      // it is the one frame here that does not need a person.
+      // A plural gloss needs a plural copula — 道順 glosses as "directions",
+      // and "the directions is important" is broken English.
+      const plural=isPluralPhrase(topicEnglish)
+      const endings=[
+        {japanese:'大切です',reading:'たいせつです',english:plural?'are important':'is important'},
+        {japanese:'大切ではありません',reading:'たいせつではありません',english:plural?'are not important':'is not important'},
+        {japanese:'大切でした',reading:'たいせつでした',english:plural?'were important':'was important'},
+        {japanese:'必要です',reading:'ひつようです',english:plural?'are necessary':'is necessary'},
+      ]
+      let endingIndex=Math.abs(options.slotSeeds?.ending ?? seed+561)%endings.length
+      if (options.avoidWords?.ending && endings[endingIndex]!.japanese===options.avoidWords.ending) {
+        endingIndex=(endingIndex+1)%endings.length
+      }
+      const ending=endings[endingIndex]!
+      const furigana=[wordPart(topic,'topic'),literalPart('は','わ'),literalPart(ending.japanese,ending.reading,'ending')]
+      const english=`${topicEnglish.charAt(0).toUpperCase()+topicEnglish.slice(1)} ${ending.english}.`
+      return finish(furigana,english,{topic},{ending:grammarSlot(`abstract-judgement-${endingIndex}`,ending.japanese,'大切だ',ending.reading,ending.english,['judgement','na-adjective','ending'],'na_adjective')},['Topic is an abstraction, which is what this judgement frame takes.'])
+    }
+
+    const subject=pick(humans,562,'subject')
+    if (!subject) return null
+    const subjectEnglish=englishPhrase(subject,'subject')
+
+    if (patternId==='n4-26') {
+      // 〜について話します — the standard N4 frame for "about X".
+      const talks=subjectUsesBaseVerb(subjectEnglish)?'talk':'talks'
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(topic,'topic'),literalPart('について'),literalPart('話します','はなします','verb')]
+      return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${talks} about ${topicEnglish}.`,{subject,topic},{verb:grammarSlot('verb-hanasu-nitsuite','話します','話す','はなします','talk',['communication','nitsuite'])},['について takes a topic of discussion, not a physical object.'])
+    }
+    // n4-28: 〜を説明します — explaining an abstraction.
+    const explains=subjectUsesBaseVerb(subjectEnglish)?'explain':'explains'
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(topic,'topic'),literalPart('を'),literalPart('説明します','せつめいします','verb')]
+    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${explains} ${topicEnglish}.`,{subject,topic},{verb:grammarSlot('verb-setsumei','説明します','説明する','せつめいします','explain',['communication','transitive'])},['説明する takes an idea or situation as its object.'])
   }
   return null
 }

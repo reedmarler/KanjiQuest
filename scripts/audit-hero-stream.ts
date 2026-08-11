@@ -88,7 +88,12 @@ const jpNegative = (jp: string) => !jpObligation(jp) && !jpRestrictive(jp) && !j
   // ends on いい, so the predicate-final test read it as affirmative and then
   // flagged its correct "does not have to eat" gloss as an invented negative.
   || /なくても(いい|よい|かまいません|大丈夫)(です|でした)?$/.test(jpCore(jp)))
+// The kana list below is godan-shaped (った/いた/した/んだ). An ichidan past is
+// stem + た, so 食べた and 開けた ended in べた/けた and read as non-past, which
+// then flagged their correct "ate"/"opened" glosses as tense mismatches.
+const ichidanPast = (jp: string) => /[べめげねてでれせけえ]た$/.test(jp)
 const jpPast = (jp: string) => /(った|いた|えた|した|んだ|ました|なかった|ませんでした|てしまった|ていた|かった)(?:です)?$/.test(jpCore(jp))
+  || ichidanPast(jpCore(jp))
   || /でした$/.test(jpCore(jp))
   // 見たばかりです ("has just watched") is past — the marker simply is not
   // adjacent to です, so the end-anchored test above cannot see it.
