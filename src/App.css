@@ -8902,3 +8902,225 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 .quest-gate-intro>.btn{margin-top:.42rem}.quest-battle-arena{aspect-ratio:2.31/1}.quest-battle-action-slot{position:relative;display:grid;min-height:2.5rem;place-items:center}.quest-battle-action-slot>.quest-checkpoint-next{min-width:9.2rem;min-height:2.5rem;padding:.44rem 1.3rem;font-size:1rem}.quest-battle-action-message{position:absolute;top:50%;left:.2rem;display:-webkit-box;width:calc(50% - 5.5rem);max-height:2.2rem;overflow:hidden;padding:.28rem .4rem;border:1px solid var(--border);border-radius:7px;color:var(--text-muted);font-size:.5rem;line-height:1.35;text-align:left;transform:translateY(-50%);-webkit-box-orient:vertical;-webkit-line-clamp:2}.quest-battle-action-message.is-correct{border-color:color-mix(in srgb,var(--rayquaza-light) 42%,var(--border));color:var(--rayquaza-light)}.quest-battle-action-message.is-wrong{border-color:color-mix(in srgb,var(--sakura) 42%,var(--border));color:var(--sakura-light)}.quest-battle-action-message.is-blocked{border-color:color-mix(in srgb,var(--gold) 48%,var(--border));color:var(--gold)}
 .quest-kanji-card .kanji-learning-divider{margin:.3rem auto .22rem}.quest-kanji-word-answer{margin-bottom:.18rem}.quest-kanji-parts>article>strong{font-size:3.05rem}.quest-kanji-part-examples b{font-size:1.18rem}.quest-kanji-part-examples small{font-size:.66rem}.quest-kanji-part-examples em{font-size:.54rem}.quest-kanji-parts.is-single>article>strong{font-size:3.65rem}
 @media(max-width:720px){.quest-gate-intro>.btn{margin-top:.3rem}.quest-battle-action-message{left:0;width:calc(50% - 4.7rem);font-size:.42rem}.quest-kanji-parts>article>strong{font-size:2.65rem}.quest-kanji-part-examples b{font-size:1.04rem}.quest-kanji-part-examples small{font-size:.57rem}.quest-kanji-parts.is-single>article>strong{font-size:3.05rem}}
+
+/* ── Campaign arcs, relic shelf, and expanded guardian battles ─────────── */
+.quest-arc{margin-top:.85rem;padding:.75rem .85rem;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+.quest-arc.is-sealed{opacity:.62}
+.quest-arc-head{display:grid;grid-template-columns:2.6rem 1fr auto;align-items:center;gap:.65rem;margin-bottom:.7rem}
+.quest-arc-mark{display:grid;place-items:center;width:2.6rem;aspect-ratio:1;border:1px solid color-mix(in srgb,var(--gold) 40%,var(--border));border-radius:12px;background:color-mix(in srgb,var(--gold) 12%,var(--surface-2));color:var(--gold);font:700 1.3rem 'Noto Sans JP',sans-serif}
+.quest-arc-head small{color:var(--gold);font-size:.5rem;letter-spacing:.1em}
+.quest-arc-head h2{margin:.1rem 0;font-size:1.02rem}
+.quest-arc-head h2 em{color:var(--text-muted);font:400 .78rem 'Noto Sans JP',sans-serif}
+.quest-arc-head p{margin:0;color:var(--text-muted);font-size:.58rem;line-height:1.45}
+.quest-arc-head>b{color:var(--text-muted);font-size:.72rem;white-space:nowrap}
+.quest-arc-road{position:relative;display:flex;align-items:center;justify-content:space-between;min-height:2.1rem;padding:0 .3rem}
+.quest-arc-road .quest-road-stop{cursor:pointer;transition:transform 140ms ease,box-shadow 140ms ease,background 140ms ease}
+.quest-arc-road .quest-road-stop:hover:not(:disabled){transform:translateY(-2px)}
+.quest-road-stop.is-done{border-color:color-mix(in srgb,var(--success) 55%,var(--border));background:color-mix(in srgb,var(--success) 26%,var(--surface-2));color:#fff}
+.quest-road-stop:disabled{cursor:default;opacity:.45;font-size:.44rem}
+
+.quest-relic-shelf{margin-top:.75rem;padding:.7rem .8rem;border:1px solid color-mix(in srgb,var(--gold) 26%,var(--border));border-radius:14px;background:color-mix(in srgb,var(--gold) 5%,var(--surface))}
+.quest-relic-shelf-head{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem;margin-bottom:.5rem}
+.quest-relic-shelf-head span{color:var(--gold);font-size:.52rem;font-weight:800;letter-spacing:.1em}
+.quest-relic-shelf-head small{color:var(--text-muted);font-size:.5rem}
+.quest-relic-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:.45rem}
+.quest-relic-chip{display:grid;grid-template-columns:1.9rem 1fr;align-items:center;gap:.45rem;padding:.42rem .5rem;border:1px solid var(--border);border-radius:10px;background:var(--surface-2)}
+.quest-relic-chip>span{display:grid;place-items:center;width:1.9rem;aspect-ratio:1;border-radius:8px;background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold);font:700 1rem 'Noto Sans JP',sans-serif}
+.quest-relic-chip b{display:block;font-size:.62rem}
+.quest-relic-chip small{display:block;color:var(--text-muted);font-size:.5rem;line-height:1.35}
+.quest-relic-chip.is-legendary{border-color:color-mix(in srgb,var(--gold) 60%,var(--border));box-shadow:0 0 .8rem color-mix(in srgb,var(--gold) 22%,transparent)}
+.quest-guardian-phases{margin-top:.15rem;padding:.12rem .4rem;border-radius:999px;background:color-mix(in srgb,var(--sakura) 18%,transparent);color:var(--sakura-light);font-size:.46rem}
+
+.quest-gate-stats{display:block;margin-top:.2rem;color:var(--gold);font-size:.5rem}
+.quest-gate-relics{grid-column:1/-1;margin-top:.3rem}
+.quest-gate-relics small{color:var(--gold);font-size:.46rem;letter-spacing:.09em}
+.quest-gate-relics>div{display:flex;flex-wrap:wrap;gap:.28rem;margin-top:.22rem}
+.quest-gate-relics span{padding:.2rem .42rem;border:1px solid color-mix(in srgb,var(--gold) 32%,var(--border));border-radius:999px;background:color-mix(in srgb,var(--gold) 8%,transparent);color:var(--gold);font-size:.46rem}
+
+.quest-combo-meter{display:flex;align-items:center;justify-content:center;gap:.4rem;margin-top:.5rem;padding:.3rem .55rem;border:1px solid color-mix(in srgb,var(--gold) 40%,var(--border));border-radius:999px;background:color-mix(in srgb,var(--gold) 9%,transparent);animation:quest-combo-pulse 1.6s ease-in-out infinite}
+.quest-combo-meter b{color:var(--gold);font:800 .95rem 'Outfit',sans-serif}
+.quest-combo-meter small,.quest-combo-meter em{color:var(--text-muted);font-size:.5rem;font-style:normal}
+.quest-combo-meter em{color:var(--gold)}
+@keyframes quest-combo-pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 22%,transparent)}50%{box-shadow:0 0 .7rem .1rem color-mix(in srgb,var(--gold) 20%,transparent)}}
+
+.quest-relic-tray{display:flex;flex-wrap:wrap;justify-content:center;gap:.3rem;margin-top:.5rem}
+.quest-relic-tray span,.quest-relic-tray button{padding:.22rem .5rem;border:1px solid color-mix(in srgb,var(--gold) 34%,var(--border));border-radius:999px;background:color-mix(in srgb,var(--gold) 8%,transparent);color:var(--gold);font:600 .5rem 'Outfit',sans-serif}
+.quest-relic-tray button.is-usable{cursor:pointer;transition:transform 120ms ease,background 140ms ease}
+.quest-relic-tray button.is-usable:hover:not(:disabled){background:color-mix(in srgb,var(--gold) 18%,transparent);transform:translateY(-1px)}
+.quest-relic-tray .is-spent{border-color:var(--border);background:transparent;color:var(--text-muted);opacity:.6}
+.quest-echo-flag{display:inline-block;margin-bottom:.35rem;padding:.2rem .5rem;border-radius:999px;background:color-mix(in srgb,var(--kyogre) 22%,transparent);color:var(--kyogre-light);font-size:.48rem}
+.quest-truth-hint{margin:.15rem 0 .35rem;color:var(--gold);font-size:.56rem}
+.quest-heal-note{color:var(--success);font-style:normal}
+
+.quest-phase-break{display:grid;justify-items:center;gap:.4rem;text-align:center;animation:quest-phase-enter 520ms cubic-bezier(.2,.9,.25,1) both}
+.quest-phase-break>span{color:var(--sakura-light);font-size:.55rem;font-weight:800;letter-spacing:.12em}
+.quest-phase-mark{display:grid;place-items:center;width:5.2rem;aspect-ratio:1;margin:.3rem 0;border:1px solid color-mix(in srgb,var(--sakura) 55%,var(--border));border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--sakura) 26%,var(--surface-2)),var(--surface-2));color:var(--sakura-light);font:700 2.5rem 'Noto Sans JP',sans-serif;animation:quest-phase-throb 1.5s ease-in-out infinite}
+.quest-phase-break h1{margin:0;font-size:1.4rem}
+.quest-phase-break p{max-width:28rem;margin:0 0 .5rem;color:var(--text-muted);font-size:.68rem;line-height:1.5}
+@keyframes quest-phase-enter{0%{opacity:0;transform:scale(.94)}100%{opacity:1;transform:scale(1)}}
+@keyframes quest-phase-throb{0%,100%{box-shadow:0 0 22px color-mix(in srgb,var(--sakura) 18%,transparent)}50%{box-shadow:0 0 42px color-mix(in srgb,var(--sakura) 34%,transparent)}}
+
+.quest-battle-arena.is-final-phase{background:radial-gradient(circle at 50% 100%,color-mix(in srgb,var(--sakura) 20%,transparent),transparent 55%),var(--surface-2);animation:quest-final-phase-glow 2.4s ease-in-out infinite}
+@keyframes quest-final-phase-glow{0%,100%{box-shadow:inset 0 0 1.5rem color-mix(in srgb,var(--sakura) 10%,transparent)}50%{box-shadow:inset 0 0 2.4rem color-mix(in srgb,var(--sakura) 22%,transparent)}}
+
+.quest-fighter-mark-shell{position:relative}
+.quest-fighter-guardian .quest-fighter-mark-shell{display:flex;justify-content:flex-end}
+.quest-fighter.is-critical .quest-fighter-portrait{animation:quest-fighter-double-lunge 700ms cubic-bezier(.2,.9,.25,1)}
+.quest-fighter-guardian.is-critical-hit .quest-fighter-portrait{animation:quest-fighter-double-hit 700ms ease}
+.quest-battle-clash.kanji-critical{color:var(--gold);text-shadow:0 0 .5rem var(--gold);animation:quest-clash-double 700ms ease}
+@keyframes quest-clash-double{25%{transform:translateX(.8rem) scale(1.3)}45%{transform:translateX(-.3rem) scale(1.1)}70%{transform:translateX(1rem) scale(1.42)}}
+@keyframes quest-fighter-double-lunge{0%,100%{transform:translateX(0)}22%{transform:translateX(1.9rem) rotate(3deg) scale(1.04)}44%{transform:translateX(.5rem)}66%{transform:translateX(2.4rem) rotate(5deg) scale(1.07)}}
+@keyframes quest-fighter-double-hit{0%,100%{transform:translateX(0);filter:none}20%{transform:translateX(.9rem) rotate(5deg);filter:brightness(1.9)}40%{transform:translateX(-.4rem) rotate(-3deg)}62%{transform:translateX(1.1rem) rotate(6deg);filter:brightness(1.9)}80%{transform:translateX(-.25rem)}}
+.quest-double-strike{position:absolute;inset:0;z-index:9;overflow:hidden;pointer-events:none}
+.quest-double-strike i{position:absolute;top:50%;left:50%;width:88%;height:.13rem;border-radius:99px;background:linear-gradient(90deg,transparent,var(--gold) 30%,#fff 55%,transparent);box-shadow:0 0 .4rem var(--gold);transform:translate(-50%,-50%) rotate(-18deg) scaleX(0);transform-origin:left center;animation:quest-double-streak 700ms cubic-bezier(.2,.8,.2,1) both}
+.quest-double-strike i:nth-of-type(2){transform:translate(-50%,-50%) rotate(16deg) scaleX(0);animation-delay:180ms}
+.quest-double-strike b{position:absolute;top:50%;left:50%;color:var(--gold);font:800 1.5rem 'Noto Sans JP',sans-serif;text-shadow:0 0 .5rem #fff;transform:translate(-50%,-50%) scale(.4);opacity:0;animation:quest-double-mark 700ms ease-out both;animation-delay:230ms}
+@keyframes quest-double-streak{0%{transform:translate(-50%,-50%) rotate(-18deg) scaleX(0);opacity:0}22%{opacity:1}55%{transform:translate(-50%,-50%) rotate(-18deg) scaleX(1);opacity:1}100%{transform:translate(-50%,-50%) rotate(-18deg) scaleX(1);opacity:0}}
+@keyframes quest-double-mark{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}35%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.quest-shockwave{position:absolute;top:50%;left:50%;z-index:7;width:2rem;aspect-ratio:1;border:2px solid color-mix(in srgb,var(--sakura-light) 70%,transparent);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;animation:quest-shockwave-burst 900ms ease-out both}
+@keyframes quest-shockwave-burst{0%{opacity:.9;transform:translate(-50%,-50%) scale(.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(6)}}
+
+@media(prefers-reduced-motion:reduce){.quest-combo-meter,.quest-phase-mark,.quest-battle-arena.is-final-phase,.quest-shockwave,.quest-double-strike i,.quest-double-strike b{animation:none}}
+@media(max-width:720px){.quest-arc-head{grid-template-columns:2.2rem 1fr auto;gap:.5rem}.quest-arc-head p{display:none}.quest-relic-row{grid-template-columns:1fr}.quest-phase-mark{width:4.2rem;font-size:2rem}}
+
+.dashboard-quest-button{position:relative}
+.dashboard-quest-track{position:absolute;right:.7rem;bottom:.55rem;left:.7rem;height:.16rem;border-radius:99px;background:color-mix(in srgb,var(--text-muted) 22%,transparent);overflow:hidden}
+.dashboard-quest-track>span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--sakura-light));transition:width 420ms ease}
+
+/* ── Guardian SVG creatures ────────────────────────────────────────────── */
+.guardian-sprite{position:relative;width:100%;height:100%;display:grid;place-items:center;--gs-1:#7a8b99;--gs-2:#4a5866;--gs-ink:rgba(6,10,16,.72);--gs-glow:#8fd9ff;--gs-eye:#fff8e6;--gs-pupil:#10151c}
+.guardian-sprite svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 .35rem .5rem rgba(0,0,0,.42))}
+.gs-body,.gs-face,.gs-skull,.gs-gourd,.gs-hunch{fill:var(--gs-1);stroke:var(--gs-ink);stroke-width:2;stroke-linejoin:round}
+.gs-shade{fill:var(--gs-2);opacity:.55;stroke:none}
+.gs-hair,.gs-cloth,.gs-wisp{fill:var(--gs-2);stroke:var(--gs-ink);stroke-width:1.6;stroke-linejoin:round}
+.gs-limb{fill:none;stroke:var(--gs-1);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.gs-rib,.gs-cloth-fold,.gs-brow,.gs-wrinkle,.gs-mark,.gs-tear{fill:none;stroke:var(--gs-ink);stroke-width:1.7;stroke-linecap:round;opacity:.62}
+.gs-rope{fill:none;stroke:var(--gs-2);stroke-width:3;stroke-linecap:round}
+.gs-eye{fill:var(--gs-eye);stroke:var(--gs-ink);stroke-width:1.4;transform-box:fill-box;transform-origin:50% 50%;animation:gs-blink 5.2s ease-in-out infinite}
+.gs-pupil{fill:var(--gs-pupil)}
+.gs-jaw,.gs-tongue,.gs-nose,.gs-snout,.gs-second-mouth{fill:var(--gs-ink);stroke:none}
+.gs-fang{fill:#fff;stroke:none}
+.gs-aura{fill:var(--gs-glow);opacity:.12;filter:blur(6px);animation:gs-aura-pulse 3.4s ease-in-out infinite}
+.gs-sway{transform-box:fill-box;transform-origin:50% 0;animation:gs-sway 3.6s ease-in-out infinite}
+.gs-float{transform-box:fill-box;transform-origin:50% 100%;animation:gs-float 2.9s ease-in-out infinite}
+@keyframes gs-float{0%,100%{transform:translateY(0) rotate(-.5deg)}50%{transform:translateY(-3px) rotate(.6deg)}}
+@keyframes gs-sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.8deg)}}
+@keyframes gs-blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+@keyframes gs-aura-pulse{0%,100%{opacity:.1;transform:scale(1)}50%{opacity:.22;transform:scale(1.06)}}
+
+/* Per-creature palettes */
+.gs-first-morning{--gs-1:#7fae5c;--gs-2:#456b34;--gs-glow:#b6ff7a;--gs-eye:#fffbe0}
+.gs-first-morning .gs-tongue{fill:#e0607f}
+.gs-lunch-together{--gs-1:#b8a463;--gs-2:#6d5c30;--gs-glow:#ffe27a}
+.gs-catch-the-train{--gs-1:#b5544f;--gs-2:#5f2724;--gs-glow:#ff8f7a}
+.gs-lost-wallet{--gs-1:#e2dcd2;--gs-2:#6e6a74;--gs-glow:#cfd6ff;--gs-ink:rgba(20,18,26,.6)}
+.gs-first-school-day{--gs-1:#c8503f;--gs-2:#2b2a30;--gs-glow:#ffa06a}
+.gs-first-school-day .gs-wing{fill:#2b2a30;stroke:var(--gs-ink);stroke-width:1.5}
+.gs-first-school-day .gs-nose{fill:#c8503f;stroke:var(--gs-ink);stroke-width:2}
+.gs-first-school-day .gs-crest{fill:#d8b24a;stroke:var(--gs-ink);stroke-width:1.5}
+.gs-rainy-day{--gs-1:#8fa9c4;--gs-2:#2f4358;--gs-glow:#9fd4ff}
+.gs-rainy-day .gs-rain,.gs-rainy-day .gs-tear{fill:none;stroke:#9fd4ff;stroke-width:2;stroke-linecap:round;opacity:.75}
+.gs-night-shift{--gs-1:#d9c9c2;--gs-2:#1d1a20;--gs-glow:#ff6b7d;--gs-eye:#fff}
+.gs-night-shift .gs-slit{fill:#a8203a}
+.gs-night-shift .gs-slit-line{fill:none;stroke:#a8203a;stroke-width:3;stroke-linecap:round}
+.gs-night-shift .gs-scissors path{fill:none;stroke:#c9d2dc;stroke-width:3.4;stroke-linecap:round}
+.gs-night-shift .gs-scissors circle{fill:none;stroke:#c9d2dc;stroke-width:3}
+.gs-hospital-visit{--gs-1:#e8e4d8;--gs-2:#8d8878;--gs-glow:#ff9d4a;--gs-ink:rgba(28,24,20,.66)}
+.gs-hospital-visit .gs-socket{fill:#241f1a}
+.gs-hospital-visit .gs-emberlight{fill:#ff9d4a;stroke:none;filter:drop-shadow(0 0 4px #ff7a1a);animation:gs-ember 1.9s ease-in-out infinite}
+.gs-hospital-visit .gs-nasal{fill:#241f1a;stroke:none}
+.gs-hospital-visit .gs-teeth{fill:none;stroke:var(--gs-ink);stroke-width:2.2}
+.gs-hospital-visit .gs-rib{stroke:#e8e4d8;stroke-width:3;opacity:.9}
+.gs-festival-mask{--gs-1:#e08a3c;--gs-2:#f5ede0;--gs-glow:#ffd166}
+.gs-festival-mask .gs-tails{fill:#e08a3c;stroke:var(--gs-ink);stroke-width:1.5;opacity:.94}
+.gs-festival-mask .gs-ear{fill:#e08a3c;stroke:var(--gs-ink);stroke-width:1.6}
+.gs-festival-mask .gs-ear-inner{fill:#f5c9a0;stroke:none}
+.gs-festival-mask .gs-snout{fill:#f5ede0;stroke:var(--gs-ink);stroke-width:1.5}
+.gs-festival-mask .gs-slitpupil{fill:none;stroke:var(--gs-pupil);stroke-width:3.4;stroke-linecap:round}
+.gs-festival-mask .gs-mark{stroke:#a8452a;opacity:.8}
+.gs-festival-mask .gs-foxfire circle{fill:#8fd9ff;opacity:.75;filter:drop-shadow(0 0 5px #4fb8ff);animation:gs-foxfire 2.6s ease-in-out infinite}
+.gs-festival-mask .gs-foxfire circle:nth-child(2){animation-delay:-.9s}
+.gs-festival-mask .gs-foxfire circle:nth-child(3){animation-delay:-1.7s}
+.gs-empty-apartment{--gs-1:#eef4f6;--gs-2:#20242c;--gs-glow:#bfe9ff;--gs-ink:rgba(24,32,44,.5)}
+.gs-empty-apartment svg{opacity:.9}
+.gs-empty-apartment .gs-wisp{fill:#eef4f6;opacity:.72}
+.gs-empty-apartment .gs-hollow{fill:#20242c;stroke:none}
+.gs-empty-apartment .gs-triangle{fill:#f7fbfd;stroke:var(--gs-ink);stroke-width:1.4}
+.gs-empty-apartment .gs-droop{stroke:#eef4f6;stroke-width:4;opacity:.85}
+.gs-mountain-path{--gs-1:#9a8aa8;--gs-2:#d9d4e0;--gs-glow:#c9a6ff}
+.gs-mountain-path .gs-hair{fill:#d9d4e0}
+.gs-mountain-path .gs-second-mouth{fill:#5a1f36}
+.gs-hollow-lantern{--gs-1:#c9b6d8;--gs-2:#3a2450;--gs-glow:#d4a72c;--gs-eye:#fff4d0}
+.gs-hollow-lantern .gs-kesa{fill:#d4a72c;stroke:var(--gs-ink);stroke-width:1.4}
+.gs-hollow-lantern .gs-beard{fill:#e8e2ee;stroke:var(--gs-ink);stroke-width:1.4}
+.gs-hollow-lantern .gs-cup{fill:#e8e2ee;stroke:var(--gs-ink);stroke-width:1.6}
+.gs-hollow-lantern .gs-cup-handle{fill:none;stroke:#e8e2ee;stroke-width:2.4}
+.gs-hollow-lantern .gs-steam{fill:none;stroke:#e8e2ee;stroke-width:1.6;stroke-linecap:round;opacity:.6}
+.gs-hollow-lantern .gs-boss-aura{opacity:.2;animation:gs-aura-pulse 2.2s ease-in-out infinite}
+.gs-hollow-lantern .gs-boss-eye{filter:drop-shadow(0 0 4px #d4a72c)}
+@keyframes gs-ember{0%,100%{opacity:.75;r:3.4}50%{opacity:1;r:4.4}}
+@keyframes gs-foxfire{0%,100%{opacity:.45;transform:translateY(0)}50%{opacity:.95;transform:translateY(-6px)}}
+
+/* Phase escalation — same creature, angrier */
+.guardian-sprite.is-phase-1{--gs-glow:#ff9d6a;filter:saturate(1.2)}
+.guardian-sprite.is-phase-2{--gs-glow:#ff5470;filter:saturate(1.45) contrast(1.08)}
+.guardian-sprite.is-phase-2 .gs-aura{opacity:.3;animation-duration:1.3s}
+.guardian-sprite.is-phase-2 .gs-float{animation-duration:1.5s}
+
+/* Battle states */
+.guardian-sprite.is-attacking{animation:gs-attack 620ms cubic-bezier(.2,.9,.25,1)}
+.guardian-sprite.is-attacking .gs-jaw,.guardian-sprite.is-attacking .gs-second-mouth{animation:gs-chomp 620ms ease}
+.guardian-sprite.is-attacking .gs-eye{animation:gs-eye-flare 620ms ease}
+.guardian-sprite.is-hit{animation:gs-recoil 560ms ease}
+.guardian-sprite.is-hit svg{animation:gs-flash 560ms ease}
+.guardian-sprite.is-critical-hit{animation:gs-recoil-hard 700ms ease}
+.guardian-sprite.is-critical-hit svg{animation:gs-flash 700ms ease 2}
+.guardian-sprite.is-ultimate-hit{animation:gs-shatter 1.15s cubic-bezier(.2,.85,.3,1) both}
+.guardian-sprite.is-ultimate-hit svg{animation:gs-flash-white 1.15s ease both}
+.guardian-sprite.is-defeated{animation:gs-dissolve 900ms ease both}
+@keyframes gs-attack{0%,100%{transform:translateX(0) scale(1)}35%{transform:translateX(-16px) scale(1.09) rotate(-3deg)}60%{transform:translateX(-6px) scale(1.03)}}
+@keyframes gs-chomp{0%,100%{transform:scaleY(1)}30%{transform:scaleY(2.1)}60%{transform:scaleY(.8)}}
+@keyframes gs-eye-flare{0%,100%{filter:none}40%{filter:drop-shadow(0 0 7px var(--gs-glow)) brightness(1.6)}}
+@keyframes gs-recoil{0%,100%{transform:translateX(0) rotate(0)}22%{transform:translateX(11px) rotate(5deg)}48%{transform:translateX(-5px) rotate(-3deg)}72%{transform:translateX(3px)}}
+@keyframes gs-recoil-hard{0%,100%{transform:translateX(0) rotate(0) scale(1)}16%{transform:translateX(14px) rotate(7deg) scale(.97)}36%{transform:translateX(-7px) rotate(-5deg)}56%{transform:translateX(12px) rotate(6deg)}78%{transform:translateX(-3px)}}
+@keyframes gs-flash{0%,100%{filter:none}25%{filter:brightness(2.4) saturate(.3)}55%{filter:brightness(1.1)}}
+@keyframes gs-flash-white{0%{filter:none}18%{filter:brightness(3.4) saturate(0)}40%{filter:brightness(1.4)}70%{filter:brightness(2.6) saturate(0)}100%{filter:brightness(.55) saturate(.4)}}
+@keyframes gs-shatter{0%{transform:translateX(0) rotate(0) scale(1)}14%{transform:translateX(18px) rotate(9deg) scale(.94)}30%{transform:translateX(-10px) rotate(-6deg) scale(1.02)}52%{transform:translateX(14px) rotate(8deg)}72%{transform:translateX(-6px) rotate(-4deg) scale(.97)}100%{transform:translateX(4px) rotate(2deg) scale(.9);opacity:.72}}
+@keyframes gs-dissolve{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.12) translateY(-10px);filter:blur(4px)}}
+
+/* Sprite sizing inside the arena */
+.quest-fighter-sprite-shell{position:relative;align-self:end;width:100%;height:7.2rem}
+.quest-fighter-guardian .quest-fighter-sprite-shell{display:flex;justify-content:flex-end}
+.quest-fighter-sprite-shell .guardian-sprite{width:8.2rem;height:8.2rem}
+
+/* ── Heavier combat feedback ──────────────────────────────────────────── */
+.quest-battle-arena{position:relative}
+.quest-battle-arena.is-shake-light{animation:arena-shake-light 380ms ease}
+.quest-battle-arena.is-shake-heavy{animation:arena-shake-heavy 620ms ease}
+.quest-battle-arena.is-shake-ultimate{animation:arena-shake-ultimate 1s cubic-bezier(.3,.9,.2,1)}
+@keyframes arena-shake-light{0%,100%{transform:translate(0,0)}25%{transform:translate(-2px,1px)}60%{transform:translate(2px,-1px)}}
+@keyframes arena-shake-heavy{0%,100%{transform:translate(0,0)}12%{transform:translate(-5px,2px)}30%{transform:translate(5px,-3px)}50%{transform:translate(-4px,-2px)}72%{transform:translate(3px,2px)}}
+@keyframes arena-shake-ultimate{0%,100%{transform:translate(0,0)}8%{transform:translate(-9px,4px) rotate(-.5deg)}20%{transform:translate(9px,-5px) rotate(.6deg)}34%{transform:translate(-7px,-3px)}48%{transform:translate(7px,4px) rotate(-.4deg)}64%{transform:translate(-4px,2px)}82%{transform:translate(3px,-2px)}}
+.quest-impact-flare{position:absolute;inset:0;z-index:6;pointer-events:none;background:radial-gradient(circle at 72% 55%,rgba(255,255,255,.9),rgba(255,209,102,.35) 22%,transparent 58%);opacity:0;animation:impact-flare 620ms ease-out both}
+.quest-impact-flare.is-ultimate{background:radial-gradient(circle at 70% 52%,rgba(255,255,255,.97),rgba(143,217,255,.5) 26%,rgba(255,107,157,.3) 44%,transparent 68%);animation-duration:1.05s}
+@keyframes impact-flare{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
+.quest-speed-lines{position:absolute;inset:0;z-index:5;overflow:hidden;pointer-events:none}
+.quest-speed-lines i{position:absolute;left:-30%;height:2px;width:60%;border-radius:99px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);opacity:0;animation:speed-line 520ms ease-out both}
+.quest-speed-lines i:nth-child(1){top:26%;animation-delay:0ms}
+.quest-speed-lines i:nth-child(2){top:44%;animation-delay:60ms}
+.quest-speed-lines i:nth-child(3){top:62%;animation-delay:120ms}
+.quest-speed-lines i:nth-child(4){top:78%;animation-delay:40ms}
+@keyframes speed-line{0%{opacity:0;transform:translateX(0)}20%{opacity:.9}100%{opacity:0;transform:translateX(180%)}}
+.quest-ultimate-charge{position:absolute;inset:0;z-index:4;pointer-events:none;background:radial-gradient(circle at 28% 62%,rgba(143,217,255,.42),transparent 42%);animation:ult-charge 900ms ease-in-out infinite}
+@keyframes ult-charge{0%,100%{opacity:.35}50%{opacity:.85}}
+
+@media(prefers-reduced-motion:reduce){
+  .gs-float,.gs-sway,.gs-eye,.gs-aura,.gs-emberlight,.gs-foxfire circle,.quest-ultimate-charge{animation:none}
+  .guardian-sprite.is-attacking,.guardian-sprite.is-hit,.guardian-sprite.is-critical-hit,.guardian-sprite.is-ultimate-hit,
+  .quest-battle-arena.is-shake-light,.quest-battle-arena.is-shake-heavy,.quest-battle-arena.is-shake-ultimate,
+  .quest-speed-lines i,.quest-impact-flare{animation:none}
+}
+@media(max-width:720px){.quest-fighter-sprite-shell{height:5.9rem}.quest-fighter-sprite-shell .guardian-sprite{width:6.6rem;height:6.6rem}}
+@media(max-width:430px){.quest-fighter-sprite-shell{height:5.1rem}.quest-fighter-sprite-shell .guardian-sprite{width:5.7rem;height:5.7rem}}
+
+.quest-guardian-card-sprite{width:6.2rem;height:6.2rem;margin:.2rem auto}

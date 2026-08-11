@@ -2,7 +2,8 @@
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
 import type { AchievementMetrics } from '../lib/achievementProgress'
-import type { QuestProgress } from '../lib/questProgress'
+import { isQuestComplete, type QuestProgress } from '../lib/questProgress'
+import { QUESTS } from '../data/questCampaign'
 import { buildAchievements } from '../data/achievements'
 import { complexityDetails, GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
 import { HERO_STORY_DEFINITIONS, HERO_STORY_LEVELS, getHeroStoriesForLevel } from '../data/heroStories'
@@ -308,7 +309,7 @@ function DashboardHeroSentence({
   )
 }
 
-const HERO_ROTATIONS_PER_SPEED_BUMP = 150
+const HERO_ROTATIONS_PER_SPEED_BUMP = 300
 
 function savedPlaybackRate(): HeroPlaybackRate {
   if (typeof window === 'undefined') return 1
@@ -381,6 +382,14 @@ export function Dashboard({
   const effectiveSpeechRateRef = useRef(effectiveSpeechRate)
   effectiveSpeechRateRef.current = effectiveSpeechRate
   const speechRateIsAutomatic = effectiveSpeechRate > speechRate
+
+  // Surface where the player actually stands on the road rather than a
+  // static tagline — the next guardian is the reason to tap through.
+  const questsCleared = QUESTS.filter((quest) => isQuestComplete(questProgress, quest.id)).length
+  const nextQuest = QUESTS.find((quest) => !isQuestComplete(questProgress, quest.id))
+  const currentQuestLabel = nextQuest
+    ? `Next: ${nextQuest.title} · ${nextQuest.guardian.name}`
+    : 'The road is yours — every seal recovered'
 
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
   const achievements = buildAchievements({ learnedCards: learnedCount, favoriteSentences: favoriteSentenceCount, questProgress, metrics: achievementMetrics })
@@ -850,7 +859,14 @@ export function Dashboard({
       <div className="dashboard-action-grid">
         <button type="button" className="dashboard-quest-button" onClick={onOpenQuests}>
           <span className="dashboard-quest-mark" aria-hidden="true">&#20365;</span>
-          <span><small>STUDY PATH</small><b>Quests</b><em>Follow your guided story</em></span>
+          <span>
+            <small>STUDY PATH · {questsCleared} / {QUESTS.length} SEALS</small>
+            <b>Quests</b>
+            <em>{currentQuestLabel}</em>
+          </span>
+          <span className="dashboard-quest-track" aria-hidden="true">
+            <span style={{ width: `${(questsCleared / QUESTS.length) * 100}%` }} />
+          </span>
         </button>
 
         <button type="button" className="dashboard-tool-button study-tools-panel" onClick={onOpenStudyTools}>

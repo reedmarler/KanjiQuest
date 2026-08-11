@@ -3,9 +3,10 @@ import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
 import { loadProgress } from './lib/storage'
-import { completeQuestStep, isQuestComplete, loadQuestProgress, type QuestStep } from './lib/questProgress'
+import { completeQuestStep, loadQuestProgress, type QuestStep } from './lib/questProgress'
 import { loadAchievementMetrics, recordBossBattle, recordQuestScene } from './lib/achievementProgress'
 import { getQuestById } from './data/questCampaign'
+import { buildRelicLoadout } from './lib/relics'
 import {
   favoriteFromExercise,
   favoriteFromDrillExercise,
@@ -271,22 +272,30 @@ function App() {
           <QuestHub
             onBack={() => setView('dashboard')}
             progress={questProgress}
-            onOpenVocab={(topicId) => {
+            onOpenVocab={(topicId, questId) => {
               setQuestVocabTopicId(topicId)
-              setActiveQuestId('first-morning')
+              setActiveQuestId(questId)
               setPracticeReturnView('quests')
               setView('vocab-practice')
             }}
-            onOpenKanji={() => {
+            onOpenKanji={(questId) => {
+              setActiveQuestId(questId)
               setPracticeReturnView('quests')
               setView('kanji')
             }}
-            onOpenGrammar={() => {
+            onOpenGrammar={(questId) => {
+              setActiveQuestId(questId)
               setPracticeReturnView('quests')
               setView('grammar')
             }}
-            onOpenScene={() => setView('quest-scene')}
-            onOpenCheckpoint={() => setView('quest-checkpoint')}
+            onOpenScene={(questId) => {
+              setActiveQuestId(questId)
+              setView('quest-scene')
+            }}
+            onOpenCheckpoint={(questId) => {
+              setActiveQuestId(questId)
+              setView('quest-checkpoint')
+            }}
           />
         </Suspense>
       </div>
@@ -391,7 +400,7 @@ function App() {
           <QuestCheckpoint
             questId={activeQuestId}
             onBack={() => setView('quests')}
-            hasDawnGuard={isQuestComplete(questProgress, 'first-morning')}
+            loadout={buildRelicLoadout(questProgress)}
             onBattleResult={({ won, perfect }) => {
               if (activeQuestId) setAchievementMetrics((current) => recordBossBattle(current, activeQuestId, won, perfect))
             }}
@@ -490,10 +499,7 @@ function App() {
       <Dashboard
         learnedCount={learnedCount}
         totalCards={CARD_TOTAL}
-        onOpenQuests={() => {
-          setActiveQuestId('first-morning')
-          setView('quests')
-        }}
+        onOpenQuests={() => setView('quests')}
         onOpenAchievements={() => setView('achievements')}
         onOpenStudyTools={() => setView('study-tools')}
         onOpenAdditionalTools={() => setView('additional-tools')}
