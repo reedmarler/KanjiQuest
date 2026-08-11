@@ -54,6 +54,27 @@ const tests: Array<{ category: SentenceCategory; pattern: RegExp; tags?: string[
 const drinkTags = ['drink','drinkable','beverage','water','tea','coffee','juice','soda','alcohol','milk','dairy']
 const solidFoodTags = ['dessert','snack','candy','ice-cream','yogurt','cheese','butter','fruit','vegetable','meat','seafood','fish','rice','bread','noodles','egg','protein','staple-food','meal','grain']
 
+const moneyTags = ['money','currency']
+
+/**
+ * Splits a coarse imported category using the word's own tags.
+ *
+ * The imported taxonomy files money under "Time & Numbers", so cash, fees,
+ * fares and salaries all arrived categorised as Time. Nothing reads Time and
+ * money the same way, so the Money category ended up holding zero words and
+ * 払う ("pay") — whose object slot requires Money — could never fill it and
+ * never generated a sentence at all.
+ *
+ * This is the same split the Food/Drink bucket already needs (so that milk is
+ * never eaten): the imported category is a bucket, and tags decide which half
+ * of it a word is in. Both places that widen an imported category into a
+ * SentenceCategory route through here so the two cannot drift apart.
+ */
+export function refineCoarseCategory(category: SentenceCategory, tags: string[]): SentenceCategory {
+  if (category === 'Time' && tags.some(tag => moneyTags.includes(tag))) return 'Money'
+  return category
+}
+
 const grammarPattern = /(^|\b)(particle|conjunction|copula|auxiliary|suffix|prefix|interjection|pronoun|expression|counter|case|polite after verb|assertion|conj\.|disc\.)($|\b)/
 const adverbPattern = /\b(adverb|quickly|slowly|already|always|often|sometimes|usually|really|very|together|again|still|soon|perhaps|probably|almost|especially|suddenly|finally|immediately)\b/
 
@@ -161,7 +182,7 @@ export function classifyVocabularyCard(card: StudyCard): VocabularyClassificatio
     // 飲む do not share objects. Tags decide which half of the bucket a word is
     // in, so that milk is never eaten.
     const drink=tags.some(tag=>drinkTags.includes(tag)) && !tags.some(tag=>solidFoodTags.includes(tag))
-    const category=bodyPart ? 'Object' : drink && importedCategoryMap[imported.category] === 'Food' ? 'Drink' : importedCategoryMap[imported.category]
+    const category=bodyPart ? 'Object' : drink && importedCategoryMap[imported.category] === 'Food' ? 'Drink' : refineCoarseCategory(importedCategoryMap[imported.category],tags)
     return { category, tags, confidence:'high' }
   }
   const finish = (category: SentenceCategory, tags: string[], confidence: VocabularyClassification['confidence']): VocabularyClassification => {

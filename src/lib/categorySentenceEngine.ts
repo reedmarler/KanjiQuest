@@ -2,7 +2,7 @@
 import type { GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import { normalizeTags } from '../data/tagTaxonomy'
 import { allCards } from '../data'
-import { classifyVocabularyCard } from './vocabularyClassifier'
+import { classifyVocabularyCard, refineCoarseCategory } from './vocabularyClassifier'
 import { inferPreferredTranslation } from '../data/preferredVocabularyTranslations'
 import type { JlptLevel, StudyCard } from './types'
 import { toHiragana } from 'wanakana'
@@ -661,9 +661,16 @@ const categoryLookup = new Map<string,SentenceCategory>([
 function approvedWords(): WordRecord[] {
   return getApprovedContentRecords().flatMap(record => {
     if (record.kind !== 'vocabulary') return []
+    // Approved records carry the same coarse imported buckets the classifier
+    // does, so they need the same tag-driven split — "time & numbers" is where
+    // 現金/料金/給料 were arriving as Time. Approved records also *replace* the
+    // built-in entry for a word outright (see the merge in editorWords), so
+    // leaving this unrefined silently discarded the hand-authored Money
+    // records for those words too.
+    const recordTags = normalizeTags(record.tags)
     const categories = (record.categories?.length ? record.categories : [record.category]).flatMap(value => {
       const category = categoryLookup.get(value.toLowerCase())
-      return category ? [category] : []
+      return category ? [refineCoarseCategory(category,recordTags)] : []
     })
     if (!categories.length) return []
     const preferredTranslation = inferPreferredTranslation(record.japanese,record.english,record.reading) || record.preferredTranslation?.trim() || record.english

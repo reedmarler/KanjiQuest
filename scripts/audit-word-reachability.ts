@@ -18,9 +18,13 @@
  *   purpose (an い-adjective is rightly refused by a manner-adverb slot). Use
  *   it to find coverage gaps, not as a defect list.
  *
- * Usage:  npx tsx scripts/audit-word-reachability.ts [--all] [--category=Food]
+ * `--pools` inverts the report: how many eligible words each slot has. A slot
+ * with a handful of candidates is what makes the stream feel repetitive, and
+ * distinguishes "we need more words" from "we need more sentence patterns".
+ *
+ * Usage:  npx tsx scripts/audit-word-reachability.ts [--all] [--category=Food] [--pools]
  */
-import { auditWordReachability, SENTENCE_CATEGORIES, type SentenceCategory } from '../src/lib/categorySentenceEngine'
+import { auditWordReachability, getVerbUsageRecords, SENTENCE_CATEGORIES, type SentenceCategory } from '../src/lib/categorySentenceEngine'
 
 const showAll = process.argv.includes('--all')
 const categoryArg = process.argv.find(arg => arg.startsWith('--category='))?.split('=')[1] as SentenceCategory | undefined
@@ -75,6 +79,42 @@ if (orphans.length) {
     console.log(`     ${row.tagBlockedBy[0] ?? 'no slot accepts this category'}`)
   }
   if (!showAll && shown.length > 30) console.log(`  … and ${shown.length - 30} more (pass --all)`)
+}
+
+if (process.argv.includes('--pools')) {
+  // Eligible words per slot, and the resulting sentence space per verb. The
+  // per-verb figure multiplies its slots together, so one starved slot caps
+  // the whole verb no matter how rich the others are — which is exactly the
+  // difference between needing more vocabulary and needing more patterns.
+  const perSlot = new Map<string, number>()
+  for (const row of rows) for (const slot of row.slots) perSlot.set(slot, (perSlot.get(slot) ?? 0) + 1)
+
+  // Enumerated from the verb records, not from perSlot: a slot with zero
+  // candidates never appears in perSlot at all, and those are the ones that
+  // matter most — a single empty slot makes the whole verb ungeneratable, the
+  // way an empty Money category silently killed 払う.
+  const verbSpace = getVerbUsageRecords().map(verb => {
+    const slots = Object.keys(verb.slots).map(name => ({ name, count: perSlot.get(`${verb.id}.${name}`) ?? 0 }))
+    const counts = slots.map(slot => slot.count)
+    return {
+      verb: verb.id,
+      japanese: verb.japanese,
+      slots: slots.map(slot => `${slot.name}:${slot.count}`).join(' '),
+      narrowest: counts.length ? Math.min(...counts) : 0,
+      space: counts.reduce((a, b) => a * b, 1),
+    }
+  }).sort((a, b) => a.space - b.space)
+
+  const dead = verbSpace.filter(v => v.space === 0)
+  const starved = verbSpace.filter(v => v.space > 0 && v.narrowest <= 5)
+  const median = verbSpace.filter(v => v.space > 0)[Math.floor(verbSpace.filter(v => v.space > 0).length / 2)]
+
+  console.log(`\n${'='.repeat(78)}\nSLOT POOL DEPTH — ${verbSpace.length} verbs\n`)
+  console.log(`DEAD (a slot has 0 candidates, so the verb can never generate): ${dead.length}`)
+  for (const v of dead) console.log(`  ${v.japanese} ${v.verb.padEnd(24)} ${v.slots}`)
+  console.log(`\nStarved (narrowest slot <= 5 candidates): ${starved.length}`)
+  for (const v of starved.slice(0, 12)) console.log(`  ${v.japanese} ${v.verb.padEnd(24)} space=${String(v.space).padStart(7)}  ${v.slots}`)
+  console.log(`\nMedian distinct-sentence space among live verbs: ${median?.space.toLocaleString() ?? 0}`)
 }
 
 // Only the invariant fails the run; unreachability is reported, not enforced.
