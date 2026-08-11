@@ -99,7 +99,7 @@ const jpPast = (jp: string) => /(った|いた|えた|した|んだ|ました|�
   // 〜たことがあります is experiential ("has watched before") — present perfect
   // in English, so the past-tense verb in the gloss is correct even though the
   // Japanese predicate is non-past.
-  || /[ただ]ことが(あります|ある|ありました|あった)$/.test(jpCore(jp))
+  || /[ただ]ことが(あります|ある|ありました|あった|ありません|ない|ありませんでした|なかった)$/.test(jpCore(jp))
 // A subordinate clause can carry its own past tense that the main predicate
 // does not: 日本に来て以来、連絡していません is correctly "ever since I came".
 const jpSubordinatePast = (jp: string) => /(以来|てから|あと|後で)/.test(jp)
@@ -107,7 +107,13 @@ const jpSubordinatePast = (jp: string) => /(以来|てから|あと|後で)/.tes
 // on top of a negative subordinate clause, and the gloss has to carry that
 // negative. 遅刻しないように、早く家を出ます is "so that I will not be late",
 // and 休みなく働きます is "works without rest" — both correct.
-const jpSubordinateNegative = (jp: string) => /(ないように|ないで|ずに|なく[、,]|なく[^なて])/.test(jp)
+const jpSubordinateNegative = (jp: string) =>
+  /(ないように|ないで|ずに|なく[、,]|なく[^なて])/.test(jp)
+  // A negative can also sit in front of any clause connector — 知らないくせに、
+  // 説明します is "even though they don't know" — or inside a nominalised
+  // clause, as in 悪いことから ("judging from"). The main predicate that
+  // follows is affirmative, so only the connector reveals the negation.
+  || /(ない|ません)(くせに|のに|ので|から|けれど|けど|ため|うちに|ことから|こと[はがを]|の[はがを]|と[、,]|が[、,])/.test(jp)
 const jpVolitional = (jp: string) => /(おう|こう|そう|とう|もう|ろう|よう)$/.test(jp) && !/(そうだ|ようだ)$/.test(jp)
 const jpDesire = (jp: string) => /(たい|たがる)$/.test(jp)
 const jpPotential = (jp: string) => /ことができる$/.test(jp)
