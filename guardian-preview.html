@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kanji Quest — guardian roster</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;padding:28px;background:#12151c;color:#e8ecf2;font:14px/1.5 system-ui,-apple-system,sans-serif}
+h1{font-size:20px;margin:0 0 4px}
+p.sub{margin:0 0 22px;color:#93a0b4;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;max-width:1100px}
+figure{margin:0;padding:14px 12px;border:1px solid #262c38;border-radius:12px;background:#181c25;text-align:center}
+.cell{width:112px;height:112px;margin:0 auto}
+figcaption b{display:block;font-size:13px;margin-top:10px}
+figcaption small{color:#93a0b4;font-size:11px}
+
+.guardian-sprite{position:relative;width:100%;height:100%;display:grid;place-items:center;--gs-1:#7a8b99;--gs-2:#4a5866;--gs-ink:rgba(6,10,16,.72);--gs-glow:#8fd9ff;--gs-eye:#fff8e6;--gs-pupil:#10151c}
+.guardian-sprite svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 .35rem .5rem rgba(0,0,0,.42))}
+.gs-body,.gs-face,.gs-skull,.gs-gourd,.gs-hunch{fill:var(--gs-1);stroke:var(--gs-ink);stroke-width:2;stroke-linejoin:round}
+.gs-shade{fill:var(--gs-2);opacity:.55;stroke:none}
+.gs-hair,.gs-cloth,.gs-wisp{fill:var(--gs-2);stroke:var(--gs-ink);stroke-width:1.6;stroke-linejoin:round}
+.gs-limb{fill:none;stroke:var(--gs-1);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.gs-rib,.gs-cloth-fold,.gs-brow,.gs-wrinkle,.gs-mark,.gs-tear{fill:none;stroke:var(--gs-ink);stroke-width:1.7;stroke-linecap:round;opacity:.62}
+.gs-rope{fill:none;stroke:var(--gs-2);stroke-width:3;stroke-linecap:round}
+.gs-eye{fill:var(--gs-eye);stroke:var(--gs-ink);stroke-width:1.4;transform-box:fill-box;transform-origin:50% 50%;animation:gs-blink 5.2s ease-in-out infinite}
+.gs-pupil{fill:var(--gs-pupil)}
+.gs-jaw,.gs-tongue,.gs-nose,.gs-snout,.gs-second-mouth{fill:var(--gs-ink);stroke:none}
+.gs-fang{fill:#fff;stroke:none}
+.gs-aura{fill:var(--gs-glow);opacity:.12;filter:blur(6px);animation:gs-aura-pulse 3.4s ease-in-out infinite}
+.gs-sway{transform-box:fill-box;transform-origin:50% 0;animation:gs-sway 3.6s ease-in-out infinite}
+.gs-float{transform-box:fill-box;transform-origin:50% 100%;animation:gs-float 2.9s ease-in-out infinite}
+@keyframes gs-float{0%,100%{transform:translateY(0) rotate(-.5deg)}50%{transform:translateY(-3px) rotate(.6deg)}}
+@keyframes gs-sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.8deg)}}
+@keyframes gs-blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+@keyframes gs-aura-pulse{0%,100%{opacity:.1;transform:scale(1)}50%{opacity:.22;transform:scale(1.06)}}
+.gs-first-morning{--gs-1:#7fae5c;--gs-2:#456b34;--gs-glow:#b6ff7a;--gs-eye:#fffbe0}
+.gs-first-morning .gs-tongue{fill:#e0607f}
+.gs-lunch-together{--gs-1:#b8a463;--gs-2:#6d5c30;--gs-glow:#ffe27a}
+.gs-catch-the-train{--gs-1:#b5544f;--gs-2:#5f2724;--gs-glow:#ff8f7a}
+.gs-lost-wallet{--gs-1:#e2dcd2;--gs-2:#6e6a74;--gs-glow:#cfd6ff;--gs-ink:rgba(20,18,26,.6)}
+.gs-first-school-day{--gs-1:#c8503f;--gs-2:#2b2a30;--gs-glow:#ffa06a}
+.gs-first-school-day .gs-wing{fill:#2b2a30;stroke:var(--gs-ink);stroke-width:1.5}
+.gs-first-school-day .gs-nose{fill:#c8503f;stroke:var(--gs-ink);stroke-width:2}
+.gs-first-school-day .gs-crest{fill:#d8b24a;stroke:var(--gs-ink);stroke-width:1.5}
+.gs-rainy-day{--gs-1:#8fa9c4;--gs-2:#2f4358;--gs-glow:#9fd4ff}
+.gs-rainy-day .gs-rain,.gs-rainy-day .gs-tear{fill:none;stroke:#9fd4ff;stroke-width:2;stroke-linecap:round;opacity:.75}
+.gs-night-shift{--gs-1:#d9c9c2;--gs-2:#1d1a20;--gs-glow:#ff6b7d;--gs-eye:#fff}
+.gs-night-shift .gs-slit{fill:#a8203a}
+.gs-night-shift .gs-slit-line{fill:none;stroke:#a8203a;stroke-width:3;stroke-linecap:round}
+.gs-night-shift .gs-scissors path{fill:none;stroke:#c9d2dc;stroke-width:3.4;stroke-linecap:round}
+.gs-night-shift .gs-scissors circle{fill:none;stroke:#c9d2dc;stroke-width:3}
+.gs-hospital-visit{--gs-1:#e8e4d8;--gs-2:#8d8878;--gs-glow:#ff9d4a;--gs-ink:rgba(28,24,20,.66)}
+.gs-hospital-visit .gs-socket{fill:#241f1a}
+.gs-hospital-visit .gs-emberlight{fill:#ff9d4a;stroke:none;filter:drop-shadow(0 0 4px #ff7a1a);animation:gs-ember 1.9s ease-in-out infinite}
+.gs-hospital-visit .gs-nasal{fill:#241f1a;stroke:none}
+.gs-hospital-visit .gs-teeth{fill:none;stroke:var(--gs-ink);stroke-width:2.2}
+.gs-hospital-visit .gs-rib{stroke:#e8e4d8;stroke-width:3;opacity:.9}
+.gs-festival-mask{--gs-1:#e08a3c;--gs-2:#f5ede0;--gs-glow:#ffd166}
+.gs-festival-mask .gs-tails{fill:#e08a3c;stroke:var(--gs-ink);stroke-width:1.5;opacity:.94}
+.gs-festival-mask .gs-ear{fill:#e08a3c;stroke:var(--gs-ink);stroke-width:1.6}
+.gs-festival-mask .gs-ear-inner{fill:#f5c9a0;stroke:none}
+.gs-festival-mask .gs-snout{fill:#f5ede0;stroke:var(--gs-ink);stroke-width:1.5}
+.gs-festival-mask .gs-slitpupil{fill:none;stroke:var(--gs-pupil);stroke-width:3.4;stroke-linecap:round}
+.gs-festival-mask .gs-mark{stroke:#a8452a;opacity:.8}
+.gs-festival-mask .gs-foxfire circle{fill:#8fd9ff;opacity:.75;filter:drop-shadow(0 0 5px #4fb8ff);animation:gs-foxfire 2.6s ease-in-out infinite}
+.gs-festival-mask .gs-foxfire circle:nth-child(2){animation-delay:-.9s}
+.gs-festival-mask .gs-foxfire circle:nth-child(3){animation-delay:-1.7s}
+.gs-empty-apartment{--gs-1:#eef4f6;--gs-2:#20242c;--gs-glow:#bfe9ff;--gs-ink:rgba(24,32,44,.5)}
+.gs-empty-apartment svg{opacity:.9}
+.gs-empty-apartment .gs-wisp{fill:#eef4f6;opacity:.72}
+.gs-empty-apartment .gs-hollow{fill:#20242c;stroke:none}
+.gs-empty-apartment .gs-triangle{fill:#f7fbfd;stroke:var(--gs-ink);stroke-width:1.4}
+.gs-empty-apartment .gs-droop{stroke:#eef4f6;stroke-width:4;opacity:.85}
+.gs-mountain-path{--gs-1:#9a8aa8;--gs-2:#d9d4e0;--gs-glow:#c9a6ff}
+.gs-mountain-path .gs-hair{fill:#d9d4e0}
+.gs-mountain-path .gs-second-mouth{fill:#5a1f36}
+.gs-hollow-lantern{--gs-1:#c9b6d8;--gs-2:#3a2450;--gs-glow:#d4a72c;--gs-eye:#fff4d0}
+.gs-hollow-lantern .gs-kesa{fill:#d4a72c;stroke:var(--gs-ink);stroke-width:1.4}
+.gs-hollow-lantern .gs-beard{fill:#e8e2ee;stroke:var(--gs-ink);stroke-width:1.4}
+.gs-hollow-lantern .gs-cup{fill:#e8e2ee;stroke:var(--gs-ink);stroke-width:1.6}
+.gs-hollow-lantern .gs-cup-handle{fill:none;stroke:#e8e2ee;stroke-width:2.4}
+.gs-hollow-lantern .gs-steam{fill:none;stroke:#e8e2ee;stroke-width:1.6;stroke-linecap:round;opacity:.6}
+.gs-hollow-lantern .gs-boss-aura{opacity:.2;animation:gs-aura-pulse 2.2s ease-in-out infinite}
+.gs-hollow-lantern .gs-boss-eye{filter:drop-shadow(0 0 4px #d4a72c)}
+@keyframes gs-ember{0%,100%{opacity:.75;r:3.4}50%{opacity:1;r:4.4}}
+@keyframes gs-foxfire{0%,100%{opacity:.45;transform:translateY(0)}50%{opacity:.95;transform:translateY(-6px)}}
+</style>
+</head>
+<body>
+<h1>Kanji Quest — guardian roster</h1>
+<p class="sub">12 inline-SVG yōkai. Idle animations (float, blink, hair sway, foxfire, skull embers) are live — this is exactly what renders in the battle arena.</p>
+<div class="grid">
+
+<figure><div class="cell"><div class="guardian-sprite gs-first-morning"><svg viewBox="0 0 120 120"><g class="gs-float"><ellipse class="gs-aura" cx="60" cy="72" rx="34" ry="30"/><path class="gs-limb" d="M32 66q-13 6-16 19"/><path class="gs-limb" d="M88 66q13 6 16 19"/><path class="gs-body" d="M60 34q26 0 30 26t-30 32q-30-2-30-32t30-26z"/><path class="gs-shade" d="M60 34q26 0 30 26t-30 32q-8 0-14-3 22-6 24-30t-10-25z"/><ellipse class="gs-eye" cx="47" cy="56" rx="8" ry="9"/><ellipse class="gs-eye" cx="70" cy="55" rx="6" ry="7"/><circle class="gs-pupil" cx="45" cy="57" r="3.4"/><circle class="gs-pupil" cx="68" cy="56" r="2.6"/><path class="gs-jaw" d="M44 74q16 12 32 0-16 6-32 0z"/><path class="gs-tongue gs-sway" d="M56 76q-4 16-16 22 14 2 20-10z"/></g></svg></div></div><figcaption><b>Akaname</b><small>The Grime Eater</small></figcaption></figure>
+
+<figure><div class="cell"><div class="guardian-sprite gs-lunch-together"><svg viewBox="0 0 120 120"><g class="gs-float"><ellipse class="gs-aura" cx="60" cy="66" rx="30" ry="36"/><path class="gs-limb" d="M38 62q-16 10-18 26M20 88l-6 8M20 88l2 10"/><path class="gs-limb" d="M84 62q16 10 18 26"/><path class="gs-body" d="M60 30q22 2 22 26 0 30-22 44-22-14-22-44 0-24 22-26z"/><path class="gs-rib" d="M46 60h28M45 70h30M47 80h26"/><ellipse class="gs-eye" cx="51" cy="44" rx="6" ry="7"/><ellipse class="gs-eye" cx="69" cy="44" rx="6" ry="7"/><circle class="gs-pupil" cx="50" cy="45" r="2.4"/><circle class="gs-pupil" cx="68" cy="45" r="2.4"/><path class="gs-jaw" d="M48 54q12 18 24 0-12 26-24 0z"/><path class="gs-fang" d="M53 58l3 7 3-7zM62 58l3 7 3-7z"/></g></svg></div></div><figcaption><b>Jikininki</b><small>The Hungry Spirit</small></figcaption></figure>
+
+<figure><div class="cell"><div class="guardian-sprite gs-catch-the-train"><svg viewBox="0 0 120 120"><g class="gs-float"><path class="gs-rope gs-sway" d="M60 0v22"/><ellipse class="gs-aura" cx="60" cy="64" rx="32" ry="30"/><path class="gs-hair gs-sway" d="M60 22q-30 4-32 34 8-14 14-16-4 16 2 24 2-18 8-22-2 20 8 26 8-6 6-26 6 4 8 22 6-8 2-24 6 2 14 16-2-30-32-34z"/><circle class="gs-body" cx="60" cy="58" r="26"/><path class="gs-shade" d="M60 32a26 26 0 0 1 0 52q-6 0-11-2a26 26 0 0 0 11-50z"/><ellipse class="gs-eye" cx="49" cy="52" rx="8" ry="8"/><ellipse class="gs-eye" cx="71" cy="52" rx="8" ry="8"/><circle class="gs-pupil" cx="48" cy="54" r="3.2"/><circle class="gs-pupil" cx="70" cy="54" r="3.2"/><path class="gs-jaw" d="M42 68q18 20 36 0-18 10-36 0z"/><path class="gs-fang" d="M50 70l3 8 3-8zM64 70l3 8 3-8z"/></g></svg></div></div><figcaption><b>Tsurube-otoshi</b><small>The Falling Head</small></figcaption></figure>
+
+<figure><div class="cell"><div class="guardian-sprite gs-lost-wallet"><svg viewBox="0 0 120 120"><g class="gs-float"><ellipse class="gs-aura" cx="60" cy="66" rx="30" ry="34"/><path class="gs-cloth gs-sway" d="M60 52q-26 6-30 50h60q-4-44-30-50z"/><path class="gs-cloth-fold" d="M60 56v46M46 62l-6 40M74 62l6 40"/><ellipse class="gs-body gs-face" cx="60" cy="40" rx="20" ry="24"/><path class="gs-shade" d="M60 16a20 24 0 0 1 0 48q-5 0-9-2a20 24 0 0 0 9-46z"/><path class="gs-hair" d="M40 34q4-22 20-22t20 22q-6-12-20-12t-20 12z"/></g></svg></div></div><figcaption><b>Noppera-bō</b><small>The Faceless Thief</small></figcaption></figure>
+
+<figure><div class="cell"><div class="guardian-sprite gs-first-school-day"><svg viewBox="0 0 120 120"><g class="gs-float"><ellipse class="gs-aura" cx="60" cy="62" rx="36" ry="32"/><path class="gs-wing gs-sway" d="M34 44q-26-8-30 14 12-6 16-2-14 6-14 20 12-12 20-10-8 8-6 20 12-16 22-14z"/><path class="gs-wing gs-sway" d="M86 44q26-8 30 14-12-6-16-2 14 6 14 20-12-12-20-10 8 8 6 20-12-16-22-14z"/><path class="gs-body" d="M60 26q24 2 24 28t-24 38q-24-12-24-38T60 26z"/><path class="gs-nose" d="M58 54q-26 4-30 14 6 14 30 4z"/><path class="gs-brow" d="M48 40l16 4M74 40l-8 4"/><ellipse class="gs-eye" cx="54" cy="48" rx="7" ry="6"/><ellipse class="gs-eye" cx="74" cy="47" rx="6" ry="5"/><circle class="gs-pupil" cx="53" cy="49" r="2.8"/><circle class="gs-pupil" cx="73" cy="48" r="2.4"/><path class="gs-jaw" d="M56 70q14 8 24-2-10 12-24 2z"/><path class="gs-crest" d="M48 24h24l-4-10H52z"/></g></svg></div></div><figcaption><b>Tengu</b><small>The Proud Teacher</small></figcaption></figure>
+
+<figure><div class="cell"><div class="guardian-sprite gs-rainy-day"><svg viewBox="0 0 120 120"><g class="gs-float"><ellipse class="gs-aura" cx="60" cy="64" rx="32" ry="36"/><path class="gs-hair gs-sway" d="M60 16q-26 4-26 34 0 34 8 54 4-30 6-40 2 26 6 40 2-30 6-40 2 26 6 40 4-24 8-54 0-30-26-34z"/><ellipse class="gs-body gs-face" cx="60" cy="42" rx="17" ry="21"/><path class="gs-shade" d="M60 21a17 21 0 0 1 0 42q-4 0-8-2a17 21 0 0 0 8-40z"/><ellipse class="gs-eye" cx="53" cy="42" rx="5" ry="6"/><ellipse class="gs-eye" cx="68" cy="42" rx="5" ry="6"/><circle class="gs-pupil" cx="52" cy="43" r="2.2"/><circle class="gs-pupil" cx="67" cy="43" r="2.2"/><path class="gs-tear" d="M52 50v14M67 50v12"/><path class="gs-jaw" d="M55 54q6 6 11 0-5 4-11 0z"/><g class="gs-rain gs-sway"><path d="M26 30v12M34 48v10M92 34v12M84 52v9M20 60v9M100 62v9"/></g></g></svg></div></div><figcaption><b>Ame-onna</b><small>The Rain Caller</small></figcaption></figure>
+
+<figure><div class="cell"><div class="guardian-sprite gs-night-shift"><svg viewBox="0 0 120 120"><g class="gs-float"><ellipse class="gs-aura" cx="60" cy="62" rx="32" ry="36"/><path class="gs-hair gs-sway" d="M60 12q-28 4-28 32 0 32 6 54 2-32 6-40 0 26 4 38 2-30 6-38 2 30 6 38 2-30 4-38 2 30 6 40 6-22 6-54 0-28-26-32z"/><ellipse class="gs-body gs-face" cx="60" cy="40" rx="18" ry="22"/><path class="gs-shade" d="M60 18a18 22 0 0 1 0 44q-4 0-8-2a18 22 0 0 0 8-42z"/><ellipse class="gs-eye" cx="52" cy="38" rx="6" ry="6"/><ellipse class="gs-eye" cx="68" cy="38" rx="6" ry="6"/><circle class="gs-pupil" cx="51" cy="39" r="2.6"/><circle class="gs-pupil" cx="67" cy="39" r="2.6"/><path class="gs-jaw gs-slit" d="M40 52q20 22 40 0-20 8-40 0z"/><path class="gs-slit-line" d="M40 52l-6-6M80 52l6-6"/><g class="gs-scissors"><path d="M92 60l16 16M108 60l-16 16"/><circle cx="90" cy="58" r="3.6"/><circle cx="110" cy="58" r="3.6"/></g></g></svg></div></div><figcaption><b>Kuchisake-onna</b><small>The Question That Cuts</small></figcaption></figure>
+
+<figure><div class="cell"><div class="guardian-sprite gs-hospital-visit"><svg viewBox="0 0 120 120"><g class="gs-float"><ellipse class="gs-aura" cx="60" cy="60" rx="40" ry="40"/><path class="gs-limb" d="M30 58q-18 8-20 30M14 84l-8 6M14 84l0 10"/><path class="gs-limb" d="M90 58q18 8 20 30M106 84l8 6M106 84l0 10"/><path class="gs-rib" d="M44 78h32M42 88h36M46 98h24M60 74v28"/><path class="gs-body gs-skull" d="M60 16q28 0 28 30 0 16-10 24H42q-10-8-10-24 0-30 28-30z"/><ellipse class="gs-socket" cx="48" cy="44" rx="9" ry="10"/><ellipse class="gs-socket" cx="72" cy="44" rx="9" ry="10"/><circle class="gs-eye gs-emberlight" cx="48" cy="45" r="3.6"/><circle class="gs-eye gs-emberlight" cx="72" cy="45" r="3.6"/><path class="gs-nasal" d="M60 52l-5 10h10z"/><path class="gs-jaw gs-teeth" d="M44 66h32M50 66v8M58 66v8M66 66v8"/></g></svg></div></div><figcaption><b>Gashadokuro</b><small>The Bone Tide · 2 phases</small></figcaption></figure>
+
+<figure><div class="cell"><div class="guardian-sprite gs-festival-mask"><svg viewBox="0 0 120 120"><g class="gs-float"><ellipse class="gs-aura" cx="60" cy="64" rx="36" ry="32"/><g class="gs-sway gs-tails"><path d="M84 66q26-16 30-40-6 26-24 38z"/><path d="M84 70q28-8 36-30-10 24-30 32z"/><path d="M84 74q30 0 40-18-14 20-38 22z"/><path d="M84 78q28 8 42-6-18 16-40 10z"/><path d="M84 82q24 14 40 6-20 14-40 0z"/></g><path class="gs-body" d="M60 30q22 2 22 26t-22 36q-22-10-22-36t22-26z"/><path class="gs-ear" d="M40 34l-4-24 20 14zM80 34l4-24-20 14z"/><path class="gs-ear-inner" d="M42 30l-2-13 11 8zM78 30l2-13-11 8z"/><ellipse class="gs-eye" cx="50" cy="50" rx="7" ry="5"/><ellipse class="gs-eye" cx="70" cy="50" rx="7" ry="5"/><path class="gs-pupil gs-slitpupil" d="M50 46v9M70 46v9"/><path class="gs-snout" d="M60 60q-10 2-8 10 8 6 16 0 2-8-8-10z"/><circle class="gs-nose" cx="60" cy="62" r="3"/><path class="gs-jaw" d="M54 70q6 6 12 0-6 4-12 0z"/><path class="gs-mark" d="M44 40l6 4M76 40l-6 4"/><g class="gs-foxfire"><circle cx="26" cy="42" r="5"/><circle cx="18" cy="66" r="4"/><circle cx="30" cy="84" r="3.4"/></g></g></svg></div></div><figcaption><b>Kyūbi no Kitsune</b><small>Nine-Tailed Trickster · 2 phases</small></figcaption></figure>
+
+<figure><div class="cell"><div class="guardian-sprite gs-empty-apartment"><svg viewBox="0 0 120 120"><g class="gs-float"><ellipse class="gs-aura" cx="60" cy="58" rx="30" ry="38"/><path class="gs-cloth gs-sway gs-wisp" d="M60 48q-22 4-24 34-2 22 4 30 6-14 12-16-4 14 2 20 4-12 6-14 2 12 8 14-4-16 2-20 6 2 12 16 6-8 4-30-2-30-26-34z"/><path class="gs-cloth-fold" d="M48 60l24-6M50 74l20-6"/><ellipse class="gs-body gs-face" cx="60" cy="34" rx="16" ry="20"/><path class="gs-hair gs-sway" d="M60 12q-24 2-24 26 0 20 4 32 2-24 6-32 0 20 4 28 2-22 4-28 2 22 4 28 2-22 4-28 2 24 6 32 4-12 4-32 0-24-22-26z"/><path class="gs-triangle" d="M60 8l-9 12h18z"/><ellipse class="gs-eye gs-hollow" cx="53" cy="34" rx="5" ry="7"/><ellipse class="gs-eye gs-hollow" cx="67" cy="34" rx="5" ry="7"/><path class="gs-jaw" d="M55 46q5 8 10 0-5 5-10 0z"/><path class="gs-limb gs-droop" d="M40 56q-14 4-16 18"/><path class="gs-limb gs-droop" d="M80 56q14 4 16 18"/></g></svg></div></div><figcaption><b>Yūrei</b><small>The Lingering Voice · 2 phases</small></figcaption></figure>
+
+<figure><div class="cell"><div class="guardian-sprite gs-mountain-path"><svg viewBox="0 0 120 120"><g class="gs-float"><ellipse class="gs-aura" cx="60" cy="64" rx="34" ry="34"/><path class="gs-hair gs-sway" d="M60 10q-30 4-30 34 0 12 4 20 0-18 6-24-2 18 2 26 0-20 6-26-2 20 2 28 2-22 6-28 4 6 6 28 4-8 2-28 6 6 6 26 4-8 2-26 6 6 6 24 4-8 4-20 0-30-28-34z"/><path class="gs-body gs-hunch" d="M60 40q22 4 24 26t-24 32q-24-10-24-32t24-26z"/><ellipse class="gs-eye" cx="51" cy="54" rx="6" ry="5"/><ellipse class="gs-eye" cx="69" cy="54" rx="6" ry="5"/><circle class="gs-pupil" cx="50" cy="55" r="2.6"/><circle class="gs-pupil" cx="68" cy="55" r="2.6"/><path class="gs-wrinkle" d="M44 46l8 2M76 46l-8 2M46 64q6 4 12 2M74 64q-6 4-12 2"/><path class="gs-jaw" d="M52 70q8 8 16 0-8 5-16 0z"/><path class="gs-second-mouth" d="M42 26q18 14 36 0-18 22-36 0z"/><path class="gs-fang" d="M50 28l3 7 3-7zM64 28l3 7 3-7z"/><path class="gs-limb" d="M36 68q-16 6-18 24"/><path class="gs-limb" d="M84 68q16 6 18 24"/></g></svg></div></div><figcaption><b>Yamauba</b><small>The Mountain Crone · 2 phases</small></figcaption></figure>
+
+<figure><div class="cell"><div class="guardian-sprite gs-hollow-lantern"><svg viewBox="0 0 120 120"><g class="gs-float"><ellipse class="gs-aura gs-boss-aura" cx="60" cy="62" rx="42" ry="42"/><path class="gs-cloth gs-sway" d="M60 62q-30 6-34 52h68q-4-46-34-52z"/><path class="gs-cloth-fold" d="M60 66v48M44 74l-8 40M76 74l8 40"/><path class="gs-kesa" d="M38 82l44-10 3 12-44 10z"/><path class="gs-body gs-gourd" d="M60 6q-16 0-22 22-8 26 6 36 8 6 16 6t16-6q14-10 6-36-6-22-22-22z"/><path class="gs-shade" d="M60 6q16 0 22 22 8 26-6 36-5 4-10 5 10-8 12-24 3-24-8-36-5-3-10-3z"/><path class="gs-brow" d="M46 44l14 3M78 44l-10 3"/><ellipse class="gs-eye gs-boss-eye" cx="52" cy="52" rx="7" ry="5"/><ellipse class="gs-eye gs-boss-eye" cx="72" cy="52" rx="6" ry="4.4"/><circle class="gs-pupil" cx="51" cy="52" r="2.8"/><circle class="gs-pupil" cx="71" cy="52" r="2.4"/><path class="gs-jaw" d="M54 62q10 5 16-1-8 9-16 1z"/><path class="gs-beard gs-sway" d="M56 66q-4 16 4 22 8-6 4-22z"/><g class="gs-teacup"><path class="gs-cup" d="M22 78h16l-2 9H24z"/><path class="gs-cup-handle" d="M38 80q6 1 5 5t-6 3"/><path class="gs-steam gs-sway" d="M27 72q3-5 0-9M34 72q3-5 0-9"/></g></g></svg></div></div><figcaption><b>Nurarihyon</b><small>Supreme Commander · 3 phases</small></figcaption></figure>
+
+</div>
+</body>
+</html>
