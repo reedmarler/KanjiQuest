@@ -320,8 +320,9 @@ const abstractTopicTags = ['abstract','emotion','feeling','philosophy','thought'
 // noun rather than an idea.
 const nonAbstractTopicWords = new Set(['体','声','目','眼','顔','手','足','頭','心臓','実','点','気','水','空','風','雨','雪','雲','熱','色','形','音','中心',
   // 話 glosses as "talk", which collides with the verb of the について frame:
-  // "he talks about the talk".
-  '話'])
+  // "he talks about the talk". お願い glosses as "please", which is not a noun
+  // in English at all.
+  '話','お願い'])
 const portablePhysicalObjectTags = [...genericObjectTags,'toy','ball','key','money','currency','wallet']
 // 持つ normally describes something a person can comfortably carry or hold.
 // Keep bulky electronics/appliances (television, refrigerator, vacuum) out
@@ -2101,6 +2102,102 @@ const personAdjectives: ReadonlyArray<{japanese:string;reading:string;english:st
 const personAdjectiveWords = new Set(personAdjectives.map(entry => entry.japanese))
 
 /**
+ * Adjectives that judge an idea or situation rather than a person, for n4-30.
+ *
+ * `suffix` carries 的 for the words that are noun stems in the vocabulary data
+ * but only ever function as adjectives with it attached: the entry is 客観, the
+ * adjective is 客観的. `noDegree` marks the variety words, which describe a
+ * spread rather than a quantity — "very various" is not English.
+ *
+ * Readings are stated here because several of these records carry romaji or
+ * incorrect readings in the source data (客観 is listed as "kakkyoku", not
+ * きゃっかん), and a wrong reading would render as wrong furigana.
+ */
+const abstractJudgementAdjectives: ReadonlyArray<{japanese:string;reading:string;english:string;na:boolean;suffix?:string;noDegree?:boolean}> = [
+  { japanese:'重要', reading:'じゅうよう', english:'important', na:true },
+  { japanese:'大事', reading:'だいじ', english:'important', na:true },
+  { japanese:'明らか', reading:'あきらか', english:'obvious', na:true },
+  { japanese:'明確', reading:'めいかく', english:'clear', na:true },
+  { japanese:'不思議', reading:'ふしぎ', english:'mysterious', na:true },
+  { japanese:'無理', reading:'むり', english:'impossible', na:true },
+  { japanese:'妥当', reading:'だとう', english:'reasonable', na:true },
+  { japanese:'意外', reading:'いがい', english:'unexpected', na:true },
+  { japanese:'極端', reading:'きょくたん', english:'extreme', na:true },
+  { japanese:'危険', reading:'きけん', english:'dangerous', na:true },
+  { japanese:'端的', reading:'たんてき', english:'concise', na:true },
+  { japanese:'精緻', reading:'せいち', english:'elaborate', na:true },
+  { japanese:'未曾有', reading:'みぞう', english:'unprecedented', na:true },
+  { japanese:'急速', reading:'きゅうそく', english:'rapid', na:true },
+  { japanese:'客観', reading:'きゃっかんてき', english:'objective', na:true, suffix:'的' },
+  { japanese:'抽象', reading:'ちゅうしょうてき', english:'abstract', na:true, suffix:'的' },
+  { japanese:'具体', reading:'ぐたいてき', english:'concrete', na:true, suffix:'的' },
+  { japanese:'相対', reading:'そうたいてき', english:'relative', na:true, suffix:'的' },
+  { japanese:'絶対', reading:'ぜったいてき', english:'absolute', na:true, suffix:'的' },
+  { japanese:'普遍', reading:'ふへんてき', english:'universal', na:true, suffix:'的' },
+  { japanese:'一般', reading:'いっぱんてき', english:'general', na:true, suffix:'的' },
+  { japanese:'国際', reading:'こくさいてき', english:'international', na:true, suffix:'的' },
+  { japanese:'必然的', reading:'ひつぜんてき', english:'inevitable', na:true },
+  { japanese:'著しい', reading:'いちじるしい', english:'remarkable', na:false },
+  { japanese:'激しい', reading:'はげしい', english:'intense', na:false },
+  { japanese:'深い', reading:'ふかい', english:'deep', na:false },
+  { japanese:'細かい', reading:'こまかい', english:'detailed', na:false },
+  { japanese:'様々', reading:'さまざま', english:'varied', na:true, noDegree:true },
+  { japanese:'いろいろ', reading:'いろいろ', english:'varied', na:true, noDegree:true },
+]
+/** Degree adverbs for n4-30. All are ungrammatical before a plain verb, which is why they are here and not in `actionAdverbWords`. */
+const degreeAdverbs: ReadonlyArray<{japanese:string;reading:string;english:string}> = [
+  { japanese:'非常に', reading:'ひじょうに', english:'extremely' },
+  { japanese:'かなり', reading:'かなり', english:'quite' },
+  { japanese:'極端に', reading:'きょくたんに', english:'extremely' },
+  { japanese:'明らかに', reading:'あきらかに', english:'clearly' },
+  { japanese:'意外に', reading:'いがいに', english:'surprisingly' },
+  { japanese:'わずかに', reading:'わずかに', english:'slightly' },
+  { japanese:'結構', reading:'けっこう', english:'fairly' },
+  { japanese:'大変', reading:'たいへん', english:'very' },
+]
+/**
+ * Words whose meaning is a relation between two things, for n4-31. They cannot
+ * work in the n4-30 predicate frame: "the reason is different" needs something
+ * to be different *from*.
+ */
+const comparisonAdjectives: ReadonlyArray<{japanese:string;reading:string;english:string}> = [
+  { japanese:'同じ', reading:'おなじ', english:'the same as' },
+  { japanese:'同様', reading:'どうよう', english:'similar to' },
+  { japanese:'一緒', reading:'いっしょ', english:'the same as' },
+  { japanese:'別', reading:'べつ', english:'separate from' },
+  { japanese:'逆', reading:'ぎゃく', english:'the opposite of' },
+]
+/**
+ * Concept pairs for n4-31, with the relation that actually holds between them.
+ *
+ * Curated because a comparison of two arbitrary abstractions is grammatical and
+ * empty — "the laugh is the same as the daily life". Constraining the pair to a
+ * shared tag was tried first and is not enough: the tags these words share are
+ * `abstract` and their JLPT level, which say nothing about whether comparing
+ * them means anything. These are the pairs Japanese actually contrasts.
+ */
+const conceptPairs: ReadonlyArray<{first:string;second:string;comparison:string}> = [
+  { first:'理想', second:'現実', comparison:'逆' },
+  { first:'本音', second:'建前', comparison:'逆' },
+  { first:'原因', second:'結果', comparison:'別' },
+  { first:'過程', second:'結果', comparison:'別' },
+  { first:'理由', second:'根拠', comparison:'同様' },
+  { first:'意見', second:'考え', comparison:'同様' },
+  { first:'問題', second:'課題', comparison:'同様' },
+  { first:'目的', second:'目標', comparison:'同じ' },
+  { first:'方法', second:'手段', comparison:'同じ' },
+  { first:'経験', second:'知識', comparison:'別' },
+]
+const abstractAdjectiveWords = new Set([
+  ...abstractJudgementAdjectives.map(entry => entry.japanese),
+  ...degreeAdverbs.map(entry => entry.japanese),
+  ...comparisonAdjectives.map(entry => entry.japanese),
+  // The bare stems the degree adverbs are built from: the vocabulary entry is
+  // 非常/極端/明らか, and the adverb attaches に.
+  '非常','極端','明らか','意外','わずか',
+])
+
+/**
  * Abstractions eligible for the topic patterns (n4-26 … n4-28).
  *
  * Defined here rather than inline in the generator so the reachability audit
@@ -2183,6 +2280,7 @@ function slotEligibleWords(): Set<string> {
     for (const word of pool) eligible.add(word.japanese)
   }
   for (const japanese of personAdjectiveWords) eligible.add(japanese)
+  for (const japanese of abstractAdjectiveWords) eligible.add(japanese)
   for (const rule of adjectiveRules) eligible.add(rule.japanese)
 
   slotIndexCache = eligible
@@ -2242,6 +2340,7 @@ export function auditWordReachability(): WordReachability[] {
     ['adjective', new Set(adjectiveRules.map(rule => rule.japanese))],
     ['abstract-topic', new Set(abstractTopicPool(vocabulary).map(word => word.japanese))],
     ['person-adjective', personAdjectiveWords],
+    ['abstract-adjective', abstractAdjectiveWords],
   ]
 
   return vocabulary.map(word => {
@@ -2678,7 +2777,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${go} too.`,{subject},{verb:verbSlot('verb-iku-mo','行きます','行く','いきます','go',['movement','additive-topic','context-dependent'])},['も marks an additional subject.','This template assumes prior discourse context.'])
 }
 
-const additionalN4PatternIds = new Set(Array.from({length:19},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
+const additionalN4PatternIds = new Set(Array.from({length:21},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
 
 function additionalN4Sentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!additionalN4PatternIds.has(patternId)) return null
@@ -2976,6 +3075,77 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart(form.japanese,form.reading,'ending')]
     const english=`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${copula} ${adjective.english}.`
     return finish(furigana,english,{subject},{ending:grammarSlot(`person-adjective-${adjectiveIndex}-${endingIndex}`,form.japanese,adjective.japanese,form.reading,adjective.english,['description',adjective.na?'na-adjective':'i-adjective','ending'],adjective.na?'na_adjective':'i_adjective')},['Adjective describes a person, which is what this frame takes.'])
+  }
+  if (patternId==='n4-30') {
+    // Topic は [Degree] Adjective です — a judgement about an idea, optionally
+    // graded. This is the frame the degree words need: they modify an
+    // adjective, so a pattern without one has nothing for them to attach to.
+    const topic=pick(abstractTopicPool(vocabulary),seed+580,'topic')
+    if (!topic) return null
+    const adjective=abstractJudgementAdjectives[Math.abs(seed+581)%abstractJudgementAdjectives.length]!
+    const stem=`${adjective.japanese}${adjective.suffix ?? ''}`
+    const forms=adjective.na
+      ? [
+        {japanese:`${stem}です`,reading:`${adjective.reading}です`,english:'is'},
+        {japanese:`${stem}ではありません`,reading:`${adjective.reading}ではありません`,english:'is not'},
+        {japanese:`${stem}でした`,reading:`${adjective.reading}でした`,english:'was'},
+      ]
+      : [
+        {japanese:`${stem}です`,reading:`${adjective.reading}です`,english:'is'},
+        {japanese:`${stem.slice(0,-1)}くないです`,reading:`${adjective.reading.slice(0,-1)}くないです`,english:'is not'},
+        {japanese:`${stem.slice(0,-1)}かったです`,reading:`${adjective.reading.slice(0,-1)}かったです`,english:'was'},
+      ]
+    let endingIndex=Math.abs(options.slotSeeds?.ending ?? seed+582)%forms.length
+    if (options.avoidWords?.ending && forms[endingIndex]!.japanese===options.avoidWords.ending) {
+      endingIndex=(endingIndex+1)%forms.length
+    }
+    const form=forms[endingIndex]!
+    // Grade only some of the time, so the pattern still teaches the plain
+    // predicate, and never on the variety adjectives.
+    // Never on a negative: the adverb scopes over the whole predicate there, so
+    // わずかに客観的ではありません glosses as "is not slightly objective", which
+    // says something quite different from the Japanese.
+    const degree=adjective.noDegree||form.english==='is not'||Math.abs(seed+583)%3===0
+      ? null
+      : degreeAdverbs[Math.abs(seed+584)%degreeAdverbs.length]!
+    const topicEnglish=abstractTopicEnglish(primaryEnglishGloss(topic.preferredTranslation||topic.english))
+    const plural=isPluralPhrase(topicEnglish)
+    const copula=form.english==='was'?(plural?'were':'was'):form.english==='is not'?(plural?'are not':'is not'):(plural?'are':'is')
+    const furigana=[
+      wordPart(topic,'topic'),literalPart('は','わ'),
+      ...(degree?[literalPart(degree.japanese,degree.reading,'adverb')]:[]),
+      literalPart(form.japanese,form.reading,'ending'),
+    ]
+    const english=`${topicEnglish.charAt(0).toUpperCase()+topicEnglish.slice(1)} ${copula} ${degree?`${degree.english} `:''}${adjective.english}.`
+    const extra: GeneratedPreviewSentence['slots']={ending:grammarSlot(`abstract-adjective-${adjective.japanese}-${endingIndex}`,form.japanese,stem,form.reading,adjective.english,['judgement',adjective.na?'na-adjective':'i-adjective','ending'],adjective.na?'na_adjective':'i_adjective')}
+    if (degree) extra.adverb=grammarSlot(`degree-${degree.japanese}`,degree.japanese,degree.japanese,degree.reading,degree.english,['degree','adverb'],'na_adjective')
+    return finish(furigana,english,{topic},extra,['Degree adverbs modify the adjective, not the verb.'])
+  }
+  if (patternId==='n4-31') {
+    // A は B と 同じです — the comparison words need a second thing to relate to,
+    // and the pair has to be one worth comparing, so both come from the curated
+    // concept pairs rather than from the topic pool at large.
+    const byJapanese=new Map(vocabulary.map(word=>[word.japanese,word]))
+    const available=conceptPairs.filter(pair=>byJapanese.has(pair.first)&&byJapanese.has(pair.second))
+    if (!available.length) return null
+    const pair=available[Math.abs(seed+587)%available.length]!
+    const first=byJapanese.get(pair.first)!,second=byJapanese.get(pair.second)!
+    const comparison=comparisonAdjectives.find(entry=>entry.japanese===pair.comparison)!
+    const endings=[
+      {japanese:`${comparison.japanese}です`,reading:`${comparison.reading}です`,english:'is'},
+      {japanese:`${comparison.japanese}ではありません`,reading:`${comparison.reading}ではありません`,english:'is not'},
+    ]
+    let endingIndex=Math.abs(options.slotSeeds?.ending ?? seed+588)%endings.length
+    if (options.avoidWords?.ending && endings[endingIndex]!.japanese===options.avoidWords.ending) {
+      endingIndex=(endingIndex+1)%endings.length
+    }
+    const ending=endings[endingIndex]!
+    const firstEnglish=abstractTopicEnglish(primaryEnglishGloss(first.preferredTranslation||first.english))
+    const secondEnglish=abstractTopicEnglish(primaryEnglishGloss(second.preferredTranslation||second.english))
+    const copula=(isPluralPhrase(firstEnglish)?'are':'is')+(endingIndex===1?' not':'')
+    const furigana=[wordPart(first,'topic'),literalPart('は','わ'),wordPart(second,'comparison'),literalPart('と'),literalPart(ending.japanese,ending.reading,'ending')]
+    const english=`${firstEnglish.charAt(0).toUpperCase()+firstEnglish.slice(1)} ${copula} ${comparison.english} ${secondEnglish}.`
+    return finish(furigana,english,{topic:first,comparison:second},{ending:grammarSlot(`comparison-${comparison.japanese}-${endingIndex}`,ending.japanese,comparison.japanese,ending.reading,comparison.english,['comparison','na-adjective','ending'],'na_adjective')},['Both nouns come from a curated pair, so the comparison is meaningful.'])
   }
   return null
 }

@@ -76,6 +76,8 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N4','Topic は 大切です',['Topic','は','大切です'],'経験は大切です','judgement about an abstraction','na-adjective predicate',true],
   ['N4','Subject は Topic を 説明する',['Subject','は','Topic','を','説明する'],'部長は理由を説明します','explain an idea or situation','dictionary',true],
   ['N4','Subject は Adjective です',['Subject','は','Adjective','です'],'祖父は健康です','describe a person','adjective predicate',true,'Takes person-describing adjectives; な- and い-adjectives inflect differently.'],
+  ['N4','Topic は Degree Adjective です',['Topic','は','Degree','Adjective','です'],'経験は非常に重要です','graded judgement about an idea','adjective predicate',true,'The frame degree adverbs need: they modify an adjective, not a verb.'],
+  ['N4','A は B と 同じです',['A','は','B','と','同じです'],'理由は結果と同じです','compare two things','na-adjective predicate',true],
 
   ['N3','Subject は Verbようにする',['Subject','は','Verbようにする'],'毎日勉強するようにする','make an effort or habit','plain form + ようにする',true],
   ['N3','Subject は Verbことにする',['Subject','は','Verbことにする'],'日本へ行くことにする','decide to do','plain form + ことにする',true],
