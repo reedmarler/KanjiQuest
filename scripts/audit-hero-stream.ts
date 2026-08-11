@@ -92,10 +92,22 @@ const jpPast = (jp: string) => /(った|いた|えた|した|んだ|ました|�
   || /でした$/.test(jpCore(jp))
   // 見たばかりです ("has just watched") is past — the marker simply is not
   // adjacent to です, so the end-anchored test above cannot see it.
-  || /た(ばかり|ところ)(です|でした)?$/.test(jpCore(jp))
+  // [ただ] because the plain past of a verb like 飲む is 飲んだ, not 飲んた:
+  // anchoring on た alone missed every voiced-stem verb, so 飲んだばかりです
+  // reported its correct "just drank tea" gloss as a tense mismatch.
+  || /[ただ](ばかり|ところ)(です|でした)?$/.test(jpCore(jp))
+  // 〜たことがあります is experiential ("has watched before") — present perfect
+  // in English, so the past-tense verb in the gloss is correct even though the
+  // Japanese predicate is non-past.
+  || /[ただ]ことが(あります|ある|ありました|あった)$/.test(jpCore(jp))
 // A subordinate clause can carry its own past tense that the main predicate
 // does not: 日本に来て以来、連絡していません is correctly "ever since I came".
 const jpSubordinatePast = (jp: string) => /(以来|てから|あと|後で)/.test(jp)
+// The mirror of the above for polarity: an affirmative main predicate can sit
+// on top of a negative subordinate clause, and the gloss has to carry that
+// negative. 遅刻しないように、早く家を出ます is "so that I will not be late",
+// and 休みなく働きます is "works without rest" — both correct.
+const jpSubordinateNegative = (jp: string) => /(ないように|ないで|ずに|なく[、,]|なく[^なて])/.test(jp)
 const jpVolitional = (jp: string) => /(おう|こう|そう|とう|もう|ろう|よう)$/.test(jp) && !/(そうだ|ようだ)$/.test(jp)
 const jpDesire = (jp: string) => /(たい|たがる)$/.test(jp)
 const jpPotential = (jp: string) => /ことができる$/.test(jp)
@@ -113,8 +125,14 @@ const jpPermission = (jp: string) => /てもいい$/.test(jp)
 // for 216 of 271 findings on one run.
 // "not only X but also Y" is a correlative, not a negation — 〜ばかりか is an
 // affirmative sentence whose correct gloss happens to contain "not".
-const enNegative = (en: string) => /\b(do not|does not|did not|not|n't|never|must not|cannot|can not|no|none|nothing|no one|unable|without|hardly|rarely)\b/i
-  .test(en.replace(/\bnot only\b/gi, ''))
+// Contractions need their own test: `n't` cannot be an alternative inside a
+// \b(...)\b group, because "doesn't" has no word boundary between "does" and
+// "n't". Written that way it silently never matched, and every contracted
+// gloss ("doesn't even know Japanese") read as affirmative.
+const enContractedNegative = (en: string) => /n't\b/i.test(en)
+const enNegative = (en: string) => enContractedNegative(en)
+  || /\b(do not|does not|did not|not|never|must not|cannot|can not|no|none|nothing|no one|unable|without|hardly|rarely)\b/i
+    .test(en.replace(/\bnot only\b/gi, ''))
 // `read` is deliberately absent: its past and present forms are spelled the
 // same, so "wants to read a letter" was being reported as a past-tense gloss
 // on a non-past sentence. A check that cannot tell the two apart can only
@@ -216,7 +234,8 @@ const CHECKS: Check[] = [
     rule: 'EN: polarity invented (JP affirmative, EN negative)',
     severity: 'broken',
     note: 'Japanese is affirmative but the gloss is negative.',
-    test: (r) => !jpNegative(r.jp) && !adverbAmari(r.jp) && !/ぜんぜん/.test(r.jp) && enNegative(r.en),
+    test: (r) => !jpNegative(r.jp) && !jpSubordinateNegative(r.jp) && !adverbAmari(r.jp)
+      && !/ぜんぜん/.test(r.jp) && enNegative(r.en),
   },
   {
     rule: 'EN: tense mismatch (JP non-past, EN past)',
