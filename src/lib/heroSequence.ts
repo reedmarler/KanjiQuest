@@ -249,6 +249,7 @@ function rotateOneSlot(
   avoidWords: Record<string, string>,
   slot: string,
   salt: number,
+  extraAvoidTexts: readonly string[] = [],
 ): { seed: number; frame: HeroSentenceFrame; avoidWords: Record<string, string> } | null {
   // Excluding the word already on screen means the first candidate that
   // survives the natural-sentence and category checks is a genuine change —
@@ -283,6 +284,15 @@ function rotateOneSlot(
     if (!candidate?.japanese || !isDashboardSentenceNatural(candidate)) continue
     const frame = categoryFrameFor(candidate)
     if (!isSingleSlotNeighbor(current, frame)) continue
+    // The two-ending cluster (see buildDatabaseHeroSteps) can otherwise swing
+    // the second rotation straight back to the form shown before the first —
+    // べきです -> べきではありません -> べきです — since each call only avoids
+    // the single form it's replacing. extraAvoidTexts carries that earlier
+    // form forward so the second rotation is forced to a genuinely new one.
+    if (slot === 'ending') {
+      const candidateText = frame.segments?.find((segment) => segment.key === endingAnchor)?.text
+      if (candidateText && extraAvoidTexts.includes(candidateText)) continue
+    }
     candidates.push({ seed: candidateSeed, frame })
   }
   // A real word swap prefers the least jarring width change, so nearest-length
@@ -410,9 +420,15 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
     const baseSeed = seedBySentence.get(sentence)
     let slotSeeds: Record<string, number> = {}
     let avoidWords: Record<string, string> = {}
+    const endingHistory: string[] = []
     for (let position = 0; baseSeed !== undefined && position < sweepQueue.length && steps.length < stepCount; position++) {
       const slot = sweepQueue[position]!
-      const next = rotateOneSlot(level, sentence.frameId, baseSeed, current, slotSeeds, avoidWords, slot, position)
+      if (slot === 'ending') {
+        const endingAnchor = current.segments?.some((segment) => segment.key === 'adjective') ? 'adjective' : 'verb'
+        const anchorText = current.segments?.find((segment) => segment.key === endingAnchor)?.text
+        if (anchorText && !endingHistory.includes(anchorText)) endingHistory.push(anchorText)
+      }
+      const next = rotateOneSlot(level, sentence.frameId, baseSeed, current, slotSeeds, avoidWords, slot, position, endingHistory)
       if (!next) continue
       slotSeeds = { ...slotSeeds, [slot]: next.seed }
       avoidWords = next.avoidWords

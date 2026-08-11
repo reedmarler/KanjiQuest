@@ -485,6 +485,37 @@ body:has(.dashboard) {
   text-wrap: balance;
 }
 
+/* Story sentences translate to English that runs well past what the
+   single-line database English row was sized for (measured up to ~190
+   characters), so a fixed two-line clamp still clips the longest ones.
+   Story mode instead lets the row grow to however many lines the current
+   translation needs, with the block's own fixed height traded for a min
+   height so the rest of the panel doesn't jump on every short sentence. */
+.hero-story-block {
+  height: auto;
+  min-height: var(--hero-rotater-height);
+  max-height: none;
+  flex-basis: auto;
+}
+
+.hero-story-block .hero-database-english {
+  height: auto;
+  min-height: calc(var(--hero-database-english-row-height) * 2);
+  max-height: none;
+  overflow: visible;
+  white-space: normal;
+}
+
+.hero-story-block .hero-database-english-stack {
+  height: auto;
+  min-height: calc(var(--hero-database-english-row-height) * 2);
+}
+
+.hero-story-block .hero-database-english-text {
+  white-space: normal;
+  line-height: 1.3;
+}
+
 @keyframes hero-database-highlight {
   from { color: var(--text-muted); filter: brightness(1); }
   to { color: var(--rayquaza); filter: brightness(1.12); }
@@ -2054,22 +2085,28 @@ body:has(.dashboard) {
   gap: 0.65rem;
 }
 
-.hero-controls-content {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-  gap: 0.55rem;
-  min-width: 0;
-  padding: 0.75rem;
-}
-
 .hero-settings-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(14rem, 0.7fr);
+  grid-template-areas: "difficulty voice" "story voice";
+  align-items: start;
+  gap: 0.55rem;
   min-width: 0;
+  padding: 0.75rem;
   border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   background: color-mix(in srgb, var(--surface-2) 46%, transparent);
+}
+
+.hero-settings-layout .control-group-levels {
+  grid-area: difficulty;
+}
+
+.hero-settings-layout .control-story-panel {
+  grid-area: story;
+}
+
+.hero-settings-layout .voice-settings-panel {
+  grid-area: voice;
 }
 
 .hero-controls-primary {
@@ -2404,8 +2441,14 @@ body:has(.dashboard) {
 
 .control-icon-button:hover:not(:disabled) {
   color: var(--text);
-  border-color: color-mix(in srgb, var(--kyogre-light) 42%, var(--border));
-  background: color-mix(in srgb, var(--kyogre) 14%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--text-muted) 46%, var(--border));
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+}
+
+.control-icon-button.is-active:hover:not(:disabled) {
+  color: var(--kyogre-light);
+  border-color: color-mix(in srgb, var(--kyogre-light) 68%, transparent);
+  background: color-mix(in srgb, var(--kyogre) 22%, var(--surface-2));
 }
 
 .control-icon-button:active:not(:disabled) {
@@ -2589,6 +2632,36 @@ body:has(.dashboard) {
   min-width: 0;
   padding: 0.75rem;
   border-left: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.voice-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.1rem;
+}
+
+.voice-settings-reset {
+  padding: 0.22rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font: 700 0.55rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+}
+
+.voice-settings-reset:hover {
+  border-color: color-mix(in srgb, var(--kyogre-light) 42%, var(--border));
+  color: var(--text);
+  background: color-mix(in srgb, var(--kyogre) 12%, var(--surface-2));
+}
+
+.voice-settings-reset:active {
+  transform: scale(0.96);
 }
 
 .voice-setting {
@@ -4967,9 +5040,9 @@ body:has(.dashboard) {
   }
   .hero-controls-primary .control-nav-button {
     justify-self: center;
-    width: 2.58rem;
-    min-width: 2.58rem;
-    height: 2.58rem;
+    width: 2.97rem;
+    min-width: 2.97rem;
+    height: 2.97rem;
     border-radius: 999px;
     font-size: 2rem;
   }
@@ -4986,7 +5059,7 @@ body:has(.dashboard) {
   }
   .hero-controls-primary .control-play {
     width: 100%;
-    height: 2.58rem;
+    height: 2.97rem;
     border-radius: 999px;
   }
   .hero-controls-primary .control-play-label {
@@ -5004,12 +5077,10 @@ body:has(.dashboard) {
   }
   .hero-settings-layout {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "difficulty" "voice" "story";
   }
   .control-group {
     max-width: 100%;
-  }
-  .hero-controls-content {
-    padding: 0.65rem 0.25rem;
   }
   .control-group-levels {
     grid-template-columns: 1fr;
@@ -7188,6 +7259,44 @@ body:has(.dashboard) {
   margin: 0 auto;
 }
 
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 0.35rem;
+  height: 2.1rem;
+  padding: 0 0.85rem 0 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: 700 0.7rem inherit;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.back-button:hover {
+  border-color: var(--kyogre-light);
+  color: var(--kyogre-light);
+  background: color-mix(in srgb, var(--kyogre) 10%, var(--surface));
+  transform: translateX(-1px);
+}
+
+.back-button:active {
+  transform: translateX(-1px) scale(0.97);
+}
+
+.back-button-icon {
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .tool-menu-heading {
   display: grid;
   gap: 0.22rem;
@@ -7251,6 +7360,58 @@ body:has(.dashboard) {
   background: color-mix(in srgb, var(--kyogre) 16%, var(--surface-2));
   color: var(--kyogre-light);
   font: 700 1.1rem/1 'Noto Sans JP', sans-serif;
+}
+
+.tool-menu-card--sakura {
+  border-color: color-mix(in srgb, var(--sakura-light) 30%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--sakura) 10%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--sakura:hover {
+  border-color: var(--sakura-light);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--sakura) 16%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--sakura .tool-menu-mark {
+  background: color-mix(in srgb, var(--sakura) 18%, var(--surface-2));
+  color: var(--sakura-light);
+}
+
+.tool-menu-card--rayquaza {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 30%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--rayquaza) 10%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--rayquaza:hover {
+  border-color: var(--rayquaza-light);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--rayquaza) 16%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--rayquaza .tool-menu-mark {
+  background: color-mix(in srgb, var(--rayquaza) 18%, var(--surface-2));
+  color: var(--rayquaza-light);
+}
+
+.tool-menu-card--gold {
+  border-color: color-mix(in srgb, var(--gold) 30%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 10%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--gold:hover {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 16%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--gold .tool-menu-mark {
+  background: color-mix(in srgb, var(--gold) 18%, var(--surface-2));
+  color: var(--gold);
+}
+
+.tool-menu-card--kyogre {
+  border-color: color-mix(in srgb, var(--kyogre-light) 30%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--kyogre) 10%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--kyogre:hover {
+  border-color: var(--kyogre-light);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--kyogre) 16%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--kyogre .tool-menu-mark {
+  background: color-mix(in srgb, var(--kyogre) 18%, var(--surface-2));
+  color: var(--kyogre-light);
 }
 
 .tool-menu-card b {

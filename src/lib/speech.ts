@@ -44,8 +44,11 @@ function findJapaneseBrowserVoice() {
     ?? voices.find((voice) => voice.name.toLowerCase().includes('japanese'))
 }
 
-function speakWithBrowserVoice(text: string, rate: number, volume: number, generation: number) {
-  if (!canUseBrowserSpeech() || generation !== speechGeneration) return
+function speakWithBrowserVoice(text: string, rate: number, volume: number, generation: number, onEnd?: () => void) {
+  if (!canUseBrowserSpeech() || generation !== speechGeneration) {
+    onEnd?.()
+    return
+  }
 
   window.speechSynthesis.cancel()
   const utterance = new SpeechSynthesisUtterance(text)
@@ -54,6 +57,9 @@ function speakWithBrowserVoice(text: string, rate: number, volume: number, gener
   utterance.rate = rate
   utterance.volume = volume
   if (japaneseVoice) utterance.voice = japaneseVoice
+  const finish = () => { if (generation === speechGeneration) onEnd?.() }
+  utterance.onend = finish
+  utterance.onerror = finish
   window.speechSynthesis.speak(utterance)
 }
 
@@ -106,14 +112,24 @@ export function stopSpeaking() {
 /**
  * Speaks one sentence, replacing anything already playing. The hero sentence
  * changes on a timer, so a backlog would quickly fall out of sync.
+ *
+ * `onEnd`, when given, fires exactly once — on natural completion, on
+ * playback error, or immediately if no speech route is available at all —
+ * so a caller waiting on it (Story mode's read-then-advance pacing) never
+ * hangs. It does NOT fire when a newer speakJapanese call supersedes this
+ * one first; whatever superseded it already has its own completion to wait
+ * on, and firing both would double up on whatever action `onEnd` triggers.
  */
-export function speakJapanese(text: string, rate = 0.9, volume = 1) {
-  if (!text.trim()) return
+export function speakJapanese(text: string, rate = 0.9, volume = 1, onEnd?: () => void) {
+  if (!text.trim()) {
+    onEnd?.()
+    return
+  }
   stopSpeaking()
   const generation = ++speechGeneration
 
   if (!serverAvailable) {
-    speakWithBrowserVoice(text, rate, volume, generation)
+    speakWithBrowserVoice(text, rate, volume, generation, onEnd)
     return
   }
 
@@ -132,10 +148,13 @@ export function speakJapanese(text: string, rate = 0.9, volume = 1) {
       const audio = new Audio(URL.createObjectURL(blob))
       audio.volume = volume
       currentAudio = audio
-      void audio.play()
+      const finish = () => { if (generation === speechGeneration) onEnd?.() }
+      audio.addEventListener('ended', finish, { once: true })
+      audio.addEventListener('error', finish, { once: true })
+      audio.play().catch(finish)
     })
     .catch(() => {
       serverAvailable = false
-      speakWithBrowserVoice(text, rate, volume, generation)
+      speakWithBrowserVoice(text, rate, volume, generation, onEnd)
     })
 }

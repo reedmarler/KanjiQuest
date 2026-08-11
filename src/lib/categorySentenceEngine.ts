@@ -2,7 +2,7 @@
 import type { GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import { normalizeTags } from '../data/tagTaxonomy'
 import { allCards } from '../data'
-import { classifyVocabularyCard } from './vocabularyClassifier'
+import { classifyVocabularyCard, refineCoarseCategory } from './vocabularyClassifier'
 import { inferPreferredTranslation } from '../data/preferredVocabularyTranslations'
 import type { JlptLevel, StudyCard } from './types'
 import { toHiragana } from 'wanakana'
@@ -12,6 +12,48 @@ export const SENTENCE_CATEGORIES = [
 ] as const
 
 export type SentenceCategory = typeof SENTENCE_CATEGORIES[number]
+
+/**
+ * The tag every word in a category is guaranteed to carry.
+ *
+ * Slot rules gate on *tags*, not categories alone, so a word whose tags miss
+ * whatever allowlist a slot happens to check is silently unreachable: present
+ * in the pool, accepted by nothing, and indistinguishable from a word that is
+ * simply rare. That failure has no error and no test — 馬 tagged `farm`
+ * instead of `animal`, 監督 tagged `coach` instead of `occupation`, and 現金
+ * tagged `payment` instead of `money` all looked correct and all generated
+ * exactly nothing.
+ *
+ * Guaranteeing this tag (see `withCanonicalCategoryTags`) makes category
+ * membership sufficient for the broad category-shaped allowlists below, which
+ * are in turn *derived* from this map rather than repeating its values. A
+ * miswritten tag then costs discoverability inside a category, never
+ * reachability itself.
+ *
+ * Approved (human-reviewed) records are exempt: their tags are the reviewed
+ * artifact, and overriding a reviewer's omission is how 共 ("both; together")
+ * briefly became a valid sentence subject.
+ *
+ * This deliberately does not collapse the narrower semantic lists
+ * (`edibleTags`, `readableTags`, `standaloneDestinationTags`, ...) onto their
+ * categories: those encode real distinctions that must survive. 塩 is Food but
+ * is not eaten, 切手 is a Document but is not read, and 交差点 is a Place but is
+ * not somewhere you travel *to*. Those lists stay hand-curated on purpose.
+ */
+const CANONICAL_CATEGORY_TAGS: Record<SentenceCategory,string> = {
+  Person:'person', Animal:'animal', Plant:'plant', Food:'food', Drink:'drink',
+  Medicine:'medicine', Place:'place', Building:'building', Room:'room',
+  Object:'object', Tool:'tool', Technology:'technology', Vehicle:'vehicle',
+  Clothing:'clothing', Furniture:'furniture', Book:'book', Document:'document',
+  Media:'media', Time:'time', Weather:'weather', Emotion:'emotion',
+  Activity:'activity', Event:'event', Adverb:'adverb', Number:'number',
+  Money:'money', Language:'language',
+}
+
+/** Adds each category's guaranteed tag, keeping the author's own tags first. */
+function withCanonicalCategoryTags(categories: SentenceCategory[], tags: string[]) {
+  return normalizeTags([...tags, ...categories.map(category => CANONICAL_CATEGORY_TAGS[category])])
+}
 
 interface WordRecord {
   id: string
@@ -137,7 +179,37 @@ const words: WordRecord[] = [
   ['eiga','映画','えいが','a movie',['Media'],['film']], ['anime','アニメ','アニメ','anime',['Media'],['animation']], ['terebi','テレビ','テレビ','television',['Media','Technology'],['video']],
   ['shichiji','七時','しちじ','at seven',['Time'],['clock-time']], ['hachiji','八時','はちじ','at eight',['Time'],['clock-time']],
   ['yukkuri','ゆっくり','ゆっくり','slowly',['Adverb'],['adverb','manner']],
-].map(([id,japanese,reading,english,categories,tags]) => ({ id, japanese, reading, english, preferredTranslation:inferPreferredTranslation(String(japanese),String(english),String(reading)), categories, tags, source: 'built-in' })) as WordRecord[]
+
+  // N5 words previously absent from every generation pool (audited against
+  // the full N5 vocab list — see the vocab-coverage report). Concrete,
+  // unambiguous nouns only; verbs and adjectives need their own slot
+  // machinery and are left for a follow-up pass.
+  ['san','三','さん','three',['Number'],['number']], ['go','五','ご','five',['Number'],['number']], ['roku','六','ろく','six',['Number'],['number']], ['futari','二人','ふたり','two people',['Number'],['number','people']],
+  ['gozen','午前','ごぜん','the morning',['Time'],['clock-time']], ['gogo','午後','ごご','the afternoon',['Time'],['clock-time']], ['yuugata','夕方','ゆうがた','evening',['Time'],['clock-time']],
+  ['yuki','雪','ゆき','snow',['Weather'],['cold','precipitation']], ['kumo','雲','くも','a cloud',['Weather'],['sky']], ['kaminari','雷','かみなり','thunder',['Weather'],['storm']], ['hare','晴れ','はれ','sunny weather',['Weather'],['clear']], ['kumori','曇り','くもり','cloudy weather',['Weather'],['overcast']],
+  ['kusa','草','くさ','grass',['Plant'],['outdoor']], ['ha','葉','は','a leaf',['Plant'],['outdoor']],
+  ['uma','馬','うま','a horse',['Animal'],['animal']],
+  ['ike','池','いけ','a pond',['Place'],['outdoor','water']], ['mizuumi','湖','みずうみ','a lake',['Place'],['outdoor','water']], ['mukou','向こう','むこう','over there',['Place'],['direction']], ['kousaten','交差点','こうさてん','the intersection',['Place'],['street']], ['oudanhodou','横断歩道','おうだんほどう','the crosswalk',['Place'],['street']],
+  ['suupaa','スーパー','すーぱー','the supermarket',['Building'],['shopping']], ['konbini','コンビニ','こんびに','the convenience store',['Building'],['shopping']],
+  ['toriniku','鶏肉','とりにく','chicken',['Food'],['meat']], ['shio','塩','しお','salt',['Food'],['condiment']],
+  ['kagami','鏡','かがみ','a mirror',['Object'],['household']], ['haburashi','歯ブラシ','はぶらし','a toothbrush',['Object'],['household']], ['sekken','石けん','せっけん','soap',['Object'],['household']],
+  ['moufu','毛布','もうふ','a blanket',['Furniture'],['bedroom']],
+  ['megane','眼鏡','めがね','glasses',['Clothing'],['accessory']],
+  ['jugyou','授業','じゅぎょう','class',['Activity'],['school']], ['supootsu','スポーツ','すぽーつ','sports',['Activity'],['hobby']], ['souji','掃除','そうじ','cleaning',['Activity'],['chore']],
+  ['matsuri','祭り','まつり','a festival',['Event'],['seasonal']], ['kaji','火事','かじ','a fire',['Event'],['emergency']],
+  ['genkin','現金','げんきん','cash',['Money'],['money','currency']], ['otsuri','お釣り','おつり','change',['Money'],['money']],
+
+  // N4-N1 words from the study-only core-expansion/focus decks that were
+  // never admitted into the generator (see the catalogWords() comment above
+  // for why those decks stay excluded by default). Concrete nouns only,
+  // hand-reviewed the same way as the N5 batch above; verbs and highly
+  // abstract N2/N1 discourse vocabulary (制度/傾向/根拠/...) need dedicated
+  // sentence patterns rather than a pool entry and are left for later.
+  ['kisetsu','季節','きせつ','a season',['Time'],['calendar']], ['kyuuryou','給料','きゅうりょう','a salary',['Money'],['money','currency']], ['yakkyoku','薬局','やっきょく','the pharmacy',['Building'],['shopping']], ['bai','倍','ばい','times/-fold',['Number'],['number']], ['hanabi','花火','はなび','fireworks',['Event'],['seasonal']], ['shukujitsu','祝日','しゅくじつ','a national holiday',['Event'],['calendar']], ['massugu','真っ直ぐ','まっすぐ','straight ahead',['Adverb'],['adverb','manner']], ['sentakuki','洗濯機','せんたくき','a washing machine',['Furniture'],['household','machine']], ['soujiki','掃除機','そうじき','a vacuum cleaner',['Furniture'],['household','machine']], ['touchaku','到着','とうちゃく','arrival',['Event'],['travel']], ['hikkoshi','引っ越し','ひっこし','moving house',['Event'],['home']], ['uketsuke','受付','うけつけ','the reception desk',['Place'],['workplace']],
+  ['kibun','気分','きぶん','a feeling',['Emotion'],['mood']], ['torizara','取り皿','とりざら','a small serving plate',['Object'],['kitchenware']], ['mochikaeri','持ち帰り','もちかえり','takeout',['Activity'],['restaurant']], ['denpyou','伝票','でんぴょう','a bill',['Document'],['receipt']], ['kantoku','監督','かんとく','the coach',['Person'],['occupation']], ['hikiwake','引き分け','ひきわけ','a draw',['Event'],['sports']], ['yuushou','優勝','ゆうしょう','a championship win',['Event'],['sports']], ['buta','豚','ぶた','a pig',['Animal'],['animal']], ['zou','象','ぞう','an elephant',['Animal'],['animal']], ['yubiwa','指輪','ゆびわ','a ring',['Clothing'],['accessory']], ['keshou','化粧','けしょう','makeup',['Object'],['accessory']], ['hinan','避難','ひなん','evacuation',['Event'],['emergency']], ['hijouguchi','非常口','ひじょうぐち','the emergency exit',['Place'],['building']], ['tanjou','誕生','たんじょう','a birth',['Event'],['family']], ['shuushoku','就職','しゅうしょく','finding employment',['Event'],['work']], ['goukei','合計','ごうけい','a total',['Number'],['number']], ['keigo','敬語','けいご','polite language',['Language'],['japanese']], ['hanami','花見','はなみ','flower viewing',['Event'],['seasonal']], ['okurimono','贈り物','おくりもの','a gift',['Object'],['present']], ['shoutai','招待','しょうたい','an invitation',['Event'],['social']], ['kinenbi','記念日','きねんび','an anniversary',['Event'],['calendar']],
+  ['shinpan','審判','しんぱん','the referee',['Person'],['occupation']], ['juui','獣医','じゅうい','the veterinarian',['Person'],['occupation']], ['mejirushi','目印','めじるし','a landmark',['Object'],['direction']], ['choumiryou','調味料','ちょうみりょう','seasoning',['Food'],['condiment']], ['tsuuhou','通報','つうほう','a report to authorities',['Event'],['emergency']], ['tounan','盗難','とうなん','theft',['Event'],['emergency']], ['rikon','離婚','りこん','a divorce',['Event'],['family']], ['taishoku','退職','たいしょく','retirement',['Event'],['work']], ['soushiki','葬式','そうしき','a funeral',['Event'],['family']], ['hanataba','花束','はなたば','a bouquet',['Object'],['present']], ['bonodori','盆踊り','ぼんおどり','a bon dance',['Event'],['seasonal']],
+  ['oukyuuteate','応急手当','おうきゅうてあて','first aid',['Activity'],['emergency']],
+].map(([id,japanese,reading,english,categories,tags]) => ({ id, japanese, reading, english, preferredTranslation:inferPreferredTranslation(String(japanese),String(english),String(reading)), categories, tags:withCanonicalCategoryTags(categories as SentenceCategory[],tags as string[]), source: 'built-in' })) as WordRecord[]
 
 let catalogWordCache: WordRecord[] | null = null
 
@@ -166,7 +238,7 @@ function isStudyOnlyDeck(id: string) {
 function toCategoryWordRecord(card: StudyCard): WordRecord {
   const classification = classifyVocabularyCard(card)
   const english = card.back || card.english || 'Meaning needed'
-  return { id:`catalog-${card.id}`, japanese:card.front, reading:card.reading ?? 'Reading needed', english, preferredTranslation:inferPreferredTranslation(card.front,english,card.reading), jlpt:card.jlpt, categories:[classification.category], tags:classification.tags, source:'built-in' }
+  return { id:`catalog-${card.id}`, japanese:card.front, reading:card.reading ?? 'Reading needed', english, preferredTranslation:inferPreferredTranslation(card.front,english,card.reading), jlpt:card.jlpt, categories:[classification.category], tags:withCanonicalCategoryTags([classification.category],classification.tags), source:'built-in' }
 }
 
 /**
@@ -185,8 +257,11 @@ export function getPendingReviewWords(): CategoryWordRecord[] {
 
 // `ingredient` is deliberately absent: sugar, flour, and oil are what a dish is
 // made of, not what someone sits down and eats.
-const edibleTags = ['food','fruit','vegetable','meat','seafood','fish','rice','bread','noodles','soup','dessert','snack','candy','ice-cream','edible']
-const drinkableTags = ['drink','drinkable','beverage','water','tea','coffee','juice','soda','alcohol','milk','dairy']
+const edibleTags = [CANONICAL_CATEGORY_TAGS.Food,'fruit','vegetable','meat','seafood','fish','rice','bread','noodles','soup','dessert','snack','candy','ice-cream','edible']
+// `medicine` rides along because 薬 is drunk rather than eaten in Japanese.
+// It doubles as the guard that keeps medicine out of 食べる, which excludes
+// anything drinkable that carries no solid-food tag.
+const drinkableTags = [CANONICAL_CATEGORY_TAGS.Drink,CANONICAL_CATEGORY_TAGS.Medicine,'drinkable','beverage','water','tea','coffee','juice','soda','alcohol','milk','dairy']
 // Solid foods that also carry a drink tag — ice cream and yogurt are dairy but
 // are eaten, so these tags override drinkability.
 const solidFoodTags = ['dessert','snack','candy','ice-cream','yogurt','cheese','butter','fruit','vegetable','meat','seafood','fish','rice','bread','noodles','egg','protein','staple-food','meal','grain']
@@ -201,7 +276,7 @@ const cookingInputTags = ['ingredient','seasoning','condiment','spice','flavorin
 // let stamps, tickets, and name cards become objects of 読む. `letter` is absent
 // for a different reason — it covers both mail and letters of the alphabet, so
 // it made 文字 readable. 手紙 qualifies through `document`.
-const readableTags = ['book','document','notebook','magazine','newspaper','reading','fiction','news','textbook','comic']
+const readableTags = [CANONICAL_CATEGORY_TAGS.Book,CANONICAL_CATEGORY_TAGS.Document,'notebook','magazine','newspaper','reading','fiction','news','textbook','comic']
 // Declared early so verb entries above `portableObjectTags` (which is built
 // from this and other tag lists further down the file) can still reference a
 // generic "handleable object" tag set without a use-before-declaration error.
@@ -216,7 +291,7 @@ const watchableTags = ['movie','film','television','tv','video','anime','animati
 // share a category with real tools but are not something you physically use.
 // 'household'/'machine' cover genuinely bulky appliances (冷蔵庫, 掃除機) that
 // you operate rather than hold — fine for 使う (use), excluded from 持つ below.
-const usableToolTags = ['tool','knife','scissors','electronics','computer','laptop','phone','tablet','camera','television','tv','pen','pencil','instrument','household','machine','vehicle','bicycle','kitchenware','ball','sport','equipment','personal-item','wearable','accessory']
+const usableToolTags = [CANONICAL_CATEGORY_TAGS.Tool,CANONICAL_CATEGORY_TAGS.Vehicle,'knife','scissors','electronics','computer','laptop','phone','tablet','camera','television','tv','pen','pencil','instrument','household','machine','bicycle','kitchenware','ball','sport','equipment','personal-item','wearable','accessory']
 const portablePhysicalObjectTags = [...genericObjectTags,'toy','ball','key','money','currency','wallet']
 // 持つ normally describes something a person can comfortably carry or hold.
 // Keep bulky electronics/appliances (television, refrigerator, vacuum) out
@@ -228,18 +303,22 @@ const handHeldObjectTags = [...portablePhysicalObjectTags,'phone','camera','pers
 // several already-curated lists rather than a bare category, so abstract or
 // junk-classified words never slip in the way an untagged category would.
 const existenceObjectTags = [...usableToolTags,...readableTags,...watchableTags,...edibleTags,...drinkableTags,'clothing','shirt','coat','furniture','chair','table','desk','picture','photo','bag','box','bottle','cup','key']
-// Words classified Animal all carry this single tag (see vocabularyClassifier.ts).
-const animalSubjectTags = ['animal','dog','cat','bird','fish','pet']
+// Category-shaped lists: "any member of this category, plus the finer-grained
+// tags an individual word may carry instead". These lead with the category's
+// canonical tag rather than repeating its literal value, so a category can
+// never drift out of the list that is supposed to accept all of its members —
+// the drift that made 馬 (Animal, tagged `farm`) unusable as a subject.
+const animalSubjectTags = [CANONICAL_CATEGORY_TAGS.Animal,'dog','cat','bird','fish','pet']
 // The current verb records describe human activities. Animals and plants need
 // their own verb usages so that an otherwise valid category cannot create a
 // sentence such as “a horse goes to university” or “a tree talks.”
-const humanSubjectTags = ['person','pronoun','speaker','man','woman','boy','girl','baby','child','teenager','adult','elderly','human','family','mother','father','wife','husband','brother','sister','grandparent','grandchild','relative','friend','partner','classmate','coworker','neighbor','customer','boss','employee','occupation','teacher','student','doctor','nurse','citizen']
+const humanSubjectTags = [CANONICAL_CATEGORY_TAGS.Person,'pronoun','speaker','man','woman','boy','girl','baby','child','teenager','adult','elderly','human','family','mother','father','wife','husband','brother','sister','grandparent','grandchild','relative','friend','partner','classmate','coworker','neighbor','customer','boss','employee','occupation','teacher','student','doctor','nurse','citizen']
 // zoo/bridge/port/intersection/shop/hot-spring/countryside/aquarium/direction
 // were missing even though 動物園, 橋, 港, 交差点, 薬局, 温泉, 田舎, 水族館,
 // and 東/西/南/北 are all ordinary, natural destinations — the same class of
 // gap as readingMannerTags: real words carrying real destination-shaped tags
 // that simply weren't in this allowlist yet.
-const standaloneDestinationTags = ['country','city','town','village','neighborhood','building','house','home','apartment','school','education','university','office','store','shop','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','river','lake','beach','ocean','island','platform','parking-lot','room','kitchen','bathroom','bedroom','classroom','public','transport','destination','zoo','bridge','port','intersection','hot-spring','countryside','aquarium','direction']
+const standaloneDestinationTags = ['country','city','town','village','neighborhood',CANONICAL_CATEGORY_TAGS.Building,'house','home','apartment','school','education','university','office','store','shop','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','river','lake','beach','ocean','island','platform','parking-lot',CANONICAL_CATEGORY_TAGS.Room,'kitchen','bathroom','bedroom','classroom','public','transport','destination','zoo','bridge','port','intersection','hot-spring','countryside','aquarium','direction']
 const workplaceLocationTags = ['company','office','store','shop','school','education','university','hospital','bank','restaurant','cafe','library','museum','station','airport','hotel','post-office','movie-theater']
 const crowdedPlaceTags = ['city','town','village','neighborhood','park','restaurant','cafe','station','market','festival','event','downtown','public']
 const pushableObjectTags = ['button','door','box','bag','cart','chair','table','furniture','switch','key','tool']
@@ -251,7 +330,7 @@ const deepFryableTags = ['meat','seafood','fish','vegetable','potato','chicken',
 // A subset of destinations you can walk into and be inside of. Open-air or
 // natural places (mountains, forests, rivers) fit 行く/帰る but not 入る —
 // nobody "enters" a mountain, they climb it.
-const enterableDestinationTags = ['country','city','town','village','neighborhood','building','house','home','apartment','school','education','university','office','store','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport','platform','parking-lot','room','kitchen','bathroom','bedroom','classroom']
+const enterableDestinationTags = ['country','city','town','village','neighborhood',CANONICAL_CATEGORY_TAGS.Building,'house','home','apartment','school','education','university','office','store','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport','platform','parking-lot',CANONICAL_CATEGORY_TAGS.Room,'kitchen','bathroom','bedroom','classroom']
 // `education` is deliberately absent: it also covers libraries and study rooms,
 // where eating is exactly what you do not do. Schools stay through `school`.
 const eatingLocationTags = ['restaurant','cafe','cafeteria','house','home','kitchen','dining-room','room','school','classroom','office','workplace','park','hotel','eating-location']
@@ -355,10 +434,19 @@ const preferLongerFormWords = new Set(['子'])
 
 const verbs: VerbUsageRecord[] = [
   { id:'taberu-basic', japanese:'食べる', reading:'たべる', english:'eat', englishThird:'eats', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','eating','ichidan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
-  { id:'nomu-basic', japanese:'飲む', reading:'のむ', english:'drink', englishThird:'drinks', verbClass:'godan-mu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food','Drink'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','drinking','godan','transitive','drink'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food','Drink'],tags:drinkableTags} } },
+  // Medicine belongs here because Japanese takes medicine by drinking it
+  // (薬を飲む), which is also the only slot that consumes the Medicine
+  // category — without it, splitting 薬 out of Food would leave it stranded.
+  { id:'nomu-basic', japanese:'飲む', reading:'のむ', english:'drink', englishThird:'drinks', verbClass:'godan-mu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food','Drink','Medicine'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','drinking','godan','transitive','drink'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food','Drink','Medicine'],tags:drinkableTags} } },
   { id:'yomu-basic', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags} } },
   { id:'miru-basic', japanese:'見る', reading:'みる', english:'watch', englishThird:'watches', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Media','Technology'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','perception','watching','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Media','Technology'],tags:watchableTags} } },
   { id:'iku-ni', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-02', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
+  // n5-30, means of transport (〜で行きます). The Vehicle category had 13 words
+  // and only two slots accepting it, neither of which was about travelling —
+  // this is the pattern those words exist for.
+  { id:'iku-transport', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-30', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
+  { id:'kaeru-transport', japanese:'帰る', reading:'かえる', english:'return home', englishThird:'returns home', verbClass:'godan-ru', sentencePattern:'n5-30', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
+  { id:'kuru-transport', japanese:'来る', reading:'くる', english:'come', englishThird:'comes', verbClass:'irregular', sentencePattern:'n5-30', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','irregular','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
   { id:'taberu-location', japanese:'食べる', reading:'たべる', english:'eat', englishThird:'eats', verbClass:'ichidan', sentencePattern:'n5-03', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','eating','ichidan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:eatingLocationTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'hanasu-companion', japanese:'話す', reading:'はなす', english:'talk', englishThird:'talks', verbClass:'godan-su', sentencePattern:'n5-04', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} with {Companion}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','speaking','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, companion:{categories:['Person'],tags:humanSubjectTags} } },
   { id:'okiru-time', japanese:'起きる', reading:'おきる', english:'wake up', englishThird:'wakes up', verbClass:'ichidan', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','sleeping','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
@@ -391,7 +479,7 @@ const verbs: VerbUsageRecord[] = [
   { id:'hirou-basic', japanese:'拾う', reading:'ひろう', english:'pick up', englishThird:'picks up', verbClass:'godan-u', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object','Money'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object','Money'],tags:portablePhysicalObjectTags} } },
   { id:'kariru-basic', japanese:'借りる', reading:'かりる', english:'borrow', englishThird:'borrows', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:usableToolTags} } },
   { id:'kasu-basic', japanese:'貸す', reading:'かす', english:'lend', englishThird:'lends', verbClass:'godan-su', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:usableToolTags} } },
-  { id:'harau-basic', japanese:'払う', reading:'はらう', english:'pay', englishThird:'pays', verbClass:'godan-u', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Money'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','commerce','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Money'],tags:['money','currency','price','cost']} } },
+  { id:'harau-basic', japanese:'払う', reading:'はらう', english:'pay', englishThird:'pays', verbClass:'godan-u', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Money'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','commerce','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Money'],tags:[CANONICAL_CATEGORY_TAGS.Money,'currency','price','cost']} } },
   { id:'yaku-basic', japanese:'焼く', reading:'やく', english:'bake', englishThird:'bakes', verbClass:'godan-ku', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','godan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:bakedFoodTags} } },
   { id:'sasou-basic', japanese:'誘う', reading:'さそう', english:'invite', englishThird:'invites', verbClass:'godan-u', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Person'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','social','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Person'],tags:humanSubjectTags} } },
   { id:'hakobu-basic', japanese:'運ぶ', reading:'はこぶ', english:'carry', englishThird:'carries', verbClass:'godan-bu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:portablePhysicalObjectTags} } },
@@ -464,6 +552,12 @@ const verbs: VerbUsageRecord[] = [
   { id:'aru-existence', japanese:'ある', reading:'ある', english:'are', englishThird:'is', verbClass:'godan-ru', sentencePattern:'n5-27', subjectCategories:['Object','Tool','Technology','Food','Drink','Book','Document','Media','Furniture','Clothing'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','existence','godan','intransitive'], slots:{ location:{categories:['Place','Building','Room'],tags:objectExistenceLocationTags}, subject:{categories:['Object','Tool','Technology','Food','Drink','Book','Document','Media','Furniture','Clothing'],tags:existenceObjectTags} } },
   // Bare "Subject wa Verb" shape (n5-28) — the first shape with no slot at all
   // beyond subject, for verbs that genuinely take no object/destination/location.
+  // Animals had 15 words and exactly one slot (there-is sentences), so nothing
+  // an animal does was expressible. These reuse n5-28's existing subject-は-verb
+  // layout rather than adding a builder, and take Person too since people run
+  // and sleep as readily as animals do.
+  { id:'hashiru-basic', japanese:'走る', reading:'はしる', english:'run', englishThird:'runs', verbClass:'godan-ru', sentencePattern:'n5-28', subjectCategories:['Person','Animal'], objectCategories:[], translationTemplate:'{Subject} {Verb}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person','Animal'],tags:[...humanSubjectTags,...animalSubjectTags]} } },
+  { id:'neru-basic', japanese:'寝る', reading:'ねる', english:'sleep', englishThird:'sleeps', verbClass:'ichidan', sentencePattern:'n5-28', subjectCategories:['Person','Animal'], objectCategories:[], translationTemplate:'{Subject} {Verb}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','sleeping','ichidan','intransitive'], slots:{ subject:{categories:['Person','Animal'],tags:[...humanSubjectTags,...animalSubjectTags]} } },
   { id:'tatsu-basic', japanese:'立つ', reading:'たつ', english:'stand', englishThird:'stands', verbClass:'godan-tsu', sentencePattern:'n5-28', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','body','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags} } },
   { id:'suwaru-basic', japanese:'座る', reading:'すわる', english:'sit', englishThird:'sits', verbClass:'godan-ru', sentencePattern:'n5-28', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','body','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags} } },
   { id:'naku-basic', japanese:'泣く', reading:'なく', english:'cry', englishThird:'cries', verbClass:'godan-ku', sentencePattern:'n5-28', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','emotion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags} } },
@@ -585,12 +679,26 @@ const categoryLookup = new Map<string,SentenceCategory>([
 function approvedWords(): WordRecord[] {
   return getApprovedContentRecords().flatMap(record => {
     if (record.kind !== 'vocabulary') return []
+    // Approved records carry the same coarse imported buckets the classifier
+    // does, so they need the same tag-driven split — "time & numbers" is where
+    // 現金/料金/給料 were arriving as Time. Approved records also *replace* the
+    // built-in entry for a word outright (see the merge in editorWords), so
+    // leaving this unrefined silently discarded the hand-authored Money
+    // records for those words too.
+    const recordTags = normalizeTags(record.tags)
     const categories = (record.categories?.length ? record.categories : [record.category]).flatMap(value => {
       const category = categoryLookup.get(value.toLowerCase())
-      return category ? [category] : []
+      return category ? [refineCoarseCategory(category,recordTags)] : []
     })
     if (!categories.length) return []
     const preferredTranslation = inferPreferredTranslation(record.japanese,record.english,record.reading) || record.preferredTranslation?.trim() || record.english
+    // Deliberately NOT given canonical category tags. An approved record's tag
+    // set is the reviewed artifact — a reviewer who left `person` off a
+    // Person-category word was making a judgement, and injecting it back
+    // overrides them. 共 ("both; together; plural ending") is filed under
+    // Person and reviewed down to together/companion/group precisely so it
+    // never becomes a sentence subject; adding `person` produced "共は足が痛く
+    // ないです" ("a both's foot does not hurt").
     return [{ id:`approved-${record.id}`, japanese:record.japanese, reading:record.reading, english:record.english, preferredTranslation, jlpt:record.jlpt, categories, tags:record.tags, source:'approved' as const }]
   })
 }
@@ -765,6 +873,8 @@ const uncountableGlosses = new Set([
   'water','rice','bread','milk','tea','coffee','juice','alcohol','sake','beer','wine','soup','miso soup','ramen','sushi','udon','soba','pasta',
   'meat','beef','pork','chicken','fish','seafood','fruit','food','sugar','salt','oil','butter','cheese','ice cream',
   'money','music','information','news','homework','work','weather','clothing','furniture','luggage','advice','anime','paper','mail',
+  // "takes medicine", never "takes a medicine".
+  'medicine',
   // These foods are generally treated as substances when eaten.
   'pizza','curry','salad','chocolate','candy','cereal','yogurt','tofu',
   // Language names take no article as a study/speech object: “speaks Japanese”, not “speaks a Japanese”.
@@ -1003,6 +1113,11 @@ function translatedVerb(verb: VerbUsageRecord, filled: Record<string,WordRecord>
   }
   if (verb.japanese === '見る' && (objectTags.has('picture') || objectTags.has('photo'))) {
     return useBase ? 'look at' : 'looks at'
+  }
+  // Japanese drinks medicine; English takes it. 薬を飲む is the reason the
+  // Medicine category reaches 飲む at all, so the gloss has to follow.
+  if (verb.japanese === '飲む' && objectTags.has('medicine')) {
+    return useBase ? 'take' : 'takes'
   }
   // "are" is the base form for I/you/we/they everywhere else, but the copula
   // is the one English verb where "I" alone still needs its own form ("am").
@@ -1329,6 +1444,11 @@ function baseFurigana(verb: VerbUsageRecord, filled: Record<string,WordRecord>, 
     'n5-27':()=>[wordPart('location'),literalPart('に'),wordPart('subject'),literalPart('が'),verbPart()],
     'n5-28':()=>[wordPart('subject'),literalPart('は','わ'),verbPart()],
     'n5-29':()=>[wordPart('subject'),literalPart('は','わ'),wordPart('source'),literalPart('から'),verbPart()],
+    // Means of transport: 電車で行きます. Shares its particle with n5-25's
+    // location で but is a separate pattern because the English preposition
+    // differs ("by train", not "at the station") and because it is the only
+    // slot that consumes the Vehicle category.
+    'n5-30':()=>[wordPart('subject'),literalPart('は','わ'),wordPart('transport'),literalPart('で'),verbPart()],
   }
   return builders[verb.sentencePattern]?.() ?? null
 }
@@ -1830,6 +1950,92 @@ function slotEligibleWords(): Set<string> {
 
   slotIndexCache = eligible
   return eligible
+}
+
+export interface WordReachability {
+  japanese: string
+  reading: string
+  english: string
+  jlpt?: JlptLevel
+  categories: SentenceCategory[]
+  tags: string[]
+  /** `verbId.slot` gates this word clears outright. */
+  slots: string[]
+  /** Curated pools (human/place/time/inanimate) that accept this word. */
+  pools: string[]
+  reachable: boolean
+  /**
+   * Slots that accept the word's category but reject its tags, as
+   * `verbId.slot wants a|b|c`. Usually this is a filter working correctly — an
+   * い-adjective is rightly refused by a manner-of-reading adverb slot — so it
+   * is context for reading the unreachable list, not a defect list itself.
+   */
+  tagBlockedBy: string[]
+  /**
+   * Categories whose canonical tag the word is missing. This is the real
+   * invariant: `withCanonicalCategoryTags` guarantees it at construction, so
+   * any violation means a built-in record bypassed that helper. Unlike
+   * `tagBlockedBy` this is never legitimate, which makes it safe to fail on.
+   *
+   * Always empty for approved records — a reviewer's tag set is deliberate and
+   * is not held to this invariant (see `approvedWords`).
+   */
+  missingCanonicalTags: SentenceCategory[]
+}
+
+/**
+ * Static reachability report for every word the generator can see.
+ *
+ * Deliberately mirrors `slotEligibleWords` rather than sampling generated
+ * sentences: a word that no slot accepts produces nothing no matter how many
+ * seeds are drawn, so sampling can only ever show its absence as a very long
+ * run of bad luck. This answers it directly, in about a second, and is the
+ * check that would have caught the 馬/監督/現金 mistagging immediately.
+ */
+export function auditWordReachability(): WordReachability[] {
+  const vocabulary = editorWords()
+  const poolMembership: Array<[string, Set<string>]> = [
+    ['human', new Set(validHumanPool(vocabulary).map(word => word.japanese))],
+    ['place', new Set(validPlacePool(vocabulary).map(word => word.japanese))],
+    ['time', new Set(validTimePool(vocabulary).map(word => word.japanese))],
+    ['inanimate', new Set(validInanimatePool(vocabulary).map(word => word.japanese))],
+    // Adjectives reach the stream through their own rules rather than a verb
+    // slot; slotEligibleWords counts them, so this has to as well or the audit
+    // reports the entire adjective vocabulary as unreachable.
+    ['adjective', new Set(adjectiveRules.map(rule => rule.japanese))],
+  ]
+
+  return vocabulary.map(word => {
+    const slots: string[] = []
+    const tagBlockedBy: string[] = []
+    for (const verb of verbs) {
+      for (const [slot, rule] of Object.entries(verb.slots)) {
+        if (!categoryMatch(word, rule.categories)) continue
+        if (rule.tags?.length && matchingTags(word, rule.tags).length === 0) {
+          tagBlockedBy.push(`${verb.id}.${slot} wants ${rule.tags.slice(0, 6).join('|')}`)
+          continue
+        }
+        slots.push(`${verb.id}.${slot}`)
+      }
+    }
+    const pools = poolMembership.filter(([, members]) => members.has(word.japanese)).map(([name]) => name)
+    const carried = new Set(word.tags)
+    return {
+      japanese: word.japanese,
+      reading: word.reading,
+      english: word.preferredTranslation || word.english,
+      jlpt: word.jlpt,
+      categories: word.categories,
+      tags: word.tags,
+      slots,
+      pools,
+      reachable: slots.length > 0 || pools.length > 0,
+      tagBlockedBy,
+      missingCanonicalTags: word.source === 'approved'
+        ? []
+        : word.categories.filter(category => !carried.has(CANONICAL_CATEGORY_TAGS[category])),
+    }
+  })
 }
 
 function originEnglish(word: WordRecord) {

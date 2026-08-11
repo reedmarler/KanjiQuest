@@ -327,19 +327,19 @@ function App() {
           description="Choose a focused drill."
           onBack={() => setView('dashboard')}
           tools={[
-            { mark: '文', title: 'Sentences', detail: 'Build Japanese sentence order.', onClick: () => startSentenceMode('study-tools') },
-            { mark: '文法', title: 'Grammar', detail: 'Practice patterns and particles.', onClick: () => {
+            { mark: '文', title: 'Sentences', detail: 'Build Japanese sentence order.', accent: 'sakura', onClick: () => startSentenceMode('study-tools') },
+            { mark: '文法', title: 'Grammar', detail: 'Practice patterns and particles.', accent: 'rayquaza', onClick: () => {
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
               setView('grammar')
             } },
-            { mark: '語彙', title: 'Vocab', detail: 'Drill focused word groups.', onClick: () => {
+            { mark: '語彙', title: 'Vocab', detail: 'Drill focused word groups.', accent: 'gold', onClick: () => {
               setQuestVocabTopicId(undefined)
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
               setView('vocab-practice')
             } },
-            { mark: '漢', title: 'Kanji', detail: 'Study kanji readings and forms.', onClick: () => {
+            { mark: '漢', title: 'Kanji', detail: 'Study kanji readings and forms.', accent: 'kyogre', onClick: () => {
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
               setView('kanji')
@@ -359,16 +359,16 @@ function App() {
           description="Manage saved content and practice tools."
           onBack={() => setView('dashboard')}
           tools={[
-            { mark: '語', title: 'Vocab List', detail: 'Browse every word by level.', onClick: () => {
+            { mark: '語', title: 'Vocab List', detail: 'Browse every word by level.', accent: 'sakura', onClick: () => {
               setLibraryTab('vocab')
               setView('library')
             } },
-            { mark: '動', title: 'Word Categories', detail: 'Browse verbs, adjectives, nouns, and more.', onClick: () => {
+            { mark: '動', title: 'Word Categories', detail: 'Browse verbs, adjectives, nouns, and more.', accent: 'rayquaza', onClick: () => {
               setLibraryTab('categories')
               setView('library')
             } },
-            { mark: '編', title: 'Content Studio', detail: 'Add and organize your own content.', onClick: () => setView('content-studio') },
-            { mark: '験', title: 'Sentence Testing', detail: 'Generate sentences by complexity level.', onClick: () => setView('sentence-testing') },
+            { mark: '編', title: 'Content Studio', detail: 'Add and organize your own content.', accent: 'gold', onClick: () => setView('content-studio') },
+            { mark: '験', title: 'Sentence Testing', detail: 'Generate sentences by complexity level.', accent: 'kyogre', onClick: () => setView('sentence-testing') },
           ]}
         />
       </div>
@@ -513,11 +513,14 @@ function App() {
   )
 }
 
+type ToolMenuAccent = 'sakura' | 'rayquaza' | 'gold' | 'kyogre'
+
 type ToolMenuItem = {
   mark: string
   title: string
   detail: string
   onClick: () => void
+  accent: ToolMenuAccent
 }
 
 function ToolMenuPage({
@@ -535,7 +538,12 @@ function ToolMenuPage({
 }) {
   return (
     <main className="tool-menu-page">
-      <button type="button" className="back-button" onClick={onBack}>← Back</button>
+      <button type="button" className="back-button" onClick={onBack} aria-label="Back">
+        <svg className="back-button-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="15 5 8 12 15 19" />
+        </svg>
+        <span>Back</span>
+      </button>
       <section className="tool-menu-heading">
         <small>{eyebrow}</small>
         <h1>{title}</h1>
@@ -543,7 +551,7 @@ function ToolMenuPage({
       </section>
       <div className="tool-menu-grid">
         {tools.map((tool) => (
-          <button key={tool.title} type="button" className="tool-menu-card" onClick={tool.onClick}>
+          <button key={tool.title} type="button" className={`tool-menu-card tool-menu-card--${tool.accent}`} onClick={tool.onClick}>
             <span className="tool-menu-mark" aria-hidden="true">{tool.mark}</span>
             <span>
               <b>{tool.title}</b>

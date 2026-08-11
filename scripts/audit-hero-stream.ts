@@ -47,20 +47,55 @@ function collect(): Row[] {
 
 // ---- Japanese surface analysis -------------------------------------------
 
-const jpNegative = (jp: string) => /(ない|ません|なかった|ませんでした)$/.test(jp)
-const jpPast = (jp: string) => /(った|いた|えた|した|んだ|ました|なかった|ませんでした|てしまった|ていた|かった)$/.test(jp)
+// These all anchor on the predicate, so the sentence-final punctuation and the
+// polite copula have to come off first. Without that every polite sentence
+// ending in 。 or です read as affirmative non-past no matter what it said:
+// 痛くないです。 was reported as "JP affirmative, EN negative" against its
+// entirely correct "does not hurt" gloss.
+const jpCore = (jp: string) => jp.replace(/[。！？!?\s]+$/, '')
+// 〜なければなりません and friends are built out of two negatives but mean a
+// positive obligation ("must decline"), so the end-anchored ません match reads
+// them as negative and then flags their correct glosses as polarity-inverted.
+const jpObligation = (jp: string) => /(なければ|なくては)(なりません|ならない|いけません|いけない|なりませんでした|ならなかった)$/.test(jpCore(jp))
+// 〜しか〜ません is a negative verb carrying a positive, restrictive meaning:
+// お茶しか飲みません is "only drinks tea", not "does not drink tea". Counting it
+// as negative flagged every correct "only ..." gloss as polarity-inverted.
+const jpRestrictive = (jp: string) => /しか/.test(jp) && /(ません|ない)$/.test(jpCore(jp))
+// 〜に違いない ("must be") is a confident assertion that happens to end in ない.
+// Same shape as the obligation and restrictive forms above: negative
+// morphology, positive meaning, correct affirmative gloss being flagged.
+const jpCertainty = (jp: string) => /に違いない$|に違いありません$/.test(jpCore(jp))
+const jpNegative = (jp: string) => !jpObligation(jp) && !jpRestrictive(jp) && !jpCertainty(jp) && (/(ない|ません|なかった|ませんでした)(?:です|でした)?$/.test(jpCore(jp))
+  // 〜なくなる ("stopped doing", "no longer does") ends on なりました, so the
+  // end-anchored check missed it entirely and then flagged the correct
+  // "no longer ..." gloss as an invented negative.
+  || /なくなり(ました|ます)$|なくなった$|なくなる$/.test(jpCore(jp))
+  // ないでください (negative request) and 〜かねます ("cannot readily") are both
+  // negative but end on ください/ます, so an end-anchored check reads them as
+  // affirmative and then flags their correct "do not"/"cannot" glosses.
+  || /ないでください$/.test(jpCore(jp))
+  || /かね(ます|ません)$/.test(jpCore(jp)))
+const jpPast = (jp: string) => /(った|いた|えた|した|んだ|ました|なかった|ませんでした|てしまった|ていた|かった)(?:です)?$/.test(jpCore(jp))
+  || /でした$/.test(jpCore(jp))
 const jpVolitional = (jp: string) => /(おう|こう|そう|とう|もう|ろう|よう)$/.test(jp) && !/(そうだ|ようだ)$/.test(jp)
 const jpDesire = (jp: string) => /(たい|たがる)$/.test(jp)
 const jpPotential = (jp: string) => /ことができる$/.test(jp)
 const jpProhibition = (jp: string) => /てはいけない$/.test(jp)
-const jpObligation = (jp: string) => /(なければならない|なくてはいけない)$/.test(jp)
 const jpPermission = (jp: string) => /てもいい$/.test(jp)
 
 // ---- English surface analysis --------------------------------------------
 
-const enNegative = (en: string) => /\b(do not|does not|did not|not|never|must not|cannot|can not)\b/i.test(en)
+// English negates in more ways than "not". "There is no need to wash" is as
+// negative as "does not wash", but only matching `not` reported it as an
+// affirmative gloss on a negative sentence — that single omission accounted
+// for 216 of 271 findings on one run.
+const enNegative = (en: string) => /\b(do not|does not|did not|not|never|must not|cannot|can not|no|none|nothing|no one|unable|without|hardly|rarely)\b/i.test(en)
+// `read` is deliberately absent: its past and present forms are spelled the
+// same, so "wants to read a letter" was being reported as a past-tense gloss
+// on a non-past sentence. A check that cannot tell the two apart can only
+// manufacture false positives here.
 const enPast = (en: string) =>
-  /\b(was|were|did|had|ate|drank|read|made|bought|took|saw|watched|listened|studied|used|waited|started|learned|borrowed|sang|wrote|went|came|ended up)\b/i.test(en)
+  /\b(was|were|did|had|ate|drank|made|bought|took|saw|watched|listened|studied|used|waited|started|learned|borrowed|sang|wrote|went|came|ended up)\b/i.test(en)
 
 // Adverbs that must survive into the gloss, with the English they map to.
 const ADVERB_GLOSS: [string, RegExp][] = [

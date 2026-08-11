@@ -52,6 +52,15 @@ export interface RotatingHeroSentenceProps {
   onCanRewindChange?: (canRewind: boolean) => void
   /** Fires with the verified spoken reading of the sentence on screen. */
   onSentenceChange?: (speechText: string) => void
+  /**
+   * When false, the rest/highlight/swap timer still animates for visual
+   * polish but stops short of calling advanceSentence — the caller is
+   * expected to drive advancement itself (via `advanceSignal`). Story mode
+   * uses this so the voice can finish reading a beat at its own pace
+   * instead of the sentence rotating on a fixed clock underneath it.
+   * Defaults to true, matching the old always-auto-advance behavior.
+   */
+  autoAdvance?: boolean
 }
 
 type HeroHistoryEntry = {
@@ -84,6 +93,7 @@ export function RotatingHeroSentence({
   advanceSignal = 0,
   onCanRewindChange,
   onSentenceChange,
+  autoAdvance = true,
 }: RotatingHeroSentenceProps) {
   const [sequenceSeed, setSequenceSeed] = useState(newSequenceSeed)
   const effectiveStoryLevel = storyLevel ?? 'N5'
@@ -236,11 +246,14 @@ export function RotatingHeroSentence({
     const timer = window.setTimeout(() => {
       if (phase === 'rest') setPhase('highlight')
       else if (phase === 'highlight') setPhase('swap')
-      else advanceSentence()
+      // Once settled in 'swap', a caller with autoAdvance off (Story mode
+      // reading aloud) is expected to advance via `advanceSignal` itself —
+      // staying put here is what lets the voice finish at its own pace.
+      else if (autoAdvance) advanceSentence()
     }, duration)
 
     return () => window.clearTimeout(timer)
-  }, [advanceSentence, displayMode, paused, phase, playbackRate, steps.length])
+  }, [advanceSentence, autoAdvance, displayMode, paused, phase, playbackRate, steps.length])
 
   // Keep the dashboard header at its final height even if a rare generator
   // pass has not produced its first pair of usable sentences yet.

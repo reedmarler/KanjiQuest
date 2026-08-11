@@ -261,6 +261,7 @@ function DashboardHeroSentence({
   advanceSignal,
   onCanRewindChange,
   onSentenceChange,
+  autoAdvance,
 }: {
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
@@ -278,6 +279,7 @@ function DashboardHeroSentence({
   advanceSignal: number
   onCanRewindChange: (canRewind: boolean) => void
   onSentenceChange: (speechText: string) => void
+  autoAdvance: boolean
 }) {
   return (
     <Suspense
@@ -304,6 +306,7 @@ function DashboardHeroSentence({
         advanceSignal={advanceSignal}
         onCanRewindChange={onCanRewindChange}
         onSentenceChange={onSentenceChange}
+        autoAdvance={autoAdvance}
       />
     </Suspense>
   )
@@ -377,11 +380,18 @@ export function Dashboard({
   // them as dependencies, so slider changes do not restart active speech.
   const speechVolumeRef = useRef(speechVolume)
   speechVolumeRef.current = speechVolume
-  const minimumSpeechRate = minimumSpeechRateForSentence(spokenSentence, playbackRate)
+  // Read by the speech-end handler below so a beat that finishes reading
+  // while paused doesn't force an advance the pause was meant to prevent.
+  const pausedRef = useRef(paused)
+  pausedRef.current = paused
+  // Story mode no longer rotates sentences on a fixed clock (see the
+  // advanceSignal-on-speech-end effect below), so there is nothing for the
+  // voice to race to finish before — it reads at the user's chosen rate.
+  const minimumSpeechRate = storyMode ? speechRate : minimumSpeechRateForSentence(spokenSentence, playbackRate)
   const effectiveSpeechRate = Math.max(speechRate, minimumSpeechRate) as HeroSpeechRate
   const effectiveSpeechRateRef = useRef(effectiveSpeechRate)
   effectiveSpeechRateRef.current = effectiveSpeechRate
-  const speechRateIsAutomatic = effectiveSpeechRate > speechRate
+  const speechRateIsAutomatic = !storyMode && effectiveSpeechRate > speechRate
 
   // Surface where the player actually stands on the road rather than a
   // static tagline — the next guardian is the reason to tap through.
@@ -450,6 +460,12 @@ export function Dashboard({
     window.localStorage.setItem(HERO_SPEECH_VOLUME_STORAGE_KEY, String(volume))
   }
 
+  function resetSliders() {
+    setPlaybackRate(1)
+    changeSpeechRate(1)
+    changeSpeechVolume(0.5)
+  }
+
   function toggleSettingsExpanded() {
     setSettingsExpanded((expanded) => {
       const next = !expanded
@@ -473,9 +489,16 @@ export function Dashboard({
   // restart the sentence currently being spoken.
   useEffect(() => {
     if (!speechOn || !spokenSentence) return
-    speakJapanese(spokenSentence, effectiveSpeechRateRef.current, speechVolumeRef.current)
+    // Story mode drives its own advance off this completion instead of the
+    // rest/highlight/swap timer (autoAdvance={false} above), so the sentence
+    // stays up exactly as long as the voice takes to read it. A beat that
+    // finishes while paused should not force the story forward.
+    const onEnd = storyMode
+      ? () => { if (!pausedRef.current) setAdvanceSignal((value) => value + 1) }
+      : undefined
+    speakJapanese(spokenSentence, effectiveSpeechRateRef.current, speechVolumeRef.current, onEnd)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [speechOn, spokenSentence])
+  }, [speechOn, spokenSentence, storyMode])
 
   // Leaving the dashboard mid-sentence should not keep talking.
   useEffect(() => stopSpeaking, [])
@@ -582,6 +605,7 @@ export function Dashboard({
           advanceSignal={advanceSignal}
           onCanRewindChange={setCanRewindSentence}
           onSentenceChange={setSpokenSentence}
+          autoAdvance={!(storyMode && speechOn)}
         />
       </header>
 
@@ -672,8 +696,7 @@ export function Dashboard({
         </div>
 
         {settingsExpanded && (
-          <div className="hero-settings-layout">
-            <div className="hero-controls-content" id="hero-content-settings">
+          <div className="hero-settings-layout" id="hero-content-settings">
               <div className={`control-group control-group-levels${storyMode ? ' is-disabled' : ''}`} aria-disabled={storyMode}>
                 <span className="control-group-label" id="hero-level-label">Sentence difficulty</span>
                 <div className="control-segmented control-segmented-difficulty" role="group" aria-labelledby="hero-level-label">
@@ -787,9 +810,19 @@ export function Dashboard({
                     </label>
                   </div>
               </div>
-            </div>
 
             <div className="voice-settings-panel" id="hero-voice-settings" aria-label="Playback settings">
+                <div className="voice-settings-header">
+                  <span className="control-group-label">Playback</span>
+                  <button
+                    type="button"
+                    className="voice-settings-reset"
+                    onClick={resetSliders}
+                    title="Reset sliders to 1x, 1x, 50%"
+                  >
+                    Reset
+                  </button>
+                </div>
                 <label className="voice-setting">
                   <span>Sentence speed</span>
                   <input
