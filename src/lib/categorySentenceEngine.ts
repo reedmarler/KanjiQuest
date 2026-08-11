@@ -125,6 +125,14 @@ export interface VerbSlotRule {
   categories: SentenceCategory[]
   /** At least one semantic tag must match when tags are supplied. */
   tags?: string[]
+  /**
+   * Explicit allowlist for slots where tags cannot express the restriction —
+   * the Adverb category tags manner, degree, epistemic and negative-polarity
+   * words all as `adverb`. Declared on the rule rather than filtered inside
+   * fillVerbSlots so the reachability audit sees the same pool the generator
+   * does; hiding it in the generator inflated the audit by 60-odd words.
+   */
+  words?: ReadonlySet<string>
 }
 
 export interface VerbUsageRecord {
@@ -369,6 +377,38 @@ const fleeingDestinationTags = ['building','house','home','apartment','room','fo
 // reads as “read out distinctly” rather than the plain manner of reading this
 // pattern teaches.
 const readingMannerTags = ['slowly','leisurely','quickly','carefully','quietly','silently','aloud','fluently','adverbial-manner']
+/**
+ * Adverbs safe to drop in front of a plain action verb.
+ *
+ * Named individually because the classifier gives almost every adverb the
+ * single tag `adverb`, which cannot separate the ones that work here from the
+ * ones that produce broken Japanese or broken English:
+ *
+ *   余り / ぜんぜん  negative-polarity — ungrammatical without 〜ない, and this
+ *                   slot's ending rotates through affirmative forms
+ *   とても / すごく / 非常に / 極めて / かなり
+ *                   degree adverbs that modify adjectives, not verbs
+ *                   (とても食べます is wrong)
+ *   もう / まだ      tense-sensitive; wrong against most of the 8 endings
+ *   たぶん / きっと / 確か / やはり / 結局 / 一体
+ *                   sentence-level epistemics, not verb manner
+ *   たくさん / 少し / 全部 / 一緒に
+ *                   grammatical, but English wants them *after* the verb
+ *                   ("eats a lot"), and this pattern renders {Adverb} before
+ *                   it ("a lot eats")
+ *   ございます       a polite verb the classifier filed under Adverb
+ *
+ * What remains is frequency and manner, which read correctly pre-verbally in
+ * both languages.
+ */
+const actionAdverbWords = new Set([
+  'よく','たまに','たいてい','ゆっくり','すぐ','だんだん',
+  'しっかり','きちんと','一生懸命','静かに','丁寧に',
+])
+// A distinct array instance: fillVerbSlots keys the word filter off this
+// identity, the same way it keys the reading-manner widening off
+// readingMannerTags.
+const actionAdverbTags = ['adverb']
 const wakeTimeTags = ['clock-time','hour','morning','dawn','sunrise','wake-time']
 // Time expressions that take に generally, not just the wake-up ones. 起きる
 // still restricts itself to wakeTimeTags through its own slot rule, so this
@@ -440,6 +480,15 @@ const verbs: VerbUsageRecord[] = [
   { id:'nomu-basic', japanese:'飲む', reading:'のむ', english:'drink', englishThird:'drinks', verbClass:'godan-mu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food','Drink','Medicine'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','drinking','godan','transitive','drink'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food','Drink','Medicine'],tags:drinkableTags} } },
   { id:'yomu-basic', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags} } },
   { id:'miru-basic', japanese:'見る', reading:'みる', english:'watch', englishThird:'watches', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Media','Technology'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','perception','watching','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Media','Technology'],tags:watchableTags} } },
+  // n5-09 (Subject は Object を Adverb Verb) existed but only 読む and 書く used
+  // it, so the whole Adverb category reached the stream through one
+  // reading-specific slot with two candidates. These reuse the layout with the
+  // curated action-adverb pool and each verb's existing object rules.
+  { id:'taberu-adverb', japanese:'食べる', reading:'たべる', english:'eat', englishThird:'eats', verbClass:'ichidan', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','eating','ichidan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
+  { id:'nomu-adverb', japanese:'飲む', reading:'のむ', english:'drink', englishThird:'drinks', verbClass:'godan-mu', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Food','Drink','Medicine'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','drinking','godan','transitive','drink'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food','Drink','Medicine'],tags:drinkableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
+  { id:'miru-adverb', japanese:'見る', reading:'みる', english:'watch', englishThird:'watches', verbClass:'ichidan', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Object','Media','Technology'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','perception','watching','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Media','Technology'],tags:watchableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
+  { id:'tsukau-adverb', japanese:'使う', reading:'つかう', english:'use', englishThird:'uses', verbClass:'godan-u', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:usableToolTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
+  { id:'tsukuru-adverb', japanese:'作る', reading:'つくる', english:'make', englishThird:'makes', verbClass:'godan-ru', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','godan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:['bread','dessert','cake','pie','pastry','baked','noodles','sushi','dish','meal']}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
   { id:'iku-ni', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-02', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
   // n5-30, means of transport (〜で行きます). The Vehicle category had 13 words
   // and only two slots accepting it, neither of which was about travelling —
@@ -658,7 +707,7 @@ export function getVerbUsageRecords(): VerbUsageRecord[] {
     objectCategories:[...verb.objectCategories],
     supportedGrammarForms:[...verb.supportedGrammarForms],
     tags:[...verb.tags],
-    slots:Object.fromEntries(Object.entries(verb.slots).map(([slot,rule]) => [slot,{ categories:[...rule.categories], tags:rule.tags ? [...rule.tags] : undefined }])),
+    slots:Object.fromEntries(Object.entries(verb.slots).map(([slot,rule]) => [slot,{ categories:[...rule.categories], tags:rule.tags ? [...rule.tags] : undefined, words:rule.words }])),
   }))
 }
 
@@ -1222,7 +1271,7 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
     // A composite entry like "町／街" is two words joined by a slash in the
     // source data, not one usable word — the generator must pick one, not
     // paste the raw alternatives straight into a sentence.
-    let pool=vocabulary.filter(word=>categoryMatch(word,rule.categories) && !hasCompositeSurface(word))
+    let pool=vocabulary.filter(word=>categoryMatch(word,rule.categories) && !hasCompositeSurface(word) && hasUsableMeaning(word))
     if (rule.tags?.length) pool=pool.filter(word=>matchingTags(word,rule.tags).length>0)
     // A word only reaches 食べる through a Food category, but an import can file a
     // drink there. Anything drinkable that is not also solid food is not eaten.
@@ -1253,6 +1302,7 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
       const extra = vocabulary.filter(word => extraMannerAdverbs.has(word.japanese))
       if (extra.length) pool = [...pool, ...extra]
     }
+    if (rule.words) pool = pool.filter(word => rule.words!.has(word.japanese))
     if (verb.japanese === '読む' && slot === 'object') pool=pool.filter(word=>!unreadableObjectWords.has(word.japanese))
     if (verb.id === 'hirou-basic' && slot === 'object') pool=pool.filter(word=>!['光','電気','音','熱','空気','影'].includes(word.japanese))
     // 冷蔵庫/冷凍庫 carry a 'kitchenware' tag alongside 'machine'/'household'
@@ -1931,6 +1981,7 @@ function slotEligibleWords(): Set<string> {
       for (const word of vocabulary) {
         if (!categoryMatch(word,rule.categories)) continue
         if (rule.tags?.length && matchingTags(word,rule.tags).length === 0) continue
+        if (rule.words && !rule.words.has(word.japanese)) continue
         eligible.add(word.japanese)
       }
     }
@@ -2013,6 +2064,10 @@ export function auditWordReachability(): WordReachability[] {
         if (!categoryMatch(word, rule.categories)) continue
         if (rule.tags?.length && matchingTags(word, rule.tags).length === 0) {
           tagBlockedBy.push(`${verb.id}.${slot} wants ${rule.tags.slice(0, 6).join('|')}`)
+          continue
+        }
+        if (rule.words && !rule.words.has(word.japanese)) {
+          tagBlockedBy.push(`${verb.id}.${slot} allows only a named set`)
           continue
         }
         slots.push(`${verb.id}.${slot}`)
