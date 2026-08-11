@@ -65,20 +65,25 @@ const jpRestrictive = (jp: string) => /しか/.test(jp) && /(ません|ない)$/
 // Same shape as the obligation and restrictive forms above: negative
 // morphology, positive meaning, correct affirmative gloss being flagged.
 const jpCertainty = (jp: string) => /に違いない$|に違いありません$/.test(jpCore(jp))
+// 〜かねません is 〜かねない, "might well ..." — a possibility, not a negation,
+// despite ending in ません. Its correct affirmative gloss was being flagged.
+const jpPossibility = (jp: string) => /かねません$|かねない$/.test(jpCore(jp))
 // 〜のあまり ("so much that ...") is a noun construction that merely contains
 // the same characters as the adverb あまり ("not much"). Treating them alike
 // flagged 悲しさのあまり、泣いてしまいました on two separate rules at once.
 const adverbAmari = (jp: string) => /(?<!の)あまり/.test(jp)
-const jpNegative = (jp: string) => !jpObligation(jp) && !jpRestrictive(jp) && !jpCertainty(jp) && (/(ない|ません|なかった|ませんでした)(?:です|でした)?$/.test(jpCore(jp))
+const jpNegative = (jp: string) => !jpObligation(jp) && !jpRestrictive(jp) && !jpCertainty(jp) && !jpPossibility(jp) && (/(ない|ません|なかった|ませんでした)(?:です|でした)?$/.test(jpCore(jp))
   // 〜なくなる ("stopped doing", "no longer does") ends on なりました, so the
   // end-anchored check missed it entirely and then flagged the correct
   // "no longer ..." gloss as an invented negative.
   || /なくなり(ました|ます)$|なくなった$|なくなる$/.test(jpCore(jp))
-  // ないでください (negative request) and 〜かねます ("cannot readily") are both
+  // ないでください (negative request) and 〜かねます ("unable to") are both
   // negative but end on ください/ます, so an end-anchored check reads them as
   // affirmative and then flags their correct "do not"/"cannot" glosses.
+  // 〜かねません is deliberately excluded: it is 〜かねない, "might well",
+  // a possibility rather than a negation.
   || /ないでください$/.test(jpCore(jp))
-  || /かね(ます|ません)$/.test(jpCore(jp))
+  || /かねます$/.test(jpCore(jp))
   // 〜なくてもいい ("does not have to") carries its negative on the stem and
   // ends on いい, so the predicate-final test read it as affirmative and then
   // flagged its correct "does not have to eat" gloss as an invented negative.
@@ -99,13 +104,16 @@ const jpPermission = (jp: string) => /てもいい$/.test(jp)
 
 // ---- English surface analysis --------------------------------------------
 
+// Contractions count: 「日本語すら知りません」 glossed "doesn't even know
+// Japanese" is negative on both sides, but only the spelled-out forms were
+// recognised.
 // English negates in more ways than "not". "There is no need to wash" is as
 // negative as "does not wash", but only matching `not` reported it as an
 // affirmative gloss on a negative sentence — that single omission accounted
 // for 216 of 271 findings on one run.
 // "not only X but also Y" is a correlative, not a negation — 〜ばかりか is an
 // affirmative sentence whose correct gloss happens to contain "not".
-const enNegative = (en: string) => /\b(do not|does not|did not|not|never|must not|cannot|can not|no|none|nothing|no one|unable|without|hardly|rarely)\b/i
+const enNegative = (en: string) => /\b(do not|does not|did not|not|n't|never|must not|cannot|can not|no|none|nothing|no one|unable|without|hardly|rarely)\b/i
   .test(en.replace(/\bnot only\b/gi, ''))
 // `read` is deliberately absent: its past and present forms are spelled the
 // same, so "wants to read a letter" was being reported as a past-tense gloss
@@ -246,7 +254,7 @@ const CHECKS: Check[] = [
     rule: 'EN: adverb placed before verb (word salad)',
     severity: 'awkward',
     note: 'Adverb phrase dropped in front of the verb without reordering, e.g. "I a little drink tea".',
-    test: (r) => /\b(a little|a lot|not much|not at all|very|often|already|still)\s+(drink|eat|read|buy|make|take|watch|use|wait|start|study|learn|borrow|sing|write)s?\b/i.test(r.en),
+    test: (r) => /\b(a little|a lot|not much|not at all|very)\s+(drink|eat|read|buy|make|take|watch|use|wait|start|study|learn|borrow|sing|write)s?\b/i.test(r.en),
   },
   {
     rule: 'EN: modal lost (prohibition/obligation/permission)',

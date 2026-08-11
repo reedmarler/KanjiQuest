@@ -493,13 +493,13 @@ const verbs: VerbUsageRecord[] = [
   // n5-30, means of transport (〜で行きます). The Vehicle category had 13 words
   // and only two slots accepting it, neither of which was about travelling —
   // this is the pattern those words exist for.
-  { id:'iku-transport', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-30', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
-  { id:'kaeru-transport', japanese:'帰る', reading:'かえる', english:'return home', englishThird:'returns home', verbClass:'godan-ru', sentencePattern:'n5-30', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
-  { id:'kuru-transport', japanese:'来る', reading:'くる', english:'come', englishThird:'comes', verbClass:'irregular', sentencePattern:'n5-30', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','irregular','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
+  { id:'iku-transport', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-32', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
+  { id:'kaeru-transport', japanese:'帰る', reading:'かえる', english:'return home', englishThird:'returns home', verbClass:'godan-ru', sentencePattern:'n5-32', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
+  { id:'kuru-transport', japanese:'来る', reading:'くる', english:'come', englishThird:'comes', verbClass:'irregular', sentencePattern:'n5-32', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','irregular','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
   { id:'taberu-location', japanese:'食べる', reading:'たべる', english:'eat', englishThird:'eats', verbClass:'ichidan', sentencePattern:'n5-03', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','eating','ichidan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:eatingLocationTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'hanasu-companion', japanese:'話す', reading:'はなす', english:'talk', englishThird:'talks', verbClass:'godan-su', sentencePattern:'n5-04', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} with {Companion}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','speaking','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, companion:{categories:['Person'],tags:humanSubjectTags} } },
   { id:'okiru-time', japanese:'起きる', reading:'おきる', english:'wake up', englishThird:'wakes up', verbClass:'ichidan', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','sleeping','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
-  { id:'yomu-adverb', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags}, adverb:{categories:['Adverb'],tags:readingMannerTags} } },
+  { id:'yomu-adverb', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
   { id:'iku-e', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
   { id:'kau-basic', japanese:'買う', reading:'かう', english:'buy', englishThird:'buys', verbClass:'godan-u', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','shopping','godan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'tsukuru-basic', japanese:'作る', reading:'つくる', english:'make', englishThird:'makes', verbClass:'godan-ru', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','godan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:['bread','dessert','cake','pie','pastry','baked','noodles','sushi','dish','meal']} } },
@@ -516,7 +516,7 @@ const verbs: VerbUsageRecord[] = [
   { id:'yomu-location', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-03', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Verb} {Object} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:eatingLocationTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags} } },
   { id:'neru-time', japanese:'寝る', reading:'ねる', english:'sleep', englishThird:'sleeps', verbClass:'ichidan', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','sleeping','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
   { id:'oyogu-time', japanese:'泳ぐ', reading:'およぐ', english:'swim', englishThird:'swims', verbClass:'godan-gu', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','sports','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
-  { id:'kaku-adverb', japanese:'書く', reading:'かく', english:'write', englishThird:'writes', verbClass:'godan-ku', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Document'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','writing','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Document'],tags:readableTags}, adverb:{categories:['Adverb'],tags:readingMannerTags} } },
+  { id:'kaku-adverb', japanese:'書く', reading:'かく', english:'write', englishThird:'writes', verbClass:'godan-ku', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Document'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','writing','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Document'],tags:readableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
   { id:'uru-basic', japanese:'売る', reading:'うる', english:'sell', englishThird:'sells', verbClass:'godan-ru', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','commerce','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'motsu-basic', japanese:'持つ', reading:'もつ', english:'hold', englishThird:'holds', verbClass:'godan-tsu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','possession','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:handHeldObjectTags} } },
   { id:'hashiru-destination', japanese:'走る', reading:'はしる', english:'run', englishThird:'runs', verbClass:'godan-ru', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','sports','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
@@ -591,7 +591,7 @@ const verbs: VerbUsageRecord[] = [
   { id:'arasou-companion', japanese:'争う', reading:'あらそう', english:'compete', englishThird:'competes', verbClass:'godan-u', sentencePattern:'n5-04', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} with {Companion}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','conflict','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, companion:{categories:['Person'],tags:humanSubjectTags} } },
   { id:'nigeru-destination', japanese:'逃げる', reading:'にげる', english:'flee', englishThird:'flees', verbClass:'ichidan', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:fleeingDestinationTags} } },
   { id:'mukau-destination', japanese:'向かう', reading:'むかう', english:'head', englishThird:'heads', verbClass:'godan-u', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
-  { id:'suwaru-location', japanese:'座る', reading:'すわる', english:'sit', englishThird:'sits', verbClass:'godan-ru', sentencePattern:'n5-26', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','body','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Furniture'],tags:['chair','bench','sofa','stool']} } },
+  { id:'suwaru-location', japanese:'座る', reading:'すわる', english:'sit', englishThird:'sits', verbClass:'godan-ru', sentencePattern:'n5-26', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','body','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Furniture','Object'],tags:['chair','bench','sofa','stool','seat']} } },
   { id:'nemuru-time', japanese:'眠る', reading:'ねむる', english:'sleep', englishThird:'sleeps', verbClass:'godan-ru', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
   { id:'suru-basic', japanese:'する', reading:'する', english:'do', englishThird:'does', verbClass:'irregular', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Activity'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','irregular','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Activity']} } },
   // subject before location (unlike most verb records) so fillVerbSlots'
@@ -964,6 +964,14 @@ const uncountableGlosses = new Set([
 const mediumNotDeviceVerbs = new Set(['見る'])
 
 /** Plural-only nouns and regular plurals, for is/are agreement. */
+
+/** Regular English plural, enough for the concrete nouns the counters take. */
+function pluralize(noun: string) {
+  if (/(s|x|z|ch|sh)$/i.test(noun)) return `${noun}es`
+  if (/[^aeiou]y$/i.test(noun)) return `${noun.slice(0,-1)}ies`
+  return `${noun}s`
+}
+
 function isPluralPhrase(value: string) {
   const head = value.replace(/^(?:a|an|the|my|your|his|her|our|their)\s+/i, '')
   if (/^(?:people|men|women|children|data|clothes|shoes|glasses|pants|scissors|documents|parents)$/i.test(head)) return true
@@ -1520,11 +1528,10 @@ function baseFurigana(verb: VerbUsageRecord, filled: Record<string,WordRecord>, 
     'n5-27':()=>[wordPart('location'),literalPart('に'),wordPart('subject'),literalPart('が'),verbPart()],
     'n5-28':()=>[wordPart('subject'),literalPart('は','わ'),verbPart()],
     'n5-29':()=>[wordPart('subject'),literalPart('は','わ'),wordPart('source'),literalPart('から'),verbPart()],
-    // Means of transport: 電車で行きます. Shares its particle with n5-25's
-    // location で but is a separate pattern because the English preposition
-    // differs ("by train", not "at the station") and because it is the only
-    // slot that consumes the Vehicle category.
-    'n5-30':()=>[wordPart('subject'),literalPart('は','わ'),wordPart('transport'),literalPart('で'),verbPart()],
+    // Means of transport: 電車で行きます. Distinct from n5-25's location で
+    // ("by train", not "at the station") and from n5-31's 乗る, which is
+    // boarding rather than travelling by.
+    'n5-32':()=>[wordPart('subject'),literalPart('は','わ'),wordPart('transport'),literalPart('で'),verbPart()],
   }
   return builders[verb.sentencePattern]?.() ?? null
 }
@@ -1632,7 +1639,56 @@ function generatedWordSlots(filled: Record<string,WordRecord>,slotTagMatches: Re
   }])) as GeneratedPreviewSentence['slots']
 }
 
-const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31'])
+
+/**
+ * Counter forms, written out rather than composed.
+ *
+ * Japanese counters are not a number plus a suffix: 一本 is いっぽん, 三本 is
+ * さんぼん and 六本 is ろっぽん, and the same gemination and rendaku hit 杯, 匹
+ * and 個 differently. Generating the reading by rule would need all of those
+ * exceptions encoded anyway, so the forms are simply listed and can be checked
+ * by eye. Indexed 0-4 for one to five.
+ *
+ * This is what the Number category was missing. Its 34 entries are a grab-bag
+ * of 一杯/まず/最初に/単位 alongside bare numerals, and a bare numeral cannot
+ * appear in a sentence at all without one of these.
+ */
+const COUNTER_FORMS: Record<string, ReadonlyArray<readonly [string,string]>> = {
+  satsu: [['一冊','いっさつ'],['二冊','にさつ'],['三冊','さんさつ'],['四冊','よんさつ'],['五冊','ごさつ']],
+  hai:   [['一杯','いっぱい'],['二杯','にはい'],['三杯','さんばい'],['四杯','よんはい'],['五杯','ごはい']],
+  ko:    [['一個','いっこ'],['二個','にこ'],['三個','さんこ'],['四個','よんこ'],['五個','ごこ']],
+  mai:   [['一枚','いちまい'],['二枚','にまい'],['三枚','さんまい'],['四枚','よんまい'],['五枚','ごまい']],
+}
+const COUNTER_ENGLISH = ['one','two','three','four','five'] as const
+
+/**
+ * Which counter an object takes, and the verb that object belongs with.
+ *
+ * パン and 紙 are deliberately absent even though they take these counters:
+ * their English is uncountable, and "two breads"/"two papers" is wrong in a
+ * way the Japanese is not.
+ * Restricted to combinations that are unambiguous in both languages — a
+ * counted object needs a plural English noun, so anything whose gloss does not
+ * pluralise cleanly is left out rather than guessed at.
+ */
+const COUNTED_FRAMES: ReadonlyArray<{
+  counter: keyof typeof COUNTER_FORMS
+  words: ReadonlySet<string>
+  verb: { japanese: string; reading: string; english: string; englishThird: string }
+  /** "two cups of tea" rather than "two teas". */
+  measureOf?: string
+}> = [
+  { counter:'satsu', words:new Set(['本','小説','雑誌','辞書','教科書','漫画']),
+    verb:{japanese:'読みます',reading:'よみます',english:'read',englishThird:'reads'} },
+  { counter:'hai', words:new Set(['お茶','コーヒー','水','牛乳','ジュース']),
+    verb:{japanese:'飲みます',reading:'のみます',english:'drink',englishThird:'drinks'}, measureOf:'cup' },
+  { counter:'ko', words:new Set(['卵','りんご','ケーキ','おにぎり','みかん']),
+    verb:{japanese:'食べます',reading:'たべます',english:'eat',englishThird:'eats'} },
+  { counter:'mai', words:new Set(['シャツ','切符','写真','皿','はがき']),
+    verb:{japanese:'買います',reading:'かいます',english:'buy',englishThird:'buys'} },
+]
+
+const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33'])
 const geographicOriginTags = new Set(normalizeTags(['country','city','town','village','neighborhood','island']))
 const originSubjectDisallowedTags = new Set(normalizeTags(['patient','sick','illness','medical','hospital','guest','customer']))
 const portableObjectTags = new Set(normalizeTags([
@@ -2455,12 +2511,51 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const endingSlot={id:`itai-ending-${endingIndex}`,surface:suffixes[endingIndex]!,dictionaryForm:'痛い',reading:suffixes[endingIndex]!,english,pos:'i_adjective' as const,jlpt:'N5' as const,tags:['ending']}
     return finish(furigana,english,{subject,object:bodyPart},{adjective:adjectiveSlot,ending:endingSlot},['痛い needs a body part named explicitly, not a bare subject.'])
   }
+  if (patternId === 'n5-33') {
+    // A counted quantity: 私は本を三冊読みます. The counter is picked from the
+    // object, not chosen freely — 本 takes 冊 and お茶 takes 杯, and using the
+    // wrong one is as wrong as a bad particle.
+    const frame = COUNTED_FRAMES[Math.abs(seed + 1601) % COUNTED_FRAMES.length]!
+    const candidates = vocabulary.filter(word => frame.words.has(word.japanese))
+    const subject = pick(humans, 1602, 'subject')
+    const object = pick(candidates, 1603, 'object')
+    if (!subject || !object) return null
+    const forms = COUNTER_FORMS[frame.counter]!
+    let countIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1604) % forms.length
+    const surfaceFor = (index: number) => forms[index]![0]
+    if (options.avoidWords?.ending && surfaceFor(countIndex) === options.avoidWords.ending) {
+      countIndex = (countIndex + 1) % forms.length
+    }
+    const [countSurface, countReading] = forms[countIndex]!
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const objectGloss = primaryEnglishGloss(object.preferredTranslation || object.english)
+    const plural = countIndex === 0 ? objectGloss : pluralize(objectGloss)
+    // 一杯 is "one cup of tea", not "one tea"; the measure word itself is what
+    // pluralises.
+    const quantity = frame.measureOf
+      ? `${COUNTER_ENGLISH[countIndex]} ${countIndex === 0 ? frame.measureOf : pluralize(frame.measureOf)} of ${objectGloss}`
+      : `${COUNTER_ENGLISH[countIndex]} ${plural}`
+    const verbEnglish = subjectUsesBaseVerb(subjectEnglish) ? frame.verb.english : frame.verb.englishThird
+    const english = `${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${verbEnglish} ${quantity}.`
+    const furigana = [
+      wordPart(subject,'subject'),literalPart('は','わ'),
+      wordPart(object,'object'),literalPart('を'),
+      {text:countSurface,reading:countReading,slot:'count'},
+      {text:frame.verb.japanese,reading:frame.verb.reading,slot:'verb'},
+    ]
+    const countSlot = {id:`count-${frame.counter}-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['counter',frame.counter]}
+    const endingSlot = {id:`count-ending-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    return finish(furigana,english,{subject,object},{count:countSlot,ending:endingSlot},[`${frame.counter} is the counter ${object.japanese} takes.`])
+  }
   if (patternId === 'n5-31') {
     // 乗る never existed at all — every vehicle word (自転車, 飛行機, 自動車,
     // 電車, 救急車, 消防車, ...) had no verb whose object/destination category
     // fit them. "Xに乗ります" (ride/board X) is the standard, extremely common
     // N5 frame that actually matches how vehicle nouns are used.
-    const vehicles = vocabulary.filter(word => word.categories.includes('Object') && word.tags.includes('vehicle'))
+    // Vehicles used to arrive in the Objects bucket; they now have a category
+    // of their own, so this accepts both rather than silently emptying out and
+    // leaving the pattern to fall back to its catalog example.
+    const vehicles = vocabulary.filter(word => categoryMatch(word,['Vehicle','Object']) && word.tags.includes('vehicle'))
     const subject = pick(humans, 1511, 'subject')
     const vehicle = pick(vehicles, 1512, 'destination')
     if (!subject || !vehicle) return null
