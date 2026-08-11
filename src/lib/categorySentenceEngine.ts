@@ -763,6 +763,32 @@ export function getAllCategoryWords(): CategoryWordRecord[] {
     .sort((a, b) => a.english.localeCompare(b.english))
 }
 
+let generatorWordCache: WordRecord[] | null = null
+
+if (typeof window !== 'undefined') {
+  window.addEventListener(CONTENT_DATABASE_EVENT,()=>{ generatorWordCache=null })
+}
+
+/**
+ * The vocabulary generators may draw from, as opposed to the one the editor
+ * lists.
+ *
+ * A composite entry such as 目/眼 is two dictionary alternatives joined by a
+ * slash in the source data, never a usable surface — 「課長は目/眼が痛いです」
+ * reached the dashboard because the slash-guard was applied per pool, and the
+ * body-part pool was one of several hand-rolled `vocabulary.filter(...)` calls
+ * that had never had it added. Filtering once, here, is what makes that
+ * impossible rather than merely fixed in the places someone remembered.
+ *
+ * Content Studio keeps reading editorWords() directly: a reviewer needs to see
+ * these entries in order to repair them.
+ */
+function generatorWords(): WordRecord[] {
+  if (generatorWordCache) return generatorWordCache
+  generatorWordCache = editorWords().filter(word => !hasCompositeSurface(word) && hasUsableMeaning(word))
+  return generatorWordCache
+}
+
 function editorWords(): WordRecord[] {
   if (editorWordsCache) return editorWordsCache
   const merged = new Map<string,WordRecord>()
@@ -1972,7 +1998,7 @@ if (typeof window !== 'undefined') {
  */
 function slotEligibleWords(): Set<string> {
   if (slotIndexCache) return slotIndexCache
-  const vocabulary = editorWords()
+  const vocabulary = generatorWords()
   const eligible = new Set<string>()
 
   for (const verb of verbs) {
@@ -2044,7 +2070,7 @@ export interface WordReachability {
  * check that would have caught the 馬/監督/現金 mistagging immediately.
  */
 export function auditWordReachability(): WordReachability[] {
-  const vocabulary = editorWords()
+  const vocabulary = generatorWords()
   const poolMembership: Array<[string, Set<string>]> = [
     ['human', new Set(validHumanPool(vocabulary).map(word => word.japanese))],
     ['place', new Set(validPlacePool(vocabulary).map(word => word.japanese))],
@@ -2100,7 +2126,7 @@ function originEnglish(word: WordRecord) {
 
 function additionalN5Sentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!additionalN5PatternIds.has(patternId)) return null
-  const vocabulary=editorWords()
+  const vocabulary=generatorWords()
   const humans=validHumanPool(vocabulary)
   const places=validPlacePool(vocabulary)
   const localizedPlaces=places.filter(word=>![...tagSet(word)].some(tag=>geographicOriginTags.has(tag)))
@@ -2455,7 +2481,7 @@ const additionalN4PatternIds = new Set(Array.from({length:15},(_,index)=>`n4-${S
 
 function additionalN4Sentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!additionalN4PatternIds.has(patternId)) return null
-  const vocabulary=editorWords()
+  const vocabulary=generatorWords()
   const humans=validHumanPool(vocabulary)
   const places=validPlacePool(vocabulary)
   const pick=requiredWordPicker(seed,options.requiredWord,options)
@@ -2680,7 +2706,7 @@ const n3PatternMeanings: Record<string,string> = {
 
 function generateN3CategorySentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!n3PatternIds.has(patternId)) return null
-  const vocabulary=editorWords()
+  const vocabulary=generatorWords()
   const humans=validHumanPool(vocabulary)
   const places=validPlacePool(vocabulary)
   const pick=requiredWordPicker(seed,options.requiredWord,options)
@@ -3174,7 +3200,7 @@ function advancedPatternLevel(patternId: string): 'N4' | 'N3' | 'N2' | 'N1' {
 function generateAdvancedCategorySentence(seed: number, patternId: string, options: CategorySentenceOptions = {}): GeneratedPreviewSentence | null {
   if (!advancedPatternIds.has(patternId)) return null
   const level = advancedPatternLevel(patternId)
-  const vocabulary = editorWords()
+  const vocabulary = generatorWords()
   const humans = validHumanPool(vocabulary)
   // A pick tagged with a slot name can be re-seeded on its own, which is what
   // lets the hero rotator vary one word and hold the rest of the sentence
@@ -4865,7 +4891,7 @@ function generateN4Nagara(seed: number,vocabulary: WordRecord[],options: Categor
 function generateN4CategorySentence(seed: number,requestedPatternId?: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   const patternIds=Object.keys(n4PatternMeanings)
   const patternId=requestedPatternId && patternIds.includes(requestedPatternId) ? requestedPatternId : seededPick(patternIds,seed,61)
-  const vocabulary=editorWords()
+  const vocabulary=generatorWords()
   if (patternId === 'n4-09') return generateN4Nagara(seed,vocabulary,options)
   // いる/ある (existence) fundamentally don't take these aspectual templates —
   // an inanimate "subject" (really the thing located) has no desire (～たい),
@@ -5079,7 +5105,7 @@ export function generateCategorySentence(seed: number, requestedPatternId?: stri
     ? verbPool.find(candidate => candidate.id === options.verbId)
     : seededPick(verbSelectPool, options.slotSeeds?.verb ?? seed, 1)
   if (!verb) return null
-  const vocabulary = editorWords()
+  const vocabulary = generatorWords()
   const result = fillVerbSlots(verb,vocabulary,seed,2,slotOptions)
   if (!result) return null
   const { filled,slotTagMatches } = result
