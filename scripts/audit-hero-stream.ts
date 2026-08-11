@@ -91,7 +91,9 @@ const jpNegative = (jp: string) => !jpObligation(jp) && !jpRestrictive(jp) && !j
 // The kana list below is godan-shaped (った/いた/した/んだ). An ichidan past is
 // stem + た, so 食べた and 開けた ended in べた/けた and read as non-past, which
 // then flagged their correct "ate"/"opened" glosses as tense mismatches.
-const ichidanPast = (jp: string) => /[べめげねてでれせけえ]た$/.test(jp)
+// A final た directly after kanji is also past — 来た, 見た, 出た, 寝た write
+// their stem in kanji, so no kana-based test can see them.
+const ichidanPast = (jp: string) => /[べめげねてでれせけえ]た$/.test(jp) || /[一-鿿]た$/.test(jp)
 const jpPast = (jp: string) => /(った|いた|えた|した|んだ|ました|なかった|ませんでした|てしまった|ていた|かった)(?:です)?$/.test(jpCore(jp))
   || ichidanPast(jpCore(jp))
   || /でした$/.test(jpCore(jp))

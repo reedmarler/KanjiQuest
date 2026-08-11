@@ -426,6 +426,14 @@ const readingMannerTags = ['slowly','leisurely','quickly','carefully','quietly',
 const actionAdverbWords = new Set([
   'よく','たまに','たいてい','ゆっくり','すぐ','だんだん',
   'しっかり','きちんと','一生懸命','静かに','丁寧に',
+  // Frequency and manner adverbs that pass the same test as the originals:
+  // grammatical before a plain verb in Japanese and natural before the verb in
+  // English ("always reads a book", "suddenly ate bread"). They were sitting in
+  // the unreachable list purely because nothing had vetted them yet, unlike the
+  // degree and sentence adverbs above, which are excluded on purpose.
+  // 直接 is deliberately absent: it belongs with speech verbs (直接聞く,
+  // 直接話す) and produced "directly drinks tea" against this slot's verbs.
+  'いつも','常に','早く','突然','急に','はっきり','どんどん',
 ])
 // A distinct array instance: fillVerbSlots keys the word filter off this
 // identity, the same way it keys the reading-manner widening off
@@ -1104,6 +1112,11 @@ function englishPhrase(word: WordRecord, slot: string) {
     const readingWritingAdverbEnglish: Record<string,string> = {
       きちんと:'properly', 静かに:'quietly', はっきり:'clearly',
       丁寧に:'carefully', しっかり:'attentively', 一生懸命:'diligently',
+      // Same reason as above: the dictionary glosses here are "early", "abrupt",
+      // "direct" and "more and more", none of which sit correctly in front of a
+      // verb the way the adverbial form does.
+      早く:'quickly', 突然:'suddenly', 急に:'suddenly', 直接:'directly',
+      どんどん:'rapidly', いつも:'always', 常に:'always',
     }
     if (readingWritingAdverbEnglish[word.japanese]) return readingWritingAdverbEnglish[word.japanese]!
   }
@@ -2059,6 +2072,35 @@ const validTimePool = memoizePool(function validTimePool(vocabulary: WordRecord[
 })
 
 /**
+ * Adjectives that describe a person, for the n4-29 predicate frame.
+ *
+ * Curated rather than derived, for two reasons the vocabulary data makes
+ * unavoidable. First, the classifier files these under Adverb, so category
+ * alone cannot find them. Second, a な-adjective's dictionary gloss is usually
+ * a noun — 健康 glosses as "health", 寛容 as "tolerance" — so the English
+ * predicate has to be stated, not read off the record.
+ *
+ * Restricted to adjectives that describe people. The rest of the miscategorised
+ * adjectives are degree and comparison words (絶対, 同様, 一般) that need
+ * something to modify and produce nonsense as a bare predicate about a person.
+ */
+const personAdjectives: ReadonlyArray<{japanese:string;reading:string;english:string;na:boolean}> = [
+  { japanese:'健康', reading:'けんこう', english:'healthy', na:true },
+  { japanese:'素敵', reading:'すてき', english:'lovely', na:true },
+  { japanese:'寛容', reading:'かんよう', english:'tolerant', na:true },
+  { japanese:'変', reading:'へん', english:'strange', na:true },
+  { japanese:'満腹', reading:'まんぷく', english:'full', na:true },
+  { japanese:'積極的', reading:'せっきょくてき', english:'proactive', na:true },
+  { japanese:'消極的', reading:'しょうきょくてき', english:'passive', na:true },
+  { japanese:'恥ずかしい', reading:'はずかしい', english:'embarrassed', na:false },
+  { japanese:'可愛い', reading:'かわいい', english:'cute', na:false },
+  { japanese:'素晴らしい', reading:'すばらしい', english:'wonderful', na:false },
+  { japanese:'詳しい', reading:'くわしい', english:'knowledgeable', na:false },
+  { japanese:'うまい', reading:'うまい', english:'skillful', na:false },
+]
+const personAdjectiveWords = new Set(personAdjectives.map(entry => entry.japanese))
+
+/**
  * Abstractions eligible for the topic patterns (n4-26 … n4-28).
  *
  * Defined here rather than inline in the generator so the reachability audit
@@ -2140,6 +2182,7 @@ function slotEligibleWords(): Set<string> {
   ]) {
     for (const word of pool) eligible.add(word.japanese)
   }
+  for (const japanese of personAdjectiveWords) eligible.add(japanese)
   for (const rule of adjectiveRules) eligible.add(rule.japanese)
 
   slotIndexCache = eligible
@@ -2198,6 +2241,7 @@ export function auditWordReachability(): WordReachability[] {
     // reports the entire adjective vocabulary as unreachable.
     ['adjective', new Set(adjectiveRules.map(rule => rule.japanese))],
     ['abstract-topic', new Set(abstractTopicPool(vocabulary).map(word => word.japanese))],
+    ['person-adjective', personAdjectiveWords],
   ]
 
   return vocabulary.map(word => {
@@ -2634,7 +2678,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${go} too.`,{subject},{verb:verbSlot('verb-iku-mo','行きます','行く','いきます','go',['movement','additive-topic','context-dependent'])},['も marks an additional subject.','This template assumes prior discourse context.'])
 }
 
-const additionalN4PatternIds = new Set(Array.from({length:18},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
+const additionalN4PatternIds = new Set(Array.from({length:19},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
 
 function additionalN4Sentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!additionalN4PatternIds.has(patternId)) return null
@@ -2898,6 +2942,40 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     const explains=subjectUsesBaseVerb(subjectEnglish)?'explain':'explains'
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(topic,'topic'),literalPart('を'),literalPart('説明します','せつめいします','verb')]
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${explains} ${topicEnglish}.`,{subject,topic},{verb:grammarSlot('verb-setsumei','説明します','説明する','せつめいします','explain',['communication','transitive'])},['説明する takes an idea or situation as its object.'])
+  }
+  if (patternId==='n4-29') {
+    // Subject は Adjective です — a plain description of a person. な- and
+    // い-adjectives take different negative and past forms, so the ending is
+    // built from the entry rather than shared.
+    const subject=pick(humans,571,'subject')
+    if (!subject) return null
+    const adjectiveIndex=Math.abs(seed+572)%personAdjectives.length
+    const adjective=personAdjectives[adjectiveIndex]!
+    const forms=adjective.na
+      ? [
+        {japanese:`${adjective.japanese}です`,reading:`${adjective.reading}です`,english:'is'},
+        {japanese:`${adjective.japanese}ではありません`,reading:`${adjective.reading}ではありません`,english:'is not'},
+        {japanese:`${adjective.japanese}でした`,reading:`${adjective.reading}でした`,english:'was'},
+      ]
+      : [
+        {japanese:`${adjective.japanese}です`,reading:`${adjective.reading}です`,english:'is'},
+        {japanese:`${adjective.japanese.slice(0,-1)}くないです`,reading:`${adjective.reading.slice(0,-1)}くないです`,english:'is not'},
+        {japanese:`${adjective.japanese.slice(0,-1)}かったです`,reading:`${adjective.reading.slice(0,-1)}かったです`,english:'was'},
+      ]
+    let endingIndex=Math.abs(options.slotSeeds?.ending ?? seed+573)%forms.length
+    if (options.avoidWords?.ending && forms[endingIndex]!.japanese===options.avoidWords.ending) {
+      endingIndex=(endingIndex+1)%forms.length
+    }
+    const form=forms[endingIndex]!
+    const subjectEnglish=englishPhrase(subject,'subject')
+    // "I am", "you are", "a doctor is" — the copula has to agree with whichever
+    // subject the pool produced.
+    const copulaPresent=subjectEnglish==='I'?'am':subjectUsesBaseVerb(subjectEnglish)?'are':'is'
+    const copulaPast=subjectUsesBaseVerb(subjectEnglish)&&subjectEnglish!=='I'?'were':'was'
+    const copula=form.english==='was'?copulaPast:form.english==='is not'?`${copulaPresent} not`:copulaPresent
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart(form.japanese,form.reading,'ending')]
+    const english=`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${copula} ${adjective.english}.`
+    return finish(furigana,english,{subject},{ending:grammarSlot(`person-adjective-${adjectiveIndex}-${endingIndex}`,form.japanese,adjective.japanese,form.reading,adjective.english,['description',adjective.na?'na-adjective':'i-adjective','ending'],adjective.na?'na_adjective':'i_adjective')},['Adjective describes a person, which is what this frame takes.'])
   }
   return null
 }
