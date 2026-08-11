@@ -75,12 +75,16 @@ const solidFoodTags = ['dessert','snack','candy','ice-cream','yogurt','cheese','
  * widen an imported category into a SentenceCategory route through here so the
  * two cannot drift apart.
  */
-const CATEGORY_REFINEMENTS: Array<{ from: SentenceCategory; to: SentenceCategory; tags: string[] }> = [
+// `unless` guards a refinement against words that are *about* the finer
+// category without belonging to it. 獣医 ("veterinarian") is tagged `animal`
+// because that is what it treats, and without the guard it became an Animal —
+// a vet that barks.
+const CATEGORY_REFINEMENTS: Array<{ from: SentenceCategory; to: SentenceCategory; tags: string[]; unless?: string[] }> = [
   // "People & Living Things" is people, animals and plants in one bucket. This
   // split is also a correctness fix, not just a coverage one: it is why 犬 kept
   // arriving as a Person and needing to be filtered back out by hand.
-  { from:'Person', to:'Animal', tags:['animal','pet','dog','cat','bird','fish','insect','horse','cow','pig','chicken','rabbit'] },
-  { from:'Person', to:'Plant', tags:['plant','tree','flower','grass','bush','crop'] },
+  { from:'Person', to:'Animal', tags:['animal','pet','dog','cat','bird','fish','insect','horse','cow','pig','chicken','rabbit'], unless:['person','occupation','human','doctor','nurse','teacher','student','family','friend'] },
+  { from:'Person', to:'Plant', tags:['plant','tree','flower','grass','bush','crop'], unless:['person','occupation','human','farmer'] },
   // 薬 arrives in the Food & Drink bucket, which is both why the Medicine
   // category was empty and why medicine was one tag away from being eaten.
   { from:'Food', to:'Medicine', tags:['medicine'] },
@@ -104,7 +108,9 @@ const CATEGORY_REFINEMENTS: Array<{ from: SentenceCategory; to: SentenceCategory
 ]
 
 export function refineCoarseCategory(category: SentenceCategory, tags: string[]): SentenceCategory {
-  const match = CATEGORY_REFINEMENTS.find(rule => rule.from === category && tags.some(tag => rule.tags.includes(tag)))
+  const match = CATEGORY_REFINEMENTS.find(rule => rule.from === category
+    && tags.some(tag => rule.tags.includes(tag))
+    && !rule.unless?.some(tag => tags.includes(tag)))
   return match ? match.to : category
 }
 
