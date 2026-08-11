@@ -11,6 +11,7 @@
     "generate:hero-pos": "tsx scripts/generate-hero-pos-vocab.ts",
     "generate:vocab-examples": "tsx scripts/generate-vocab-examples.ts",
     "audit:sentences": "tsx scripts/audit-sentence-regressions.ts",
+    "audit:reachability": "tsx scripts/audit-word-reachability.ts",
     "vet:sentences": "tsx scripts/vet-sentences-openai.ts"
   },
   "dependencies": {
