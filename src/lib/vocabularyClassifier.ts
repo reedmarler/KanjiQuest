@@ -54,25 +54,54 @@ const tests: Array<{ category: SentenceCategory; pattern: RegExp; tags?: string[
 const drinkTags = ['drink','drinkable','beverage','water','tea','coffee','juice','soda','alcohol','milk','dairy']
 const solidFoodTags = ['dessert','snack','candy','ice-cream','yogurt','cheese','butter','fruit','vegetable','meat','seafood','fish','rice','bread','noodles','egg','protein','staple-food','meal','grain']
 
-const moneyTags = ['money','currency']
-
 /**
  * Splits a coarse imported category using the word's own tags.
  *
- * The imported taxonomy files money under "Time & Numbers", so cash, fees,
- * fares and salaries all arrived categorised as Time. Nothing reads Time and
- * money the same way, so the Money category ended up holding zero words and
- * 払う ("pay") — whose object slot requires Money — could never fill it and
- * never generated a sentence at all.
+ * The imported taxonomy has only eight buckets, but the generator distinguishes
+ * 27 categories, so everything imported collapsed into Person/Place/Object/
+ * Food/Activity/Adverb/Time/Language and *fourteen* categories held zero words.
+ * Verb slots that ask for those categories then had nothing to draw from, and a
+ * slot with no candidates makes its whole verb ungeneratable: 書く, 洗う, 着る,
+ * 脱ぐ, 履く, かぶる, 消す, 点ける, 調べる, 建てる, 育てる, 伝える, 直す, 止める,
+ * 座る and 出る had never produced a sentence between them.
  *
- * This is the same split the Food/Drink bucket already needs (so that milk is
- * never eaten): the imported category is a bucket, and tags decide which half
- * of it a word is in. Both places that widen an imported category into a
- * SentenceCategory route through here so the two cannot drift apart.
+ * The tags needed to undo the collapse are already on the words — the imported
+ * taxonomy tags 服 as `clothing` and 車 as `vehicle`, it just files both under
+ * "Objects". So this reads the tag back out and restores the finer category,
+ * which is the same move the Food/Drink bucket already needed so that milk is
+ * never eaten.
+ *
+ * Ordered most specific first; the first matching rule wins. Both places that
+ * widen an imported category into a SentenceCategory route through here so the
+ * two cannot drift apart.
  */
+const CATEGORY_REFINEMENTS: Array<{ from: SentenceCategory; to: SentenceCategory; tags: string[] }> = [
+  // "People & Living Things" is people, animals and plants in one bucket. This
+  // split is also a correctness fix, not just a coverage one: it is why 犬 kept
+  // arriving as a Person and needing to be filtered back out by hand.
+  { from:'Person', to:'Animal', tags:['animal','pet','dog','cat','bird','fish','insect','horse','cow','pig','chicken','rabbit'] },
+  { from:'Person', to:'Plant', tags:['plant','tree','flower','grass','bush','crop'] },
+  // "Objects" is the largest bucket and hides the most categories.
+  { from:'Object', to:'Medicine', tags:['medicine'] },
+  { from:'Object', to:'Clothing', tags:['clothing','shirt','pants','shoes','hat','coat','dress','gloves','wearable'] },
+  { from:'Object', to:'Book', tags:['book','magazine','comic','textbook'] },
+  { from:'Object', to:'Document', tags:['document','notebook','newspaper','paper'] },
+  { from:'Object', to:'Vehicle', tags:['vehicle','car','bus','train','bicycle','motorcycle','airplane','ship'] },
+  { from:'Object', to:'Technology', tags:['technology','electronics','computer','laptop','phone','tablet','camera'] },
+  { from:'Object', to:'Furniture', tags:['furniture','chair','table','desk','bed','sofa','shelf','cabinet'] },
+  { from:'Object', to:'Tool', tags:['tool','knife','scissors','hammer','instrument'] },
+  // "Places" covers open places, whole buildings and rooms inside them, which
+  // 入る/住む/座る care about distinguishing.
+  { from:'Place', to:'Room', tags:['room','kitchen','bathroom','bedroom','classroom','living-room'] },
+  { from:'Place', to:'Building', tags:['building','house','apartment','school','university','office','store','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport'] },
+  // "Time & Numbers" is three things: times, counts and money.
+  { from:'Time', to:'Money', tags:['money','currency'] },
+  { from:'Time', to:'Number', tags:['number','counter','percent','measurement'] },
+]
+
 export function refineCoarseCategory(category: SentenceCategory, tags: string[]): SentenceCategory {
-  if (category === 'Time' && tags.some(tag => moneyTags.includes(tag))) return 'Money'
-  return category
+  const match = CATEGORY_REFINEMENTS.find(rule => rule.from === category && tags.some(tag => rule.tags.includes(tag)))
+  return match ? match.to : category
 }
 
 const grammarPattern = /(^|\b)(particle|conjunction|copula|auxiliary|suffix|prefix|interjection|pronoun|expression|counter|case|polite after verb|assertion|conj\.|disc\.)($|\b)/
