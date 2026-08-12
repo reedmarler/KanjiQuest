@@ -67,6 +67,16 @@ type HeroSettingsMode = 'none' | 'story' | 'grammar' | 'star'
 // rather than the word, so the drill needs wrong-but-plausible forms that the
 // generator deliberately never produces. The button stays visible and inert
 // rather than silently doing nothing when pressed.
+// What the top-right toggle says and switches off. It follows whichever mode
+// is running rather than always offering Story, so there is one place to leave
+// the mode you are actually in. With no mode active it offers Story, which is
+// where it started.
+const HERO_MODE_LABELS: Record<Exclude<HeroSettingsMode, 'none'>, string> = {
+  story: 'Story',
+  grammar: 'Grammar',
+  star: 'Star',
+}
+
 const HERO_SWAP_FOCUS_OPTIONS: ReadonlyArray<{ focus: HeroSwapFocus | null; label: string }> = [
   { focus: 'verb', label: 'Verbs' },
   { focus: 'noun', label: 'Nouns' },
@@ -383,9 +393,15 @@ export function Dashboard({
   const [storyLevel, setStoryLevel] = useState<JlptLevel>(HERO_STORY_LEVELS[0] ?? 'N5')
   const [storyPlaybackMode, setStoryPlaybackMode] = useState<StoryPlaybackMode>('repeat')
   const [storyQuickSelectOpen, setStoryQuickSelectOpen] = useState(false)
+  const [focusQuickSelectOpen, setFocusQuickSelectOpen] = useState(false)
+  const focusQuickSelectRef = useRef<HTMLDivElement | null>(null)
   const storyQuickSelectRef = useRef<HTMLDivElement | null>(null)
   const storiesAtLevel = useMemo(() => getHeroStoriesForLevel(storyLevel), [storyLevel])
   const selectedStoryTitle = storiesAtLevel.find((story) => story.id === storyId)?.shortTitle ?? 'Guided reading'
+  // The top-right toggle follows the running mode so it can switch that mode
+  // off; with none running it stays the Story entry point it has always been.
+  const topToggleMode: Exclude<HeroSettingsMode, 'none'> = settingsMode === 'none' ? 'story' : settingsMode
+  const activeFocusLabel = HERO_SWAP_FOCUS_OPTIONS.find((option) => option.focus === swapFocus)?.label ?? 'Choose focus'
   const storyRolloverId = useMemo(() => {
     if (!storyMode || storyPlaybackMode === 'repeat' || storiesAtLevel.length < 2) return storyId
     const alternatives = storiesAtLevel.filter((story) => story.id !== storyId)
@@ -396,6 +412,7 @@ export function Dashboard({
     setSettingsMode((current) => {
       const next = current === mode ? 'none' : mode
       if (next !== 'story') setStoryQuickSelectOpen(false)
+      if (next !== 'grammar') setFocusQuickSelectOpen(false)
       return next
     })
   }
@@ -439,15 +456,23 @@ export function Dashboard({
   }, [storiesAtLevel, storyId])
 
   useEffect(() => {
-    if (!storyQuickSelectOpen) return
+    if (!storyQuickSelectOpen && !focusQuickSelectOpen) return
 
+    // One handler for both menus: whichever is open closes on an outside
+    // pointer or Escape, and only one can be open at a time since the modes
+    // are mutually exclusive.
     const closeOnOutsidePointer = (event: PointerEvent) => {
       if (!storyQuickSelectRef.current?.contains(event.target as Node)) {
         setStoryQuickSelectOpen(false)
       }
+      if (!focusQuickSelectRef.current?.contains(event.target as Node)) {
+        setFocusQuickSelectOpen(false)
+      }
     }
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setStoryQuickSelectOpen(false)
+      if (event.key !== 'Escape') return
+      setStoryQuickSelectOpen(false)
+      setFocusQuickSelectOpen(false)
     }
 
     document.addEventListener('pointerdown', closeOnOutsidePointer)
@@ -456,7 +481,7 @@ export function Dashboard({
       document.removeEventListener('pointerdown', closeOnOutsidePointer)
       document.removeEventListener('keydown', closeOnEscape)
     }
-  }, [storyQuickSelectOpen])
+  }, [storyQuickSelectOpen, focusQuickSelectOpen])
 
   function toggleFurigana() {
     setFuriganaOn((on) => !on)
@@ -592,17 +617,62 @@ export function Dashboard({
             )}
           </div>
         )}
+        {grammarMode && (
+          <div className="control-story-quick-select" ref={focusQuickSelectRef}>
+            <button
+              type="button"
+              className={`control-story-name-button${focusQuickSelectOpen ? ' is-open' : ''}`}
+              onClick={() => setFocusQuickSelectOpen((open) => !open)}
+              aria-label={`Choose grammar focus. Current focus: ${activeFocusLabel}`}
+              aria-haspopup="menu"
+              aria-expanded={focusQuickSelectOpen}
+              aria-controls="focus-quick-select-menu"
+              title="Quick-select grammar focus"
+            >
+              <span className="control-story-name-mark" aria-hidden="true">&#25991;</span>
+              <span className="control-story-name-text">{activeFocusLabel}</span>
+              <span className="control-story-name-chevron" aria-hidden="true">&#9662;</span>
+            </button>
+            {focusQuickSelectOpen && (
+              <div
+                className="control-story-quick-menu"
+                id="focus-quick-select-menu"
+                role="menu"
+                aria-label="Grammar focus"
+              >
+                {HERO_SWAP_FOCUS_OPTIONS.map(({ focus, label }) => (
+                  <button
+                    key={label}
+                    type="button"
+                    className={focus && swapFocus === focus ? 'is-active' : ''}
+                    role="menuitemradio"
+                    aria-checked={focus ? swapFocus === focus : false}
+                    disabled={!focus}
+                    title={focus ? undefined : 'Particle swapping is not wired up yet'}
+                    onClick={focus ? () => {
+                      setSwapFocus((current) => (current === focus ? null : focus))
+                      setFocusQuickSelectOpen(false)
+                    } : undefined}
+                  >
+                    <span>{label}</span>
+                    {focus && swapFocus === focus && <span aria-hidden="true">&#10003;</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <button
           type="button"
-          className={`control-story-toggle control-story-top-toggle${storyMode ? ' is-active' : ''}`}
-          onClick={() => selectSettingsMode('story')}
+          className={`control-story-toggle control-story-top-toggle${settingsMode !== 'none' ? ' is-active' : ''}`}
+          onClick={() => selectSettingsMode(topToggleMode)}
           role="switch"
-          aria-checked={storyMode}
-          aria-label={storyMode ? 'Return to normal sentences' : 'Enable Story mode'}
-          title={storyMode ? 'Return to normal sentences' : 'Enable Story mode'}
+          aria-checked={settingsMode !== 'none'}
+          aria-label={settingsMode === 'none' ? 'Enable Story mode' : `Turn off ${HERO_MODE_LABELS[topToggleMode]} mode`}
+          title={settingsMode === 'none' ? 'Enable Story mode' : `Turn off ${HERO_MODE_LABELS[topToggleMode]} mode`}
         >
           <span className="control-toggle-track" aria-hidden="true"><span /></span>
-          <span>Story</span>
+          <span>{HERO_MODE_LABELS[topToggleMode]}</span>
         </button>
       </div>
 
