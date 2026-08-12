@@ -1839,6 +1839,37 @@ const POSITION_NOUNS: ReadonlyArray<{japanese:string;reading:string;english:stri
   { japanese:'そば', reading:'そば', english:'beside', references:'beside' },
 ]
 const positionNounWords = new Set(POSITION_NOUNS.map(entry => entry.japanese))
+
+/**
+ * Question words for n5-37, each with the frame it belongs in.
+ *
+ * A question word is not interchangeable with the others: どこ replaces a
+ * destination, 何 replaces an object, どうして replaces nothing and fronts the
+ * whole clause. One question slot filled from a pool would produce 「学生は
+ * どうしてを食べますか」, so each carries its own shape.
+ *
+ * Readings are stated because 何 is recorded as "nani / nan" — two readings in
+ * one field, which would render as furigana literally reading "nani / nan".
+ * Here it is なに, the reading 何を takes.
+ *
+ * どんな, どの, どちら and どれ are absent: they modify or choose between nouns
+ * already under discussion, so they need a context this generator has no way to
+ * establish. かしら is a sentence-ending particle, not a question word.
+ */
+const QUESTION_FRAMES: ReadonlyArray<{
+  japanese:string
+  reading:string
+  shape:'destination'|'object'|'reason'|'price'
+}> = [
+  { japanese:'どこ', reading:'どこ', shape:'destination' },
+  { japanese:'何', reading:'なに', shape:'object' },
+  { japanese:'どうして', reading:'どうして', shape:'reason' },
+  { japanese:'なぜ', reading:'なぜ', shape:'reason' },
+  { japanese:'いくら', reading:'いくら', shape:'price' },
+]
+const questionWords = new Set(QUESTION_FRAMES.map(entry => entry.japanese))
+/** Objects with a price, for the いくら frame. */
+const PRICED_OBJECTS = new Set(['本','傘','鞄','靴','時計','眼鏡','切符','シャツ','辞書','雑誌','財布'])
 const POSITION_SUBJECTS = new Set(['本','鞄','傘','皿','雑誌','新聞','辞書','時計','眼鏡','財布','鍵','猫','犬','鳥'])
 /** Verb and object pairings for n5-35, in the two polite forms the tenses need. */
 const TIMED_ACTION_FRAMES: ReadonlyArray<{
@@ -1907,7 +1938,7 @@ const COUNTED_FRAMES: ReadonlyArray<{
     verb:{japanese:'買います',reading:'かいます',english:'buy',englishThird:'buys'} },
 ]
 
-const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34','n5-35','n5-36'])
+const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34','n5-35','n5-36','n5-37'])
 const geographicOriginTags = new Set(normalizeTags(['country','city','town','village','neighborhood','island']))
 const originSubjectDisallowedTags = new Set(normalizeTags(['patient','sick','illness','medical','hospital','guest','customer']))
 const portableObjectTags = new Set(normalizeTags([
@@ -2445,6 +2476,7 @@ function slotEligibleWords(): Set<string> {
   for (const japanese of counterSourceWords) eligible.add(japanese)
   for (const japanese of timeAdverbialWords) eligible.add(japanese)
   for (const japanese of positionNounWords) eligible.add(japanese)
+  for (const japanese of questionWords) eligible.add(japanese)
   for (const rule of adjectiveRules) eligible.add(rule.japanese)
 
   slotIndexCache = eligible
@@ -2508,6 +2540,7 @@ export function auditWordReachability(): WordReachability[] {
     ['counter-source', counterSourceWords],
     ['time-adverbial', timeAdverbialWords],
     ['position-noun', positionNounWords],
+    ['question-word', questionWords],
   ]
 
   return vocabulary.map(word => {
@@ -2918,6 +2951,50 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const countSlot = {id:`count-${frame.counter}-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['counter',frame.counter]}
     const endingSlot = {id:`count-ending-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
     return finish(furigana,english,{subject,object},{count:countSlot,ending:endingSlot},[`${frame.counter} is the counter ${object.japanese} takes.`])
+  }
+  if (patternId === 'n5-37') {
+    // Question sentences. か marks the whole clause, and the question word sits
+    // where the answer would go — which is a different position for each one.
+    let questionIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1640) % QUESTION_FRAMES.length
+    if (options.avoidWords?.ending && QUESTION_FRAMES[questionIndex]!.japanese === options.avoidWords.ending) {
+      questionIndex = (questionIndex + 1) % QUESTION_FRAMES.length
+    }
+    const question = QUESTION_FRAMES[questionIndex]!
+    const questionPart = {text:question.japanese,reading:question.reading,slot:'question'}
+    const questionSlot = {id:`question-${question.japanese}`,surface:question.japanese,dictionaryForm:question.japanese,reading:question.reading,english:question.shape,pos:'noun' as const,jlpt:'N5' as const,tags:['question','interrogative']}
+    const endingSlot = {id:`question-ending-${questionIndex}`,surface:question.japanese,dictionaryForm:question.japanese,reading:question.reading,english:question.shape,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    const extra = {question:questionSlot,ending:endingSlot}
+
+    if (question.shape === 'price') {
+      const item = pick(vocabulary.filter(word => PRICED_OBJECTS.has(word.japanese)), 1641, 'object')
+      if (!item) return null
+      const itemEnglish = definite(primaryEnglishGloss(item.preferredTranslation || item.english))
+      const furigana=[wordPart(item,'object'),literalPart('は','わ'),questionPart,literalPart('ですか')]
+      return finish(furigana,`How much ${isPluralPhrase(itemEnglish)?'are':'is'} ${itemEnglish}?`,{object:item},extra,['いくら asks a price and takes the copula.'])
+    }
+
+    const subject = pick(humans, 1642, 'subject')
+    if (!subject) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    // English questions need do-support, which Japanese does not: 「行きますか」
+    // is one word where "does ... go" is three.
+    const does = subjectEnglish==='I' ? 'do' : subjectUsesBaseVerb(subjectEnglish) ? 'do' : 'does'
+
+    if (question.shape === 'destination') {
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),questionPart,literalPart('に'),{text:'行きますか',reading:'いきますか',slot:'verb'}]
+      return finish(furigana,`Where ${does} ${subjectEnglish} go?`,{subject},extra,['どこ stands where the destination would go.'])
+    }
+    if (question.shape === 'object') {
+      const frame = TIMED_ACTION_FRAMES[Math.abs(seed + 1643) % TIMED_ACTION_FRAMES.length]!
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),questionPart,literalPart('を'),{text:`${frame.present.japanese}か`,reading:`${frame.present.reading}か`,slot:'verb'}]
+      return finish(furigana,`What ${does} ${subjectEnglish} ${frame.english.base}?`,{subject},extra,['何 stands where the object would go.'])
+    }
+    // reason: the question word fronts the clause and nothing is removed.
+    const frame = TIMED_ACTION_FRAMES[Math.abs(seed + 1644) % TIMED_ACTION_FRAMES.length]!
+    const object = pick(vocabulary.filter(word => frame.words.has(word.japanese)), 1645, 'object')
+    if (!object) return null
+    const furigana=[questionPart,wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:`${frame.present.japanese}か`,reading:`${frame.present.reading}か`,slot:'verb'}]
+    return finish(furigana,`Why ${does} ${subjectEnglish} ${frame.english.base} ${englishPhrase(object,'object')}?`,{subject,object},extra,['どうして fronts the clause and removes nothing.'])
   }
   if (patternId === 'n5-36') {
     // Reference の Position に Subject が あります/います — the existence frame
