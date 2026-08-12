@@ -11066,7 +11066,8 @@
         "preference",
         "positive",
         "emotion",
-        "n5"
+        "n5",
+        "expression"
       ],
       "status": "approved",
       "source": "kanji-quest",
@@ -11094,7 +11095,8 @@
         "desire",
         "relationship",
         "emotion",
-        "n4"
+        "n4",
+        "expression"
       ],
       "status": "approved",
       "source": "kanji-quest",
@@ -12306,7 +12308,6 @@
       "tags": [
         "laughter",
         "emotion",
-        "expression",
         "n3"
       ],
       "status": "approved",

@@ -850,6 +850,11 @@ if (typeof window !== 'undefined') {
 const nonNounRecordTags = new Set(normalizeTags([
   'auxiliary-verb','honorific-verb','grammar-pattern','particle','conjunction',
   'sentence-ending','auxiliary','interjection','greeting',
+  // Set phrases: ありがとう, 気を付けて, 好きです, 会いたい. Whole utterances
+  // rather than words, and the tag also covers eight conjunctions (て, ので,
+  // ば, し, ながら) that were reachable as noun-slot fillers — the same defect
+  // the particles above had.
+  'expression',
 ]))
 function isNonNounRecord(word: WordRecord) {
   return normalizeTags(word.tags).some(tag => nonNounRecordTags.has(tag))

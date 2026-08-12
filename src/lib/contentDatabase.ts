@@ -65,6 +65,20 @@ const wordRepairs: Record<string,{ category:string; english:string; preferredTra
 const readingRepairs: Record<string,string> = { '十':'じゅう', '客観':'きゃっかん' }
 
 /**
+ * Whole phrases filed as plain vocabulary.
+ *
+ * 好きです ("I like you") and 会いたい ("I want to see you") are sentences, not
+ * words, and were sitting in Descriptors with nothing to say so — which is how
+ * they turned up in the unreachable-vocabulary list looking like a gap to fill.
+ * They are worth teaching; they are just not slot fillers. The data already has
+ * the convention for this: ありがとう, 気を付けて and 久しぶり all carry
+ * `expression`, which keeps them out of noun slots.
+ */
+const expressionRecords = new Set(['好きです','会いたい'])
+/** 笑い is the noun "laughter", not a set phrase; the tag was simply wrong. */
+const strayExpressionTag = new Set(['笑い'])
+
+/**
  * Glosses for records the source data left as "Meaning needed".
  *
  * Only the ones that are ordinary vocabulary. The rest of that set is grammar —
@@ -100,8 +114,14 @@ function repairTag(tag: string): string {
 function repairKnownCategoryErrors(record: ContentRecord): ContentRecord {
   if (record.kind !== 'vocabulary') return record
   const repairedReading = readingRepairs[record.japanese] ?? record.reading
-  const repairedTags = record.tags.map(repairTag)
-  if (repairedReading !== record.reading || repairedTags.some((tag,index) => tag !== record.tags[index])) {
+  const baseTags = strayExpressionTag.has(record.japanese)
+    ? record.tags.filter(tag => tag !== 'expression')
+    : record.tags
+  const repairedTags = expressionRecords.has(record.japanese) && !baseTags.includes('expression')
+    ? [...baseTags.map(repairTag), 'expression']
+    : baseTags.map(repairTag)
+  if (repairedReading !== record.reading || repairedTags.length !== record.tags.length
+    || repairedTags.some((tag,index) => tag !== record.tags[index])) {
     record = { ...record, reading:repairedReading, tags:repairedTags }
   }
   const missingGloss = /meaning needed/i.test(record.english ?? '') ? missingGlossRepairs[record.japanese] : undefined
