@@ -349,7 +349,15 @@ const humanSubjectTags = [CANONICAL_CATEGORY_TAGS.Person,'pronoun','speaker','ma
 // and 東/西/南/北 are all ordinary, natural destinations — the same class of
 // gap as readingMannerTags: real words carrying real destination-shaped tags
 // that simply weren't in this allowlist yet.
-const standaloneDestinationTags = ['country','city','town','village','neighborhood',CANONICAL_CATEGORY_TAGS.Building,'house','home','apartment','school','education','university','office','store','shop','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','river','lake','beach','ocean','island','platform','parking-lot',CANONICAL_CATEGORY_TAGS.Room,'kitchen','bathroom','bedroom','classroom','public','transport','destination','zoo','bridge','port','intersection','hot-spring','countryside','aquarium','direction']
+const standaloneDestinationTags = ['country','city','town','village','neighborhood',CANONICAL_CATEGORY_TAGS.Building,'house','home','apartment','school','education','university','office','store','shop','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','river','lake','beach','ocean','island','platform','parking-lot',CANONICAL_CATEGORY_TAGS.Room,'kitchen','bathroom','bedroom','classroom','public','transport','destination','zoo','bridge','port','intersection','hot-spring','countryside','aquarium','direction',
+  // Same class of gap again: 市場, 劇場, 地域, ヨーロッパ and 通り are ordinary
+  // destinations carrying destination-shaped tags that were never listed.
+  //
+  // 世界 and 地球 are excluded despite being places: 世界に行きます is not
+  // something anyone says, and it generated "runs to world". 土地 is excluded
+  // for the same reason. Positional nouns (上, 横, そば) stay out too — they are
+  // relations rather than places you travel to, and get their own frame.
+  'market','theater','region','continent','street','urban']
 const workplaceLocationTags = ['company','office','store','shop','school','education','university','hospital','bank','restaurant','cafe','library','museum','station','airport','hotel','post-office','movie-theater']
 const crowdedPlaceTags = ['city','town','village','neighborhood','park','restaurant','cafe','station','market','festival','event','downtown','public']
 const pushableObjectTags = ['button','door','box','bag','cart','chair','table','furniture','switch','key','tool']
@@ -1101,6 +1109,9 @@ const definitePlaceTags = new Set(normalizeTags([
   'building','house','home','school','university','office','store','restaurant','cafe','hospital','hotel',
   'library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','apartment','neighborhood','local-area','post-office','movie-theater','shop',
   'river','lake','beach','ocean','platform','parking-lot','road','bridge','intersection','room','kitchen',
+  // Added with the destination widening above: without these, 市場/劇場/地域
+  // rendered as "goes to market" with no article at all.
+  'market','theater','region','street','urban',
   'bathroom','bedroom','living-room','classroom',
   // Kept in sync with standaloneDestinationTags' zoo/port/hot-spring/
   // countryside/aquarium/direction additions — without an entry here too,
@@ -1794,6 +1805,41 @@ const TIME_ADVERBIALS: ReadonlyArray<{japanese:string;reading:string;english:str
   { japanese:'将来', reading:'しょうらい', english:'in the future', tense:'future' },
 ]
 const timeAdverbialWords = new Set(TIME_ADVERBIALS.map(entry => entry.japanese))
+
+/**
+ * Positional nouns for n5-36 — 机の上に本があります.
+ *
+ * These are relations, not places: 上 is "the top of something", so it cannot
+ * stand in a destination slot the way 公園 can, which is why widening the
+ * destination tags left them behind. In Japanese they are ordinary nouns joined
+ * by の, and in English they are prepositions, so the frame has to translate a
+ * two-noun construction into a preposition rather than word-for-word.
+ *
+ * `surfaceOnly` marks the ones that need the reference noun to have a top
+ * surface — "on the cat" is not where you put a book.
+ */
+const POSITION_REFERENCE_SETS = {
+  // 上 needs a top surface, 下 needs something with space beneath it, and 中
+  // needs a container. Sharing one reference list produced "in the door" and
+  // "under the park".
+  surface: new Set(['机','椅子','棚','テーブル','ベッド']),
+  under:   new Set(['机','椅子','棚','テーブル','ベッド','木','窓']),
+  inside:  new Set(['部屋','家','鞄','店','病院','学校','駅']),
+  beside:  new Set(['机','椅子','棚','窓','ドア','家','学校','駅','公園','店','病院','木']),
+} as const
+const POSITION_NOUNS: ReadonlyArray<{japanese:string;reading:string;english:string;references:keyof typeof POSITION_REFERENCE_SETS}> = [
+  { japanese:'上', reading:'うえ', english:'on', references:'surface' },
+  { japanese:'下', reading:'した', english:'under', references:'under' },
+  { japanese:'中', reading:'なか', english:'in', references:'inside' },
+  { japanese:'前', reading:'まえ', english:'in front of', references:'beside' },
+  { japanese:'後ろ', reading:'うしろ', english:'behind', references:'beside' },
+  { japanese:'横', reading:'よこ', english:'beside', references:'beside' },
+  { japanese:'隣', reading:'となり', english:'next to', references:'beside' },
+  { japanese:'近く', reading:'ちかく', english:'near', references:'beside' },
+  { japanese:'そば', reading:'そば', english:'beside', references:'beside' },
+]
+const positionNounWords = new Set(POSITION_NOUNS.map(entry => entry.japanese))
+const POSITION_SUBJECTS = new Set(['本','鞄','傘','皿','雑誌','新聞','辞書','時計','眼鏡','財布','鍵','猫','犬','鳥'])
 /** Verb and object pairings for n5-35, in the two polite forms the tenses need. */
 const TIMED_ACTION_FRAMES: ReadonlyArray<{
   words: ReadonlySet<string>
@@ -1861,7 +1907,7 @@ const COUNTED_FRAMES: ReadonlyArray<{
     verb:{japanese:'買います',reading:'かいます',english:'buy',englishThird:'buys'} },
 ]
 
-const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34','n5-35'])
+const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34','n5-35','n5-36'])
 const geographicOriginTags = new Set(normalizeTags(['country','city','town','village','neighborhood','island']))
 const originSubjectDisallowedTags = new Set(normalizeTags(['patient','sick','illness','medical','hospital','guest','customer']))
 const portableObjectTags = new Set(normalizeTags([
@@ -2398,6 +2444,7 @@ function slotEligibleWords(): Set<string> {
   for (const japanese of abstractAdjectiveWords) eligible.add(japanese)
   for (const japanese of counterSourceWords) eligible.add(japanese)
   for (const japanese of timeAdverbialWords) eligible.add(japanese)
+  for (const japanese of positionNounWords) eligible.add(japanese)
   for (const rule of adjectiveRules) eligible.add(rule.japanese)
 
   slotIndexCache = eligible
@@ -2460,6 +2507,7 @@ export function auditWordReachability(): WordReachability[] {
     ['abstract-adjective', abstractAdjectiveWords],
     ['counter-source', counterSourceWords],
     ['time-adverbial', timeAdverbialWords],
+    ['position-noun', positionNounWords],
   ]
 
   return vocabulary.map(word => {
@@ -2870,6 +2918,34 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const countSlot = {id:`count-${frame.counter}-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['counter',frame.counter]}
     const endingSlot = {id:`count-ending-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
     return finish(furigana,english,{subject,object},{count:countSlot,ending:endingSlot},[`${frame.counter} is the counter ${object.japanese} takes.`])
+  }
+  if (patternId === 'n5-36') {
+    // Reference の Position に Subject が あります/います — the existence frame
+    // built on a positional noun. います for animals, あります for things.
+    let positionIndex = Math.abs(seed + 1630) % POSITION_NOUNS.length
+    if (options.avoidWords?.ending && POSITION_NOUNS[positionIndex]!.japanese === options.avoidWords.ending) {
+      positionIndex = (positionIndex + 1) % POSITION_NOUNS.length
+    }
+    const chosen = POSITION_NOUNS[positionIndex]!
+    const reference = pick(vocabulary.filter(word => POSITION_REFERENCE_SETS[chosen.references].has(word.japanese)), 1631, 'location')
+    const subject = pick(vocabulary.filter(word => POSITION_SUBJECTS.has(word.japanese)), 1632, 'subject')
+    if (!reference || !subject) return null
+    const animate = [...tagSet(subject)].some(tag => animalSubjectTags.includes(tag))
+    const verb = animate ? {japanese:'います',reading:'います'} : {japanese:'あります',reading:'あります'}
+    const subjectEnglish = objectEnglish(primaryEnglishGloss(subject.preferredTranslation || subject.english))
+    const referenceEnglish = definite(primaryEnglishGloss(reference.preferredTranslation || reference.english))
+    const furigana = [
+      wordPart(reference,'location'),literalPart('の'),
+      {text:chosen.japanese,reading:chosen.reading,slot:'position'},
+      literalPart('に'),
+      wordPart(subject,'subject'),literalPart('が'),
+      {text:verb.japanese,reading:verb.reading,slot:'verb'},
+    ]
+    // 眼鏡 glosses as "glasses" — plural, so the existence verb has to agree.
+    const english = `There ${isPluralPhrase(subjectEnglish) ? 'are' : 'is'} ${subjectEnglish} ${chosen.english} ${referenceEnglish}.`
+    const positionSlot = {id:`position-${chosen.japanese}`,surface:chosen.japanese,dictionaryForm:chosen.japanese,reading:chosen.reading,english:chosen.english,pos:'noun' as const,jlpt:'N5' as const,tags:['position','relative-location']}
+    const endingSlot = {id:`position-ending-${positionIndex}`,surface:chosen.japanese,dictionaryForm:chosen.japanese,reading:chosen.reading,english:chosen.english,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    return finish(furigana,english,{location:reference,subject},{position:positionSlot,ending:endingSlot},['A positional noun attaches to its reference with の.',`${verb.japanese} is the ${animate?'animate':'inanimate'} existence verb.`])
   }
   if (patternId === 'n5-35') {
     // Time Subject は Object を Verb — the time word picks the tense. These are
