@@ -2531,6 +2531,55 @@ function slotEligibleWords(): Set<string> {
   return eligible
 }
 
+export interface ApprovedOverride {
+  japanese: string
+  reading: string
+  builtInCategories: SentenceCategory[]
+  approvedCategories: SentenceCategory[]
+  /** Tags the built-in record carried that the approved record drops. */
+  droppedTags: string[]
+}
+
+/**
+ * Approved records that replace a built-in entry, and what that costs.
+ *
+ * `editorWords` lets an approved record win outright rather than merging: a
+ * reviewer's category and tag set is a decision, and unioning it with the
+ * built-in tags would quietly undo their edits. That is deliberate — but it
+ * also means a reviewer can drop the one tag a slot rule gates on and make a
+ * word unreachable without anything saying so, which is how 共 once became a
+ * person subject and produced "a both's foot does not hurt".
+ *
+ * Reporting the shadowing keeps the reviewer's authority while making its
+ * effects visible, which changing the merge would not.
+ */
+export function auditApprovedOverrides(): ApprovedOverride[] {
+  const builtIn = new Map<string,WordRecord>()
+  for (const word of [...catalogWords(), ...words]) {
+    const key = `${word.japanese}|${word.reading}`
+    const existing = builtIn.get(key)
+    builtIn.set(key, existing ? { ...existing, ...word, categories:word.categories, tags:normalizeTags([...existing.tags,...word.tags]) } : word)
+  }
+  const overrides: ApprovedOverride[] = []
+  for (const approved of approvedWords()) {
+    const original = builtIn.get(`${approved.japanese}|${approved.reading}`)
+    if (!original) continue
+    const approvedTags = new Set(normalizeTags(approved.tags))
+    const droppedTags = normalizeTags(original.tags).filter(tag => !approvedTags.has(tag))
+    const sameCategories = original.categories.length === approved.categories.length
+      && original.categories.every(category => approved.categories.includes(category))
+    if (sameCategories && !droppedTags.length) continue
+    overrides.push({
+      japanese: approved.japanese,
+      reading: approved.reading,
+      builtInCategories: original.categories,
+      approvedCategories: approved.categories,
+      droppedTags,
+    })
+  }
+  return overrides
+}
+
 export interface WordReachability {
   japanese: string
   reading: string

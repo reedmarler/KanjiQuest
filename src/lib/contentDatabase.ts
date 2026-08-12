@@ -75,26 +75,42 @@ function seedRecords(): ContentRecord[] {
   return Array.isArray(records) ? records : []
 }
 
+/**
+ * The repairs every record gets, whatever route it arrives by.
+ *
+ * This used to run only over records parsed back out of localStorage, so the
+ * seed path and the no-storage path returned unrepaired data. The effect was a
+ * silent split: the browser generated sentences from repaired records while
+ * offline generation and the audit scripts — which have no localStorage and go
+ * straight to the seed — saw the raw ones, and a fresh install saw raw records
+ * until its first reload. Two sources of truth for the same vocabulary is
+ * exactly the kind of divergence the audits exist to catch, and it made them
+ * measure something other than what the app shows.
+ */
+function migrateRecords(records: ContentRecord[]): ContentRecord[] {
+  return records.map(record => {
+    const repaired = repairKnownCategoryErrors(record)
+    if (repaired.kind !== 'vocabulary' || repaired.preferredTranslation?.trim()) return repaired
+    return { ...repaired, preferredTranslation:inferPreferredTranslation(repaired.japanese,repaired.english,repaired.reading) }
+  })
+}
+
 export function loadContentDatabase(): ContentRecord[] {
   // Outside the browser (build scripts such as generate:vocab-examples) there
   // is no localStorage, but the committed seed file still holds the reviewed
   // records. Returning it here is what lets offline generation see the same
   // approved vocabulary the app does, instead of falling back to bare defaults.
-  if (!storageAvailable()) return seedRecords()
+  if (!storageAvailable()) return migrateRecords(seedRecords())
   try {
     const stored = window.localStorage.getItem(DATABASE_KEY)
     if (!stored) {
-      const seed = seedRecords()
+      const seed = migrateRecords(seedRecords())
       if (!seed.length) return []
       window.localStorage.setItem(DATABASE_KEY, JSON.stringify(seed))
       return seed
     }
     const parsed = JSON.parse(stored) as ContentRecord[]
-    const migrated = parsed.map(record => {
-      const repaired = repairKnownCategoryErrors(record)
-      if (repaired.kind !== 'vocabulary' || repaired.preferredTranslation?.trim()) return repaired
-      return { ...repaired, preferredTranslation:inferPreferredTranslation(repaired.japanese,repaired.english,repaired.reading) }
-    })
+    const migrated = migrateRecords(parsed)
     if (JSON.stringify(migrated) !== JSON.stringify(parsed)) window.localStorage.setItem(DATABASE_KEY,JSON.stringify(migrated))
     return migrated
   } catch {

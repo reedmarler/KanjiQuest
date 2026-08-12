@@ -24,7 +24,7 @@
  *
  * Usage:  npx tsx scripts/audit-word-reachability.ts [--all] [--category=Food] [--pools]
  */
-import { auditWordReachability, getVerbUsageRecords, SENTENCE_CATEGORIES, type SentenceCategory } from '../src/lib/categorySentenceEngine'
+import { auditApprovedOverrides, auditWordReachability, getVerbUsageRecords, SENTENCE_CATEGORIES, type SentenceCategory } from '../src/lib/categorySentenceEngine'
 
 const showAll = process.argv.includes('--all')
 const categoryArg = process.argv.find(arg => arg.startsWith('--category='))?.split('=')[1] as SentenceCategory | undefined
@@ -52,6 +52,25 @@ if (violations.length) {
 } else {
   console.log('  none — every word carries its category tag, so category membership')
   console.log('  alone is enough for the broad category-shaped allowlists.')
+}
+
+// Approved records replace built-ins outright, which is deliberate but silent:
+// dropping the one tag a slot gates on makes a word unreachable with nothing
+// to show for it. Reachability above already counts the result; this names the
+// records responsible so a reviewer can see what their edit cost.
+const overrides = auditApprovedOverrides()
+const reachableByWord = new Map(rows.map((row) => [`${row.japanese}|${row.reading}`, row.reachable]))
+const costly = overrides.filter((row) => reachableByWord.get(`${row.japanese}|${row.reading}`) === false)
+console.log(`\nApproved records shadowing a built-in: ${overrides.length}`)
+if (overrides.length) {
+  console.log(`  of those now unreachable: ${costly.length}`)
+  for (const row of costly.slice(0, 20)) {
+    const categories = row.builtInCategories.join('/') === row.approvedCategories.join('/')
+      ? row.approvedCategories.join('/')
+      : `${row.builtInCategories.join('/')} → ${row.approvedCategories.join('/')}`
+    console.log(`  ${row.japanese} [${categories}] dropped: ${row.droppedTags.join(', ') || '(none)'}`)
+  }
+  if (costly.length > 20) console.log(`  … and ${costly.length - 20} more`)
 }
 
 console.log(`\nUnreachable by category:`)
