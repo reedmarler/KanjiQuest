@@ -63,6 +63,17 @@ type HeroSpeechVolume = typeof HERO_SPEECH_VOLUMES[number]
 type StoryPlaybackMode = 'repeat' | 'shuffle'
 type HeroSettingsMode = 'none' | 'story' | 'grammar' | 'star'
 
+// Particles has no focus yet: swapping は for を changes the grammatical role
+// rather than the word, so the drill needs wrong-but-plausible forms that the
+// generator deliberately never produces. The button stays visible and inert
+// rather than silently doing nothing when pressed.
+const HERO_SWAP_FOCUS_OPTIONS: ReadonlyArray<{ focus: HeroSwapFocus | null; label: string }> = [
+  { focus: 'verb', label: 'Verbs' },
+  { focus: 'noun', label: 'Nouns' },
+  { focus: null, label: 'Particles' },
+  { focus: 'adjective', label: 'Adjectives' },
+]
+
 // Labelled by JLPT level, because that is what this picker now selects: the
 // hero stream draws from patternsForLevel, not from the complexity tiers.
 // The old labels described the complexity axis — L2 "Pairs" meant two
@@ -101,6 +112,7 @@ function savedSpeechVolume(): HeroSpeechVolume {
   return HERO_SPEECH_VOLUMES.find((volume) => volume === stored) ?? 1
 }
 
+import type { HeroSwapFocus } from '../lib/heroSequence'
 const RotatingHeroSentence = lazy(() => import('./RotatingHeroSentence').then((module) => ({ default: module.RotatingHeroSentence })))
 
 function ProgressRunnerVideo() {
@@ -262,6 +274,7 @@ function DashboardHeroSentence({
   furiganaOn,
   englishOn,
   jlptLevel,
+  swapFocus,
   storyId,
   storyLevel,
   storyRolloverId,
@@ -280,6 +293,7 @@ function DashboardHeroSentence({
   furiganaOn: boolean
   englishOn: boolean
   jlptLevel: ReturnType<typeof heroJlptForComplexity>
+  swapFocus: HeroSwapFocus | null
   storyId: string | null
   storyLevel: JlptLevel
   storyRolloverId: string | null
@@ -307,6 +321,7 @@ function DashboardHeroSentence({
         englishOn={englishOn}
         delayedFurigana={false}
         jlptLevel={jlptLevel}
+        swapFocus={swapFocus}
         storyId={storyId}
         storyLevel={storyLevel}
         storyRolloverId={storyRolloverId}
@@ -359,6 +374,9 @@ export function Dashboard({
   const [englishOn, setEnglishOn] = useState(true)
   const [complexity, setComplexity] = useState<GenerationComplexity>(1)
   const [settingsMode, setSettingsMode] = useState<HeroSettingsMode>('none')
+  // Which part of speech the grammar drill rotates. Null keeps the ordinary
+  // sweep, where every slot gets one turn.
+  const [swapFocus, setSwapFocus] = useState<HeroSwapFocus | null>(null)
   const storyMode = settingsMode === 'story'
   const grammarMode = settingsMode === 'grammar'
   const [storyId, setStoryId] = useState(HERO_STORY_DEFINITIONS[0]?.id ?? '')
@@ -596,6 +614,7 @@ export function Dashboard({
           furiganaOn={furiganaOn}
           englishOn={englishOn}
           jlptLevel={heroJlptForComplexity(complexity)}
+          swapFocus={grammarMode ? swapFocus : null}
           storyId={storyMode ? storyId : null}
           storyLevel={storyLevel}
           storyRolloverId={storyMode ? storyRolloverId : null}
@@ -836,10 +855,21 @@ export function Dashboard({
 
                   {grammarMode && (
                     <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
-                      <button type="button" className="hero-swap-mode-panel">Verbs</button>
-                      <button type="button" className="hero-swap-mode-panel">Nouns</button>
-                      <button type="button" className="hero-swap-mode-panel">Articles</button>
-                      <button type="button" className="hero-swap-mode-panel">Adjectives</button>
+                      {HERO_SWAP_FOCUS_OPTIONS.map(({ focus, label }) => (
+                        <button
+                          key={label}
+                          type="button"
+                          className={`hero-swap-mode-panel${focus && swapFocus === focus ? ' is-active' : ''}`}
+                          aria-pressed={focus ? swapFocus === focus : undefined}
+                          // Selecting the focus already on screen turns the drill
+                          // off, so the same button both enters and leaves it.
+                          onClick={focus ? () => setSwapFocus((current) => (current === focus ? null : focus)) : undefined}
+                          disabled={!focus}
+                          title={focus ? undefined : 'Particle swapping is not wired up yet'}
+                        >
+                          {label}
+                        </button>
+                      ))}
                     </div>
                   )}
 

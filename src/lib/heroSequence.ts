@@ -136,6 +136,46 @@ function changedSegmentKeys(previous: HeroSentenceFrame, current: HeroSentenceFr
  * pattern fills, then the verb last — matching where each word actually sits
  * in the sentence rather than an arbitrary object-key order.
  */
+/**
+ * Grammar-focus drill: hold the sentence still and rotate one part of speech.
+ *
+ * The ordinary stream sweeps every slot once, so a given word is on screen for
+ * one step. A focused stream does the opposite — it keeps the sentence fixed
+ * and works the chosen part of speech repeatedly, which is what makes a
+ * conjugation drill a drill.
+ */
+export type HeroSwapFocus = 'verb' | 'noun' | 'adjective'
+
+/** How many rotations a focused sentence gets before the stream moves on. */
+const FOCUS_ROTATIONS = 5
+
+/**
+ * The sweep queue for a focused sentence, or null when this sentence cannot
+ * serve the focus at all — a verbless pattern under a verb drill. Returning
+ * null lets the caller skip to the next pattern instead of emitting a sentence
+ * the learner cannot practise on.
+ */
+function focusedSweepQueue(sentence: GeneratedPreviewSentence, focus: HeroSwapFocus): string[] | null {
+  const slots = orderedSwappableSlotKeys(sentence)
+  if (focus === 'verb') {
+    // Endings only. The verb itself stays put so the conjugation is the one
+    // thing changing, which is the whole point of the drill.
+    if (!slots.includes('verb')) return null
+    return Array.from({ length: FOCUS_ROTATIONS }, () => 'ending')
+  }
+  if (focus === 'adjective') {
+    // Alternate the adjective and its ending: 面白いです → 新しいです →
+    // 新しくないです. Both halves of an adjective predicate get practised.
+    if (!slots.includes('adjective')) return null
+    return Array.from({ length: FOCUS_ROTATIONS }, (_, index) => (index % 2 === 0 ? 'adjective' : 'ending'))
+  }
+  // Nouns: every slot that is not the predicate or its ending, cycled until the
+  // rotation budget is spent. A one-noun sentence still gets five turns at it.
+  const nouns = slots.filter((slot) => slot !== 'verb' && slot !== 'adjective' && slot !== 'ending')
+  if (!nouns.length) return null
+  return Array.from({ length: FOCUS_ROTATIONS }, (_, index) => nouns[index % nouns.length]!)
+}
+
 function orderedSwappableSlotKeys(sentence: GeneratedPreviewSentence): string[] {
   const seen = new Set<string>()
   const order: string[] = []
@@ -314,7 +354,7 @@ function rotateOneSlot(
  * `templateRefresh` marks the steps that jump to a new pattern; the rest carry
  * exactly one key in `changed`.
  */
-function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCount: number): HeroStep[] {
+function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCount: number, focus?: HeroSwapFocus): HeroStep[] {
   const patterns = patternsForLevel(level)
   if (!patterns.length) return []
 
@@ -407,9 +447,16 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
     // Forward reaches the predicate (sentence-final in Japanese) last, so its
     // cluster leads with the word swap, then the two endings. Reversed reaches
     // it first, so the endings come before the word swap — the mirror image.
-    const sweepQueue = sweepForward
+    const focusedQueue = focus ? focusedSweepQueue(sentence, focus) : undefined
+    // A sentence that cannot serve the focus is dropped rather than shown
+    // without rotations — the pattern walk moves on to one that can.
+    if (focus && !focusedQueue) {
+      steps.pop()
+      continue
+    }
+    const sweepQueue = focusedQueue ?? (sweepForward
       ? [...otherSlots, ...predicateCluster]
-      : [...predicateCluster.slice().reverse(), ...otherSlots.slice().reverse()]
+      : [...predicateCluster.slice().reverse(), ...otherSlots.slice().reverse()])
     sweepForward = !sweepForward
 
     const baseSeed = seedBySentence.get(sentence)
@@ -446,12 +493,13 @@ export function buildHeroSteps(
   level: JlptLevel,
   sequenceSeed = 0,
   stepCount = STEPS_PER_LEVEL,
+  focus?: HeroSwapFocus,
 ): HeroStep[] {
-  const cacheKey = `${level}:${sequenceSeed}:${stepCount}`
+  const cacheKey = `${level}:${sequenceSeed}:${stepCount}:${focus ?? 'sweep'}`
   const cached = STEPS_CACHE.get(cacheKey)
   if (cached) return cached
 
-  const steps = buildDatabaseHeroSteps(level, sequenceSeed, stepCount)
+  const steps = buildDatabaseHeroSteps(level, sequenceSeed, stepCount, focus)
   STEPS_CACHE.set(cacheKey, steps)
   return steps
 }
