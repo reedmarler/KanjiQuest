@@ -822,9 +822,42 @@ if (typeof window !== 'undefined') {
  * Content Studio keeps reading editorWords() directly: a reviewer needs to see
  * these entries in order to repair them.
  */
+/**
+ * Tags that mean a record is grammar rather than vocabulary.
+ *
+ * A slot fills with a thing: a subject, an object, a place. These records are
+ * particles, copulas, auxiliaries and set phrases (の, です, か, ていただく,
+ * ありがとう) that the content database files under noun categories. They were
+ * counted as unreachable *vocabulary*, which is the wrong description — they
+ * are not vocabulary a noun slot can use, and no slot rule should ever be
+ * widened to admit them. Saying so once here stops each future pass
+ * rediscovering them as an apparent gap.
+ *
+ * Deliberately narrow. The first version of this also excluded anything tagged
+ * verb, godan, ichidan, i-adjective or na-adjective, which removed 557 working
+ * words: those tags sit on plenty of ordinary nouns (健康, 危険, 元気) that
+ * generate correctly. Miscategorised verbs and adjectives such as 申す and
+ * ひどい are therefore still counted — they need their category corrected in
+ * the content data, which `auditApprovedOverrides` reports.
+ *
+ * Excluding these also fixed a live defect rather than only a metric: の, に,
+ * と, で, です, か, よ, より and である were all *reachable* before this,
+ * meaning noun slots were accepting bare particles.
+ *
+ * The engine's own verbs and adjectives are unaffected — they live in `verbs`
+ * and `adjectiveRules`, named literally rather than drawn from this pool.
+ */
+const nonNounRecordTags = new Set(normalizeTags([
+  'auxiliary-verb','honorific-verb','grammar-pattern','particle','conjunction',
+  'sentence-ending','auxiliary','interjection','greeting',
+]))
+function isNonNounRecord(word: WordRecord) {
+  return normalizeTags(word.tags).some(tag => nonNounRecordTags.has(tag))
+}
+
 function generatorWords(): WordRecord[] {
   if (generatorWordCache) return generatorWordCache
-  generatorWordCache = editorWords().filter(word => !hasCompositeSurface(word) && hasUsableMeaning(word))
+  generatorWordCache = editorWords().filter(word => !hasCompositeSurface(word) && hasUsableMeaning(word) && !isNonNounRecord(word))
   return generatorWordCache
 }
 
