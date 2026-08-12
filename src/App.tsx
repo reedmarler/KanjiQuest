@@ -503,9 +503,7 @@ function App() {
         onOpenAchievements={() => setView('achievements')}
         onOpenStudyTools={() => setView('study-tools')}
         onOpenAdditionalTools={() => setView('additional-tools')}
-        achievementMetrics={achievementMetrics}
         questProgress={questProgress}
-        favoriteSentenceCount={favoriteSentences.length}
         wrongPool={wrongPool}
         progress={progress}
       />

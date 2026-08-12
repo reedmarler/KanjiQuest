@@ -118,7 +118,8 @@ body:has(.dashboard) {
 /* Dashboard */
 .dashboard {
   position: relative;
-  padding-top: 1.9rem;
+  /* Desktop: title shares a row with the absolute story toggle */
+  padding-top: 0.2rem;
 }
 
 .hero {
@@ -135,6 +136,8 @@ body:has(.dashboard) {
   font-weight: 700;
   line-height: 1.18;
   padding-bottom: 0.06em;
+  /* Keep the centered title clear of the story toggle on desktop */
+  padding-inline: 5.75rem;
   background: linear-gradient(135deg, var(--kyogre-light), var(--sakura));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -205,7 +208,7 @@ body:has(.dashboard) {
      and a mismatched box height here shifted the baseline by the difference
      the instant a step's render path switched between them. */
   --hero-database-slot-height: 1.86em;
-  --hero-rotater-height: calc(var(--hero-japanese-row-height) + 3.08rem);
+  --hero-rotater-height: calc(var(--hero-japanese-row-height) + 3.5rem);
   height: var(--hero-rotater-height);
   min-height: var(--hero-rotater-height);
   max-height: var(--hero-rotater-height);
@@ -245,11 +248,17 @@ body:has(.dashboard) {
 }
 
 .hero-database-english {
-  --hero-database-english-row-height: 1.45rem;
+  /* Fixed two-line slot — long glosses clamp inside instead of resizing the row. */
+  --hero-database-english-row-height: 1.35rem;
+  --hero-database-english-slot-height: calc(var(--hero-database-english-row-height) * 2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  height: var(--hero-database-english-row-height);
-  min-height: var(--hero-database-english-row-height);
-  margin: 0.46rem 0 0.35rem;
+  height: var(--hero-database-english-slot-height);
+  min-height: var(--hero-database-english-slot-height);
+  max-height: var(--hero-database-english-slot-height);
+  margin: 0.4rem 0 0.3rem;
   padding-inline: 0.75rem;
   color: var(--kyogre-light);
   font: 500 0.84rem/var(--hero-database-english-row-height) 'Outfit', system-ui, sans-serif;
@@ -259,7 +268,7 @@ body:has(.dashboard) {
 }
 
 .hero-database-english-stack {
-  display: inline-grid;
+  display: grid;
   align-items: center;
   /* justify-items must stay "stretch" (the grid default), not "center": see
      the matching note on .hero-database-frame-stack above — centering the
@@ -270,15 +279,21 @@ body:has(.dashboard) {
      itself is then centered within that stable width via text-align. */
   justify-items: stretch;
   width: 100%;
-  height: var(--hero-database-english-row-height);
+  height: 100%;
+  min-height: 0;
 }
 
 .hero-database-english-text {
-  display: inline-block;
+  display: -webkit-box;
   grid-area: 1 / 1;
   max-width: 100%;
+  overflow: hidden;
   line-height: var(--hero-database-english-row-height);
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 /* Same duration and easing as the Japanese frame's fade below, and the same
@@ -485,35 +500,25 @@ body:has(.dashboard) {
   text-wrap: balance;
 }
 
-/* Story sentences translate to English that runs well past what the
-   single-line database English row was sized for (measured up to ~190
-   characters), so a fixed two-line clamp still clips the longest ones.
-   Story mode instead lets the row grow to however many lines the current
-   translation needs, with the block's own fixed height traded for a min
-   height so the rest of the panel doesn't jump on every short sentence. */
+/* Story English stays inside the same fixed two-line slot as normal mode so
+   long translations clamp instead of pushing the panel up and down. */
 .hero-story-block {
-  height: auto;
+  height: var(--hero-rotater-height);
   min-height: var(--hero-rotater-height);
-  max-height: none;
-  flex-basis: auto;
+  max-height: var(--hero-rotater-height);
+  flex-basis: var(--hero-rotater-height);
 }
 
-.hero-story-block .hero-database-english {
-  height: auto;
-  min-height: calc(var(--hero-database-english-row-height) * 2);
-  max-height: none;
-  overflow: visible;
-  white-space: normal;
-}
-
+.hero-story-block .hero-database-english,
 .hero-story-block .hero-database-english-stack {
-  height: auto;
-  min-height: calc(var(--hero-database-english-row-height) * 2);
+  height: var(--hero-database-english-slot-height);
+  min-height: var(--hero-database-english-slot-height);
+  max-height: var(--hero-database-english-slot-height);
 }
 
 .hero-story-block .hero-database-english-text {
   white-space: normal;
-  line-height: 1.3;
+  line-height: var(--hero-database-english-row-height);
 }
 
 @keyframes hero-database-highlight {
@@ -550,11 +555,11 @@ body:has(.dashboard) {
 
 @keyframes hero-database-english-blur-out {
   0%, 40% { opacity: 1; filter: blur(0); }
-  100% { opacity: 0; filter: blur(7px); }
+  100% { opacity: 0; filter: blur(5px); }
 }
 
 @keyframes hero-database-english-blur-in {
-  0%, 40% { opacity: 0; filter: blur(7px); }
+  0%, 40% { opacity: 0; filter: blur(5px); }
   100% { opacity: 1; filter: blur(0); }
 }
 
@@ -2131,7 +2136,7 @@ body:has(.dashboard) {
 
 .control-story-topbar {
   position: absolute;
-  top: 0;
+  top: 0.45rem;
   left: 0;
   right: 0;
   z-index: 12;
@@ -2139,6 +2144,7 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: flex-end;
   gap: 0.28rem;
+  min-height: 1.85rem;
   pointer-events: none;
 }
 
@@ -2159,7 +2165,6 @@ body:has(.dashboard) {
   grid-template-columns: auto minmax(0, 1fr);
   gap: 0.55rem;
   width: 100%;
-  transition: opacity 140ms ease, filter 140ms ease;
 }
 
 .control-group-levels.is-disabled {
@@ -2627,11 +2632,61 @@ body:has(.dashboard) {
 .voice-settings-panel {
   display: grid;
   grid-template-columns: 1fr;
-  align-content: center;
+  align-content: start;
   gap: 0.5rem;
   min-width: 0;
   padding: 0.75rem;
   border-left: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.hero-swap-mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  min-height: 5.2rem;
+}
+
+.hero-mode-panel-slot {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  min-height: 5.2rem;
+}
+
+.hero-mode-panel-hint {
+  margin: 0;
+  color: color-mix(in srgb, var(--text-muted) 72%, transparent);
+  font: italic 500 0.72rem/1.2 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.hero-mode-panel-slot > .control-story-options,
+.hero-mode-panel-slot > .hero-swap-mode-grid {
+  width: 100%;
+  justify-self: stretch;
+}
+
+.hero-swap-mode-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.4rem;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  color: var(--text-muted);
+  font: 700 0.62rem/1.1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+}
+
+.hero-swap-mode-panel:hover {
+  border-color: color-mix(in srgb, var(--kyogre-light) 42%, var(--border));
+  color: var(--text);
+  background: color-mix(in srgb, var(--kyogre) 12%, var(--surface-2));
 }
 
 .voice-settings-header {
@@ -2855,6 +2910,60 @@ body:has(.dashboard) {
   display: flex;
   align-items: center;
   gap: 0.28rem;
+  flex-shrink: 0;
+}
+
+.hero-mode-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.control-story-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.control-story-picker .control-select {
+  width: 50%;
+  max-width: 50%;
+  flex: 0 0 50%;
+  min-width: 0;
+}
+
+.control-story-playback {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  flex-shrink: 0;
+}
+
+.hero-mode-icon {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--text-muted) 8%, var(--surface-2));
+  color: color-mix(in srgb, var(--text-muted) 78%, transparent);
+  font: 700 0.82rem/1 'Noto Sans JP', 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.hero-mode-icon:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--text-muted) 52%, transparent);
+}
+
+.hero-mode-icon.is-active {
+  color: var(--rayquaza-light);
+  border-color: color-mix(in srgb, var(--rayquaza-light) 54%, transparent);
+  background: color-mix(in srgb, var(--rayquaza) 16%, var(--surface-2));
 }
 
 .control-story-toggle {
@@ -2870,7 +2979,6 @@ body:has(.dashboard) {
   color: var(--text-muted);
   font: 700 0.48rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
-  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
 }
 
 .control-toggle-track {
@@ -2881,7 +2989,6 @@ body:has(.dashboard) {
   padding: 0.1rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--text-muted) 34%, transparent);
-  transition: background 140ms ease;
 }
 
 .control-toggle-track > span {
@@ -2890,7 +2997,6 @@ body:has(.dashboard) {
   border-radius: 50%;
   background: var(--text-muted);
   transform: translateX(0);
-  transition: background 140ms ease, transform 140ms ease;
 }
 
 .control-story-toggle.is-active {
@@ -2920,7 +3026,6 @@ body:has(.dashboard) {
   color: color-mix(in srgb, var(--text-muted) 78%, transparent);
   font: 700 0.78rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
-  transition: border-color 140ms ease, background 140ms ease, color 140ms ease, opacity 140ms ease;
 }
 
 .control-story-action:hover:not(:disabled) {
@@ -2943,7 +3048,7 @@ body:has(.dashboard) {
   display: grid;
   gap: 0.38rem;
   min-width: 0;
-  transition: opacity 140ms ease, filter 140ms ease;
+  min-height: 5.2rem;
 }
 
 .control-story-options.is-disabled {
@@ -2976,6 +3081,12 @@ body:has(.dashboard) {
 .control-story-setting .control-select {
   width: 100%;
   max-width: none;
+}
+
+.control-story-setting .control-story-picker .control-select {
+  width: 50%;
+  max-width: 50%;
+  flex: 0 0 50%;
 }
 
 .control-story-setting .control-segmented-story {
@@ -3060,6 +3171,7 @@ body:has(.dashboard) {
 }
 
 .dashboard-quest-button {
+  position: relative;
   width: 100%;
   display: grid;
   grid-template-columns: 2.25rem 1fr;
@@ -3094,11 +3206,12 @@ body:has(.dashboard) {
   font: 700 1.1rem/1 'Noto Sans JP', sans-serif;
 }
 
-.dashboard-quest-button > span:last-child {
+.dashboard-quest-copy {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: baseline;
   column-gap: 0.45rem;
+  min-width: 0;
 }
 
 .dashboard-quest-button small,
@@ -3169,24 +3282,122 @@ body:has(.dashboard) {
 
 .dashboard-action-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
   margin: -0.1rem 0 0.6rem;
 }
 
-.dashboard-action-grid > .dashboard-quest-button,
-.dashboard-action-grid > .dashboard-achievement-button,
-.dashboard-action-grid > .dashboard-tool-button,
-.dashboard-action-grid > .dashboard-additional {
-  min-height: 6.9rem;
-  margin: 0;
+.dashboard-action-primary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
 }
 
-.dashboard-action-grid > .dashboard-quest-button,
-.dashboard-action-grid > .dashboard-achievement-button,
-.dashboard-action-grid > .dashboard-tool-button {
+.dashboard-action-secondary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.dashboard-action-primary > .dashboard-quest-button,
+.dashboard-action-primary > .dashboard-tool-button {
+  min-height: 8.4rem;
+  margin: 0;
   align-content: center;
-  grid-template-columns: 2.25rem minmax(0, 1fr);
+  grid-template-columns: 2.7rem minmax(0, 1fr);
+  gap: 0.7rem;
+  padding: 0.85rem 0.9rem 1.15rem;
+}
+
+.dashboard-action-primary .dashboard-quest-mark,
+.dashboard-action-primary .study-tools-mark {
+  width: 2.55rem;
+  border-radius: 11px;
+  font-size: 1.3rem;
+}
+
+.dashboard-action-primary .dashboard-quest-button b,
+.dashboard-action-primary .five-minute-study-heading b {
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+.dashboard-action-primary .dashboard-quest-button small,
+.dashboard-action-primary .five-minute-study-heading small {
+  font-size: 0.52rem;
+  letter-spacing: 0.12em;
+}
+
+.dashboard-action-primary .dashboard-quest-button em,
+.dashboard-action-primary .five-minute-study-heading em {
+  display: block;
+  font-size: 0.68rem;
+  margin-top: 0.35rem;
+}
+
+.dashboard-action-secondary > .dashboard-achievement-button,
+.dashboard-action-secondary > .dashboard-additional {
+  min-height: 2.85rem;
+  margin: 0;
+  padding: 0.38rem 0.55rem;
+  gap: 0.4rem;
+  border-radius: 10px;
+  opacity: 0.88;
+}
+
+.dashboard-action-secondary > .dashboard-achievement-button {
+  grid-template-columns: 1.55rem minmax(0, 1fr);
+  align-content: center;
+}
+
+.dashboard-action-secondary > .dashboard-additional {
+  display: grid;
+  grid-template-columns: 1.55rem minmax(0, 1fr);
+  align-items: center;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+}
+
+.dashboard-action-secondary > .dashboard-additional:hover {
+  border-color: var(--kyogre-light);
+  transform: translateY(-1px);
+}
+
+.dashboard-action-secondary .dashboard-achievement-mark,
+.dashboard-action-secondary .dashboard-additional-mark-main {
+  width: 1.45rem;
+  border-radius: 7px;
+  font-size: 0.78rem;
+}
+
+.dashboard-action-secondary .dashboard-achievement-button b,
+.dashboard-action-secondary .dashboard-additional-heading b {
+  display: block;
+  font-size: 0.68rem;
+  line-height: 1.1;
+}
+
+.dashboard-action-secondary .dashboard-achievement-button em,
+.dashboard-action-secondary .dashboard-additional-heading em {
+  display: block;
+  margin-top: 0.12rem;
+  font-size: 0.5rem;
+  font-style: normal;
+  color: var(--text-muted);
+}
+
+.dashboard-action-secondary .dashboard-achievement-button > span:last-child,
+.dashboard-action-secondary .dashboard-additional-heading {
+  display: grid;
+  gap: 0;
+}
+
+.dashboard-action-secondary .dashboard-additional-heading {
+  margin: 0;
 }
 
 .five-minute-study,
@@ -4886,6 +5097,12 @@ body:has(.dashboard) {
 
 @media (max-width: 720px) {
   .hero h1 { font-size: 2rem; }
+  .dashboard {
+    padding-top: 1.9rem;
+  }
+  .hero-compact h1 {
+    padding-inline: 0;
+  }
   /* Pull the settled block down closer to the controls panel below it —
      roughly half the gap it used to leave (0.35rem + 0.4rem combined). */
   .hero-database-english { margin-bottom: 0.18rem; }
@@ -4950,6 +5167,7 @@ body:has(.dashboard) {
 
   .control-story-topbar {
     top: 0;
+    min-height: 0;
     gap: 0.32rem;
   }
   .control-story-topbar:has(.control-story-quick-select) {
@@ -8928,26 +9146,32 @@ body:has(.dashboard) {
 .quest-battle-question>.quest-checkpoint-next{min-width:9.2rem;min-height:3rem;font-size:.88rem}
 @media(max-width:720px){.quest-reader-toggles{gap:.22rem}.quest-reader-toggles .btn{padding:.38rem .45rem;font-size:.5rem}.quest-reading-paragraph{font-size:1rem;line-height:2.1}.quest-checkpoint-result{align-items:stretch;flex-direction:column}.quest-checkpoint-result .btn{width:100%}.quest-book-reader{padding:.75rem}.quest-book-heading{margin-bottom:.45rem}.quest-book-heading p{display:none}.quest-book-page{min-height:17rem;padding:1.55rem 1.35rem 1.1rem}.quest-book-page .quest-reading-paragraph{font-size:clamp(1.16rem,5.1vw,1.42rem);line-height:2.12}.quest-book-page .quest-reading-paragraph.is-furigana-visible{line-height:2.65}.quest-book-footer{align-items:stretch;flex-direction:column}.quest-book-footer .btn{width:100%}.quest-kanji-card{padding:.65rem}.quest-kanji-word{font-size:clamp(2.7rem,14vw,4rem)}.quest-kanji-parts{grid-template-columns:1fr;align-content:start;overflow-y:auto}.quest-kanji-parts>article{grid-template-columns:2.8rem 1fr;padding:.48rem}.quest-kanji-parts>article>strong{font-size:2.35rem}.quest-kanji-part-examples{gap:.45rem}.quest-gate-intro{padding:.75rem}.quest-gate-scene{height:11.25rem}.quest-gate-figure{bottom:-.85rem;width:8.6rem;height:8.6rem}.quest-gate-hero{left:-.55rem}.quest-gate-guardian{right:-.55rem}.quest-torii{top:1.65rem;width:6.2rem;height:7.4rem}.quest-torii:before{width:8.1rem}.quest-gate-seal{top:3.4rem;width:2.9rem}.quest-gate-copy>p:last-child{font-size:.56rem}.quest-gate-intro>.btn{width:100%}}
 @media(max-width:720px){.quest-campaign-bar{padding:.8rem}.quest-current-compact{grid-template-columns:1fr}.quest-reward{grid-template-columns:auto 1fr;justify-items:start;text-align:left}.quest-reward>span{grid-column:2}.quest-reward>strong{grid-row:1/4;grid-column:1}.quest-reward>b,.quest-reward small{grid-column:2}.quest-steps-compact{padding:.9rem}.quest-checkpoint-card{padding:1.05rem}.quest-checkpoint-options{grid-template-columns:1fr}.quest-campaign-progress{display:none}}
-@media(max-width:720px){.dashboard-journey-actions{grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr)}.dashboard-quest-button em,.dashboard-achievement-button em{display:none}.achievements-hero{grid-template-columns:3.35rem 1fr auto;padding:.9rem}.achievements-crest{width:3.35rem}.achievement-grid{grid-template-columns:1fr}.achievement-filters{overflow-x:auto;padding-bottom:.15rem}.achievement-filters button{flex:0 0 auto}.quest-battle-rules{flex-wrap:wrap;justify-content:center}.quest-battle-arena{min-height:6.5rem;padding:.55rem}.quest-fighter-mark{width:3rem}.quest-battle-question{padding-inline:0}.quest-battle-question>header small{display:none}}
+@media(max-width:720px){.dashboard-journey-actions{grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr)}.dashboard-action-primary .dashboard-quest-button em{display:none}.achievements-hero{grid-template-columns:3.35rem 1fr auto;padding:.9rem}.achievements-crest{width:3.35rem}.achievement-grid{grid-template-columns:1fr}.achievement-filters{overflow-x:auto;padding-bottom:.15rem}.achievement-filters button{flex:0 0 auto}.quest-battle-rules{flex-wrap:wrap;justify-content:center}.quest-battle-arena{min-height:6.5rem;padding:.55rem}.quest-fighter-mark{width:3rem}.quest-battle-question{padding-inline:0}.quest-battle-question>header small{display:none}}
 @media(max-width:430px){.dashboard-journey-actions{grid-template-columns:1fr 1fr}.dashboard-quest-button,.dashboard-achievement-button{grid-template-columns:1.85rem 1fr;padding:.4rem}.dashboard-quest-mark,.dashboard-achievement-mark{width:1.8rem}.dashboard-quest-button small,.dashboard-achievement-button small{font-size:.4rem}.achievements-hero>strong{display:none}.achievements-hero{grid-template-columns:3.2rem 1fr}.quest-battle-arena{grid-template-columns:1fr 1.5rem 1fr}.quest-fighter-name span{display:none}.quest-checkpoint-clue{font-size:.72rem}.quest-battle-intro h1{font-size:1.3rem}.quest-kanji-card-label small{display:none}.quest-kanji-word-answer{align-items:center;flex-direction:column;gap:.05rem}.quest-kanji-part-examples{flex-wrap:wrap}.quest-book-page{min-height:16.5rem;padding:1.4rem 1rem 1rem}.quest-gate-scene{height:10rem}.quest-gate-figure{width:7.2rem;height:7.2rem}.quest-torii{width:5.4rem;height:6.5rem}.quest-torii:before{width:7rem}.quest-gate-seal{top:3rem;width:2.45rem}.quest-gate-seal span{font-size:1rem}.quest-gate-copy>p:last-child{max-width:19rem}.quest-battle-rules span{font-size:.43rem}}
 
 @media(max-width:720px){
-  .dashboard-action-grid {
-    grid-auto-rows: 8.45rem;
+  .dashboard-action-primary {
+    grid-auto-rows: 7.6rem;
   }
-  .dashboard-action-grid > .dashboard-quest-button,
-  .dashboard-action-grid > .dashboard-achievement-button,
-  .dashboard-action-grid > .dashboard-tool-button,
-  .dashboard-action-grid > .dashboard-additional {
+  .dashboard-action-primary > .dashboard-quest-button,
+  .dashboard-action-primary > .dashboard-tool-button {
     min-height: 0;
     height: 100%;
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+    padding: 0.7rem 0.72rem;
   }
-  .dashboard-action-grid > .dashboard-quest-button,
-  .dashboard-action-grid > .dashboard-achievement-button,
-  .dashboard-action-grid > .dashboard-tool-button {
-    align-content: center;
-    grid-template-columns: 2rem minmax(0, 1fr);
-    padding: 0.56rem;
+  .dashboard-action-primary .dashboard-quest-mark,
+  .dashboard-action-primary .study-tools-mark {
+    width: 2.1rem;
+    font-size: 1.15rem;
+  }
+  .dashboard-action-primary .dashboard-quest-button b,
+  .dashboard-action-primary .five-minute-study-heading b {
+    font-size: 0.92rem;
+  }
+  .dashboard-action-secondary > .dashboard-achievement-button,
+  .dashboard-action-secondary > .dashboard-additional {
+    min-height: 2.55rem;
   }
   .dashboard-action-grid .five-minute-study-heading,
   .dashboard-action-grid .dashboard-additional-heading {
@@ -8958,23 +9182,21 @@ body:has(.dashboard) {
   .dashboard-action-grid .dashboard-additional-heading p {
     text-align: left;
   }
-  .dashboard-action-grid .dashboard-quest-mark,
-  .dashboard-action-grid .dashboard-achievement-mark,
-  .dashboard-action-grid .study-tools-mark,
-  .dashboard-action-grid .dashboard-additional-mark-main {
-    width: 1.95rem;
-  }
 }
 
 @media(max-width:430px){
-  .dashboard-action-grid {
-    grid-auto-rows: 7.25rem;
+  .dashboard-action-primary {
+    grid-auto-rows: 6.8rem;
   }
-  .dashboard-action-grid > .dashboard-quest-button,
-  .dashboard-action-grid > .dashboard-achievement-button,
-  .dashboard-action-grid > .dashboard-tool-button,
-  .dashboard-action-grid > .dashboard-additional {
+  .dashboard-action-primary > .dashboard-quest-button,
+  .dashboard-action-primary > .dashboard-tool-button {
     min-height: 0;
+    padding: 0.58rem 0.55rem;
+  }
+  .dashboard-action-secondary > .dashboard-achievement-button,
+  .dashboard-action-secondary > .dashboard-additional {
+    min-height: 2.35rem;
+    padding: 0.32rem 0.45rem;
   }
   .tool-menu-grid {
     grid-template-columns: 1fr;

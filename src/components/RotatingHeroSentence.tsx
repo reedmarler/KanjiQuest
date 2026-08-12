@@ -14,13 +14,12 @@ type HeroDisplayMode = 'sentence' | 'word'
 type StreamPhase = 'rest' | 'highlight' | 'swap'
 
 // These are divided by playbackRate below, so raising them raises how long
-// everything takes at 1x. Scaled by 1/0.6 from the original 1350/1150/1650
-// so that HERO_PLAYBACK_RATES' new "1x" takes exactly as long as the old
-// 0.6x step used to (the old 1x speed, reduced 40%) — every other step on
-// the new ladder is a plain multiple of this same baseline.
-const HERO_REST_MS = 2250
-const HERO_HIGHLIGHT_MS = 1917
-const HERO_SWAP_MS = 2750
+// everything takes at 1x. Scaled by 1/0.7 from the prior 2250/1917/2750
+// baseline so labeled 1x is 30% slower, with every other step a plain
+// multiple of that same redefined baseline.
+const HERO_REST_MS = 3214
+const HERO_HIGHLIGHT_MS = 2739
+const HERO_SWAP_MS = 3929
 const STARTER_STEP_COUNT = 2
 
 function newSequenceSeed() {
@@ -392,14 +391,16 @@ export function RotatingHeroSentence({
 
       {englishOn && (
         <p className={`hero-database-english${englishIsSwapping ? ' is-swapping' : ''}`} aria-live="polite">
-          {englishIsSwapping ? (
-            <span className="hero-database-english-stack">
-              <span className="hero-database-english-text is-outgoing">{english}</span>
-              <span className="hero-database-english-text is-incoming">{nextEnglish}</span>
-            </span>
-          ) : (
-            <span className="hero-database-english-text">{english}</span>
-          )}
+          <span className="hero-database-english-stack">
+            {englishIsSwapping ? (
+              <>
+                <span className="hero-database-english-text is-outgoing">{english}</span>
+                <span className="hero-database-english-text is-incoming">{nextEnglish}</span>
+              </>
+            ) : (
+              <span className="hero-database-english-text">{english}</span>
+            )}
+          </span>
         </p>
       )}
 
