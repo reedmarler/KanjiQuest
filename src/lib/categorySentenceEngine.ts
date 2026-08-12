@@ -310,7 +310,7 @@ const usableToolTags = [CANONICAL_CATEGORY_TAGS.Tool,CANONICAL_CATEGORY_TAGS.Veh
 // and on concrete carriers of information (写真, 電話番号), which produced
 // "explains the cloudy weather". Every genuinely abstract word that carried one
 // of them also carries 'abstract', so nothing is lost by dropping them.
-const abstractTopicTags = ['abstract','emotion','feeling','philosophy','thought','ideology','psychology','logic','society','relationship','situation','reason','result','outcome','method','process','opinion','belief','value','goal','problem','communication','experience','memory','plan','purpose','trend','pattern','responsibility','duty','ethics','reality','ideal']
+const abstractTopicTags = ['abstract','emotion','feeling','philosophy','thought','ideology','psychology','logic','society','relationship','situation','reason','result','outcome','method','process','opinion','belief','value','goal','problem','communication','experience','memory','knowledge','learning','plan','purpose','trend','pattern','responsibility','duty','ethics','reality','ideal']
 // Body parts, weather and other concrete nouns pick up 'state' or 'condition'
 // from the imported taxonomy, and a handful of words carry an abstract tag
 // beside a thoroughly physical gloss. Naming them is cheaper and safer than
@@ -357,7 +357,7 @@ const standaloneDestinationTags = ['country','city','town','village','neighborho
   // something anyone says, and it generated "runs to world". 土地 is excluded
   // for the same reason. Positional nouns (上, 横, そば) stay out too — they are
   // relations rather than places you travel to, and get their own frame.
-  'market','theater','region','continent','street','urban']
+  'market','theater','region','continent','street','urban','road','highway','infrastructure']
 const workplaceLocationTags = ['company','office','store','shop','school','education','university','hospital','bank','restaurant','cafe','library','museum','station','airport','hotel','post-office','movie-theater']
 const crowdedPlaceTags = ['city','town','village','neighborhood','park','restaurant','cafe','station','market','festival','event','downtown','public']
 const pushableObjectTags = ['button','door','box','bag','cart','chair','table','furniture','switch','key','tool']
@@ -1081,7 +1081,7 @@ function abstractTopicEnglish(gloss: string) {
 // are the cases where the definite article is not merely narrow but wrong:
 // "talks about life", never "talks about the life".
 const abstractMassGlosses = new Set([
-  'life','death','nature','society','culture','freedom','happiness','love','trust','permission','responsibility','experience','knowledge','ethics','reality','nostalgia','jealousy','hope','peace','justice','honesty','patience','courage','luck','fate','progress','growth','health','beauty','truth','power','strength','confidence','pride','respect','stress','sleep','fun','trouble','damage','demand','supply','evidence',
+  'life','death','nature','society','culture','education','knowledge','freedom','happiness','love','trust','permission','responsibility','experience','knowledge','ethics','reality','nostalgia','jealousy','hope','peace','justice','honesty','patience','courage','luck','fate','progress','growth','health','beauty','truth','power','strength','confidence','pride','respect','stress','sleep','fun','trouble','damage','demand','supply','evidence',
 ])
 
 function tagSet(word: WordRecord) {
