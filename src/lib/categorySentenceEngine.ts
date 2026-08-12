@@ -1003,6 +1003,36 @@ function pluralize(noun: string) {
   return `${noun}s`
 }
 
+/**
+ * Plural of a person noun. `pluralize` is a spelling rule and person nouns are
+ * where English keeps its irregulars, so it produced "womans" and "grandchilds".
+ * Glosses that are already plural (両親 "parents") are left alone.
+ */
+const irregularPersonPlurals: Record<string,string> = {
+  woman:'women', man:'men', child:'children', grandchild:'grandchildren',
+  person:'people', wife:'wives', housewife:'housewives', policeman:'policemen',
+  policewoman:'policewomen', salesman:'salesmen', businessman:'businessmen',
+  fisherman:'fishermen', chairman:'chairmen',
+}
+function pluralizePerson(gloss: string) {
+  if (isPluralPhrase(gloss)) return gloss
+  const lower = gloss.toLowerCase()
+  if (irregularPersonPlurals[lower]) return irregularPersonPlurals[lower]!
+  // Compounds inherit the head's irregular plural: "older brother" → "older
+  // brothers" is regular, but "old man" → "old men" is not.
+  const head = lower.split(' ').pop()!
+  if (irregularPersonPlurals[head]) return `${gloss.slice(0, gloss.length - head.length)}${irregularPersonPlurals[head]}`
+  return pluralize(gloss)
+}
+/** People whose gloss is inherently definite or non-countable in this frame. */
+const countableExemptPeople = new Set([
+  '私','僕','俺','私たち','我々','あなた','君','お前','彼','彼女','彼ら','自分','皆',
+  // Group nouns whose English gloss is singular and so slips past the
+  // already-plural test: 夫婦 is counted with 組, 家族 with 人 only when you
+  // mean its members.
+  '夫婦','家族','兄弟','姉妹','親戚','双子',
+])
+
 function isPluralPhrase(value: string) {
   const head = value.replace(/^(?:a|an|the|my|your|his|her|our|their)\s+/i, '')
   if (/^(?:people|men|women|children|data|clothes|shoes|glasses|pants|scissors|documents|parents)$/i.test(head)) return true
@@ -1716,8 +1746,29 @@ const COUNTER_FORMS: Record<string, ReadonlyArray<readonly [string,string]>> = {
   hai:   [['一杯','いっぱい'],['二杯','にはい'],['三杯','さんばい'],['四杯','よんはい'],['五杯','ごはい']],
   ko:    [['一個','いっこ'],['二個','にこ'],['三個','さんこ'],['四個','よんこ'],['五個','ごこ']],
   mai:   [['一枚','いちまい'],['二枚','にまい'],['三枚','さんまい'],['四枚','よんまい'],['五枚','ごまい']],
+  // 〜つ is the native series and is irregular throughout — ひとつ/ふたつ/みっつ
+  // share no reading with 一/二/三 at all.
+  tsu:   [['一つ','ひとつ'],['二つ','ふたつ'],['三つ','みっつ'],['四つ','よっつ'],['五つ','いつつ']],
+  // 一人 and 二人 are ひとり/ふたり, not いちにん/357にん; from three on the
+  // series is regular apart from 四人 being よにん rather than よんにん.
+  nin:   [['一人','ひとり'],['二人','ふたり'],['三人','さんにん'],['四人','よにん'],['五人','ごにん']],
 }
 const COUNTER_ENGLISH = ['one','two','three','four','five'] as const
+/**
+ * The numerals and counter words these forms are built from.
+ *
+ * 三冊 is a fused surface, so the vocabulary entry 三 never appears as its own
+ * token — but the learner does see it, and it is the entry the deck teaches.
+ * Deriving this from the tables rather than listing it keeps the two from
+ * drifting apart.
+ */
+const counterSourceWords = new Set<string>(
+  Object.values(COUNTER_FORMS).flatMap(forms => forms.flatMap(([surface]) => [
+    surface.charAt(0),
+    surface.slice(1),
+    surface,
+  ])).filter(Boolean),
+)
 
 /**
  * Which counter an object takes, and the verb that object belongs with.
@@ -1742,11 +1793,13 @@ const COUNTED_FRAMES: ReadonlyArray<{
     verb:{japanese:'飲みます',reading:'のみます',english:'drink',englishThird:'drinks'}, measureOf:'cup' },
   { counter:'ko', words:new Set(['卵','りんご','ケーキ','おにぎり','みかん']),
     verb:{japanese:'食べます',reading:'たべます',english:'eat',englishThird:'eats'} },
+  { counter:'tsu', words:new Set(['椅子','机','傘','鞄','窓']),
+    verb:{japanese:'買います',reading:'かいます',english:'buy',englishThird:'buys'} },
   { counter:'mai', words:new Set(['シャツ','切符','写真','皿','はがき']),
     verb:{japanese:'買います',reading:'かいます',english:'buy',englishThird:'buys'} },
 ]
 
-const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33'])
+const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34'])
 const geographicOriginTags = new Set(normalizeTags(['country','city','town','village','neighborhood','island']))
 const originSubjectDisallowedTags = new Set(normalizeTags(['patient','sick','illness','medical','hospital','guest','customer']))
 const portableObjectTags = new Set(normalizeTags([
@@ -2281,6 +2334,7 @@ function slotEligibleWords(): Set<string> {
   }
   for (const japanese of personAdjectiveWords) eligible.add(japanese)
   for (const japanese of abstractAdjectiveWords) eligible.add(japanese)
+  for (const japanese of counterSourceWords) eligible.add(japanese)
   for (const rule of adjectiveRules) eligible.add(rule.japanese)
 
   slotIndexCache = eligible
@@ -2341,6 +2395,7 @@ export function auditWordReachability(): WordReachability[] {
     ['abstract-topic', new Set(abstractTopicPool(vocabulary).map(word => word.japanese))],
     ['person-adjective', personAdjectiveWords],
     ['abstract-adjective', abstractAdjectiveWords],
+    ['counter-source', counterSourceWords],
   ]
 
   return vocabulary.map(word => {
@@ -2751,6 +2806,46 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const countSlot = {id:`count-${frame.counter}-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['counter',frame.counter]}
     const endingSlot = {id:`count-ending-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
     return finish(furigana,english,{subject,object},{count:countSlot,ending:endingSlot},[`${frame.counter} is the counter ${object.japanese} takes.`])
+  }
+  if (patternId === 'n5-34') {
+    // Place に Person が N人 います — the people counter, which is the one
+    // counter series a learner meets before any object counter.
+    // Directions (東, 西) are in the place pool but "at the east" is not where
+    // people stand; this frame wants somewhere you can be inside or at.
+    const countablePlaces = places.filter(word => ![...tagSet(word)].some(tag => ['direction','compass'].includes(tag)))
+    // A pronoun cannot be counted — "there is one we" — and neither can the
+    // speaker's own family terms, which are already definite.
+    const countablePeople = humans.filter(word => {
+      const tags = tagSet(word)
+      if (tags.has('pronoun') || tags.has('first-person')) return false
+      if (countableExemptPeople.has(word.japanese)) return false
+      // A group noun is not counted with 人: 夫婦 takes 組, and 両親 already
+      // means both of them, so 両親が三人 is wrong however it is glossed.
+      return !isPluralPhrase(primaryEnglishGloss(word.preferredTranslation || word.english))
+    })
+    const place = pick(countablePlaces, 1610, 'place')
+    const person = pick(countablePeople, 1611, 'subject')
+    if (!place || !person) return null
+    const forms = COUNTER_FORMS.nin!
+    let countIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1612) % forms.length
+    if (options.avoidWords?.ending && forms[countIndex]![0] === options.avoidWords.ending) {
+      countIndex = (countIndex + 1) % forms.length
+    }
+    const [countSurface, countReading] = forms[countIndex]!
+    const personGloss = primaryEnglishGloss(person.preferredTranslation || person.english)
+    // The count already says how many, so the English noun is bare and plural
+    // rather than taking an article: "two students are", not "two a students".
+    const counted = countIndex === 0 ? personGloss : pluralizePerson(personGloss)
+    const furigana = [
+      wordPart(place,'place'),literalPart('に'),
+      wordPart(person,'subject'),literalPart('が'),
+      {text:countSurface,reading:countReading,slot:'count'},
+      {text:'います',reading:'います',slot:'verb'},
+    ]
+    const english = `There ${countIndex === 0 ? 'is' : 'are'} ${COUNTER_ENGLISH[countIndex]} ${counted} ${englishPhrase(place,'location')}.`
+    const countSlot = {id:`count-nin-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:`${COUNTER_ENGLISH[countIndex]} people`,pos:'noun' as const,jlpt:'N5' as const,tags:['counter','nin']}
+    const endingSlot = {id:`count-nin-ending-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:`${COUNTER_ENGLISH[countIndex]} people`,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    return finish(furigana,english,{place,subject:person},{count:countSlot,ending:endingSlot},['人 is the counter for people.','います is the animate existence verb.'])
   }
   if (patternId === 'n5-31') {
     // 乗る never existed at all — every vehicle word (自転車, 飛行機, 自動車,
