@@ -47,6 +47,7 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N5','Subject は Transport で Verb',['Subject','は','Transport','で','Verb'],'私は電車で行く','means of transport','dictionary',true,'Distinct from n5-31 (乗る, boarding): this is travelling *by* a vehicle.'],
   ['N5','Subject は Object を Count Verb',['Subject','は','Object','を','Count','Verb'],'私は本を三冊読む','counted quantity of an object','dictionary',true,'The counter is chosen by the object: 冊 for books, 杯 for drinks, 個 for food, 枚 for flat things.'],
   ['N5','Place に Person が Count います',['Place','に','Person','が','Count','います'],'教室に学生が二人います','how many people are somewhere','います',true,'人 is irregular at one and two: ひとり and ふたり.'],
+  ['N5','Time Subject は Object を Verb',['Time','Subject','は','Object','を','Verb'],'昨日私は本を読みました','a relative time, which fixes the tense','polite present or past',true,'昨日 requires past and 明日 forbids it; the time word chooses the verb form. None of these take に.'],
 
   ['N4','Subject は Object を Verbたい',['Subject','は','Object','を','Verbたい'],'本を読みたい','desire to do','masu-stem + たい',true],
   ['N4','Subject は Object を Verbている',['Subject','は','Object','を','Verbている'],'本を読んでいる','ongoing or resulting state','te-form + いる',true],

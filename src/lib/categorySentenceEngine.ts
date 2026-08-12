@@ -1754,6 +1754,68 @@ const COUNTER_FORMS: Record<string, ReadonlyArray<readonly [string,string]>> = {
   nin:   [['一人','ひとり'],['二人','ふたり'],['三人','さんにん'],['四人','よにん'],['五人','ごにん']],
 }
 const COUNTER_ENGLISH = ['one','two','three','four','five'] as const
+
+/**
+ * Time words for n5-35, each with the tense its meaning forces.
+ *
+ * The tense is the whole point of the pattern: 昨日 requires a past verb and
+ * 明日 forbids one, in both languages. Getting that wrong produces the single
+ * most common learner error this vocabulary is involved in, so the time word
+ * chooses the verb form rather than the two being drawn independently.
+ *
+ * None of these take に — they are relative to now, which is what
+ * `niIncompatibleTimeWords` above records. Curated because the glosses in the
+ * source data are unusable as adverbials: 後 is "afterwards", 先 is "future",
+ * 頃 is "time".
+ */
+const TIME_ADVERBIALS: ReadonlyArray<{japanese:string;reading:string;english:string;tense:'past'|'future'|'present'}> = [
+  { japanese:'今日', reading:'きょう', english:'today', tense:'present' },
+  { japanese:'今', reading:'いま', english:'now', tense:'present' },
+  { japanese:'今晩', reading:'こんばん', english:'tonight', tense:'present' },
+  { japanese:'今週', reading:'こんしゅう', english:'this week', tense:'present' },
+  { japanese:'今月', reading:'こんげつ', english:'this month', tense:'present' },
+  { japanese:'今年', reading:'ことし', english:'this year', tense:'present' },
+  { japanese:'週末', reading:'しゅうまつ', english:'on the weekend', tense:'present' },
+  { japanese:'毎日', reading:'まいにち', english:'every day', tense:'present' },
+  { japanese:'毎週', reading:'まいしゅう', english:'every week', tense:'present' },
+  { japanese:'毎年', reading:'まいとし', english:'every year', tense:'present' },
+  { japanese:'時々', reading:'ときどき', english:'sometimes', tense:'present' },
+  { japanese:'普段', reading:'ふだん', english:'usually', tense:'present' },
+  { japanese:'昨日', reading:'きのう', english:'yesterday', tense:'past' },
+  { japanese:'先週', reading:'せんしゅう', english:'last week', tense:'past' },
+  { japanese:'先月', reading:'せんげつ', english:'last month', tense:'past' },
+  { japanese:'去年', reading:'きょねん', english:'last year', tense:'past' },
+  { japanese:'最近', reading:'さいきん', english:'recently', tense:'past' },
+  { japanese:'昔', reading:'むかし', english:'long ago', tense:'past' },
+  { japanese:'明日', reading:'あした', english:'tomorrow', tense:'future' },
+  { japanese:'来週', reading:'らいしゅう', english:'next week', tense:'future' },
+  { japanese:'来月', reading:'らいげつ', english:'next month', tense:'future' },
+  { japanese:'来年', reading:'らいねん', english:'next year', tense:'future' },
+  { japanese:'将来', reading:'しょうらい', english:'in the future', tense:'future' },
+]
+const timeAdverbialWords = new Set(TIME_ADVERBIALS.map(entry => entry.japanese))
+/** Verb and object pairings for n5-35, in the two polite forms the tenses need. */
+const TIMED_ACTION_FRAMES: ReadonlyArray<{
+  words: ReadonlySet<string>
+  present: {japanese:string;reading:string}
+  past: {japanese:string;reading:string}
+  english: {base:string;third:string;past:string}
+}> = [
+  { words:new Set(['本','小説','雑誌','辞書','教科書','漫画','新聞']),
+    present:{japanese:'読みます',reading:'よみます'}, past:{japanese:'読みました',reading:'よみました'},
+    english:{base:'read',third:'reads',past:'read'} },
+  { words:new Set(['お茶','コーヒー','水','牛乳','ジュース']),
+    present:{japanese:'飲みます',reading:'のみます'}, past:{japanese:'飲みました',reading:'のみました'},
+    english:{base:'drink',third:'drinks',past:'drank'} },
+  { words:new Set(['ご飯','パン','魚','肉','果物','卵','ケーキ']),
+    present:{japanese:'食べます',reading:'たべます'}, past:{japanese:'食べました',reading:'たべました'},
+    english:{base:'eat',third:'eats',past:'ate'} },
+  // テレビ is absent: with 見る it is the medium, "watches television", not a
+  // countable set, and this frame renders the object with an article.
+  { words:new Set(['映画','番組','アニメ']),
+    present:{japanese:'見ます',reading:'みます'}, past:{japanese:'見ました',reading:'みました'},
+    english:{base:'watch',third:'watches',past:'watched'} },
+]
 /**
  * The numerals and counter words these forms are built from.
  *
@@ -1799,7 +1861,7 @@ const COUNTED_FRAMES: ReadonlyArray<{
     verb:{japanese:'買います',reading:'かいます',english:'buy',englishThird:'buys'} },
 ]
 
-const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34'])
+const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34','n5-35'])
 const geographicOriginTags = new Set(normalizeTags(['country','city','town','village','neighborhood','island']))
 const originSubjectDisallowedTags = new Set(normalizeTags(['patient','sick','illness','medical','hospital','guest','customer']))
 const portableObjectTags = new Set(normalizeTags([
@@ -2335,6 +2397,7 @@ function slotEligibleWords(): Set<string> {
   for (const japanese of personAdjectiveWords) eligible.add(japanese)
   for (const japanese of abstractAdjectiveWords) eligible.add(japanese)
   for (const japanese of counterSourceWords) eligible.add(japanese)
+  for (const japanese of timeAdverbialWords) eligible.add(japanese)
   for (const rule of adjectiveRules) eligible.add(rule.japanese)
 
   slotIndexCache = eligible
@@ -2396,6 +2459,7 @@ export function auditWordReachability(): WordReachability[] {
     ['person-adjective', personAdjectiveWords],
     ['abstract-adjective', abstractAdjectiveWords],
     ['counter-source', counterSourceWords],
+    ['time-adverbial', timeAdverbialWords],
   ]
 
   return vocabulary.map(word => {
@@ -2806,6 +2870,38 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const countSlot = {id:`count-${frame.counter}-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['counter',frame.counter]}
     const endingSlot = {id:`count-ending-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
     return finish(furigana,english,{subject,object},{count:countSlot,ending:endingSlot},[`${frame.counter} is the counter ${object.japanese} takes.`])
+  }
+  if (patternId === 'n5-35') {
+    // Time Subject は Object を Verb — the time word picks the tense. These are
+    // all relative to now, so none of them takes に.
+    const frame = TIMED_ACTION_FRAMES[Math.abs(seed + 1620) % TIMED_ACTION_FRAMES.length]!
+    const candidates = vocabulary.filter(word => frame.words.has(word.japanese))
+    const subject = pick(humans, 1621, 'subject')
+    const object = pick(candidates, 1622, 'object')
+    if (!subject || !object) return null
+    let timeIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1623) % TIME_ADVERBIALS.length
+    if (options.avoidWords?.ending && TIME_ADVERBIALS[timeIndex]!.japanese === options.avoidWords.ending) {
+      timeIndex = (timeIndex + 1) % TIME_ADVERBIALS.length
+    }
+    const time = TIME_ADVERBIALS[timeIndex]!
+    const verb = time.tense === 'past' ? frame.past : frame.present
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const objectEnglish = englishPhrase(object,'object')
+    const verbEnglish = time.tense === 'past'
+      ? frame.english.past
+      : time.tense === 'future'
+        ? `will ${frame.english.base}`
+        : subjectUsesBaseVerb(subjectEnglish) ? frame.english.base : frame.english.third
+    const furigana = [
+      {text:time.japanese,reading:time.reading,slot:'time'},
+      wordPart(subject,'subject'),literalPart('は','わ'),
+      wordPart(object,'object'),literalPart('を'),
+      {text:verb.japanese,reading:verb.reading,slot:'verb'},
+    ]
+    const english = `${time.english.charAt(0).toUpperCase()+time.english.slice(1)} ${subjectEnglish} ${verbEnglish} ${objectEnglish}.`
+    const timeSlot = {id:`time-${time.japanese}`,surface:time.japanese,dictionaryForm:time.japanese,reading:time.reading,english:time.english,pos:'noun' as const,jlpt:'N5' as const,tags:['time',time.tense]}
+    const endingSlot = {id:`time-ending-${timeIndex}`,surface:time.japanese,dictionaryForm:time.japanese,reading:time.reading,english:time.english,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    return finish(furigana,english,{subject,object},{time:timeSlot,ending:endingSlot},[`${time.japanese} is relative to now, so it takes no に.`,`${time.japanese} forces the ${time.tense} form.`])
   }
   if (patternId === 'n5-34') {
     // Place に Person が N人 います — the people counter, which is the one
