@@ -54,8 +54,80 @@ const wordRepairs: Record<string,{ category:string; english:string; preferredTra
   '男性': { category:'People & Living Things', english:'man / male person', preferredTranslation:'man', tags:['person','man','male','adult','human'] },
 }
 
+/**
+ * Readings the source data records wrongly, as opposed to merely in romaji.
+ *
+ * Romaji readings are fine — they normalise to kana before rendering — but
+ * these two normalise to the wrong kana: 十 was "juutoo" (じゅうとお rather
+ * than じゅう) and 客観 was "kakkyoku" (かっきょく rather than きゃっかん). A
+ * wrong reading renders as wrong furigana, which teaches the mistake.
+ */
+const readingRepairs: Record<string,string> = { '十':'じゅう', '客観':'きゃっかん' }
+
+/**
+ * Whole phrases filed as plain vocabulary.
+ *
+ * 好きです ("I like you") and 会いたい ("I want to see you") are sentences, not
+ * words, and were sitting in Descriptors with nothing to say so — which is how
+ * they turned up in the unreachable-vocabulary list looking like a gap to fill.
+ * They are worth teaching; they are just not slot fillers. The data already has
+ * the convention for this: ありがとう, 気を付けて and 久しぶり all carry
+ * `expression`, which keeps them out of noun slots.
+ */
+const expressionRecords = new Set(['好きです','会いたい'])
+/** 笑い is the noun "laughter", not a set phrase; the tag was simply wrong. */
+const strayExpressionTag = new Set(['笑い'])
+
+/**
+ * Glosses for records the source data left as "Meaning needed".
+ *
+ * Only the ones that are ordinary vocabulary. The rest of that set is grammar —
+ * しか, ばかり, ておく, なければならない — which has no noun gloss to give and is
+ * excluded from generation anyway; inventing one would only let a particle into
+ * a noun slot.
+ */
+const missingGlossRepairs: Record<string,{ category: string; english: string; preferredTranslation: string; tags: string[] }> = {
+  'タバコ': { category:'Objects', english:'cigarette / tobacco', preferredTranslation:'cigarette', tags:['cigarette','tobacco','object','n5'] },
+  'インターネット': { category:'Objects', english:'the internet', preferredTranslation:'the internet', tags:['internet','technology','object','n4'] },
+  'イギリス': { category:'Places', english:'the United Kingdom / Britain', preferredTranslation:'Britain', tags:['country','place','n5'] },
+  'フランス': { category:'Places', english:'France', preferredTranslation:'France', tags:['country','place','n5'] },
+  'やめる': { category:'Actions', english:'to quit / to stop doing', preferredTranslation:'quit', tags:['verb','ichidan','transitive','n4'] },
+  'つながる': { category:'Actions', english:'to be connected', preferredTranslation:'connect', tags:['verb','godan','intransitive','n3'] },
+  'まとめる': { category:'Actions', english:'to gather together / to summarise', preferredTranslation:'summarise', tags:['verb','ichidan','transitive','n3'] },
+  'つらい': { category:'Descriptors', english:'painful / tough', preferredTranslation:'tough', tags:['painful','difficult','i-adjective','n3'] },
+  'すぐ': { category:'Descriptors', english:'immediately / right away', preferredTranslation:'immediately', tags:['immediately','adverb','n5'] },
+  'すべて': { category:'Descriptors', english:'all / everything', preferredTranslation:'all', tags:['all','quantity','n3'] },
+  'いろんな': { category:'Descriptors', english:'various / all sorts of', preferredTranslation:'various', tags:['various','noun-modifier','n4'] },
+  'たまたま': { category:'Descriptors', english:'by chance / as it happens', preferredTranslation:'by chance', tags:['by-chance','adverb','n2'] },
+}
+
+/**
+ * Tags that ran into the next record's headword during import: 覚える carried
+ * `n5開く`, 政治 carried `n3-池`. The JLPT prefix is the real tag; the kanji is
+ * a neighbouring entry that leaked in.
+ */
+function repairTag(tag: string): string {
+  const match = /^(n[1-5])-?[぀-ヿ一-鿿]+$/.exec(tag)
+  return match ? match[1]! : tag
+}
+
 function repairKnownCategoryErrors(record: ContentRecord): ContentRecord {
   if (record.kind !== 'vocabulary') return record
+  const repairedReading = readingRepairs[record.japanese] ?? record.reading
+  const baseTags = strayExpressionTag.has(record.japanese)
+    ? record.tags.filter(tag => tag !== 'expression')
+    : record.tags
+  const repairedTags = expressionRecords.has(record.japanese) && !baseTags.includes('expression')
+    ? [...baseTags.map(repairTag), 'expression']
+    : baseTags.map(repairTag)
+  if (repairedReading !== record.reading || repairedTags.length !== record.tags.length
+    || repairedTags.some((tag,index) => tag !== record.tags[index])) {
+    record = { ...record, reading:repairedReading, tags:repairedTags }
+  }
+  const missingGloss = /meaning needed/i.test(record.english ?? '') ? missingGlossRepairs[record.japanese] : undefined
+  if (missingGloss) {
+    return { ...record, english:missingGloss.english, preferredTranslation:missingGloss.preferredTranslation, category:missingGloss.category, categories:[missingGloss.category], tags:[...missingGloss.tags], allowedRoles:[missingGloss.category] }
+  }
   const senseRepair=senseRepairs[`${record.japanese}|${record.reading.trim().toLowerCase()}`] ?? wordRepairs[record.japanese]
   if (senseRepair) return { ...record, english:senseRepair.english, preferredTranslation:senseRepair.preferredTranslation ?? record.preferredTranslation, category:senseRepair.category, categories:[senseRepair.category], tags:[...senseRepair.tags], allowedRoles:[senseRepair.category] }
   const tags = record.tags.map(tag => tag.trim().replace(/([a-z0-9])([A-Z])/g,'$1-$2').toLowerCase().replace(/[_\s]+/g,'-'))
@@ -75,26 +147,42 @@ function seedRecords(): ContentRecord[] {
   return Array.isArray(records) ? records : []
 }
 
+/**
+ * The repairs every record gets, whatever route it arrives by.
+ *
+ * This used to run only over records parsed back out of localStorage, so the
+ * seed path and the no-storage path returned unrepaired data. The effect was a
+ * silent split: the browser generated sentences from repaired records while
+ * offline generation and the audit scripts — which have no localStorage and go
+ * straight to the seed — saw the raw ones, and a fresh install saw raw records
+ * until its first reload. Two sources of truth for the same vocabulary is
+ * exactly the kind of divergence the audits exist to catch, and it made them
+ * measure something other than what the app shows.
+ */
+function migrateRecords(records: ContentRecord[]): ContentRecord[] {
+  return records.map(record => {
+    const repaired = repairKnownCategoryErrors(record)
+    if (repaired.kind !== 'vocabulary' || repaired.preferredTranslation?.trim()) return repaired
+    return { ...repaired, preferredTranslation:inferPreferredTranslation(repaired.japanese,repaired.english,repaired.reading) }
+  })
+}
+
 export function loadContentDatabase(): ContentRecord[] {
   // Outside the browser (build scripts such as generate:vocab-examples) there
   // is no localStorage, but the committed seed file still holds the reviewed
   // records. Returning it here is what lets offline generation see the same
   // approved vocabulary the app does, instead of falling back to bare defaults.
-  if (!storageAvailable()) return seedRecords()
+  if (!storageAvailable()) return migrateRecords(seedRecords())
   try {
     const stored = window.localStorage.getItem(DATABASE_KEY)
     if (!stored) {
-      const seed = seedRecords()
+      const seed = migrateRecords(seedRecords())
       if (!seed.length) return []
       window.localStorage.setItem(DATABASE_KEY, JSON.stringify(seed))
       return seed
     }
     const parsed = JSON.parse(stored) as ContentRecord[]
-    const migrated = parsed.map(record => {
-      const repaired = repairKnownCategoryErrors(record)
-      if (repaired.kind !== 'vocabulary' || repaired.preferredTranslation?.trim()) return repaired
-      return { ...repaired, preferredTranslation:inferPreferredTranslation(repaired.japanese,repaired.english,repaired.reading) }
-    })
+    const migrated = migrateRecords(parsed)
     if (JSON.stringify(migrated) !== JSON.stringify(parsed)) window.localStorage.setItem(DATABASE_KEY,JSON.stringify(migrated))
     return migrated
   } catch {

@@ -26,9 +26,9 @@ const patternsByComplexity: Record<GenerationComplexity, readonly string[]> = {
   1: [
     'n5-01', 'n5-02', 'n5-03', 'n5-04', 'n5-05', 'n5-06', 'n5-07', 'n5-08', 'n5-09', 'n5-10',
     'n5-11', 'n5-12', 'n5-13', 'n5-14', 'n5-15', 'n5-16', 'n5-17', 'n5-18', 'n5-19', 'n5-20',
-    'n5-21', 'n5-22', 'n5-23', 'n5-24', 'n5-25', 'n5-26', 'n5-27', 'n5-28', 'n5-29', 'n5-30', 'n5-31',
+    'n5-21', 'n5-22', 'n5-23', 'n5-24', 'n5-25', 'n5-26', 'n5-27', 'n5-28', 'n5-29', 'n5-30', 'n5-31', 'n5-32', 'n5-33', 'n5-34', 'n5-35', 'n5-36', 'n5-37', 'n5-38', 'n5-39',
     'n4-01', 'n4-02', 'n4-03', 'n4-04', 'n4-05', 'n4-06', 'n4-07', 'n4-08',
-    'n4-11', 'n4-12', 'n4-15', 'n4-16', 'n4-17', 'n4-20', 'n4-24', 'n4-25',
+    'n4-11', 'n4-12', 'n4-15', 'n4-16', 'n4-17', 'n4-20', 'n4-24', 'n4-25', 'n4-26', 'n4-27', 'n4-28', 'n4-29', 'n4-30', 'n4-31', 'n4-32', 'n4-33',
     'n3-13', 'n2-10', 'n2-11', 'n1-04', 'n2-13', 'n2-14', 'n2-04',
     'n2-06', 'n2-16', 'n2-18', 'n2-03', 'n2-08',
     'n3-20', 'n3-21', 'n3-22', 'n3-23', 'n3-26', 'n3-29', 'n3-30',
@@ -60,6 +60,24 @@ const complexityByPattern = new Map<string, GenerationComplexity>(
 /** Uncategorized foundation patterns remain Level 1 rather than disappearing from practice. */
 export function complexityForPattern(patternId: string): GenerationComplexity {
   return complexityByPattern.get(patternId) ?? 1
+}
+
+/**
+ * Generator-ready patterns for a JLPT level.
+ *
+ * The hero stream used to select by complexity, via a straight N5→1, N4→2 map.
+ * That conflated two different axes: complexity measures how much structure the
+ * generator coordinates (level 2 means *two interacting verbs*), so every
+ * single-clause pattern lands at level 1 whatever its vocabulary. The N5 stream
+ * was therefore carrying 89 patterns — 13 of them N2 and one N1 — while N4
+ * single-clause frames had nowhere to appear at all.
+ *
+ * Complexity is still the right axis for Content Studio and the testing view,
+ * which ask "how hard is this to build". A learner stream wants "what is at my
+ * level", which is what JLPT records.
+ */
+export function patternsForLevel(level: JlptLevel): SentencePatternRecord[] {
+  return sentencePatternCatalog.filter((pattern) => pattern.jlpt === level && pattern.generatorReady)
 }
 
 export function patternsForComplexity(complexity: GenerationComplexity): SentencePatternRecord[] {

@@ -1,5 +1,5 @@
 import { charLength, HERO_SLOT_WIDTHS, type HeroSentenceFrame, type HeroStep } from '../data/heroSentences'
-import { patternsForComplexity, type GenerationComplexity } from './generationComplexity'
+import { patternsForLevel } from './generationComplexity'
 import { generatePreviewSentence, type GeneratedPreviewSentence } from './sentenceGeneratorPreview'
 import { selectMostDiverse, SentenceDiversityTracker } from './sentenceDiversity'
 import { isDashboardSentenceNatural } from './dashboardSentenceQuality'
@@ -74,10 +74,6 @@ const LINKED_FORMS: Partial<Record<JlptLevel, Readonly<Record<string, readonly s
 // The dashboard's complexity buttons (L1-L5) drive JLPT level everywhere else
 // in the app; the category-sentence generator groups patterns by grammatical
 // complexity instead, so map back to that axis here.
-const JLPT_TO_COMPLEXITY: Record<JlptLevel, GenerationComplexity> = {
-  N5: 1, N4: 2, N3: 3, N2: 4, N1: 5,
-}
-
 if (typeof window !== 'undefined') {
   window.addEventListener('kanji-quest-content-database-change', () => STEPS_CACHE.clear())
 }
@@ -319,8 +315,7 @@ function rotateOneSlot(
  * exactly one key in `changed`.
  */
 function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCount: number): HeroStep[] {
-  const complexity = JLPT_TO_COMPLEXITY[level]
-  const patterns = patternsForComplexity(complexity)
+  const patterns = patternsForLevel(level)
   if (!patterns.length) return []
 
   const start = Math.abs(sequenceSeed) % patterns.length

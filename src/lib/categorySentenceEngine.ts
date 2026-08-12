@@ -125,6 +125,14 @@ export interface VerbSlotRule {
   categories: SentenceCategory[]
   /** At least one semantic tag must match when tags are supplied. */
   tags?: string[]
+  /**
+   * Explicit allowlist for slots where tags cannot express the restriction —
+   * the Adverb category tags manner, degree, epistemic and negative-polarity
+   * words all as `adverb`. Declared on the rule rather than filtered inside
+   * fillVerbSlots so the reachability audit sees the same pool the generator
+   * does; hiding it in the generator inflated the audit by 60-odd words.
+   */
+  words?: ReadonlySet<string>
 }
 
 export interface VerbUsageRecord {
@@ -292,6 +300,29 @@ const watchableTags = ['movie','film','television','tv','video','anime','animati
 // 'household'/'machine' cover genuinely bulky appliances (冷蔵庫, 掃除機) that
 // you operate rather than hold — fine for 使う (use), excluded from 持つ below.
 const usableToolTags = [CANONICAL_CATEGORY_TAGS.Tool,CANONICAL_CATEGORY_TAGS.Vehicle,'knife','scissors','electronics','computer','laptop','phone','tablet','camera','television','tv','pen','pencil','instrument','household','machine','bicycle','kitchenware','ball','sport','equipment','personal-item','wearable','accessory']
+// Abstractions — ideas, feelings, situations. They share the Object category
+// with physical things but no physical-object slot will ever take them: you do
+// not read a tendency or carry a responsibility around. They were the single
+// largest block of unreachable vocabulary until the topic patterns below gave
+// them frames of their own.
+// 'state', 'condition' and 'information' are deliberately absent even though
+// they look abstract: the imported taxonomy hangs them on weather (曇り, 晴れ)
+// and on concrete carriers of information (写真, 電話番号), which produced
+// "explains the cloudy weather". Every genuinely abstract word that carried one
+// of them also carries 'abstract', so nothing is lost by dropping them.
+const abstractTopicTags = ['abstract','emotion','feeling','philosophy','thought','ideology','psychology','logic','society','relationship','situation','reason','result','outcome','method','process','opinion','belief','value','goal','problem','communication','experience','memory','knowledge','learning','plan','purpose','trend','pattern','responsibility','duty','ethics','reality','ideal']
+// Body parts, weather and other concrete nouns pick up 'state' or 'condition'
+// from the imported taxonomy, and a handful of words carry an abstract tag
+// beside a thoroughly physical gloss. Naming them is cheaper and safer than
+// trying to out-tag the source data.
+// 中心 is included for a different reason: it is genuinely abstract, but its
+// gloss is the bare "center", and "explains the center" reads as a missing
+// noun rather than an idea.
+const nonAbstractTopicWords = new Set(['体','声','目','眼','顔','手','足','頭','心臓','実','点','気','水','空','風','雨','雪','雲','熱','色','形','音','中心',
+  // 話 glosses as "talk", which collides with the verb of the について frame:
+  // "he talks about the talk". お願い glosses as "please", which is not a noun
+  // in English at all.
+  '話','お願い'])
 const portablePhysicalObjectTags = [...genericObjectTags,'toy','ball','key','money','currency','wallet']
 // 持つ normally describes something a person can comfortably carry or hold.
 // Keep bulky electronics/appliances (television, refrigerator, vacuum) out
@@ -318,7 +349,15 @@ const humanSubjectTags = [CANONICAL_CATEGORY_TAGS.Person,'pronoun','speaker','ma
 // and 東/西/南/北 are all ordinary, natural destinations — the same class of
 // gap as readingMannerTags: real words carrying real destination-shaped tags
 // that simply weren't in this allowlist yet.
-const standaloneDestinationTags = ['country','city','town','village','neighborhood',CANONICAL_CATEGORY_TAGS.Building,'house','home','apartment','school','education','university','office','store','shop','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','river','lake','beach','ocean','island','platform','parking-lot',CANONICAL_CATEGORY_TAGS.Room,'kitchen','bathroom','bedroom','classroom','public','transport','destination','zoo','bridge','port','intersection','hot-spring','countryside','aquarium','direction']
+const standaloneDestinationTags = ['country','city','town','village','neighborhood',CANONICAL_CATEGORY_TAGS.Building,'house','home','apartment','school','education','university','office','store','shop','restaurant','cafe','hospital','hotel','library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','river','lake','beach','ocean','island','platform','parking-lot',CANONICAL_CATEGORY_TAGS.Room,'kitchen','bathroom','bedroom','classroom','public','transport','destination','zoo','bridge','port','intersection','hot-spring','countryside','aquarium','direction',
+  // Same class of gap again: 市場, 劇場, 地域, ヨーロッパ and 通り are ordinary
+  // destinations carrying destination-shaped tags that were never listed.
+  //
+  // 世界 and 地球 are excluded despite being places: 世界に行きます is not
+  // something anyone says, and it generated "runs to world". 土地 is excluded
+  // for the same reason. Positional nouns (上, 横, そば) stay out too — they are
+  // relations rather than places you travel to, and get their own frame.
+  'market','theater','region','continent','street','urban','road','highway','infrastructure']
 const workplaceLocationTags = ['company','office','store','shop','school','education','university','hospital','bank','restaurant','cafe','library','museum','station','airport','hotel','post-office','movie-theater']
 const crowdedPlaceTags = ['city','town','village','neighborhood','park','restaurant','cafe','station','market','festival','event','downtown','public']
 const pushableObjectTags = ['button','door','box','bag','cart','chair','table','furniture','switch','key','tool']
@@ -369,6 +408,46 @@ const fleeingDestinationTags = ['building','house','home','apartment','room','fo
 // reads as “read out distinctly” rather than the plain manner of reading this
 // pattern teaches.
 const readingMannerTags = ['slowly','leisurely','quickly','carefully','quietly','silently','aloud','fluently','adverbial-manner']
+/**
+ * Adverbs safe to drop in front of a plain action verb.
+ *
+ * Named individually because the classifier gives almost every adverb the
+ * single tag `adverb`, which cannot separate the ones that work here from the
+ * ones that produce broken Japanese or broken English:
+ *
+ *   余り / ぜんぜん  negative-polarity — ungrammatical without 〜ない, and this
+ *                   slot's ending rotates through affirmative forms
+ *   とても / すごく / 非常に / 極めて / かなり
+ *                   degree adverbs that modify adjectives, not verbs
+ *                   (とても食べます is wrong)
+ *   もう / まだ      tense-sensitive; wrong against most of the 8 endings
+ *   たぶん / きっと / 確か / やはり / 結局 / 一体
+ *                   sentence-level epistemics, not verb manner
+ *   たくさん / 少し / 全部 / 一緒に
+ *                   grammatical, but English wants them *after* the verb
+ *                   ("eats a lot"), and this pattern renders {Adverb} before
+ *                   it ("a lot eats")
+ *   ございます       a polite verb the classifier filed under Adverb
+ *
+ * What remains is frequency and manner, which read correctly pre-verbally in
+ * both languages.
+ */
+const actionAdverbWords = new Set([
+  'よく','たまに','たいてい','ゆっくり','すぐ','だんだん',
+  'しっかり','きちんと','一生懸命','静かに','丁寧に',
+  // Frequency and manner adverbs that pass the same test as the originals:
+  // grammatical before a plain verb in Japanese and natural before the verb in
+  // English ("always reads a book", "suddenly ate bread"). They were sitting in
+  // the unreachable list purely because nothing had vetted them yet, unlike the
+  // degree and sentence adverbs above, which are excluded on purpose.
+  // 直接 is deliberately absent: it belongs with speech verbs (直接聞く,
+  // 直接話す) and produced "directly drinks tea" against this slot's verbs.
+  'いつも','常に','早く','突然','急に','はっきり','どんどん',
+])
+// A distinct array instance: fillVerbSlots keys the word filter off this
+// identity, the same way it keys the reading-manner widening off
+// readingMannerTags.
+const actionAdverbTags = ['adverb']
 const wakeTimeTags = ['clock-time','hour','morning','dawn','sunrise','wake-time']
 // Time expressions that take に generally, not just the wake-up ones. 起きる
 // still restricts itself to wakeTimeTags through its own slot rule, so this
@@ -440,17 +519,26 @@ const verbs: VerbUsageRecord[] = [
   { id:'nomu-basic', japanese:'飲む', reading:'のむ', english:'drink', englishThird:'drinks', verbClass:'godan-mu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food','Drink','Medicine'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','drinking','godan','transitive','drink'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food','Drink','Medicine'],tags:drinkableTags} } },
   { id:'yomu-basic', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags} } },
   { id:'miru-basic', japanese:'見る', reading:'みる', english:'watch', englishThird:'watches', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Object','Media','Technology'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','perception','watching','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Media','Technology'],tags:watchableTags} } },
+  // n5-09 (Subject は Object を Adverb Verb) existed but only 読む and 書く used
+  // it, so the whole Adverb category reached the stream through one
+  // reading-specific slot with two candidates. These reuse the layout with the
+  // curated action-adverb pool and each verb's existing object rules.
+  { id:'taberu-adverb', japanese:'食べる', reading:'たべる', english:'eat', englishThird:'eats', verbClass:'ichidan', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','eating','ichidan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
+  { id:'nomu-adverb', japanese:'飲む', reading:'のむ', english:'drink', englishThird:'drinks', verbClass:'godan-mu', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Food','Drink','Medicine'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','drinking','godan','transitive','drink'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food','Drink','Medicine'],tags:drinkableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
+  { id:'miru-adverb', japanese:'見る', reading:'みる', english:'watch', englishThird:'watches', verbClass:'ichidan', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Object','Media','Technology'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','perception','watching','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Media','Technology'],tags:watchableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
+  { id:'tsukau-adverb', japanese:'使う', reading:'つかう', english:'use', englishThird:'uses', verbClass:'godan-u', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:usableToolTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
+  { id:'tsukuru-adverb', japanese:'作る', reading:'つくる', english:'make', englishThird:'makes', verbClass:'godan-ru', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','godan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:['bread','dessert','cake','pie','pastry','baked','noodles','sushi','dish','meal']}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
   { id:'iku-ni', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-02', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
   // n5-30, means of transport (〜で行きます). The Vehicle category had 13 words
   // and only two slots accepting it, neither of which was about travelling —
   // this is the pattern those words exist for.
-  { id:'iku-transport', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-30', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
-  { id:'kaeru-transport', japanese:'帰る', reading:'かえる', english:'return home', englishThird:'returns home', verbClass:'godan-ru', sentencePattern:'n5-30', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
-  { id:'kuru-transport', japanese:'来る', reading:'くる', english:'come', englishThird:'comes', verbClass:'irregular', sentencePattern:'n5-30', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','irregular','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
+  { id:'iku-transport', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-32', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
+  { id:'kaeru-transport', japanese:'帰る', reading:'かえる', english:'return home', englishThird:'returns home', verbClass:'godan-ru', sentencePattern:'n5-32', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
+  { id:'kuru-transport', japanese:'来る', reading:'くる', english:'come', englishThird:'comes', verbClass:'irregular', sentencePattern:'n5-32', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} by {Transport}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','irregular','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, transport:{categories:['Vehicle'],tags:[CANONICAL_CATEGORY_TAGS.Vehicle,'car','bus','train','bicycle','motorcycle','airplane','ship']} } },
   { id:'taberu-location', japanese:'食べる', reading:'たべる', english:'eat', englishThird:'eats', verbClass:'ichidan', sentencePattern:'n5-03', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','eating','ichidan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:eatingLocationTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'hanasu-companion', japanese:'話す', reading:'はなす', english:'talk', englishThird:'talks', verbClass:'godan-su', sentencePattern:'n5-04', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} with {Companion}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','speaking','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, companion:{categories:['Person'],tags:humanSubjectTags} } },
   { id:'okiru-time', japanese:'起きる', reading:'おきる', english:'wake up', englishThird:'wakes up', verbClass:'ichidan', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','sleeping','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
-  { id:'yomu-adverb', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags}, adverb:{categories:['Adverb'],tags:readingMannerTags} } },
+  { id:'yomu-adverb', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
   { id:'iku-e', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
   { id:'kau-basic', japanese:'買う', reading:'かう', english:'buy', englishThird:'buys', verbClass:'godan-u', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','shopping','godan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'tsukuru-basic', japanese:'作る', reading:'つくる', english:'make', englishThird:'makes', verbClass:'godan-ru', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','godan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:['bread','dessert','cake','pie','pastry','baked','noodles','sushi','dish','meal']} } },
@@ -467,7 +555,7 @@ const verbs: VerbUsageRecord[] = [
   { id:'yomu-location', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-03', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Verb} {Object} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:eatingLocationTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags} } },
   { id:'neru-time', japanese:'寝る', reading:'ねる', english:'sleep', englishThird:'sleeps', verbClass:'ichidan', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','sleeping','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
   { id:'oyogu-time', japanese:'泳ぐ', reading:'およぐ', english:'swim', englishThird:'swims', verbClass:'godan-gu', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','sports','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
-  { id:'kaku-adverb', japanese:'書く', reading:'かく', english:'write', englishThird:'writes', verbClass:'godan-ku', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Document'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','writing','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Document'],tags:readableTags}, adverb:{categories:['Adverb'],tags:readingMannerTags} } },
+  { id:'kaku-adverb', japanese:'書く', reading:'かく', english:'write', englishThird:'writes', verbClass:'godan-ku', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Document'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','writing','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Document'],tags:readableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
   { id:'uru-basic', japanese:'売る', reading:'うる', english:'sell', englishThird:'sells', verbClass:'godan-ru', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','commerce','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'motsu-basic', japanese:'持つ', reading:'もつ', english:'hold', englishThird:'holds', verbClass:'godan-tsu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','possession','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:handHeldObjectTags} } },
   { id:'hashiru-destination', japanese:'走る', reading:'はしる', english:'run', englishThird:'runs', verbClass:'godan-ru', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','sports','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
@@ -542,7 +630,7 @@ const verbs: VerbUsageRecord[] = [
   { id:'arasou-companion', japanese:'争う', reading:'あらそう', english:'compete', englishThird:'competes', verbClass:'godan-u', sentencePattern:'n5-04', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} with {Companion}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','conflict','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, companion:{categories:['Person'],tags:humanSubjectTags} } },
   { id:'nigeru-destination', japanese:'逃げる', reading:'にげる', english:'flee', englishThird:'flees', verbClass:'ichidan', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:fleeingDestinationTags} } },
   { id:'mukau-destination', japanese:'向かう', reading:'むかう', english:'head', englishThird:'heads', verbClass:'godan-u', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
-  { id:'suwaru-location', japanese:'座る', reading:'すわる', english:'sit', englishThird:'sits', verbClass:'godan-ru', sentencePattern:'n5-26', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','body','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Furniture'],tags:['chair','bench','sofa','stool']} } },
+  { id:'suwaru-location', japanese:'座る', reading:'すわる', english:'sit', englishThird:'sits', verbClass:'godan-ru', sentencePattern:'n5-26', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','body','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Furniture','Object'],tags:['chair','bench','sofa','stool','seat']} } },
   { id:'nemuru-time', japanese:'眠る', reading:'ねむる', english:'sleep', englishThird:'sleeps', verbClass:'godan-ru', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
   { id:'suru-basic', japanese:'する', reading:'する', english:'do', englishThird:'does', verbClass:'irregular', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Activity'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','irregular','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Activity']} } },
   // subject before location (unlike most verb records) so fillVerbSlots'
@@ -658,7 +746,7 @@ export function getVerbUsageRecords(): VerbUsageRecord[] {
     objectCategories:[...verb.objectCategories],
     supportedGrammarForms:[...verb.supportedGrammarForms],
     tags:[...verb.tags],
-    slots:Object.fromEntries(Object.entries(verb.slots).map(([slot,rule]) => [slot,{ categories:[...rule.categories], tags:rule.tags ? [...rule.tags] : undefined }])),
+    slots:Object.fromEntries(Object.entries(verb.slots).map(([slot,rule]) => [slot,{ categories:[...rule.categories], tags:rule.tags ? [...rule.tags] : undefined, words:rule.words }])),
   }))
 }
 
@@ -712,6 +800,70 @@ export function getCategoryWords(category: SentenceCategory): CategoryWordRecord
 export function getAllCategoryWords(): CategoryWordRecord[] {
   return editorWords()
     .sort((a, b) => a.english.localeCompare(b.english))
+}
+
+let generatorWordCache: WordRecord[] | null = null
+
+if (typeof window !== 'undefined') {
+  window.addEventListener(CONTENT_DATABASE_EVENT,()=>{ generatorWordCache=null })
+}
+
+/**
+ * The vocabulary generators may draw from, as opposed to the one the editor
+ * lists.
+ *
+ * A composite entry such as 目/眼 is two dictionary alternatives joined by a
+ * slash in the source data, never a usable surface — 「課長は目/眼が痛いです」
+ * reached the dashboard because the slash-guard was applied per pool, and the
+ * body-part pool was one of several hand-rolled `vocabulary.filter(...)` calls
+ * that had never had it added. Filtering once, here, is what makes that
+ * impossible rather than merely fixed in the places someone remembered.
+ *
+ * Content Studio keeps reading editorWords() directly: a reviewer needs to see
+ * these entries in order to repair them.
+ */
+/**
+ * Tags that mean a record is grammar rather than vocabulary.
+ *
+ * A slot fills with a thing: a subject, an object, a place. These records are
+ * particles, copulas, auxiliaries and set phrases (の, です, か, ていただく,
+ * ありがとう) that the content database files under noun categories. They were
+ * counted as unreachable *vocabulary*, which is the wrong description — they
+ * are not vocabulary a noun slot can use, and no slot rule should ever be
+ * widened to admit them. Saying so once here stops each future pass
+ * rediscovering them as an apparent gap.
+ *
+ * Deliberately narrow. The first version of this also excluded anything tagged
+ * verb, godan, ichidan, i-adjective or na-adjective, which removed 557 working
+ * words: those tags sit on plenty of ordinary nouns (健康, 危険, 元気) that
+ * generate correctly. Miscategorised verbs and adjectives such as 申す and
+ * ひどい are therefore still counted — they need their category corrected in
+ * the content data, which `auditApprovedOverrides` reports.
+ *
+ * Excluding these also fixed a live defect rather than only a metric: の, に,
+ * と, で, です, か, よ, より and である were all *reachable* before this,
+ * meaning noun slots were accepting bare particles.
+ *
+ * The engine's own verbs and adjectives are unaffected — they live in `verbs`
+ * and `adjectiveRules`, named literally rather than drawn from this pool.
+ */
+const nonNounRecordTags = new Set(normalizeTags([
+  'auxiliary-verb','honorific-verb','grammar-pattern','particle','conjunction',
+  'sentence-ending','auxiliary','interjection','greeting',
+  // Set phrases: ありがとう, 気を付けて, 好きです, 会いたい. Whole utterances
+  // rather than words, and the tag also covers eight conjunctions (て, ので,
+  // ば, し, ながら) that were reachable as noun-slot fillers — the same defect
+  // the particles above had.
+  'expression',
+]))
+function isNonNounRecord(word: WordRecord) {
+  return normalizeTags(word.tags).some(tag => nonNounRecordTags.has(tag))
+}
+
+function generatorWords(): WordRecord[] {
+  if (generatorWordCache) return generatorWordCache
+  generatorWordCache = editorWords().filter(word => !hasCompositeSurface(word) && hasUsableMeaning(word) && !isNonNounRecord(word))
+  return generatorWordCache
 }
 
 function editorWords(): WordRecord[] {
@@ -889,6 +1041,44 @@ const uncountableGlosses = new Set([
 const mediumNotDeviceVerbs = new Set(['見る'])
 
 /** Plural-only nouns and regular plurals, for is/are agreement. */
+
+/** Regular English plural, enough for the concrete nouns the counters take. */
+function pluralize(noun: string) {
+  if (/(s|x|z|ch|sh)$/i.test(noun)) return `${noun}es`
+  if (/[^aeiou]y$/i.test(noun)) return `${noun.slice(0,-1)}ies`
+  return `${noun}s`
+}
+
+/**
+ * Plural of a person noun. `pluralize` is a spelling rule and person nouns are
+ * where English keeps its irregulars, so it produced "womans" and "grandchilds".
+ * Glosses that are already plural (両親 "parents") are left alone.
+ */
+const irregularPersonPlurals: Record<string,string> = {
+  woman:'women', man:'men', child:'children', grandchild:'grandchildren',
+  person:'people', wife:'wives', housewife:'housewives', policeman:'policemen',
+  policewoman:'policewomen', salesman:'salesmen', businessman:'businessmen',
+  fisherman:'fishermen', chairman:'chairmen',
+}
+function pluralizePerson(gloss: string) {
+  if (isPluralPhrase(gloss)) return gloss
+  const lower = gloss.toLowerCase()
+  if (irregularPersonPlurals[lower]) return irregularPersonPlurals[lower]!
+  // Compounds inherit the head's irregular plural: "older brother" → "older
+  // brothers" is regular, but "old man" → "old men" is not.
+  const head = lower.split(' ').pop()!
+  if (irregularPersonPlurals[head]) return `${gloss.slice(0, gloss.length - head.length)}${irregularPersonPlurals[head]}`
+  return pluralize(gloss)
+}
+/** People whose gloss is inherently definite or non-countable in this frame. */
+const countableExemptPeople = new Set([
+  '私','僕','俺','私たち','我々','あなた','君','お前','彼','彼女','彼ら','自分','皆',
+  // Group nouns whose English gloss is singular and so slips past the
+  // already-plural test: 夫婦 is counted with 組, 家族 with 人 only when you
+  // mean its members.
+  '夫婦','家族','兄弟','姉妹','親戚','双子',
+])
+
 function isPluralPhrase(value: string) {
   const head = value.replace(/^(?:a|an|the|my|your|his|her|our|their)\s+/i, '')
   if (/^(?:people|men|women|children|data|clothes|shoes|glasses|pants|scissors|documents|parents)$/i.test(head)) return true
@@ -909,6 +1099,28 @@ function objectEnglish(gloss: string) {
   if (head !== lower && uncountableGlosses.has(head)) return gloss
   return indefinite(gloss)
 }
+
+/**
+ * An abstract noun in a topic slot. The default is "the", which is the mirror
+ * of the reasoning behind `objectEnglish`: half these glosses are countable
+ * ("the reason", "the result", "the problem") and a bare countable noun is
+ * outright broken, whereas a definite mass noun ("the experience") is at worst
+ * slightly narrower than intended. Japanese topic nouns in these frames are
+ * contextually definite anyway, so "the" is usually the better reading. Glosses
+ * already known to be uncountable keep taking no article at all.
+ */
+function abstractTopicEnglish(gloss: string) {
+  const lower = gloss.toLowerCase()
+  if (uncountableGlosses.has(lower) || abstractMassGlosses.has(lower)) return gloss
+  return `the ${gloss}`
+}
+
+// Abstractions that name a whole domain rather than an instance of one. These
+// are the cases where the definite article is not merely narrow but wrong:
+// "talks about life", never "talks about the life".
+const abstractMassGlosses = new Set([
+  'life','death','nature','society','culture','education','knowledge','freedom','happiness','love','trust','permission','responsibility','experience','knowledge','ethics','reality','nostalgia','jealousy','hope','peace','justice','honesty','patience','courage','luck','fate','progress','growth','health','beauty','truth','power','strength','confidence','pride','respect','stress','sleep','fun','trouble','damage','demand','supply','evidence',
+])
 
 function tagSet(word: WordRecord) {
   return new Set(normalizeTags(word.tags))
@@ -935,6 +1147,9 @@ const definitePlaceTags = new Set(normalizeTags([
   'building','house','home','school','university','office','store','restaurant','cafe','hospital','hotel',
   'library','museum','temple','shrine','church','bank','station','airport','park','forest','mountain','apartment','neighborhood','local-area','post-office','movie-theater','shop',
   'river','lake','beach','ocean','platform','parking-lot','road','bridge','intersection','room','kitchen',
+  // Added with the destination widening above: without these, 市場/劇場/地域
+  // rendered as "goes to market" with no article at all.
+  'market','theater','region','street','urban',
   'bathroom','bedroom','living-room','classroom',
   // Kept in sync with standaloneDestinationTags' zoo/port/hot-spring/
   // countryside/aquarium/direction additions — without an entry here too,
@@ -977,6 +1192,11 @@ function englishPhrase(word: WordRecord, slot: string) {
     const readingWritingAdverbEnglish: Record<string,string> = {
       きちんと:'properly', 静かに:'quietly', はっきり:'clearly',
       丁寧に:'carefully', しっかり:'attentively', 一生懸命:'diligently',
+      // Same reason as above: the dictionary glosses here are "early", "abrupt",
+      // "direct" and "more and more", none of which sit correctly in front of a
+      // verb the way the adverbial form does.
+      早く:'quickly', 突然:'suddenly', 急に:'suddenly', 直接:'directly',
+      どんどん:'rapidly', いつも:'always', 常に:'always',
     }
     if (readingWritingAdverbEnglish[word.japanese]) return readingWritingAdverbEnglish[word.japanese]!
   }
@@ -1024,6 +1244,16 @@ function englishPhrase(word: WordRecord, slot: string) {
     if ((tags.has('clock-time') || tags.has('hour')) && !/^at\b/i.test(gloss)) return `at ${gloss}`
     if (tags.has('season') || ['春','夏','秋','冬'].includes(word.japanese)) return `in ${gloss}`
     if (tags.has('weekday') || tags.has('day-of-week') || /曜日$/.test(word.japanese)) return `on ${gloss}`
+    // Named occasions and days need a preposition English will not supply on
+    // its own: 「正月に男が来ます」 was glossing as "a man comes New Year".
+    // Relative adverbials below this line are correctly bare — "comes last
+    // year" takes no preposition — which is why this is a tag test rather than
+    // a fallback for everything that reaches here.
+    if (word.japanese === '正月') return 'at New Year'
+    if (word.japanese === '昼' || tags.has('noon')) return 'at noon'
+    if (tags.has('weekend') || word.japanese === '週末') return 'on the weekend'
+    if (tags.has('holiday') || tags.has('anniversary') || tags.has('celebration')
+      || ((tags.has('date') || tags.has('day')) && !tags.has('every-day'))) return `on ${definite(gloss)}`
   }
   return gloss
 }
@@ -1222,7 +1452,7 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
     // A composite entry like "町／街" is two words joined by a slash in the
     // source data, not one usable word — the generator must pick one, not
     // paste the raw alternatives straight into a sentence.
-    let pool=vocabulary.filter(word=>categoryMatch(word,rule.categories) && !hasCompositeSurface(word))
+    let pool=vocabulary.filter(word=>categoryMatch(word,rule.categories) && !hasCompositeSurface(word) && hasUsableMeaning(word))
     if (rule.tags?.length) pool=pool.filter(word=>matchingTags(word,rule.tags).length>0)
     // A word only reaches 食べる through a Food category, but an import can file a
     // drink there. Anything drinkable that is not also solid food is not eaten.
@@ -1253,6 +1483,7 @@ function fillVerbSlots(verb: VerbUsageRecord, vocabulary: WordRecord[], seed: nu
       const extra = vocabulary.filter(word => extraMannerAdverbs.has(word.japanese))
       if (extra.length) pool = [...pool, ...extra]
     }
+    if (rule.words) pool = pool.filter(word => rule.words!.has(word.japanese))
     if (verb.japanese === '読む' && slot === 'object') pool=pool.filter(word=>!unreadableObjectWords.has(word.japanese))
     if (verb.id === 'hirou-basic' && slot === 'object') pool=pool.filter(word=>!['光','電気','音','熱','空気','影'].includes(word.japanese))
     // 冷蔵庫/冷凍庫 carry a 'kitchenware' tag alongside 'machine'/'household'
@@ -1444,11 +1675,10 @@ function baseFurigana(verb: VerbUsageRecord, filled: Record<string,WordRecord>, 
     'n5-27':()=>[wordPart('location'),literalPart('に'),wordPart('subject'),literalPart('が'),verbPart()],
     'n5-28':()=>[wordPart('subject'),literalPart('は','わ'),verbPart()],
     'n5-29':()=>[wordPart('subject'),literalPart('は','わ'),wordPart('source'),literalPart('から'),verbPart()],
-    // Means of transport: 電車で行きます. Shares its particle with n5-25's
-    // location で but is a separate pattern because the English preposition
-    // differs ("by train", not "at the station") and because it is the only
-    // slot that consumes the Vehicle category.
-    'n5-30':()=>[wordPart('subject'),literalPart('は','わ'),wordPart('transport'),literalPart('で'),verbPart()],
+    // Means of transport: 電車で行きます. Distinct from n5-25's location で
+    // ("by train", not "at the station") and from n5-31's 乗る, which is
+    // boarding rather than travelling by.
+    'n5-32':()=>[wordPart('subject'),literalPart('は','わ'),wordPart('transport'),literalPart('で'),verbPart()],
   }
   return builders[verb.sentencePattern]?.() ?? null
 }
@@ -1556,7 +1786,302 @@ function generatedWordSlots(filled: Record<string,WordRecord>,slotTagMatches: Re
   }])) as GeneratedPreviewSentence['slots']
 }
 
-const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31'])
+
+/**
+ * Counter forms, written out rather than composed.
+ *
+ * Japanese counters are not a number plus a suffix: 一本 is いっぽん, 三本 is
+ * さんぼん and 六本 is ろっぽん, and the same gemination and rendaku hit 杯, 匹
+ * and 個 differently. Generating the reading by rule would need all of those
+ * exceptions encoded anyway, so the forms are simply listed and can be checked
+ * by eye. Indexed 0-4 for one to five.
+ *
+ * This is what the Number category was missing. Its 34 entries are a grab-bag
+ * of 一杯/まず/最初に/単位 alongside bare numerals, and a bare numeral cannot
+ * appear in a sentence at all without one of these.
+ */
+const COUNTER_FORMS: Record<string, ReadonlyArray<readonly [string,string]>> = {
+  satsu: [['一冊','いっさつ'],['二冊','にさつ'],['三冊','さんさつ'],['四冊','よんさつ'],['五冊','ごさつ']],
+  hai:   [['一杯','いっぱい'],['二杯','にはい'],['三杯','さんばい'],['四杯','よんはい'],['五杯','ごはい']],
+  ko:    [['一個','いっこ'],['二個','にこ'],['三個','さんこ'],['四個','よんこ'],['五個','ごこ']],
+  mai:   [['一枚','いちまい'],['二枚','にまい'],['三枚','さんまい'],['四枚','よんまい'],['五枚','ごまい']],
+  // 〜つ is the native series and is irregular throughout — ひとつ/ふたつ/みっつ
+  // share no reading with 一/二/三 at all.
+  tsu:   [['一つ','ひとつ'],['二つ','ふたつ'],['三つ','みっつ'],['四つ','よっつ'],['五つ','いつつ']],
+  // 一人 and 二人 are ひとり/ふたり, not いちにん/357にん; from three on the
+  // series is regular apart from 四人 being よにん rather than よんにん.
+  nin:   [['一人','ひとり'],['二人','ふたり'],['三人','さんにん'],['四人','よにん'],['五人','ごにん']],
+}
+const COUNTER_ENGLISH = ['one','two','three','four','five'] as const
+
+/**
+ * Time words for n5-35, each with the tense its meaning forces.
+ *
+ * The tense is the whole point of the pattern: 昨日 requires a past verb and
+ * 明日 forbids one, in both languages. Getting that wrong produces the single
+ * most common learner error this vocabulary is involved in, so the time word
+ * chooses the verb form rather than the two being drawn independently.
+ *
+ * None of these take に — they are relative to now, which is what
+ * `niIncompatibleTimeWords` above records. Curated because the glosses in the
+ * source data are unusable as adverbials: 後 is "afterwards", 先 is "future",
+ * 頃 is "time".
+ */
+const TIME_ADVERBIALS: ReadonlyArray<{japanese:string;reading:string;english:string;tense:'past'|'future'|'present'}> = [
+  { japanese:'今日', reading:'きょう', english:'today', tense:'present' },
+  { japanese:'今', reading:'いま', english:'now', tense:'present' },
+  { japanese:'今晩', reading:'こんばん', english:'tonight', tense:'present' },
+  { japanese:'今週', reading:'こんしゅう', english:'this week', tense:'present' },
+  { japanese:'今月', reading:'こんげつ', english:'this month', tense:'present' },
+  { japanese:'今年', reading:'ことし', english:'this year', tense:'present' },
+  { japanese:'週末', reading:'しゅうまつ', english:'on the weekend', tense:'present' },
+  { japanese:'毎日', reading:'まいにち', english:'every day', tense:'present' },
+  { japanese:'毎週', reading:'まいしゅう', english:'every week', tense:'present' },
+  { japanese:'毎年', reading:'まいとし', english:'every year', tense:'present' },
+  { japanese:'時々', reading:'ときどき', english:'sometimes', tense:'present' },
+  { japanese:'普段', reading:'ふだん', english:'usually', tense:'present' },
+  { japanese:'昨日', reading:'きのう', english:'yesterday', tense:'past' },
+  { japanese:'先週', reading:'せんしゅう', english:'last week', tense:'past' },
+  { japanese:'先月', reading:'せんげつ', english:'last month', tense:'past' },
+  { japanese:'去年', reading:'きょねん', english:'last year', tense:'past' },
+  { japanese:'最近', reading:'さいきん', english:'recently', tense:'past' },
+  { japanese:'昔', reading:'むかし', english:'long ago', tense:'past' },
+  { japanese:'明日', reading:'あした', english:'tomorrow', tense:'future' },
+  { japanese:'来週', reading:'らいしゅう', english:'next week', tense:'future' },
+  { japanese:'来月', reading:'らいげつ', english:'next month', tense:'future' },
+  { japanese:'来年', reading:'らいねん', english:'next year', tense:'future' },
+  { japanese:'将来', reading:'しょうらい', english:'in the future', tense:'future' },
+]
+const timeAdverbialWords = new Set(TIME_ADVERBIALS.map(entry => entry.japanese))
+
+/**
+ * Positional nouns for n5-36 — 机の上に本があります.
+ *
+ * These are relations, not places: 上 is "the top of something", so it cannot
+ * stand in a destination slot the way 公園 can, which is why widening the
+ * destination tags left them behind. In Japanese they are ordinary nouns joined
+ * by の, and in English they are prepositions, so the frame has to translate a
+ * two-noun construction into a preposition rather than word-for-word.
+ *
+ * `surfaceOnly` marks the ones that need the reference noun to have a top
+ * surface — "on the cat" is not where you put a book.
+ */
+const POSITION_REFERENCE_SETS = {
+  // 上 needs a top surface, 下 needs something with space beneath it, and 中
+  // needs a container. Sharing one reference list produced "in the door" and
+  // "under the park".
+  surface: new Set(['机','椅子','棚','テーブル','ベッド']),
+  under:   new Set(['机','椅子','棚','テーブル','ベッド','木','窓']),
+  inside:  new Set(['部屋','家','鞄','店','病院','学校','駅']),
+  beside:  new Set(['机','椅子','棚','窓','ドア','家','学校','駅','公園','店','病院','木']),
+} as const
+const POSITION_NOUNS: ReadonlyArray<{japanese:string;reading:string;english:string;references:keyof typeof POSITION_REFERENCE_SETS}> = [
+  { japanese:'上', reading:'うえ', english:'on', references:'surface' },
+  { japanese:'下', reading:'した', english:'under', references:'under' },
+  { japanese:'中', reading:'なか', english:'in', references:'inside' },
+  { japanese:'前', reading:'まえ', english:'in front of', references:'beside' },
+  { japanese:'後ろ', reading:'うしろ', english:'behind', references:'beside' },
+  { japanese:'横', reading:'よこ', english:'beside', references:'beside' },
+  { japanese:'隣', reading:'となり', english:'next to', references:'beside' },
+  { japanese:'近く', reading:'ちかく', english:'near', references:'beside' },
+  { japanese:'そば', reading:'そば', english:'beside', references:'beside' },
+]
+const positionNounWords = new Set(POSITION_NOUNS.map(entry => entry.japanese))
+
+/**
+ * Question words for n5-37, each with the frame it belongs in.
+ *
+ * A question word is not interchangeable with the others: どこ replaces a
+ * destination, 何 replaces an object, どうして replaces nothing and fronts the
+ * whole clause. One question slot filled from a pool would produce 「学生は
+ * どうしてを食べますか」, so each carries its own shape.
+ *
+ * Readings are stated because 何 is recorded as "nani / nan" — two readings in
+ * one field, which would render as furigana literally reading "nani / nan".
+ * Here it is なに, the reading 何を takes.
+ *
+ * どんな, どの, どちら and どれ are absent: they modify or choose between nouns
+ * already under discussion, so they need a context this generator has no way to
+ * establish. かしら is a sentence-ending particle, not a question word.
+ */
+const QUESTION_FRAMES: ReadonlyArray<{
+  japanese:string
+  reading:string
+  shape:'destination'|'object'|'reason'|'price'
+}> = [
+  { japanese:'どこ', reading:'どこ', shape:'destination' },
+  { japanese:'何', reading:'なに', shape:'object' },
+  { japanese:'どうして', reading:'どうして', shape:'reason' },
+  { japanese:'なぜ', reading:'なぜ', shape:'reason' },
+  { japanese:'いくら', reading:'いくら', shape:'price' },
+]
+const questionWords = new Set(QUESTION_FRAMES.map(entry => entry.japanese))
+
+/**
+ * Weather words for n5-38, each with the frame its meaning takes.
+ *
+ * Weather does not have one shape: 雨 falls, 晴れ is a state, 風 is strong, and
+ * 天気 is good or bad. English differs again — 「今日は雨です」 is "it is rainy
+ * today", where the Japanese predicate is a noun and the English is an
+ * adjective with a dummy subject Japanese does not use at all.
+ */
+const WEATHER_FRAMES: ReadonlyArray<{
+  japanese:string
+  reading:string
+  shape:'state'|'falls'|'strong'|'quality'|'pretty'
+  english:string
+}> = [
+  { japanese:'雨', reading:'あめ', shape:'state', english:'rainy' },
+  { japanese:'雪', reading:'ゆき', shape:'state', english:'snowy' },
+  { japanese:'晴れ', reading:'はれ', shape:'state', english:'sunny' },
+  { japanese:'曇り', reading:'くもり', shape:'state', english:'cloudy' },
+  { japanese:'雨', reading:'あめ', shape:'falls', english:'rains' },
+  { japanese:'雪', reading:'ゆき', shape:'falls', english:'snows' },
+  { japanese:'風', reading:'かぜ', shape:'strong', english:'wind' },
+  { japanese:'雷', reading:'かみなり', shape:'strong', english:'thunder' },
+  { japanese:'天気', reading:'てんき', shape:'quality', english:'weather' },
+  { japanese:'景色', reading:'けしき', shape:'pretty', english:'scenery' },
+  { japanese:'星', reading:'ほし', shape:'pretty', english:'stars' },
+  { japanese:'雲', reading:'くも', shape:'pretty', english:'clouds' },
+]
+const weatherWords = new Set(WEATHER_FRAMES.map(entry => entry.japanese))
+
+/**
+ * Sequence adverbials for n5-39 — まず, 最初に, 後で.
+ *
+ * These order actions rather than locating them in time, so they take no
+ * particle and no tense agreement, unlike the TIME_ADVERBIALS above. The
+ * vocabulary stores some as bare nouns (最初, 最後) and some already inflected
+ * (最初に, 後で), so both surfaces are registered.
+ */
+const SEQUENCE_ADVERBIALS: ReadonlyArray<{japanese:string;reading:string;english:string;base?:string}> = [
+  { japanese:'まず', reading:'まず', english:'First' },
+  { japanese:'最初に', reading:'さいしょに', english:'First', base:'最初' },
+  { japanese:'先に', reading:'さきに', english:'First of all', base:'先' },
+  { japanese:'後で', reading:'あとで', english:'Later', base:'後' },
+  { japanese:'最後に', reading:'さいごに', english:'Last', base:'最後' },
+]
+const sequenceAdverbialWords = new Set(SEQUENCE_ADVERBIALS.flatMap(e => e.base ? [e.japanese, e.base] : [e.japanese]))
+
+/**
+ * Measurements for n4-32 — 山の高さは三千メートルです.
+ *
+ * Each measurement takes its own unit and its own kind of reference: a room has
+ * a temperature but not a length, and a mountain has a height but not a
+ * weight. Values are written out because the reading of a numeral with a unit
+ * is not derivable — 三千 is さんぜん, not さんせん, and 十 before メートル is
+ * じゅう where 十本 would be じゅっぽん.
+ */
+const MEASUREMENT_FRAMES: ReadonlyArray<{
+  japanese:string; reading:string; english:string
+  references: ReadonlySet<string>
+  values: ReadonlyArray<readonly [string,string,string]>
+}> = [
+  // Split by scale rather than sharing one value list: 山 and 建物/木 differ by
+  // two orders of magnitude, and one list produced a three-thousand-metre tree.
+  { japanese:'高さ', reading:'たかさ', english:'height', references:new Set(['山']),
+    values:[['三千メートル','さんぜんメートル','three thousand meters'],['二千メートル','にせんメートル','two thousand meters']] },
+  { japanese:'高さ', reading:'たかさ', english:'height', references:new Set(['建物','木']),
+    values:[['十メートル','じゅうメートル','ten meters'],['五十メートル','ごじゅうメートル','fifty meters']] },
+  { japanese:'長さ', reading:'ながさ', english:'length', references:new Set(['橋','道路','川']),
+    values:[['五百メートル','ごひゃくメートル','five hundred meters'],['二キロ','にキロ','two kilometers'],['十メートル','じゅうメートル','ten meters']] },
+  { japanese:'重さ', reading:'おもさ', english:'weight', references:new Set(['荷物','鞄']),
+    values:[['五キロ','ごキロ','five kilograms'],['三キロ','さんキロ','three kilograms'],['十キロ','じゅっキロ','ten kilograms']] },
+  { japanese:'温度', reading:'おんど', english:'temperature', references:new Set(['部屋','水','空気']),
+    values:[['二十度','にじゅうど','twenty degrees'],['三十度','さんじゅうど','thirty degrees'],['五度','ごど','five degrees']] },
+]
+const measurementWords = new Set(MEASUREMENT_FRAMES.map(entry => entry.japanese))
+
+/**
+ * Period nouns for n4-33 — 昭和は長い時代でした.
+ *
+ * A named era or span is talked *about*, which is why the time patterns could
+ * not reach these: 昭和に行きます is not a sentence. `era` marks the ones that
+ * take 時代 as their predicate noun.
+ */
+const PERIOD_NOUNS: ReadonlyArray<{japanese:string;reading:string;english:string;era?:boolean}> = [
+  { japanese:'昭和', reading:'しょうわ', english:'the Showa era', era:true },
+  { japanese:'平成', reading:'へいせい', english:'the Heisei era', era:true },
+  { japanese:'期間', reading:'きかん', english:'the period' },
+  { japanese:'時間', reading:'じかん', english:'the time' },
+  { japanese:'瞬間', reading:'しゅんかん', english:'the moment' },
+]
+// 時代 is taught as the predicate noun of the era frame (昭和は長い時代でした)
+// rather than as a topic for it — 「時代は長い期間です」 says nothing.
+const periodNounWords = new Set([...PERIOD_NOUNS.map(e => e.japanese), '時代', '締め切り'])
+/** Only the present-tense time words make sense with a weather report. */
+const WEATHER_TIMES = TIME_ADVERBIALS.filter(entry => entry.tense !== 'past' && ['今日','今週','明日','週末','今晩'].includes(entry.japanese))
+/** Objects with a price, for the いくら frame. */
+const PRICED_OBJECTS = new Set(['本','傘','鞄','靴','時計','眼鏡','切符','シャツ','辞書','雑誌','財布'])
+const POSITION_SUBJECTS = new Set(['本','鞄','傘','皿','雑誌','新聞','辞書','時計','眼鏡','財布','鍵','猫','犬','鳥'])
+/** Verb and object pairings for n5-35, in the two polite forms the tenses need. */
+const TIMED_ACTION_FRAMES: ReadonlyArray<{
+  words: ReadonlySet<string>
+  present: {japanese:string;reading:string}
+  past: {japanese:string;reading:string}
+  english: {base:string;third:string;past:string}
+}> = [
+  { words:new Set(['本','小説','雑誌','辞書','教科書','漫画','新聞']),
+    present:{japanese:'読みます',reading:'よみます'}, past:{japanese:'読みました',reading:'よみました'},
+    english:{base:'read',third:'reads',past:'read'} },
+  { words:new Set(['お茶','コーヒー','水','牛乳','ジュース']),
+    present:{japanese:'飲みます',reading:'のみます'}, past:{japanese:'飲みました',reading:'のみました'},
+    english:{base:'drink',third:'drinks',past:'drank'} },
+  { words:new Set(['ご飯','パン','魚','肉','果物','卵','ケーキ']),
+    present:{japanese:'食べます',reading:'たべます'}, past:{japanese:'食べました',reading:'たべました'},
+    english:{base:'eat',third:'eats',past:'ate'} },
+  // テレビ is absent: with 見る it is the medium, "watches television", not a
+  // countable set, and this frame renders the object with an article.
+  { words:new Set(['映画','番組','アニメ']),
+    present:{japanese:'見ます',reading:'みます'}, past:{japanese:'見ました',reading:'みました'},
+    english:{base:'watch',third:'watches',past:'watched'} },
+]
+/**
+ * The numerals and counter words these forms are built from.
+ *
+ * 三冊 is a fused surface, so the vocabulary entry 三 never appears as its own
+ * token — but the learner does see it, and it is the entry the deck teaches.
+ * Deriving this from the tables rather than listing it keeps the two from
+ * drifting apart.
+ */
+const counterSourceWords = new Set<string>(
+  Object.values(COUNTER_FORMS).flatMap(forms => forms.flatMap(([surface]) => [
+    surface.charAt(0),
+    surface.slice(1),
+    surface,
+  ])).filter(Boolean),
+)
+
+/**
+ * Which counter an object takes, and the verb that object belongs with.
+ *
+ * パン and 紙 are deliberately absent even though they take these counters:
+ * their English is uncountable, and "two breads"/"two papers" is wrong in a
+ * way the Japanese is not.
+ * Restricted to combinations that are unambiguous in both languages — a
+ * counted object needs a plural English noun, so anything whose gloss does not
+ * pluralise cleanly is left out rather than guessed at.
+ */
+const COUNTED_FRAMES: ReadonlyArray<{
+  counter: keyof typeof COUNTER_FORMS
+  words: ReadonlySet<string>
+  verb: { japanese: string; reading: string; english: string; englishThird: string }
+  /** "two cups of tea" rather than "two teas". */
+  measureOf?: string
+}> = [
+  { counter:'satsu', words:new Set(['本','小説','雑誌','辞書','教科書','漫画']),
+    verb:{japanese:'読みます',reading:'よみます',english:'read',englishThird:'reads'} },
+  { counter:'hai', words:new Set(['お茶','コーヒー','水','牛乳','ジュース']),
+    verb:{japanese:'飲みます',reading:'のみます',english:'drink',englishThird:'drinks'}, measureOf:'cup' },
+  { counter:'ko', words:new Set(['卵','りんご','ケーキ','おにぎり','みかん']),
+    verb:{japanese:'食べます',reading:'たべます',english:'eat',englishThird:'eats'} },
+  { counter:'tsu', words:new Set(['椅子','机','傘','鞄','窓']),
+    verb:{japanese:'買います',reading:'かいます',english:'buy',englishThird:'buys'} },
+  { counter:'mai', words:new Set(['シャツ','切符','写真','皿','はがき']),
+    verb:{japanese:'買います',reading:'かいます',english:'buy',englishThird:'buys'} },
+]
+
+const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34','n5-35','n5-36','n5-37','n5-38','n5-39'])
 const geographicOriginTags = new Set(normalizeTags(['country','city','town','village','neighborhood','island']))
 const originSubjectDisallowedTags = new Set(normalizeTags(['patient','sick','illness','medical','hospital','guest','customer']))
 const portableObjectTags = new Set(normalizeTags([
@@ -1794,6 +2319,23 @@ export const adjectiveRules = [
   { id:'shinkoku',japanese:'深刻',reading:'しんこく',english:'serious',categories:['Event'] as SentenceCategory[] },
   { id:'kanou',japanese:'可能',reading:'かのう',english:'possible',categories:['Document'] as SentenceCategory[] },
   { id:'fukanou',japanese:'不可能',reading:'ふかのう',english:'impossible',categories:['Document'] as SentenceCategory[] },
+  // Adjectives the vocabulary filed under Adverb, where no rule could reach
+  // them. English is restated for the ones whose gloss is a noun — 楽 is
+  // recorded as "comfort" and 確か as "definite" — because these are predicates
+  // here, not dictionary headwords.
+  { id:'hidoi',japanese:'ひどい',reading:'ひどい',english:'awful',categories:['Event','Weather','Media','Food'] as SentenceCategory[] },
+  { id:'okashii',japanese:'おかしい',reading:'おかしい',english:'strange',categories:['Event','Media','Object'] as SentenceCategory[] },
+  // Object reaches 番組 ("a program is low"), so 低い is limited to the two
+  // categories whose members reliably have a physical height.
+  { id:'hikui',japanese:'低い',reading:'ひくい',english:'low',categories:['Building','Furniture'] as SentenceCategory[],physicalOnly:true },
+  // 楽, だめ, 確か and 急 were tried here and removed. The category vocabulary
+  // cannot express what they need: 楽 wants activity nouns like 仕事 but the
+  // Activity category also holds verbs ("a settle is easy"), 確か wants sources
+  // of information where Media means anime ("anime is reliable"), and だめ
+  // reached 成功 ("a success is no good"). They need a noun-level distinction
+  // this engine does not have, and a wrong predicate is worse than a missing
+  // one.
+  { id:'katte',japanese:'勝手',reading:'かって',english:'selfish',categories:['Person'] as SentenceCategory[] },
 ]
 
 function hasCompositeSurface(word: WordRecord) {
@@ -1882,6 +2424,162 @@ const validTimePool = memoizePool(function validTimePool(vocabulary: WordRecord[
   })
 })
 
+/**
+ * Adjectives that describe a person, for the n4-29 predicate frame.
+ *
+ * Curated rather than derived, for two reasons the vocabulary data makes
+ * unavoidable. First, the classifier files these under Adverb, so category
+ * alone cannot find them. Second, a な-adjective's dictionary gloss is usually
+ * a noun — 健康 glosses as "health", 寛容 as "tolerance" — so the English
+ * predicate has to be stated, not read off the record.
+ *
+ * Restricted to adjectives that describe people. The rest of the miscategorised
+ * adjectives are degree and comparison words (絶対, 同様, 一般) that need
+ * something to modify and produce nonsense as a bare predicate about a person.
+ */
+const personAdjectives: ReadonlyArray<{japanese:string;reading:string;english:string;na:boolean}> = [
+  { japanese:'健康', reading:'けんこう', english:'healthy', na:true },
+  { japanese:'素敵', reading:'すてき', english:'lovely', na:true },
+  { japanese:'寛容', reading:'かんよう', english:'tolerant', na:true },
+  { japanese:'変', reading:'へん', english:'strange', na:true },
+  { japanese:'満腹', reading:'まんぷく', english:'full', na:true },
+  { japanese:'積極的', reading:'せっきょくてき', english:'proactive', na:true },
+  { japanese:'消極的', reading:'しょうきょくてき', english:'passive', na:true },
+  { japanese:'恥ずかしい', reading:'はずかしい', english:'embarrassed', na:false },
+  { japanese:'可愛い', reading:'かわいい', english:'cute', na:false },
+  { japanese:'素晴らしい', reading:'すばらしい', english:'wonderful', na:false },
+  { japanese:'詳しい', reading:'くわしい', english:'knowledgeable', na:false },
+  { japanese:'うまい', reading:'うまい', english:'skillful', na:false },
+]
+const personAdjectiveWords = new Set(personAdjectives.map(entry => entry.japanese))
+
+/**
+ * Adjectives that judge an idea or situation rather than a person, for n4-30.
+ *
+ * `suffix` carries 的 for the words that are noun stems in the vocabulary data
+ * but only ever function as adjectives with it attached: the entry is 客観, the
+ * adjective is 客観的. `noDegree` marks the variety words, which describe a
+ * spread rather than a quantity — "very various" is not English.
+ *
+ * Readings are stated here because several of these records carry romaji or
+ * incorrect readings in the source data (客観 is listed as "kakkyoku", not
+ * きゃっかん), and a wrong reading would render as wrong furigana.
+ */
+const abstractJudgementAdjectives: ReadonlyArray<{japanese:string;reading:string;english:string;na:boolean;suffix?:string;noDegree?:boolean}> = [
+  { japanese:'重要', reading:'じゅうよう', english:'important', na:true },
+  { japanese:'大事', reading:'だいじ', english:'important', na:true },
+  { japanese:'明らか', reading:'あきらか', english:'obvious', na:true },
+  { japanese:'明確', reading:'めいかく', english:'clear', na:true },
+  { japanese:'不思議', reading:'ふしぎ', english:'mysterious', na:true },
+  { japanese:'無理', reading:'むり', english:'impossible', na:true },
+  { japanese:'妥当', reading:'だとう', english:'reasonable', na:true },
+  { japanese:'意外', reading:'いがい', english:'unexpected', na:true },
+  { japanese:'極端', reading:'きょくたん', english:'extreme', na:true },
+  { japanese:'危険', reading:'きけん', english:'dangerous', na:true },
+  { japanese:'端的', reading:'たんてき', english:'concise', na:true },
+  { japanese:'精緻', reading:'せいち', english:'elaborate', na:true },
+  { japanese:'未曾有', reading:'みぞう', english:'unprecedented', na:true },
+  { japanese:'急速', reading:'きゅうそく', english:'rapid', na:true },
+  { japanese:'客観', reading:'きゃっかんてき', english:'objective', na:true, suffix:'的' },
+  { japanese:'抽象', reading:'ちゅうしょうてき', english:'abstract', na:true, suffix:'的' },
+  { japanese:'具体', reading:'ぐたいてき', english:'concrete', na:true, suffix:'的' },
+  { japanese:'相対', reading:'そうたいてき', english:'relative', na:true, suffix:'的' },
+  { japanese:'絶対', reading:'ぜったいてき', english:'absolute', na:true, suffix:'的' },
+  { japanese:'普遍', reading:'ふへんてき', english:'universal', na:true, suffix:'的' },
+  { japanese:'一般', reading:'いっぱんてき', english:'general', na:true, suffix:'的' },
+  { japanese:'国際', reading:'こくさいてき', english:'international', na:true, suffix:'的' },
+  { japanese:'必然的', reading:'ひつぜんてき', english:'inevitable', na:true },
+  { japanese:'著しい', reading:'いちじるしい', english:'remarkable', na:false },
+  { japanese:'激しい', reading:'はげしい', english:'intense', na:false },
+  { japanese:'深い', reading:'ふかい', english:'deep', na:false },
+  { japanese:'細かい', reading:'こまかい', english:'detailed', na:false },
+  { japanese:'様々', reading:'さまざま', english:'varied', na:true, noDegree:true },
+  { japanese:'いろいろ', reading:'いろいろ', english:'varied', na:true, noDegree:true },
+]
+/** Degree adverbs for n4-30. All are ungrammatical before a plain verb, which is why they are here and not in `actionAdverbWords`. */
+const degreeAdverbs: ReadonlyArray<{japanese:string;reading:string;english:string}> = [
+  { japanese:'非常に', reading:'ひじょうに', english:'extremely' },
+  { japanese:'かなり', reading:'かなり', english:'quite' },
+  { japanese:'極端に', reading:'きょくたんに', english:'extremely' },
+  { japanese:'明らかに', reading:'あきらかに', english:'clearly' },
+  { japanese:'意外に', reading:'いがいに', english:'surprisingly' },
+  { japanese:'わずかに', reading:'わずかに', english:'slightly' },
+  { japanese:'結構', reading:'けっこう', english:'fairly' },
+  { japanese:'大変', reading:'たいへん', english:'very' },
+]
+/**
+ * Words whose meaning is a relation between two things, for n4-31. They cannot
+ * work in the n4-30 predicate frame: "the reason is different" needs something
+ * to be different *from*.
+ */
+const comparisonAdjectives: ReadonlyArray<{japanese:string;reading:string;english:string}> = [
+  { japanese:'同じ', reading:'おなじ', english:'the same as' },
+  { japanese:'同様', reading:'どうよう', english:'similar to' },
+  { japanese:'一緒', reading:'いっしょ', english:'the same as' },
+  { japanese:'別', reading:'べつ', english:'separate from' },
+  { japanese:'逆', reading:'ぎゃく', english:'the opposite of' },
+]
+/**
+ * Concept pairs for n4-31, with the relation that actually holds between them.
+ *
+ * Curated because a comparison of two arbitrary abstractions is grammatical and
+ * empty — "the laugh is the same as the daily life". Constraining the pair to a
+ * shared tag was tried first and is not enough: the tags these words share are
+ * `abstract` and their JLPT level, which say nothing about whether comparing
+ * them means anything. These are the pairs Japanese actually contrasts.
+ */
+const conceptPairs: ReadonlyArray<{first:string;second:string;comparison:string}> = [
+  { first:'理想', second:'現実', comparison:'逆' },
+  { first:'本音', second:'建前', comparison:'逆' },
+  { first:'原因', second:'結果', comparison:'別' },
+  { first:'過程', second:'結果', comparison:'別' },
+  { first:'理由', second:'根拠', comparison:'同様' },
+  { first:'意見', second:'考え', comparison:'同様' },
+  { first:'問題', second:'課題', comparison:'同様' },
+  { first:'目的', second:'目標', comparison:'同じ' },
+  { first:'方法', second:'手段', comparison:'同じ' },
+  { first:'経験', second:'知識', comparison:'別' },
+]
+const abstractAdjectiveWords = new Set([
+  ...abstractJudgementAdjectives.map(entry => entry.japanese),
+  ...degreeAdverbs.map(entry => entry.japanese),
+  ...comparisonAdjectives.map(entry => entry.japanese),
+  // The bare stems the degree adverbs are built from: the vocabulary entry is
+  // 非常/極端/明らか, and the adverb attaches に.
+  '非常','極端','明らか','意外','わずか',
+])
+
+/**
+ * Abstractions eligible for the topic patterns (n4-26 … n4-28).
+ *
+ * Defined here rather than inline in the generator so the reachability audit
+ * can see it. A pool that only exists inside a generator is invisible to the
+ * audit, which then reports its members as unreachable — the same mistake that
+ * hid the curated adverb list until it moved onto `VerbSlotRule.words`.
+ */
+/**
+ * Body parts for the 痛い frame (n5-30).
+ *
+ * Extracted from inside the generator so the audit can see it. Filtered inline,
+ * it reported all 26 body parts as unreachable when they generate fine — the
+ * third time a generator-local pool has produced a phantom gap in the report.
+ *
+ * 血, 身 and 尻尾 are excluded: blood and one's person do not ache in the way
+ * this frame means, and a tail is not a body part of the people in the subject
+ * pool.
+ */
+const bodyPartPool = memoizePool(function bodyPartPool(vocabulary: WordRecord[]) {
+  return vocabulary.filter(word => word.tags.includes('body-part') && !['尻尾','血','身'].includes(word.japanese))
+})
+
+const abstractTopicPool = memoizePool(function abstractTopicPool(vocabulary: WordRecord[]) {
+  return vocabulary.filter(word=>
+    categoryMatch(word,['Object'])
+    && hasUsableMeaning(word)
+    && !nonAbstractTopicWords.has(word.japanese)
+    && [...tagSet(word)].some(tag=>abstractTopicTags.includes(tag)))
+})
+
 const validInanimatePool = memoizePool<[categories?: SentenceCategory[]]>(function validInanimatePool(vocabulary: WordRecord[],categories: SentenceCategory[]=inanimateCategories) {
   return vocabulary.filter(word=>{
     const tags=tagSet(word)
@@ -1922,7 +2620,7 @@ if (typeof window !== 'undefined') {
  */
 function slotEligibleWords(): Set<string> {
   if (slotIndexCache) return slotIndexCache
-  const vocabulary = editorWords()
+  const vocabulary = generatorWords()
   const eligible = new Set<string>()
 
   for (const verb of verbs) {
@@ -1931,6 +2629,7 @@ function slotEligibleWords(): Set<string> {
       for (const word of vocabulary) {
         if (!categoryMatch(word,rule.categories)) continue
         if (rule.tags?.length && matchingTags(word,rule.tags).length === 0) continue
+        if (rule.words && !rule.words.has(word.japanese)) continue
         eligible.add(word.japanese)
       }
     }
@@ -1943,13 +2642,74 @@ function slotEligibleWords(): Set<string> {
     validPlacePool(vocabulary),
     validTimePool(vocabulary),
     validInanimatePool(vocabulary),
+    abstractTopicPool(vocabulary),
+    bodyPartPool(vocabulary),
   ]) {
     for (const word of pool) eligible.add(word.japanese)
   }
+  for (const japanese of personAdjectiveWords) eligible.add(japanese)
+  for (const japanese of abstractAdjectiveWords) eligible.add(japanese)
+  for (const japanese of counterSourceWords) eligible.add(japanese)
+  for (const japanese of timeAdverbialWords) eligible.add(japanese)
+  for (const japanese of positionNounWords) eligible.add(japanese)
+  for (const japanese of questionWords) eligible.add(japanese)
+  for (const japanese of weatherWords) eligible.add(japanese)
+  for (const japanese of sequenceAdverbialWords) eligible.add(japanese)
+  for (const japanese of measurementWords) eligible.add(japanese)
+  for (const japanese of periodNounWords) eligible.add(japanese)
   for (const rule of adjectiveRules) eligible.add(rule.japanese)
 
   slotIndexCache = eligible
   return eligible
+}
+
+export interface ApprovedOverride {
+  japanese: string
+  reading: string
+  builtInCategories: SentenceCategory[]
+  approvedCategories: SentenceCategory[]
+  /** Tags the built-in record carried that the approved record drops. */
+  droppedTags: string[]
+}
+
+/**
+ * Approved records that replace a built-in entry, and what that costs.
+ *
+ * `editorWords` lets an approved record win outright rather than merging: a
+ * reviewer's category and tag set is a decision, and unioning it with the
+ * built-in tags would quietly undo their edits. That is deliberate — but it
+ * also means a reviewer can drop the one tag a slot rule gates on and make a
+ * word unreachable without anything saying so, which is how 共 once became a
+ * person subject and produced "a both's foot does not hurt".
+ *
+ * Reporting the shadowing keeps the reviewer's authority while making its
+ * effects visible, which changing the merge would not.
+ */
+export function auditApprovedOverrides(): ApprovedOverride[] {
+  const builtIn = new Map<string,WordRecord>()
+  for (const word of [...catalogWords(), ...words]) {
+    const key = `${word.japanese}|${word.reading}`
+    const existing = builtIn.get(key)
+    builtIn.set(key, existing ? { ...existing, ...word, categories:word.categories, tags:normalizeTags([...existing.tags,...word.tags]) } : word)
+  }
+  const overrides: ApprovedOverride[] = []
+  for (const approved of approvedWords()) {
+    const original = builtIn.get(`${approved.japanese}|${approved.reading}`)
+    if (!original) continue
+    const approvedTags = new Set(normalizeTags(approved.tags))
+    const droppedTags = normalizeTags(original.tags).filter(tag => !approvedTags.has(tag))
+    const sameCategories = original.categories.length === approved.categories.length
+      && original.categories.every(category => approved.categories.includes(category))
+    if (sameCategories && !droppedTags.length) continue
+    overrides.push({
+      japanese: approved.japanese,
+      reading: approved.reading,
+      builtInCategories: original.categories,
+      approvedCategories: approved.categories,
+      droppedTags,
+    })
+  }
+  return overrides
 }
 
 export interface WordReachability {
@@ -1993,7 +2753,7 @@ export interface WordReachability {
  * check that would have caught the 馬/監督/現金 mistagging immediately.
  */
 export function auditWordReachability(): WordReachability[] {
-  const vocabulary = editorWords()
+  const vocabulary = generatorWords()
   const poolMembership: Array<[string, Set<string>]> = [
     ['human', new Set(validHumanPool(vocabulary).map(word => word.japanese))],
     ['place', new Set(validPlacePool(vocabulary).map(word => word.japanese))],
@@ -2003,6 +2763,18 @@ export function auditWordReachability(): WordReachability[] {
     // slot; slotEligibleWords counts them, so this has to as well or the audit
     // reports the entire adjective vocabulary as unreachable.
     ['adjective', new Set(adjectiveRules.map(rule => rule.japanese))],
+    ['abstract-topic', new Set(abstractTopicPool(vocabulary).map(word => word.japanese))],
+    ['body-part', new Set(bodyPartPool(vocabulary).map(word => word.japanese))],
+    ['person-adjective', personAdjectiveWords],
+    ['abstract-adjective', abstractAdjectiveWords],
+    ['counter-source', counterSourceWords],
+    ['time-adverbial', timeAdverbialWords],
+    ['position-noun', positionNounWords],
+    ['question-word', questionWords],
+    ['weather', weatherWords],
+    ['sequence-adverbial', sequenceAdverbialWords],
+    ['measurement', measurementWords],
+    ['period-noun', periodNounWords],
   ]
 
   return vocabulary.map(word => {
@@ -2013,6 +2785,10 @@ export function auditWordReachability(): WordReachability[] {
         if (!categoryMatch(word, rule.categories)) continue
         if (rule.tags?.length && matchingTags(word, rule.tags).length === 0) {
           tagBlockedBy.push(`${verb.id}.${slot} wants ${rule.tags.slice(0, 6).join('|')}`)
+          continue
+        }
+        if (rule.words && !rule.words.has(word.japanese)) {
+          tagBlockedBy.push(`${verb.id}.${slot} allows only a named set`)
           continue
         }
         slots.push(`${verb.id}.${slot}`)
@@ -2045,7 +2821,7 @@ function originEnglish(word: WordRecord) {
 
 function additionalN5Sentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!additionalN5PatternIds.has(patternId)) return null
-  const vocabulary=editorWords()
+  const vocabulary=generatorWords()
   const humans=validHumanPool(vocabulary)
   const places=validPlacePool(vocabulary)
   const localizedPlaces=places.filter(word=>![...tagSet(word)].some(tag=>geographicOriginTags.has(tag)))
@@ -2341,7 +3117,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     // tagged body-part is a real human body part, including おなか (stomach),
     // which lacks the 'human' tag other entries have but is exactly the word
     // this pattern most needs (おなかが痛い is the textbook example).
-    const bodyParts = vocabulary.filter(word => word.tags.includes('body-part') && !['尻尾','血','身'].includes(word.japanese))
+    const bodyParts = bodyPartPool(vocabulary)
     const subject = pick(humans, 1501, 'subject')
     const bodyPart = pick(bodyParts, 1502, 'object')
     if (!subject || !bodyPart) return null
@@ -2374,12 +3150,255 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const endingSlot={id:`itai-ending-${endingIndex}`,surface:suffixes[endingIndex]!,dictionaryForm:'痛い',reading:suffixes[endingIndex]!,english,pos:'i_adjective' as const,jlpt:'N5' as const,tags:['ending']}
     return finish(furigana,english,{subject,object:bodyPart},{adjective:adjectiveSlot,ending:endingSlot},['痛い needs a body part named explicitly, not a bare subject.'])
   }
+  if (patternId === 'n5-33') {
+    // A counted quantity: 私は本を三冊読みます. The counter is picked from the
+    // object, not chosen freely — 本 takes 冊 and お茶 takes 杯, and using the
+    // wrong one is as wrong as a bad particle.
+    const frame = COUNTED_FRAMES[Math.abs(seed + 1601) % COUNTED_FRAMES.length]!
+    const candidates = vocabulary.filter(word => frame.words.has(word.japanese))
+    const subject = pick(humans, 1602, 'subject')
+    const object = pick(candidates, 1603, 'object')
+    if (!subject || !object) return null
+    const forms = COUNTER_FORMS[frame.counter]!
+    let countIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1604) % forms.length
+    const surfaceFor = (index: number) => forms[index]![0]
+    if (options.avoidWords?.ending && surfaceFor(countIndex) === options.avoidWords.ending) {
+      countIndex = (countIndex + 1) % forms.length
+    }
+    const [countSurface, countReading] = forms[countIndex]!
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const objectGloss = primaryEnglishGloss(object.preferredTranslation || object.english)
+    const plural = countIndex === 0 ? objectGloss : pluralize(objectGloss)
+    // 一杯 is "one cup of tea", not "one tea"; the measure word itself is what
+    // pluralises.
+    const quantity = frame.measureOf
+      ? `${COUNTER_ENGLISH[countIndex]} ${countIndex === 0 ? frame.measureOf : pluralize(frame.measureOf)} of ${objectGloss}`
+      : `${COUNTER_ENGLISH[countIndex]} ${plural}`
+    const verbEnglish = subjectUsesBaseVerb(subjectEnglish) ? frame.verb.english : frame.verb.englishThird
+    const english = `${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${verbEnglish} ${quantity}.`
+    const furigana = [
+      wordPart(subject,'subject'),literalPart('は','わ'),
+      wordPart(object,'object'),literalPart('を'),
+      {text:countSurface,reading:countReading,slot:'count'},
+      {text:frame.verb.japanese,reading:frame.verb.reading,slot:'verb'},
+    ]
+    const countSlot = {id:`count-${frame.counter}-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['counter',frame.counter]}
+    const endingSlot = {id:`count-ending-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    return finish(furigana,english,{subject,object},{count:countSlot,ending:endingSlot},[`${frame.counter} is the counter ${object.japanese} takes.`])
+  }
+  if (patternId === 'n5-39') {
+    // まず本を読みます — ordering an action rather than dating it, so there is
+    // no particle and no tense to agree with.
+    let index = Math.abs(options.slotSeeds?.ending ?? seed + 1660) % SEQUENCE_ADVERBIALS.length
+    if (options.avoidWords?.ending && SEQUENCE_ADVERBIALS[index]!.japanese === options.avoidWords.ending) {
+      index = (index + 1) % SEQUENCE_ADVERBIALS.length
+    }
+    const step = SEQUENCE_ADVERBIALS[index]!
+    const frame = TIMED_ACTION_FRAMES[Math.abs(seed + 1661) % TIMED_ACTION_FRAMES.length]!
+    const subject = pick(humans, 1662, 'subject')
+    const object = pick(vocabulary.filter(word => frame.words.has(word.japanese)), 1663, 'object')
+    if (!subject || !object) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const verbEnglish = subjectUsesBaseVerb(subjectEnglish) ? frame.english.base : frame.english.third
+    const furigana = [
+      {text:step.japanese,reading:step.reading,slot:'sequence'},
+      wordPart(subject,'subject'),literalPart('は','わ'),
+      wordPart(object,'object'),literalPart('を'),
+      {text:frame.present.japanese,reading:frame.present.reading,slot:'verb'},
+    ]
+    const english = `${step.english}, ${subjectEnglish} ${verbEnglish} ${englishPhrase(object,'object')}.`
+    const slot = {id:`sequence-${step.japanese}`,surface:step.japanese,dictionaryForm:step.base ?? step.japanese,reading:step.reading,english:step.english.toLowerCase(),pos:'noun' as const,jlpt:'N5' as const,tags:['sequence','adverbial']}
+    return finish(furigana,english,{subject,object},{sequence:slot,ending:{...slot,id:`sequence-ending-${index}`,tags:['ending']}},['A sequence adverbial orders the action and takes no particle.'])
+  }
+  if (patternId === 'n5-38') {
+    let weatherIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1650) % WEATHER_FRAMES.length
+    if (options.avoidWords?.ending && WEATHER_FRAMES[weatherIndex]!.japanese === options.avoidWords.ending) {
+      weatherIndex = (weatherIndex + 1) % WEATHER_FRAMES.length
+    }
+    const weather = WEATHER_FRAMES[weatherIndex]!
+    const weatherPart = {text:weather.japanese,reading:weather.reading,slot:'weather'}
+    const weatherSlot = {id:`weather-${weather.japanese}-${weather.shape}`,surface:weather.japanese,dictionaryForm:weather.japanese,reading:weather.reading,english:weather.english,pos:'noun' as const,jlpt:'N5' as const,tags:['weather',weather.shape]}
+    const endingSlot = {id:`weather-ending-${weatherIndex}`,surface:weather.japanese,dictionaryForm:weather.japanese,reading:weather.reading,english:weather.english,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    const extra = {weather:weatherSlot,ending:endingSlot}
+    const time = WEATHER_TIMES[Math.abs(seed + 1651) % WEATHER_TIMES.length]!
+    const timePart = {text:time.japanese,reading:time.reading,slot:'time'}
+
+    if (weather.shape === 'state') {
+      // 今日は雨です — the Japanese predicate is a noun, the English an
+      // adjective with a dummy "it" that Japanese never uses.
+      const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('です')]
+      return finish(furigana,`It is ${weather.english} ${time.english}.`,{},extra,['A weather noun predicates directly with です.'])
+    }
+    if (weather.shape === 'falls') {
+      const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('が'),{text:'降ります',reading:'ふります',slot:'verb'}]
+      return finish(furigana,`It ${weather.english} ${time.english}.`,{},extra,['降る is the verb rain and snow take.'])
+    }
+    if (weather.shape === 'strong') {
+      const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('が'),{text:'強いです',reading:'つよいです',slot:'adjective'}]
+      return finish(furigana,`The ${weather.english} is strong ${time.english}.`,{},extra,['強い describes wind and thunder, not the day itself.'])
+    }
+    if (weather.shape === 'quality') {
+      const good = Math.abs(seed + 1652) % 2 === 0
+      const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('が'),{text:good?'いいです':'悪いです',reading:good?'いいです':'わるいです',slot:'adjective'}]
+      return finish(furigana,`The ${weather.english} is ${good?'good':'bad'} ${time.english}.`,{},extra,['天気 takes a quality adjective, not a weather noun.'])
+    }
+    const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('が'),{text:'きれいです',reading:'きれいです',slot:'adjective'}]
+    const isPlural = isPluralPhrase(weather.english)
+    return finish(furigana,`The ${weather.english} ${isPlural?'are':'is'} beautiful ${time.english}.`,{},extra,['きれい describes something seen, not the weather itself.'])
+  }
+  if (patternId === 'n5-37') {
+    // Question sentences. か marks the whole clause, and the question word sits
+    // where the answer would go — which is a different position for each one.
+    let questionIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1640) % QUESTION_FRAMES.length
+    if (options.avoidWords?.ending && QUESTION_FRAMES[questionIndex]!.japanese === options.avoidWords.ending) {
+      questionIndex = (questionIndex + 1) % QUESTION_FRAMES.length
+    }
+    const question = QUESTION_FRAMES[questionIndex]!
+    const questionPart = {text:question.japanese,reading:question.reading,slot:'question'}
+    const questionSlot = {id:`question-${question.japanese}`,surface:question.japanese,dictionaryForm:question.japanese,reading:question.reading,english:question.shape,pos:'noun' as const,jlpt:'N5' as const,tags:['question','interrogative']}
+    const endingSlot = {id:`question-ending-${questionIndex}`,surface:question.japanese,dictionaryForm:question.japanese,reading:question.reading,english:question.shape,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    const extra = {question:questionSlot,ending:endingSlot}
+
+    if (question.shape === 'price') {
+      const item = pick(vocabulary.filter(word => PRICED_OBJECTS.has(word.japanese)), 1641, 'object')
+      if (!item) return null
+      const itemEnglish = definite(primaryEnglishGloss(item.preferredTranslation || item.english))
+      const furigana=[wordPart(item,'object'),literalPart('は','わ'),questionPart,literalPart('ですか')]
+      return finish(furigana,`How much ${isPluralPhrase(itemEnglish)?'are':'is'} ${itemEnglish}?`,{object:item},extra,['いくら asks a price and takes the copula.'])
+    }
+
+    const subject = pick(humans, 1642, 'subject')
+    if (!subject) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    // English questions need do-support, which Japanese does not: 「行きますか」
+    // is one word where "does ... go" is three.
+    const does = subjectEnglish==='I' ? 'do' : subjectUsesBaseVerb(subjectEnglish) ? 'do' : 'does'
+
+    if (question.shape === 'destination') {
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),questionPart,literalPart('に'),{text:'行きますか',reading:'いきますか',slot:'verb'}]
+      return finish(furigana,`Where ${does} ${subjectEnglish} go?`,{subject},extra,['どこ stands where the destination would go.'])
+    }
+    if (question.shape === 'object') {
+      const frame = TIMED_ACTION_FRAMES[Math.abs(seed + 1643) % TIMED_ACTION_FRAMES.length]!
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),questionPart,literalPart('を'),{text:`${frame.present.japanese}か`,reading:`${frame.present.reading}か`,slot:'verb'}]
+      return finish(furigana,`What ${does} ${subjectEnglish} ${frame.english.base}?`,{subject},extra,['何 stands where the object would go.'])
+    }
+    // reason: the question word fronts the clause and nothing is removed.
+    const frame = TIMED_ACTION_FRAMES[Math.abs(seed + 1644) % TIMED_ACTION_FRAMES.length]!
+    const object = pick(vocabulary.filter(word => frame.words.has(word.japanese)), 1645, 'object')
+    if (!object) return null
+    const furigana=[questionPart,wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:`${frame.present.japanese}か`,reading:`${frame.present.reading}か`,slot:'verb'}]
+    return finish(furigana,`Why ${does} ${subjectEnglish} ${frame.english.base} ${englishPhrase(object,'object')}?`,{subject,object},extra,['どうして fronts the clause and removes nothing.'])
+  }
+  if (patternId === 'n5-36') {
+    // Reference の Position に Subject が あります/います — the existence frame
+    // built on a positional noun. います for animals, あります for things.
+    let positionIndex = Math.abs(seed + 1630) % POSITION_NOUNS.length
+    if (options.avoidWords?.ending && POSITION_NOUNS[positionIndex]!.japanese === options.avoidWords.ending) {
+      positionIndex = (positionIndex + 1) % POSITION_NOUNS.length
+    }
+    const chosen = POSITION_NOUNS[positionIndex]!
+    const reference = pick(vocabulary.filter(word => POSITION_REFERENCE_SETS[chosen.references].has(word.japanese)), 1631, 'location')
+    const subject = pick(vocabulary.filter(word => POSITION_SUBJECTS.has(word.japanese)), 1632, 'subject')
+    if (!reference || !subject) return null
+    const animate = [...tagSet(subject)].some(tag => animalSubjectTags.includes(tag))
+    const verb = animate ? {japanese:'います',reading:'います'} : {japanese:'あります',reading:'あります'}
+    const subjectEnglish = objectEnglish(primaryEnglishGloss(subject.preferredTranslation || subject.english))
+    const referenceEnglish = definite(primaryEnglishGloss(reference.preferredTranslation || reference.english))
+    const furigana = [
+      wordPart(reference,'location'),literalPart('の'),
+      {text:chosen.japanese,reading:chosen.reading,slot:'position'},
+      literalPart('に'),
+      wordPart(subject,'subject'),literalPart('が'),
+      {text:verb.japanese,reading:verb.reading,slot:'verb'},
+    ]
+    // 眼鏡 glosses as "glasses" — plural, so the existence verb has to agree.
+    const english = `There ${isPluralPhrase(subjectEnglish) ? 'are' : 'is'} ${subjectEnglish} ${chosen.english} ${referenceEnglish}.`
+    const positionSlot = {id:`position-${chosen.japanese}`,surface:chosen.japanese,dictionaryForm:chosen.japanese,reading:chosen.reading,english:chosen.english,pos:'noun' as const,jlpt:'N5' as const,tags:['position','relative-location']}
+    const endingSlot = {id:`position-ending-${positionIndex}`,surface:chosen.japanese,dictionaryForm:chosen.japanese,reading:chosen.reading,english:chosen.english,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    return finish(furigana,english,{location:reference,subject},{position:positionSlot,ending:endingSlot},['A positional noun attaches to its reference with の.',`${verb.japanese} is the ${animate?'animate':'inanimate'} existence verb.`])
+  }
+  if (patternId === 'n5-35') {
+    // Time Subject は Object を Verb — the time word picks the tense. These are
+    // all relative to now, so none of them takes に.
+    const frame = TIMED_ACTION_FRAMES[Math.abs(seed + 1620) % TIMED_ACTION_FRAMES.length]!
+    const candidates = vocabulary.filter(word => frame.words.has(word.japanese))
+    const subject = pick(humans, 1621, 'subject')
+    const object = pick(candidates, 1622, 'object')
+    if (!subject || !object) return null
+    let timeIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1623) % TIME_ADVERBIALS.length
+    if (options.avoidWords?.ending && TIME_ADVERBIALS[timeIndex]!.japanese === options.avoidWords.ending) {
+      timeIndex = (timeIndex + 1) % TIME_ADVERBIALS.length
+    }
+    const time = TIME_ADVERBIALS[timeIndex]!
+    const verb = time.tense === 'past' ? frame.past : frame.present
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const objectEnglish = englishPhrase(object,'object')
+    const verbEnglish = time.tense === 'past'
+      ? frame.english.past
+      : time.tense === 'future'
+        ? `will ${frame.english.base}`
+        : subjectUsesBaseVerb(subjectEnglish) ? frame.english.base : frame.english.third
+    const furigana = [
+      {text:time.japanese,reading:time.reading,slot:'time'},
+      wordPart(subject,'subject'),literalPart('は','わ'),
+      wordPart(object,'object'),literalPart('を'),
+      {text:verb.japanese,reading:verb.reading,slot:'verb'},
+    ]
+    const english = `${time.english.charAt(0).toUpperCase()+time.english.slice(1)} ${subjectEnglish} ${verbEnglish} ${objectEnglish}.`
+    const timeSlot = {id:`time-${time.japanese}`,surface:time.japanese,dictionaryForm:time.japanese,reading:time.reading,english:time.english,pos:'noun' as const,jlpt:'N5' as const,tags:['time',time.tense]}
+    const endingSlot = {id:`time-ending-${timeIndex}`,surface:time.japanese,dictionaryForm:time.japanese,reading:time.reading,english:time.english,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    return finish(furigana,english,{subject,object},{time:timeSlot,ending:endingSlot},[`${time.japanese} is relative to now, so it takes no に.`,`${time.japanese} forces the ${time.tense} form.`])
+  }
+  if (patternId === 'n5-34') {
+    // Place に Person が N人 います — the people counter, which is the one
+    // counter series a learner meets before any object counter.
+    // Directions (東, 西) are in the place pool but "at the east" is not where
+    // people stand; this frame wants somewhere you can be inside or at.
+    const countablePlaces = places.filter(word => ![...tagSet(word)].some(tag => ['direction','compass'].includes(tag)))
+    // A pronoun cannot be counted — "there is one we" — and neither can the
+    // speaker's own family terms, which are already definite.
+    const countablePeople = humans.filter(word => {
+      const tags = tagSet(word)
+      if (tags.has('pronoun') || tags.has('first-person')) return false
+      if (countableExemptPeople.has(word.japanese)) return false
+      // A group noun is not counted with 人: 夫婦 takes 組, and 両親 already
+      // means both of them, so 両親が三人 is wrong however it is glossed.
+      return !isPluralPhrase(primaryEnglishGloss(word.preferredTranslation || word.english))
+    })
+    const place = pick(countablePlaces, 1610, 'place')
+    const person = pick(countablePeople, 1611, 'subject')
+    if (!place || !person) return null
+    const forms = COUNTER_FORMS.nin!
+    let countIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1612) % forms.length
+    if (options.avoidWords?.ending && forms[countIndex]![0] === options.avoidWords.ending) {
+      countIndex = (countIndex + 1) % forms.length
+    }
+    const [countSurface, countReading] = forms[countIndex]!
+    const personGloss = primaryEnglishGloss(person.preferredTranslation || person.english)
+    // The count already says how many, so the English noun is bare and plural
+    // rather than taking an article: "two students are", not "two a students".
+    const counted = countIndex === 0 ? personGloss : pluralizePerson(personGloss)
+    const furigana = [
+      wordPart(place,'place'),literalPart('に'),
+      wordPart(person,'subject'),literalPart('が'),
+      {text:countSurface,reading:countReading,slot:'count'},
+      {text:'います',reading:'います',slot:'verb'},
+    ]
+    const english = `There ${countIndex === 0 ? 'is' : 'are'} ${COUNTER_ENGLISH[countIndex]} ${counted} ${englishPhrase(place,'location')}.`
+    const countSlot = {id:`count-nin-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:`${COUNTER_ENGLISH[countIndex]} people`,pos:'noun' as const,jlpt:'N5' as const,tags:['counter','nin']}
+    const endingSlot = {id:`count-nin-ending-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:`${COUNTER_ENGLISH[countIndex]} people`,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    return finish(furigana,english,{place,subject:person},{count:countSlot,ending:endingSlot},['人 is the counter for people.','います is the animate existence verb.'])
+  }
   if (patternId === 'n5-31') {
     // 乗る never existed at all — every vehicle word (自転車, 飛行機, 自動車,
     // 電車, 救急車, 消防車, ...) had no verb whose object/destination category
     // fit them. "Xに乗ります" (ride/board X) is the standard, extremely common
     // N5 frame that actually matches how vehicle nouns are used.
-    const vehicles = vocabulary.filter(word => word.categories.includes('Object') && word.tags.includes('vehicle'))
+    // Vehicles used to arrive in the Objects bucket; they now have a category
+    // of their own, so this accepts both rather than silently emptying out and
+    // leaving the pattern to fall back to its catalog example.
+    const vehicles = vocabulary.filter(word => categoryMatch(word,['Vehicle','Object']) && word.tags.includes('vehicle'))
     const subject = pick(humans, 1511, 'subject')
     const vehicle = pick(vehicles, 1512, 'destination')
     if (!subject || !vehicle) return null
@@ -2396,11 +3415,11 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${go} too.`,{subject},{verb:verbSlot('verb-iku-mo','行きます','行く','いきます','go',['movement','additive-topic','context-dependent'])},['も marks an additional subject.','This template assumes prior discourse context.'])
 }
 
-const additionalN4PatternIds = new Set(Array.from({length:15},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
+const additionalN4PatternIds = new Set(Array.from({length:23},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
 
 function additionalN4Sentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!additionalN4PatternIds.has(patternId)) return null
-  const vocabulary=editorWords()
+  const vocabulary=generatorWords()
   const humans=validHumanPool(vocabulary)
   const places=validPlacePool(vocabulary)
   const pick=requiredWordPicker(seed,options.requiredWord,options)
@@ -2614,6 +3633,214 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     const notRequired=subjectUsesBaseVerb(subjectEnglish)?'do not have to':'does not have to'
     return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${notRequired} ${base} ${englishPhrase(object,'object')}.`,{subject,object},{verb:grammarSlot(`verb-${verb.id}-nakute`,negative.japanese,verb.japanese,negative.reading,verb.english,['not-required','nakute-mo-ii'])},['Verb selected first and supplied the object rule.','なくてもいい expresses that the action is not required.'])
   }
+  // ---- Abstract-noun topics (n4-26 … n4-28) ----
+  // Ideas, feelings and situations had no frame at all: every Object slot in
+  // the engine wants something physical. These three take an abstract noun as
+  // the thing discussed, judged or explained, which is how such nouns actually
+  // appear in Japanese.
+  if (patternId==='n4-26' || patternId==='n4-27' || patternId==='n4-28') {
+    const topic=pick(abstractTopicPool(vocabulary),seed+560,'topic')
+    if (!topic) return null
+    const topicEnglish=abstractTopicEnglish(primaryEnglishGloss(topic.preferredTranslation||topic.english))
+
+    if (patternId==='n4-27') {
+      // 〜は大切です — a judgement about the topic, with no subject at all, so
+      // it is the one frame here that does not need a person.
+      // A plural gloss needs a plural copula — 道順 glosses as "directions",
+      // and "the directions is important" is broken English.
+      const plural=isPluralPhrase(topicEnglish)
+      const endings=[
+        {japanese:'大切です',reading:'たいせつです',english:plural?'are important':'is important'},
+        {japanese:'大切ではありません',reading:'たいせつではありません',english:plural?'are not important':'is not important'},
+        {japanese:'大切でした',reading:'たいせつでした',english:plural?'were important':'was important'},
+        {japanese:'必要です',reading:'ひつようです',english:plural?'are necessary':'is necessary'},
+      ]
+      let endingIndex=Math.abs(options.slotSeeds?.ending ?? seed+561)%endings.length
+      if (options.avoidWords?.ending && endings[endingIndex]!.japanese===options.avoidWords.ending) {
+        endingIndex=(endingIndex+1)%endings.length
+      }
+      const ending=endings[endingIndex]!
+      const furigana=[wordPart(topic,'topic'),literalPart('は','わ'),literalPart(ending.japanese,ending.reading,'ending')]
+      const english=`${topicEnglish.charAt(0).toUpperCase()+topicEnglish.slice(1)} ${ending.english}.`
+      return finish(furigana,english,{topic},{ending:grammarSlot(`abstract-judgement-${endingIndex}`,ending.japanese,'大切だ',ending.reading,ending.english,['judgement','na-adjective','ending'],'na_adjective')},['Topic is an abstraction, which is what this judgement frame takes.'])
+    }
+
+    const subject=pick(humans,562,'subject')
+    if (!subject) return null
+    const subjectEnglish=englishPhrase(subject,'subject')
+
+    if (patternId==='n4-26') {
+      // 〜について話します — the standard N4 frame for "about X".
+      const talks=subjectUsesBaseVerb(subjectEnglish)?'talk':'talks'
+      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(topic,'topic'),literalPart('について'),literalPart('話します','はなします','verb')]
+      return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${talks} about ${topicEnglish}.`,{subject,topic},{verb:grammarSlot('verb-hanasu-nitsuite','話します','話す','はなします','talk',['communication','nitsuite'])},['について takes a topic of discussion, not a physical object.'])
+    }
+    // n4-28: 〜を説明します — explaining an abstraction.
+    const explains=subjectUsesBaseVerb(subjectEnglish)?'explain':'explains'
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(topic,'topic'),literalPart('を'),literalPart('説明します','せつめいします','verb')]
+    return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${explains} ${topicEnglish}.`,{subject,topic},{verb:grammarSlot('verb-setsumei','説明します','説明する','せつめいします','explain',['communication','transitive'])},['説明する takes an idea or situation as its object.'])
+  }
+  if (patternId==='n4-29') {
+    // Subject は Adjective です — a plain description of a person. な- and
+    // い-adjectives take different negative and past forms, so the ending is
+    // built from the entry rather than shared.
+    const subject=pick(humans,571,'subject')
+    if (!subject) return null
+    const adjectiveIndex=Math.abs(seed+572)%personAdjectives.length
+    const adjective=personAdjectives[adjectiveIndex]!
+    const forms=adjective.na
+      ? [
+        {japanese:`${adjective.japanese}です`,reading:`${adjective.reading}です`,english:'is'},
+        {japanese:`${adjective.japanese}ではありません`,reading:`${adjective.reading}ではありません`,english:'is not'},
+        {japanese:`${adjective.japanese}でした`,reading:`${adjective.reading}でした`,english:'was'},
+      ]
+      : [
+        {japanese:`${adjective.japanese}です`,reading:`${adjective.reading}です`,english:'is'},
+        {japanese:`${adjective.japanese.slice(0,-1)}くないです`,reading:`${adjective.reading.slice(0,-1)}くないです`,english:'is not'},
+        {japanese:`${adjective.japanese.slice(0,-1)}かったです`,reading:`${adjective.reading.slice(0,-1)}かったです`,english:'was'},
+      ]
+    let endingIndex=Math.abs(options.slotSeeds?.ending ?? seed+573)%forms.length
+    if (options.avoidWords?.ending && forms[endingIndex]!.japanese===options.avoidWords.ending) {
+      endingIndex=(endingIndex+1)%forms.length
+    }
+    const form=forms[endingIndex]!
+    const subjectEnglish=englishPhrase(subject,'subject')
+    // "I am", "you are", "a doctor is" — the copula has to agree with whichever
+    // subject the pool produced.
+    const copulaPresent=subjectEnglish==='I'?'am':subjectUsesBaseVerb(subjectEnglish)?'are':'is'
+    const copulaPast=subjectUsesBaseVerb(subjectEnglish)&&subjectEnglish!=='I'?'were':'was'
+    const copula=form.english==='was'?copulaPast:form.english==='is not'?`${copulaPresent} not`:copulaPresent
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart(form.japanese,form.reading,'ending')]
+    const english=`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${copula} ${adjective.english}.`
+    return finish(furigana,english,{subject},{ending:grammarSlot(`person-adjective-${adjectiveIndex}-${endingIndex}`,form.japanese,adjective.japanese,form.reading,adjective.english,['description',adjective.na?'na-adjective':'i-adjective','ending'],adjective.na?'na_adjective':'i_adjective')},['Adjective describes a person, which is what this frame takes.'])
+  }
+  if (patternId==='n4-32' || patternId==='n4-33') {
+    if (patternId==='n4-32') {
+      // 山の高さは三千メートルです — a measurement of something, which is the
+      // frame the measurement nouns and the units need.
+      const measurement = MEASUREMENT_FRAMES[Math.abs(seed+590)%MEASUREMENT_FRAMES.length]!
+      const reference = pick(vocabulary.filter(word => measurement.references.has(word.japanese)), 591, 'topic')
+      if (!reference) return null
+      let valueIndex = Math.abs(options.slotSeeds?.ending ?? seed+592) % measurement.values.length
+      if (options.avoidWords?.ending && measurement.values[valueIndex]![0] === options.avoidWords.ending) {
+        valueIndex = (valueIndex + 1) % measurement.values.length
+      }
+      const [valueSurface, valueReading, valueEnglish] = measurement.values[valueIndex]!
+      const referenceEnglish = definite(primaryEnglishGloss(reference.preferredTranslation||reference.english))
+      const furigana=[
+        wordPart(reference,'topic'),literalPart('の'),
+        {text:measurement.japanese,reading:measurement.reading,slot:'measurement'},
+        literalPart('は','わ'),
+        {text:valueSurface,reading:valueReading,slot:'value'},
+        literalPart('です'),
+      ]
+      const english=`The ${measurement.english} of ${referenceEnglish} is ${valueEnglish}.`
+      const valueSlot={id:`measure-${measurement.japanese}-${valueIndex}`,surface:valueSurface,dictionaryForm:valueSurface,reading:valueReading,english:valueEnglish,pos:'noun' as const,jlpt:'N4' as const,tags:['measurement','value']}
+      return finish(furigana,english,{topic:reference},{value:valueSlot,ending:{...valueSlot,id:`measure-ending-${valueIndex}`,tags:['ending']}},[`${measurement.japanese} takes its own unit and its own kind of reference.`])
+    }
+    // n4-33: 昭和は長い時代でした — a named span, talked about rather than
+    // acted in.
+    let index = Math.abs(options.slotSeeds?.ending ?? seed+593) % PERIOD_NOUNS.length
+    if (options.avoidWords?.ending && PERIOD_NOUNS[index]!.japanese === options.avoidWords.ending) {
+      index = (index + 1) % PERIOD_NOUNS.length
+    }
+    const period = PERIOD_NOUNS[index]!
+    const adjectives = period.era
+      ? [{japanese:'長い',reading:'ながい',english:'long'},{japanese:'短い',reading:'みじかい',english:'short'}]
+      : [{japanese:'長い',reading:'ながい',english:'long'},{japanese:'短い',reading:'みじかい',english:'short'},{japanese:'大切な',reading:'たいせつな',english:'important'}]
+    const adjective = adjectives[Math.abs(seed+594)%adjectives.length]!
+    const past = period.era || Math.abs(seed+595)%2===0
+    const noun = period.era ? {japanese:'時代',reading:'じだい'} : {japanese:'期間',reading:'きかん'}
+    const useNoun = Boolean(period.era)
+    // な- and い-adjectives inflect differently, and an い-adjective's past
+    // drops the い before かった: 長い becomes 長かったです, not 長いかったです.
+    const na = adjective.japanese.endsWith('な')
+    const stem = (value: string) => na ? value.replace(/な$/,'') : value.replace(/い$/,'')
+    const tail = useNoun
+      ? {japanese:`${adjective.japanese}${noun.japanese}${past?'でした':'です'}`,reading:`${adjective.reading}${noun.reading}${past?'でした':'です'}`}
+      : na
+        ? {japanese:`${stem(adjective.japanese)}${past?'でした':'です'}`,reading:`${stem(adjective.reading)}${past?'でした':'です'}`}
+        : {japanese:`${past?`${stem(adjective.japanese)}かったです`:adjective.japanese+'です'}`,reading:`${past?`${stem(adjective.reading)}かったです`:adjective.reading+'です'}`}
+    const furigana=[
+      {text:period.japanese,reading:period.reading,slot:'topic'},
+      literalPart('は','わ'),
+      {text:tail.japanese,reading:tail.reading,slot:'ending'},
+    ]
+    const english=`${period.english.charAt(0).toUpperCase()+period.english.slice(1)} ${past?'was':'is'} ${useNoun?`a ${adjective.english} era`:adjective.english}.`
+    const endingSlot={id:`period-${period.japanese}-${index}`,surface:tail.japanese,dictionaryForm:period.japanese,reading:tail.reading,english:adjective.english,pos:'noun' as const,jlpt:'N4' as const,tags:['period','ending']}
+    return finish(furigana,english,{},{ending:endingSlot},['A named span is described, not acted in.'])
+  }
+  if (patternId==='n4-30') {
+    // Topic は [Degree] Adjective です — a judgement about an idea, optionally
+    // graded. This is the frame the degree words need: they modify an
+    // adjective, so a pattern without one has nothing for them to attach to.
+    const topic=pick(abstractTopicPool(vocabulary),seed+580,'topic')
+    if (!topic) return null
+    const adjective=abstractJudgementAdjectives[Math.abs(seed+581)%abstractJudgementAdjectives.length]!
+    const stem=`${adjective.japanese}${adjective.suffix ?? ''}`
+    const forms=adjective.na
+      ? [
+        {japanese:`${stem}です`,reading:`${adjective.reading}です`,english:'is'},
+        {japanese:`${stem}ではありません`,reading:`${adjective.reading}ではありません`,english:'is not'},
+        {japanese:`${stem}でした`,reading:`${adjective.reading}でした`,english:'was'},
+      ]
+      : [
+        {japanese:`${stem}です`,reading:`${adjective.reading}です`,english:'is'},
+        {japanese:`${stem.slice(0,-1)}くないです`,reading:`${adjective.reading.slice(0,-1)}くないです`,english:'is not'},
+        {japanese:`${stem.slice(0,-1)}かったです`,reading:`${adjective.reading.slice(0,-1)}かったです`,english:'was'},
+      ]
+    let endingIndex=Math.abs(options.slotSeeds?.ending ?? seed+582)%forms.length
+    if (options.avoidWords?.ending && forms[endingIndex]!.japanese===options.avoidWords.ending) {
+      endingIndex=(endingIndex+1)%forms.length
+    }
+    const form=forms[endingIndex]!
+    // Grade only some of the time, so the pattern still teaches the plain
+    // predicate, and never on the variety adjectives.
+    // Never on a negative: the adverb scopes over the whole predicate there, so
+    // わずかに客観的ではありません glosses as "is not slightly objective", which
+    // says something quite different from the Japanese.
+    const degree=adjective.noDegree||form.english==='is not'||Math.abs(seed+583)%3===0
+      ? null
+      : degreeAdverbs[Math.abs(seed+584)%degreeAdverbs.length]!
+    const topicEnglish=abstractTopicEnglish(primaryEnglishGloss(topic.preferredTranslation||topic.english))
+    const plural=isPluralPhrase(topicEnglish)
+    const copula=form.english==='was'?(plural?'were':'was'):form.english==='is not'?(plural?'are not':'is not'):(plural?'are':'is')
+    const furigana=[
+      wordPart(topic,'topic'),literalPart('は','わ'),
+      ...(degree?[literalPart(degree.japanese,degree.reading,'adverb')]:[]),
+      literalPart(form.japanese,form.reading,'ending'),
+    ]
+    const english=`${topicEnglish.charAt(0).toUpperCase()+topicEnglish.slice(1)} ${copula} ${degree?`${degree.english} `:''}${adjective.english}.`
+    const extra: GeneratedPreviewSentence['slots']={ending:grammarSlot(`abstract-adjective-${adjective.japanese}-${endingIndex}`,form.japanese,stem,form.reading,adjective.english,['judgement',adjective.na?'na-adjective':'i-adjective','ending'],adjective.na?'na_adjective':'i_adjective')}
+    if (degree) extra.adverb=grammarSlot(`degree-${degree.japanese}`,degree.japanese,degree.japanese,degree.reading,degree.english,['degree','adverb'],'na_adjective')
+    return finish(furigana,english,{topic},extra,['Degree adverbs modify the adjective, not the verb.'])
+  }
+  if (patternId==='n4-31') {
+    // A は B と 同じです — the comparison words need a second thing to relate to,
+    // and the pair has to be one worth comparing, so both come from the curated
+    // concept pairs rather than from the topic pool at large.
+    const byJapanese=new Map(vocabulary.map(word=>[word.japanese,word]))
+    const available=conceptPairs.filter(pair=>byJapanese.has(pair.first)&&byJapanese.has(pair.second))
+    if (!available.length) return null
+    const pair=available[Math.abs(seed+587)%available.length]!
+    const first=byJapanese.get(pair.first)!,second=byJapanese.get(pair.second)!
+    const comparison=comparisonAdjectives.find(entry=>entry.japanese===pair.comparison)!
+    const endings=[
+      {japanese:`${comparison.japanese}です`,reading:`${comparison.reading}です`,english:'is'},
+      {japanese:`${comparison.japanese}ではありません`,reading:`${comparison.reading}ではありません`,english:'is not'},
+    ]
+    let endingIndex=Math.abs(options.slotSeeds?.ending ?? seed+588)%endings.length
+    if (options.avoidWords?.ending && endings[endingIndex]!.japanese===options.avoidWords.ending) {
+      endingIndex=(endingIndex+1)%endings.length
+    }
+    const ending=endings[endingIndex]!
+    const firstEnglish=abstractTopicEnglish(primaryEnglishGloss(first.preferredTranslation||first.english))
+    const secondEnglish=abstractTopicEnglish(primaryEnglishGloss(second.preferredTranslation||second.english))
+    const copula=(isPluralPhrase(firstEnglish)?'are':'is')+(endingIndex===1?' not':'')
+    const furigana=[wordPart(first,'topic'),literalPart('は','わ'),wordPart(second,'comparison'),literalPart('と'),literalPart(ending.japanese,ending.reading,'ending')]
+    const english=`${firstEnglish.charAt(0).toUpperCase()+firstEnglish.slice(1)} ${copula} ${comparison.english} ${secondEnglish}.`
+    return finish(furigana,english,{topic:first,comparison:second},{ending:grammarSlot(`comparison-${comparison.japanese}-${endingIndex}`,ending.japanese,comparison.japanese,ending.reading,comparison.english,['comparison','na-adjective','ending'],'na_adjective')},['Both nouns come from a curated pair, so the comparison is meaningful.'])
+  }
   return null
 }
 
@@ -2625,7 +3852,7 @@ const n3PatternMeanings: Record<string,string> = {
 
 function generateN3CategorySentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!n3PatternIds.has(patternId)) return null
-  const vocabulary=editorWords()
+  const vocabulary=generatorWords()
   const humans=validHumanPool(vocabulary)
   const places=validPlacePool(vocabulary)
   const pick=requiredWordPicker(seed,options.requiredWord,options)
@@ -3119,7 +4346,7 @@ function advancedPatternLevel(patternId: string): 'N4' | 'N3' | 'N2' | 'N1' {
 function generateAdvancedCategorySentence(seed: number, patternId: string, options: CategorySentenceOptions = {}): GeneratedPreviewSentence | null {
   if (!advancedPatternIds.has(patternId)) return null
   const level = advancedPatternLevel(patternId)
-  const vocabulary = editorWords()
+  const vocabulary = generatorWords()
   const humans = validHumanPool(vocabulary)
   // A pick tagged with a slot name can be re-seeded on its own, which is what
   // lets the hero rotator vary one word and hold the rest of the sentence
@@ -4810,7 +6037,7 @@ function generateN4Nagara(seed: number,vocabulary: WordRecord[],options: Categor
 function generateN4CategorySentence(seed: number,requestedPatternId?: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   const patternIds=Object.keys(n4PatternMeanings)
   const patternId=requestedPatternId && patternIds.includes(requestedPatternId) ? requestedPatternId : seededPick(patternIds,seed,61)
-  const vocabulary=editorWords()
+  const vocabulary=generatorWords()
   if (patternId === 'n4-09') return generateN4Nagara(seed,vocabulary,options)
   // いる/ある (existence) fundamentally don't take these aspectual templates —
   // an inanimate "subject" (really the thing located) has no desire (～たい),
@@ -5024,7 +6251,7 @@ export function generateCategorySentence(seed: number, requestedPatternId?: stri
     ? verbPool.find(candidate => candidate.id === options.verbId)
     : seededPick(verbSelectPool, options.slotSeeds?.verb ?? seed, 1)
   if (!verb) return null
-  const vocabulary = editorWords()
+  const vocabulary = generatorWords()
   const result = fillVerbSlots(verb,vocabulary,seed,2,slotOptions)
   if (!result) return null
   const { filled,slotTagMatches } = result

@@ -65,18 +65,62 @@ const jpRestrictive = (jp: string) => /しか/.test(jp) && /(ません|ない)$/
 // Same shape as the obligation and restrictive forms above: negative
 // morphology, positive meaning, correct affirmative gloss being flagged.
 const jpCertainty = (jp: string) => /に違いない$|に違いありません$/.test(jpCore(jp))
-const jpNegative = (jp: string) => !jpObligation(jp) && !jpRestrictive(jp) && !jpCertainty(jp) && (/(ない|ません|なかった|ませんでした)(?:です|でした)?$/.test(jpCore(jp))
+// 〜かねません is 〜かねない, "might well ..." — a possibility, not a negation,
+// despite ending in ません. Its correct affirmative gloss was being flagged.
+const jpPossibility = (jp: string) => /かねません$|かねない$/.test(jpCore(jp))
+// 〜のあまり ("so much that ...") is a noun construction that merely contains
+// the same characters as the adverb あまり ("not much"). Treating them alike
+// flagged 悲しさのあまり、泣いてしまいました on two separate rules at once.
+const adverbAmari = (jp: string) => /(?<!の)あまり/.test(jp)
+const jpNegative = (jp: string) => !jpObligation(jp) && !jpRestrictive(jp) && !jpCertainty(jp) && !jpPossibility(jp) && (/(ない|ません|なかった|ませんでした)(?:です|でした)?$/.test(jpCore(jp))
   // 〜なくなる ("stopped doing", "no longer does") ends on なりました, so the
   // end-anchored check missed it entirely and then flagged the correct
   // "no longer ..." gloss as an invented negative.
   || /なくなり(ました|ます)$|なくなった$|なくなる$/.test(jpCore(jp))
-  // ないでください (negative request) and 〜かねます ("cannot readily") are both
+  // ないでください (negative request) and 〜かねます ("unable to") are both
   // negative but end on ください/ます, so an end-anchored check reads them as
   // affirmative and then flags their correct "do not"/"cannot" glosses.
+  // 〜かねません is deliberately excluded: it is 〜かねない, "might well",
+  // a possibility rather than a negation.
   || /ないでください$/.test(jpCore(jp))
-  || /かね(ます|ません)$/.test(jpCore(jp)))
-const jpPast = (jp: string) => /(った|いた|えた|した|んだ|ました|なかった|ませんでした|てしまった|ていた|かった)(?:です)?$/.test(jpCore(jp))
+  || /かねます$/.test(jpCore(jp))
+  // 〜なくてもいい ("does not have to") carries its negative on the stem and
+  // ends on いい, so the predicate-final test read it as affirmative and then
+  // flagged its correct "does not have to eat" gloss as an invented negative.
+  || /なくても(いい|よい|かまいません|大丈夫)(です|でした)?$/.test(jpCore(jp)))
+// The kana list below is godan-shaped (った/いた/した/んだ). An ichidan past is
+// stem + た, so 食べた and 開けた ended in べた/けた and read as non-past, which
+// then flagged their correct "ate"/"opened" glosses as tense mismatches.
+// A final た directly after kanji is also past — 来た, 見た, 出た, 寝た write
+// their stem in kanji, so no kana-based test can see them.
+const ichidanPast = (jp: string) => /[べめげねてでれせけえ]た$/.test(jp) || /[一-鿿]た$/.test(jp)
+const jpPast = (jp: string) => /(った|いた|えた|した|んだ|いだ|ました|なかった|ませんでした|てしまった|ていた|かった)(?:です)?$/.test(jpCore(jp))
+  || ichidanPast(jpCore(jp))
   || /でした$/.test(jpCore(jp))
+  // 見たばかりです ("has just watched") is past — the marker simply is not
+  // adjacent to です, so the end-anchored test above cannot see it.
+  // [ただ] because the plain past of a verb like 飲む is 飲んだ, not 飲んた:
+  // anchoring on た alone missed every voiced-stem verb, so 飲んだばかりです
+  // reported its correct "just drank tea" gloss as a tense mismatch.
+  || /[ただ](ばかり|ところ)(です|でした)?$/.test(jpCore(jp))
+  // 〜たことがあります is experiential ("has watched before") — present perfect
+  // in English, so the past-tense verb in the gloss is correct even though the
+  // Japanese predicate is non-past.
+  || /[ただ]ことが(あります|ある|ありました|あった|ありません|ない|ありませんでした|なかった)$/.test(jpCore(jp))
+// A subordinate clause can carry its own past tense that the main predicate
+// does not: 日本に来て以来、連絡していません is correctly "ever since I came".
+const jpSubordinatePast = (jp: string) => /(以来|てから|あと|後で)/.test(jp)
+// The mirror of the above for polarity: an affirmative main predicate can sit
+// on top of a negative subordinate clause, and the gloss has to carry that
+// negative. 遅刻しないように、早く家を出ます is "so that I will not be late",
+// and 休みなく働きます is "works without rest" — both correct.
+const jpSubordinateNegative = (jp: string) =>
+  /(ないように|ないで|ずに|なく[、,]|なく[^なて])/.test(jp)
+  // A negative can also sit in front of any clause connector — 知らないくせに、
+  // 説明します is "even though they don't know" — or inside a nominalised
+  // clause, as in 悪いことから ("judging from"). The main predicate that
+  // follows is affirmative, so only the connector reveals the negation.
+  || /(ない|ません)(くせに|のに|ので|から|けれど|けど|ため|うちに|ことから|こと[はがを]|の[はがを]|と[、,]|が[、,])/.test(jp)
 const jpVolitional = (jp: string) => /(おう|こう|そう|とう|もう|ろう|よう)$/.test(jp) && !/(そうだ|ようだ)$/.test(jp)
 const jpDesire = (jp: string) => /(たい|たがる)$/.test(jp)
 const jpPotential = (jp: string) => /ことができる$/.test(jp)
@@ -85,11 +129,23 @@ const jpPermission = (jp: string) => /てもいい$/.test(jp)
 
 // ---- English surface analysis --------------------------------------------
 
+// Contractions count: 「日本語すら知りません」 glossed "doesn't even know
+// Japanese" is negative on both sides, but only the spelled-out forms were
+// recognised.
 // English negates in more ways than "not". "There is no need to wash" is as
 // negative as "does not wash", but only matching `not` reported it as an
 // affirmative gloss on a negative sentence — that single omission accounted
 // for 216 of 271 findings on one run.
-const enNegative = (en: string) => /\b(do not|does not|did not|not|never|must not|cannot|can not|no|none|nothing|no one|unable|without|hardly|rarely)\b/i.test(en)
+// "not only X but also Y" is a correlative, not a negation — 〜ばかりか is an
+// affirmative sentence whose correct gloss happens to contain "not".
+// Contractions need their own test: `n't` cannot be an alternative inside a
+// \b(...)\b group, because "doesn't" has no word boundary between "does" and
+// "n't". Written that way it silently never matched, and every contracted
+// gloss ("doesn't even know Japanese") read as affirmative.
+const enContractedNegative = (en: string) => /n't\b/i.test(en)
+const enNegative = (en: string) => enContractedNegative(en)
+  || /\b(do not|does not|did not|not|never|must not|cannot|can not|no|none|nothing|no one|unable|without|hardly|rarely)\b/i
+    .test(en.replace(/\bnot only\b/gi, ''))
 // `read` is deliberately absent: its past and present forms are spelled the
 // same, so "wants to read a letter" was being reported as a past-tense gloss
 // on a non-past sentence. A check that cannot tell the two apart can only
@@ -101,7 +157,7 @@ const enPast = (en: string) =>
 const ADVERB_GLOSS: [string, RegExp][] = [
   ['あまり', /not much|not very|much/i],
   ['ぜんぜん', /at all|not at all/i],
-  ['よく', /often|well|frequently|a lot/i],
+  ['よく', /often|well|frequently|a lot|carefully|thoroughly/i],
   ['ときどき', /sometimes|occasionally/i],
   ['時々', /sometimes|occasionally/i],
   ['たくさん', /a lot|many|lots|much/i],
@@ -129,7 +185,7 @@ const CHECKS: Check[] = [
     rule: 'JP: あまり + affirmative predicate',
     severity: 'broken',
     note: 'あまり is negative-polarity; it requires 〜ない. "あまり始める" is ungrammatical.',
-    test: (r) => r.jp.includes('あまり') && !jpNegative(r.jp),
+    test: (r) => adverbAmari(r.jp) && !jpNegative(r.jp),
   },
   {
     rule: 'JP: ぜんぜん + affirmative predicate',
@@ -141,7 +197,13 @@ const CHECKS: Check[] = [
     rule: 'JP: とても + verb (not adjective)',
     severity: 'broken',
     note: 'とても modifies adjectives, not plain action verbs. "とても見る" is ungrammatical.',
-    test: (r) => r.jp.includes('とても') && !/(い|な)(です)?$/.test(r.jp) && !jpNegative(r.jp),
+    // とても modifies adjectives and adjectival states, so a copula predicate
+    // (とても丈夫です) is correct — the old kana-only test could not see an
+    // adjective written in kanji — and so is 〜になる (とても頼りになります).
+    test: (r) => r.jp.includes('とても')
+      && !/(です|でした)$/.test(jpCore(r.jp))
+      && !/に(なります|なる|なりました|なった|なりません)$/.test(jpCore(r.jp))
+      && !jpNegative(r.jp),
   },
   {
     rule: 'JP: たい + がる double-stacked',
@@ -153,7 +215,7 @@ const CHECKS: Check[] = [
     rule: 'JP: negative-polarity adverb + non-negative modal',
     severity: 'broken',
     note: 'あまり/ぜんぜん combined with potential/obligation without negation.',
-    test: (r) => /(あまり|ぜんぜん)/.test(r.jp) && (jpPotential(r.jp) || jpObligation(r.jp)),
+    test: (r) => (adverbAmari(r.jp) || /ぜんぜん/.test(r.jp)) && (jpPotential(r.jp) || jpObligation(r.jp)),
   },
   {
     rule: 'JP: もう + non-past affirmative',
@@ -185,13 +247,14 @@ const CHECKS: Check[] = [
     rule: 'EN: polarity invented (JP affirmative, EN negative)',
     severity: 'broken',
     note: 'Japanese is affirmative but the gloss is negative.',
-    test: (r) => !jpNegative(r.jp) && !/(あまり|ぜんぜん)/.test(r.jp) && enNegative(r.en),
+    test: (r) => !jpNegative(r.jp) && !jpSubordinateNegative(r.jp) && !adverbAmari(r.jp)
+      && !/ぜんぜん/.test(r.jp) && enNegative(r.en),
   },
   {
     rule: 'EN: tense mismatch (JP non-past, EN past)',
     severity: 'broken',
     note: 'Gloss is past tense but the Japanese is not, e.g. 飲もう → "drank".',
-    test: (r) => !jpPast(r.jp) && !jpDesire(r.jp) && enPast(r.en) && !/ended up/i.test(r.en),
+    test: (r) => !jpPast(r.jp) && !jpSubordinatePast(r.jp) && !jpDesire(r.jp) && enPast(r.en) && !/ended up/i.test(r.en),
   },
   {
     rule: 'EN: desire form glossed as past',
@@ -217,20 +280,20 @@ const CHECKS: Check[] = [
     rule: 'EN: adverb dropped from gloss',
     severity: 'broken',
     note: 'An adverb present in the Japanese has no counterpart in the English.',
-    test: (r) => ADVERB_GLOSS.some(([jp, re]) => r.jp.includes(jp) && !re.test(r.en)),
+    test: (r) => ADVERB_GLOSS.some(([jp, re]) => (jp === 'あまり' ? adverbAmari(r.jp) : r.jp.includes(jp)) && !re.test(r.en)),
   },
   {
     rule: 'EN: adverb placed before verb (word salad)',
     severity: 'awkward',
     note: 'Adverb phrase dropped in front of the verb without reordering, e.g. "I a little drink tea".',
-    test: (r) => /\b(a little|a lot|not much|not at all|very|often|already|still)\s+(drink|eat|read|buy|make|take|watch|use|wait|start|study|learn|borrow|sing|write)s?\b/i.test(r.en),
+    test: (r) => /\b(a little|a lot|not much|not at all|very)\s+(drink|eat|read|buy|make|take|watch|use|wait|start|study|learn|borrow|sing|write)s?\b/i.test(r.en),
   },
   {
     rule: 'EN: modal lost (prohibition/obligation/permission)',
     severity: 'broken',
     note: 'てはいけない / なければならない / てもいい not rendered as must / must not / may.',
     test: (r) => (jpProhibition(r.jp) && !/must not|may not|cannot|should not/i.test(r.en))
-      || (jpObligation(r.jp) && !/must|have to|need to/i.test(r.en))
+      || (jpObligation(r.jp) && !/must|have to|has to|had to|need to|needed to/i.test(r.en))
       || (jpPermission(r.jp) && !/may|can|allowed|it is ok/i.test(r.en)),
   },
   {

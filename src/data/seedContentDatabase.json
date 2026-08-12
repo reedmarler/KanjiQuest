@@ -11066,7 +11066,8 @@
         "preference",
         "positive",
         "emotion",
-        "n5"
+        "n5",
+        "expression"
       ],
       "status": "approved",
       "source": "kanji-quest",
@@ -11094,7 +11095,8 @@
         "desire",
         "relationship",
         "emotion",
-        "n4"
+        "n4",
+        "expression"
       ],
       "status": "approved",
       "source": "kanji-quest",
@@ -12306,7 +12308,6 @@
       "tags": [
         "laughter",
         "emotion",
-        "expression",
         "n3"
       ],
       "status": "approved",
@@ -16664,7 +16665,7 @@
       "sourceId": "vocab-n2-kakkyoku",
       "kind": "vocabulary",
       "japanese": "客観",
-      "reading": "kakkyoku",
+      "reading": "きゃっかん",
       "english": "objectivity",
       "jlpt": "N2",
       "category": "Descriptors",
@@ -22016,7 +22017,7 @@
       "sourceId": "vocab-freq-0834",
       "kind": "vocabulary",
       "japanese": "十",
-      "reading": "juutoo",
+      "reading": "じゅう",
       "english": "ten",
       "jlpt": "N5",
       "category": "Time & Numbers",
@@ -27695,7 +27696,7 @@
         "mental",
         "ichidan",
         "transitive",
-        "n5開く"
+        "n5"
       ],
       "status": "approved",
       "source": "kanji-quest",
@@ -38074,7 +38075,7 @@
         "government",
         "society",
         "abstract",
-        "n3-池"
+        "n3"
       ],
       "status": "approved",
       "source": "kanji-quest",
@@ -39217,7 +39218,7 @@
         "snow",
         "weather",
         "nature",
-        "n5石けん"
+        "n5"
       ],
       "status": "approved",
       "source": "kanji-quest",
@@ -42871,7 +42872,7 @@
         "weather",
         "nature",
         "state",
-        "n5監督"
+        "n5"
       ],
       "status": "approved",
       "source": "kanji-quest",
@@ -44087,7 +44088,7 @@
         "exam",
         "assessment",
         "negative",
-        "n5失敗"
+        "n5"
       ],
       "status": "approved",
       "source": "kanji-quest",
