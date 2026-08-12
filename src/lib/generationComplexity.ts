@@ -62,6 +62,24 @@ export function complexityForPattern(patternId: string): GenerationComplexity {
   return complexityByPattern.get(patternId) ?? 1
 }
 
+/**
+ * Generator-ready patterns for a JLPT level.
+ *
+ * The hero stream used to select by complexity, via a straight N5→1, N4→2 map.
+ * That conflated two different axes: complexity measures how much structure the
+ * generator coordinates (level 2 means *two interacting verbs*), so every
+ * single-clause pattern lands at level 1 whatever its vocabulary. The N5 stream
+ * was therefore carrying 89 patterns — 13 of them N2 and one N1 — while N4
+ * single-clause frames had nowhere to appear at all.
+ *
+ * Complexity is still the right axis for Content Studio and the testing view,
+ * which ask "how hard is this to build". A learner stream wants "what is at my
+ * level", which is what JLPT records.
+ */
+export function patternsForLevel(level: JlptLevel): SentencePatternRecord[] {
+  return sentencePatternCatalog.filter((pattern) => pattern.jlpt === level && pattern.generatorReady)
+}
+
 export function patternsForComplexity(complexity: GenerationComplexity): SentencePatternRecord[] {
   return patternsByComplexity[complexity]
     .map((id) => sentencePatternCatalog.find((pattern) => pattern.id === id))
