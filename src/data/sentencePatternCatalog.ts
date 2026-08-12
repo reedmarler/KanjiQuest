@@ -51,6 +51,7 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N5','Reference の Position に Subject が ある',['Reference','の','Position','に','Subject','が','ある'],'机の上に本があります','where something is, relative to something else','ある/いる',true,'A positional noun joins its reference with の; English turns the pair into a preposition.'],
   ['N5','Question word + か',['Question','...','か'],'学生はどこに行きますか','asking where, what, why, or how much','polite + か',true,'The question word stands where the answer would go, which differs per word.'],
   ['N5','Time は Weather です',['Time','は','Weather','です'],'今日は雨です','a weather report','copula or adjective',true,'Weather has several shapes: 雨 falls, 晴れ is a state, 風 is strong, 天気 is good or bad.'],
+  ['N5','Sequence Subject は Object を Verb',['Sequence','Subject','は','Object','を','Verb'],'まず学生は本を読みます','ordering one action before another','polite present',true,'A sequence adverbial orders the action and takes no particle.'],
 
   ['N4','Subject は Object を Verbたい',['Subject','は','Object','を','Verbたい'],'本を読みたい','desire to do','masu-stem + たい',true],
   ['N4','Subject は Object を Verbている',['Subject','は','Object','を','Verbている'],'本を読んでいる','ongoing or resulting state','te-form + いる',true],
@@ -83,6 +84,8 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N4','Subject は Adjective です',['Subject','は','Adjective','です'],'祖父は健康です','describe a person','adjective predicate',true,'Takes person-describing adjectives; な- and い-adjectives inflect differently.'],
   ['N4','Topic は Degree Adjective です',['Topic','は','Degree','Adjective','です'],'経験は非常に重要です','graded judgement about an idea','adjective predicate',true,'The frame degree adverbs need: they modify an adjective, not a verb.'],
   ['N4','A は B と 同じです',['A','は','B','と','同じです'],'理由は結果と同じです','compare two things','na-adjective predicate',true],
+  ['N4','Reference の Measurement は Value です',['Reference','の','Measurement','は','Value','です'],'山の高さは三千メートルです','a measurement of something','copula',true,'Each measurement takes its own unit and its own kind of reference.'],
+  ['N4','Period は Adjective です',['Period','は','Adjective','です'],'昭和は長い時代でした','describing a named span of time','copula',true,'A named era is talked about rather than acted in.'],
 
   ['N3','Subject は Verbようにする',['Subject','は','Verbようにする'],'毎日勉強するようにする','make an effort or habit','plain form + ようにする',true],
   ['N3','Subject は Verbことにする',['Subject','は','Verbことにする'],'日本へ行くことにする','decide to do','plain form + ことにする',true],

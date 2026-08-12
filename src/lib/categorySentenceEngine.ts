@@ -1940,6 +1940,70 @@ const WEATHER_FRAMES: ReadonlyArray<{
   { japanese:'雲', reading:'くも', shape:'pretty', english:'clouds' },
 ]
 const weatherWords = new Set(WEATHER_FRAMES.map(entry => entry.japanese))
+
+/**
+ * Sequence adverbials for n5-39 — まず, 最初に, 後で.
+ *
+ * These order actions rather than locating them in time, so they take no
+ * particle and no tense agreement, unlike the TIME_ADVERBIALS above. The
+ * vocabulary stores some as bare nouns (最初, 最後) and some already inflected
+ * (最初に, 後で), so both surfaces are registered.
+ */
+const SEQUENCE_ADVERBIALS: ReadonlyArray<{japanese:string;reading:string;english:string;base?:string}> = [
+  { japanese:'まず', reading:'まず', english:'First' },
+  { japanese:'最初に', reading:'さいしょに', english:'First', base:'最初' },
+  { japanese:'先に', reading:'さきに', english:'First of all', base:'先' },
+  { japanese:'後で', reading:'あとで', english:'Later', base:'後' },
+  { japanese:'最後に', reading:'さいごに', english:'Last', base:'最後' },
+]
+const sequenceAdverbialWords = new Set(SEQUENCE_ADVERBIALS.flatMap(e => e.base ? [e.japanese, e.base] : [e.japanese]))
+
+/**
+ * Measurements for n4-32 — 山の高さは三千メートルです.
+ *
+ * Each measurement takes its own unit and its own kind of reference: a room has
+ * a temperature but not a length, and a mountain has a height but not a
+ * weight. Values are written out because the reading of a numeral with a unit
+ * is not derivable — 三千 is さんぜん, not さんせん, and 十 before メートル is
+ * じゅう where 十本 would be じゅっぽん.
+ */
+const MEASUREMENT_FRAMES: ReadonlyArray<{
+  japanese:string; reading:string; english:string
+  references: ReadonlySet<string>
+  values: ReadonlyArray<readonly [string,string,string]>
+}> = [
+  // Split by scale rather than sharing one value list: 山 and 建物/木 differ by
+  // two orders of magnitude, and one list produced a three-thousand-metre tree.
+  { japanese:'高さ', reading:'たかさ', english:'height', references:new Set(['山']),
+    values:[['三千メートル','さんぜんメートル','three thousand meters'],['二千メートル','にせんメートル','two thousand meters']] },
+  { japanese:'高さ', reading:'たかさ', english:'height', references:new Set(['建物','木']),
+    values:[['十メートル','じゅうメートル','ten meters'],['五十メートル','ごじゅうメートル','fifty meters']] },
+  { japanese:'長さ', reading:'ながさ', english:'length', references:new Set(['橋','道路','川']),
+    values:[['五百メートル','ごひゃくメートル','five hundred meters'],['二キロ','にキロ','two kilometers'],['十メートル','じゅうメートル','ten meters']] },
+  { japanese:'重さ', reading:'おもさ', english:'weight', references:new Set(['荷物','鞄']),
+    values:[['五キロ','ごキロ','five kilograms'],['三キロ','さんキロ','three kilograms'],['十キロ','じゅっキロ','ten kilograms']] },
+  { japanese:'温度', reading:'おんど', english:'temperature', references:new Set(['部屋','水','空気']),
+    values:[['二十度','にじゅうど','twenty degrees'],['三十度','さんじゅうど','thirty degrees'],['五度','ごど','five degrees']] },
+]
+const measurementWords = new Set(MEASUREMENT_FRAMES.map(entry => entry.japanese))
+
+/**
+ * Period nouns for n4-33 — 昭和は長い時代でした.
+ *
+ * A named era or span is talked *about*, which is why the time patterns could
+ * not reach these: 昭和に行きます is not a sentence. `era` marks the ones that
+ * take 時代 as their predicate noun.
+ */
+const PERIOD_NOUNS: ReadonlyArray<{japanese:string;reading:string;english:string;era?:boolean}> = [
+  { japanese:'昭和', reading:'しょうわ', english:'the Showa era', era:true },
+  { japanese:'平成', reading:'へいせい', english:'the Heisei era', era:true },
+  { japanese:'期間', reading:'きかん', english:'the period' },
+  { japanese:'時間', reading:'じかん', english:'the time' },
+  { japanese:'瞬間', reading:'しゅんかん', english:'the moment' },
+]
+// 時代 is taught as the predicate noun of the era frame (昭和は長い時代でした)
+// rather than as a topic for it — 「時代は長い期間です」 says nothing.
+const periodNounWords = new Set([...PERIOD_NOUNS.map(e => e.japanese), '時代', '締め切り'])
 /** Only the present-tense time words make sense with a weather report. */
 const WEATHER_TIMES = TIME_ADVERBIALS.filter(entry => entry.tense !== 'past' && ['今日','今週','明日','週末','今晩'].includes(entry.japanese))
 /** Objects with a price, for the いくら frame. */
@@ -2012,7 +2076,7 @@ const COUNTED_FRAMES: ReadonlyArray<{
     verb:{japanese:'買います',reading:'かいます',english:'buy',englishThird:'buys'} },
 ]
 
-const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34','n5-35','n5-36','n5-37','n5-38'])
+const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34','n5-35','n5-36','n5-37','n5-38','n5-39'])
 const geographicOriginTags = new Set(normalizeTags(['country','city','town','village','neighborhood','island']))
 const originSubjectDisallowedTags = new Set(normalizeTags(['patient','sick','illness','medical','hospital','guest','customer']))
 const portableObjectTags = new Set(normalizeTags([
@@ -2568,6 +2632,9 @@ function slotEligibleWords(): Set<string> {
   for (const japanese of positionNounWords) eligible.add(japanese)
   for (const japanese of questionWords) eligible.add(japanese)
   for (const japanese of weatherWords) eligible.add(japanese)
+  for (const japanese of sequenceAdverbialWords) eligible.add(japanese)
+  for (const japanese of measurementWords) eligible.add(japanese)
+  for (const japanese of periodNounWords) eligible.add(japanese)
   for (const rule of adjectiveRules) eligible.add(rule.japanese)
 
   slotIndexCache = eligible
@@ -2683,6 +2750,9 @@ export function auditWordReachability(): WordReachability[] {
     ['position-noun', positionNounWords],
     ['question-word', questionWords],
     ['weather', weatherWords],
+    ['sequence-adverbial', sequenceAdverbialWords],
+    ['measurement', measurementWords],
+    ['period-noun', periodNounWords],
   ]
 
   return vocabulary.map(word => {
@@ -3094,6 +3164,30 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const endingSlot = {id:`count-ending-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
     return finish(furigana,english,{subject,object},{count:countSlot,ending:endingSlot},[`${frame.counter} is the counter ${object.japanese} takes.`])
   }
+  if (patternId === 'n5-39') {
+    // まず本を読みます — ordering an action rather than dating it, so there is
+    // no particle and no tense to agree with.
+    let index = Math.abs(options.slotSeeds?.ending ?? seed + 1660) % SEQUENCE_ADVERBIALS.length
+    if (options.avoidWords?.ending && SEQUENCE_ADVERBIALS[index]!.japanese === options.avoidWords.ending) {
+      index = (index + 1) % SEQUENCE_ADVERBIALS.length
+    }
+    const step = SEQUENCE_ADVERBIALS[index]!
+    const frame = TIMED_ACTION_FRAMES[Math.abs(seed + 1661) % TIMED_ACTION_FRAMES.length]!
+    const subject = pick(humans, 1662, 'subject')
+    const object = pick(vocabulary.filter(word => frame.words.has(word.japanese)), 1663, 'object')
+    if (!subject || !object) return null
+    const subjectEnglish = englishPhrase(subject,'subject')
+    const verbEnglish = subjectUsesBaseVerb(subjectEnglish) ? frame.english.base : frame.english.third
+    const furigana = [
+      {text:step.japanese,reading:step.reading,slot:'sequence'},
+      wordPart(subject,'subject'),literalPart('は','わ'),
+      wordPart(object,'object'),literalPart('を'),
+      {text:frame.present.japanese,reading:frame.present.reading,slot:'verb'},
+    ]
+    const english = `${step.english}, ${subjectEnglish} ${verbEnglish} ${englishPhrase(object,'object')}.`
+    const slot = {id:`sequence-${step.japanese}`,surface:step.japanese,dictionaryForm:step.base ?? step.japanese,reading:step.reading,english:step.english.toLowerCase(),pos:'noun' as const,jlpt:'N5' as const,tags:['sequence','adverbial']}
+    return finish(furigana,english,{subject,object},{sequence:slot,ending:{...slot,id:`sequence-ending-${index}`,tags:['ending']}},['A sequence adverbial orders the action and takes no particle.'])
+  }
   if (patternId === 'n5-38') {
     let weatherIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1650) % WEATHER_FRAMES.length
     if (options.avoidWords?.ending && WEATHER_FRAMES[weatherIndex]!.japanese === options.avoidWords.ending) {
@@ -3299,7 +3393,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   return finish(furigana,`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${go} too.`,{subject},{verb:verbSlot('verb-iku-mo','行きます','行く','いきます','go',['movement','additive-topic','context-dependent'])},['も marks an additional subject.','This template assumes prior discourse context.'])
 }
 
-const additionalN4PatternIds = new Set(Array.from({length:21},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
+const additionalN4PatternIds = new Set(Array.from({length:23},(_,index)=>`n4-${String(index+11).padStart(2,'0')}`))
 
 function additionalN4Sentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!additionalN4PatternIds.has(patternId)) return null
@@ -3597,6 +3691,62 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart(form.japanese,form.reading,'ending')]
     const english=`${subjectEnglish.charAt(0).toUpperCase()+subjectEnglish.slice(1)} ${copula} ${adjective.english}.`
     return finish(furigana,english,{subject},{ending:grammarSlot(`person-adjective-${adjectiveIndex}-${endingIndex}`,form.japanese,adjective.japanese,form.reading,adjective.english,['description',adjective.na?'na-adjective':'i-adjective','ending'],adjective.na?'na_adjective':'i_adjective')},['Adjective describes a person, which is what this frame takes.'])
+  }
+  if (patternId==='n4-32' || patternId==='n4-33') {
+    if (patternId==='n4-32') {
+      // 山の高さは三千メートルです — a measurement of something, which is the
+      // frame the measurement nouns and the units need.
+      const measurement = MEASUREMENT_FRAMES[Math.abs(seed+590)%MEASUREMENT_FRAMES.length]!
+      const reference = pick(vocabulary.filter(word => measurement.references.has(word.japanese)), 591, 'topic')
+      if (!reference) return null
+      let valueIndex = Math.abs(options.slotSeeds?.ending ?? seed+592) % measurement.values.length
+      if (options.avoidWords?.ending && measurement.values[valueIndex]![0] === options.avoidWords.ending) {
+        valueIndex = (valueIndex + 1) % measurement.values.length
+      }
+      const [valueSurface, valueReading, valueEnglish] = measurement.values[valueIndex]!
+      const referenceEnglish = definite(primaryEnglishGloss(reference.preferredTranslation||reference.english))
+      const furigana=[
+        wordPart(reference,'topic'),literalPart('の'),
+        {text:measurement.japanese,reading:measurement.reading,slot:'measurement'},
+        literalPart('は','わ'),
+        {text:valueSurface,reading:valueReading,slot:'value'},
+        literalPart('です'),
+      ]
+      const english=`The ${measurement.english} of ${referenceEnglish} is ${valueEnglish}.`
+      const valueSlot={id:`measure-${measurement.japanese}-${valueIndex}`,surface:valueSurface,dictionaryForm:valueSurface,reading:valueReading,english:valueEnglish,pos:'noun' as const,jlpt:'N4' as const,tags:['measurement','value']}
+      return finish(furigana,english,{topic:reference},{value:valueSlot,ending:{...valueSlot,id:`measure-ending-${valueIndex}`,tags:['ending']}},[`${measurement.japanese} takes its own unit and its own kind of reference.`])
+    }
+    // n4-33: 昭和は長い時代でした — a named span, talked about rather than
+    // acted in.
+    let index = Math.abs(options.slotSeeds?.ending ?? seed+593) % PERIOD_NOUNS.length
+    if (options.avoidWords?.ending && PERIOD_NOUNS[index]!.japanese === options.avoidWords.ending) {
+      index = (index + 1) % PERIOD_NOUNS.length
+    }
+    const period = PERIOD_NOUNS[index]!
+    const adjectives = period.era
+      ? [{japanese:'長い',reading:'ながい',english:'long'},{japanese:'短い',reading:'みじかい',english:'short'}]
+      : [{japanese:'長い',reading:'ながい',english:'long'},{japanese:'短い',reading:'みじかい',english:'short'},{japanese:'大切な',reading:'たいせつな',english:'important'}]
+    const adjective = adjectives[Math.abs(seed+594)%adjectives.length]!
+    const past = period.era || Math.abs(seed+595)%2===0
+    const noun = period.era ? {japanese:'時代',reading:'じだい'} : {japanese:'期間',reading:'きかん'}
+    const useNoun = Boolean(period.era)
+    // な- and い-adjectives inflect differently, and an い-adjective's past
+    // drops the い before かった: 長い becomes 長かったです, not 長いかったです.
+    const na = adjective.japanese.endsWith('な')
+    const stem = (value: string) => na ? value.replace(/な$/,'') : value.replace(/い$/,'')
+    const tail = useNoun
+      ? {japanese:`${adjective.japanese}${noun.japanese}${past?'でした':'です'}`,reading:`${adjective.reading}${noun.reading}${past?'でした':'です'}`}
+      : na
+        ? {japanese:`${stem(adjective.japanese)}${past?'でした':'です'}`,reading:`${stem(adjective.reading)}${past?'でした':'です'}`}
+        : {japanese:`${past?`${stem(adjective.japanese)}かったです`:adjective.japanese+'です'}`,reading:`${past?`${stem(adjective.reading)}かったです`:adjective.reading+'です'}`}
+    const furigana=[
+      {text:period.japanese,reading:period.reading,slot:'topic'},
+      literalPart('は','わ'),
+      {text:tail.japanese,reading:tail.reading,slot:'ending'},
+    ]
+    const english=`${period.english.charAt(0).toUpperCase()+period.english.slice(1)} ${past?'was':'is'} ${useNoun?`a ${adjective.english} era`:adjective.english}.`
+    const endingSlot={id:`period-${period.japanese}-${index}`,surface:tail.japanese,dictionaryForm:period.japanese,reading:tail.reading,english:adjective.english,pos:'noun' as const,jlpt:'N4' as const,tags:['period','ending']}
+    return finish(furigana,english,{},{ending:endingSlot},['A named span is described, not acted in.'])
   }
   if (patternId==='n4-30') {
     // Topic は [Degree] Adjective です — a judgement about an idea, optionally
