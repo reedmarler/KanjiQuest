@@ -1868,6 +1868,37 @@ const QUESTION_FRAMES: ReadonlyArray<{
   { japanese:'いくら', reading:'いくら', shape:'price' },
 ]
 const questionWords = new Set(QUESTION_FRAMES.map(entry => entry.japanese))
+
+/**
+ * Weather words for n5-38, each with the frame its meaning takes.
+ *
+ * Weather does not have one shape: 雨 falls, 晴れ is a state, 風 is strong, and
+ * 天気 is good or bad. English differs again — 「今日は雨です」 is "it is rainy
+ * today", where the Japanese predicate is a noun and the English is an
+ * adjective with a dummy subject Japanese does not use at all.
+ */
+const WEATHER_FRAMES: ReadonlyArray<{
+  japanese:string
+  reading:string
+  shape:'state'|'falls'|'strong'|'quality'|'pretty'
+  english:string
+}> = [
+  { japanese:'雨', reading:'あめ', shape:'state', english:'rainy' },
+  { japanese:'雪', reading:'ゆき', shape:'state', english:'snowy' },
+  { japanese:'晴れ', reading:'はれ', shape:'state', english:'sunny' },
+  { japanese:'曇り', reading:'くもり', shape:'state', english:'cloudy' },
+  { japanese:'雨', reading:'あめ', shape:'falls', english:'rains' },
+  { japanese:'雪', reading:'ゆき', shape:'falls', english:'snows' },
+  { japanese:'風', reading:'かぜ', shape:'strong', english:'wind' },
+  { japanese:'雷', reading:'かみなり', shape:'strong', english:'thunder' },
+  { japanese:'天気', reading:'てんき', shape:'quality', english:'weather' },
+  { japanese:'景色', reading:'けしき', shape:'pretty', english:'scenery' },
+  { japanese:'星', reading:'ほし', shape:'pretty', english:'stars' },
+  { japanese:'雲', reading:'くも', shape:'pretty', english:'clouds' },
+]
+const weatherWords = new Set(WEATHER_FRAMES.map(entry => entry.japanese))
+/** Only the present-tense time words make sense with a weather report. */
+const WEATHER_TIMES = TIME_ADVERBIALS.filter(entry => entry.tense !== 'past' && ['今日','今週','明日','週末','今晩'].includes(entry.japanese))
 /** Objects with a price, for the いくら frame. */
 const PRICED_OBJECTS = new Set(['本','傘','鞄','靴','時計','眼鏡','切符','シャツ','辞書','雑誌','財布'])
 const POSITION_SUBJECTS = new Set(['本','鞄','傘','皿','雑誌','新聞','辞書','時計','眼鏡','財布','鍵','猫','犬','鳥'])
@@ -1938,7 +1969,7 @@ const COUNTED_FRAMES: ReadonlyArray<{
     verb:{japanese:'買います',reading:'かいます',english:'buy',englishThird:'buys'} },
 ]
 
-const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34','n5-35','n5-36','n5-37'])
+const additionalN5PatternIds = new Set([...Array.from({length:14},(_,index)=>`n5-${String(index+11).padStart(2,'0')}`),'n5-30','n5-31','n5-33','n5-34','n5-35','n5-36','n5-37','n5-38'])
 const geographicOriginTags = new Set(normalizeTags(['country','city','town','village','neighborhood','island']))
 const originSubjectDisallowedTags = new Set(normalizeTags(['patient','sick','illness','medical','hospital','guest','customer']))
 const portableObjectTags = new Set(normalizeTags([
@@ -2397,6 +2428,21 @@ const abstractAdjectiveWords = new Set([
  * audit, which then reports its members as unreachable — the same mistake that
  * hid the curated adverb list until it moved onto `VerbSlotRule.words`.
  */
+/**
+ * Body parts for the 痛い frame (n5-30).
+ *
+ * Extracted from inside the generator so the audit can see it. Filtered inline,
+ * it reported all 26 body parts as unreachable when they generate fine — the
+ * third time a generator-local pool has produced a phantom gap in the report.
+ *
+ * 血, 身 and 尻尾 are excluded: blood and one's person do not ache in the way
+ * this frame means, and a tail is not a body part of the people in the subject
+ * pool.
+ */
+const bodyPartPool = memoizePool(function bodyPartPool(vocabulary: WordRecord[]) {
+  return vocabulary.filter(word => word.tags.includes('body-part') && !['尻尾','血','身'].includes(word.japanese))
+})
+
 const abstractTopicPool = memoizePool(function abstractTopicPool(vocabulary: WordRecord[]) {
   return vocabulary.filter(word=>
     categoryMatch(word,['Object'])
@@ -2468,6 +2514,7 @@ function slotEligibleWords(): Set<string> {
     validTimePool(vocabulary),
     validInanimatePool(vocabulary),
     abstractTopicPool(vocabulary),
+    bodyPartPool(vocabulary),
   ]) {
     for (const word of pool) eligible.add(word.japanese)
   }
@@ -2477,6 +2524,7 @@ function slotEligibleWords(): Set<string> {
   for (const japanese of timeAdverbialWords) eligible.add(japanese)
   for (const japanese of positionNounWords) eligible.add(japanese)
   for (const japanese of questionWords) eligible.add(japanese)
+  for (const japanese of weatherWords) eligible.add(japanese)
   for (const rule of adjectiveRules) eligible.add(rule.japanese)
 
   slotIndexCache = eligible
@@ -2535,12 +2583,14 @@ export function auditWordReachability(): WordReachability[] {
     // reports the entire adjective vocabulary as unreachable.
     ['adjective', new Set(adjectiveRules.map(rule => rule.japanese))],
     ['abstract-topic', new Set(abstractTopicPool(vocabulary).map(word => word.japanese))],
+    ['body-part', new Set(bodyPartPool(vocabulary).map(word => word.japanese))],
     ['person-adjective', personAdjectiveWords],
     ['abstract-adjective', abstractAdjectiveWords],
     ['counter-source', counterSourceWords],
     ['time-adverbial', timeAdverbialWords],
     ['position-noun', positionNounWords],
     ['question-word', questionWords],
+    ['weather', weatherWords],
   ]
 
   return vocabulary.map(word => {
@@ -2883,7 +2933,7 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     // tagged body-part is a real human body part, including おなか (stomach),
     // which lacks the 'human' tag other entries have but is exactly the word
     // this pattern most needs (おなかが痛い is the textbook example).
-    const bodyParts = vocabulary.filter(word => word.tags.includes('body-part') && !['尻尾','血','身'].includes(word.japanese))
+    const bodyParts = bodyPartPool(vocabulary)
     const subject = pick(humans, 1501, 'subject')
     const bodyPart = pick(bodyParts, 1502, 'object')
     if (!subject || !bodyPart) return null
@@ -2951,6 +3001,42 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const countSlot = {id:`count-${frame.counter}-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['counter',frame.counter]}
     const endingSlot = {id:`count-ending-${countIndex}`,surface:countSurface,dictionaryForm:countSurface,reading:countReading,english:quantity,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
     return finish(furigana,english,{subject,object},{count:countSlot,ending:endingSlot},[`${frame.counter} is the counter ${object.japanese} takes.`])
+  }
+  if (patternId === 'n5-38') {
+    let weatherIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1650) % WEATHER_FRAMES.length
+    if (options.avoidWords?.ending && WEATHER_FRAMES[weatherIndex]!.japanese === options.avoidWords.ending) {
+      weatherIndex = (weatherIndex + 1) % WEATHER_FRAMES.length
+    }
+    const weather = WEATHER_FRAMES[weatherIndex]!
+    const weatherPart = {text:weather.japanese,reading:weather.reading,slot:'weather'}
+    const weatherSlot = {id:`weather-${weather.japanese}-${weather.shape}`,surface:weather.japanese,dictionaryForm:weather.japanese,reading:weather.reading,english:weather.english,pos:'noun' as const,jlpt:'N5' as const,tags:['weather',weather.shape]}
+    const endingSlot = {id:`weather-ending-${weatherIndex}`,surface:weather.japanese,dictionaryForm:weather.japanese,reading:weather.reading,english:weather.english,pos:'noun' as const,jlpt:'N5' as const,tags:['ending']}
+    const extra = {weather:weatherSlot,ending:endingSlot}
+    const time = WEATHER_TIMES[Math.abs(seed + 1651) % WEATHER_TIMES.length]!
+    const timePart = {text:time.japanese,reading:time.reading,slot:'time'}
+
+    if (weather.shape === 'state') {
+      // 今日は雨です — the Japanese predicate is a noun, the English an
+      // adjective with a dummy "it" that Japanese never uses.
+      const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('です')]
+      return finish(furigana,`It is ${weather.english} ${time.english}.`,{},extra,['A weather noun predicates directly with です.'])
+    }
+    if (weather.shape === 'falls') {
+      const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('が'),{text:'降ります',reading:'ふります',slot:'verb'}]
+      return finish(furigana,`It ${weather.english} ${time.english}.`,{},extra,['降る is the verb rain and snow take.'])
+    }
+    if (weather.shape === 'strong') {
+      const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('が'),{text:'強いです',reading:'つよいです',slot:'adjective'}]
+      return finish(furigana,`The ${weather.english} is strong ${time.english}.`,{},extra,['強い describes wind and thunder, not the day itself.'])
+    }
+    if (weather.shape === 'quality') {
+      const good = Math.abs(seed + 1652) % 2 === 0
+      const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('が'),{text:good?'いいです':'悪いです',reading:good?'いいです':'わるいです',slot:'adjective'}]
+      return finish(furigana,`The ${weather.english} is ${good?'good':'bad'} ${time.english}.`,{},extra,['天気 takes a quality adjective, not a weather noun.'])
+    }
+    const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('が'),{text:'きれいです',reading:'きれいです',slot:'adjective'}]
+    const isPlural = isPluralPhrase(weather.english)
+    return finish(furigana,`The ${weather.english} ${isPlural?'are':'is'} beautiful ${time.english}.`,{},extra,['きれい describes something seen, not the weather itself.'])
   }
   if (patternId === 'n5-37') {
     // Question sentences. か marks the whole clause, and the question word sits
