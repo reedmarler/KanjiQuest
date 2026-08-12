@@ -5,7 +5,7 @@ import type { AchievementMetrics } from '../lib/achievementProgress'
 import { isQuestComplete, type QuestProgress } from '../lib/questProgress'
 import { QUESTS } from '../data/questCampaign'
 import { buildAchievements } from '../data/achievements'
-import { complexityDetails, GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
+import { GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
 import { HERO_STORY_DEFINITIONS, HERO_STORY_LEVELS, getHeroStoriesForLevel } from '../data/heroStories'
 import {
   HERO_PLAYBACK_RATES,
@@ -57,12 +57,18 @@ const HERO_SPEECH_VOLUMES = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] 
 type HeroSpeechVolume = typeof HERO_SPEECH_VOLUMES[number]
 type StoryPlaybackMode = 'repeat' | 'shuffle'
 
-const COMPLEXITY_DISPLAY: Record<GenerationComplexity, { level: string; name: string }> = {
-  1: { level: 'L1', name: 'Basics' },
-  2: { level: 'L2', name: 'Pairs' },
-  3: { level: 'L3', name: 'Chains' },
-  4: { level: 'L4', name: 'Logic' },
-  5: { level: 'L5', name: 'Expert' },
+// Labelled by JLPT level, because that is what this picker now selects: the
+// hero stream draws from patternsForLevel, not from the complexity tiers.
+// The old labels described the complexity axis — L2 "Pairs" meant two
+// interacting verbs — and after the switch L2 was showing single-verb and
+// copula sentences, promising a structure it no longer delivered. Complexity
+// still labels Content Studio and the testing view, which do select on it.
+const COMPLEXITY_DISPLAY: Record<GenerationComplexity, { level: string; name: string; description: string }> = {
+  1: { level: 'N5', name: 'Intro', description: 'Foundation grammar: basic particles, ～ます, adjective predicates.' },
+  2: { level: 'N4', name: 'Elementary', description: 'Everyday grammar: ～たい, ～ている, ～てから, plain past.' },
+  3: { level: 'N3', name: 'Intermediate', description: 'Connected grammar: conditionals, ～ようになる, quotation, comparison.' },
+  4: { level: 'N2', name: 'Upper', description: 'Formal and written grammar: ～わけ, ～ざるを得ない, ～に違いない.' },
+  5: { level: 'N1', name: 'Advanced', description: 'Advanced discourse: ～にほかならない, ～とは限らない, literary connectives.' },
 }
 
 const STORY_LEVEL_DISPLAY: Array<{ level: JlptLevel; name: string }> = [
@@ -708,8 +714,8 @@ export function Dashboard({
                       className={`control-segment${complexity === level ? ' is-active' : ''}`}
                       onClick={() => setComplexity(level)}
                       aria-pressed={complexity === level}
-                      aria-label={`${COMPLEXITY_DISPLAY[level].level} ${complexityDetails[level].label}: ${complexityDetails[level].description}`}
-                      title={complexityDetails[level].description}
+                      aria-label={`${COMPLEXITY_DISPLAY[level].level} ${COMPLEXITY_DISPLAY[level].name}: ${COMPLEXITY_DISPLAY[level].description}`}
+                      title={COMPLEXITY_DISPLAY[level].description}
                       disabled={storyMode}
                     >
                       <span className="control-level-code">{COMPLEXITY_DISPLAY[level].level}</span>

@@ -1239,6 +1239,16 @@ function englishPhrase(word: WordRecord, slot: string) {
     if ((tags.has('clock-time') || tags.has('hour')) && !/^at\b/i.test(gloss)) return `at ${gloss}`
     if (tags.has('season') || ['春','夏','秋','冬'].includes(word.japanese)) return `in ${gloss}`
     if (tags.has('weekday') || tags.has('day-of-week') || /曜日$/.test(word.japanese)) return `on ${gloss}`
+    // Named occasions and days need a preposition English will not supply on
+    // its own: 「正月に男が来ます」 was glossing as "a man comes New Year".
+    // Relative adverbials below this line are correctly bare — "comes last
+    // year" takes no preposition — which is why this is a tag test rather than
+    // a fallback for everything that reaches here.
+    if (word.japanese === '正月') return 'at New Year'
+    if (word.japanese === '昼' || tags.has('noon')) return 'at noon'
+    if (tags.has('weekend') || word.japanese === '週末') return 'on the weekend'
+    if (tags.has('holiday') || tags.has('anniversary') || tags.has('celebration')
+      || ((tags.has('date') || tags.has('day')) && !tags.has('every-day'))) return `on ${definite(gloss)}`
   }
   return gloss
 }
