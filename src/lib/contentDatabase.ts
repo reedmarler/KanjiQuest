@@ -54,8 +54,60 @@ const wordRepairs: Record<string,{ category:string; english:string; preferredTra
   '男性': { category:'People & Living Things', english:'man / male person', preferredTranslation:'man', tags:['person','man','male','adult','human'] },
 }
 
+/**
+ * Readings the source data records wrongly, as opposed to merely in romaji.
+ *
+ * Romaji readings are fine — they normalise to kana before rendering — but
+ * these two normalise to the wrong kana: 十 was "juutoo" (じゅうとお rather
+ * than じゅう) and 客観 was "kakkyoku" (かっきょく rather than きゃっかん). A
+ * wrong reading renders as wrong furigana, which teaches the mistake.
+ */
+const readingRepairs: Record<string,string> = { '十':'じゅう', '客観':'きゃっかん' }
+
+/**
+ * Glosses for records the source data left as "Meaning needed".
+ *
+ * Only the ones that are ordinary vocabulary. The rest of that set is grammar —
+ * しか, ばかり, ておく, なければならない — which has no noun gloss to give and is
+ * excluded from generation anyway; inventing one would only let a particle into
+ * a noun slot.
+ */
+const missingGlossRepairs: Record<string,{ category: string; english: string; preferredTranslation: string; tags: string[] }> = {
+  'タバコ': { category:'Objects', english:'cigarette / tobacco', preferredTranslation:'cigarette', tags:['cigarette','tobacco','object','n5'] },
+  'インターネット': { category:'Objects', english:'the internet', preferredTranslation:'the internet', tags:['internet','technology','object','n4'] },
+  'イギリス': { category:'Places', english:'the United Kingdom / Britain', preferredTranslation:'Britain', tags:['country','place','n5'] },
+  'フランス': { category:'Places', english:'France', preferredTranslation:'France', tags:['country','place','n5'] },
+  'やめる': { category:'Actions', english:'to quit / to stop doing', preferredTranslation:'quit', tags:['verb','ichidan','transitive','n4'] },
+  'つながる': { category:'Actions', english:'to be connected', preferredTranslation:'connect', tags:['verb','godan','intransitive','n3'] },
+  'まとめる': { category:'Actions', english:'to gather together / to summarise', preferredTranslation:'summarise', tags:['verb','ichidan','transitive','n3'] },
+  'つらい': { category:'Descriptors', english:'painful / tough', preferredTranslation:'tough', tags:['painful','difficult','i-adjective','n3'] },
+  'すぐ': { category:'Descriptors', english:'immediately / right away', preferredTranslation:'immediately', tags:['immediately','adverb','n5'] },
+  'すべて': { category:'Descriptors', english:'all / everything', preferredTranslation:'all', tags:['all','quantity','n3'] },
+  'いろんな': { category:'Descriptors', english:'various / all sorts of', preferredTranslation:'various', tags:['various','noun-modifier','n4'] },
+  'たまたま': { category:'Descriptors', english:'by chance / as it happens', preferredTranslation:'by chance', tags:['by-chance','adverb','n2'] },
+}
+
+/**
+ * Tags that ran into the next record's headword during import: 覚える carried
+ * `n5開く`, 政治 carried `n3-池`. The JLPT prefix is the real tag; the kanji is
+ * a neighbouring entry that leaked in.
+ */
+function repairTag(tag: string): string {
+  const match = /^(n[1-5])-?[぀-ヿ一-鿿]+$/.exec(tag)
+  return match ? match[1]! : tag
+}
+
 function repairKnownCategoryErrors(record: ContentRecord): ContentRecord {
   if (record.kind !== 'vocabulary') return record
+  const repairedReading = readingRepairs[record.japanese] ?? record.reading
+  const repairedTags = record.tags.map(repairTag)
+  if (repairedReading !== record.reading || repairedTags.some((tag,index) => tag !== record.tags[index])) {
+    record = { ...record, reading:repairedReading, tags:repairedTags }
+  }
+  const missingGloss = /meaning needed/i.test(record.english ?? '') ? missingGlossRepairs[record.japanese] : undefined
+  if (missingGloss) {
+    return { ...record, english:missingGloss.english, preferredTranslation:missingGloss.preferredTranslation, category:missingGloss.category, categories:[missingGloss.category], tags:[...missingGloss.tags], allowedRoles:[missingGloss.category] }
+  }
   const senseRepair=senseRepairs[`${record.japanese}|${record.reading.trim().toLowerCase()}`] ?? wordRepairs[record.japanese]
   if (senseRepair) return { ...record, english:senseRepair.english, preferredTranslation:senseRepair.preferredTranslation ?? record.preferredTranslation, category:senseRepair.category, categories:[senseRepair.category], tags:[...senseRepair.tags], allowedRoles:[senseRepair.category] }
   const tags = record.tags.map(tag => tag.trim().replace(/([a-z0-9])([A-Z])/g,'$1-$2').toLowerCase().replace(/[_\s]+/g,'-'))
