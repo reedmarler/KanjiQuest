@@ -2319,6 +2319,23 @@ export const adjectiveRules = [
   { id:'shinkoku',japanese:'深刻',reading:'しんこく',english:'serious',categories:['Event'] as SentenceCategory[] },
   { id:'kanou',japanese:'可能',reading:'かのう',english:'possible',categories:['Document'] as SentenceCategory[] },
   { id:'fukanou',japanese:'不可能',reading:'ふかのう',english:'impossible',categories:['Document'] as SentenceCategory[] },
+  // Adjectives the vocabulary filed under Adverb, where no rule could reach
+  // them. English is restated for the ones whose gloss is a noun — 楽 is
+  // recorded as "comfort" and 確か as "definite" — because these are predicates
+  // here, not dictionary headwords.
+  { id:'hidoi',japanese:'ひどい',reading:'ひどい',english:'awful',categories:['Event','Weather','Media','Food'] as SentenceCategory[] },
+  { id:'okashii',japanese:'おかしい',reading:'おかしい',english:'strange',categories:['Event','Media','Object'] as SentenceCategory[] },
+  // Object reaches 番組 ("a program is low"), so 低い is limited to the two
+  // categories whose members reliably have a physical height.
+  { id:'hikui',japanese:'低い',reading:'ひくい',english:'low',categories:['Building','Furniture'] as SentenceCategory[],physicalOnly:true },
+  // 楽, だめ, 確か and 急 were tried here and removed. The category vocabulary
+  // cannot express what they need: 楽 wants activity nouns like 仕事 but the
+  // Activity category also holds verbs ("a settle is easy"), 確か wants sources
+  // of information where Media means anime ("anime is reliable"), and だめ
+  // reached 成功 ("a success is no good"). They need a noun-level distinction
+  // this engine does not have, and a wrong predicate is worse than a missing
+  // one.
+  { id:'katte',japanese:'勝手',reading:'かって',english:'selfish',categories:['Person'] as SentenceCategory[] },
 ]
 
 function hasCompositeSurface(word: WordRecord) {
