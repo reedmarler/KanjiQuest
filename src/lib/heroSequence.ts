@@ -354,7 +354,7 @@ function rotateOneSlot(
  * `templateRefresh` marks the steps that jump to a new pattern; the rest carry
  * exactly one key in `changed`.
  */
-function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCount: number, focus?: HeroSwapFocus): HeroStep[] {
+function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCount: number, focus?: HeroSwapFocus, favouriteWords: ReadonlySet<string> = new Set()): HeroStep[] {
   const patterns = patternsForLevel(level)
   if (!patterns.length) return []
 
@@ -410,7 +410,15 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
     // lower-level verb can safely carry another ending, or a paired complete
     // clause/discourse form at N3–N1. The other four keep the full pattern
     // walk broad.
-    const sentence = selectMostDiverse(linkedFormCandidates.length ? linkedFormCandidates : ordinaryCandidates, tracker)
+    const pool = linkedFormCandidates.length ? linkedFormCandidates : ordinaryCandidates
+    // Starred words bias the choice rather than dictating it: candidates using
+    // one are preferred when this seed produced any, and the normal pool is
+    // used otherwise. Filtering outright would blank whole grammar patterns
+    // that no favourite happens to fit.
+    const favouringCandidates = favouriteWords.size
+      ? pool.filter((candidate) => [...favouriteWords].some((word) => candidate.japanese.includes(word)))
+      : []
+    const sentence = selectMostDiverse(favouringCandidates.length ? favouringCandidates : pool, tracker)
     if (!sentence) continue
     tracker.add(sentence)
     {
@@ -494,12 +502,17 @@ export function buildHeroSteps(
   sequenceSeed = 0,
   stepCount = STEPS_PER_LEVEL,
   focus?: HeroSwapFocus,
+  favouriteWords: ReadonlySet<string> = new Set(),
 ): HeroStep[] {
-  const cacheKey = `${level}:${sequenceSeed}:${stepCount}:${focus ?? 'sweep'}`
+  // The favourites belong in the cache key: the same level and seed produce a
+  // different stream once a word is starred, and a stale hit would silently
+  // ignore the new favourite.
+  const favouriteKey = favouriteWords.size ? [...favouriteWords].sort().join(',') : 'none'
+  const cacheKey = `${level}:${sequenceSeed}:${stepCount}:${focus ?? 'sweep'}:${favouriteKey}`
   const cached = STEPS_CACHE.get(cacheKey)
   if (cached) return cached
 
-  const steps = buildDatabaseHeroSteps(level, sequenceSeed, stepCount, focus)
+  const steps = buildDatabaseHeroSteps(level, sequenceSeed, stepCount, focus, favouriteWords)
   STEPS_CACHE.set(cacheKey, steps)
   return steps
 }

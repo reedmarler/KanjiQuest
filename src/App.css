@@ -9546,3 +9546,151 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 @media(max-width:430px){.quest-fighter-sprite-shell{height:5.1rem}.quest-fighter-sprite-shell .guardian-sprite{width:5.7rem;height:5.7rem}}
 
 .quest-guardian-card-sprite{width:6.2rem;height:6.2rem;margin:.2rem auto}
+
+/* ── Favorite words ─────────────────────────────────────────────────────── */
+
+.favorite-words-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.favorite-words-panel-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.favorite-words-count {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.favorite-words-manage {
+  margin-left: auto;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+
+.favorite-words-manage:hover { border-color: var(--gold); }
+
+.favorite-words-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.favorite-word-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--border));
+  border-radius: 999px;
+  background: rgba(255, 211, 107, 0.1);
+  color: var(--text);
+  padding: 0.22rem 0.55rem;
+  font: 500 0.82rem 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+}
+
+.favorite-word-chip:hover { border-color: var(--danger); }
+.favorite-word-chip-x { color: var(--text-muted); font-size: 0.75rem; }
+
+.favorite-words-more,
+.favorite-words-empty {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.favorite-words-empty { line-height: 1.5; }
+
+/* Star toggle used in the vocab lists and the manage page. */
+.favorite-word-star {
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+}
+
+.favorite-word-star.is-favorite { color: var(--gold); }
+.favorite-word-star:hover { color: var(--gold); }
+
+.favorite-words-row { position: relative; }
+.favorite-words-row .favorite-word-star {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+}
+
+.favorite-words-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+
+.favorite-words-search {
+  flex: 1 1 14rem;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 0.45rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+/* Kanji / Quests dashboard buttons, rendered as a big-initial wordmark.
+   Both buttons default to an icon column + copy column grid; a wordmark has no
+   icon and wants the full width, so the modifier replaces that grid outright
+   rather than leaving the text squeezed into the 2.7rem icon track. */
+.dashboard-action-primary > .is-wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.85rem 1rem 1.25rem;
+}
+
+.dashboard-wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 0.04em;
+  color: var(--text);
+  line-height: 1;
+}
+
+/* Matches the specificity of the existing .dashboard-action-primary rules that
+   size b/small inside these buttons, which would otherwise win. */
+.dashboard-action-primary .dashboard-wordmark b {
+  font-size: 2.9rem;
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+.dashboard-action-primary .dashboard-wordmark span {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+}
+
+.dashboard-action-primary .dashboard-wordmark-note {
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}

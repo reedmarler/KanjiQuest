@@ -16,6 +16,7 @@ import {
   stopSpeaking,
   watchSpeechSupport,
 } from '../lib/speech'
+import { FavoriteWordsPanel } from './FavoriteWordsPanel'
 
 const HERO_SPEECH_STORAGE_KEY = 'kanji-quest-hero-speech-v1'
 const HERO_SPEECH_RATE_STORAGE_KEY = 'kanji-quest-hero-speech-rate-v2'
@@ -366,6 +367,7 @@ interface DashboardProps {
   onOpenAchievements: () => void
   onOpenStudyTools: () => void
   onOpenAdditionalTools: () => void
+  onOpenFavoriteWords: () => void
   questProgress: QuestProgress
 }
 
@@ -376,6 +378,7 @@ export function Dashboard({
   onOpenAchievements,
   onOpenStudyTools,
   onOpenAdditionalTools,
+  onOpenFavoriteWords,
   questProgress,
   wrongPool,
   progress,
@@ -943,7 +946,11 @@ export function Dashboard({
                     </div>
                   )}
 
-                  {!storyMode && !grammarMode && (
+                  {settingsMode === 'star' && (
+                    <FavoriteWordsPanel onManage={onOpenFavoriteWords} />
+                  )}
+
+                  {!storyMode && !grammarMode && settingsMode !== 'star' && (
                     <p className="hero-mode-panel-hint">Try a mode</p>
                   )}
                 </div>
@@ -1029,22 +1036,20 @@ export function Dashboard({
 
       <div className="dashboard-action-grid">
         <div className="dashboard-action-primary">
-          <button type="button" className="dashboard-quest-button" onClick={onOpenQuests}>
-            <span className="dashboard-quest-mark" aria-hidden="true">&#20365;</span>
-            <span className="dashboard-quest-copy">
-              <b>Quests</b>
+          <button type="button" className="dashboard-tool-button study-tools-panel is-wordmark" onClick={onOpenStudyTools}>
+            <span className="dashboard-wordmark">
+              <b>K</b><span>anji</span>
             </span>
-            <span className="dashboard-quest-track" aria-hidden="true">
-              <span style={{ width: `${(questsCleared / QUESTS.length) * 100}%` }} />
-            </span>
+            <span className="dashboard-wordmark-note">+ other tools</span>
           </button>
 
-          <button type="button" className="dashboard-tool-button study-tools-panel" onClick={onOpenStudyTools}>
-            <span className="study-tools-mark" aria-hidden="true">&#25991;</span>
-            <span className="five-minute-study-heading">
-              <span className="study-tools-copy">
-                <b>Study tools</b>
-              </span>
+          <button type="button" className="dashboard-quest-button is-wordmark" onClick={onOpenQuests}>
+            <span className="dashboard-wordmark">
+              <b>Q</b><span>uests</span>
+            </span>
+            <span className="dashboard-wordmark-note">{questsCleared} of {QUESTS.length} cleared</span>
+            <span className="dashboard-quest-track" aria-hidden="true">
+              <span style={{ width: `${(questsCleared / QUESTS.length) * 100}%` }} />
             </span>
           </button>
         </div>

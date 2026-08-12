@@ -98,6 +98,12 @@ const CATEGORY_REFINEMENTS: Array<{ from: SentenceCategory; to: SentenceCategory
   { from:'Object', to:'Technology', tags:['technology','electronics','computer','laptop','phone','tablet','camera'] },
   { from:'Object', to:'Furniture', tags:['furniture','chair','table','desk','bed','sofa','shelf','cabinet'] },
   { from:'Object', to:'Tool', tags:['tool','knife','scissors','hammer','instrument'] },
+  // The imported taxonomy has no bucket for occurrences, so 祭り, 会議, 試合,
+  // 地震 and 葬式 all arrived as Objects and the Event category held nothing at
+  // all — an event was a thing you could put in a bag. Listed after the
+  // concrete-object refinements so a physical item that merely mentions an
+  // event keeps its object category.
+  { from:'Object', to:'Event', tags:['event','festival','party','meeting','ceremony','wedding','funeral','concert','competition','exam','test','accident'] },
   // "Places" covers open places, whole buildings and rooms inside them, which
   // 入る/住む/座る care about distinguishing.
   { from:'Place', to:'Room', tags:['room','kitchen','bathroom','bedroom','classroom','living-room'] },

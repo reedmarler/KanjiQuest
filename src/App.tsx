@@ -41,6 +41,7 @@ const FocusedVocabPractice = lazy(() => import('./components/FocusedVocabPractic
 const QuestHub = lazy(() => import('./components/QuestHub').then((module) => ({ default: module.QuestHub })))
 const QuestScene = lazy(() => import('./components/QuestScene').then((module) => ({ default: module.QuestScene })))
 const QuestCheckpoint = lazy(() => import('./components/QuestCheckpoint').then((module) => ({ default: module.QuestCheckpoint })))
+const FavoriteWordsPage = lazy(() => import('./components/FavoriteWordsPage').then((module) => ({ default: module.FavoriteWordsPage })))
 const AchievementsPanel = lazy(() => import('./components/AchievementsPanel').then((module) => ({ default: module.AchievementsPanel })))
 
 type View =
@@ -60,6 +61,7 @@ type View =
   | 'achievements'
   | 'study-tools'
   | 'additional-tools'
+  | 'favorite-words'
 
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
@@ -350,6 +352,16 @@ function App() {
     )
   }
 
+  if (view === 'favorite-words') {
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Favorite Words" />}>
+          <FavoriteWordsPage onBack={() => setView('dashboard')} />
+        </Suspense>
+      </div>
+    )
+  }
+
   if (view === 'additional-tools') {
     return (
       <div className="app">
@@ -503,6 +515,7 @@ function App() {
         onOpenAchievements={() => setView('achievements')}
         onOpenStudyTools={() => setView('study-tools')}
         onOpenAdditionalTools={() => setView('additional-tools')}
+        onOpenFavoriteWords={() => setView('favorite-words')}
         questProgress={questProgress}
         wrongPool={wrongPool}
         progress={progress}

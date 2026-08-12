@@ -443,6 +443,12 @@ const actionAdverbWords = new Set([
   // 直接 is deliberately absent: it belongs with speech verbs (直接聞く,
   // 直接話す) and produced "directly drinks tea" against this slot's verbs.
   'いつも','常に','早く','突然','急に','はっきり','どんどん',
+  // Vetted on the same two tests as the batch above — grammatical directly
+  // before a plain verb, and natural directly before the English verb. 必ず,
+  // また, 再び, 遅く and 初めて were considered and left out: all five are fine
+  // in Japanese but English wants them after the verb ("eats again", "eats
+  // late"), which is the same reason たくさん and 少し are excluded.
+  '時々','ちゃんと','やっと','いきなり','思わず',
 ])
 // A distinct array instance: fillVerbSlots keys the word filter off this
 // identity, the same way it keys the reading-manner widening off
@@ -456,7 +462,9 @@ const generalTimeTags = [...wakeTimeTags,'afternoon','evening','night','noon','s
 const niIncompatibleTimeTags = new Set(normalizeTags(['today','tonight','tomorrow','yesterday','morning','this-morning','this-evening','this-time','frequency','daily','weekly','monthly','yearly','every-morning','every-evening','every-night','every-day']))
 // Relative time words name a period by its distance from now, and Japanese
 // attaches them directly ("来週行きます"), so に reads wrong on them.
-const niIncompatibleTimeWords = new Set(['今朝','今晩','今日','明日','昨日','毎朝','毎晩','毎日','今週','来週','先週','今月','来月','先月','今年','来年','去年','今','最近'])
+// 毎週/毎月/毎年 sit with 毎日 and 毎朝, not with 今月/来月: they name a
+// recurrence rather than a point, so 毎月に読みます is as wrong as 毎日に.
+const niIncompatibleTimeWords = new Set(['今朝','今晩','今日','明日','昨日','毎朝','毎晩','毎日','毎週','毎月','毎年','今週','来週','先週','今月','来月','先月','今年','来年','去年','今','最近'])
 // englishPhrase(...,'time') is tuned for mid-sentence use after a verb
 // ("comes tonight", "comes in this month"), where a preposition helps it
 // flow — but reads broken as a fronted sentence-initial adjunct ("In the
@@ -1197,6 +1205,11 @@ function englishPhrase(word: WordRecord, slot: string) {
       // verb the way the adverbial form does.
       早く:'quickly', 突然:'suddenly', 急に:'suddenly', 直接:'directly',
       どんどん:'rapidly', いつも:'always', 常に:'always',
+      // "at times", "in a proper manner", "at last", "all of a sudden" and
+      // "without thinking" are the dictionary senses; these are what actually
+      // sits in front of the verb.
+      時々:'sometimes', ちゃんと:'properly', やっと:'finally',
+      いきなり:'abruptly', 思わず:'unintentionally',
     }
     if (readingWritingAdverbEnglish[word.japanese]) return readingWritingAdverbEnglish[word.japanese]!
   }
@@ -2506,6 +2519,17 @@ const degreeAdverbs: ReadonlyArray<{japanese:string;reading:string;english:strin
   { japanese:'わずかに', reading:'わずかに', english:'slightly' },
   { japanese:'結構', reading:'けっこう', english:'fairly' },
   { japanese:'大変', reading:'たいへん', english:'very' },
+  // Degree adverbs from the deck that attach straight to an adjective with no
+  // に and read correctly in "{topic} is {degree} {adjective}". They were
+  // unplaceable anywhere in the generator before, which is most of why the
+  // Adverbs section had two example sentences between 142 words.
+  { japanese:'とても', reading:'とても', english:'very' },
+  { japanese:'すごく', reading:'すごく', english:'really' },
+  { japanese:'ずいぶん', reading:'ずいぶん', english:'considerably' },
+  { japanese:'多少', reading:'たしょう', english:'somewhat' },
+  { japanese:'割と', reading:'わりと', english:'relatively' },
+  { japanese:'最も', reading:'もっとも', english:'most' },
+  { japanese:'極めて', reading:'きわめて', english:'exceedingly' },
 ]
 /**
  * Words whose meaning is a relation between two things, for n4-31. They cannot
@@ -3799,9 +3823,16 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     // Never on a negative: the adverb scopes over the whole predicate there, so
     // わずかに客観的ではありません glosses as "is not slightly objective", which
     // says something quite different from the Japanese.
-    const degree=adjective.noDegree||form.english==='is not'||Math.abs(seed+583)%3===0
+    // Asking for a degree adverb by name has to pin this slot, or the word can
+    // never appear in its own example sentence — the seeded pick would drop it
+    // two times in three and choose a different adverb the rest of the time.
+    // The two guards above still hold: rather than force a degree onto a
+    // negative or a variety adjective, bail so another seed or pattern can try.
+    const requiredDegree=options.requiredWord ? degreeAdverbs.find(entry => entry.japanese===options.requiredWord) : undefined
+    if (requiredDegree && (adjective.noDegree||form.english==='is not')) return null
+    const degree=requiredDegree ?? (adjective.noDegree||form.english==='is not'||Math.abs(seed+583)%3===0
       ? null
-      : degreeAdverbs[Math.abs(seed+584)%degreeAdverbs.length]!
+      : degreeAdverbs[Math.abs(seed+584)%degreeAdverbs.length]!)
     const topicEnglish=abstractTopicEnglish(primaryEnglishGloss(topic.preferredTranslation||topic.english))
     const plural=isPluralPhrase(topicEnglish)
     const copula=form.english==='was'?(plural?'were':'was'):form.english==='is not'?(plural?'are not':'is not'):(plural?'are':'is')
@@ -4205,123 +4236,6 @@ export const abstractConcepts: Array<{ id:string; japanese:string; reading:strin
 // (にこにこ, わくわく, きらきら…) are left out: they gloss awkwardly in
 // isolation and matter far less to N2/N1 grammar than degree and discourse
 // adverbs do.
-export const adverbPool: Array<{ id:string; japanese:string; reading:string; english:string }> = [
-  // Degree
-  { id:'totemo', japanese:'とても', reading:'とても', english:'very' },
-  { id:'kanari', japanese:'かなり', reading:'かなり', english:'considerably' },
-  { id:'sukoshi', japanese:'少し', reading:'すこし', english:'a little' },
-  { id:'chotto', japanese:'ちょっと', reading:'ちょっと', english:'a bit' },
-  { id:'motto', japanese:'もっと', reading:'もっと', english:'more' },
-  { id:'zutto', japanese:'ずっと', reading:'ずっと', english:'by far' },
-  { id:'amari', japanese:'あまり', reading:'あまり', english:'not very' },
-  { id:'hotondo', japanese:'ほとんど', reading:'ほとんど', english:'almost' },
-  { id:'zenzen', japanese:'全然', reading:'ぜんぜん', english:'not at all' },
-  { id:'sugoku', japanese:'すごく', reading:'すごく', english:'incredibly' },
-  { id:'hijouni', japanese:'非常に', reading:'ひじょうに', english:'extremely' },
-  { id:'kiwamete', japanese:'極めて', reading:'きわめて', english:'exceedingly' },
-  { id:'hikakuteki', japanese:'比較的', reading:'ひかくてき', english:'relatively' },
-  { id:'soutou', japanese:'相当', reading:'そうとう', english:'considerably' },
-  { id:'tashou', japanese:'多少', reading:'たしょう', english:'somewhat' },
-  { id:'hobo', japanese:'ほぼ', reading:'ほぼ', english:'nearly' },
-  { id:'zenbu', japanese:'全部', reading:'ぜんぶ', english:'entirely' },
-  { id:'subete', japanese:'全て', reading:'すべて', english:'entirely' },
-  { id:'hanbun', japanese:'半分', reading:'はんぶん', english:'halfway' },
-  { id:'kanzenni', japanese:'完全に', reading:'かんぜんに', english:'completely' },
-  { id:'juubunni', japanese:'十分に', reading:'じゅうぶんに', english:'sufficiently' },
-  { id:'sukoshizutsu', japanese:'少しずつ', reading:'すこしずつ', english:'little by little' },
-  { id:'dandan', japanese:'だんだん', reading:'だんだん', english:'gradually' },
-  { id:'masumasu', japanese:'ますます', reading:'ますます', english:'increasingly' },
-  { id:'sarani', japanese:'さらに', reading:'さらに', english:'furthermore' },
-  { id:'mattaku', japanese:'まったく', reading:'まったく', english:'entirely' },
-  { id:'sukkari', japanese:'すっかり', reading:'すっかり', english:'completely' },
-  { id:'sappari', japanese:'さっぱり', reading:'さっぱり', english:'not at all' },
-  // Frequency
-  { id:'yoku', japanese:'よく', reading:'よく', english:'often' },
-  { id:'itsumo', japanese:'いつも', reading:'いつも', english:'always' },
-  { id:'mainichi', japanese:'毎日', reading:'まいにち', english:'every day' },
-  { id:'maishuu', japanese:'毎週', reading:'まいしゅう', english:'every week' },
-  { id:'maitsuki', japanese:'毎月', reading:'まいつき', english:'every month' },
-  { id:'mainen', japanese:'毎年', reading:'まいねん', english:'every year' },
-  { id:'tokidoki', japanese:'時々', reading:'ときどき', english:'sometimes' },
-  { id:'tamani', japanese:'たまに', reading:'たまに', english:'occasionally' },
-  { id:'shibashiba', japanese:'しばしば', reading:'しばしば', english:'frequently' },
-  { id:'hinpanni', japanese:'頻繁に', reading:'ひんぱんに', english:'frequently' },
-  { id:'taitei', japanese:'たいてい', reading:'たいてい', english:'usually' },
-  // Time
-  { id:'sakini', japanese:'先に', reading:'さきに', english:'ahead of time' },
-  { id:'atode', japanese:'あとで', reading:'あとで', english:'later' },
-  { id:'mou', japanese:'もう', reading:'もう', english:'already' },
-  { id:'mada', japanese:'まだ', reading:'まだ', english:'still' },
-  { id:'sugu', japanese:'すぐ', reading:'すぐ', english:'right away' },
-  { id:'mamonaku', japanese:'まもなく', reading:'まもなく', english:'shortly' },
-  { id:'yatto', japanese:'やっと', reading:'やっと', english:'finally' },
-  { id:'youyaku', japanese:'ようやく', reading:'ようやく', english:'at last' },
-  { id:'totsuzen', japanese:'突然', reading:'とつぜん', english:'suddenly' },
-  { id:'kyuuni', japanese:'急に', reading:'きゅうに', english:'suddenly' },
-  { id:'mukashi', japanese:'昔', reading:'むかし', english:'long ago' },
-  { id:'saikin', japanese:'最近', reading:'さいきん', english:'recently' },
-  { id:'izen', japanese:'以前', reading:'いぜん', english:'previously' },
-  { id:'saishoni', japanese:'最初に', reading:'さいしょに', english:'at first' },
-  { id:'saigoni', japanese:'最後に', reading:'さいごに', english:'lastly' },
-  { id:'doujini', japanese:'同時に', reading:'どうじに', english:'simultaneously' },
-  { id:'tsuneni', japanese:'常に', reading:'つねに', english:'constantly' },
-  { id:'futatabi', japanese:'再び', reading:'ふたたび', english:'once again' },
-  { id:'mouichido', japanese:'もう一度', reading:'もういちど', english:'one more time' },
-  { id:'nandomo', japanese:'何度も', reading:'なんども', english:'many times' },
-  { id:'itsuka', japanese:'いつか', reading:'いつか', english:'someday' },
-  { id:'toutou', japanese:'とうとう', reading:'とうとう', english:'finally' },
-  { id:'tsuini', japanese:'ついに', reading:'ついに', english:'at last' },
-  { id:'kekkyoku', japanese:'結局', reading:'けっきょく', english:'in the end' },
-  { id:'ikinari', japanese:'いきなり', reading:'いきなり', english:'abruptly' },
-  // Manner
-  { id:'yukkuri', japanese:'ゆっくり', reading:'ゆっくり', english:'slowly' },
-  { id:'isoide', japanese:'急いで', reading:'いそいで', english:'hurriedly' },
-  { id:'hayaku', japanese:'速く', reading:'はやく', english:'quickly' },
-  { id:'osoku', japanese:'遅く', reading:'おそく', english:'slowly' },
-  { id:'shizukani', japanese:'静かに', reading:'しずかに', english:'quietly' },
-  { id:'ookiku', japanese:'大きく', reading:'おおきく', english:'largely' },
-  { id:'chiisaku', japanese:'小さく', reading:'ちいさく', english:'in a small way' },
-  { id:'tsuyoku', japanese:'強く', reading:'つよく', english:'strongly' },
-  { id:'yowaku', japanese:'弱く', reading:'よわく', english:'weakly' },
-  { id:'yasashiku', japanese:'優しく', reading:'やさしく', english:'gently' },
-  { id:'teineini', japanese:'丁寧に', reading:'ていねいに', english:'carefully' },
-  { id:'kantanni', japanese:'簡単に', reading:'かんたんに', english:'easily' },
-  { id:'rakuni', japanese:'楽に', reading:'らくに', english:'comfortably' },
-  { id:'jiyuuni', japanese:'自由に', reading:'じゆうに', english:'freely' },
-  { id:'shizenni', japanese:'自然に', reading:'しぜんに', english:'naturally' },
-  { id:'shinkenni', japanese:'真剣に', reading:'しんけんに', english:'seriously' },
-  { id:'isshoukenmei', japanese:'一生懸命', reading:'いっしょうけんめい', english:'as hard as possible' },
-  { id:'isshoni', japanese:'一緒に', reading:'いっしょに', english:'together' },
-  { id:'betsubetsuni', japanese:'別々に', reading:'べつべつに', english:'separately' },
-  { id:'jibunde', japanese:'自分で', reading:'じぶんで', english:'by oneself' },
-  { id:'tagaini', japanese:'互いに', reading:'たがいに', english:'mutually' },
-  { id:'junbanni', japanese:'順番に', reading:'じゅんばんに', english:'in order' },
-  { id:'tsugitsugini', japanese:'次々に', reading:'つぎつぎに', english:'one after another' },
-  { id:'hakkiri', japanese:'はっきり', reading:'はっきり', english:'clearly' },
-  { id:'shikkari', japanese:'しっかり', reading:'しっかり', english:'firmly' },
-  { id:'kichinto', japanese:'きちんと', reading:'きちんと', english:'properly' },
-  // Discourse and logical connectors
-  { id:'hontouni', japanese:'本当に', reading:'ほんとうに', english:'truly' },
-  { id:'jitsuwa', japanese:'実は', reading:'じつは', english:'actually' },
-  { id:'tashikani', japanese:'確かに', reading:'たしかに', english:'certainly' },
-  { id:'mochiron', japanese:'もちろん', reading:'もちろん', english:'of course' },
-  { id:'tabun', japanese:'たぶん', reading:'たぶん', english:'probably' },
-  { id:'kitto', japanese:'きっと', reading:'きっと', english:'surely' },
-  { id:'osoraku', japanese:'おそらく', reading:'おそらく', english:'perhaps' },
-  { id:'zehi', japanese:'ぜひ', reading:'ぜひ', english:'by all means' },
-  { id:'kanarazu', japanese:'必ず', reading:'かならず', english:'without fail' },
-  { id:'zettaini', japanese:'絶対に', reading:'ぜったいに', english:'absolutely' },
-  { id:'kesshite', japanese:'決して', reading:'けっして', english:'never' },
-  { id:'tatoeba', japanese:'例えば', reading:'たとえば', english:'for example' },
-  { id:'tsumari', japanese:'つまり', reading:'つまり', english:'in other words' },
-  { id:'yougo', japanese:'要するに', reading:'ようするに', english:'in short' },
-  { id:'tokuni', japanese:'特に', reading:'とくに', english:'especially' },
-  { id:'ippanni', japanese:'一般に', reading:'いっぱんに', english:'generally' },
-  { id:'jissaini', japanese:'実際に', reading:'じっさいに', english:'in reality' },
-  { id:'omoni', japanese:'主に', reading:'おもに', english:'mainly' },
-  { id:'igaini', japanese:'意外に', reading:'いがいに', english:'unexpectedly' },
-  { id:'jitsuni', japanese:'実に', reading:'じつに', english:'truly' },
-]
 
 const advancedPatternIds = new Set([
   'n2-01', 'n2-02', 'n2-09', 'n1-01', 'n1-02', 'n3-11', 'n3-12', 'n3-13', 'n3-14', 'n3-15', 'n2-10',

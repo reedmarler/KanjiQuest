@@ -8,6 +8,7 @@ import { heroSwapBlockChars } from '../lib/heroSlotResize'
 import type { HeroPlaybackRate } from '../lib/heroPlayback'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
+import { useFavoriteWords } from '../lib/favoriteWords'
 import { getFuriganaRuns } from './FuriganaText'
 
 type HeroDisplayMode = 'sentence' | 'word'
@@ -98,6 +99,13 @@ export function RotatingHeroSentence({
   autoAdvance = true,
 }: RotatingHeroSentenceProps) {
   const [sequenceSeed, setSequenceSeed] = useState(newSequenceSeed)
+  // Starred words steer sentence selection only while the learner has asked
+  // for it; an empty set leaves the stream exactly as it was.
+  const { words: favouriteWords, prioritize: prioritizeFavourites } = useFavoriteWords()
+  const favouriteWordSet = useMemo(
+    () => new Set(prioritizeFavourites ? favouriteWords.map((word) => word.japanese) : []),
+    [favouriteWords, prioritizeFavourites],
+  )
   const effectiveStoryLevel = storyLevel ?? 'N5'
   // The level actually driving the visible stream. Changing the dashboard's
   // difficulty picker updates `jlptLevel` immediately, but we deliberately
@@ -114,8 +122,8 @@ export function RotatingHeroSentence({
   const starterSteps = useMemo(
     () => storyId
       ? buildHeroStorySteps(storyId, effectiveStoryLevel)
-      : buildHeroSteps(wrongPool, progress, activeLevel, sequenceSeed, STARTER_STEP_COUNT, swapFocus ?? undefined),
-    [wrongPool, progress, activeLevel, sequenceSeed, storyId, effectiveStoryLevel, swapFocus],
+      : buildHeroSteps(wrongPool, progress, activeLevel, sequenceSeed, STARTER_STEP_COUNT, swapFocus ?? undefined, favouriteWordSet),
+    [wrongPool, progress, activeLevel, sequenceSeed, storyId, effectiveStoryLevel, swapFocus, favouriteWordSet],
   )
   const [preparedStream, setPreparedStream] = useState<PreparedStream | null>(null)
   const steps = preparedStream?.key === streamKey ? preparedStream.steps : starterSteps
@@ -131,7 +139,7 @@ export function RotatingHeroSentence({
     // before the longer, quality-filtered queue uses the main thread.
     const paintFrame = window.requestAnimationFrame(() => {
       timer = window.setTimeout(() => {
-        const completeSteps = buildHeroSteps(wrongPool, progress, activeLevel, sequenceSeed, undefined, swapFocus ?? undefined)
+        const completeSteps = buildHeroSteps(wrongPool, progress, activeLevel, sequenceSeed, undefined, swapFocus ?? undefined, favouriteWordSet)
         if (!cancelled) setPreparedStream({ key: streamKey, steps: completeSteps })
       }, 0)
     })
@@ -141,7 +149,7 @@ export function RotatingHeroSentence({
       window.cancelAnimationFrame(paintFrame)
       if (timer !== undefined) window.clearTimeout(timer)
     }
-  }, [wrongPool, progress, activeLevel, sequenceSeed, storyId, streamKey, swapFocus])
+  }, [wrongPool, progress, activeLevel, sequenceSeed, storyId, streamKey, swapFocus, favouriteWordSet])
 
   useEffect(() => {
     onCanRewindChange?.(history.length > 0)
@@ -176,8 +184,8 @@ export function RotatingHeroSentence({
   const rolloverSteps = useMemo(
     () => storyId
       ? buildHeroStorySteps(effectiveStoryRolloverId ?? storyId, effectiveStoryLevel)
-      : buildHeroSteps(wrongPool, progress, activeLevel, rolloverSeed, STARTER_STEP_COUNT, swapFocus ?? undefined),
-    [wrongPool, progress, activeLevel, rolloverSeed, storyId, effectiveStoryLevel, effectiveStoryRolloverId, swapFocus],
+      : buildHeroSteps(wrongPool, progress, activeLevel, rolloverSeed, STARTER_STEP_COUNT, swapFocus ?? undefined, favouriteWordSet),
+    [wrongPool, progress, activeLevel, rolloverSeed, storyId, effectiveStoryLevel, effectiveStoryRolloverId, swapFocus, favouriteWordSet],
   )
 
   // A level change previews on its own seed as soon as it's requested, so the
@@ -190,7 +198,7 @@ export function RotatingHeroSentence({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const pendingSeed = useMemo(() => newSequenceSeed(), [jlptLevel])
   const pendingSteps = useMemo(
-    () => levelIsPending ? buildHeroSteps(wrongPool, progress, jlptLevel, pendingSeed, STARTER_STEP_COUNT, swapFocus ?? undefined) : null,
+    () => levelIsPending ? buildHeroSteps(wrongPool, progress, jlptLevel, pendingSeed, STARTER_STEP_COUNT, swapFocus ?? undefined, favouriteWordSet) : null,
     [levelIsPending, wrongPool, progress, jlptLevel, pendingSeed, swapFocus],
   )
 
