@@ -2379,6 +2379,18 @@ body:has(.dashboard) {
   cursor: pointer;
 }
 
+/* Grammar mode wears the blue accent while story mode keeps the green one, so
+   the top bar says which mode is running before you read the label. Every rule
+   in this cluster already reads --rayquaza, so rebinding the two tokens on the
+   container recolours the toggle, the chip and the menu together rather than
+   duplicating a dozen declarations. */
+.control-story-toggle.is-grammar,
+.control-story-quick-select.is-grammar {
+  --rayquaza: var(--kyogre);
+  --rayquaza-light: var(--kyogre-light);
+  --rayquaza-deep: var(--kyogre-deep);
+}
+
 /* Particles is present but not wired; it should read as unavailable in the
    menu the same way it does in the panel. */
 .control-story-quick-menu button:disabled {

@@ -618,7 +618,7 @@ export function Dashboard({
           </div>
         )}
         {grammarMode && (
-          <div className="control-story-quick-select" ref={focusQuickSelectRef}>
+          <div className="control-story-quick-select is-grammar" ref={focusQuickSelectRef}>
             <button
               type="button"
               className={`control-story-name-button${focusQuickSelectOpen ? ' is-open' : ''}`}
@@ -664,7 +664,7 @@ export function Dashboard({
         )}
         <button
           type="button"
-          className={`control-story-toggle control-story-top-toggle${settingsMode !== 'none' ? ' is-active' : ''}`}
+          className={`control-story-toggle control-story-top-toggle${settingsMode !== 'none' ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
           onClick={() => selectSettingsMode(topToggleMode)}
           role="switch"
           aria-checked={settingsMode !== 'none'}
