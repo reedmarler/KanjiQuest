@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { getQuestById, type GuardianAttack } from '../data/questCampaign'
+import { getQuestById, type GuardianAttack, type GuardianBattleStyle } from '../data/questCampaign'
 import type { DrillExercise } from '../lib/drillExercises'
 import { kitsuneLuckChance, perfectEdgeThreshold, twinStrikeInterval, type RelicLoadout } from '../lib/relics'
 import { GuardianSprite, hasGuardianSprite } from './GuardianSprite'
@@ -51,6 +51,7 @@ export function QuestCheckpoint({ questId, onBack, onComplete, loadout, onBattle
 
   if (!quest?.grammarDrills.length) return null
   const drills = quest.grammarDrills
+  const guardianBattleStyle = quest.guardian.battleStyle
   // Boss health can exceed the drill count, so questions cycle rather than
   // running out — the battle ends when a health bar empties, not the list.
   const exercise = echoQueue[0] ?? drills[(index + rerollBump) % drills.length]!
@@ -217,6 +218,9 @@ export function QuestCheckpoint({ questId, onBack, onComplete, loadout, onBattle
           <span>QUEST {String(quest.number).padStart(2, '0')} · THE GUARDIAN GATE</span>
           <div className="quest-gate-scene" aria-label={`${quest.guardian.name} waits beyond the gate`}>
             <img className="quest-gate-art" src="/quest-guardian-gate.png" alt="The Kanji Quest samurai faces the guardian beyond a shrine gate" />
+            {guardianBattleStyle && quest.guardian.portrait && (
+              <img className={`quest-gate-featured-guardian is-${guardianBattleStyle}`} src={quest.guardian.portrait} alt="" />
+            )}
           </div>
           <div className={`quest-gate-brief${loadout.relics.length ? '' : ' has-no-relic'}`}>
             <div className="quest-gate-identity">
@@ -243,7 +247,7 @@ export function QuestCheckpoint({ questId, onBack, onComplete, loadout, onBattle
 
       {(phase === 'question' || phase === 'feedback') && (
         <section className="quest-battle-card">
-          <div className={`quest-battle-arena${isFinalPhase && phases.length > 1 ? ' is-final-phase' : ''}${shakeClass}`} aria-label="Guardian battle">
+          <div className={`quest-battle-arena${guardianBattleStyle ? ` is-guardian-${guardianBattleStyle}` : ''}${isFinalPhase && phases.length > 1 ? ' is-final-phase' : ''}${shakeClass}`} aria-label="Guardian battle">
             {/* Charge glow telegraphs that the next clean hit ends the fight. */}
             {phase === 'question' && guardianHealth === 1 && <span className="quest-ultimate-charge" aria-hidden="true" />}
             {phase === 'feedback' && lastHitCorrect && strikeTier !== 'strike' && (
@@ -251,6 +255,9 @@ export function QuestCheckpoint({ questId, onBack, onComplete, loadout, onBattle
             )}
             {phase === 'feedback' && lastHitCorrect && (
               <span className="quest-speed-lines" aria-hidden="true"><i /><i /><i /><i /></span>
+            )}
+            {phase === 'feedback' && !lastHitCorrect && !lastHitBlocked && guardianBattleStyle && (
+              <GuardianAttackEffect style={guardianBattleStyle} />
             )}
             <Fighter
               name="You" mark="侍" portrait="/quest-mascot-battle.png"
@@ -262,7 +269,7 @@ export function QuestCheckpoint({ questId, onBack, onComplete, loadout, onBattle
             <Fighter
               name={activePhase.name || quest.guardian.name} mark={activePhase.mark || quest.guardian.mark} portrait={quest.guardian.portrait}
               health={guardianHealth} maxHealth={guardianMaxHealth} side="guardian" state={guardianState} tier={strikeTier}
-              spriteQuestId={quest.id} phaseIndex={phaseIndexFor(guardianHealth)}
+              spriteQuestId={quest.id} phaseIndex={phaseIndexFor(guardianHealth)} guardianStyle={guardianBattleStyle}
             />
           </div>
 
@@ -364,7 +371,7 @@ export function QuestCheckpoint({ questId, onBack, onComplete, loadout, onBattle
   )
 }
 
-function Fighter({ name, mark, portrait, health, maxHealth, side, state, tier, spriteQuestId, phaseIndex }: {
+function Fighter({ name, mark, portrait, health, maxHealth, side, state, tier, spriteQuestId, phaseIndex, guardianStyle }: {
   name: string; mark: string; portrait?: string; health: number; maxHealth: number
   side: 'player' | 'guardian'
   state?: 'attacking' | 'critical' | 'hit' | 'guarded' | 'ultimate' | 'ultimate-hit' | 'critical-hit'
@@ -372,8 +379,9 @@ function Fighter({ name, mark, portrait, health, maxHealth, side, state, tier, s
   /** Quest id selects which yōkai SVG to draw for the guardian. */
   spriteQuestId?: string
   phaseIndex?: number
+  guardianStyle?: GuardianBattleStyle
 }) {
-  const useSprite = side === 'guardian' && hasGuardianSprite(spriteQuestId)
+  const useSprite = side === 'guardian' && !portrait && hasGuardianSprite(spriteQuestId)
   // The guardian's own recoil animation is driven by the sprite, so map the
   // battle state onto the sprite's vocabulary rather than the portrait's.
   const spriteState = state === 'ultimate-hit' ? 'ultimate-hit'
@@ -389,7 +397,7 @@ function Fighter({ name, mark, portrait, health, maxHealth, side, state, tier, s
   )
 
   return (
-    <div className={`quest-fighter quest-fighter-${side}${state ? ` is-${state}` : ''}`}>
+    <div className={`quest-fighter quest-fighter-${side}${guardianStyle ? ` has-featured-art is-${guardianStyle}` : ''}${state ? ` is-${state}` : ''}`}>
       <div className="quest-fighter-name"><b>{name}</b><span>{health} / {maxHealth}</span></div>
       <div className="quest-health"><span style={{ width: `${(health / maxHealth) * 100}%` }} /></div>
       {useSprite
@@ -417,4 +425,8 @@ function KanjiSlashEffect() {
 
 function DoubleStrikeEffect() {
   return <div className="quest-double-strike" aria-hidden="true"><i /><i /><b>連</b></div>
+}
+
+function GuardianAttackEffect({ style }: { style: GuardianBattleStyle }) {
+  return <div className={`quest-guardian-attack is-${style}`} aria-hidden="true"><i /><i /><span /><span /><span /></div>
 }

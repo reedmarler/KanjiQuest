@@ -246,8 +246,8 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
           <span className="study-type-badge"><span>Quest Kanji</span><span className="jlpt-badge">{quest?.level}</span></span>
         </div>
         <div className="study-progress-bar"><div className="study-progress-fill" style={{ width: ((index + 1) / entries.length) * 100 + '%' }} /></div>
-        <section className="kanji-study-navigation">
-          <div className="kanji-path-heading"><div><span>BUILD THE WORD</span><h2>{quest?.title}</h2><p>See how each character works inside the quest vocabulary.</p></div></div>
+        <section className="kanji-study-navigation kanji-armory-navigation">
+          <div className="kanji-path-heading"><span className="kanji-armory-mark" aria-hidden="true">漢</span><div><span>BUILD THE WORD</span><h2>{quest?.title}</h2><p>See how each character works inside the quest vocabulary.</p></div></div>
         </section>
 
         <main className={`grammar-choice-card kanji-learning-card quest-kanji-card${revealed ? ' is-revealed' : ''}`}>
@@ -294,9 +294,10 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
         <div className="study-progress-fill" style={{ width: ((index + 1) / entries.length) * 100 + '%' }} />
       </div>
 
-      <section className="kanji-study-navigation">
+      <section className="kanji-study-navigation kanji-armory-navigation">
         {questMode ? (
           <div className="kanji-path-heading">
+            <span className="kanji-armory-mark" aria-hidden="true">漢</span>
             <div><span>QUEST KANJI</span><h2>{quest?.title}</h2><p>{quest?.vocabularyTheme} — only the kanji from this quest’s vocabulary.</p></div>
           </div>
         ) : (<>
@@ -310,6 +311,7 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
         </div>
         {mode === 'paths' ? (
           <div className="kanji-path-heading">
+            <span className="kanji-armory-mark" aria-hidden="true">漢</span>
             <div>
               <span>15-CHARACTER PATH</span>
               <h2>{path.title}</h2>

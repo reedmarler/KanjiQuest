@@ -26,6 +26,20 @@ export type GuardianAttack = {
   flavor: string
 }
 
+export type GuardianBattleStyle =
+  | 'sludge'
+  | 'ember'
+  | 'frost'
+  | 'vanish'
+  | 'wind'
+  | 'storm'
+  | 'shadow'
+  | 'bone'
+  | 'foxfire'
+  | 'spirit'
+  | 'earth'
+  | 'oni'
+
 /**
  * Later guardians fight in phases: each cleared phase changes the guardian's
  * look and taunt rather than simply draining one shared health bar, which is
@@ -59,6 +73,7 @@ export type QuestDefinition = {
     mark: string
     lore: string
     portrait?: string
+    battleStyle: GuardianBattleStyle
     /** Strikes needed to break the seal. Bosses run higher. */
     health?: number
     attacks?: readonly GuardianAttack[]
@@ -559,9 +574,9 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: homeGrammarDrills,
     guardian: {
-      name: 'Akaname', japanese: '垢嘗', title: 'The Grime Eater', mark: '怪', health: 3,
+      name: 'Akaname', japanese: '垢嘗', title: 'The Grime Ronin', mark: '怪', health: 3,
       lore: 'A small yōkai has swallowed the words of the morning. Use those words correctly to restore the lantern seal.',
-      portrait: '/quest-guardian-akaname.png',
+      portrait: '/guardian-grime-ronin.png', battleStyle: 'sludge',
       attacks: [
         { name: 'Grime Lick', japanese: '垢舐め', flavor: 'It drags a filthy tongue across the seal and a word blurs away.' },
         { name: 'Damp Tile Slip', japanese: '濡れ床', flavor: 'The floor turns slick and your footing — and your grammar — slides.' },
@@ -582,8 +597,9 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: foodGrammarDrills,
     guardian: {
-      name: 'Jikininki', japanese: '食人鬼', title: 'The Hungry Spirit', mark: '餓', health: 3,
+      name: 'Jikininki', japanese: '食人鬼', title: 'The Ember Chef', mark: '餓', health: 3,
       lore: 'A hungry spirit twists the language of food and hospitality. Feed it the right words or it will eat the meal, the menu, and the meaning.',
+      portrait: '/guardian-ogre-chef.png', battleStyle: 'ember',
       attacks: [
         { name: 'Devouring Bowl', japanese: '喰らい椀', flavor: 'It swallows the sentence whole and leaves only steam.' },
         { name: 'Bitter Course', japanese: '苦膳', flavor: 'Every flavour turns wrong on your tongue, and so does the particle.' },
@@ -604,11 +620,13 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: travelGrammarDrills,
     guardian: {
-      name: 'Tsurube-otoshi', japanese: '釣瓶落とし', title: 'The Falling Head', mark: '落', health: 3,
-      lore: 'It drops from the station rafters without warning and tests every direction, place, and destination you thought you knew.',
+      name: 'Frostfang Byakko', japanese: '氷牙白虎', title: 'The Icebound Blade', mark: '氷', health: 4,
+      lore: 'The silver tiger has frozen every rail out of the station. Name each place and destination precisely or his blade will send you back to the first platform.',
+      portrait: '/guardian-frostfang.png', battleStyle: 'frost',
       attacks: [
-        { name: 'Sudden Drop', japanese: '急落', flavor: 'It plummets from the ceiling and the platform sign goes blank.' },
-        { name: 'Missed Departure', japanese: '発車遅れ', flavor: 'The doors close on the word you needed.' },
+        { name: 'Glacier Draw', japanese: '氷河抜刀', flavor: 'The curved blade clears its sheath and an icy line cuts through your destination.' },
+        { name: 'White Tiger Rush', japanese: '白虎突進', flavor: 'Silver armor flashes down the platform before the next word can arrive.' },
+        { name: 'Frozen Rail', japanese: '凍結線路', flavor: 'Blue frost locks every route except the wrong one.' },
       ],
     },
     reward: { name: 'Traveler’s Bell', mark: '鈴', perk: 'clear-path', perkTitle: 'Clear Path', perkDescription: 'Removes one wrong choice from the first question of each battle.' },
@@ -626,8 +644,9 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: shoppingGrammarDrills,
     guardian: {
-      name: 'Noppera-bō', japanese: 'のっぺらぼう', title: 'The Faceless Thief', mark: '盗', health: 3,
+      name: 'Noppera-bō', japanese: 'のっぺらぼう', title: 'The Ashen Faceless', mark: '盗', health: 3,
       lore: 'A faceless stranger hides names, possessions, and the truth of what happened. Only exact past-tense speech will pin it down.',
+      portrait: '/guardian-faceless-ninja.png', battleStyle: 'vanish',
       attacks: [
         { name: 'Blank Face', japanese: '無貌', flavor: 'You look up and the answer has no features left to read.' },
         { name: 'Pocket Sleight', japanese: '掏摸', flavor: 'The word you were holding is simply gone.' },
@@ -648,8 +667,9 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: schoolGrammarDrills,
     guardian: {
-      name: 'Tengu', japanese: '天狗', title: 'The Proud Teacher', mark: '天', health: 4,
+      name: 'Tengu', japanese: '天狗', title: 'The Crimson General', mark: '天', health: 4,
       lore: 'The mountain teacher demands precise introductions and cleanly connected actions. He has failed better students than you for less.',
+      portrait: '/guardian-tengu-general.png', battleStyle: 'wind',
       attacks: [
         { name: 'Feather Gale', japanese: '羽嵐', flavor: 'One beat of his fan scatters your sentence across the classroom.' },
         { name: 'Red Ink', japanese: '朱筆', flavor: 'He circles the error before you finish making it.' },
@@ -671,8 +691,9 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: natureGrammarDrills,
     guardian: {
-      name: 'Ame-onna', japanese: '雨女', title: 'The Rain Caller', mark: '雨', health: 4,
+      name: 'Ame-onna', japanese: '雨女', title: 'The Storm Priestess', mark: '雨', health: 4,
       lore: 'The storm grows smarter as you speak, testing reasons, plans, and every condition you try to set against it.',
+      portrait: '/guardian-storm-priestess.png', battleStyle: 'storm',
       attacks: [
         { name: 'Downpour', japanese: '土砂降り', flavor: 'Rain hammers the page until the reason washes off it.' },
         { name: 'Cold Front', japanese: '寒波', flavor: 'The air drops and your clause freezes half-formed.' },
@@ -694,12 +715,13 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: workGrammarDrills,
     guardian: {
-      name: 'Kuchisake-onna', japanese: '口裂け女', title: 'The Question That Cuts', mark: '問', health: 4,
-      lore: 'She waits by the elevator with one question, and every answer you give is the wrong one until your grammar is exact.',
+      name: 'Kage Yoroi', japanese: '影鎧', title: 'The Unlit Blade', mark: '影', health: 4,
+      lore: 'A suit of living shadow stands beneath the last office light. Finish the work exactly or its magenta blade will erase the sentence from the dark.',
+      portrait: '/guardian-shadowblade.png', battleStyle: 'shadow',
       attacks: [
-        { name: 'Am I Pretty?', japanese: '私、綺麗？', flavor: 'The question arrives before you have finished the last one.' },
-        { name: 'Scissor Snip', japanese: '鋏音', flavor: 'A clean metallic sound, and your sentence is two pieces.' },
-        { name: 'Fluorescent Flicker', japanese: '蛍光明滅', flavor: 'The office lights stutter and the answer moves.' },
+        { name: 'Midnight Sever', japanese: '真夜中斬り', flavor: 'A magenta edge crosses the room and the clause falls into darkness.' },
+        { name: 'Blackout Step', japanese: '暗転歩法', flavor: 'The lights fail for one breath. The knight is already behind your answer.' },
+        { name: 'Shadow Deadline', japanese: '影の締切', flavor: 'The darkness closes around the final word before you can finish it.' },
       ],
     },
     reward: { name: 'Overtime Seal', mark: '残', perk: 'iron-will', perkTitle: 'Iron Will', perkDescription: 'Start every guardian battle with one extra heart.' },
@@ -717,8 +739,9 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: healthGrammarDrills,
     guardian: {
-      name: 'Gashadokuro', japanese: 'がしゃどくろ', title: 'The Bone Tide', mark: '骨', health: 5,
+      name: 'Gashadokuro', japanese: 'がしゃどくろ', title: 'The Ivory Shogun', mark: '骨', health: 5,
       lore: 'Assembled from everyone who never said where it hurt. It looms over the ward and dares you to explain yourself clearly.',
+      portrait: '/guardian-bone-shogun.png', battleStyle: 'bone',
       attacks: [
         { name: 'Bone Rain', japanese: '骨雨', flavor: 'The ceiling comes apart into a thousand small white sounds.' },
         { name: 'Gnashing Toll', japanese: '歯噛み', flavor: 'A grinding note that shakes the reason out of your clause.' },
@@ -744,8 +767,9 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: holidaysGrammarDrills,
     guardian: {
-      name: 'Kyūbi no Kitsune', japanese: '九尾の狐', title: 'The Nine-Tailed Trickster', mark: '狐', health: 5,
+      name: 'Kyūbi no Kitsune', japanese: '九尾の狐', title: 'The Foxfire Duelist', mark: '狐', health: 5,
       lore: 'You bought her face at a stall for four hundred yen. She would like it back, and she will play for it.',
+      portrait: '/guardian-kitsune-duelist.png', battleStyle: 'foxfire',
       attacks: [
         { name: 'Foxfire', japanese: '狐火', flavor: 'Blue flames drift up from the riverbank and rearrange the sentence.' },
         { name: 'Nine Tails', japanese: '九尾', flavor: 'Nine answers appear. Eight of them are hers.' },
@@ -771,8 +795,9 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: cityGrammarDrills,
     guardian: {
-      name: 'Yūrei', japanese: '幽霊', title: 'The Lingering Voice', mark: '霊', health: 5,
+      name: 'Yūrei', japanese: '幽霊', title: 'The Spectral Courtier', mark: '霊', health: 5,
       lore: 'It has been repeating the same sentence in room 402 for eleven years. Say it back correctly and it can finally stop.',
+      portrait: '/guardian-spectral-warrior.png', battleStyle: 'spirit',
       attacks: [
         { name: 'Cold Whisper', japanese: '冷語', flavor: 'The words arrive from behind you, in your own voice.' },
         { name: 'Repeating Hallway', japanese: '繰廊', flavor: 'You walk the same corridor and answer the same question again.' },
@@ -798,8 +823,9 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: mountainGrammarDrills,
     guardian: {
-      name: 'Yamauba', japanese: '山姥', title: 'The Mountain Crone', mark: '姥', health: 5,
+      name: 'Yamauba', japanese: '山姥', title: 'The Stone Mountain Hag', mark: '姥', health: 5,
       lore: 'She gave you directions and a warm meal. She would like you to stay on this mountain permanently, and she is very good at asking.',
+      portrait: '/guardian-mountain-hag.png', battleStyle: 'earth',
       attacks: [
         { name: 'Kind Offer', japanese: '親切', flavor: 'Stay the night, she says, and the path behind you closes a little.' },
         { name: 'Fog Bind', japanese: '霧縛', flavor: 'The white closes in until only the wrong road is visible.' },
@@ -825,18 +851,19 @@ export const QUESTS: readonly QuestDefinition[] = [
     ],
     grammarDrills: finaleGrammarDrills,
     guardian: {
-      name: 'Nurarihyon', japanese: 'ぬらりひょん', title: 'Supreme Commander of the Yōkai', mark: '主', health: 6,
-      lore: 'He walked into your house, sat down, and poured himself tea as though he had always lived there. Every stolen word is in his lantern, and he is in no hurry at all.',
+      name: 'Koganemaru', japanese: '黄金丸', title: 'The Horned Regent', mark: '王', health: 6,
+      lore: 'The gold oni forged the stolen words into his armor. Break the magenta core at his chest and the Hollow Lantern will release every voice it holds.',
+      portrait: '/guardian-gold-oni.png', battleStyle: 'oni',
       attacks: [
-        { name: 'Uninvited Guest', japanese: '客来', flavor: 'He is already inside the sentence, sitting comfortably.' },
-        { name: 'Hollow Flame', japanese: '空焔', flavor: 'The lantern burns and gives no light, only a spreading quiet.' },
-        { name: 'Tea Cools', japanese: '茶冷', flavor: 'He sets down the cup. That, more than anything, is the threat.' },
-        { name: 'Command of the Hundred', japanese: '百鬼夜行', flavor: 'Every guardian you defeated moves once more at his word.' },
+        { name: 'Regent Hammer', japanese: '王槌', flavor: 'A plated fist strikes the road and the whole sentence jumps from its place.' },
+        { name: 'Dragon Shoulder', japanese: '双竜衝', flavor: 'The beasts on his armor roar and crash through both sides of the clause.' },
+        { name: 'Magenta Core', japanese: '紅玉核', flavor: 'The chest gem burns bright enough to pull the meaning out of every word.' },
+        { name: 'Golden Ruin', japanese: '黄金崩し', flavor: 'All that armored weight comes down at once. Even the lantern flame bends.' },
       ],
       phases: [
-        { name: 'Nurarihyon · At Ease', mark: '主', taunt: 'He gestures at the cushion opposite him. Sit, if you like.' },
-        { name: 'Nurarihyon · Standing', mark: '立', taunt: 'He stands. The room becomes noticeably smaller.' },
-        { name: 'Nurarihyon · Night Parade', mark: '百', taunt: 'The hundred demons walk behind him, and they all know your name.' },
+        { name: 'Koganemaru · Sealed', mark: '封', taunt: 'The horned armor wakes, one gold plate at a time.' },
+        { name: 'Koganemaru · Unbound', mark: '解', taunt: 'The magenta core opens and the mountain answers.' },
+        { name: 'Koganemaru · Regent', mark: '王', taunt: 'He raises one fist. Every stolen word falls silent.' },
       ],
     },
     reward: { name: 'Rekindled Lantern', mark: '燈', perk: 'lantern-flame', perkTitle: 'Rekindled Flame', perkDescription: 'Every relic you carry grows stronger. The road is yours.' },

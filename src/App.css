@@ -9325,6 +9325,993 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 .quest-kanji-card .kanji-learning-divider{margin:.3rem auto .22rem}.quest-kanji-word-answer{margin-bottom:.18rem}.quest-kanji-parts>article>strong{font-size:3.05rem}.quest-kanji-part-examples b{font-size:1.18rem}.quest-kanji-part-examples small{font-size:.66rem}.quest-kanji-part-examples em{font-size:.54rem}.quest-kanji-parts.is-single>article>strong{font-size:3.65rem}
 @media(max-width:720px){.quest-gate-intro>.btn{margin-top:.3rem}.quest-battle-action-message{left:0;width:calc(50% - 4.7rem);font-size:.42rem}.quest-kanji-parts>article>strong{font-size:2.65rem}.quest-kanji-part-examples b{font-size:1.04rem}.quest-kanji-part-examples small{font-size:.57rem}.quest-kanji-parts.is-single>article>strong{font-size:3.05rem}}
 
+/* RPG-facing Quest and Kanji hubs. */
+.quest-campaign-hero {
+  position: relative;
+  min-height: 18rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--gold) 38%, var(--border));
+  border-radius: 8px;
+  background: #080a12;
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, .28);
+  isolation: isolate;
+}
+
+.quest-campaign-hero > img {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 45%;
+}
+
+.quest-campaign-shade {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(5, 6, 13, .96) 0%, rgba(5, 6, 13, .72) 35%, rgba(5, 6, 13, .08) 70%), linear-gradient(0deg, rgba(5, 6, 13, .58), transparent 62%);
+}
+
+.quest-campaign-copy {
+  position: absolute;
+  bottom: 1.55rem;
+  left: 1.65rem;
+  width: min(22rem, 48%);
+}
+
+.quest-campaign-copy > span {
+  color: var(--gold);
+  font-size: .53rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.quest-campaign-copy h1 {
+  margin: .34rem 0 .48rem;
+  color: #fff;
+  font-size: clamp(1.55rem, 3.5vw, 2.45rem);
+  line-height: 1.04;
+}
+
+.quest-campaign-copy p {
+  color: rgba(255, 255, 255, .72);
+  font-size: .67rem;
+}
+
+.quest-campaign-hero .quest-campaign-progress {
+  position: absolute;
+  top: .9rem;
+  right: .9rem;
+  padding: .5rem .62rem;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 7px;
+  background: rgba(7, 7, 14, .72);
+  color: #fff;
+  backdrop-filter: blur(8px);
+}
+
+.quest-mission-card {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr) 15rem;
+  gap: 1.15rem;
+  border-color: color-mix(in srgb, var(--sakura-light) 36%, var(--border));
+  border-radius: 8px;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--sakura) 8%, var(--surface)), var(--surface) 55%, color-mix(in srgb, var(--gold) 6%, var(--surface)));
+}
+
+.quest-mission-card .quest-current-intro {
+  align-self: center;
+  padding: .45rem;
+}
+
+.quest-mission-card .quest-current-intro h2 {
+  font-size: 1.52rem;
+}
+
+.quest-mission-card .quest-guardian-card {
+  min-height: 13rem;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--sakura-light) 25%, var(--border));
+  border-radius: 0;
+  background: radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--sakura) 23%, transparent), transparent 58%);
+}
+
+.quest-mission-card .quest-guardian-card-sprite {
+  width: 8.4rem;
+  height: 8.4rem;
+  margin: -.25rem auto -.55rem;
+}
+
+.quest-mission-card .quest-guardian-card > b {
+  font-size: .8rem;
+}
+
+.quest-arc {
+  border-radius: 8px;
+}
+
+.kanji-armory-navigation {
+  padding: .5rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--border));
+  border-radius: 8px;
+  background: linear-gradient(110deg, color-mix(in srgb, var(--gold) 7%, var(--surface)), var(--surface));
+}
+
+.kanji-armory-navigation .kanji-path-heading {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .7rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.kanji-armory-mark {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--border));
+  border-radius: 7px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--gold) 22%, var(--surface-2)), var(--surface-2));
+  color: var(--gold) !important;
+  font: 700 1.65rem/1 'Noto Sans JP', sans-serif !important;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gold) 8%, transparent);
+}
+
+.kanji-armory-navigation .kanji-study-mode-tabs {
+  margin-bottom: .48rem;
+}
+
+.kanji-lab .kanji-learning-card {
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 27%, var(--border));
+  border-radius: 8px;
+  background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--kyogre) 20%, transparent), transparent 42%), linear-gradient(160deg, var(--surface), color-mix(in srgb, var(--sakura) 5%, var(--surface)));
+  box-shadow: 0 .8rem 2rem rgba(0, 0, 0, .2);
+}
+
+.kanji-lab .kanji-learning-character {
+  color: var(--sakura-light);
+  text-shadow: 0 0 1.5rem color-mix(in srgb, var(--sakura) 24%, transparent);
+}
+
+@media (max-width: 720px) {
+  .quest-campaign-hero {
+    min-height: 16.5rem;
+  }
+
+  .quest-campaign-hero > img {
+    object-position: 58% center;
+  }
+
+  .quest-campaign-shade {
+    background: linear-gradient(0deg, rgba(5, 6, 13, .98) 0%, rgba(5, 6, 13, .72) 45%, rgba(5, 6, 13, .06) 100%);
+  }
+
+  .quest-campaign-copy {
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    width: auto;
+  }
+
+  .quest-campaign-copy h1 {
+    max-width: 15rem;
+    font-size: 1.55rem;
+  }
+
+  .quest-campaign-copy p {
+    display: none;
+  }
+
+  .quest-campaign-hero .quest-campaign-progress {
+    top: .65rem;
+    right: .65rem;
+  }
+
+  .quest-mission-card {
+    grid-template-columns: 1fr;
+    padding: .8rem;
+  }
+
+  .quest-mission-card .quest-guardian-card {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    min-height: 6.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--sakura-light) 25%, var(--border));
+    border-left: 0;
+    padding-top: .7rem;
+  }
+
+  .quest-mission-card .quest-guardian-card-sprite {
+    grid-column: 1;
+    grid-row: 1 / 6;
+    width: 5.5rem;
+    height: 5.5rem;
+    margin: 0;
+  }
+
+  .quest-mission-card .quest-guardian-card > span,
+  .quest-mission-card .quest-guardian-card > b,
+  .quest-mission-card .quest-guardian-card > small,
+  .quest-mission-card .quest-guardian-card > em,
+  .quest-mission-card .quest-guardian-card > .quest-guardian-phases {
+    grid-column: 2;
+  }
+
+  .kanji-armory-navigation .kanji-path-heading {
+    grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+    gap: .5rem;
+  }
+
+  .kanji-armory-mark {
+    width: 2.75rem;
+    font-size: 1.35rem !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .quest-campaign-hero {
+    min-height: 15rem;
+  }
+
+  .quest-campaign-copy h1 {
+    font-size: 1.35rem;
+  }
+
+  .quest-campaign-hero .quest-campaign-progress small {
+    display: none;
+  }
+
+  .kanji-armory-navigation .kanji-path-heading {
+    grid-template-columns: 2.45rem minmax(0, 1fr);
+  }
+
+  .kanji-armory-mark {
+    width: 2.45rem;
+    font-size: 1.18rem !important;
+  }
+
+  .kanji-armory-navigation .kanji-path-heading > button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+/* Featured armored guardians and their battle signatures. */
+.quest-guardian-card.is-featured-guardian {
+  overflow: visible;
+}
+
+.quest-guardian-card.is-featured-guardian > img {
+  width: 10rem;
+  height: 9rem;
+  margin: -.75rem auto -1rem;
+  border-radius: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 .45rem .55rem rgba(0, 0, 0, .52));
+}
+
+.quest-gate-scene:has(.quest-gate-featured-guardian) .quest-gate-art {
+  filter: brightness(.48) saturate(.72) contrast(1.08);
+}
+
+.quest-gate-featured-guardian {
+  position: absolute;
+  z-index: 6;
+  right: 2%;
+  bottom: -17%;
+  width: 48%;
+  height: 128%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 .5rem .6rem rgba(0, 0, 0, .68));
+  animation: quest-featured-guardian-idle 2s ease-in-out infinite;
+}
+
+.quest-gate-featured-guardian.is-oni {
+  right: 0;
+  width: 52%;
+}
+
+@keyframes quest-featured-guardian-idle {
+  0%, 100% { transform: translateY(0) rotate(.2deg); }
+  50% { transform: translateY(-.22rem) rotate(-.2deg); }
+}
+
+.quest-fighter-guardian.has-featured-art .quest-fighter-portrait {
+  right: -.15rem;
+  bottom: -.15rem;
+  width: 8.35rem;
+  height: 8.35rem;
+  border-radius: 0;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.quest-fighter-guardian.is-shadow .quest-fighter-portrait {
+  filter: drop-shadow(0 0 .5rem rgba(255, 72, 164, .3)) drop-shadow(0 .35rem .5rem rgba(0, 0, 0, .6));
+}
+
+.quest-fighter-guardian.is-oni .quest-fighter-portrait {
+  width: 8.8rem;
+  height: 8.8rem;
+  filter: drop-shadow(0 0 .45rem rgba(255, 197, 79, .24)) drop-shadow(0 .35rem .55rem rgba(0, 0, 0, .62));
+}
+
+.quest-battle-arena.is-guardian-frost {
+  box-shadow: inset 0 0 0 1px rgba(131, 218, 255, .12), inset 0 -2.2rem 2.8rem rgba(4, 18, 35, .46);
+}
+
+.quest-battle-arena.is-guardian-shadow {
+  box-shadow: inset 0 0 0 1px rgba(255, 84, 168, .1), inset 0 -2.2rem 2.8rem rgba(14, 2, 22, .62);
+}
+
+.quest-battle-arena.is-guardian-oni {
+  box-shadow: inset 0 0 0 1px rgba(255, 205, 89, .14), inset 0 -2.2rem 2.8rem rgba(31, 16, 3, .5);
+}
+
+.quest-battle-arena.is-guardian-sludge { box-shadow: inset 0 0 0 1px rgba(143, 189, 82, .14), inset 0 -2.2rem 2.8rem rgba(22, 31, 7, .52); }
+.quest-battle-arena.is-guardian-ember { box-shadow: inset 0 0 0 1px rgba(255, 119, 55, .15), inset 0 -2.2rem 2.8rem rgba(43, 9, 2, .5); }
+.quest-battle-arena.is-guardian-vanish { box-shadow: inset 0 0 0 1px rgba(203, 197, 220, .12), inset 0 -2.2rem 2.8rem rgba(16, 14, 23, .58); }
+.quest-battle-arena.is-guardian-wind { box-shadow: inset 0 0 0 1px rgba(255, 100, 100, .13), inset 0 -2.2rem 2.8rem rgba(35, 5, 10, .48); }
+.quest-battle-arena.is-guardian-storm { box-shadow: inset 0 0 0 1px rgba(118, 159, 255, .15), inset 0 -2.2rem 2.8rem rgba(5, 12, 43, .56); }
+.quest-battle-arena.is-guardian-bone { box-shadow: inset 0 0 0 1px rgba(242, 229, 194, .14), inset 0 -2.2rem 2.8rem rgba(30, 25, 18, .5); }
+.quest-battle-arena.is-guardian-foxfire { box-shadow: inset 0 0 0 1px rgba(70, 232, 255, .14), inset 0 -2.2rem 2.8rem rgba(6, 25, 34, .52); }
+.quest-battle-arena.is-guardian-spirit { box-shadow: inset 0 0 0 1px rgba(181, 255, 241, .13), inset 0 -2.2rem 2.8rem rgba(7, 29, 32, .5); }
+.quest-battle-arena.is-guardian-earth { box-shadow: inset 0 0 0 1px rgba(211, 154, 78, .14), inset 0 -2.2rem 2.8rem rgba(39, 24, 10, .52); }
+
+.quest-guardian-attack {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.quest-guardian-attack i,
+.quest-guardian-attack span {
+  position: absolute;
+  display: block;
+}
+
+.quest-guardian-attack.is-frost::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 31% 58%, rgba(220, 250, 255, .92), rgba(74, 190, 255, .4) 20%, transparent 48%);
+  opacity: 0;
+  animation: quest-frost-flash 700ms ease-out both;
+}
+
+.quest-guardian-attack.is-frost i {
+  top: 54%;
+  right: -14%;
+  width: 76%;
+  height: .16rem;
+  background: linear-gradient(90deg, transparent, #70d9ff 18%, #fff 48%, #86e6ff 70%, transparent);
+  box-shadow: 0 0 .55rem #67d7ff;
+  transform: rotate(-18deg) scaleX(0);
+  transform-origin: right center;
+  animation: quest-frost-cut 720ms cubic-bezier(.17, .78, .2, 1) both;
+}
+
+.quest-guardian-attack.is-frost i:nth-child(2) {
+  top: 45%;
+  animation-delay: 90ms;
+  transform: rotate(-8deg) scaleX(0);
+}
+
+.quest-guardian-attack.is-frost span {
+  top: 55%;
+  left: 32%;
+  width: .35rem;
+  aspect-ratio: 1;
+  background: #d9f8ff;
+  clip-path: polygon(50% 0, 100% 100%, 0 75%);
+  opacity: 0;
+  animation: quest-ice-shard 760ms ease-out both;
+}
+
+.quest-guardian-attack.is-frost span:nth-of-type(2) { --ice-x: -2.8rem; --ice-y: -1.7rem; animation-delay: 60ms; }
+.quest-guardian-attack.is-frost span:nth-of-type(3) { --ice-x: 2.2rem; --ice-y: -2rem; animation-delay: 120ms; }
+
+.quest-guardian-attack.is-shadow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 28% 55%, rgba(255, 65, 163, .42), transparent 31%), rgba(0, 0, 0, .42);
+  opacity: 0;
+  animation: quest-shadow-pulse 820ms ease both;
+}
+
+.quest-guardian-attack.is-shadow i {
+  top: 50%;
+  right: -10%;
+  width: 88%;
+  height: .2rem;
+  background: linear-gradient(90deg, transparent, #ff4fa7 22%, #fff 48%, #ff4fa7 70%, transparent);
+  box-shadow: 0 0 .65rem #ff3e9c, 0 0 1.1rem rgba(255, 49, 146, .55);
+  transform: rotate(21deg) scaleX(0);
+  transform-origin: right center;
+  animation: quest-shadow-cut 800ms cubic-bezier(.16, .82, .2, 1) both;
+}
+
+.quest-guardian-attack.is-shadow i:nth-child(2) {
+  top: 56%;
+  transform: rotate(-16deg) scaleX(0);
+  animation-delay: 110ms;
+}
+
+.quest-guardian-attack.is-shadow span {
+  top: 48%;
+  left: 28%;
+  width: .3rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #ff70b7;
+  box-shadow: 0 0 .5rem #ff3c9a;
+  opacity: 0;
+  animation: quest-shadow-spark 820ms ease-out both;
+}
+
+.quest-guardian-attack.is-shadow span:nth-of-type(2) { --shadow-x: -2.5rem; --shadow-y: 1.3rem; animation-delay: 80ms; }
+.quest-guardian-attack.is-shadow span:nth-of-type(3) { --shadow-x: 2.4rem; --shadow-y: -1.4rem; animation-delay: 140ms; }
+
+.quest-guardian-attack.is-oni::before {
+  content: '';
+  position: absolute;
+  left: 23%;
+  bottom: 9%;
+  width: 5rem;
+  aspect-ratio: 1;
+  border: .2rem solid rgba(255, 210, 94, .9);
+  border-radius: 50%;
+  box-shadow: 0 0 1rem #ffbd45, inset 0 0 1rem rgba(255, 87, 167, .45);
+  opacity: 0;
+  transform: scale(.1) rotateX(66deg);
+  animation: quest-oni-shockwave 900ms ease-out both;
+}
+
+.quest-guardian-attack.is-oni::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 29% 62%, #fff 0, rgba(255, 199, 80, .62) 10%, rgba(255, 71, 159, .26) 28%, transparent 56%);
+  opacity: 0;
+  animation: quest-oni-flash 760ms ease-out both;
+}
+
+.quest-guardian-attack.is-oni i {
+  bottom: 12%;
+  left: 25%;
+  width: .22rem;
+  height: 62%;
+  background: linear-gradient(transparent, #ffd978 35%, #fff 76%, transparent);
+  box-shadow: 0 0 .65rem #ffc457;
+  transform: rotate(12deg) scaleY(0);
+  transform-origin: bottom;
+  animation: quest-oni-crack 760ms ease-out both;
+}
+
+.quest-guardian-attack.is-oni i:nth-child(2) {
+  left: 36%;
+  transform: rotate(-17deg) scaleY(0);
+  animation-delay: 90ms;
+}
+
+.quest-guardian-attack:is(.is-sludge, .is-ember, .is-vanish, .is-wind, .is-storm, .is-bone, .is-foxfire, .is-spirit, .is-earth)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 29% 57%, var(--guardian-flash), transparent 48%);
+  opacity: 0;
+  animation: quest-guardian-flash 780ms ease-out both;
+}
+
+.quest-guardian-attack:is(.is-sludge, .is-ember, .is-vanish, .is-wind, .is-storm, .is-bone, .is-foxfire, .is-spirit, .is-earth) i {
+  top: var(--guardian-cut-top, 52%);
+  right: -13%;
+  width: 82%;
+  height: var(--guardian-cut-size, .19rem);
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--guardian-main) 20%, #fff 48%, var(--guardian-main) 72%, transparent);
+  box-shadow: 0 0 .65rem var(--guardian-glow);
+  transform: rotate(var(--guardian-angle, -14deg)) scaleX(0);
+  transform-origin: right center;
+  animation: quest-guardian-cut 780ms cubic-bezier(.17, .8, .2, 1) both;
+}
+
+.quest-guardian-attack:is(.is-sludge, .is-ember, .is-vanish, .is-wind, .is-storm, .is-bone, .is-foxfire, .is-spirit, .is-earth) i:nth-child(2) {
+  top: calc(var(--guardian-cut-top, 52%) + 9%);
+  --guardian-angle: 14deg;
+  transform: rotate(var(--guardian-angle)) scaleX(0);
+  animation-delay: 90ms;
+}
+
+.quest-guardian-attack:is(.is-sludge, .is-ember, .is-vanish, .is-wind, .is-storm, .is-bone, .is-foxfire, .is-spirit, .is-earth) span {
+  top: 55%;
+  left: 29%;
+  width: var(--guardian-particle-size, .38rem);
+  aspect-ratio: 1;
+  border-radius: var(--guardian-particle-radius, 50%);
+  background: var(--guardian-particle, var(--guardian-main));
+  box-shadow: 0 0 .55rem var(--guardian-glow);
+  opacity: 0;
+  animation: quest-guardian-particle 820ms ease-out both;
+}
+
+.quest-guardian-attack:is(.is-sludge, .is-ember, .is-vanish, .is-wind, .is-storm, .is-bone, .is-foxfire, .is-spirit, .is-earth) span:nth-of-type(1) { --guardian-x: -2.6rem; --guardian-y: -1.8rem; }
+.quest-guardian-attack:is(.is-sludge, .is-ember, .is-vanish, .is-wind, .is-storm, .is-bone, .is-foxfire, .is-spirit, .is-earth) span:nth-of-type(2) { --guardian-x: 2.4rem; --guardian-y: -2.2rem; animation-delay: 70ms; }
+.quest-guardian-attack:is(.is-sludge, .is-ember, .is-vanish, .is-wind, .is-storm, .is-bone, .is-foxfire, .is-spirit, .is-earth) span:nth-of-type(3) { --guardian-x: 1.4rem; --guardian-y: 1.5rem; animation-delay: 130ms; }
+
+.quest-guardian-attack.is-sludge { --guardian-main: #9fc458; --guardian-glow: #607d2d; --guardian-flash: rgba(142, 181, 70, .58); --guardian-cut-size: .38rem; --guardian-particle-size: .55rem; --guardian-particle-radius: 45% 55% 60% 40%; }
+.quest-guardian-attack.is-ember { --guardian-main: #ff683f; --guardian-glow: #ff3d1f; --guardian-flash: rgba(255, 86, 40, .72); --guardian-angle: 18deg; --guardian-particle: #ffbd4a; }
+.quest-guardian-attack.is-vanish { --guardian-main: #c9c4d8; --guardian-glow: #8b7fa4; --guardian-flash: rgba(202, 195, 219, .48); --guardian-cut-size: .28rem; --guardian-particle-size: .7rem; --guardian-particle: rgba(213, 207, 226, .75); }
+.quest-guardian-attack.is-wind { --guardian-main: #ff7379; --guardian-glow: #ff394d; --guardian-flash: rgba(255, 78, 92, .58); --guardian-angle: -25deg; --guardian-cut-size: .13rem; --guardian-particle-radius: 0; }
+.quest-guardian-attack.is-storm { --guardian-main: #78a5ff; --guardian-glow: #536dff; --guardian-flash: rgba(103, 136, 255, .68); --guardian-angle: 70deg; --guardian-cut-size: .15rem; --guardian-particle-radius: 15%; }
+.quest-guardian-attack.is-bone { --guardian-main: #f0e2bc; --guardian-glow: #d4b77a; --guardian-flash: rgba(240, 224, 184, .62); --guardian-angle: 38deg; --guardian-particle-radius: 50% 12% 50% 12%; }
+.quest-guardian-attack.is-foxfire { --guardian-main: #4deaff; --guardian-glow: #19bfe8; --guardian-flash: rgba(57, 221, 255, .64); --guardian-angle: -8deg; --guardian-particle-size: .7rem; --guardian-particle: #74f1ff; }
+.quest-guardian-attack.is-spirit { --guardian-main: #b6fff0; --guardian-glow: #72dfd0; --guardian-flash: rgba(174, 255, 239, .55); --guardian-angle: 4deg; --guardian-cut-size: .32rem; --guardian-particle: rgba(198, 255, 246, .85); }
+.quest-guardian-attack.is-earth { --guardian-main: #d59b50; --guardian-glow: #a8642d; --guardian-flash: rgba(204, 139, 66, .62); --guardian-angle: 72deg; --guardian-cut-size: .25rem; --guardian-particle-radius: 12%; --guardian-particle: #f0bb70; }
+
+@keyframes quest-frost-flash { 0%, 100% { opacity: 0; } 18% { opacity: 1; } }
+@keyframes quest-frost-cut { 0%, 18% { opacity: 0; transform: rotate(-18deg) scaleX(0); } 45%, 68% { opacity: 1; transform: rotate(-18deg) scaleX(1); } 100% { opacity: 0; transform: translateX(-55%) rotate(-18deg) scaleX(1); } }
+@keyframes quest-ice-shard { 0%, 22% { opacity: 0; transform: translate(0, 0) scale(.2); } 45% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--ice-x, -1.8rem), var(--ice-y, -2.3rem)) rotate(110deg) scale(1.2); } }
+@keyframes quest-shadow-pulse { 0%, 100% { opacity: 0; } 24%, 56% { opacity: 1; } }
+@keyframes quest-shadow-cut { 0%, 14% { opacity: 0; transform: rotate(21deg) scaleX(0); } 42%, 68% { opacity: 1; transform: rotate(21deg) scaleX(1); } 100% { opacity: 0; transform: translateX(-65%) rotate(21deg) scaleX(1); } }
+@keyframes quest-shadow-spark { 0%, 25% { opacity: 0; transform: scale(.2); } 45% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--shadow-x, -1.8rem), var(--shadow-y, -1.8rem)) scale(.4); } }
+@keyframes quest-oni-shockwave { 0%, 20% { opacity: 0; transform: scale(.1) rotateX(66deg); } 42% { opacity: 1; } 100% { opacity: 0; transform: scale(3.8) rotateX(66deg); } }
+@keyframes quest-oni-flash { 0%, 18%, 100% { opacity: 0; } 34% { opacity: 1; } }
+@keyframes quest-oni-crack { 0%, 20% { opacity: 0; transform: rotate(12deg) scaleY(0); } 48%, 72% { opacity: 1; transform: rotate(12deg) scaleY(1); } 100% { opacity: 0; transform: rotate(12deg) scaleY(1); } }
+@keyframes quest-guardian-flash { 0%, 100% { opacity: 0; } 22%, 52% { opacity: 1; } }
+@keyframes quest-guardian-cut { 0%, 16% { opacity: 0; transform: rotate(var(--guardian-angle, -14deg)) scaleX(0); } 44%, 68% { opacity: 1; transform: rotate(var(--guardian-angle, -14deg)) scaleX(1); } 100% { opacity: 0; transform: translateX(-58%) rotate(var(--guardian-angle, -14deg)) scaleX(1); } }
+@keyframes quest-guardian-particle { 0%, 24% { opacity: 0; transform: scale(.2); } 48% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--guardian-x), var(--guardian-y)) rotate(140deg) scale(.45); } }
+
+@media (max-width: 720px) {
+  .quest-guardian-card.is-featured-guardian > img {
+    grid-column: 1;
+    grid-row: 1 / 6;
+    width: 5.6rem;
+    height: 5.6rem;
+    margin: 0;
+  }
+
+  .quest-fighter-guardian.has-featured-art .quest-fighter-portrait {
+    bottom: -.1rem;
+    width: 6.8rem;
+    height: 6.8rem;
+  }
+
+  .quest-fighter-guardian.is-oni .quest-fighter-portrait {
+    width: 7.15rem;
+    height: 7.15rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .quest-gate-featured-guardian {
+    right: -3%;
+    width: 54%;
+  }
+
+  .quest-fighter-guardian.has-featured-art .quest-fighter-portrait {
+    width: 6rem;
+    height: 6rem;
+  }
+
+  .quest-fighter-guardian.is-oni .quest-fighter-portrait {
+    width: 6.25rem;
+    height: 6.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quest-gate-featured-guardian,
+  .quest-guardian-attack,
+  .quest-guardian-attack::before,
+  .quest-guardian-attack::after,
+  .quest-guardian-attack i,
+  .quest-guardian-attack span {
+    animation: none;
+  }
+}
+
+/* Simplified quest selection: one current mission, one quiet road. */
+.quest-hub-simple {
+  width: min(100%, 54rem);
+}
+
+.quest-focus {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(15rem, .7fr);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--sakura) 26%, var(--border));
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.quest-focus-copy {
+  min-width: 0;
+  padding: 1.35rem 1.45rem 1.2rem;
+}
+
+.quest-focus-copy > header,
+.quest-picker > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.quest-focus-copy > header > span,
+.quest-picker > header span,
+.quest-next-action small,
+.quest-focus-guardian small {
+  color: var(--sakura-light);
+  font-size: .48rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.quest-focus-copy > header > small,
+.quest-picker > header > small {
+  color: var(--text-muted);
+  font-size: .52rem;
+}
+
+.quest-focus-copy h1 {
+  margin: .45rem 0 .18rem;
+  font-size: 1.55rem;
+}
+
+.quest-focus-copy > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .68rem;
+}
+
+.quest-focus-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem .8rem;
+  margin-top: .75rem;
+  color: var(--text-muted);
+  font-size: .52rem;
+}
+
+.quest-focus-meta span + span::before {
+  content: '·';
+  margin-right: .8rem;
+  color: var(--border-strong);
+}
+
+.quest-next-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: .7rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.quest-next-action > div {
+  display: grid;
+  gap: .08rem;
+}
+
+.quest-next-action b {
+  font-size: .75rem;
+}
+
+.quest-next-action .btn {
+  min-width: 7.2rem;
+}
+
+.quest-step-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: .8rem;
+}
+
+.quest-step-row {
+  display: grid;
+  min-width: 0;
+  gap: .12rem;
+  padding: .35rem .55rem;
+  border: 0;
+  border-left: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+.quest-step-row:first-child {
+  border-left: 0;
+}
+
+.quest-step-row:not(:disabled) {
+  cursor: pointer;
+}
+
+.quest-step-row > span {
+  color: var(--text-muted);
+  font-size: .45rem;
+  font-weight: 800;
+}
+
+.quest-step-row b {
+  overflow: hidden;
+  font-size: .58rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quest-step-row small {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: .43rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quest-step-row.is-next > span,
+.quest-step-row.is-next b,
+.quest-step-row.is-done > span {
+  color: var(--sakura-light);
+}
+
+.quest-step-row:disabled {
+  opacity: .42;
+}
+
+.quest-focus-guardian {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 20rem;
+  overflow: hidden;
+  padding: 1.15rem;
+  border-left: 1px solid var(--border);
+  background: radial-gradient(circle at 50% 62%, color-mix(in srgb, var(--sakura) 18%, transparent), transparent 42%), var(--surface-2);
+}
+
+.quest-focus-guardian-copy,
+.quest-focus-guardian footer {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: .08rem;
+}
+
+.quest-focus-guardian-copy b {
+  font-size: .82rem;
+}
+
+.quest-focus-guardian-copy span {
+  color: var(--text-muted);
+  font-size: .54rem;
+}
+
+.quest-focus-guardian > img {
+  position: absolute;
+  z-index: 1;
+  right: -10%;
+  bottom: -5%;
+  width: 120%;
+  height: 84%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 .45rem .55rem rgba(0, 0, 0, .58));
+}
+
+.quest-focus-guardian > strong {
+  place-self: center;
+  color: var(--sakura-light);
+  font: 700 3rem 'Noto Sans JP', sans-serif;
+}
+
+.quest-focus-guardian footer {
+  align-self: end;
+  margin: 0 -.25rem -.25rem;
+  padding: .55rem .65rem;
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  backdrop-filter: blur(5px);
+}
+
+.quest-focus-guardian footer b {
+  font-size: .62rem;
+}
+
+.quest-picker {
+  margin-top: .75rem;
+  padding: .9rem 1rem 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.quest-picker h2 {
+  margin: .12rem 0 0;
+  font-size: .85rem;
+}
+
+.quest-picker-grid {
+  display: grid;
+  grid-auto-columns: 9.5rem;
+  grid-auto-flow: column;
+  gap: .4rem;
+  margin-top: .7rem;
+  padding-bottom: .3rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scroll-snap-type: inline proximity;
+}
+
+.quest-picker-item {
+  display: grid;
+  grid-template-columns: 1.55rem 1fr;
+  align-items: center;
+  gap: .48rem;
+  min-width: 0;
+  min-height: 3rem;
+  padding: .48rem .55rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  scroll-snap-align: start;
+}
+
+.quest-picker-item:not(:disabled) {
+  cursor: pointer;
+}
+
+.quest-picker-item > span {
+  display: grid;
+  place-items: center;
+  width: 1.55rem;
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: .52rem;
+}
+
+.quest-picker-item > div {
+  display: grid;
+  min-width: 0;
+  gap: .08rem;
+}
+
+.quest-picker-item b {
+  overflow: hidden;
+  font-size: .55rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quest-picker-item small {
+  color: var(--text-muted);
+  font-size: .43rem;
+}
+
+.quest-picker-item.is-current {
+  border-color: color-mix(in srgb, var(--sakura-light) 55%, var(--border));
+  background: color-mix(in srgb, var(--sakura) 10%, var(--surface-2));
+}
+
+.quest-picker-item.is-current > span,
+.quest-picker-item.is-done > span {
+  border-color: color-mix(in srgb, var(--sakura-light) 50%, var(--border));
+  color: var(--sakura-light);
+}
+
+.quest-picker-item:disabled {
+  opacity: .42;
+}
+
+@media (max-width: 720px) {
+  .quest-hub-simple .quest-topbar {
+    margin-bottom: .55rem;
+  }
+
+  .quest-focus {
+    grid-template-columns: 1fr;
+  }
+
+  .quest-focus-copy {
+    padding: 1rem;
+  }
+
+  .quest-focus-copy h1 {
+    font-size: 1.28rem;
+  }
+
+  .quest-focus-meta {
+    gap: .28rem .55rem;
+  }
+
+  .quest-focus-meta span + span::before {
+    margin-right: .55rem;
+  }
+
+  .quest-step-list {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .quest-step-row {
+    grid-template-columns: 1.55rem 1fr auto;
+    align-items: center;
+    min-height: 2.2rem;
+    padding: .3rem .15rem;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+
+  .quest-step-row:first-child {
+    border-top: 0;
+  }
+
+  .quest-step-row small {
+    max-width: 9rem;
+  }
+
+  .quest-focus-guardian {
+    grid-template-columns: 1fr 7.5rem;
+    grid-template-rows: 1fr auto;
+    min-height: 9.2rem;
+    padding: .9rem 1rem;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+
+  .quest-focus-guardian > img {
+    right: -.3rem;
+    bottom: -8%;
+    width: 9rem;
+    height: 10rem;
+  }
+
+  .quest-focus-guardian footer {
+    grid-column: 1;
+    align-self: end;
+    width: fit-content;
+    margin: .5rem 0 0;
+  }
+
+  .quest-picker {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .quest-picker-grid {
+    grid-auto-columns: 8.8rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .quest-hub-simple .quest-topbar > span {
+    font-size: .48rem;
+  }
+
+  .quest-next-action .btn {
+    min-width: 6rem;
+  }
+
+  .quest-step-row small {
+    max-width: 6.5rem;
+  }
+}
+
 /* ── Campaign arcs, relic shelf, and expanded guardian battles ─────────── */
 .quest-arc{margin-top:.85rem;padding:.75rem .85rem;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
 .quest-arc.is-sealed{opacity:.62}
