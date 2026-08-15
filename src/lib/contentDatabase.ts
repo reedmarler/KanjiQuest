@@ -52,6 +52,12 @@ const wordRepairs: Record<string,{ category:string; english:string; preferredTra
   '本人': { category:'People & Living Things', english:'the person himself or herself', preferredTranslation:'the person', tags:['person','individual','human'] },
   'ご飯': { category:'Food & Drink', english:'rice / meal', preferredTranslation:'meal', tags:['rice','meal','staple-food','edible'] },
   '男性': { category:'People & Living Things', english:'man / male person', preferredTranslation:'man', tags:['person','man','male','adult','human'] },
+  // 番組 is what is broadcast, not the set it plays on, so `television` was the
+  // wrong tag: it is one of the tags the generator reads as "a tangible thing",
+  // which is how a broadcast acquired a shape and a colour ("a program is not
+  // round", "a program is blue"). `video` keeps it watchable for 見る without
+  // claiming it is an object you can hold.
+  '番組': { category:'Objects', english:'program; show', preferredTranslation:'program', tags:['media','video','entertainment','n5'] },
 }
 
 /**
