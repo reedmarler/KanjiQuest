@@ -85,18 +85,12 @@ const HERO_SWAP_FOCUS_OPTIONS: ReadonlyArray<{ focus: HeroSwapFocus | null; labe
   { focus: 'adjective', label: 'Adjectives' },
 ]
 
-// Labelled by JLPT level, because that is what this picker now selects: the
-// hero stream draws from patternsForLevel, not from the complexity tiers.
-// The old labels described the complexity axis — L2 "Pairs" meant two
-// interacting verbs — and after the switch L2 was showing single-verb and
-// copula sentences, promising a structure it no longer delivered. Complexity
-// still labels Content Studio and the testing view, which do select on it.
 const COMPLEXITY_DISPLAY: Record<GenerationComplexity, { level: string; name: string; description: string }> = {
-  1: { level: 'N5', name: 'Intro', description: 'Foundation grammar: basic particles, ～ます, adjective predicates.' },
-  2: { level: 'N4', name: 'Elementary', description: 'Everyday grammar: ～たい, ～ている, ～てから, plain past.' },
-  3: { level: 'N3', name: 'Intermediate', description: 'Connected grammar: conditionals, ～ようになる, quotation, comparison.' },
-  4: { level: 'N2', name: 'Upper', description: 'Formal and written grammar: ～わけ, ～ざるを得ない, ～に違いない.' },
-  5: { level: 'N1', name: 'Advanced', description: 'Advanced discourse: ～にほかならない, ～とは限らない, literary connectives.' },
+  1: { level: 'L1', name: 'Intro', description: 'Foundation grammar: basic particles, ～ます, adjective predicates.' },
+  2: { level: 'L2', name: 'Elementary', description: 'Everyday grammar: ～たい, ～ている, ～てから, plain past.' },
+  3: { level: 'L3', name: 'Intermediate', description: 'Connected grammar: conditionals, ～ようになる, quotation, comparison.' },
+  4: { level: 'L4', name: 'Upper', description: 'Formal and written grammar: ～わけ, ～ざるを得ない, ～に違いない.' },
+  5: { level: 'L5', name: 'Advanced', description: 'Advanced discourse: ～にほかならない, ～とは限らない, literary connectives.' },
 }
 
 const STORY_LEVEL_DISPLAY: Array<{ level: JlptLevel; name: string }> = [

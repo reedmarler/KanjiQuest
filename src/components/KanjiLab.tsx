@@ -16,10 +16,12 @@ const levels: JlptLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1']
 const retryDistance = 5
 type KanjiStudyMode = 'paths' | 'levels'
 const KANJI_CHARACTER_RE = /[\u3400-\u4DBF\u4E00-\u9FFF]/u
+const KANJI_DEFINITION_FALLBACKS: Readonly<Record<string, string>> = {
+  '札': 'tag · ticket',
+  '券': 'ticket · coupon',
+}
 
 function ContextWord({ word, character }: { word: string; character: string }) {
-  if (word === character) return <span className="kanji-learning-word-target">{word}</span>
-
   return (
     <>
       {[...word].map((part, partIndex) => (
@@ -27,6 +29,155 @@ function ContextWord({ word, character }: { word: string; character: string }) {
       ))}
     </>
   )
+}
+
+function QuestExampleWord({ word, character, reading }: { word: string; character: string; reading: string }) {
+  const characters = [...word]
+  const anchorIndex = characters.indexOf(character)
+  const characterReadings = questWordCharacterReadings(word, reading)
+
+  const renderCharacters = (start: number, end: number) => characters.slice(start, end).map((part, offset) => {
+    const index = start + offset
+    return (
+      <span className="quest-kanji-example-character" key={`${part}-${index}`}>
+        {characterReadings[index] && <small className="quest-kanji-expanded-reading">{characterReadings[index]}</small>}
+        <span>{part}</span>
+      </span>
+    )
+  })
+
+  if (anchorIndex < 0) return <strong className="kanji-learning-word-target">{character}</strong>
+
+  return (
+    <>
+      <span className="quest-kanji-example-prefix">{renderCharacters(0, anchorIndex)}</span>
+      <span className="quest-kanji-example-anchor">
+        {characterReadings[anchorIndex] && <small className="quest-kanji-expanded-reading">{characterReadings[anchorIndex]}</small>}
+        <strong className="kanji-learning-word-target">{character}</strong>
+      </span>
+      <span className="quest-kanji-example-suffix">{renderCharacters(anchorIndex + 1, characters.length)}</span>
+    </>
+  )
+}
+
+function QuestMainWord({ word, reading }: { word: string; reading: string }) {
+  const characterReadings = questWordCharacterReadings(word, reading)
+
+  return (
+    <>
+      {[...word].map((character, index) => (
+        <span className="quest-kanji-main-character" key={`${character}-${index}`}>
+          {characterReadings[index] && <small>{characterReadings[index]}</small>}
+          <span>{character}</span>
+        </span>
+      ))}
+    </>
+  )
+}
+
+function normalizeKanaReading(reading: string) {
+  return reading
+    .replace(/[\u30A1-\u30F6]/g, (character) => String.fromCodePoint(character.codePointAt(0)! - 0x60))
+    .replace(/[.\-]/g, '')
+}
+
+function voicedReadingVariants(reading: string) {
+  const voicedInitials: Readonly<Record<string, readonly string[]>> = {
+    か: ['が'], き: ['ぎ'], く: ['ぐ'], け: ['げ'], こ: ['ご'],
+    さ: ['ざ'], し: ['じ'], す: ['ず'], せ: ['ぜ'], そ: ['ぞ'],
+    た: ['だ'], ち: ['ぢ'], つ: ['づ'], て: ['で'], と: ['ど'],
+    は: ['ば', 'ぱ'], ひ: ['び', 'ぴ'], ふ: ['ぶ', 'ぷ'], へ: ['べ', 'ぺ'], ほ: ['ぼ', 'ぽ'],
+  }
+  const firstCharacter = reading[0]
+  return [reading, ...(voicedInitials[firstCharacter] ?? []).map((initial) => initial + reading.slice(1))]
+}
+
+function questWordCharacterReadings(word: string, reading: string) {
+  const characters = [...word]
+  const spoken = normalizeKanaReading(reading)
+  const memo = new Map<string, string[] | null>()
+
+  const splitReading = (wordIndex: number, readingIndex: number): string[] | null => {
+    const memoKey = `${wordIndex}:${readingIndex}`
+    if (memo.has(memoKey)) return memo.get(memoKey) ?? null
+    if (wordIndex === characters.length) return readingIndex === spoken.length ? [] : null
+
+    const character = characters[wordIndex]
+    if (!KANJI_CHARACTER_RE.test(character)) {
+      const kana = normalizeKanaReading(character)
+      if (!spoken.startsWith(kana, readingIndex)) return null
+      const tail = splitReading(wordIndex + 1, readingIndex + kana.length)
+      const result = tail ? ['', ...tail] : null
+      memo.set(memoKey, result)
+      return result
+    }
+
+    const dictionaryEntry = kanjiReadings[character]
+    const candidates = [...new Set([...(dictionaryEntry?.on ?? []), ...(dictionaryEntry?.kun ?? [])]
+      .map(normalizeKanaReading)
+      .filter(Boolean))]
+      .sort((left, right) => right.length - left.length)
+
+    for (const candidate of candidates) {
+      for (const variant of voicedReadingVariants(candidate)) {
+        if (!spoken.startsWith(variant, readingIndex)) continue
+        const tail = splitReading(wordIndex + 1, readingIndex + variant.length)
+        if (tail) {
+          const result = [spoken.slice(readingIndex, readingIndex + variant.length), ...tail]
+          memo.set(memoKey, result)
+          return result
+        }
+      }
+    }
+
+    memo.set(memoKey, null)
+    return null
+  }
+
+  const segmented = splitReading(0, 0)
+  if (segmented) return segmented
+
+  const splitFromEnd = (wordIndex: number, readingEnd: number): string[] | null => {
+    if (wordIndex < 0) return readingEnd === 0 ? [] : null
+    const character = characters[wordIndex]
+
+    if (!KANJI_CHARACTER_RE.test(character)) {
+      const kana = normalizeKanaReading(character)
+      if (!spoken.slice(0, readingEnd).endsWith(kana)) return null
+      const head = splitFromEnd(wordIndex - 1, readingEnd - kana.length)
+      return head ? [...head, ''] : null
+    }
+
+    if (wordIndex === 0 && readingEnd > 0) return [spoken.slice(0, readingEnd)]
+
+    const dictionaryEntry = kanjiReadings[character]
+    const candidates = [...new Set([...(dictionaryEntry?.on ?? []), ...(dictionaryEntry?.kun ?? [])]
+      .map(normalizeKanaReading)
+      .filter(Boolean))]
+      .sort((left, right) => right.length - left.length)
+
+    for (const candidate of candidates) {
+      for (const variant of voicedReadingVariants(candidate)) {
+        if (!spoken.slice(0, readingEnd).endsWith(variant)) continue
+        const start = readingEnd - variant.length
+        const head = splitFromEnd(wordIndex - 1, start)
+        if (head) return [...head, spoken.slice(start, readingEnd)]
+      }
+    }
+
+    return null
+  }
+
+  const segmentedFromEnd = splitFromEnd(characters.length - 1, spoken.length)
+  if (segmentedFromEnd) return segmentedFromEnd
+
+  return characters.map((character) => {
+    if (!KANJI_CHARACTER_RE.test(character)) return ''
+    const dictionaryEntry = kanjiReadings[character]
+    return [...(dictionaryEntry?.on ?? []), ...(dictionaryEntry?.kun ?? [])]
+      .map(normalizeKanaReading)
+      .find((candidate) => candidate && spoken.includes(candidate)) ?? ''
+  })
 }
 
 function questKanjiParts(word: string) {
@@ -49,7 +200,13 @@ function questKanjiParts(word: string) {
       })
       .slice(0, characters.length >= 3 ? 1 : 2)
     examples.forEach((example) => usedWords.add(example.example.word))
-    return { character, examples }
+    const definitionSource = kanjiLabEntries.find((candidate) => candidate.character === character && candidate.card.front === character)
+      ?? kanjiLabEntries.find((candidate) => candidate.character === character)
+    const definition = KANJI_DEFINITION_FALLBACKS[character]
+      ?? definitionSource?.card.back.split(';')[0]
+      ?? definitionSource?.example.meaning.split(';')[0]
+      ?? 'definition coming soon'
+    return { character, examples, definition }
   })
 }
 
@@ -236,6 +393,9 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
   }
 
   if (questMode) {
+    const mainWordCharacters = [...card.front]
+    const mainWordCharacterReadings = questWordCharacterReadings(card.front, entry.example.reading)
+
     return (
       <div className="grammar-practice-view kanji-lab kanji-lab-paths quest-kanji-study">
         <div className="study-top grammar-study-top">
@@ -247,31 +407,52 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
         </div>
         <div className="study-progress-bar"><div className="study-progress-fill" style={{ width: ((index + 1) / entries.length) * 100 + '%' }} /></div>
         <section className="kanji-study-navigation kanji-armory-navigation">
-          <div className="kanji-path-heading"><span className="kanji-armory-mark" aria-hidden="true">漢</span><div><span>BUILD THE WORD</span><h2>{quest?.title}</h2><p>See how each character works inside the quest vocabulary.</p></div></div>
+          <div className="kanji-path-heading"><span className="kanji-armory-mark" aria-hidden="true">{quest?.symbol}</span><div><h2>{quest?.title}</h2></div></div>
         </section>
 
         <main className={`grammar-choice-card kanji-learning-card quest-kanji-card${revealed ? ' is-revealed' : ''}`}>
-          <div className="quest-kanji-card-label"><span>{questParts.length > 1 ? `${questParts.length}-KANJI COMPOUND` : 'KANJI IN CONTEXT'}</span><small>Read the parts, then connect the word.</small></div>
-          <p className="quest-kanji-word" lang="ja">{card.front}</p>
+          <p className="quest-kanji-word" lang="ja">
+            <QuestMainWord word={card.front} reading={entry.example.reading} />
+          </p>
           <div className="kanji-learning-divider" aria-hidden="true" />
           <div className={`quest-kanji-word-answer${revealed ? ' is-revealed' : ''}`} aria-hidden={!revealed}>
-            <b lang="ja">{entry.example.reading}</b><span>{entry.example.meaning}</span>
+            <span>{entry.example.meaning}</span>
           </div>
-          <div className={`quest-kanji-parts${questParts.length === 1 ? ' is-single' : ''}${revealed ? ' is-revealed' : ''}`}>
-            {questParts.map((part) => (
-              <article key={part.character} className={part.examples.length ? '' : 'has-no-examples'}>
-                <strong lang="ja">{part.character}</strong>
-                <div className="quest-kanji-part-examples">
-                  {part.examples.map((example) => (
-                    <span key={example.example.word}><small lang="ja">{example.example.reading}</small><b lang="ja"><ContextWord word={example.example.word} character={part.character} /></b><em>{example.example.meaning.split(';')[0]}</em></span>
-                  ))}
-                </div>
-              </article>
-            ))}
+          <div className={`quest-kanji-parts part-count-${questParts.length}${questParts.length === 1 ? ' is-single' : ''}${revealed ? ' is-revealed' : ''}`}>
+            {questParts.map((part) => {
+              const examples = part.examples.length ? part.examples.slice(0, 2) : [undefined]
+              const mainWordIndex = mainWordCharacters.indexOf(part.character)
+              const partReading = mainWordIndex >= 0 ? mainWordCharacterReadings[mainWordIndex] ?? '' : ''
+              const exampleColumns = examples.length === 2
+                ? examples.map((example) => {
+                  const length = example ? [...example.example.word].length : 1
+                  return `minmax(0, ${1 + Math.max(0, length - 2) * 0.22}fr)`
+                }).join(' ')
+                : undefined
+              return (
+                <article key={part.character} className={part.examples.length ? '' : 'has-no-examples'}>
+                  <div className={`quest-kanji-expanded-examples example-count-${examples.length}`} style={exampleColumns ? { gridTemplateColumns: exampleColumns } : undefined}>
+                    {examples.map((example, exampleIndex) => {
+                      const wordLength = example ? [...example.example.word].length : 1
+                      return (
+                        <div className="quest-kanji-expanded-example" key={example?.example.word ?? `${part.character}-${exampleIndex}`}>
+                          <div className={`quest-kanji-expanded-word word-length-${Math.min(wordLength, 5)}`} lang="ja">
+                            {example
+                              ? <QuestExampleWord word={example.example.word} character={part.character} reading={example.example.reading} />
+                              : <><span className="quest-kanji-example-anchor">{partReading && <small className="quest-kanji-expanded-reading">{partReading}</small>}<strong>{part.character}</strong></span><span className="is-definition">{part.definition}</span></>}
+                          </div>
+                          <em className="quest-kanji-expanded-meaning">{example?.example.meaning.split(';')[0] ?? ''}</em>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </article>
+              )
+            })}
           </div>
           <div className="kanji-learning-controls">
-            <div className="kanji-learning-reveal-row"><button type="button" className="btn btn-primary kanji-learning-reveal" onClick={() => setRevealed((value) => !value)}>{revealed ? 'Hide' : 'Reveal parts'}</button></div>
-            <div className="kanji-learning-actions"><button type="button" className="btn btn-ghost" onClick={() => nextCard(false)}>Study again</button><button type="button" className="btn kanji-learning-easy" onClick={() => nextCard(true)}>Got it</button></div>
+            <div className="kanji-learning-reveal-row"><button type="button" className="btn btn-primary kanji-learning-reveal" onClick={() => setRevealed((value) => !value)}>{revealed ? 'Hide examples' : 'Show examples'}</button></div>
+            <div className="kanji-learning-actions"><button type="button" className="btn btn-ghost" onClick={() => nextCard(false)}>Review again</button><button type="button" className="btn kanji-learning-easy" onClick={() => nextCard(true)}>Next word</button></div>
           </div>
         </main>
       </div>

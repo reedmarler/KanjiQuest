@@ -34,7 +34,7 @@ export const vocabVerbCards: StudyCard[] = [
   { id: 'vocab-verb-soujisuru', type: 'vocab', front: '掃除する', reading: 'souji suru', back: 'to clean', jlpt: 'N4' },
   { id: 'vocab-verb-shuurisuru', type: 'vocab', front: '修理する', reading: 'shuuri suru', back: 'to repair', jlpt: 'N3' },
   { id: 'vocab-verb-seirisuru', type: 'vocab', front: '整理する', reading: 'seiri suru', back: 'to organize; to sort out', jlpt: 'N3' },
-  { id: 'vocab-verb-katazuku', type: 'vocab', front: '片づく', reading: 'katazuku', back: 'to be put away; to be tidied up', jlpt: 'N2' },
+  { id: 'vocab-verb-katazuku', type: 'vocab', front: '片づく', reading: 'かたづく', back: 'to be put away; to be tidied up', jlpt: 'N2' },
   { id: 'vocab-verb-kawaku', type: 'vocab', front: '乾く', reading: 'kawaku', back: 'to dry (intransitive)', jlpt: 'N3' },
   { id: 'vocab-verb-kawakasu', type: 'vocab', front: '乾かす', reading: 'kawakasu', back: 'to dry something', jlpt: 'N3' },
   { id: 'vocab-verb-tatamu', type: 'vocab', front: '畳む', reading: 'tatamu', back: 'to fold', jlpt: 'N2' },

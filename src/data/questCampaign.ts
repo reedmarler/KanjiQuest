@@ -54,6 +54,7 @@ export type GuardianPhase = {
 export type QuestDefinition = {
   id: string
   number: number
+  symbol: string
   title: string
   subtitle: string
   level: 'N5' | 'N4' | 'N3'
@@ -562,7 +563,7 @@ const finaleGrammarDrills: readonly DrillExercise[] = [
 
 export const QUESTS: readonly QuestDefinition[] = [
   {
-    id: 'first-morning', number: 1, title: 'My First Morning', subtitle: 'Settle into a new day in Japan.', level: 'N5', arcId: 'inkbound',
+    id: 'first-morning', number: 1, symbol: '朝', title: 'My First Morning', subtitle: 'Settle into a new day in Japan.', level: 'N5', arcId: 'inkbound',
     vocabularySetId: 'home', vocabularyTheme: 'Home & routine', grammar: ['～ます / ～です', 'time words', 'place particles'],
     storyTitle: 'Scene one: A new routine', storyJapanese: '朝、私は家で朝ご飯を食べます。', storyEnglish: 'In the morning, I eat breakfast at home.',
     scene: [
@@ -585,7 +586,7 @@ export const QUESTS: readonly QuestDefinition[] = [
     reward: { name: 'Morning Lantern', mark: '灯', perk: 'dawn-guard', perkTitle: 'Dawn Guard', perkDescription: 'Blocks the first wrong answer in every guardian battle.' },
   },
   {
-    id: 'lunch-together', number: 2, title: 'Lunch Together', subtitle: 'Order food and get to know someone.', level: 'N5', arcId: 'inkbound',
+    id: 'lunch-together', number: 2, symbol: '食', title: 'Lunch Together', subtitle: 'Order food and get to know someone.', level: 'N5', arcId: 'inkbound',
     vocabularySetId: 'food', vocabularyTheme: 'Food & dining', grammar: ['～が好きです', '～をください', 'food words'],
     storyTitle: 'Scene two: At the restaurant', storyJapanese: '友達と一緒に昼ご飯を食べます。', storyEnglish: 'I eat lunch together with a friend.',
     scene: [
@@ -608,7 +609,7 @@ export const QUESTS: readonly QuestDefinition[] = [
     reward: { name: 'Shared Bento', mark: '弁', perk: 'second-wind', perkTitle: 'Second Wind', perkDescription: 'Restores one heart after two correct answers in a row.' },
   },
   {
-    id: 'catch-the-train', number: 3, title: 'Catch the Train', subtitle: 'Find your way through the station.', level: 'N5', arcId: 'inkbound',
+    id: 'catch-the-train', number: 3, symbol: '電車', title: 'Catch the Train', subtitle: 'Find your way through the station.', level: 'N5', arcId: 'inkbound',
     vocabularySetId: 'travel', vocabularyTheme: 'Travel & transport', grammar: ['～へ行きます', '～ています', 'location particles'],
     storyTitle: 'Scene three: On the platform', storyJapanese: '駅で電車を待っています。', storyEnglish: 'I am waiting for the train at the station.',
     scene: [
@@ -632,7 +633,7 @@ export const QUESTS: readonly QuestDefinition[] = [
     reward: { name: 'Traveler’s Bell', mark: '鈴', perk: 'clear-path', perkTitle: 'Clear Path', perkDescription: 'Removes one wrong choice from the first question of each battle.' },
   },
   {
-    id: 'lost-wallet', number: 4, title: 'The Lost Wallet', subtitle: 'Ask for help and solve a small problem.', level: 'N5', arcId: 'inkbound',
+    id: 'lost-wallet', number: 4, symbol: '財布', title: 'The Lost Wallet', subtitle: 'Ask for help and solve a small problem.', level: 'N5', arcId: 'inkbound',
     vocabularySetId: 'shopping', vocabularyTheme: 'Shopping & money', grammar: ['あります / ありません', 'questions', 'past tense'],
     storyTitle: 'Scene four: Looking under the bench', storyJapanese: '財布がありません。ベンチの下を探します。', storyEnglish: 'My wallet is missing. I look under the bench.',
     scene: [
@@ -655,7 +656,7 @@ export const QUESTS: readonly QuestDefinition[] = [
     reward: { name: 'Truth Coin', mark: '真', perk: 'true-sight', perkTitle: 'True Sight', perkDescription: 'Shows the grammar meaning hint on every battle question.' },
   },
   {
-    id: 'first-school-day', number: 5, title: 'First Day at School', subtitle: 'Meet your class and make a friend.', level: 'N5', arcId: 'inkbound',
+    id: 'first-school-day', number: 5, symbol: '学校', title: 'First Day at School', subtitle: 'Meet your class and make a friend.', level: 'N5', arcId: 'inkbound',
     vocabularySetId: 'school', vocabularyTheme: 'School & study', grammar: ['～て', 'introductions', 'together actions'],
     storyTitle: 'Scene five: A new friend', storyJapanese: '隣の学生が話しかけます。', storyEnglish: 'The student next to me speaks to me.',
     scene: [
@@ -679,7 +680,7 @@ export const QUESTS: readonly QuestDefinition[] = [
     reward: { name: 'Tengu Feather', mark: '羽', perk: 'perfect-edge', perkTitle: 'Perfect Edge', perkDescription: 'Three correct answers in a row deal one extra strike.' },
   },
   {
-    id: 'rainy-day', number: 6, title: 'A Rainy Day', subtitle: 'Make a plan when the weather changes.', level: 'N4', arcId: 'inkbound',
+    id: 'rainy-day', number: 6, symbol: '雨', title: 'A Rainy Day', subtitle: 'Make a plan when the weather changes.', level: 'N4', arcId: 'inkbound',
     vocabularySetId: 'nature', vocabularyTheme: 'Nature & weather', grammar: ['～から', '～たら', 'reasons'],
     storyTitle: 'Scene six: Changing plans', storyJapanese: '雨が降っているから、家にいます。', storyEnglish: 'Because it is raining, I stay home.',
     scene: [
@@ -703,7 +704,7 @@ export const QUESTS: readonly QuestDefinition[] = [
     reward: { name: 'Storm Charm', mark: '護', perk: 'change-fate', perkTitle: 'Change Fate', perkDescription: 'Once per battle, swap a question you do not want.' },
   },
   {
-    id: 'night-shift', number: 7, title: 'The Night Shift', subtitle: 'Stay late and finish what the office left behind.', level: 'N4', arcId: 'hollow-lantern',
+    id: 'night-shift', number: 7, symbol: '夜', title: 'The Night Shift', subtitle: 'Stay late and finish what the office left behind.', level: 'N4', arcId: 'hollow-lantern',
     vocabularySetId: 'work', vocabularyTheme: 'Work & office', grammar: ['～なければならない', '～ても', '～た時'],
     storyTitle: 'Scene seven: The last light on the floor', storyJapanese: '今夜は残業をしなければなりません。', storyEnglish: 'I have to work overtime tonight.',
     scene: [
@@ -727,7 +728,7 @@ export const QUESTS: readonly QuestDefinition[] = [
     reward: { name: 'Overtime Seal', mark: '残', perk: 'iron-will', perkTitle: 'Iron Will', perkDescription: 'Start every guardian battle with one extra heart.' },
   },
   {
-    id: 'hospital-visit', number: 8, title: 'The Hospital Visit', subtitle: 'Explain what hurts and listen to advice.', level: 'N4', arcId: 'hollow-lantern',
+    id: 'hospital-visit', number: 8, symbol: '病院', title: 'The Hospital Visit', subtitle: 'Explain what hurts and listen to advice.', level: 'N4', arcId: 'hollow-lantern',
     vocabularySetId: 'health', vocabularyTheme: 'Health & body', grammar: ['～ので', '～た方がいい', '～ば'],
     storyTitle: 'Scene eight: The fever ward', storyJapanese: '熱があるので、病院へ行きます。', storyEnglish: 'Because I have a fever, I am going to the hospital.',
     scene: [
@@ -755,7 +756,7 @@ export const QUESTS: readonly QuestDefinition[] = [
     reward: { name: 'Bone Charm', mark: '薬', perk: 'twin-strike', perkTitle: 'Twin Strike', perkDescription: 'Every third correct answer lands a double strike.' },
   },
   {
-    id: 'festival-mask', number: 9, title: 'The Festival Mask', subtitle: 'Follow the drums to the river and buy a face.', level: 'N4', arcId: 'hollow-lantern',
+    id: 'festival-mask', number: 9, symbol: '祭', title: 'The Festival Mask', subtitle: 'Follow the drums to the river and buy a face.', level: 'N4', arcId: 'hollow-lantern',
     vocabularySetId: 'holidays', vocabularyTheme: 'Holidays & celebrations', grammar: ['～ために', '～ながら', '～ても'],
     storyTitle: 'Scene nine: Under the fireworks', storyJapanese: '夏祭りで狐の面を買いました。', storyEnglish: 'I bought a fox mask at the summer festival.',
     scene: [
@@ -783,7 +784,7 @@ export const QUESTS: readonly QuestDefinition[] = [
     reward: { name: 'Fox Mask', mark: '面', perk: 'kitsune-luck', perkTitle: 'Fox Luck', perkDescription: 'A wrong answer sometimes costs nothing at all.' },
   },
   {
-    id: 'empty-apartment', number: 10, title: 'The Empty Apartment', subtitle: 'Ask the neighbours what they have been hearing.', level: 'N4', arcId: 'hollow-lantern',
+    id: 'empty-apartment', number: 10, symbol: '空室', title: 'The Empty Apartment', subtitle: 'Ask the neighbours what they have been hearing.', level: 'N4', arcId: 'hollow-lantern',
     vocabularySetId: 'city', vocabularyTheme: 'City & community', grammar: ['～そうです', '～らしい', '～てみる'],
     storyTitle: 'Scene ten: Room 402', storyJapanese: '隣の部屋には誰も住んでいないそうです。', storyEnglish: 'I hear that nobody lives in the room next door.',
     scene: [
@@ -811,7 +812,7 @@ export const QUESTS: readonly QuestDefinition[] = [
     reward: { name: 'Echo Ward', mark: '響', perk: 'ward-echo', perkTitle: 'Echo Ward', perkDescription: 'The first missed question comes back for a second attempt.' },
   },
   {
-    id: 'mountain-path', number: 11, title: 'The Mountain Path', subtitle: 'Climb into the fog and do not look back.', level: 'N4', arcId: 'hollow-lantern',
+    id: 'mountain-path', number: 11, symbol: '山', title: 'The Mountain Path', subtitle: 'Climb into the fog and do not look back.', level: 'N4', arcId: 'hollow-lantern',
     vocabularySetId: 'directions', vocabularyTheme: 'Directions & locations', grammar: ['～ば～ほど', '～てはいけない', '～ずに'],
     storyTitle: 'Scene eleven: Above the fog line', storyJapanese: '山道を登れば登るほど、霧が濃くなります。', storyEnglish: 'The more I climb the mountain path, the thicker the fog becomes.',
     scene: [
@@ -839,7 +840,7 @@ export const QUESTS: readonly QuestDefinition[] = [
     reward: { name: 'Stone Stance', mark: '岩', perk: 'mountain-stance', perkTitle: 'Mountain Stance', perkDescription: 'Guardian counters below full strength cannot take your last heart.' },
   },
   {
-    id: 'hollow-lantern', number: 12, title: 'The Hollow Lantern', subtitle: 'Face the one who has been collecting the words.', level: 'N3', arcId: 'hollow-lantern',
+    id: 'hollow-lantern', number: 12, symbol: '灯', title: 'The Hollow Lantern', subtitle: 'Face the one who has been collecting the words.', level: 'N3', arcId: 'hollow-lantern',
     vocabularySetId: 'communication', vocabularyTheme: 'Communication & conversation', grammar: ['～わけにはいかない', '～しかない', '～かける'],
     storyTitle: 'Scene twelve: The last light', storyJapanese: '提灯の火が消えかけています。', storyEnglish: 'The lantern flame is about to go out.',
     scene: [

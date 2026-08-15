@@ -9337,6 +9337,35 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   isolation: isolate;
 }
 
+/* Quest identity is a compact label, not a second card competing with the
+   word being studied. Two-character marks use a short, wide badge. */
+.quest-kanji-study .kanji-armory-navigation {
+  margin-bottom: .18rem;
+  padding: .22rem 0 .42rem;
+  border: 0;
+  background: transparent;
+}
+
+.quest-kanji-study .kanji-armory-navigation .kanji-path-heading {
+  grid-template-columns: 3.35rem minmax(0, 1fr);
+  gap: .62rem;
+}
+
+.quest-kanji-study .kanji-armory-mark {
+  width: 3.35rem;
+  height: 2.15rem;
+  aspect-ratio: auto;
+  font-size: 1.08rem !important;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.quest-kanji-study .kanji-path-heading h2 {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.1;
+}
+
 .quest-campaign-hero > img {
   position: absolute;
   z-index: -2;
@@ -9462,6 +9491,69 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gold) 8%, transparent);
 }
 
+/* The generic heading span rule is more specific than the mark class. Keep
+   this square as a grid so the glyph is centered on both axes. */
+.kanji-armory-navigation .kanji-path-heading > .kanji-armory-mark {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  line-height: 1 !important;
+  text-align: center;
+}
+
+/* Hidden example availability must not change the placement of an unrevealed
+   kanji part. Every part begins centered, then adopts the detail layout only
+   after the learner reveals its examples. */
+.quest-kanji-parts:not(.is-revealed) > article,
+.quest-kanji-parts:not(.is-revealed) > article.has-no-examples {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1fr;
+  place-items: center;
+  text-align: center;
+}
+
+.quest-kanji-parts:not(.is-revealed) > article > strong,
+.quest-kanji-parts:not(.is-revealed) > article.has-no-examples > strong {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  justify-self: center;
+  width: 100%;
+  text-align: center;
+}
+
+.quest-kanji-parts:not(.is-revealed) .quest-kanji-part-examples {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.quest-kanji-part-examples .quest-kanji-example-word {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: baseline;
+  justify-items: stretch;
+  width: 100%;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.quest-kanji-example-word .quest-kanji-word-prefix {
+  justify-self: end;
+  text-align: right;
+}
+
+.quest-kanji-example-word .kanji-learning-word-target {
+  justify-self: center;
+}
+
+.quest-kanji-example-word .quest-kanji-word-suffix {
+  justify-self: start;
+  text-align: left;
+}
+
 .kanji-armory-navigation .kanji-study-mode-tabs {
   margin-bottom: .48rem;
 }
@@ -9578,6 +9670,89 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .kanji-armory-navigation .kanji-path-heading > button {
     grid-column: 1 / -1;
     width: 100%;
+  }
+}
+
+.quest-kanji-expanded-word > .quest-kanji-furigana-word {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  white-space: nowrap;
+  opacity: 1;
+  visibility: visible;
+}
+
+.quest-kanji-furigana-word ruby {
+  ruby-position: over;
+  ruby-align: center;
+}
+
+.quest-kanji-furigana-word rt {
+  color: var(--kyogre-light);
+  font: 600 .65rem/1 'Noto Sans JP', sans-serif;
+  letter-spacing: 0;
+  transition: opacity 160ms ease;
+}
+
+.quest-kanji-parts:not(.is-revealed) .quest-kanji-furigana-word rt {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.quest-kanji-expanded-meaning {
+  font-size: .56rem;
+}
+
+.quest-kanji-expanded-word > span.is-definition {
+  font-size: .68rem;
+}
+
+/* Center the completed example, not the highlighted character. Longer suffixes
+   therefore pull their anchor toward the divider instead of overflowing. */
+.quest-kanji-expanded-word,
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding-inline: .15rem;
+}
+
+.quest-kanji-expanded-word > strong {
+  flex: 0 0 auto;
+}
+
+.quest-kanji-expanded-word > span {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.quest-kanji-expanded-word.word-length-4 {
+  font-size: clamp(1.45rem, 5vw, 1.9rem);
+}
+
+.quest-kanji-expanded-word.word-length-5 {
+  font-size: clamp(1.3rem, 4.5vw, 1.7rem);
+}
+
+.quest-kanji-expanded-word > span.is-definition {
+  max-width: 7rem;
+  margin-left: .48rem;
+  overflow: hidden;
+  color: var(--text-muted);
+  font: 600 .62rem/1.15 'Outfit', sans-serif;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 430px) {
+  .quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-4 {
+    font-size: clamp(1.35rem, 6vw, 1.7rem);
+  }
+
+  .quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-5 {
+    font-size: clamp(1.2rem, 5.4vw, 1.5rem);
   }
 }
 
@@ -10312,6 +10487,184 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 }
 
+/* Quest kanji tiles never change horizontal alignment when details appear.
+   The large part stays centered, and each example gets the full tile width so
+   its highlighted kanji can remain on that same center axis. */
+.quest-kanji-parts.is-revealed > article,
+.quest-kanji-parts.is-revealed > article.has-no-examples {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  place-items: center;
+  text-align: center;
+}
+
+.quest-kanji-parts.is-revealed > article > strong,
+.quest-kanji-parts.is-revealed > article.has-no-examples > strong {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  justify-self: center;
+  width: 100%;
+  text-align: center;
+}
+
+.quest-kanji-parts.is-revealed > article.has-no-examples {
+  grid-template-rows: 1fr;
+}
+
+.quest-kanji-parts.is-revealed > article.has-no-examples .quest-kanji-part-examples {
+  display: none;
+}
+
+.quest-kanji-parts.is-revealed .quest-kanji-part-examples {
+  grid-column: 1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-content: stretch;
+  gap: .28rem;
+  width: 100%;
+}
+
+.quest-kanji-parts.is-revealed .quest-kanji-part-examples > span {
+  width: 100%;
+  justify-items: stretch;
+}
+
+.quest-kanji-parts.is-revealed .quest-kanji-part-examples small,
+.quest-kanji-parts.is-revealed .quest-kanji-part-examples em {
+  justify-self: center;
+  text-align: center;
+}
+
+/* Fixed-height build-the-word frame. The target kanji owns the middle column
+   permanently; reveal only fades in its prefix, suffix, reading, and meaning. */
+.quest-kanji-parts > article,
+.quest-kanji-parts:not(.is-revealed) > article,
+.quest-kanji-parts.is-revealed > article,
+.quest-kanji-parts > article.has-no-examples {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1rem 3.65rem 1rem;
+  place-items: center;
+  min-height: 6.65rem;
+  padding: .48rem .65rem;
+  text-align: center;
+}
+
+.quest-kanji-expanded-reading,
+.quest-kanji-expanded-meaning {
+  width: 100%;
+  overflow: hidden;
+  color: var(--kyogre-light);
+  font: 500 .57rem/1 'Noto Sans JP', sans-serif;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 160ms ease;
+}
+
+.quest-kanji-expanded-meaning {
+  color: var(--text-muted);
+  font: 400 .48rem/1 'Outfit', sans-serif;
+  font-style: normal;
+}
+
+.quest-kanji-expanded-word {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  color: var(--sakura-light);
+  font: 700 2.65rem/1 'Noto Sans JP', sans-serif;
+  letter-spacing: 0;
+}
+
+.quest-kanji-expanded-word > strong {
+  grid-column: 2;
+  justify-self: center;
+  font: inherit;
+}
+
+.quest-kanji-expanded-word > span {
+  min-width: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 160ms ease;
+  white-space: nowrap;
+}
+
+.quest-kanji-expanded-word > span:first-child {
+  justify-self: end;
+  text-align: right;
+}
+
+.quest-kanji-expanded-word > span:last-child {
+  justify-self: start;
+  text-align: left;
+}
+
+.quest-kanji-parts.is-revealed .quest-kanji-expanded-reading,
+.quest-kanji-parts.is-revealed .quest-kanji-expanded-meaning,
+.quest-kanji-parts.is-revealed .quest-kanji-expanded-word > span {
+  opacity: 1;
+  visibility: visible;
+}
+
+.quest-kanji-parts > article.has-no-examples .quest-kanji-expanded-word > strong {
+  grid-column: 2;
+}
+
+@media (max-width: 430px) {
+  .quest-kanji-expanded-word {
+    font-size: 2.55rem;
+  }
+}
+
+.quest-kanji-expanded-examples {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+}
+
+.quest-kanji-expanded-examples.example-count-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.quest-kanji-expanded-example {
+  display: grid;
+  grid-template-rows: 1rem 3.65rem 1rem;
+  place-items: center;
+  min-width: 0;
+  padding: 0 .35rem;
+}
+
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-example + .quest-kanji-expanded-example {
+  border-left: 1px solid var(--border);
+}
+
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word {
+  font-size: clamp(1.75rem, 5vw, 2.3rem);
+}
+
+@media (max-width: 430px) {
+  .quest-kanji-expanded-example {
+    padding-inline: .18rem;
+  }
+
+  .quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word {
+    font-size: clamp(1.55rem, 7.2vw, 2.05rem);
+  }
+}
+
 /* ── Campaign arcs, relic shelf, and expanded guardian battles ─────────── */
 .quest-arc{margin-top:.85rem;padding:.75rem .85rem;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
 .quest-arc.is-sealed{opacity:.62}
@@ -10680,4 +11033,547 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   font-size: 0.64rem;
   letter-spacing: 0.02em;
   white-space: nowrap;
+}
+
+/* Keep the revealed reading centered directly under the quest kanji word. */
+.quest-kanji-word-answer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-items: center;
+  gap: .18rem;
+  width: 100%;
+  min-height: 1.85rem;
+  text-align: center;
+}
+
+.quest-kanji-word-answer b,
+.quest-kanji-word-answer span {
+  max-width: min(100%, 24rem);
+  text-align: center;
+}
+
+.quest-kanji-word-answer b {
+  justify-self: center;
+  font-size: 1.08rem;
+  line-height: 1;
+}
+
+.quest-kanji-word-answer span {
+  justify-self: center;
+  line-height: 1.25;
+}
+
+/* Furigana example words are generated as spans; force them to occupy the
+   whole example tile so single-example rows do not drift left. */
+.quest-kanji-expanded-word > .quest-kanji-furigana-word {
+  grid-column: 1 / -1;
+  justify-self: center;
+  align-self: center;
+  max-width: 100%;
+  text-align: center;
+}
+
+.quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  text-align: center;
+}
+
+.quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-meaning {
+  justify-self: center;
+  text-align: center;
+}
+
+.quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-example {
+  justify-items: center !important;
+  text-align: center !important;
+}
+
+.quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+
+.quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word > .quest-kanji-furigana-word,
+.quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word > .quest-kanji-furigana-word:first-child,
+.quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word > .quest-kanji-furigana-word:last-child {
+  display: inline-flex !important;
+  flex: 0 1 auto !important;
+  justify-content: center !important;
+  justify-self: center !important;
+  text-align: center !important;
+}
+
+.quest-kanji-parts > article.has-no-examples .quest-kanji-expanded-word {
+  display: inline-flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: auto !important;
+  min-width: 0 !important;
+  margin-inline: auto !important;
+  gap: .55rem !important;
+}
+
+.quest-kanji-parts > article.has-no-examples .quest-kanji-expanded-word > strong {
+  flex: 0 0 auto !important;
+  grid-column: auto !important;
+}
+
+.quest-kanji-parts > article.has-no-examples .quest-kanji-expanded-word > span.is-definition,
+.quest-kanji-parts > article.has-no-examples .quest-kanji-expanded-word > span.is-definition:first-child,
+.quest-kanji-parts > article.has-no-examples .quest-kanji-expanded-word > span.is-definition:last-child {
+  flex: 0 1 auto !important;
+  justify-self: auto !important;
+  margin-left: 0 !important;
+  text-align: left !important;
+}
+
+/* Keep each example's studied kanji on the tile's center axis. The surrounding
+   characters occupy equal columns and fade in without moving the anchor. */
+.quest-kanji-parts > article:not(.has-no-examples) .quest-kanji-expanded-word,
+.quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word {
+  display: grid !important;
+  grid-template-columns: auto auto auto !important;
+  align-items: baseline !important;
+  justify-content: center !important;
+  width: 100% !important;
+  gap: 0 !important;
+  color: var(--text) !important;
+  text-align: center !important;
+}
+
+.quest-kanji-expanded-word > .quest-kanji-example-prefix {
+  grid-column: 1;
+  justify-self: end !important;
+  color: var(--text);
+  text-align: right !important;
+}
+
+.quest-kanji-expanded-word > strong.kanji-learning-word-target {
+  grid-column: 2;
+  justify-self: center;
+  color: var(--sakura-light) !important;
+  text-decoration: none;
+}
+
+.quest-kanji-expanded-word > .quest-kanji-example-suffix {
+  grid-column: 3;
+  justify-self: start !important;
+  color: var(--text);
+  text-align: left !important;
+}
+
+/* Hidden prefixes and suffixes still reserve their width, so the complete word
+   stays centered and the highlighted kanji does not jump when details appear. */
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-3 {
+  font-size: clamp(1.65rem, 6.4vw, 2.05rem);
+}
+
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-4 {
+  font-size: clamp(1.45rem, 5.6vw, 1.8rem);
+}
+
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-5 {
+  font-size: clamp(1.2rem, 4.8vw, 1.55rem);
+}
+
+@media (max-width: 430px) {
+  .quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-example {
+    padding-inline: .08rem;
+  }
+
+  .quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-4 {
+    font-size: clamp(1.35rem, 5.5vw, 1.55rem);
+  }
+
+  .quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-5 {
+    font-size: clamp(1.08rem, 4.6vw, 1.3rem);
+  }
+}
+
+/* Final Quest Kanji sizing. Keep main-word kanji pink and make all supporting
+   text readable without changing the fixed study-card rows. */
+.quest-kanji-parts > article.has-no-examples .quest-kanji-expanded-word > strong {
+  color: var(--sakura-light) !important;
+}
+
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-2 {
+  font-size: clamp(2.25rem, 8.8vw, 2.65rem);
+}
+
+.quest-kanji-expanded-reading {
+  font-size: .78rem;
+}
+
+.quest-kanji-expanded-meaning {
+  font-size: .62rem;
+}
+
+@media (max-width: 430px) {
+  .quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-3 {
+    font-size: clamp(1.95rem, 8vw, 2.2rem);
+  }
+
+  .quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-4 {
+    font-size: 2.65rem !important;
+    transform: scaleX(.88);
+    transform-origin: center;
+  }
+
+  .quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-5 {
+    font-size: clamp(1.42rem, 5.85vw, 1.65rem);
+  }
+}
+
+/* Every two-up example uses one character height. Longer words may narrow
+   horizontally to fit, but never render shorter than the word beside them. */
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word,
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word > strong,
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word > span {
+  font-size: 2.65rem !important;
+  line-height: 1 !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-2 {
+  transform: none;
+}
+
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-3 {
+  transform: scaleX(.94);
+  transform-origin: center;
+}
+
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-4 {
+  transform: scaleX(.82);
+  transform-origin: center;
+}
+
+.quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-5 {
+  transform: scaleX(.68);
+  transform-origin: center;
+}
+
+/* Readings belong to the highlighted character, not the center of the word. */
+.quest-kanji-expanded-example > .quest-kanji-expanded-word {
+  grid-row: 2;
+}
+
+.quest-kanji-expanded-example > .quest-kanji-expanded-meaning {
+  grid-row: 3;
+}
+
+.quest-kanji-expanded-word > .quest-kanji-example-anchor {
+  position: relative;
+  display: grid !important;
+  grid-column: 2;
+  place-items: center;
+  min-width: 0;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.quest-kanji-example-anchor > strong {
+  color: var(--sakura-light) !important;
+  font: inherit;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+.quest-kanji-example-anchor > .quest-kanji-expanded-reading {
+  position: absolute;
+  bottom: calc(100% + .18rem);
+  left: 50%;
+  width: max-content;
+  max-width: 7rem;
+  font-size: .78rem !important;
+  line-height: 1 !important;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.quest-kanji-example-prefix,
+.quest-kanji-example-suffix {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.quest-kanji-example-character {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1em;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+.quest-kanji-example-character > span {
+  color: var(--text);
+  font: inherit;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+.quest-kanji-example-character > .quest-kanji-expanded-reading {
+  position: absolute;
+  bottom: calc(100% + .18rem);
+  left: 50%;
+  width: max-content;
+  max-width: 4rem;
+  font-size: .78rem !important;
+  line-height: 1 !important;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.quest-kanji-parts.is-revealed .quest-kanji-example-anchor > .quest-kanji-expanded-reading {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* A single example owns the full tile, so four-character words can stay large. */
+.quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4,
+.quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4 > span,
+.quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4 .quest-kanji-example-anchor > strong {
+  font-size: 2.35rem !important;
+  line-height: 1 !important;
+}
+
+/* Main compound reading above, English meaning below. */
+.quest-kanji-main-reading {
+  display: grid;
+  min-height: 1.15rem;
+  place-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 180ms ease;
+}
+
+.quest-kanji-main-reading.is-revealed {
+  opacity: 1;
+  visibility: visible;
+}
+
+.quest-kanji-main-reading b {
+  color: var(--kyogre-light);
+  font: 600 1.08rem/1 'Noto Sans JP', sans-serif;
+}
+
+.quest-kanji-main-reading + .quest-kanji-word {
+  margin-top: .08rem;
+}
+
+.quest-kanji-word-answer {
+  min-height: 1rem;
+  margin-bottom: .18rem;
+}
+
+/* The main compound uses the same character-matched reading layout as its
+   examples, with space reserved above it before reveal. */
+.quest-kanji-word {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0;
+  margin-top: -.13rem;
+  padding-top: 1.08rem;
+}
+
+.quest-kanji-main-character {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1em;
+  font: inherit;
+}
+
+.quest-kanji-main-character > span {
+  font: inherit;
+}
+
+.quest-kanji-main-character > small {
+  position: absolute;
+  bottom: calc(100% + .08rem);
+  left: 50%;
+  width: max-content;
+  max-width: 4.5rem;
+  color: var(--kyogre-light);
+  font: 600 .82rem/1 'Noto Sans JP', sans-serif;
+  text-align: center;
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 180ms ease;
+}
+
+.quest-kanji-card.is-revealed .quest-kanji-main-character > small {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Four-kanji compounds stay fully visible on phones as a 2-by-2 study grid. */
+@media (max-width: 720px) {
+  .quest-kanji-parts.part-count-1,
+  .quest-kanji-parts.part-count-2,
+  .quest-kanji-parts.part-count-3,
+  .quest-kanji-parts.part-count-4 {
+    overflow: hidden;
+  }
+
+  .quest-kanji-parts.part-count-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    align-content: stretch;
+  }
+
+  .quest-kanji-parts.part-count-3 > article,
+  .quest-kanji-parts.part-count-3 > article.has-no-examples {
+    min-height: 0;
+    padding: .36rem .22rem;
+  }
+
+  .quest-kanji-parts.part-count-3 > article:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .quest-kanji-parts.part-count-3 .quest-kanji-expanded-example {
+    min-height: 0;
+    padding-inline: .08rem;
+  }
+
+  .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word,
+  .quest-kanji-parts.part-count-3 .quest-kanji-example-anchor > strong {
+    font-size: 2.65rem !important;
+    line-height: 1 !important;
+    transform: none;
+  }
+
+  .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word.word-length-3,
+  .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word.word-length-3 .quest-kanji-example-anchor > strong {
+    font-size: 2.25rem !important;
+  }
+
+  .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word.word-length-4,
+  .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word.word-length-4 .quest-kanji-example-anchor > strong {
+    font-size: 1.9rem !important;
+  }
+
+  .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word.word-length-5,
+  .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word.word-length-5 .quest-kanji-example-anchor > strong {
+    font-size: 1.62rem !important;
+  }
+
+  .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word > span.is-definition {
+    font-size: .68rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .quest-kanji-parts.part-count-3 .quest-kanji-expanded-reading,
+  .quest-kanji-parts.part-count-3 .quest-kanji-example-anchor > .quest-kanji-expanded-reading,
+  .quest-kanji-parts.part-count-3 .quest-kanji-example-character > .quest-kanji-expanded-reading {
+    font-size: .64rem !important;
+  }
+
+  .quest-kanji-parts.part-count-3 .quest-kanji-expanded-meaning {
+    max-width: 100%;
+    font-size: .52rem;
+    overflow: visible;
+  }
+
+  .quest-kanji-parts.part-count-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    align-content: stretch;
+    overflow: hidden;
+  }
+
+  .quest-kanji-parts.part-count-4 > article,
+  .quest-kanji-parts.part-count-4 > article.has-no-examples {
+    min-height: 0;
+    padding: .36rem .22rem;
+  }
+
+  .quest-kanji-parts.part-count-4 .quest-kanji-expanded-example {
+    min-height: 0;
+    padding-inline: .08rem;
+  }
+
+  .quest-kanji-parts.part-count-4 .quest-kanji-expanded-word,
+  .quest-kanji-parts.part-count-4 .quest-kanji-example-anchor > strong {
+    font-size: 2.65rem !important;
+    line-height: 1 !important;
+    transform: none;
+  }
+
+  .quest-kanji-parts.part-count-4 .quest-kanji-expanded-word.word-length-3,
+  .quest-kanji-parts.part-count-4 .quest-kanji-expanded-word.word-length-3 .quest-kanji-example-anchor > strong {
+    font-size: 2.25rem !important;
+  }
+
+  .quest-kanji-parts.part-count-4 .quest-kanji-expanded-word.word-length-4,
+  .quest-kanji-parts.part-count-4 .quest-kanji-expanded-word.word-length-4 .quest-kanji-example-anchor > strong {
+    font-size: 1.9rem !important;
+  }
+
+  .quest-kanji-parts.part-count-4 .quest-kanji-expanded-word.word-length-5,
+  .quest-kanji-parts.part-count-4 .quest-kanji-expanded-word.word-length-5 .quest-kanji-example-anchor > strong {
+    font-size: 1.62rem !important;
+  }
+
+  .quest-kanji-parts.part-count-4 .quest-kanji-expanded-word > span.is-definition {
+    font-size: .68rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .quest-kanji-parts.part-count-4 .quest-kanji-expanded-reading,
+  .quest-kanji-parts.part-count-4 .quest-kanji-example-anchor > .quest-kanji-expanded-reading,
+  .quest-kanji-parts.part-count-4 .quest-kanji-example-character > .quest-kanji-expanded-reading {
+    font-size: .62rem !important;
+  }
+
+  .quest-kanji-parts.part-count-4 .quest-kanji-expanded-meaning {
+    max-width: 100%;
+    font-size: .5rem;
+  }
+
+  /* Two-part compounds use two stacked rows. Trim only their frame spacing so
+     the bottom English meaning remains fully above the reveal button. */
+  .quest-kanji-parts.part-count-2 {
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    align-content: stretch;
+    gap: .4rem;
+    overflow: hidden;
+  }
+
+  .quest-kanji-parts.part-count-2 > article,
+  .quest-kanji-parts.part-count-2 > article.has-no-examples {
+    grid-template-rows: .9rem 3.45rem .9rem;
+    min-height: 0;
+    padding-block: .32rem;
+  }
+
+  .quest-kanji-parts.part-count-2 .quest-kanji-expanded-example {
+    grid-template-rows: .9rem 3.45rem .9rem;
+    min-height: 0;
+  }
+
+  .quest-kanji-parts.part-count-2 .quest-kanji-expanded-meaning {
+    align-self: center;
+    line-height: 1.15;
+    overflow: visible;
+  }
+
+  /* Longer two-up words receive a wider grid column in markup, so their
+     glyphs can keep their natural proportions at the shared character size. */
+  .quest-kanji-parts.part-count-2 .quest-kanji-expanded-word.word-length-3,
+  .quest-kanji-parts.part-count-2 .quest-kanji-expanded-word.word-length-4,
+  .quest-kanji-parts.part-count-2 .quest-kanji-expanded-word.word-length-5 {
+    transform: none;
+  }
 }
