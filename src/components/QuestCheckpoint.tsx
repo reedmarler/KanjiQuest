@@ -7,6 +7,7 @@ import { GuardianSprite, hasGuardianSprite } from './GuardianSprite'
 interface QuestCheckpointProps {
   questId?: string
   onBack: () => void
+  onDashboard?: () => void
   onComplete: () => void
   loadout: RelicLoadout
   onBattleResult: (result: { won: boolean; perfect: boolean }) => void
@@ -17,7 +18,7 @@ type BattlePhase = 'intro' | 'question' | 'feedback' | 'phase-break' | 'victory'
 type StrikeTier = 'strike' | 'critical' | 'ultimate'
 const BASE_HEALTH = 3
 
-export function QuestCheckpoint({ questId, onBack, onComplete, loadout, onBattleResult }: QuestCheckpointProps) {
+export function QuestCheckpoint({ questId, onBack, onDashboard, onComplete, loadout, onBattleResult }: QuestCheckpointProps) {
   const quest = getQuestById(questId)
   const maxPlayerHealth = BASE_HEALTH + (loadout.ironWill ? 1 : 0)
   const guardianMaxHealth = quest?.guardian.health ?? BASE_HEALTH
@@ -210,6 +211,7 @@ export function QuestCheckpoint({ questId, onBack, onComplete, loadout, onBattle
     <main className="quest-checkpoint quest-battle-page">
       <header className="quest-topbar">
         <button type="button" className="btn btn-ghost" onClick={onBack}>← Quest</button>
+        {onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}
         {phase !== 'intro' && <span>{`Battle · Attempt ${attempt}`}</span>}
       </header>
 

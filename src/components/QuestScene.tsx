@@ -5,10 +5,11 @@ import { FuriganaSegment } from './FuriganaText'
 interface QuestSceneProps {
   questId?: string
   onBack: () => void
+  onDashboard?: () => void
   onContinue: (furiganaFree: boolean) => void
 }
 
-export function QuestScene({ questId, onBack, onContinue }: QuestSceneProps) {
+export function QuestScene({ questId, onBack, onDashboard, onContinue }: QuestSceneProps) {
   const quest = getQuestById(questId)
   const [englishVisible, setEnglishVisible] = useState(false)
   const [furiganaVisible, setFuriganaVisible] = useState(false)
@@ -21,6 +22,7 @@ export function QuestScene({ questId, onBack, onContinue }: QuestSceneProps) {
     <main className="quest-scene-reader">
       <header className="quest-topbar">
         <button type="button" className="btn btn-ghost" onClick={onBack}>← Quest</button>
+        {onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}
         <div className="quest-reader-toggles">
           <button type="button" className={`btn btn-ghost${furiganaVisible ? ' is-active' : ''}`} onClick={() => { setFuriganaVisible((visible) => !visible); setFuriganaUsed(true) }}>
             {furiganaVisible ? 'Hide Furigana' : 'Show Furigana'}

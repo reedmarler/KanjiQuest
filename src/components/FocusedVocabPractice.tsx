@@ -5,6 +5,7 @@ import { FuriganaSegment } from './FuriganaText'
 
 interface FocusedVocabPracticeProps {
   onBack: () => void
+  onDashboard?: () => void
   initialTopicId?: string
   onQuestComplete?: () => void
   questTitle?: string
@@ -56,7 +57,7 @@ function newSession(previousTopicId?: string, initialTopicId?: string) {
   return { topic, cards: shuffled(topic.cards) }
 }
 
-export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, questTitle }: FocusedVocabPracticeProps) {
+export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQuestComplete, questTitle }: FocusedVocabPracticeProps) {
   const isMobile = useIsMobile()
   const [session, setSession] = useState(() => newSession(undefined, initialTopicId))
   const [index, setIndex] = useState(0)
@@ -113,6 +114,7 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
       <div className="grammar-practice-view kanji-lab kanji-lab-paths focused-vocab-practice-mobile">
         <div className="study-top grammar-study-top">
           <VocabBackButton onBack={previousCard} questMode={Boolean(questTitle)} hasPrevious={completed || index > 0} />
+          {onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}
           <span className="study-progress">{Math.min(index + 1, session.cards.length)} / {session.cards.length}</span>
           <span className="study-type-badge">
             <span>Vocab</span>
@@ -197,6 +199,7 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
       <header className="focused-vocab-top">
         <VocabBackButton onBack={previousCard} questMode={Boolean(questTitle)} hasPrevious={completed || index > 0} />
         <span>{questTitle ?? 'Focused vocab'}</span>
+        {onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}
         {!questTitle && <button type="button" className="focused-vocab-change-topic" onClick={loadNextTopic}>New topic</button>}
       </header>
 

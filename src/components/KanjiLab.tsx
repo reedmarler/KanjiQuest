@@ -8,6 +8,7 @@ import type { JlptLevel } from '../lib/types'
 
 interface KanjiLabProps {
   onBack: () => void
+  onDashboard?: () => void
   questId?: string
   onQuestComplete?: () => void
 }
@@ -15,20 +16,38 @@ interface KanjiLabProps {
 const levels: JlptLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1']
 const retryDistance = 5
 type KanjiStudyMode = 'paths' | 'levels'
+type KanjiCompoundLength = 1 | 2 | 3 | 4
+type PathStudyTarget = 'words' | 'kanji'
 const KANJI_CHARACTER_RE = /[\u3400-\u4DBF\u4E00-\u9FFF]/u
 const KANJI_DEFINITION_FALLBACKS: Readonly<Record<string, string>> = {
   '札': 'tag · ticket',
   '券': 'ticket · coupon',
 }
 
-function ContextWord({ word, character }: { word: string; character: string }) {
-  return (
-    <>
-      {[...word].map((part, partIndex) => (
-        <span key={part + partIndex} className={part === character ? 'kanji-learning-word-target' : ''}>{part}</span>
-      ))}
-    </>
-  )
+function readingSoundKey(reading: string) {
+  return [...reading.normalize('NFKC')]
+    .map((character) => {
+      const codePoint = character.codePointAt(0) ?? 0
+      return codePoint >= 0x30a1 && codePoint <= 0x30f6
+        ? String.fromCodePoint(codePoint - 0x60)
+        : character
+    })
+    .join('')
+}
+
+function uniqueCharacterReadings(readings?: { on: string[]; kun: string[] }) {
+  const seen = new Set<string>()
+  const unique = (items: string[]) => items.filter((reading) => {
+    const key = readingSoundKey(reading)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+
+  return {
+    on: unique(readings?.on ?? []),
+    kun: unique(readings?.kun ?? []),
+  }
 }
 
 function QuestExampleWord({ word, character, reading }: { word: string; character: string; reading: string }) {
@@ -58,6 +77,52 @@ function QuestExampleWord({ word, character, reading }: { word: string; characte
       <span className="quest-kanji-example-suffix">{renderCharacters(anchorIndex + 1, characters.length)}</span>
     </>
   )
+}
+
+function exampleWordFitUnits(word: string, character: string) {
+  const characters = [...word]
+  const anchorIndex = Math.max(0, characters.indexOf(character))
+  const longestSide = Math.max(anchorIndex, characters.length - anchorIndex - 1)
+
+  return longestSide * 2 + 1
+}
+
+function paginateExamples(examples: readonly KanjiLabEntry[], character: string) {
+  const pages: KanjiLabEntry[][] = []
+  const remaining = [...examples]
+  const columnSpan = (example: KanjiLabEntry) => {
+    const fitUnits = exampleWordFitUnits(example.example.word, character)
+    if (fitUnits <= 5) return 1
+    if (fitUnits <= 7) return 2
+    return 3
+  }
+
+  while (remaining.length) {
+    const page: KanjiLabEntry[] = []
+    let availableColumns = 3
+
+    while (page.length < 3) {
+      const nextIndex = remaining.findIndex((example) => columnSpan(example) <= availableColumns)
+      if (nextIndex < 0) break
+      const [nextExample] = remaining.splice(nextIndex, 1)
+      page.push(nextExample)
+      availableColumns -= columnSpan(nextExample)
+    }
+
+    pages.push(page)
+  }
+
+  return pages
+}
+
+function uniqueExampleWords(examples: readonly KanjiLabEntry[]) {
+  const seenWords = new Set<string>()
+  return examples.filter((example) => {
+    const word = example.example.word.trim()
+    if (!word || seenWords.has(word)) return false
+    seenWords.add(word)
+    return true
+  })
 }
 
 function QuestMainWord({ word, reading }: { word: string; reading: string }) {
@@ -96,6 +161,9 @@ function questWordCharacterReadings(word: string, reading: string) {
   const characters = [...word]
   const spoken = normalizeKanaReading(reading)
   const memo = new Map<string, string[] | null>()
+  const keepKanjiReadingsOnly = (readings: string[]) => characters.map((character, index) => (
+    KANJI_CHARACTER_RE.test(character) ? readings[index] ?? '' : ''
+  ))
 
   const splitReading = (wordIndex: number, readingIndex: number): string[] | null => {
     const memoKey = `${wordIndex}:${readingIndex}`
@@ -130,12 +198,24 @@ function questWordCharacterReadings(word: string, reading: string) {
       }
     }
 
+    const minimumRemainingLength = characters.slice(wordIndex + 1).reduce((total, nextCharacter) => (
+      total + (KANJI_CHARACTER_RE.test(nextCharacter) ? 1 : normalizeKanaReading(nextCharacter).length)
+    ), 0)
+    const maximumIrregularLength = spoken.length - readingIndex - minimumRemainingLength
+    for (let irregularLength = 1; irregularLength <= maximumIrregularLength; irregularLength += 1) {
+      const tail = splitReading(wordIndex + 1, readingIndex + irregularLength)
+      if (!tail) continue
+      const result = [spoken.slice(readingIndex, readingIndex + irregularLength), ...tail]
+      memo.set(memoKey, result)
+      return result
+    }
+
     memo.set(memoKey, null)
     return null
   }
 
   const segmented = splitReading(0, 0)
-  if (segmented) return segmented
+  if (segmented) return keepKanjiReadingsOnly(segmented)
 
   const splitFromEnd = (wordIndex: number, readingEnd: number): string[] | null => {
     if (wordIndex < 0) return readingEnd === 0 ? [] : null
@@ -169,7 +249,7 @@ function questWordCharacterReadings(word: string, reading: string) {
   }
 
   const segmentedFromEnd = splitFromEnd(characters.length - 1, spoken.length)
-  if (segmentedFromEnd) return segmentedFromEnd
+  if (segmentedFromEnd) return keepKanjiReadingsOnly(segmentedFromEnd)
 
   return characters.map((character) => {
     if (!KANJI_CHARACTER_RE.test(character)) return ''
@@ -228,16 +308,82 @@ function uniqueKanjiOrder(entries: readonly KanjiLabEntry[]) {
   return shuffled([...firstEntryByCharacter.values()])
 }
 
-function entriesForPath(path: KanjiFocusSet) {
-  const entryByCharacter = new Map<string, KanjiLabEntry>()
-  for (const entry of kanjiLabEntries) {
-    if (!path.characters.includes(entry.character) || entryByCharacter.has(entry.character)) continue
-    entryByCharacter.set(entry.character, entry)
-  }
-  return shuffled(path.characters.flatMap((character) => {
-    const entry = entryByCharacter.get(character)
-    return entry ? [entry] : []
+function kanjiCount(word: string) {
+  return [...word].filter((character) => KANJI_CHARACTER_RE.test(character)).length
+}
+
+function compoundEntries(source: readonly KanjiLabEntry[], length: Exclude<KanjiCompoundLength, 1>) {
+  const words = new Set<string>()
+  return shuffled(source).flatMap((entry) => {
+    if (kanjiCount(entry.example.word) !== length || words.has(entry.example.word)) return []
+    words.add(entry.example.word)
+    return [{
+      ...entry,
+      card: {
+        ...entry.card,
+        id: `kanji-compound-${length}-${entry.card.id}-${entry.example.word}`,
+        front: entry.example.word,
+        reading: entry.example.reading,
+        back: entry.example.meaning,
+      },
+    }]
+  })
+}
+
+function pathWordEntries(path: KanjiFocusSet) {
+  const vocabulary = vocabFocusSets.find((set) => set.id === path.id)
+  if (!vocabulary) return []
+
+  return shuffled(vocabulary.cards).flatMap((word) => {
+    const source = kanjiLabEntries.find((entry) => entry.example.word === word.front)
+      ?? [...word.front]
+        .map((character) => kanjiLabEntries.find((entry) => entry.character === character))
+        .find(Boolean)
+    if (!source) return []
+    const reading = word.reading ?? source.example.reading
+    return [{
+      ...source,
+      card: {
+        ...source.card,
+        id: `kanji-path-word-${path.id}-${word.id}`,
+        front: word.front,
+        reading,
+        back: word.back,
+      },
+      example: { word: word.front, reading, meaning: word.back },
+    }]
+  })
+}
+
+function pathKanjiEntries(path: KanjiFocusSet) {
+  const vocabulary = vocabFocusSets.find((set) => set.id === path.id)
+  if (!vocabulary) return []
+  const pathCharacters = new Set(path.characters)
+
+  return vocabulary.cards.flatMap((word) => [...new Set([...word.front].filter((character) => pathCharacters.has(character)))].flatMap((character) => {
+    const source = kanjiLabEntries.find((entry) => entry.character === character)
+    if (!source) return []
+    const reading = word.reading ?? source.example.reading
+    return [{
+      ...source,
+      character,
+      card: {
+        ...source.card,
+        id: `kanji-path-character-${path.id}-${word.id}-${character}`,
+        front: character,
+      },
+      example: { word: word.front, reading, meaning: word.back },
+    }]
   }))
+}
+
+function levelHasCompoundLength(level: JlptLevel, length: KanjiCompoundLength) {
+  if (length === 1) return true
+  return kanjiLabEntries.some((entry) => entry.card.jlpt === level && kanjiCount(entry.example.word) === length)
+}
+
+function entriesForPath(path: KanjiFocusSet, target: PathStudyTarget) {
+  return target === 'kanji' ? uniqueKanjiOrder(pathKanjiEntries(path)) : pathWordEntries(path)
 }
 
 function entriesForQuest(questId?: string): KanjiLabEntry[] {
@@ -267,43 +413,63 @@ function entriesForQuest(questId?: string): KanjiLabEntry[] {
   })
 }
 
-export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
+export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: KanjiLabProps) {
   const quest = getQuestById(questId)
   const questEntries = useMemo(() => entriesForQuest(questId), [questId])
   const questMode = Boolean(quest && questEntries.length)
   const [mode, setMode] = useState<KanjiStudyMode>('paths')
+  const [compoundLength, setCompoundLength] = useState<KanjiCompoundLength>(1)
   const [path, setPath] = useState(() => shuffled(kanjiFocusSets)[0]!)
+  const [pathStudyTarget, setPathStudyTarget] = useState<PathStudyTarget>('words')
   const [level, setLevel] = useState<JlptLevel>('N5')
-  const [entries, setEntries] = useState(() => questEntries.length ? questEntries : entriesForPath(path))
+  const [openTopPicker, setOpenTopPicker] = useState<'path' | 'level' | null>(null)
+  const [entries, setEntries] = useState(() => questEntries.length ? questEntries : entriesForPath(path, 'words'))
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
+  const [furiganaVisible, setFuriganaVisible] = useState(true)
+  const [englishVisible, setEnglishVisible] = useState(true)
   const [exampleOffset, setExampleOffset] = useState(0)
   const [completed, setCompleted] = useState(false)
   const entry = entries[index % entries.length]
   const card = entry?.card
-  const characterReadings = !questMode && entry ? kanjiReadings[entry.character] : undefined
+  const wordDeckMode = !questMode && (mode === 'paths' ? pathStudyTarget === 'words' : compoundLength > 1)
+  const characterReadings = !questMode && !wordDeckMode && entry ? kanjiReadings[entry.character] : undefined
+  const displayedCharacterReadings = uniqueCharacterReadings(characterReadings)
+  const mainMeaning = wordDeckMode
+    ? entry?.example.meaning.split(';')[0]?.trim() ?? ''
+    : entry?.isCurated || (mode === 'paths' && pathStudyTarget === 'kanji')
+      ? entry.card.back.split(';')[0]?.trim() ?? ''
+      : ''
   const allExamples = useMemo(() => {
     if (!entry) return []
-    return questMode
-      ? questEntries.filter((candidate) => candidate.character === entry.character)
-      : kanjiLabEntries.filter((candidate) => candidate.character === entry.character)
-  }, [entry, questEntries, questMode])
-  const relatedExamples = useMemo(() => {
+    const isDifferentFromMainWord = (candidate: KanjiLabEntry) => candidate.example.word !== entry.card.front
+    if (questMode) return uniqueExampleWords(questEntries.filter((candidate) => candidate.character === entry.character && isDifferentFromMainWord(candidate)))
+    if (mode === 'paths' && pathStudyTarget === 'kanji') {
+      return uniqueExampleWords(pathKanjiEntries(path).filter((candidate) => candidate.character === entry.character && isDifferentFromMainWord(candidate)))
+    }
+    return uniqueExampleWords(kanjiLabEntries.filter((candidate) => candidate.character === entry.character && isDifferentFromMainWord(candidate)))
+  }, [entry, mode, path, pathStudyTarget, questEntries, questMode])
+  const examplePages = useMemo(() => {
     if (!entry || !allExamples.length) return []
     const currentExample = allExamples.findIndex((candidate) => candidate.example.word === entry.example.word)
     const start = currentExample < 0 ? 0 : currentExample
-    return Array.from(
-      { length: Math.min(3, allExamples.length) },
-      (_, offset) => allExamples[(start + exampleOffset + offset) % allExamples.length]!,
-    )
-  }, [allExamples, entry, exampleOffset])
-  const hasMoreExamples = allExamples.length > relatedExamples.length
+    const orderedExamples = [...allExamples.slice(start), ...allExamples.slice(0, start)]
+    return paginateExamples(orderedExamples, entry.character)
+  }, [allExamples, entry])
+  const relatedExamples = examplePages[exampleOffset % examplePages.length] ?? []
+  const hasMoreExamples = examplePages.length > 1
   const questParts = useMemo(() => entry && questMode ? questKanjiParts(entry.character) : [], [entry, questMode])
 
   function chooseLevel(nextLevel: JlptLevel) {
     setMode('levels')
     setLevel(nextLevel)
-    setEntries(uniqueKanjiOrder(kanjiLabEntries.filter((entry) => entry.card.jlpt === nextLevel)))
+    const levelEntries = kanjiLabEntries.filter((entry) => entry.card.jlpt === nextLevel)
+    const nextLength = levelHasCompoundLength(nextLevel, compoundLength) ? compoundLength : 1
+    const nextEntries = nextLength === 1
+      ? uniqueKanjiOrder(levelEntries)
+      : compoundEntries(levelEntries, nextLength)
+    setCompoundLength(nextLength)
+    setEntries(nextEntries)
     setIndex(0)
     setRevealed(false)
     setExampleOffset(0)
@@ -312,15 +478,19 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
   function choosePath(nextPath: KanjiFocusSet) {
     setMode('paths')
     setPath(nextPath)
-    setEntries(entriesForPath(nextPath))
+    setCompoundLength(1)
+    setEntries(entriesForPath(nextPath, pathStudyTarget))
     setIndex(0)
     setRevealed(false)
     setExampleOffset(0)
   }
 
-  function chooseNextPath() {
-    const choices = shuffled(kanjiFocusSets.filter((candidate) => candidate.id !== path.id))
-    if (choices[0]) choosePath(choices[0])
+  function choosePathStudyTarget(nextTarget: PathStudyTarget) {
+    setPathStudyTarget(nextTarget)
+    setEntries(entriesForPath(path, nextTarget))
+    setIndex(0)
+    setRevealed(false)
+    setExampleOffset(0)
   }
 
   function nextCard(knewIt = false) {
@@ -360,6 +530,20 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
     setExampleOffset(0)
   }
 
+  function chooseCompoundLength(nextLength: KanjiCompoundLength) {
+    const isAvailable = levelHasCompoundLength(level, nextLength)
+    if (!isAvailable) return
+    setCompoundLength(nextLength)
+    const levelEntries = kanjiLabEntries.filter((candidate) => candidate.card.jlpt === level)
+    const nextEntries = nextLength === 1
+      ? uniqueKanjiOrder(levelEntries)
+      : compoundEntries(levelEntries, nextLength)
+    setEntries(nextEntries)
+    setIndex(0)
+    setRevealed(false)
+    setExampleOffset(0)
+  }
+
   function previousCard() {
     if (completed) {
       setCompleted(false)
@@ -375,12 +559,36 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
     onBack()
   }
 
+  function compoundLengthPicker() {
+    return (
+      <div className="kanji-compound-length-tabs" role="group" aria-label="Kanji per word">
+        <span>Kanji per word</span>
+        {[1, 2, 3, 4].map((length) => {
+          const nextLength = length as KanjiCompoundLength
+          const isAvailable = levelHasCompoundLength(level, nextLength)
+          return (
+            <button
+              key={length}
+              type="button"
+              className={compoundLength === length ? 'active' : ''}
+              aria-pressed={compoundLength === length}
+              disabled={!isAvailable}
+              onClick={() => chooseCompoundLength(nextLength)}
+            >
+              {length}
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
+
   if (!card || !entry) return null
 
   if (questMode && completed) {
     return (
       <div className="grammar-practice-view kanji-lab kanji-lab-paths">
-        <div className="study-top grammar-study-top"><button type="button" className="vocab-back-arrow" onClick={previousCard} aria-label="Previous kanji" title="Previous kanji"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button></div>
+        <div className="study-top grammar-study-top"><button type="button" className="vocab-back-arrow" onClick={previousCard} aria-label="Previous kanji" title="Previous kanji"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>{onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}</div>
         <main className="focused-vocab-complete">
           <span className="focused-vocab-complete-mark">漢</span>
           <h2>Kanji step complete</h2>
@@ -402,6 +610,7 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
           <button type="button" className="vocab-back-arrow" onClick={previousCard} aria-label={index > 0 ? 'Previous kanji' : 'Back to Quest'} title={index > 0 ? 'Previous kanji' : 'Back to Quest'}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
           </button>
+          {onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}
           <span className="study-progress">{index + 1} / {entries.length}</span>
           <span className="study-type-badge"><span>Quest Kanji</span><span className="jlpt-badge">{quest?.level}</span></span>
         </div>
@@ -410,15 +619,15 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
           <div className="kanji-path-heading"><span className="kanji-armory-mark" aria-hidden="true">{quest?.symbol}</span><div><h2>{quest?.title}</h2></div></div>
         </section>
 
-        <main className={`grammar-choice-card kanji-learning-card quest-kanji-card${revealed ? ' is-revealed' : ''}`}>
+        <main className={`grammar-choice-card kanji-learning-card quest-kanji-card${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}`}>
           <p className="quest-kanji-word" lang="ja">
             <QuestMainWord word={card.front} reading={entry.example.reading} />
           </p>
           <div className="kanji-learning-divider" aria-hidden="true" />
-          <div className={`quest-kanji-word-answer${revealed ? ' is-revealed' : ''}`} aria-hidden={!revealed}>
+          <div className={`quest-kanji-word-answer${revealed && englishVisible ? ' is-revealed' : ''}`} aria-hidden={!revealed || !englishVisible}>
             <span>{entry.example.meaning}</span>
           </div>
-          <div className={`quest-kanji-parts part-count-${questParts.length}${questParts.length === 1 ? ' is-single' : ''}${revealed ? ' is-revealed' : ''}`}>
+          <div className={`quest-kanji-parts part-count-${questParts.length}${questParts.length === 1 ? ' is-single' : ''}${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}`}>
             {questParts.map((part) => {
               const examples = part.examples.length ? part.examples.slice(0, 2) : [undefined]
               const mainWordIndex = mainWordCharacters.indexOf(part.character)
@@ -436,12 +645,15 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
                       const wordLength = example ? [...example.example.word].length : 1
                       return (
                         <div className="quest-kanji-expanded-example" key={example?.example.word ?? `${part.character}-${exampleIndex}`}>
-                          <div className={`quest-kanji-expanded-word word-length-${Math.min(wordLength, 5)}`} lang="ja">
+                          <div
+                            className={`quest-kanji-expanded-word word-length-${Math.min(wordLength, 5)}`}
+                            lang="ja"
+                          >
                             {example
                               ? <QuestExampleWord word={example.example.word} character={part.character} reading={example.example.reading} />
-                              : <><span className="quest-kanji-example-anchor">{partReading && <small className="quest-kanji-expanded-reading">{partReading}</small>}<strong>{part.character}</strong></span><span className="is-definition">{part.definition}</span></>}
+                              : <span className="quest-kanji-example-anchor">{partReading && <small className="quest-kanji-expanded-reading">{partReading}</small>}<strong>{part.character}</strong></span>}
                           </div>
-                          <em className="quest-kanji-expanded-meaning">{example?.example.meaning.split(';')[0] ?? ''}</em>
+                          <em className="quest-kanji-expanded-meaning">{example?.example.meaning.split(';')[0] ?? part.definition}</em>
                         </div>
                       )
                     })}
@@ -450,9 +662,38 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
               )
             })}
           </div>
-          <div className="kanji-learning-controls">
-            <div className="kanji-learning-reveal-row"><button type="button" className="btn btn-primary kanji-learning-reveal" onClick={() => setRevealed((value) => !value)}>{revealed ? 'Hide examples' : 'Show examples'}</button></div>
-            <div className="kanji-learning-actions"><button type="button" className="btn btn-ghost" onClick={() => nextCard(false)}>Review again</button><button type="button" className="btn kanji-learning-easy" onClick={() => nextCard(true)}>Next word</button></div>
+          <div className="kanji-learning-controls standard-kanji-controls">
+            <div className="standard-kanji-utility-row">
+              <div className="standard-kanji-display-toggles" role="group" aria-label="Display options">
+                <button
+                  type="button"
+                  className={`btn standard-kanji-furigana-toggle${furiganaVisible ? ' is-active' : ''}`}
+                  aria-pressed={furiganaVisible}
+                  onClick={() => setFuriganaVisible((isVisible) => !isVisible)}
+                >
+                  Furigana
+                </button>
+                <button
+                  type="button"
+                  className={`btn standard-kanji-english-toggle${englishVisible ? ' is-active' : ''}`}
+                  aria-pressed={englishVisible}
+                  onClick={() => setEnglishVisible((isVisible) => !isVisible)}
+                >
+                  English
+                </button>
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary kanji-learning-reveal"
+                onClick={() => setRevealed((isRevealed) => !isRevealed)}
+              >
+                {revealed ? 'Hide examples' : 'Show examples'}
+              </button>
+            </div>
+            <div className="standard-kanji-action-row">
+              <button type="button" className="btn btn-ghost standard-kanji-review" onClick={() => nextCard(false)}>Review again</button>
+              <button type="button" className="btn kanji-learning-easy" onClick={() => nextCard(true)}>Next word</button>
+            </div>
           </div>
         </main>
       </div>
@@ -460,104 +701,198 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
   }
 
   return (
-    <div className={'grammar-practice-view kanji-lab' + (mode === 'paths' ? ' kanji-lab-paths' : '')}>
+    <div className="grammar-practice-view kanji-lab kanji-lab-paths standard-kanji-study">
       <div className="study-top grammar-study-top">
         <button type="button" className="vocab-back-arrow" onClick={previousCard} aria-label={index > 0 ? 'Previous kanji' : 'Back to Dashboard'} title={index > 0 ? 'Previous kanji' : 'Back to Dashboard'}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
         </button>
+        {onDashboard && <button type="button" className="btn btn-ghost standard-kanji-dashboard" onClick={onDashboard}>Dashboard</button>}
         <span className="study-progress">{index + 1} / {entries.length}</span>
-        <span className="study-type-badge">
-          <span>{questMode ? 'Quest Kanji' : 'Kanji'}</span>
-          <span className="jlpt-badge">{questMode ? quest?.level : mode === 'paths' ? 'Path' : level}</span>
-        </span>
+        <div
+          className="standard-kanji-top-modes standard-kanji-top-selectors"
+          aria-label="Kanji study selection"
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) setOpenTopPicker(null)
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') setOpenTopPicker(null)
+          }}
+        >
+          <div className="standard-kanji-top-picker is-path">
+            <button
+              type="button"
+              className={`standard-kanji-top-picker-trigger${mode === 'paths' ? ' active' : ''}`}
+              aria-haspopup="menu"
+              aria-expanded={openTopPicker === 'path'}
+              onClick={() => setOpenTopPicker((current) => current === 'path' ? null : 'path')}
+            >
+              <span>Path</span>
+              <strong>{path.title}</strong>
+            </button>
+            {openTopPicker === 'path' && (
+              <div className="standard-kanji-top-menu path-menu" role="menu" aria-label="Choose a Kanji path">
+                {kanjiFocusSets.map((candidate) => (
+                  <button
+                    key={candidate.id}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={candidate.id === path.id}
+                    className={candidate.id === path.id ? 'is-selected' : ''}
+                    onClick={() => { choosePath(candidate); setOpenTopPicker(null) }}
+                  >
+                    {candidate.title}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="standard-kanji-top-picker is-level">
+            <button
+              type="button"
+              className={`standard-kanji-top-picker-trigger${mode === 'levels' ? ' active' : ''}`}
+              aria-haspopup="menu"
+              aria-expanded={openTopPicker === 'level'}
+              onClick={() => setOpenTopPicker((current) => current === 'level' ? null : 'level')}
+            >
+              <span>JLPT</span>
+              <strong>{level}</strong>
+            </button>
+            {openTopPicker === 'level' && (
+              <div className="standard-kanji-top-menu level-menu" role="menu" aria-label="Choose a JLPT level">
+                {levels.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={mode === 'levels' && item === level}
+                    className={mode === 'levels' && item === level ? 'is-selected' : ''}
+                    onClick={() => { chooseLevel(item); setOpenTopPicker(null) }}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
       <div className="study-progress-bar">
         <div className="study-progress-fill" style={{ width: ((index + 1) / entries.length) * 100 + '%' }} />
       </div>
 
-      <section className="kanji-study-navigation kanji-armory-navigation">
+      <section className="kanji-study-navigation kanji-armory-navigation standard-kanji-navigation">
         {questMode ? (
           <div className="kanji-path-heading">
             <span className="kanji-armory-mark" aria-hidden="true">漢</span>
             <div><span>QUEST KANJI</span><h2>{quest?.title}</h2><p>{quest?.vocabularyTheme} — only the kanji from this quest’s vocabulary.</p></div>
           </div>
         ) : (<>
-        <div className="kanji-study-mode-tabs" role="tablist" aria-label="Kanji study mode">
-          <button type="button" role="tab" aria-selected={mode === 'paths'} className={mode === 'paths' ? 'active' : ''} onClick={() => choosePath(path)}>
-            Kanji Paths
-          </button>
-          <button type="button" role="tab" aria-selected={mode === 'levels'} className={mode === 'levels' ? 'active' : ''} onClick={() => chooseLevel(level)}>
-            JLPT Explorer
-          </button>
-        </div>
         {mode === 'paths' ? (
           <div className="kanji-path-heading">
             <span className="kanji-armory-mark" aria-hidden="true">漢</span>
             <div>
-              <span>15-CHARACTER PATH</span>
               <h2>{path.title}</h2>
               <p>{path.description}</p>
             </div>
-            <button type="button" onClick={chooseNextPath}>New path</button>
+            <div className="kanji-compound-length-tabs kanji-path-study-tabs" role="group" aria-label="Path study mode">
+              <span>Study</span>
+              <button type="button" className={pathStudyTarget === 'words' ? 'active' : ''} aria-pressed={pathStudyTarget === 'words'} onClick={() => choosePathStudyTarget('words')}>Words</button>
+              <button type="button" className={pathStudyTarget === 'kanji' ? 'active' : ''} aria-pressed={pathStudyTarget === 'kanji'} onClick={() => choosePathStudyTarget('kanji')}>Kanji</button>
+            </div>
           </div>
-        ) : (
-          <div className="kanji-level-tabs">
-            {levels.map((item) => (
-              <button key={item} type="button" className={item === level ? 'active' : ''} onClick={() => chooseLevel(item)}>
-                {item}
-              </button>
-            ))}
+        ) : (<>
+          <div className="kanji-path-heading kanji-level-heading">
+            <span className="kanji-armory-mark" aria-hidden="true">{String.fromCodePoint(0x6f22)}</span>
+            <div>
+              <h2>{level} Kanji</h2>
+              <p>Study kanji grouped by Japanese Language Proficiency Test level.</p>
+            </div>
+            {compoundLengthPicker()}
           </div>
-        )}</>)}
+        </>)}</>)}
       </section>
 
-      <main className={'grammar-choice-card kanji-learning-card' + (revealed ? ' is-revealed' : '')}>
+      <main className={'grammar-choice-card kanji-learning-card standard-kanji-card' + (revealed ? ' is-revealed' : '') + (hasMoreExamples ? ' has-more-examples' : '')}>
         <div className="kanji-learning-meta">
           {hasMoreExamples && (
             <button
               type="button"
               className="btn btn-ghost kanji-learning-more-examples"
-              onClick={() => setExampleOffset((offset) => (offset + relatedExamples.length) % allExamples.length)}
+              onClick={() => setExampleOffset((offset) => (offset + 1) % examplePages.length)}
             >
               More examples
             </button>
           )}
         </div>
-        <p className="kanji-learning-character" lang="ja">{card.front}</p>
-        <p className={'kanji-learning-character-reading' + (revealed ? ' is-revealed' : '')} lang="ja" aria-hidden={!revealed}>
-          {questMode
-            ? <span>{entry.example.reading}</span>
-            : <>
-                {characterReadings?.on.length ? <span>{characterReadings.on.join('・')}</span> : null}
-                {characterReadings?.kun.length ? <span>{characterReadings.kun.join('・')}</span> : null}
-              </>}
-        </p>
-        <div className="kanji-learning-divider" aria-hidden="true" />
-
-        <div className="kanji-learning-answer">
-          <div className={'kanji-learning-examples example-count-' + relatedExamples.length + (revealed ? ' is-revealed' : '')} lang="ja">
-            {relatedExamples.map((example) => (
-              <div key={example.character + example.example.word}>
-                <small>{example.example.reading}</small>
-                <b><ContextWord word={example.example.word} character={entry.character} /></b>
-                <span>{example.example.meaning}</span>
-              </div>
-            ))}
+        <div className="standard-kanji-prompt">
+          <p className={'kanji-learning-character-reading standard-kanji-main-reading' + (!wordDeckMode && revealed && furiganaVisible ? ' is-revealed' : '')} lang="ja" aria-hidden={wordDeckMode || !revealed || !furiganaVisible}>
+            {!wordDeckMode && (<>
+              {displayedCharacterReadings.on.length ? <span>{displayedCharacterReadings.on.join('・')}</span> : null}
+              {displayedCharacterReadings.kun.length ? <span>{displayedCharacterReadings.kun.join('・')}</span> : null}
+            </>)}
+          </p>
+          <p className={`kanji-learning-character${wordDeckMode ? ' standard-kanji-compound-word' : ''}${revealed && furiganaVisible ? ' is-furigana-visible' : ''}`} lang="ja">
+            {wordDeckMode ? <QuestMainWord word={card.front} reading={entry.example.reading} /> : card.front}
+          </p>
+          <div className="kanji-learning-divider" aria-hidden="true" />
+          <div className={`quest-kanji-word-answer standard-kanji-main-meaning${revealed && englishVisible && mainMeaning ? ' is-revealed' : ''}`} aria-hidden={!revealed || !englishVisible || !mainMeaning}>
+            {mainMeaning && <span>{mainMeaning}</span>}
           </div>
         </div>
-        <div className="kanji-learning-controls">
-          <div className="kanji-learning-reveal-row">
+
+        <div className="kanji-learning-answer standard-kanji-answer">
+          <div className={`quest-kanji-parts standard-kanji-parts part-count-${relatedExamples.length}${relatedExamples.length === 1 ? ' is-single' : ''}${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}`}>
+            {relatedExamples.map((example) => {
+              const wordLength = [...example.example.word].length
+              return (
+                <article key={example.character + example.example.word}>
+                  <div className="quest-kanji-expanded-examples example-count-1">
+                    <div className="quest-kanji-expanded-example">
+                      <div
+                        className={`quest-kanji-expanded-word word-length-${Math.min(wordLength, 5)}`}
+                        lang="ja"
+                      >
+                        <QuestExampleWord word={example.example.word} character={entry.character} reading={example.example.reading} />
+                      </div>
+                      <em className="quest-kanji-expanded-meaning">{example.example.meaning.split(';')[0]}</em>
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </div>
+        <div className="kanji-learning-controls standard-kanji-controls">
+          <div className="standard-kanji-utility-row">
+            <div className="standard-kanji-display-toggles" role="group" aria-label="Display options">
+              <button
+                type="button"
+                className={`btn standard-kanji-furigana-toggle${furiganaVisible ? ' is-active' : ''}`}
+                aria-pressed={furiganaVisible}
+                onClick={() => setFuriganaVisible((isVisible) => !isVisible)}
+              >
+                Furigana
+              </button>
+              <button
+                type="button"
+                className={`btn standard-kanji-english-toggle${englishVisible ? ' is-active' : ''}`}
+                aria-pressed={englishVisible}
+                onClick={() => setEnglishVisible((isVisible) => !isVisible)}
+              >
+                English
+              </button>
+            </div>
             <button
               type="button"
               className="btn btn-primary kanji-learning-reveal"
               onClick={() => setRevealed((isRevealed) => !isRevealed)}
             >
-              {revealed ? 'Hide' : 'Reveal'}
+              {revealed ? 'Hide examples' : 'Show examples'}
             </button>
           </div>
-          <div className="kanji-learning-actions">
-            <button type="button" className="btn btn-ghost" onClick={() => nextCard(false)}>Study again</button>
-            <button type="button" className="btn kanji-learning-easy" onClick={() => nextCard(true)}>Too Easy</button>
+          <div className="standard-kanji-action-row">
+            <button type="button" className="btn btn-ghost standard-kanji-review" onClick={() => nextCard(false)}>Review again</button>
+            <button type="button" className="btn kanji-learning-easy" onClick={() => nextCard(true)}>Next word</button>
           </div>
         </div>
       </main>

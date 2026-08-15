@@ -43,6 +43,7 @@ export interface ChoiceDrillProps {
   isFavorite: (exercise: DrillExercise) => boolean
   onToggleFavorite: (exercise: DrillExercise) => void
   onBack: () => void
+  onDashboard?: () => void
   onFinishAction?: () => void
   finishActionLabel?: string
 }
@@ -155,6 +156,7 @@ export function ChoiceDrill({
   isFavorite,
   onToggleFavorite,
   onBack,
+  onDashboard,
   onFinishAction,
   finishActionLabel,
 }: ChoiceDrillProps) {
@@ -440,6 +442,7 @@ export function ChoiceDrill({
     <div className={`grammar-practice-view${showFurigana ? '' : ' is-furigana-hidden'}`}>
       <div className="study-top grammar-study-top">
         <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        {onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}
         <span className="study-progress">
           {infiniteMode ? `${infiniteCompletedCount + 1} / ∞` : `${currentIndex + 1} / ${exercises.length}`}
         </span>

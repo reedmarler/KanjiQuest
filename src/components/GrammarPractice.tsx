@@ -7,6 +7,7 @@ import { ChoiceDrill, loadLevelPreference } from './ChoiceDrill'
 
 interface GrammarPracticeProps {
   onBack: () => void
+  onDashboard?: () => void
   isFavorite: (exercise: DrillExercise) => boolean
   onToggleFavorite: (exercise: DrillExercise) => void
   questId?: string
@@ -16,7 +17,7 @@ interface GrammarPracticeProps {
 const GRAMMAR_BATCH_COUNT = 5
 const GRAMMAR_LEVELS_KEY = 'kanji-quest-generated-grammar-practice-levels-v1'
 
-export function GrammarPractice({ onBack, isFavorite, onToggleFavorite, questId, onQuestComplete }: GrammarPracticeProps) {
+export function GrammarPractice({ onBack, onDashboard, isFavorite, onToggleFavorite, questId, onQuestComplete }: GrammarPracticeProps) {
   const quest = getQuestById(questId)
   const questMode = Boolean(quest?.grammarDrills.length)
   const [pool, setPool] = useState<DrillExercise[] | null>(null)
@@ -70,6 +71,7 @@ export function GrammarPractice({ onBack, isFavorite, onToggleFavorite, questId,
         isFavorite={isFavorite}
         onToggleFavorite={onToggleFavorite}
         onBack={onBack}
+        onDashboard={onDashboard}
         onFinishAction={onQuestComplete}
         finishActionLabel="Read the scene →"
       />

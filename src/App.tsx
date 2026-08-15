@@ -225,6 +225,7 @@ function App() {
           <KanjiLab
             questId={activeQuestId}
             onBack={() => setView(practiceReturnView)}
+            onDashboard={() => setView('dashboard')}
             onQuestComplete={activeQuestId
               ? () => {
                   finishQuestStep('kanji')
@@ -246,6 +247,7 @@ function App() {
             initialTopicId={questVocabTopicId}
             questTitle={activeQuest?.title}
             onBack={() => setView(practiceReturnView)}
+            onDashboard={questVocabTopicId ? () => setView('dashboard') : undefined}
             onQuestComplete={questVocabTopicId
               ? () => {
                   finishQuestStep('vocab')
@@ -394,6 +396,7 @@ function App() {
           <QuestScene
             questId={activeQuestId}
             onBack={() => setView('quests')}
+            onDashboard={() => setView('dashboard')}
             onContinue={(furiganaFree) => {
               if (activeQuestId) setAchievementMetrics((current) => recordQuestScene(current, activeQuestId, furiganaFree))
               finishQuestStep('scene')
@@ -412,6 +415,7 @@ function App() {
           <QuestCheckpoint
             questId={activeQuestId}
             onBack={() => setView('quests')}
+            onDashboard={() => setView('dashboard')}
             loadout={buildRelicLoadout(questProgress)}
             onBattleResult={({ won, perfect }) => {
               if (activeQuestId) setAchievementMetrics((current) => recordBossBattle(current, activeQuestId, won, perfect))
@@ -442,6 +446,7 @@ function App() {
         <Suspense fallback={<RouteLoading label="Grammar" />}>
           <GrammarPractice
             onBack={() => setView(practiceReturnView)}
+            onDashboard={activeQuestId ? () => setView('dashboard') : undefined}
             isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
             onToggleFavorite={toggleDrillFavorite}
             questId={activeQuestId}
