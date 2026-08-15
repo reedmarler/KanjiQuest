@@ -751,7 +751,7 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
               onClick={() => setOpenTopPicker((current) => current === 'path' ? null : 'path')}
             >
               <span>Path</span>
-              <strong>{path.title}</strong>
+              <strong><span className="standard-kanji-path-symbol" aria-hidden="true">{path.symbol}</span><span>{path.title}</span></strong>
             </button>
             {openTopPicker === 'path' && (
               <div className="standard-kanji-top-menu path-menu" role="menu" aria-label="Choose a Kanji path">
@@ -764,7 +764,8 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
                     className={candidate.id === path.id ? 'is-selected' : ''}
                     onClick={() => { choosePath(candidate); setOpenTopPicker(null) }}
                   >
-                    {candidate.title}
+                    <span className="standard-kanji-path-symbol" aria-hidden="true">{candidate.symbol}</span>
+                    <span>{candidate.title}</span>
                   </button>
                 ))}
               </div>
@@ -813,7 +814,7 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
         ) : (<>
         {mode === 'paths' ? (
           <div className="kanji-path-heading">
-            <span className="kanji-armory-mark" aria-hidden="true">漢</span>
+            <span className="kanji-armory-mark" aria-hidden="true">{path.symbol}</span>
             <div>
               <h2>{path.title}</h2>
               <p>{path.description}</p>

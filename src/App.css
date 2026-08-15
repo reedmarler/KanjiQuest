@@ -9523,6 +9523,24 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   white-space: nowrap;
 }
 
+.standard-kanji-top-picker.is-path .standard-kanji-top-picker-trigger > strong {
+  display: flex;
+  align-items: center;
+  gap: .28rem;
+}
+
+.standard-kanji-top-picker.is-path .standard-kanji-top-picker-trigger > strong > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.standard-kanji-path-symbol {
+  flex: 0 0 auto;
+  color: var(--sakura-light);
+  font: 700 .72rem/1 'Noto Sans JP', sans-serif;
+}
+
 .standard-kanji-top-picker.is-level .standard-kanji-top-picker-trigger {
   text-align: center;
 }
@@ -9557,6 +9575,18 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   width: 12.5rem;
   max-height: 16rem;
   overflow-y: auto;
+}
+
+.standard-kanji-top-menu.path-menu button {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  align-items: center;
+  gap: .36rem;
+}
+
+.standard-kanji-top-menu.path-menu .standard-kanji-path-symbol {
+  font-size: .66rem;
+  text-align: center;
 }
 
 .standard-kanji-top-menu.level-menu {
