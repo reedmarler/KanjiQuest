@@ -12180,11 +12180,11 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 
   .standard-kanji-prompt {
-    transform: translateY(5px);
+    transform: translateY(25px);
   }
 
   .standard-kanji-card .standard-kanji-answer {
-    transform: translateY(10px);
+    transform: translateY(30px);
   }
 
   .standard-kanji-card .standard-kanji-controls {
@@ -12194,11 +12194,11 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
 @media (min-width: 721px) and (min-height: 800px) {
   .standard-kanji-prompt {
-    transform: translateY(-49px);
+    transform: translateY(-29px);
   }
 
   .standard-kanji-card .standard-kanji-answer {
-    transform: translateY(-30px);
+    transform: translateY(-10px);
   }
 }
 
@@ -12245,8 +12245,78 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   display: none;
 }
 
+/* More Examples is an overlay utility, so its presence never changes the
+   prompt/answer stack or the fixed card height. */
+.standard-kanji-card .kanji-learning-meta {
+  position: absolute;
+  top: .72rem;
+  right: .72rem;
+  z-index: 2;
+  width: auto;
+  height: auto;
+}
+
+.standard-kanji-card .kanji-learning-more-examples {
+  min-height: 1.65rem;
+  padding: .18rem .42rem;
+  border-radius: 6px;
+  font-size: .52rem;
+  line-height: 1;
+}
+
+/* Highlighted and surrounding characters use different wrappers. Anchor all
+   example readings from the same top edge so compounds such as 一生懸命 keep
+   every furigana segment on one horizontal line. */
+.quest-kanji-example-anchor > .quest-kanji-expanded-reading,
+.quest-kanji-example-character > .quest-kanji-expanded-reading {
+  top: -.96rem;
+  bottom: auto;
+}
+
 @media (max-width: 720px) {
   .standard-kanji-study .standard-kanji-dashboard {
     display: none;
+  }
+
+  .standard-kanji-card.main-word-length-3 .kanji-learning-more-examples,
+  .standard-kanji-card.main-word-length-4 .kanji-learning-more-examples {
+    display: none;
+  }
+
+  .standard-kanji-parts.part-count-3 {
+    grid-template-rows: repeat(2, clamp(7.2rem, 15dvh, 8.3rem));
+  }
+
+  .standard-kanji-parts.part-count-3 > article {
+    order: 1;
+    min-height: 0;
+  }
+
+  .standard-kanji-parts.part-count-3 > article:nth-child(3) {
+    grid-column: auto;
+  }
+
+  .standard-kanji-parts.part-count-3 > article.is-longest-example {
+    order: 2;
+    grid-column: 1 / -1;
+  }
+
+  .standard-kanji-parts.part-count-3 > article .quest-kanji-expanded-example {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .standard-kanji-controls {
+    gap: .55rem;
+  }
+
+  .standard-kanji-card .standard-kanji-utility-row > .kanji-learning-reveal {
+    min-height: 2.8rem !important;
+    font-size: .64rem;
+  }
+
+  .standard-kanji-card .standard-kanji-action-row > .kanji-learning-easy {
+    min-height: 3.05rem;
+    font-size: .88rem;
   }
 }

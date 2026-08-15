@@ -23,6 +23,9 @@ const KANJI_DEFINITION_FALLBACKS: Readonly<Record<string, string>> = {
   '札': 'tag · ticket',
   '券': 'ticket · coupon',
 }
+const LEARNER_READING_OVERRIDES: Readonly<Record<string, { on: string[]; kun: string[] }>> = {
+  '悪': { on: ['アク', 'オ'], kun: ['わるい'] },
+}
 
 function readingSoundKey(reading: string) {
   return [...reading.normalize('NFKC')]
@@ -445,7 +448,9 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
   const entry = entries[index % entries.length]
   const card = entry?.card
   const wordDeckMode = !questMode && (mode === 'paths' ? pathStudyTarget === 'words' : compoundLength > 1)
-  const characterReadings = !questMode && !wordDeckMode && entry ? kanjiReadings[entry.character] : undefined
+  const characterReadings = !questMode && !wordDeckMode && entry
+    ? LEARNER_READING_OVERRIDES[entry.character] ?? kanjiReadings[entry.character]
+    : undefined
   const displayedCharacterReadings = uniqueCharacterReadings(characterReadings)
   const mainMeaning = wordDeckMode
     ? entry?.example.meaning.split(';')[0]?.trim() ?? ''
@@ -470,6 +475,13 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
   }, [allExamples, entry])
   const relatedExamples = examplePages[exampleOffset % examplePages.length] ?? []
   const hasMoreExamples = examplePages.length > 1
+  const longestRelatedExampleIndex = entry && relatedExamples.length === 3
+    ? relatedExamples.reduce((longestIndex, example, exampleIndex) => {
+      const exampleLength = [...exampleDisplayWord(example.example.word, entry.character)].length
+      const longestLength = [...exampleDisplayWord(relatedExamples[longestIndex]!.example.word, entry.character)].length
+      return exampleLength > longestLength ? exampleIndex : longestIndex
+    }, 0)
+    : -1
   const questParts = useMemo(() => entry && questMode ? questKanjiParts(entry.character) : [], [entry, questMode])
 
   function chooseLevel(nextLevel: JlptLevel) {
@@ -824,7 +836,7 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
         </>)}</>)}
       </section>
 
-      <main className={'grammar-choice-card kanji-learning-card standard-kanji-card' + (revealed ? ' is-revealed' : '') + (hasMoreExamples ? ' has-more-examples' : '')}>
+      <main className={'grammar-choice-card kanji-learning-card standard-kanji-card main-word-length-' + Math.min([...card.front].length, 4) + (revealed ? ' is-revealed' : '') + (hasMoreExamples ? ' has-more-examples' : '')}>
         <div className="kanji-learning-meta">
           {hasMoreExamples && (
             <button
@@ -854,10 +866,10 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
 
         <div className="kanji-learning-answer standard-kanji-answer">
           <div className={`quest-kanji-parts standard-kanji-parts part-count-${relatedExamples.length}${relatedExamples.length === 1 ? ' is-single' : ''}${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}`}>
-            {relatedExamples.map((example) => {
+            {relatedExamples.map((example, exampleIndex) => {
               const wordLength = [...exampleDisplayWord(example.example.word, entry.character)].length
               return (
-                <article key={example.character + example.example.word}>
+                <article className={exampleIndex === longestRelatedExampleIndex ? 'is-longest-example' : undefined} key={example.character + example.example.word}>
                   <div className="quest-kanji-expanded-examples example-count-1">
                     <div className="quest-kanji-expanded-example">
                       <div
