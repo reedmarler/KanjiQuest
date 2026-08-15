@@ -12141,6 +12141,12 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   background: color-mix(in srgb, var(--surface-2) 88%, var(--text-muted));
 }
 
+/* The first card has nothing behind it. */
+.standard-kanji-review:disabled {
+  opacity: .38;
+  cursor: not-allowed;
+}
+
 .standard-kanji-furigana-toggle.is-active,
 .standard-kanji-furigana-toggle[aria-pressed='true'],
 .standard-kanji-english-toggle.is-active,
@@ -12233,14 +12239,6 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 /* Match the compact Quest Kanji header and identity row in the standard lab. */
-.standard-kanji-study .standard-kanji-dashboard {
-  border: 0;
-  background: transparent;
-  color: var(--text-muted);
-  box-shadow: none;
-  font-weight: 700;
-}
-
 .standard-kanji-study .standard-kanji-navigation {
   margin-bottom: .18rem;
   padding: .22rem 0 .42rem;
@@ -12304,10 +12302,6 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 @media (max-width: 720px) {
-  .standard-kanji-study .standard-kanji-dashboard {
-    display: none;
-  }
-
   .standard-kanji-card.main-word-length-3 .kanji-learning-more-examples,
   .standard-kanji-card.main-word-length-4 .kanji-learning-more-examples {
     display: none;

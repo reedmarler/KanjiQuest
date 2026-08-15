@@ -96,11 +96,11 @@ function exampleWordFitUnits(word: string, character: string) {
   return longestSide * 2 + 1
 }
 
-function paginateExamples(examples: readonly KanjiLabEntry[], character: string) {
+function paginateExamples(examples: readonly KanjiLabEntry[]) {
   const pages: KanjiLabEntry[][] = []
   const remaining = [...examples]
   const columnSpan = (example: KanjiLabEntry) => {
-    const fitUnits = exampleWordFitUnits(exampleDisplayWord(example.example.word, character), character)
+    const fitUnits = exampleWordFitUnits(exampleDisplayWord(example.example.word, example.character), example.character)
     if (fitUnits <= 5) return 1
     if (fitUnits <= 7) return 2
     return 3
@@ -132,6 +132,35 @@ function uniqueExampleWords(examples: readonly KanjiLabEntry[], character: strin
     seenWords.add(word)
     return true
   })
+}
+
+/**
+ * Round-robin the examples across every kanji in the prompt so a two-kanji word
+ * such as 感動 shows a 動 word before it spends a second slot on 感.
+ */
+function interleaveExamplesByCharacter(
+  source: readonly KanjiLabEntry[],
+  characters: readonly string[],
+  keepExample: (candidate: KanjiLabEntry) => boolean,
+) {
+  const byCharacter = characters.map((character) => uniqueExampleWords(
+    source.filter((candidate) => candidate.character === character && keepExample(candidate)),
+    character,
+  ))
+  const deepestList = Math.max(0, ...byCharacter.map((examples) => examples.length))
+  const seenWords = new Set<string>()
+  const mixed: KanjiLabEntry[] = []
+
+  for (let rank = 0; rank < deepestList; rank += 1) {
+    for (const examples of byCharacter) {
+      const example = examples[rank]
+      if (!example || seenWords.has(example.example.word)) continue
+      seenWords.add(example.example.word)
+      mixed.push(example)
+    }
+  }
+
+  return mixed
 }
 
 function QuestMainWord({ word, reading }: { word: string; reading: string }) {
@@ -464,21 +493,26 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
     if (mode === 'paths' && pathStudyTarget === 'kanji') {
       return uniqueExampleWords(pathKanjiEntries(path).filter((candidate) => candidate.character === entry.character && isDifferentFromMainWord(candidate)), entry.character)
     }
-    return uniqueExampleWords(kanjiLabEntries.filter((candidate) => candidate.character === entry.character && isDifferentFromMainWord(candidate)), entry.character)
-  }, [entry, mode, path, pathStudyTarget, questEntries, questMode])
+    // A word deck anchors on every kanji in the prompt, so 感動 can offer a 動
+    // word instead of filling all three slots with 感 words.
+    const promptKanji = [...new Set([...entry.card.front].filter((character) => KANJI_CHARACTER_RE.test(character)))]
+    const anchors = wordDeckMode && promptKanji.length > 1 ? promptKanji : [entry.character]
+    return interleaveExamplesByCharacter(kanjiLabEntries, anchors, isDifferentFromMainWord)
+  }, [entry, mode, path, pathStudyTarget, questEntries, questMode, wordDeckMode])
   const examplePages = useMemo(() => {
     if (!entry || !allExamples.length) return []
     const currentExample = allExamples.findIndex((candidate) => candidate.example.word === entry.example.word)
     const start = currentExample < 0 ? 0 : currentExample
     const orderedExamples = [...allExamples.slice(start), ...allExamples.slice(0, start)]
-    return paginateExamples(orderedExamples, entry.character)
+    return paginateExamples(orderedExamples)
   }, [allExamples, entry])
   const relatedExamples = examplePages[exampleOffset % examplePages.length] ?? []
   const hasMoreExamples = examplePages.length > 1
   const longestRelatedExampleIndex = entry && relatedExamples.length === 3
     ? relatedExamples.reduce((longestIndex, example, exampleIndex) => {
-      const exampleLength = [...exampleDisplayWord(example.example.word, entry.character)].length
-      const longestLength = [...exampleDisplayWord(relatedExamples[longestIndex]!.example.word, entry.character)].length
+      const longest = relatedExamples[longestIndex]!
+      const exampleLength = [...exampleDisplayWord(example.example.word, example.character)].length
+      const longestLength = [...exampleDisplayWord(longest.example.word, longest.character)].length
       return exampleLength > longestLength ? exampleIndex : longestIndex
     }, 0)
     : -1
@@ -727,10 +761,9 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
   return (
     <div className="grammar-practice-view kanji-lab kanji-lab-paths standard-kanji-study">
       <div className="study-top grammar-study-top">
-        <button type="button" className="vocab-back-arrow" onClick={previousCard} aria-label={index > 0 ? 'Previous kanji' : 'Back to Dashboard'} title={index > 0 ? 'Previous kanji' : 'Back to Dashboard'}>
+        <button type="button" className="vocab-back-arrow" onClick={onDashboard ?? onBack} aria-label="Back to Dashboard" title="Back to Dashboard">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
         </button>
-        {onDashboard && <button type="button" className="btn btn-ghost standard-kanji-dashboard" onClick={onDashboard}>Dashboard</button>}
         <span className="study-progress">{index + 1} / {entries.length}</span>
         <div
           className="standard-kanji-top-modes standard-kanji-top-selectors"
@@ -868,7 +901,7 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
         <div className="kanji-learning-answer standard-kanji-answer">
           <div className={`quest-kanji-parts standard-kanji-parts part-count-${relatedExamples.length}${relatedExamples.length === 1 ? ' is-single' : ''}${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}`}>
             {relatedExamples.map((example, exampleIndex) => {
-              const wordLength = [...exampleDisplayWord(example.example.word, entry.character)].length
+              const wordLength = [...exampleDisplayWord(example.example.word, example.character)].length
               return (
                 <article className={exampleIndex === longestRelatedExampleIndex ? 'is-longest-example' : undefined} key={example.character + example.example.word}>
                   <div className="quest-kanji-expanded-examples example-count-1">
@@ -877,7 +910,7 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
                         className={`quest-kanji-expanded-word word-length-${Math.min(wordLength, 5)}`}
                         lang="ja"
                       >
-                        <QuestExampleWord word={example.example.word} character={entry.character} reading={example.example.reading} />
+                        <QuestExampleWord word={example.example.word} character={example.character} reading={example.example.reading} />
                       </div>
                       <em className="quest-kanji-expanded-meaning">{example.example.meaning.split(';')[0]}</em>
                     </div>
@@ -916,7 +949,7 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
             </button>
           </div>
           <div className="standard-kanji-action-row">
-            <button type="button" className="btn btn-ghost standard-kanji-review" onClick={() => nextCard(false)}>Review again</button>
+            <button type="button" className="btn btn-ghost standard-kanji-review" onClick={previousCard} disabled={index === 0}>Previous word</button>
             <button type="button" className="btn kanji-learning-easy" onClick={() => nextCard(true)}>Next word</button>
           </div>
         </div>
