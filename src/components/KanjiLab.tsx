@@ -50,10 +50,16 @@ function uniqueCharacterReadings(readings?: { on: string[]; kun: string[] }) {
   }
 }
 
+function exampleDisplayWord(word: string, character: string) {
+  const variants = word.split(/[/／]/).map((variant) => variant.trim()).filter(Boolean)
+  return variants.find((variant) => variant.includes(character)) ?? variants[0] ?? word
+}
+
 function QuestExampleWord({ word, character, reading }: { word: string; character: string; reading: string }) {
-  const characters = [...word]
+  const displayWord = exampleDisplayWord(word, character)
+  const characters = [...displayWord]
   const anchorIndex = characters.indexOf(character)
-  const characterReadings = questWordCharacterReadings(word, reading)
+  const characterReadings = questWordCharacterReadings(displayWord, reading)
 
   const renderCharacters = (start: number, end: number) => characters.slice(start, end).map((part, offset) => {
     const index = start + offset
@@ -91,7 +97,7 @@ function paginateExamples(examples: readonly KanjiLabEntry[], character: string)
   const pages: KanjiLabEntry[][] = []
   const remaining = [...examples]
   const columnSpan = (example: KanjiLabEntry) => {
-    const fitUnits = exampleWordFitUnits(example.example.word, character)
+    const fitUnits = exampleWordFitUnits(exampleDisplayWord(example.example.word, character), character)
     if (fitUnits <= 5) return 1
     if (fitUnits <= 7) return 2
     return 3
@@ -115,10 +121,10 @@ function paginateExamples(examples: readonly KanjiLabEntry[], character: string)
   return pages
 }
 
-function uniqueExampleWords(examples: readonly KanjiLabEntry[]) {
+function uniqueExampleWords(examples: readonly KanjiLabEntry[], character: string) {
   const seenWords = new Set<string>()
   return examples.filter((example) => {
-    const word = example.example.word.trim()
+    const word = exampleDisplayWord(example.example.word, character).trim()
     if (!word || seenWords.has(word)) return false
     seenWords.add(word)
     return true
@@ -154,7 +160,13 @@ function voicedReadingVariants(reading: string) {
     は: ['ば', 'ぱ'], ひ: ['び', 'ぴ'], ふ: ['ぶ', 'ぷ'], へ: ['べ', 'ぺ'], ほ: ['ぼ', 'ぽ'],
   }
   const firstCharacter = reading[0]
-  return [reading, ...(voicedInitials[firstCharacter] ?? []).map((initial) => initial + reading.slice(1))]
+  const voicedVariants = [reading, ...(voicedInitials[firstCharacter] ?? []).map((initial) => initial + reading.slice(1))]
+
+  return [...new Set(voicedVariants.flatMap((variant) => (
+    ['つ', 'ち', 'く', 'き'].includes(variant.at(-1) ?? '')
+      ? [variant, `${variant.slice(0, -1)}っ`]
+      : [variant]
+  )))]
 }
 
 function questWordCharacterReadings(word: string, reading: string) {
@@ -443,11 +455,11 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
   const allExamples = useMemo(() => {
     if (!entry) return []
     const isDifferentFromMainWord = (candidate: KanjiLabEntry) => candidate.example.word !== entry.card.front
-    if (questMode) return uniqueExampleWords(questEntries.filter((candidate) => candidate.character === entry.character && isDifferentFromMainWord(candidate)))
+    if (questMode) return uniqueExampleWords(questEntries.filter((candidate) => candidate.character === entry.character && isDifferentFromMainWord(candidate)), entry.character)
     if (mode === 'paths' && pathStudyTarget === 'kanji') {
-      return uniqueExampleWords(pathKanjiEntries(path).filter((candidate) => candidate.character === entry.character && isDifferentFromMainWord(candidate)))
+      return uniqueExampleWords(pathKanjiEntries(path).filter((candidate) => candidate.character === entry.character && isDifferentFromMainWord(candidate)), entry.character)
     }
-    return uniqueExampleWords(kanjiLabEntries.filter((candidate) => candidate.character === entry.character && isDifferentFromMainWord(candidate)))
+    return uniqueExampleWords(kanjiLabEntries.filter((candidate) => candidate.character === entry.character && isDifferentFromMainWord(candidate)), entry.character)
   }, [entry, mode, path, pathStudyTarget, questEntries, questMode])
   const examplePages = useMemo(() => {
     if (!entry || !allExamples.length) return []
@@ -642,7 +654,7 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
                 <article key={part.character} className={part.examples.length ? '' : 'has-no-examples'}>
                   <div className={`quest-kanji-expanded-examples example-count-${examples.length}`} style={exampleColumns ? { gridTemplateColumns: exampleColumns } : undefined}>
                     {examples.map((example, exampleIndex) => {
-                      const wordLength = example ? [...example.example.word].length : 1
+                      const wordLength = example ? [...exampleDisplayWord(example.example.word, part.character)].length : 1
                       return (
                         <div className="quest-kanji-expanded-example" key={example?.example.word ?? `${part.character}-${exampleIndex}`}>
                           <div
@@ -843,7 +855,7 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
         <div className="kanji-learning-answer standard-kanji-answer">
           <div className={`quest-kanji-parts standard-kanji-parts part-count-${relatedExamples.length}${relatedExamples.length === 1 ? ' is-single' : ''}${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}`}>
             {relatedExamples.map((example) => {
-              const wordLength = [...example.example.word].length
+              const wordLength = [...exampleDisplayWord(example.example.word, entry.character)].length
               return (
                 <article key={example.character + example.example.word}>
                   <div className="quest-kanji-expanded-examples example-count-1">

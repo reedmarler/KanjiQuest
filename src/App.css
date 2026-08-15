@@ -12168,6 +12168,17 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     padding-top: 2.5rem;
   }
 
+  .standard-kanji-card .standard-kanji-compound-word {
+    font-size: clamp(4.25rem, 10.2vh, 6rem);
+  }
+
+  .standard-kanji-card .standard-kanji-parts.part-count-2 .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word,
+  .standard-kanji-card .standard-kanji-parts.part-count-2 .quest-kanji-expanded-examples.example-count-1 .quest-kanji-example-prefix,
+  .standard-kanji-card .standard-kanji-parts.part-count-2 .quest-kanji-expanded-examples.example-count-1 .quest-kanji-example-suffix,
+  .standard-kanji-card .standard-kanji-parts.part-count-2 .quest-kanji-expanded-examples.example-count-1 .quest-kanji-example-anchor > strong {
+    font-size: 2.65rem !important;
+  }
+
   .standard-kanji-prompt {
     transform: translateY(5px);
   }
