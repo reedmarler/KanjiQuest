@@ -98,6 +98,22 @@ export type CampaignArc = {
   mark: string
 }
 
+/**
+ * What the whole campaign is for.
+ *
+ * Each arc explains its own chapter, but nothing said where the road ends, so
+ * the quest list read as twelve separate errands. This is the one line that
+ * makes them a journey: the relics are not trophies, they are the twelve
+ * seals the lantern needs before it will light.
+ */
+export const CAMPAIGN_GOAL = {
+  mark: '灯',
+  title: 'Rekindle the Hollow Lantern',
+  japanese: '空提灯に灯を',
+  premise: 'Yōkai stole the seals of everyday Japanese and fed them to a lantern that burns without light.',
+  promise: 'Recover all twelve and the lantern lights again.',
+} as const
+
 export const CAMPAIGN_ARCS: readonly CampaignArc[] = [
   {
     id: 'inkbound',

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { QUESTS, isQuestUnlocked } from '../data/questCampaign'
+import { CAMPAIGN_ARCS, CAMPAIGN_GOAL, QUESTS, isQuestUnlocked } from '../data/questCampaign'
 import { completedQuestSteps, isQuestComplete, QUEST_STEPS, type QuestProgress, type QuestStep } from '../lib/questProgress'
 import { earnedRelics } from '../lib/relics'
 
@@ -50,13 +50,31 @@ export function QuestHub({ onBack, onOpenVocab, onOpenKanji, onOpenGrammar, onOp
         <span>{clearedCount} / {QUESTS.length} quests complete</span>
       </header>
 
+      {/* Why any of this matters. The relics were already the goal mechanically
+          — nothing on screen ever said so, which left twelve quests looking
+          like a to-do list rather than a road to somewhere. */}
+      <section className="journey-goal" aria-labelledby="journey-goal-title">
+        <span className="journey-goal-mark" aria-hidden="true">{CAMPAIGN_GOAL.mark}</span>
+        <div className="journey-goal-copy">
+          <span className="journey-goal-eyebrow">THE JOURNEY</span>
+          <h1 id="journey-goal-title">{CAMPAIGN_GOAL.title}<small lang="ja">{CAMPAIGN_GOAL.japanese}</small></h1>
+          <p>{CAMPAIGN_GOAL.premise} <b>{CAMPAIGN_GOAL.promise}</b></p>
+          <div className="journey-goal-track" role="img" aria-label={`${relicCount} of ${QUESTS.length} seals recovered`}>
+            <div className="journey-goal-fill" style={{ width: `${(relicCount / QUESTS.length) * 100}%` }} />
+          </div>
+          <div className="journey-goal-tally">
+            <b>{relicCount}</b><span>of {QUESTS.length} seals recovered</span>
+          </div>
+        </div>
+      </section>
+
       <section className="quest-focus" aria-labelledby="current-quest-title">
         <div className="quest-focus-copy">
           <header>
             <span>QUEST {String(selected.number).padStart(2, '0')}</span>
             <small>{selected.level} · {completed} of {QUEST_STEPS.length} steps</small>
           </header>
-          <h1 id="current-quest-title">{selected.title}</h1>
+          <h2 id="current-quest-title">{selected.title}</h2>
           <p>{selected.subtitle}</p>
 
           <div className="quest-focus-meta">
@@ -95,21 +113,60 @@ export function QuestHub({ onBack, onOpenVocab, onOpenKanji, onOpenGrammar, onOp
         </aside>
       </section>
 
-      <section className="quest-picker" aria-labelledby="quest-road-title">
-        <header><div><span>THE INKBOUND ROAD</span><h2 id="quest-road-title">Choose a quest</h2></div><small>{clearedCount} of {QUESTS.length} cleared</small></header>
-        <div className="quest-picker-grid">
-          {QUESTS.map((quest) => {
-            const isOpen = isQuestUnlocked(quest, questComplete)
-            const done = questComplete(quest.id)
-            const isSelected = quest.id === selected.id
-            return (
-              <button key={quest.id} type="button" disabled={!isOpen} onClick={() => setSelectedId(quest.id)} className={`quest-picker-item${done ? ' is-done' : ''}${isSelected ? ' is-current' : ''}`} aria-pressed={isSelected}>
-                <span>{done ? '✓' : quest.number}</span>
-                <div><b>{isOpen ? quest.title : `Quest ${quest.number}`}</b><small>{done ? 'Complete' : isOpen ? quest.level : 'Locked'}</small></div>
-              </button>
-            )
-          })}
-        </div>
+      {/* The road, told as chapters. A flat grid of twelve made every quest
+          look like a separate errand; grouping them under each arc's own lore
+          gives the list a shape and a direction. */}
+      <section className="journey-road" aria-labelledby="journey-road-title">
+        <h2 id="journey-road-title" className="journey-road-title">The road ahead</h2>
+        {CAMPAIGN_ARCS.map((arc) => {
+          const arcQuests = QUESTS.filter((quest) => quest.arcId === arc.id)
+          const arcCleared = arcQuests.filter((quest) => questComplete(quest.id)).length
+          const arcOpen = arcQuests.some((quest) => isQuestUnlocked(quest, questComplete))
+
+          return (
+            <article key={arc.id} className={`journey-chapter${arcOpen ? '' : ' is-sealed'}${arcCleared === arcQuests.length ? ' is-cleared' : ''}`}>
+              <header className="journey-chapter-header">
+                <span className="journey-chapter-mark" aria-hidden="true">{arc.mark}</span>
+                <div>
+                  <span className="journey-chapter-eyebrow">{arc.subtitle}</span>
+                  <h3>{arc.title}<small lang="ja">{arc.japanese}</small></h3>
+                  <p>{arc.blurb}</p>
+                </div>
+                <small className="journey-chapter-count">{arcCleared}/{arcQuests.length}</small>
+              </header>
+
+              <ol className="journey-path">
+                {arcQuests.map((quest) => {
+                  const isOpen = isQuestUnlocked(quest, questComplete)
+                  const done = questComplete(quest.id)
+                  const isSelected = quest.id === selected.id
+                  const isFinale = quest.number === QUESTS.length
+
+                  return (
+                    <li key={quest.id}>
+                      <button
+                        type="button"
+                        disabled={!isOpen}
+                        onClick={() => setSelectedId(quest.id)}
+                        aria-pressed={isSelected}
+                        className={`journey-stop${done ? ' is-done' : ''}${isSelected ? ' is-current' : ''}${isFinale ? ' is-finale' : ''}`}
+                      >
+                        <span className="journey-stop-dot" aria-hidden="true">{done ? '✓' : quest.number}</span>
+                        <span className="journey-stop-copy">
+                          <b>{isOpen ? quest.title : 'Sealed'}</b>
+                          {/* Naming the guardian is what turns a row into a
+                              stop on a road with something waiting on it. */}
+                          <small>{isOpen ? `${quest.level} · ${quest.guardian.name}` : quest.level}</small>
+                        </span>
+                        {isFinale && <span className="journey-stop-flag">FINALE</span>}
+                      </button>
+                    </li>
+                  )
+                })}
+              </ol>
+            </article>
+          )
+        })}
       </section>
     </main>
   )

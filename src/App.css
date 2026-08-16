@@ -12737,3 +12737,285 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   --speakable-cue-size: .7rem;
   gap: .2rem;
 }
+
+/* --- Quest hub: the journey ------------------------------------------- */
+
+/* States the destination before the twelve stops to it. Without this the
+   quest list reads as chores; with it, each one is a step toward the lantern. */
+.journey-goal {
+  display: flex;
+  gap: .9rem;
+  align-items: flex-start;
+  margin-bottom: .7rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--sakura) 30%, var(--border));
+  border-radius: 16px;
+  background:
+    radial-gradient(120% 140% at 88% 0%, color-mix(in srgb, var(--sakura) 13%, transparent), transparent 62%),
+    var(--surface);
+}
+
+.journey-goal-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid color-mix(in srgb, var(--sakura) 42%, var(--border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+  color: var(--sakura-light);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.journey-goal-copy { flex: 1; min-width: 0; }
+
+.journey-goal-eyebrow {
+  color: var(--sakura-light);
+  font-size: .5rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.journey-goal-copy h1 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .5rem;
+  margin: .2rem 0 .3rem;
+  font-size: 1.12rem;
+  line-height: 1.15;
+}
+
+.journey-goal-copy h1 small {
+  color: var(--text-muted);
+  font-size: .66rem;
+  font-weight: 600;
+}
+
+.journey-goal-copy > p {
+  margin: 0 0 .68rem;
+  color: var(--text-muted);
+  font-size: .63rem;
+  line-height: 1.5;
+}
+
+.journey-goal-copy > p b { color: var(--text); font-weight: 700; }
+
+.journey-goal-track {
+  height: .34rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 20%, transparent);
+  overflow: hidden;
+}
+
+.journey-goal-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--sakura), var(--sakura-light));
+  transition: width 400ms ease;
+}
+
+.journey-goal-tally {
+  display: flex;
+  align-items: baseline;
+  gap: .34rem;
+  margin-top: .4rem;
+  color: var(--text-muted);
+  font-size: .57rem;
+}
+
+.journey-goal-tally b { color: var(--sakura-light); font-size: .8rem; }
+
+/* --- Quest hub: the road ---------------------------------------------- */
+
+.journey-road { margin-top: .9rem; }
+
+.journey-road-title {
+  margin: 0 0 .55rem;
+  color: var(--text-muted);
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.journey-chapter {
+  margin-bottom: .7rem;
+  padding: .95rem 1rem 1.05rem;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--surface);
+}
+
+/* An arc whose quests are all still locked is context, not a menu. */
+.journey-chapter.is-sealed { opacity: .62; }
+
+.journey-chapter.is-cleared {
+  border-color: color-mix(in srgb, var(--rayquaza) 34%, var(--border));
+}
+
+.journey-chapter-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: .7rem;
+  align-items: start;
+  margin-bottom: .8rem;
+}
+
+.journey-chapter-mark {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.journey-chapter-eyebrow {
+  color: var(--text-muted);
+  font-size: .48rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.journey-chapter-header h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .42rem;
+  margin: .12rem 0 .26rem;
+  font-size: .84rem;
+}
+
+.journey-chapter-header h3 small {
+  color: var(--text-muted);
+  font-size: .6rem;
+  font-weight: 600;
+}
+
+.journey-chapter-header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .58rem;
+  line-height: 1.5;
+}
+
+.journey-chapter-count {
+  color: var(--text-muted);
+  font-size: .62rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* The path itself. The connecting line is what makes a list of buttons read
+   as consecutive stops rather than a menu of options. */
+.journey-path {
+  position: relative;
+  margin: 0;
+  padding: 0 0 0 1.15rem;
+  list-style: none;
+}
+
+.journey-path::before {
+  content: '';
+  position: absolute;
+  left: .48rem;
+  top: .9rem;
+  bottom: .9rem;
+  width: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-muted) 22%, transparent);
+}
+
+.journey-path > li { position: relative; }
+
+.journey-stop {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  width: 100%;
+  margin: 0;
+  padding: .5rem .6rem;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.journey-stop-dot {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-left: -1.4rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: .58rem;
+  font-weight: 800;
+}
+
+.journey-stop-copy { display: grid; gap: .06rem; min-width: 0; }
+.journey-stop-copy b { font-size: .7rem; }
+.journey-stop-copy small { color: var(--text-muted); font-size: .54rem; }
+
+.journey-stop:not(:disabled):hover {
+  border-color: var(--border);
+  background: var(--surface-2);
+}
+
+.journey-stop.is-done .journey-stop-dot {
+  border-color: color-mix(in srgb, var(--rayquaza) 52%, var(--border));
+  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface));
+  color: var(--rayquaza-light);
+}
+
+.journey-stop.is-current {
+  border-color: color-mix(in srgb, var(--sakura) 45%, var(--border));
+  background: color-mix(in srgb, var(--sakura) 10%, var(--surface-2));
+}
+
+.journey-stop.is-current .journey-stop-dot {
+  border-color: var(--sakura);
+  background: color-mix(in srgb, var(--sakura) 26%, var(--surface));
+  color: var(--sakura-light);
+}
+
+.journey-stop:disabled { cursor: not-allowed; opacity: .5; }
+
+.journey-stop-flag {
+  margin-left: auto;
+  padding: .12rem .38rem;
+  border: 1px solid color-mix(in srgb, var(--gold, #d9b45a) 50%, var(--border));
+  border-radius: 999px;
+  color: var(--gold, #d9b45a);
+  font-size: .45rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .journey-goal { padding: .85rem .9rem; gap: .7rem; }
+  .journey-goal-mark { width: 2.5rem; height: 2.5rem; font-size: 1.25rem; }
+  .journey-goal-copy h1 { font-size: .98rem; }
+  .journey-chapter-header { grid-template-columns: auto 1fr; }
+  /* The tally would otherwise sit alone on a third column and squeeze the
+     blurb; on the mark's row it costs no width at all. */
+  .journey-chapter-count { grid-row: 1; grid-column: 2; justify-self: end; }
+}
