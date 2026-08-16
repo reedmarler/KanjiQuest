@@ -12237,6 +12237,13 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .speak-button-icon { font-size: .95rem; }
 }
 
+/* Centred under the word being studied, so it reads as "listen to this"
+   rather than a page-level control. */
+.standard-kanji-speak {
+  justify-content: center;
+  margin-top: .5rem;
+}
+
 /* The header is space-between, so this pushes the buttons over to sit
    directly left of Reset rather than floating in the middle. */
 .voice-settings-speak {

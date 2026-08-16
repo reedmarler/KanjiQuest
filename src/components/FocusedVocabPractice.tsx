@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { vocabFocusSets, type VocabFocusSet } from '../data/vocabFocusSets'
 import { getVocabExampleSentence } from '../lib/vocabExampleSentence'
 import { FuriganaSegment } from './FuriganaText'
+import { SpeakButtons } from './SpeakButtons'
 
 interface FocusedVocabPracticeProps {
   onBack: () => void
@@ -155,6 +156,9 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
             <p className={'kanji-learning-character-reading' + (revealed ? ' is-revealed' : '')} lang="ja" aria-hidden={!revealed}>
               <span>{card.reading}</span>
             </p>
+            {/* Only once the card is turned: the reading is the answer here,
+                so hearing it first would give the card away. */}
+            {revealed && <SpeakButtons className="standard-kanji-speak" text={card.reading || card.front} />}
             <div className="kanji-learning-divider" aria-hidden="true" />
 
             <div className="kanji-learning-answer">
@@ -234,6 +238,7 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
               <p className={revealed ? 'is-visible' : ''} lang="ja" aria-hidden={!revealed}>{card.reading}</p>
               <strong className={revealed ? 'is-visible' : ''} aria-hidden={!revealed}>{card.back}</strong>
             </div>
+            {revealed && <SpeakButtons className="standard-kanji-speak" text={card.reading || card.front} />}
             {example && (
               <div className={'focused-vocab-example' + (revealed ? ' is-visible' : '')} aria-hidden={!revealed}>
                 <span className="focused-vocab-example-en">{example.english}</span>
