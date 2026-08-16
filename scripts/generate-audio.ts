@@ -27,6 +27,7 @@ import path from 'node:path'
 import { allCards } from '../src/data'
 import { vocabFocusSets } from '../src/data/vocabFocusSets'
 import { kanjiLabEntries } from '../src/lib/kanjiLabCatalog'
+import { spokenTextForCard } from '../src/lib/spokenText'
 
 const AUDIO_DIR = path.resolve(import.meta.dirname, '../public/audio')
 const MANIFEST_PATH = path.join(AUDIO_DIR, 'manifest.json')
@@ -62,18 +63,21 @@ function keyFor(text: string) {
 function collectTexts(): string[] {
   const texts: string[] = []
 
+  // spokenTextForCard is the same resolution the app's listen buttons use.
+  // It has to be: clips are keyed by a hash of the spoken text, so rendering
+  // anything else produces files the app will never ask for. It also keeps
+  // romaji readings out — roughly half the vocabulary stores "jikan" rather
+  // than じかん, and a hosted engine reads that as an English word.
   if (scope === 'focus' || scope === 'all') {
-    // Reading, not the written form: TTS on kana is unambiguous, while kanji
-    // leaves the engine to guess between readings.
     for (const set of vocabFocusSets) {
-      for (const card of set.cards) texts.push(card.reading ?? card.front)
+      for (const card of set.cards) texts.push(spokenTextForCard(card))
     }
   }
   if (scope === 'kanji' || scope === 'all') {
     for (const entry of kanjiLabEntries) texts.push(entry.example.reading || entry.example.word)
   }
   if (scope === 'all') {
-    for (const card of allCards) texts.push(card.reading || card.front)
+    for (const card of allCards) texts.push(spokenTextForCard(card))
   }
 
   return [...new Set(texts.map((t) => t.trim()).filter(Boolean))]

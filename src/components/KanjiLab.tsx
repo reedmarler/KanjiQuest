@@ -6,6 +6,7 @@ import { vocabFocusSets } from '../data/vocabFocusSets'
 import { kanjiLabEntries, type KanjiLabEntry } from '../lib/kanjiLabCatalog'
 import type { JlptLevel } from '../lib/types'
 import { SpeakButtons } from './SpeakButtons'
+import { spokenTextForCard } from '../lib/spokenText'
 
 interface KanjiLabProps {
   onBack: () => void
@@ -686,7 +687,7 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
           <div className={`quest-kanji-word-answer${revealed && englishVisible ? ' is-revealed' : ''}`} aria-hidden={!revealed || !englishVisible}>
             <span>{entry.example.meaning}</span>
           </div>
-          <SpeakButtons className="standard-kanji-speak" text={card.reading || card.front} />
+          <SpeakButtons className="standard-kanji-speak" text={spokenTextForCard(card)} />
           <div className={`quest-kanji-parts part-count-${questParts.length}${questParts.length === 1 ? ' is-single' : ''}${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}`}>
             {questParts.map((part) => {
               const examples = part.examples.length ? part.examples.slice(0, 2) : [undefined]
@@ -905,7 +906,7 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
           <SpeakButtons
             className="standard-kanji-speak"
             text={wordDeckMode
-              ? (card.reading || card.front)
+              ? spokenTextForCard(card)
               : (entry.example.reading || entry.example.word)}
           />
         </div>
