@@ -1,0 +1,10 @@
+# Dependencies for TTS_PROVIDER=elevenlabs only.
+#
+# The local Style-BERT-VITS2 engine is imported lazily, so a hosted-provider
+# deployment never touches torch, transformers, or the model tooling — this
+# installs in seconds instead of pulling ~2GB of ML dependencies it would
+# never load. Use requirements.txt instead if you want the local engine.
+fastapi
+uvicorn[standard]
+pydantic
+httpx

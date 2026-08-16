@@ -24,10 +24,12 @@ logger = logging.getLogger("tts_service")
 API_ROOT = "https://api.elevenlabs.io/v1"
 REQUEST_TIMEOUT_SECONDS = 30.0
 
-# The API accepts a narrower speed range than our UI slider implies; going
-# outside it is a 422 rather than a clamp, so clamp on this side.
-MIN_SPEED = 0.7
-MAX_SPEED = 1.2
+# The REST API accepts 0.25-4.0 (the Agents Platform is the narrower 0.7-1.2
+# one — don't confuse them). Out-of-range is a 422 rather than a clamp, so
+# clamp here. /speak's own 0.5-2.0 bound is stricter anyway, and in practice
+# everything renders at 1.0 because playback speed is handled in the browser.
+MIN_SPEED = 0.25
+MAX_SPEED = 4.0
 
 
 class ElevenLabsProvider(TTSProvider):

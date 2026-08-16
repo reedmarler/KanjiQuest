@@ -19,7 +19,41 @@ to `.env` (or set the same keys as host secrets) to configure.
 > has no such gate, which makes the consent question yours to honour rather
 > than the vendor's to check.
 
-## 1. Install
+## Quick start: cloned voice, no server in production
+
+If you only want the voice on pre-rendered content, you never deploy this
+service at all — run it on your own machine long enough to render the audio,
+commit the result, and the site serves static files forever.
+
+```bash
+cd backend/tts_service
+python -m venv .venv && .venv\Scripts\activate     # macOS/Linux: source .venv/bin/activate
+pip install -r requirements-hosted.txt              # 4 packages, no torch
+
+# From the ElevenLabs dashboard: Profile -> API key, and your voice's ID
+set TTS_PROVIDER=elevenlabs                          # macOS/Linux: export ...
+set TTS_API_KEY=sk_...
+set TTS_DEFAULT_VOICE=<voice id>
+set TTS_MODEL_ID=eleven_flash_v2_5                   # half the credits of multilingual_v2
+set TTS_ADMIN_TOKEN=<any long random string>
+
+uvicorn app:app --host 127.0.0.1 --port 8001
+```
+
+Then, in the project root:
+
+```bash
+npm run generate:audio -- --scope=focus --dry-run   # vocabulary: price it
+npm run generate:audio -- --scope=focus             # ...then render it
+npm run prewarm:audio -- --count=500                # hero sentences
+npm run harvest:audio                                # bank everything
+git add public/audio && git commit -m "Add voice audio"
+```
+
+`npm run build` now ships those clips. Nothing else has to run in production,
+and the API key never leaves your machine.
+
+## 1. Install (local Style-BERT-VITS2 engine)
 
 ```bash
 cd backend/tts_service
