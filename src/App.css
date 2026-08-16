@@ -13019,3 +13019,26 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
      blurb; on the mark's row it costs no width at all. */
   .journey-chapter-count { grid-row: 1; grid-column: 2; justify-self: end; }
 }
+
+/* --- Listen cue in packed example cells -------------------------------- */
+
+/* The standard layout packs three examples into a grid, so two of them land
+   in half-width cells: the word alone fills ~133px of a 146px cell, and the
+   trailing cue overflowed and was clipped to a sliver. Inline the cue costs
+   its own width, a gap, and the matching left padding that keeps the word
+   centred — about 40px the cell does not have. Lifting it to the cell's
+   corner gives the word its full width back; the whole card stays tappable,
+   so nothing is lost but the crowding. */
+.standard-kanji-parts .quest-kanji-expanded-example {
+  position: relative;
+}
+
+.standard-kanji-parts .speakable-word {
+  padding-inline: .15rem;
+}
+
+.standard-kanji-parts .speakable-word-cue {
+  position: absolute;
+  top: .32rem;
+  right: .38rem;
+}
