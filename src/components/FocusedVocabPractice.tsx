@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { vocabFocusSets, type VocabFocusSet } from '../data/vocabFocusSets'
 import { getVocabExampleSentence } from '../lib/vocabExampleSentence'
 import { FuriganaSegment } from './FuriganaText'
-import { SpeakButtons } from './SpeakButtons'
+import { SpeakableWord } from './SpeakableWord'
 import { spokenTextForCard } from '../lib/spokenText'
 
 interface FocusedVocabPracticeProps {
@@ -153,13 +153,12 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
             <div className="kanji-learning-meta">
               <span>{known} easy this set</span>
             </div>
-            <p className="kanji-learning-character" lang="ja">{card.front}</p>
+            <p className="kanji-learning-character" lang="ja">
+              <SpeakableWord text={spokenTextForCard(card)} disabled={!revealed}>{card.front}</SpeakableWord>
+            </p>
             <p className={'kanji-learning-character-reading' + (revealed ? ' is-revealed' : '')} lang="ja" aria-hidden={!revealed}>
               <span>{card.reading}</span>
             </p>
-            {/* Only once the card is turned: the reading is the answer here,
-                so hearing it first would give the card away. */}
-            {revealed && <SpeakButtons className="standard-kanji-speak" text={spokenTextForCard(card)} />}
             <div className="kanji-learning-divider" aria-hidden="true" />
 
             <div className="kanji-learning-answer">
@@ -234,12 +233,13 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
               <span>{index + 1} / {session.cards.length}</span>
               <span>{known} easy this set</span>
             </div>
-            <p className="focused-vocab-word" lang="ja">{card.front}</p>
+            <p className="focused-vocab-word" lang="ja">
+              <SpeakableWord text={spokenTextForCard(card)} disabled={!revealed}>{card.front}</SpeakableWord>
+            </p>
             <div className="focused-vocab-answer" aria-live="polite">
               <p className={revealed ? 'is-visible' : ''} lang="ja" aria-hidden={!revealed}>{card.reading}</p>
               <strong className={revealed ? 'is-visible' : ''} aria-hidden={!revealed}>{card.back}</strong>
             </div>
-            {revealed && <SpeakButtons className="standard-kanji-speak" text={spokenTextForCard(card)} />}
             {example && (
               <div className={'focused-vocab-example' + (revealed ? ' is-visible' : '')} aria-hidden={!revealed}>
                 <span className="focused-vocab-example-en">{example.english}</span>

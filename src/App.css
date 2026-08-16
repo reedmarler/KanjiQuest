@@ -12664,3 +12664,115 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* Press-the-word-to-listen. The word keeps its own typography — the button is
+   a hit target, not a new visual element — so the card gains an interaction
+   without gaining a control. */
+/* Stacked, so the word stays optically centred on the card. Sharing a line
+   with the slow pill pushes the character off-centre, and the word is the
+   thing being studied. */
+.speakable-word-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+}
+
+.speakable-word {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin: 0;
+  /* The trailing cue would drag the word off-centre; matching padding on the
+     left balances it so the character sits where the eye expects. */
+  padding: .1rem .25rem .1rem calc(.25rem + 1.45rem);
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .15s, transform .1s;
+}
+
+.speakable-word:hover { background: color-mix(in srgb, var(--kyogre) 14%, transparent); }
+.speakable-word:active { transform: scale(.985); }
+.speakable-word:focus-visible {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: 3px;
+}
+
+/* The only affordance. Fixed size rather than em-relative: it trails words
+   set anywhere from 1rem to 7rem, and scaling with them would make it a
+   second piece of art competing with the character being studied. */
+.speakable-word-cue {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  fill-opacity: 1;
+  opacity: .32;
+  transition: opacity .15s;
+}
+
+.speakable-word-cue-wave { fill: none; }
+.speakable-word-cue-wave-far { opacity: .6; }
+
+.speakable-word:hover .speakable-word-cue { opacity: .7; }
+
+.speakable-word.is-speaking { background: color-mix(in srgb, var(--kyogre) 20%, transparent); }
+.speakable-word.is-speaking .speakable-word-cue { opacity: 1; color: var(--kyogre-light); }
+
+@keyframes speakable-word-pulse {
+  0%, 100% { opacity: .35; }
+  50% { opacity: 1; }
+}
+.speakable-word.is-loading .speakable-word-cue { animation: speakable-word-pulse .9s ease-in-out infinite; }
+
+/* Secondary by construction: the slow control is a small pill next to the
+   word, never the same weight as the word itself. */
+.speakable-word-slow {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  min-height: 1.7rem;
+  padding: .18rem .5rem;
+  border: 1px solid color-mix(in srgb, var(--kyogre) 30%, var(--border));
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: 700 .56rem/1 'Outfit', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+
+.speakable-word-slow:hover,
+.speakable-word-slow.is-speaking {
+  background: color-mix(in srgb, var(--kyogre) 26%, var(--surface-2));
+  color: var(--text);
+}
+
+.speakable-word-slow:focus-visible {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: 2px;
+}
+
+/* Reading room on a phone: the pill drops under the word rather than
+   squeezing it. */
+@media (max-width: 480px) {
+  .speakable-word-slow { font-size: .52rem; padding: .16rem .42rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .speakable-word,
+  .speakable-word-cue,
+  .speakable-word-slow { transition: none; }
+  .speakable-word.is-loading .speakable-word-cue { animation: none; }
+}
