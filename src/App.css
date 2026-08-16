@@ -6328,8 +6328,8 @@ body:has(.dashboard) {
 }
 
 .sentence-back-icon {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: var(--speakable-cue-size, 1.15rem);
+  height: var(--speakable-cue-size, 1.15rem);
   fill: none;
   stroke: currentColor;
   stroke-width: 2.6;
@@ -12668,16 +12668,6 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 /* Press-the-word-to-listen. The word keeps its own typography — the button is
    a hit target, not a new visual element — so the card gains an interaction
    without gaining a control. */
-/* Stacked, so the word stays optically centred on the card. Sharing a line
-   with the slow pill pushes the character off-centre, and the word is the
-   thing being studied. */
-.speakable-word-wrap {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .3rem;
-}
-
 .speakable-word {
   display: inline-flex;
   align-items: center;
@@ -12685,7 +12675,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   margin: 0;
   /* The trailing cue would drag the word off-centre; matching padding on the
      left balances it so the character sits where the eye expects. */
-  padding: .1rem .25rem .1rem calc(.25rem + 1.45rem);
+  padding: .1rem .25rem .1rem calc(.25rem + var(--speakable-cue-size, 1.15rem) + .3rem);
   border: 0;
   border-radius: 12px;
   background: transparent;
@@ -12710,8 +12700,8 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 .speakable-word-cue {
   flex: 0 0 auto;
   align-self: center;
-  width: 1.15rem;
-  height: 1.15rem;
+  width: var(--speakable-cue-size, 1.15rem);
+  height: var(--speakable-cue-size, 1.15rem);
   fill: currentColor;
   stroke: currentColor;
   stroke-width: 1.6;
@@ -12735,44 +12725,15 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 .speakable-word.is-loading .speakable-word-cue { animation: speakable-word-pulse .9s ease-in-out infinite; }
 
-/* Secondary by construction: the slow control is a small pill next to the
-   word, never the same weight as the word itself. */
-.speakable-word-slow {
-  display: inline-flex;
-  align-items: center;
-  gap: .25rem;
-  min-height: 1.7rem;
-  padding: .18rem .5rem;
-  border: 1px solid color-mix(in srgb, var(--kyogre) 30%, var(--border));
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--text-muted);
-  font: 700 .56rem/1 'Outfit', sans-serif;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background .15s, color .15s;
-}
-
-.speakable-word-slow:hover,
-.speakable-word-slow.is-speaking {
-  background: color-mix(in srgb, var(--kyogre) 26%, var(--surface-2));
-  color: var(--text);
-}
-
-.speakable-word-slow:focus-visible {
-  outline: 2px solid var(--kyogre-light);
-  outline-offset: 2px;
-}
-
-/* Reading room on a phone: the pill drops under the word rather than
-   squeezing it. */
-@media (max-width: 480px) {
-  .speakable-word-slow { font-size: .52rem; padding: .16rem .42rem; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .speakable-word,
-  .speakable-word-cue,
-  .speakable-word-slow { transition: none; }
+  .speakable-word-cue { transition: none; }
   .speakable-word.is-loading .speakable-word-cue { animation: none; }
+}
+
+/* Example compounds are set far smaller than the headline word, so the cue
+   scales with them rather than looming beside a 1.5rem compound. */
+.speakable-word-compact {
+  --speakable-cue-size: .7rem;
+  gap: .2rem;
 }

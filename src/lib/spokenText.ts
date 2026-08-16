@@ -18,6 +18,10 @@ import { getStudyCardKana } from './studyGloss'
 import type { StudyCard } from './types'
 
 const LATIN = /[A-Za-z]/
+/** A reading listing alternatives rather than describing one pronunciation:
+ *  飲 carries "のみ ・ いん". There is no single right answer to speak, so
+ *  these are left silent rather than guessed at. */
+const ALTERNATIVES = /[・･/,、]/
 const JAPANESE = /[぀-ゟ゠-ヿ一-鿿㐀-䶿]/
 const HAN = /[一-鿿㐀-䶿]/
 
@@ -40,11 +44,33 @@ function kanaFromRomaji(reading: string): string {
  * nothing for empty text, and the generator skips it rather than paying to
  * synthesize it.
  */
+/**
+ * The same resolution for a word that is not a study card — the kanji deck's
+ * example compounds, which carry their own reading rather than an id into the
+ * kana maps. Kept beside spokenTextForCard so both obey one set of rules: no
+ * romaji, and never bare Han.
+ */
+export function spokenTextForWord(word: string, reading?: string): string {
+  const kana = reading?.trim()
+  if (kana && ALTERNATIVES.test(kana)) return ''
+  if (kana && !LATIN.test(kana) && JAPANESE.test(kana)) return kana
+  if (kana && LATIN.test(kana)) {
+    const converted = kanaFromRomaji(kana)
+    if (converted) return converted
+  }
+
+  const written = word?.trim() ?? ''
+  if (!JAPANESE.test(written) || LATIN.test(written)) return ''
+  return HAN.test(written) ? '' : written
+}
+
 export function spokenTextForCard(card: StudyCard): string {
   const kana = getStudyCardKana(card)?.trim()
+  if (kana && ALTERNATIVES.test(kana)) return ''
   if (kana && !LATIN.test(kana)) return kana
 
   const reading = card.reading?.trim()
+  if (reading && ALTERNATIVES.test(reading)) return ''
   if (reading && !LATIN.test(reading) && JAPANESE.test(reading)) return reading
 
   // A romaji reading still describes the pronunciation exactly — it just has

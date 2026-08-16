@@ -6,7 +6,7 @@ import { vocabFocusSets } from '../data/vocabFocusSets'
 import { kanjiLabEntries, type KanjiLabEntry } from '../lib/kanjiLabCatalog'
 import type { JlptLevel } from '../lib/types'
 import { SpeakableWord } from './SpeakableWord'
-import { spokenTextForCard } from '../lib/spokenText'
+import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
 
 interface KanjiLabProps {
   onBack: () => void
@@ -712,7 +712,14 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
                             lang="ja"
                           >
                             {example
-                              ? <QuestExampleWord word={example.example.word} character={part.character} reading={example.example.reading} />
+                              ? (
+                                <SpeakableWord
+                                  className="speakable-word-compact"
+                                  text={spokenTextForWord(example.example.word, example.example.reading)}
+                                >
+                                  <QuestExampleWord word={example.example.word} character={part.character} reading={example.example.reading} />
+                                </SpeakableWord>
+                              )
                               : <span className="quest-kanji-example-anchor">{partReading && <small className="quest-kanji-expanded-reading">{partReading}</small>}<strong>{part.character}</strong></span>}
                           </div>
                           <em className="quest-kanji-expanded-meaning">{example?.example.meaning.split(';')[0] ?? part.definition}</em>
@@ -920,7 +927,12 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
                         className={`quest-kanji-expanded-word word-length-${Math.min(wordLength, 5)}`}
                         lang="ja"
                       >
-                        <QuestExampleWord word={example.example.word} character={example.character} reading={example.example.reading} />
+                        <SpeakableWord
+                          className="speakable-word-compact"
+                          text={spokenTextForWord(example.example.word, example.example.reading)}
+                        >
+                          <QuestExampleWord word={example.example.word} character={example.character} reading={example.example.reading} />
+                        </SpeakableWord>
                       </div>
                       <em className="quest-kanji-expanded-meaning">{example.example.meaning.split(';')[0]}</em>
                     </div>

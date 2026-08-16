@@ -27,7 +27,7 @@ import path from 'node:path'
 import { allCards } from '../src/data'
 import { vocabFocusSets } from '../src/data/vocabFocusSets'
 import { kanjiLabEntries } from '../src/lib/kanjiLabCatalog'
-import { spokenTextForCard } from '../src/lib/spokenText'
+import { spokenTextForCard, spokenTextForWord } from '../src/lib/spokenText'
 
 const AUDIO_DIR = path.resolve(import.meta.dirname, '../public/audio')
 const MANIFEST_PATH = path.join(AUDIO_DIR, 'manifest.json')
@@ -74,7 +74,7 @@ function collectTexts(): string[] {
     }
   }
   if (scope === 'kanji' || scope === 'all') {
-    for (const entry of kanjiLabEntries) texts.push(entry.example.reading || entry.example.word)
+    for (const entry of kanjiLabEntries) texts.push(spokenTextForWord(entry.example.word, entry.example.reading))
   }
   if (scope === 'all') {
     for (const card of allCards) texts.push(spokenTextForCard(card))
