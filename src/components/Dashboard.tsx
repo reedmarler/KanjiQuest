@@ -16,6 +16,7 @@ import {
   stopSpeaking,
   watchSpeechSupport,
 } from '../lib/speech'
+import { SpeakButtons } from './SpeakButtons'
 import { FavoriteWordsPanel } from './FavoriteWordsPanel'
 
 const HERO_SPEECH_STORAGE_KEY = 'kanji-quest-hero-speech-v1'
@@ -957,6 +958,9 @@ export function Dashboard({
             <div className="voice-settings-panel" id="hero-voice-settings" aria-label="Playback settings">
                 <div className="voice-settings-header">
                   <span className="control-group-label">Playback</span>
+                  {/* Reads whatever sentence is on screen right now, so the
+                      buttons double as a preview while adjusting the sliders. */}
+                  <SpeakButtons className="voice-settings-speak" text={spokenSentence} />
                   <button
                     type="button"
                     className="voice-settings-reset"

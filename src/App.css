@@ -12205,18 +12205,52 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .speak-button.is-loading .speak-button-icon { animation: none; opacity: .6; }
 }
 
+/* Icon-only in tight spots. Clipped rather than display:none so the button
+   keeps an accessible name for screen readers. */
+.speak-button-label.is-clipped,
+.voice-settings-speak .speak-button-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 @media (max-width: 720px) {
-  .speak-button-label { display: none; }
+  .speak-buttons .speak-button-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   .speak-button { padding: .3rem .5rem; }
   .speak-button-icon { font-size: .95rem; }
 }
 
-/* Centred under the prompt word rather than pinned to a corner, so it reads
-   as "listen to this" instead of a page-level control. */
-.standard-kanji-speak {
-  justify-content: center;
-  margin-top: .5rem;
+/* The header is space-between, so this pushes the buttons over to sit
+   directly left of Reset rather than floating in the middle. */
+.voice-settings-speak {
+  margin-left: auto;
+  gap: .3rem;
 }
+
+.voice-settings-speak .speak-button {
+  min-height: 1.55rem;
+  padding: .18rem .5rem;
+  font-size: .55rem;
+}
+
+.voice-settings-speak .speak-button-icon { font-size: .7rem; }
 
 .standard-kanji-furigana-toggle.is-active,
 .standard-kanji-furigana-toggle[aria-pressed='true'],
