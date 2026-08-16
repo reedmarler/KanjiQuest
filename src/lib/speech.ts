@@ -45,7 +45,15 @@ const MAX_SERVER_RATE = 2
 export type SpeechStatus = 'loading' | 'playing'
 
 export interface SpeakOptions {
+  /** The speed the listener should hear. */
   rate?: number
+  /**
+   * Speed to actually synthesize at, when it differs from `rate`. The gap is
+   * made up with the audio element's playbackRate, so 🐢 replays the same
+   * clip 🔊 already fetched instead of costing a second render. Pitch is
+   * preserved, so it slows without dropping the voice.
+   */
+  synthesisRate?: number
   volume?: number
   voiceId?: string
   onEnd?: () => void
@@ -188,12 +196,16 @@ export function stopSpeaking() {
   setActive(null)
 }
 
-function playBlob(blob: Blob, volume: number, generation: number, onEnd?: () => void) {
+function playBlob(blob: Blob, volume: number, generation: number, playbackRate = 1, onEnd?: () => void) {
   if (generation !== speechGeneration) return
 
   const url = URL.createObjectURL(blob)
   const audio = new Audio(url)
   audio.volume = volume
+  if (playbackRate !== 1) {
+    audio.preservesPitch = true
+    audio.playbackRate = playbackRate
+  }
   currentAudio = audio
   currentObjectUrl = url
 
@@ -221,7 +233,9 @@ function playBlob(blob: Blob, volume: number, generation: number, onEnd?: () => 
  * firing both would double up on whatever action `onEnd` triggers.
  */
 export function speakJapanese(text: string, options: SpeakOptions = {}): number {
-  const { rate = 0.9, volume = 1, voiceId, onEnd } = options
+  const { rate = 0.9, synthesisRate = rate, volume = 1, voiceId, onEnd } = options
+  // Ratio between what we render and what we play back.
+  const playbackRate = synthesisRate === rate ? 1 : rate / synthesisRate
 
   if (!text.trim()) {
     onEnd?.()
@@ -236,7 +250,7 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
   // is the only route that works on a static deployment. Only the fixed
   // vocabulary is pre-rendered, so hero sentences always miss this and fall
   // through to the live service below.
-  findStaticAudio(text, rate)
+  findStaticAudio(text, synthesisRate)
     .then((staticUrl) => {
       if (generation !== speechGeneration) return
       if (staticUrl) {
@@ -249,13 +263,13 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
             if (!isAudio) throw new Error('no pre-rendered clip')
             return res.blob()
           })
-          .then((blob) => { playBlob(blob, volume, generation, onEnd) })
+          .then((blob) => { playBlob(blob, volume, generation, playbackRate, onEnd) })
       }
-      return speakFromService(text, rate, volume, generation, voiceId, onEnd)
+      return speakFromService(text, synthesisRate, volume, generation, voiceId, playbackRate, rate, onEnd)
     })
     .catch(() => {
       if (generation !== speechGeneration) return
-      speakFromService(text, rate, volume, generation, voiceId, onEnd)
+      speakFromService(text, synthesisRate, volume, generation, voiceId, playbackRate, rate, onEnd)
     })
 
   return generation
@@ -267,10 +281,13 @@ function speakFromService(
   volume: number,
   generation: number,
   voiceId?: string,
+  playbackRate = 1,
+  /** What the listener asked for — the browser voice can hit it directly. */
+  heardRate = rate,
   onEnd?: () => void,
 ) {
   if (!serverAvailable || !TTS_SERVER_URL) {
-    speakWithBrowserVoice(text, rate, volume, generation, onEnd)
+    speakWithBrowserVoice(text, heardRate, volume, generation, onEnd)
     return
   }
 
@@ -285,7 +302,7 @@ function speakFromService(
     .then((cached) => {
       if (generation !== speechGeneration) return
       if (cached) {
-        playBlob(cached, volume, generation, onEnd)
+        playBlob(cached, volume, generation, playbackRate, onEnd)
         return
       }
 
@@ -301,12 +318,12 @@ function speakFromService(
         })
         .then((blob) => {
           void putCachedSpeech(cacheKey, blob)
-          playBlob(blob, volume, generation, onEnd)
+          playBlob(blob, volume, generation, playbackRate, onEnd)
         })
     })
     .catch(() => {
       if (generation !== speechGeneration) return
       serverAvailable = false
-      speakWithBrowserVoice(text, rate, volume, generation, onEnd)
+      speakWithBrowserVoice(text, heardRate, volume, generation, onEnd)
     })
 }

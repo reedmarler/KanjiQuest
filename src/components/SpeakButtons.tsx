@@ -77,6 +77,9 @@ export function SpeakButtons({ text, className, showLearning = true }: SpeakButt
               }
               const token = speakJapanese(text, {
                 rate: SPEECH_SPEEDS[speed],
+                // Both buttons render at natural speed; 🐢 slows the same
+                // clip on playback, so one render serves both.
+                synthesisRate: SPEECH_SPEEDS.natural,
                 onEnd: () => setSpeaking(null),
               })
               setSpeaking({ speed, token, status: 'loading' })

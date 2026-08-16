@@ -14,7 +14,7 @@ import { SPEECH_SPEEDS, type SpeechSpeed } from './speechSpeeds'
 interface AudioManifest {
   voice: string
   ext: string
-  speeds: Record<SpeechSpeed, number>
+  speeds: Partial<Record<SpeechSpeed, number>>
   keys: string[]
 }
 
@@ -60,6 +60,9 @@ export async function findStaticAudio(text: string, rate: number): Promise<strin
 
   const loaded = await loadManifest()
   if (!loaded) return undefined
+  // A render may cover only some speeds, so trust the manifest over the
+  // speed table rather than requesting a file that was never written.
+  if (!(speedName in loaded.manifest.speeds)) return undefined
 
   const key = await keyFor(text.trim())
   if (!key || !loaded.keys.has(key)) return undefined

@@ -31,9 +31,9 @@ import { kanjiLabEntries } from '../src/lib/kanjiLabCatalog'
 const AUDIO_DIR = path.resolve(import.meta.dirname, '../public/audio')
 const MANIFEST_PATH = path.join(AUDIO_DIR, 'manifest.json')
 
-/** Must stay in sync with SPEECH_SPEEDS in src/lib/speech.ts. */
-const SPEEDS = { natural: 1, learning: 0.65 } as const
-type SpeedName = keyof typeof SPEEDS
+/** Must stay in sync with SPEECH_SPEEDS in src/lib/speechSpeeds.ts. */
+const ALL_SPEEDS = { natural: 1, learning: 0.65 } as const
+type SpeedName = keyof typeof ALL_SPEEDS
 
 const args = process.argv.slice(2)
 const flag = (name: string) => args.find((a) => a.startsWith(`--${name}=`))?.split('=')[1]
@@ -44,6 +44,15 @@ const serviceUrl = flag('service') ?? process.env.TTS_API_URL ?? 'http://127.0.0
 const voiceId = flag('voice') ?? process.env.TTS_VOICE_ID ?? ''
 const dryRun = has('dry-run')
 const prune = has('prune')
+
+// The 🐢 button slows the natural clip with the audio element's playbackRate,
+// so one render covers both buttons — half the clips, half the credits, half
+// the repo. --both-speeds renders a natively slowed take too, which
+// re-articulates rather than stretching and is a little crisper for
+// listening practice.
+const SPEEDS: Partial<Record<SpeedName, number>> = has('both-speeds')
+  ? ALL_SPEEDS
+  : { natural: ALL_SPEEDS.natural }
 
 /** Same digest the browser computes in src/lib/staticAudio.ts. */
 function keyFor(text: string) {
