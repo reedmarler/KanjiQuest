@@ -15,7 +15,8 @@
     "vet:sentences": "tsx scripts/vet-sentences-openai.ts",
     "generate:audio": "tsx scripts/generate-audio.ts",
     "harvest:audio": "tsx scripts/harvest-audio.ts",
-    "prewarm:audio": "tsx scripts/prewarm-audio.ts"
+    "prewarm:audio": "tsx scripts/prewarm-audio.ts",
+    "build:voice": "tsx scripts/build-voice-library.ts"
   },
   "dependencies": {
     "react": "^19.2.7",
