@@ -37,6 +37,7 @@ const KanjiLab = lazy(() => import('./components/KanjiLab').then((module) => ({ 
 const LibraryPanel = lazy(() => import('./components/LibraryPanel').then((module) => ({ default: module.LibraryPanel })))
 const SentenceBuilderView = lazy(() => import('./components/SentenceBuilderView').then((module) => ({ default: module.SentenceBuilderView })))
 const SentenceTesting = lazy(() => import('./components/SentenceTesting').then((module) => ({ default: module.SentenceTesting })))
+const VoiceTest = lazy(() => import('./components/VoiceTest').then((module) => ({ default: module.VoiceTest })))
 const FocusedVocabPractice = lazy(() => import('./components/FocusedVocabPractice').then((module) => ({ default: module.FocusedVocabPractice })))
 const QuestHub = lazy(() => import('./components/QuestHub').then((module) => ({ default: module.QuestHub })))
 const QuestScene = lazy(() => import('./components/QuestScene').then((module) => ({ default: module.QuestScene })))
@@ -55,6 +56,7 @@ type View =
   | 'grammar'
   | 'kanji'
   | 'sentence-testing'
+  | 'voice-test'
   | 'quests'
   | 'quest-scene'
   | 'quest-checkpoint'
@@ -383,6 +385,7 @@ function App() {
             } },
             { mark: '編', title: 'Content Studio', detail: 'Add and organize your own content.', accent: 'gold', onClick: () => setView('content-studio') },
             { mark: '験', title: 'Sentence Testing', detail: 'Generate sentences by complexity level.', accent: 'kyogre', onClick: () => setView('sentence-testing') },
+            { mark: '声', title: 'Voice Test', detail: 'Compare provider voices before building audio.', accent: 'sakura', onClick: () => setView('voice-test') },
           ]}
         />
       </div>
@@ -435,6 +438,16 @@ function App() {
       <div className="app">
         <Suspense fallback={<RouteLoading label="Sentence Testing" />}>
           <SentenceTesting onBack={() => setView('dashboard')} />
+        </Suspense>
+      </div>
+    )
+  }
+
+  if (view === 'voice-test') {
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Voice Test" />}>
+          <VoiceTest onBack={() => setView('additional-tools')} />
         </Suspense>
       </div>
     )

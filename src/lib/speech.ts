@@ -23,6 +23,14 @@ export { SPEECH_SPEEDS, type SpeechSpeed }
 const TTS_SERVER_URL = (import.meta.env.VITE_TTS_API_URL as string | undefined)?.trim()
   || (import.meta.env.DEV ? 'http://127.0.0.1:8001' : '')
 
+/** Where live synthesis goes, for callers that must reach the service
+ *  directly rather than through speakJapanese — the voice test panel needs a
+ *  named voice, which the pre-rendered library cannot provide. Empty means no
+ *  service is configured. */
+export function ttsServiceUrl() {
+  return TTS_SERVER_URL
+}
+
 /**
  * Optional fixed voice id. Setting this (to a cloned voice's id, say) makes
  * the whole app speak in that voice without touching code. Left unset, the
