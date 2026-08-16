@@ -87,6 +87,29 @@ ignored by hosted providers, so one request body works against either.
 `GET /health` reports `{ok, provider}` — the frontend uses it to decide
 whether to use real speech or fall back to the browser voice.
 
+## Pre-rendering audio (no service in production)
+
+The app's fixed vocabulary is a finite list, so it can be spoken once and
+shipped as static files instead of synthesized on demand:
+
+```bash
+uvicorn app:app --host 127.0.0.1 --port 8001    # in one terminal
+npm run generate:audio -- --dry-run              # count and price it first
+npm run generate:audio                           # render into public/audio/
+```
+
+`--scope=focus` limits it to the 342 focus-set words; `--scope=all` (the
+default) covers every study card. Re-running skips clips already on disk, so
+adding vocabulary later only renders — and only bills — the new words.
+
+The output deploys with the site, so on GitHub Pages the fixed vocabulary
+plays in the real voice with no service running, no API key anywhere, and no
+per-play cost. Only the hero sentence generator, whose text is built at
+runtime, still needs the live service.
+
+Changing voice or model means the committed clips are stale: delete
+`public/audio/` and re-render, or the app keeps serving the old voice.
+
 ## Deploying
 
 The Dockerfile targets Hugging Face Spaces (port 7860). Set the environment

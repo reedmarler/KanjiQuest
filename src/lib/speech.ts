@@ -14,6 +14,10 @@
  */
 
 import { getCachedSpeech, putCachedSpeech, speechCacheKey } from './speechCache'
+import { findStaticAudio } from './staticAudio'
+import { SPEECH_SPEEDS, type SpeechSpeed } from './speechSpeeds'
+
+export { SPEECH_SPEEDS, type SpeechSpeed }
 
 /** Public service URL. Dev falls back to the local uvicorn default. */
 const TTS_SERVER_URL = (import.meta.env.VITE_TTS_API_URL as string | undefined)?.trim()
@@ -33,14 +37,6 @@ const VOICE_IDS: Record<SpeechVoiceGender, string> = {
   girl: 'not-anime-calm',
   boy: 'not-anime-lightfire',
 }
-
-/**
- * The two learner-facing speeds. "Natural" is the voice's own pace; "learning"
- * is slow enough to pick out mora boundaries without the pitch artefacts you
- * get from stretching much further.
- */
-export const SPEECH_SPEEDS = { natural: 1, learning: 0.65 } as const
-export type SpeechSpeed = keyof typeof SPEECH_SPEEDS
 
 /** The service rejects anything outside this band, so clamp before sending. */
 const MIN_SERVER_RATE = 0.5
@@ -234,9 +230,48 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
   stopSpeaking()
   const generation = ++speechGeneration
 
+  setActive({ token: generation, status: 'loading' })
+
+  // Pre-rendered clip first: it needs no service, costs nothing to replay, and
+  // is the only route that works on a static deployment. Only the fixed
+  // vocabulary is pre-rendered, so hero sentences always miss this and fall
+  // through to the live service below.
+  findStaticAudio(text, rate)
+    .then((staticUrl) => {
+      if (generation !== speechGeneration) return
+      if (staticUrl) {
+        return fetch(staticUrl)
+          .then((res) => {
+            // A static host answers a missing file with the SPA shell and a
+            // 200, so an ok status alone doesn't mean we got audio — playing
+            // HTML would just fail silently instead of falling back.
+            const isAudio = res.ok && (res.headers.get('content-type') ?? '').startsWith('audio/')
+            if (!isAudio) throw new Error('no pre-rendered clip')
+            return res.blob()
+          })
+          .then((blob) => { playBlob(blob, volume, generation, onEnd) })
+      }
+      return speakFromService(text, rate, volume, generation, voiceId, onEnd)
+    })
+    .catch(() => {
+      if (generation !== speechGeneration) return
+      speakFromService(text, rate, volume, generation, voiceId, onEnd)
+    })
+
+  return generation
+}
+
+function speakFromService(
+  text: string,
+  rate: number,
+  volume: number,
+  generation: number,
+  voiceId?: string,
+  onEnd?: () => void,
+) {
   if (!serverAvailable || !TTS_SERVER_URL) {
     speakWithBrowserVoice(text, rate, volume, generation, onEnd)
-    return generation
+    return
   }
 
   // The service clamps too, but a rejected request would cost a round trip
@@ -245,8 +280,6 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
   const serverRate = Math.min(MAX_SERVER_RATE, Math.max(MIN_SERVER_RATE, rate))
   const voice = voiceId ?? defaultVoiceId()
   const cacheKey = speechCacheKey(text, voice, serverRate)
-
-  setActive({ token: generation, status: 'loading' })
 
   getCachedSpeech(cacheKey)
     .then((cached) => {
@@ -276,6 +309,4 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
       serverAvailable = false
       speakWithBrowserVoice(text, rate, volume, generation, onEnd)
     })
-
-  return generation
 }
