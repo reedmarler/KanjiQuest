@@ -5,7 +5,8 @@ import { getQuestById } from '../data/questCampaign'
 import { vocabFocusSets } from '../data/vocabFocusSets'
 import { kanjiLabEntries, type KanjiLabEntry } from '../lib/kanjiLabCatalog'
 import type { JlptLevel } from '../lib/types'
-import { SpeakButtons } from './SpeakButtons'
+import { SpeakableWord } from './SpeakableWord'
+import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
 
 interface KanjiLabProps {
   onBack: () => void
@@ -680,13 +681,14 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
 
         <main className={`grammar-choice-card kanji-learning-card quest-kanji-card${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}`}>
           <p className="quest-kanji-word" lang="ja">
-            <QuestMainWord word={card.front} reading={entry.example.reading} />
+            <SpeakableWord text={spokenTextForCard(card)}>
+              <QuestMainWord word={card.front} reading={entry.example.reading} />
+            </SpeakableWord>
           </p>
           <div className="kanji-learning-divider" aria-hidden="true" />
           <div className={`quest-kanji-word-answer${revealed && englishVisible ? ' is-revealed' : ''}`} aria-hidden={!revealed || !englishVisible}>
             <span>{entry.example.meaning}</span>
           </div>
-          <SpeakButtons className="standard-kanji-speak" text={card.reading || card.front} />
           <div className={`quest-kanji-parts part-count-${questParts.length}${questParts.length === 1 ? ' is-single' : ''}${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}`}>
             {questParts.map((part) => {
               const examples = part.examples.length ? part.examples.slice(0, 2) : [undefined]
@@ -710,7 +712,14 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
                             lang="ja"
                           >
                             {example
-                              ? <QuestExampleWord word={example.example.word} character={part.character} reading={example.example.reading} />
+                              ? (
+                                <SpeakableWord
+                                  className="speakable-word-compact"
+                                  text={spokenTextForWord(example.example.word, example.example.reading)}
+                                >
+                                  <QuestExampleWord word={example.example.word} character={part.character} reading={example.example.reading} />
+                                </SpeakableWord>
+                              )
                               : <span className="quest-kanji-example-anchor">{partReading && <small className="quest-kanji-expanded-reading">{partReading}</small>}<strong>{part.character}</strong></span>}
                           </div>
                           <em className="quest-kanji-expanded-meaning">{example?.example.meaning.split(';')[0] ?? part.definition}</em>
@@ -891,23 +900,19 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
               {displayedCharacterReadings.kun.length ? <span>{displayedCharacterReadings.kun.join('・')}</span> : null}
             </>)}
           </p>
+          {/* Speak the kana, not the written form: it is unambiguous, and it
+              matches the string generate-audio.ts pre-renders, so a
+              pre-rendered clip is actually found. A lone kanji has no single
+              reading, so the kanji deck speaks its example word instead. */}
           <p className={`kanji-learning-character${wordDeckMode ? ' standard-kanji-compound-word' : ''}${revealed && furiganaVisible ? ' is-furigana-visible' : ''}`} lang="ja">
-            {wordDeckMode ? <QuestMainWord word={card.front} reading={entry.example.reading} /> : card.front}
+            <SpeakableWord text={wordDeckMode ? spokenTextForCard(card) : (entry.example.reading || entry.example.word)}>
+              {wordDeckMode ? <QuestMainWord word={card.front} reading={entry.example.reading} /> : card.front}
+            </SpeakableWord>
           </p>
           <div className="kanji-learning-divider" aria-hidden="true" />
           <div className={`quest-kanji-word-answer standard-kanji-main-meaning${revealed && englishVisible && mainMeaning ? ' is-revealed' : ''}`} aria-hidden={!revealed || !englishVisible || !mainMeaning}>
             {mainMeaning && <span>{mainMeaning}</span>}
           </div>
-          {/* Speak the kana, not the written form: it is unambiguous, and it
-              matches the string generate-audio.ts pre-renders, so a
-              pre-rendered clip is actually found. A lone kanji has no single
-              reading, so the kanji deck speaks its example word instead. */}
-          <SpeakButtons
-            className="standard-kanji-speak"
-            text={wordDeckMode
-              ? (card.reading || card.front)
-              : (entry.example.reading || entry.example.word)}
-          />
         </div>
 
         <div className="kanji-learning-answer standard-kanji-answer">
@@ -922,7 +927,12 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
                         className={`quest-kanji-expanded-word word-length-${Math.min(wordLength, 5)}`}
                         lang="ja"
                       >
-                        <QuestExampleWord word={example.example.word} character={example.character} reading={example.example.reading} />
+                        <SpeakableWord
+                          className="speakable-word-compact"
+                          text={spokenTextForWord(example.example.word, example.example.reading)}
+                        >
+                          <QuestExampleWord word={example.example.word} character={example.character} reading={example.example.reading} />
+                        </SpeakableWord>
                       </div>
                       <em className="quest-kanji-expanded-meaning">{example.example.meaning.split(';')[0]}</em>
                     </div>
