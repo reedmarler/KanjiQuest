@@ -766,10 +766,6 @@ export function Dashboard({
 
           <div className="control-group control-group-audio" role="group" aria-label="Display and audio options">
             <div className="control-audio-buttons">
-              {/* Plays the sentence on screen right now. The toggle beside it
-                  is a different thing — whether every new sentence is read
-                  automatically — so they sit together but stay distinct. */}
-              <SpeakButtons className="control-speak-buttons" text={spokenSentence} />
               <button
                 type="button"
                 className={`control-icon-button control-speaker-button${speechOn ? ' is-active' : ''}`}
@@ -968,6 +964,9 @@ export function Dashboard({
             <div className="voice-settings-panel" id="hero-voice-settings" aria-label="Playback settings">
                 <div className="voice-settings-header">
                   <span className="control-group-label">Playback</span>
+                  {/* Reads whatever sentence is on screen right now, so the
+                      buttons double as a preview while adjusting the sliders. */}
+                  <SpeakButtons className="voice-settings-speak" text={spokenSentence} />
                   <button
                     type="button"
                     className="voice-settings-reset"

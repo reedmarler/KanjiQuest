@@ -12237,61 +12237,20 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .speak-button-icon { font-size: .95rem; }
 }
 
-/* In the hero control row the play buttons sit next to the auto-read toggle,
-   so they borrow that row's round icon-button shape rather than the wider
-   labelled pill used elsewhere. */
-.control-speak-buttons {
+/* The header is space-between, so this pushes the buttons over to sit
+   directly left of Reset rather than floating in the middle. */
+.voice-settings-speak {
+  margin-left: auto;
   gap: .3rem;
-  /* The toggle next door also shows 🔊 once auto-read is on, so a rule keeps
-     "play this now" visibly separate from "read every new sentence". */
-  padding-right: .42rem;
-  border-right: 1px solid color-mix(in srgb, var(--text-muted) 20%, transparent);
 }
 
-.control-speak-buttons .speak-button {
-  width: 2rem;
-  min-height: 2rem;
-  padding: 0;
-  justify-content: center;
-  border-color: color-mix(in srgb, var(--text-muted) 24%, transparent);
-  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
-  color: var(--text-muted);
+.voice-settings-speak .speak-button {
+  min-height: 1.55rem;
+  padding: .18rem .5rem;
+  font-size: .55rem;
 }
 
-.control-speak-buttons .speak-button-icon { font-size: .9rem; }
-
-.control-speak-buttons .speak-button-label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-@media (max-width: 720px) {
-  /* The row becomes a 2-column grid on mobile; the pair of play buttons is
-     one grid item that splits its own cell rather than breaking the columns. */
-  .hero-controls-primary .control-speak-buttons {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-column: 1 / -1;
-    gap: .38rem;
-    /* Stacked rather than side by side here, so the rule would sit in the
-       wrong place — the row break already separates the two groups. */
-    padding-right: 0;
-    border-right: 0;
-  }
-
-  .hero-controls-primary .control-speak-buttons .speak-button {
-    width: 100%;
-    min-width: 0;
-    height: 2.4rem;
-  }
-}
+.voice-settings-speak .speak-button-icon { font-size: .7rem; }
 
 .standard-kanji-furigana-toggle.is-active,
 .standard-kanji-furigana-toggle[aria-pressed='true'],
