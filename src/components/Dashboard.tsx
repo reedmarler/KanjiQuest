@@ -11,6 +11,7 @@ import {
   type HeroPlaybackRate,
 } from '../lib/heroPlayback'
 import {
+  SPEECH_SPEEDS,
   canSpeakJapanese,
   speakJapanese,
   stopSpeaking,
@@ -544,6 +545,11 @@ export function Dashboard({
       : undefined
     speakJapanese(spokenSentence, {
       rate: engineSpeechRate(effectiveSpeechRateRef.current),
+      // Always render at natural speed and let the audio element handle the
+      // slider. Otherwise each of the 13 steps is a separate render of the
+      // same sentence, and none of them matches a pre-recorded clip — so a
+      // sentence would be bought again every time the slider moved.
+      synthesisRate: SPEECH_SPEEDS.natural,
       volume: speechVolumeRef.current,
       onEnd,
     })

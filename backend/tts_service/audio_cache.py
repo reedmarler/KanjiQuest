@@ -9,6 +9,7 @@ provider gets the same "generate once" guarantee the local model already had
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 from pathlib import Path
 
@@ -42,7 +43,24 @@ class AudioCache:
                 return path.read_bytes(), media_type
         return None
 
-    def put(self, key: str, audio: bytes, media_type: str) -> None:
+    def entries(self) -> list[dict[str, object]]:
+        """Every cached clip with the text that produced it.
+
+        The cache filename is a hash, so without this sidecar the text is
+        unrecoverable and clips can never be promoted to permanent files.
+        """
+        found = []
+        for meta_path in sorted(self.directory.glob("*.json")):
+            try:
+                meta = json.loads(meta_path.read_text())
+            except (OSError, ValueError):
+                continue
+            key = meta_path.stem
+            if self.get(key) is not None:
+                found.append({"key": key, **meta})
+        return found
+
+    def put(self, key: str, audio: bytes, media_type: str, text: str = "", speed: float = 1.0) -> None:
         suffix = SUFFIX_BY_MEDIA_TYPE.get(media_type)
         if suffix is None:
             # Unknown container — skip caching rather than write a file we
@@ -55,3 +73,7 @@ class AudioCache:
         temp_path = path.with_suffix(f"{suffix}.part")
         temp_path.write_bytes(audio)
         temp_path.replace(path)
+
+        if text:
+            meta = {"text": text, "speed": speed, "media_type": media_type}
+            (self.directory / f"{key}.json").write_text(json.dumps(meta, ensure_ascii=False))

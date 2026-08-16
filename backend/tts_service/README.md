@@ -110,6 +110,39 @@ runtime, still needs the live service.
 Changing voice or model means the committed clips are stale: delete
 `public/audio/` and re-render, or the app keeps serving the old voice.
 
+## Capping what you can spend
+
+`TTS_MONTHLY_CHARACTER_BUDGET` is a hard ceiling on characters sent to a paid
+provider. Cache hits never count toward it, so it bounds *new* synthesis only.
+When the budget is reached the service returns 402 and the app falls back to
+the browser voice — it keeps working, it just stops sounding like the paid
+voice. The bill cannot exceed the number you set.
+
+`GET /health` reports the month-to-date total.
+
+## Banking what you have already paid for
+
+The cache lives on the server's disk: an ephemeral host wipes it on restart,
+and nothing in it is in this repo. Anything paid for there is rented.
+
+`npm run harvest:audio` copies cached clips into `public/audio/` and adds them
+to the manifest, which makes them permanent — committed, deployed as static
+files, free to play forever, and unaffected by the server going away.
+
+```bash
+# set TTS_ADMIN_TOKEN on the service first, then:
+TTS_ADMIN_TOKEN=... npm run harvest:audio -- --dry-run
+TTS_ADMIN_TOKEN=... npm run harvest:audio --service=https://your-space.hf.space
+git add public/audio && git commit -m "Bank harvested audio"
+```
+
+Run it periodically and the static library grows while the bill shrinks. Only
+natural-speed clips are harvested: the app slows playback itself, so a
+natively-slow clip would be slowed twice.
+
+The `/cache/*` endpoints this needs are disabled unless `TTS_ADMIN_TOKEN` is
+set, since they expose the text of everything synthesized.
+
 ## Deploying
 
 The Dockerfile targets Hugging Face Spaces (port 7860). Set the environment

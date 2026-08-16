@@ -67,6 +67,14 @@ class Settings:
     rate_limit_requests: int = field(default_factory=lambda: _env_int("TTS_RATE_LIMIT_REQUESTS", 20))
     rate_limit_window_seconds: int = field(default_factory=lambda: _env_int("TTS_RATE_LIMIT_WINDOW", 60))
 
+    # Hard monthly ceiling on characters sent to a paid provider. 0 = no
+    # limit. Cache hits never count, so this bounds new synthesis only.
+    monthly_character_budget: int = field(default_factory=lambda: _env_int("TTS_MONTHLY_CHARACTER_BUDGET", 0))
+
+    # Enables the harvest endpoints when set. They expose the text of
+    # everything synthesized, so they stay off unless a token is configured.
+    admin_token: str = field(default_factory=lambda: os.environ.get("TTS_ADMIN_TOKEN", "").strip())
+
     def validate(self) -> None:
         """Fails fast at startup rather than on the first user request."""
         if self.provider not in {"local", "elevenlabs"}:

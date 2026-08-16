@@ -15,12 +15,13 @@ import time
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
 from audio_cache import AudioCache, cache_key
+from budget import SpendBudget
 from config import settings
 from providers import TTSProvider, build_provider
 
@@ -29,6 +30,7 @@ logger = logging.getLogger("tts_service")
 
 provider: TTSProvider | None = None
 cache = AudioCache(settings.cache_dir)
+budget = SpendBudget(settings.cache_dir / "spend.json", settings.monthly_character_budget)
 
 
 @asynccontextmanager
@@ -90,7 +92,7 @@ def health() -> dict[str, object]:
     # Deliberately reports the provider *name* and nothing about its
     # credentials. Used by the frontend to decide whether real speech is
     # available before falling back to the browser voice.
-    return {"ok": provider is not None, "provider": settings.provider}
+    return {"ok": provider is not None, "provider": settings.provider, "budget": budget.status()}
 
 
 @app.get("/voices")
@@ -126,6 +128,13 @@ def speak(req: SpeakRequest, request: Request) -> Response:
 
     _check_rate_limit(request.client.host if request.client else "unknown")
 
+    # Refuse rather than overspend. The frontend treats a failure here as
+    # "no service" and falls back to the browser voice, so the app keeps
+    # working — it just stops sounding like the paid voice.
+    if not budget.can_afford(len(req.text)):
+        logger.warning("Monthly synthesis budget exhausted; refusing new synthesis")
+        raise HTTPException(status_code=402, detail="Monthly synthesis budget reached")
+
     try:
         result = provider.synthesize(req.text, voice_id=req.voice_id, speed=req.speed, options=options)
     except KeyError as exc:
@@ -138,8 +147,37 @@ def speak(req: SpeakRequest, request: Request) -> Response:
         logger.exception("Synthesis failed")
         raise HTTPException(status_code=502, detail="Speech synthesis failed") from exc
 
-    cache.put(key, result.audio, result.media_type)
+    budget.record(len(req.text))
+    cache.put(key, result.audio, result.media_type, text=req.text, speed=req.speed)
     return _audio_response(result.audio, result.media_type, key)
+
+
+def _require_admin(token: str | None) -> None:
+    if not settings.admin_token:
+        raise HTTPException(status_code=404, detail="Not enabled")
+    if token != settings.admin_token:
+        raise HTTPException(status_code=401, detail="Bad admin token")
+
+
+@app.get("/cache/entries")
+def cache_entries(x_admin_token: str | None = Header(default=None)) -> dict[str, object]:
+    """Everything synthesized so far, for `npm run harvest:audio` to promote
+    into permanent static files. Off unless TTS_ADMIN_TOKEN is set."""
+    _require_admin(x_admin_token)
+    return {"entries": cache.entries()}
+
+
+@app.get("/cache/audio/{key}")
+def cache_audio(key: str, x_admin_token: str | None = Header(default=None)) -> Response:
+    _require_admin(x_admin_token)
+    # Keys are hex digests; anything else is a path-traversal attempt.
+    if not key.isalnum():
+        raise HTTPException(status_code=400, detail="Bad key")
+    found = cache.get(key)
+    if found is None:
+        raise HTTPException(status_code=404, detail="Not cached")
+    audio, media_type = found
+    return Response(content=audio, media_type=media_type)
 
 
 def _audio_response(audio: bytes, media_type: str, key: str) -> Response:
