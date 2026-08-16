@@ -26,6 +26,16 @@ if "%TTS_MONTHLY_CHARACTER_BUDGET%"=="" set TTS_MONTHLY_CHARACTER_BUDGET=30000
 REM Lets the last step read finished clips back out of the service.
 if "%TTS_ADMIN_TOKEN%"=="" set TTS_ADMIN_TOKEN=local-build-token
 set TTS_CACHE_ONLY=false
+REM The build asks for thousands of clips in a row from one machine, and every
+REM one is a cache miss. The service's public default is 20 requests a minute,
+REM which would 429 nearly all of them — and the render scripts count a 429 as
+REM a failed clip rather than retrying it. Safe to lift here: the service is
+REM bound to 127.0.0.1 for the length of the build.
+if "%TTS_RATE_LIMIT_REQUESTS%"=="" set TTS_RATE_LIMIT_REQUESTS=100000
+REM Render under the chosen voice's own cache key. Left empty, every clip is
+REM keyed as "" instead, so a later build in a second voice replays this
+REM voice's cached audio — and the manifest records the voice it was built in.
+set TTS_VOICE_ID=%TTS_DEFAULT_VOICE%
 
 echo.
 echo Setting up the TTS service...
