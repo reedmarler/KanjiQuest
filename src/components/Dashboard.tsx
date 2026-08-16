@@ -541,7 +541,11 @@ export function Dashboard({
     const onEnd = storyMode
       ? () => { if (!pausedRef.current) setAdvanceSignal((value) => value + 1) }
       : undefined
-    speakJapanese(spokenSentence, engineSpeechRate(effectiveSpeechRateRef.current), speechVolumeRef.current, onEnd)
+    speakJapanese(spokenSentence, {
+      rate: engineSpeechRate(effectiveSpeechRateRef.current),
+      volume: speechVolumeRef.current,
+      onEnd,
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [speechOn, spokenSentence, storyMode])
 

@@ -1,12 +1,31 @@
 /**
- * Japanese text-to-speech for the dashboard's rotating sentence.
+ * Japanese text-to-speech.
  *
- * Uses the local Style-BERT-VITS2 service when it is running, then falls back
- * to the browser's built-in speechSynthesis so dashboard audio still works on
- * other devices and deployments.
+ * Speech comes from the TTS service (backend/tts_service), which decides for
+ * itself whether a local Style-BERT-VITS2 checkpoint or a hosted cloning
+ * provider renders the audio. This module never handles a provider
+ * credential — it only knows the service's public URL. If the service is
+ * unreachable it falls back to the browser's built-in speechSynthesis so
+ * audio still works offline and on deployments with no service configured.
+ *
+ * Configure the endpoint with VITE_TTS_API_URL (see .env.example). That value
+ * IS embedded in the built bundle, which is fine for a URL and would not be
+ * fine for a key — hence the key living only in the service's environment.
  */
 
-const TTS_SERVER_URL = 'http://127.0.0.1:8001'
+import { getCachedSpeech, putCachedSpeech, speechCacheKey } from './speechCache'
+
+/** Public service URL. Dev falls back to the local uvicorn default. */
+const TTS_SERVER_URL = (import.meta.env.VITE_TTS_API_URL as string | undefined)?.trim()
+  || (import.meta.env.DEV ? 'http://127.0.0.1:8001' : '')
+
+/**
+ * Optional fixed voice id. Setting this (to a cloned voice's id, say) makes
+ * the whole app speak in that voice without touching code. Left unset, the
+ * girl/boy toggle below picks from the local service's voices.
+ */
+const CONFIGURED_VOICE_ID = (import.meta.env.VITE_TTS_VOICE_ID as string | undefined)?.trim() ?? ''
+
 const VOICE_STORAGE_KEY = 'kanji-quest-hero-voice-v1'
 
 export type SpeechVoiceGender = 'girl' | 'boy'
@@ -15,9 +34,53 @@ const VOICE_IDS: Record<SpeechVoiceGender, string> = {
   boy: 'not-anime-lightfire',
 }
 
+/**
+ * The two learner-facing speeds. "Natural" is the voice's own pace; "learning"
+ * is slow enough to pick out mora boundaries without the pitch artefacts you
+ * get from stretching much further.
+ */
+export const SPEECH_SPEEDS = { natural: 1, learning: 0.65 } as const
+export type SpeechSpeed = keyof typeof SPEECH_SPEEDS
+
+/** The service rejects anything outside this band, so clamp before sending. */
+const MIN_SERVER_RATE = 0.5
+const MAX_SERVER_RATE = 2
+
+export type SpeechStatus = 'loading' | 'playing'
+
+export interface SpeakOptions {
+  rate?: number
+  volume?: number
+  voiceId?: string
+  onEnd?: () => void
+}
+
 let serverAvailable = false
 let currentAudio: HTMLAudioElement | null = null
+let currentObjectUrl: string | null = null
 let speechGeneration = 0
+let active: { token: number; status: SpeechStatus } | null = null
+
+const stateListeners = new Set<(active: { token: number; status: SpeechStatus } | null) => void>()
+
+function setActive(next: { token: number; status: SpeechStatus } | null) {
+  active = next
+  for (const listener of stateListeners) listener(active)
+}
+
+/**
+ * Notifies listeners whenever playback starts, changes phase, or stops.
+ *
+ * A speak call replaces whatever was playing, and the superseded caller's
+ * `onEnd` deliberately never fires — so a button that tracked only its own
+ * callback would stay lit forever once something else spoke. Subscribing lets
+ * each button notice it is no longer the active one.
+ */
+export function subscribeToSpeech(listener: (active: { token: number; status: SpeechStatus } | null) => void) {
+  stateListeners.add(listener)
+  listener(active)
+  return () => { stateListeners.delete(listener) }
+}
 
 export function canSpeakJapanese() {
   return serverAvailable || canUseBrowserSpeech()
@@ -30,6 +93,10 @@ export function savedVoiceGender(): SpeechVoiceGender {
 
 export function setVoiceGender(gender: SpeechVoiceGender) {
   window.localStorage.setItem(VOICE_STORAGE_KEY, gender)
+}
+
+function defaultVoiceId() {
+  return CONFIGURED_VOICE_ID || VOICE_IDS[savedVoiceGender()]
 }
 
 function canUseBrowserSpeech() {
@@ -57,15 +124,20 @@ function speakWithBrowserVoice(text: string, rate: number, volume: number, gener
   utterance.rate = rate
   utterance.volume = volume
   if (japaneseVoice) utterance.voice = japaneseVoice
-  const finish = () => { if (generation === speechGeneration) onEnd?.() }
+  const finish = () => {
+    if (generation !== speechGeneration) return
+    setActive(null)
+    onEnd?.()
+  }
   utterance.onend = finish
   utterance.onerror = finish
+  setActive({ token: generation, status: 'playing' })
   window.speechSynthesis.speak(utterance)
 }
 
 /**
- * Reports whether any dashboard speech route is available. Browser voices can
- * arrive asynchronously, so listen for both local-server and browser changes.
+ * Reports whether any speech route is available. Browser voices can arrive
+ * asynchronously, so listen for both service and browser changes.
  */
 export function watchSpeechSupport(listener: (supported: boolean) => void) {
   let cancelled = false
@@ -75,17 +147,19 @@ export function watchSpeechSupport(listener: (supported: boolean) => void) {
 
   report()
 
-  fetch(`${TTS_SERVER_URL}/voices`, { method: 'GET' })
-    .then((res) => {
-      if (cancelled) return
-      serverAvailable = res.ok
-      report()
-    })
-    .catch(() => {
-      if (cancelled) return
-      serverAvailable = false
-      report()
-    })
+  if (TTS_SERVER_URL) {
+    fetch(`${TTS_SERVER_URL}/health`, { method: 'GET' })
+      .then((res) => {
+        if (cancelled) return
+        serverAvailable = res.ok
+        report()
+      })
+      .catch(() => {
+        if (cancelled) return
+        serverAvailable = false
+        report()
+      })
+  }
 
   if (canUseBrowserSpeech()) {
     window.speechSynthesis.addEventListener('voiceschanged', report)
@@ -99,6 +173,13 @@ export function watchSpeechSupport(listener: (supported: boolean) => void) {
   }
 }
 
+function releaseObjectUrl() {
+  if (currentObjectUrl) {
+    URL.revokeObjectURL(currentObjectUrl)
+    currentObjectUrl = null
+  }
+}
+
 export function stopSpeaking() {
   speechGeneration++
   if (canUseBrowserSpeech()) window.speechSynthesis.cancel()
@@ -107,54 +188,94 @@ export function stopSpeaking() {
     currentAudio.currentTime = 0
     currentAudio = null
   }
+  releaseObjectUrl()
+  setActive(null)
+}
+
+function playBlob(blob: Blob, volume: number, generation: number, onEnd?: () => void) {
+  if (generation !== speechGeneration) return
+
+  const url = URL.createObjectURL(blob)
+  const audio = new Audio(url)
+  audio.volume = volume
+  currentAudio = audio
+  currentObjectUrl = url
+
+  const finish = () => {
+    if (generation !== speechGeneration) return
+    releaseObjectUrl()
+    setActive(null)
+    onEnd?.()
+  }
+  audio.addEventListener('ended', finish, { once: true })
+  audio.addEventListener('error', finish, { once: true })
+  setActive({ token: generation, status: 'playing' })
+  audio.play().catch(finish)
 }
 
 /**
- * Speaks one sentence, replacing anything already playing. The hero sentence
- * changes on a timer, so a backlog would quickly fall out of sync.
+ * Speaks one sentence, replacing anything already playing. Returns a token
+ * identifying this utterance, for matching against `subscribeToSpeech`.
  *
  * `onEnd`, when given, fires exactly once — on natural completion, on
- * playback error, or immediately if no speech route is available at all —
- * so a caller waiting on it (Story mode's read-then-advance pacing) never
- * hangs. It does NOT fire when a newer speakJapanese call supersedes this
- * one first; whatever superseded it already has its own completion to wait
- * on, and firing both would double up on whatever action `onEnd` triggers.
+ * playback error, or immediately if no speech route is available at all — so
+ * a caller waiting on it (Story mode's read-then-advance pacing) never hangs.
+ * It does NOT fire when a newer speakJapanese call supersedes this one first;
+ * whatever superseded it already has its own completion to wait on, and
+ * firing both would double up on whatever action `onEnd` triggers.
  */
-export function speakJapanese(text: string, rate = 0.9, volume = 1, onEnd?: () => void) {
+export function speakJapanese(text: string, options: SpeakOptions = {}): number {
+  const { rate = 0.9, volume = 1, voiceId, onEnd } = options
+
   if (!text.trim()) {
     onEnd?.()
-    return
+    return speechGeneration
   }
   stopSpeaking()
   const generation = ++speechGeneration
 
-  if (!serverAvailable) {
+  if (!serverAvailable || !TTS_SERVER_URL) {
     speakWithBrowserVoice(text, rate, volume, generation, onEnd)
-    return
+    return generation
   }
 
-  fetch(`${TTS_SERVER_URL}/speak`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, speed: rate, voice_id: VOICE_IDS[savedVoiceGender()] }),
-  })
-    .then((res) => {
-      if (!res.ok) throw new Error(`TTS request failed: ${res.status}`)
-      serverAvailable = true
-      return res.blob()
-    })
-    .then((blob) => {
+  // The service clamps too, but a rejected request would cost a round trip
+  // and drop us to the browser voice — the Dashboard's fastest and slowest
+  // slider steps both land outside the accepted band.
+  const serverRate = Math.min(MAX_SERVER_RATE, Math.max(MIN_SERVER_RATE, rate))
+  const voice = voiceId ?? defaultVoiceId()
+  const cacheKey = speechCacheKey(text, voice, serverRate)
+
+  setActive({ token: generation, status: 'loading' })
+
+  getCachedSpeech(cacheKey)
+    .then((cached) => {
       if (generation !== speechGeneration) return
-      const audio = new Audio(URL.createObjectURL(blob))
-      audio.volume = volume
-      currentAudio = audio
-      const finish = () => { if (generation === speechGeneration) onEnd?.() }
-      audio.addEventListener('ended', finish, { once: true })
-      audio.addEventListener('error', finish, { once: true })
-      audio.play().catch(finish)
+      if (cached) {
+        playBlob(cached, volume, generation, onEnd)
+        return
+      }
+
+      return fetch(`${TTS_SERVER_URL}/speak`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, speed: serverRate, voice_id: voice }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error(`TTS request failed: ${res.status}`)
+          serverAvailable = true
+          return res.blob()
+        })
+        .then((blob) => {
+          void putCachedSpeech(cacheKey, blob)
+          playBlob(blob, volume, generation, onEnd)
+        })
     })
     .catch(() => {
+      if (generation !== speechGeneration) return
       serverAvailable = false
       speakWithBrowserVoice(text, rate, volume, generation, onEnd)
     })
+
+  return generation
 }

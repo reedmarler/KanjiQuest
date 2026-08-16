@@ -1,109 +1,156 @@
-"""FastAPI endpoint for Style-BERT-VITS2 speech synthesis.
+"""FastAPI endpoint for Japanese speech synthesis.
 
 Run with:
     uvicorn app:app --host 127.0.0.1 --port 8001
 
-Frontend calls POST /speak and plays the returned audio/wav bytes directly
-(e.g. via an <audio> element or the Web Audio API) — same shape as calling
-Web Speech API today, just async over HTTP instead of synchronous in-browser.
+The frontend POSTs text to /speak and plays the returned audio bytes. Which
+engine produces them — a local Style-BERT-VITS2 checkpoint or a hosted
+cloning provider — is set by TTS_PROVIDER in this process's environment, so
+the browser never handles a credential and never learns which one answered.
 """
 from __future__ import annotations
 
 import logging
 import time
 from collections import defaultdict, deque
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
-from tts_engine import DEFAULT_VOICE, VOICES, SpeechSynthesizer
+from audio_cache import AudioCache, cache_key
+from config import settings
+from providers import TTSProvider, build_provider
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("tts_service")
 
-app = FastAPI(title="Kanji Quest TTS Service")
+provider: TTSProvider | None = None
+cache = AudioCache(settings.cache_dir)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global provider
+    settings.validate()
+    provider = build_provider(settings)
+    yield
+
+
+app = FastAPI(title="Kanji Quest TTS Service", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
-        "https://bunou.app",
-        "https://www.bunou.app",
-    ],
-    allow_methods=["POST"],
+    allow_origins=settings.allowed_origins,
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
-# Naive in-memory per-IP rate limit — this is a free CPU-bound public
-# endpoint, so an unlimited /speak would let anyone run up compute for free.
-# Good enough for a hobby app's traffic; swap for something Redis-backed if
-# this ever runs on more than one instance.
-RATE_LIMIT_REQUESTS = 20
-RATE_LIMIT_WINDOW_SECONDS = 60
+# Naive in-memory per-IP rate limit. Synthesis is either CPU-bound (local) or
+# billed per character (hosted), so an unlimited public /speak lets anyone
+# spend your compute or your money. Good enough for a hobby app's traffic;
+# swap for something Redis-backed if this ever runs on more than one instance.
 _request_log: dict[str, deque[float]] = defaultdict(deque)
 
 
 def _check_rate_limit(client_ip: str) -> None:
     now = time.monotonic()
     log = _request_log[client_ip]
-    while log and now - log[0] > RATE_LIMIT_WINDOW_SECONDS:
+    while log and now - log[0] > settings.rate_limit_window_seconds:
         log.popleft()
-    if len(log) >= RATE_LIMIT_REQUESTS:
+    if len(log) >= settings.rate_limit_requests:
         raise HTTPException(status_code=429, detail="Too many requests, slow down.")
     log.append(now)
-
-synthesizer: SpeechSynthesizer | None = None
-
-
-@app.on_event("startup")
-def startup() -> None:
-    global synthesizer
-    synthesizer = SpeechSynthesizer()
-    # Preload the default voice so the first request isn't slow; comment
-    # this out (or pass specific voice_ids) if you have many voices and
-    # want lazy loading instead.
-    synthesizer.preload([DEFAULT_VOICE])
 
 
 class SpeakRequest(BaseModel):
     text: str = Field(min_length=1, max_length=400)
-    voice_id: str = Field(default=DEFAULT_VOICE)
+    voice_id: str = Field(default="", description="Provider voice id; empty uses the configured default")
+    speed: float = Field(default=1.0, ge=0.5, le=2.0, description="1.0 = natural pace; <1 slower, >1 faster")
+    # Style-BERT-VITS2 knobs. Honoured by the local provider and ignored by
+    # hosted ones, so a caller can send the same body to either.
     style: str = Field(default="Neutral")
     style_weight: float = Field(default=1.0, ge=0.0, le=20.0)
-    speed: float = Field(default=1.0, ge=0.5, le=2.0, description="1.0 = normal; >1 slower")
     noise_scale: float = Field(default=0.6, ge=0.0, le=1.0)
     noise_scale_w: float = Field(default=0.8, ge=0.0, le=1.0)
+
+    def engine_options(self) -> dict[str, float | str]:
+        return {
+            "style": self.style,
+            "style_weight": self.style_weight,
+            "noise_scale": self.noise_scale,
+            "noise_scale_w": self.noise_scale_w,
+        }
+
+
+@app.get("/health")
+def health() -> dict[str, object]:
+    # Deliberately reports the provider *name* and nothing about its
+    # credentials. Used by the frontend to decide whether real speech is
+    # available before falling back to the browser voice.
+    return {"ok": provider is not None, "provider": settings.provider}
 
 
 @app.get("/voices")
 def list_voices() -> dict[str, list[str]]:
-    return {"voices": list(VOICES)}
+    assert provider is not None, "provider not initialized"
+    try:
+        return {"voices": provider.voices()}
+    except Exception as exc:
+        logger.exception("Listing voices failed")
+        raise HTTPException(status_code=502, detail="Could not list voices") from exc
 
 
 @app.post("/speak")
 def speak(req: SpeakRequest, request: Request) -> Response:
-    assert synthesizer is not None, "synthesizer not initialized"
-    client_ip = request.client.host if request.client else "unknown"
-    _check_rate_limit(client_ip)
+    assert provider is not None, "provider not initialized"
+
+    options = req.engine_options()
+    key = cache_key(
+        provider.cache_fingerprint(),
+        req.text,
+        req.voice_id,
+        round(req.speed, 3),
+        *(f"{name}={value}" for name, value in sorted(options.items())),
+    )
+
+    # Serve cache hits before the rate limiter: a replay costs nothing to
+    # produce, so counting it against the budget would punish exactly the
+    # usage pattern the cache exists to make cheap.
+    cached = cache.get(key)
+    if cached is not None:
+        audio, media_type = cached
+        return _audio_response(audio, media_type, key)
+
+    _check_rate_limit(request.client.host if request.client else "unknown")
+
     try:
-        wav_bytes = synthesizer.synthesize(
-            req.text,
-            voice_id=req.voice_id,
-            style=req.style,
-            style_weight=req.style_weight,
-            # UI "speed" is intuitive (higher = faster); VITS2's
-            # length_scale is the inverse (higher = slower), so flip it.
-            length_scale=1.0 / req.speed,
-            noise_scale=req.noise_scale,
-            noise_scale_w=req.noise_scale_w,
-        )
+        result = provider.synthesize(req.text, voice_id=req.voice_id, speed=req.speed, options=options)
     except KeyError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except FileNotFoundError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+    except Exception as exc:
+        # Never surface the provider's own error text — it can contain
+        # request echoes and account details.
+        logger.exception("Synthesis failed")
+        raise HTTPException(status_code=502, detail="Speech synthesis failed") from exc
 
-    return Response(content=wav_bytes, media_type="audio/wav")
+    cache.put(key, result.audio, result.media_type)
+    return _audio_response(result.audio, result.media_type, key)
+
+
+def _audio_response(audio: bytes, media_type: str, key: str) -> Response:
+    return Response(
+        content=audio,
+        media_type=media_type,
+        headers={
+            # The key is a hash of the full request, so a given URL+body
+            # always maps to identical bytes — safe to cache hard and
+            # revalidate with a strong ETag.
+            "Cache-Control": "public, max-age=31536000, immutable",
+            "ETag": f'"{key}"',
+        },
+    )

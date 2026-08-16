@@ -5,6 +5,7 @@ import { getQuestById } from '../data/questCampaign'
 import { vocabFocusSets } from '../data/vocabFocusSets'
 import { kanjiLabEntries, type KanjiLabEntry } from '../lib/kanjiLabCatalog'
 import type { JlptLevel } from '../lib/types'
+import { SpeakButtons } from './SpeakButtons'
 
 interface KanjiLabProps {
   onBack: () => void
@@ -685,6 +686,7 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
           <div className={`quest-kanji-word-answer${revealed && englishVisible ? ' is-revealed' : ''}`} aria-hidden={!revealed || !englishVisible}>
             <span>{entry.example.meaning}</span>
           </div>
+          <SpeakButtons className="standard-kanji-speak" text={card.front} />
           <div className={`quest-kanji-parts part-count-${questParts.length}${questParts.length === 1 ? ' is-single' : ''}${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}`}>
             {questParts.map((part) => {
               const examples = part.examples.length ? part.examples.slice(0, 2) : [undefined]
@@ -896,6 +898,9 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
           <div className={`quest-kanji-word-answer standard-kanji-main-meaning${revealed && englishVisible && mainMeaning ? ' is-revealed' : ''}`} aria-hidden={!revealed || !englishVisible || !mainMeaning}>
             {mainMeaning && <span>{mainMeaning}</span>}
           </div>
+          {/* A lone kanji has no single correct pronunciation, so the kanji
+              deck reads its example word instead of the character. */}
+          <SpeakButtons className="standard-kanji-speak" text={wordDeckMode ? card.front : entry.example.word} />
         </div>
 
         <div className="kanji-learning-answer standard-kanji-answer">

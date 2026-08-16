@@ -12147,6 +12147,77 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   cursor: not-allowed;
 }
 
+/* --- Listen controls ------------------------------------------------- */
+
+.speak-buttons {
+  display: flex;
+  gap: .4rem;
+  align-items: center;
+}
+
+.speak-button {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin: 0;
+  min-height: 2rem;
+  padding: .3rem .62rem;
+  border: 1px solid color-mix(in srgb, var(--kyogre) 34%, var(--border));
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: .58rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.speak-button-icon { font-size: .82rem; line-height: 1; }
+
+.speak-button:not(:disabled):hover {
+  border-color: var(--kyogre-light);
+  background: color-mix(in srgb, var(--kyogre) 14%, var(--surface-2));
+}
+
+.speak-button.is-active {
+  border-color: var(--kyogre-light);
+  background: color-mix(in srgb, var(--kyogre) 26%, var(--surface-2));
+  color: var(--kyogre-light);
+}
+
+/* The turtle reads slowly on purpose, so it gets the calmer of the two. */
+.speak-button-learning.is-active {
+  border-color: var(--gold, #d9b45a);
+  background: color-mix(in srgb, var(--gold, #d9b45a) 22%, var(--surface-2));
+  color: var(--gold, #d9b45a);
+}
+
+/* A hosted voice can take a beat on a cold start — show that it's working
+   rather than looking like a dead tap. */
+.speak-button.is-loading .speak-button-icon {
+  animation: speak-button-pulse 1s ease-in-out infinite;
+}
+
+@keyframes speak-button-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .speak-button.is-loading .speak-button-icon { animation: none; opacity: .6; }
+}
+
+@media (max-width: 720px) {
+  .speak-button-label { display: none; }
+  .speak-button { padding: .3rem .5rem; }
+  .speak-button-icon { font-size: .95rem; }
+}
+
+/* Centred under the prompt word rather than pinned to a corner, so it reads
+   as "listen to this" instead of a page-level control. */
+.standard-kanji-speak {
+  justify-content: center;
+  margin-top: .5rem;
+}
+
 .standard-kanji-furigana-toggle.is-active,
 .standard-kanji-furigana-toggle[aria-pressed='true'],
 .standard-kanji-english-toggle.is-active,
