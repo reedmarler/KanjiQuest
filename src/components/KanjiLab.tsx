@@ -5,7 +5,7 @@ import { getQuestById } from '../data/questCampaign'
 import { vocabFocusSets } from '../data/vocabFocusSets'
 import { kanjiLabEntries, type KanjiLabEntry } from '../lib/kanjiLabCatalog'
 import type { JlptLevel } from '../lib/types'
-import { SpeakableWord } from './SpeakableWord'
+import { SpeakableCue, SpeakableWord, useSpeakable } from './SpeakableWord'
 import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
 
 interface KanjiLabProps {
@@ -58,6 +58,25 @@ function uniqueCharacterReadings(readings?: { on: string[]; kun: string[] }) {
 function exampleDisplayWord(word: string, character: string) {
   const variants = word.split(/[/／]/).map((variant) => variant.trim()).filter(Boolean)
   return variants.find((variant) => variant.includes(character)) ?? variants[0] ?? word
+}
+
+/** The example card itself is the listen target.
+ *
+ *  Nothing may be inserted into this subtree: the furigana is placed by
+ *  direct-child selectors, the spans are matched with :first-child and
+ *  :last-child, and the card is a fixed three-row grid. So the existing
+ *  element takes the handlers, and the cue is positioned out of flow. */
+function SpeakableExample({ text, children }: { text: string; children: React.ReactNode }) {
+  const speak = useSpeakable(text)
+  return (
+    <div
+      className={`quest-kanji-expanded-example${speak.live ? ' is-speakable' : ''}${speak.isSpeaking ? ' is-speaking' : ''}`}
+      {...speak.triggerProps}
+    >
+      {children}
+      {speak.live && <SpeakableCue className="speakable-cue-corner" />}
+    </div>
+  )
 }
 
 function QuestExampleWord({ word, character, reading }: { word: string; character: string; reading: string }) {
@@ -706,24 +725,20 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
                     {examples.map((example, exampleIndex) => {
                       const wordLength = example ? [...exampleDisplayWord(example.example.word, part.character)].length : 1
                       return (
-                        <div className="quest-kanji-expanded-example" key={example?.example.word ?? `${part.character}-${exampleIndex}`}>
+                        <SpeakableExample
+                          key={example?.example.word ?? `${part.character}-${exampleIndex}`}
+                          text={example ? spokenTextForWord(example.example.word, example.example.reading) : ''}
+                        >
                           <div
                             className={`quest-kanji-expanded-word word-length-${Math.min(wordLength, 5)}`}
                             lang="ja"
                           >
                             {example
-                              ? (
-                                <SpeakableWord
-                                  className="speakable-word-compact"
-                                  text={spokenTextForWord(example.example.word, example.example.reading)}
-                                >
-                                  <QuestExampleWord word={example.example.word} character={part.character} reading={example.example.reading} />
-                                </SpeakableWord>
-                              )
+                              ? <QuestExampleWord word={example.example.word} character={part.character} reading={example.example.reading} />
                               : <span className="quest-kanji-example-anchor">{partReading && <small className="quest-kanji-expanded-reading">{partReading}</small>}<strong>{part.character}</strong></span>}
                           </div>
                           <em className="quest-kanji-expanded-meaning">{example?.example.meaning.split(';')[0] ?? part.definition}</em>
-                        </div>
+                        </SpeakableExample>
                       )
                     })}
                   </div>
@@ -922,20 +937,15 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
               return (
                 <article className={exampleIndex === longestRelatedExampleIndex ? 'is-longest-example' : undefined} key={example.character + example.example.word}>
                   <div className="quest-kanji-expanded-examples example-count-1">
-                    <div className="quest-kanji-expanded-example">
+                    <SpeakableExample text={spokenTextForWord(example.example.word, example.example.reading)}>
                       <div
                         className={`quest-kanji-expanded-word word-length-${Math.min(wordLength, 5)}`}
                         lang="ja"
                       >
-                        <SpeakableWord
-                          className="speakable-word-compact"
-                          text={spokenTextForWord(example.example.word, example.example.reading)}
-                        >
-                          <QuestExampleWord word={example.example.word} character={example.character} reading={example.example.reading} />
-                        </SpeakableWord>
+                        <QuestExampleWord word={example.example.word} character={example.character} reading={example.example.reading} />
                       </div>
                       <em className="quest-kanji-expanded-meaning">{example.example.meaning.split(';')[0]}</em>
-                    </div>
+                    </SpeakableExample>
                   </div>
                 </article>
               )
