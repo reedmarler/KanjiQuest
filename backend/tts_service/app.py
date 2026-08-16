@@ -92,7 +92,12 @@ def health() -> dict[str, object]:
     # Deliberately reports the provider *name* and nothing about its
     # credentials. Used by the frontend to decide whether real speech is
     # available before falling back to the browser voice.
-    return {"ok": provider is not None, "provider": settings.provider, "budget": budget.status()}
+    return {
+        "ok": provider is not None,
+        "provider": settings.provider,
+        "cache_only": settings.cache_only,
+        "budget": budget.status(),
+    }
 
 
 @app.get("/voices")
@@ -125,6 +130,11 @@ def speak(req: SpeakRequest, request: Request) -> Response:
     if cached is not None:
         audio, media_type = cached
         return _audio_response(audio, media_type, key)
+
+    # Cache-only: everything not already rendered is refused, so the library
+    # only ever grows when someone runs prewarm:audio with this switched off.
+    if settings.cache_only:
+        raise HTTPException(status_code=409, detail="Cache-only mode: not in the pre-rendered library")
 
     _check_rate_limit(request.client.host if request.client else "unknown")
 

@@ -71,6 +71,13 @@ class Settings:
     # limit. Cache hits never count, so this bounds new synthesis only.
     monthly_character_budget: int = field(default_factory=lambda: _env_int("TTS_MONTHLY_CHARACTER_BUDGET", 0))
 
+    # Serve only what has already been rendered. New text is refused rather
+    # than bought, so the app can never spend on its own — the library is
+    # filled deliberately with prewarm:audio, with this turned off.
+    cache_only: bool = field(
+        default_factory=lambda: os.environ.get("TTS_CACHE_ONLY", "").strip().lower() in {"1", "true", "yes"}
+    )
+
     # Enables the harvest endpoints when set. They expose the text of
     # everything synthesized, so they stay off unless a token is configured.
     admin_token: str = field(default_factory=lambda: os.environ.get("TTS_ADMIN_TOKEN", "").strip())

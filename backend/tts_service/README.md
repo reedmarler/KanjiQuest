@@ -120,6 +120,29 @@ voice. The bill cannot exceed the number you set.
 
 `GET /health` reports the month-to-date total.
 
+## Filling the library on purpose
+
+Hero-generator sentences are written at runtime, so they can't be listed in
+advance. `npm run prewarm:audio` runs the same generator the app runs and has
+the service speak what it produces, turning an open-ended live cost into one
+batch whose size you choose:
+
+```bash
+npm run prewarm:audio -- --count=500 --dry-run   # count and price it
+npm run prewarm:audio -- --count=500
+TTS_ADMIN_TOKEN=... npm run harvest:audio        # then bank them
+```
+
+Seeds are walked in order rather than sampled at random, so a later run
+extends the same library instead of scattering one-off sentences the app will
+never produce again.
+
+Pair it with `TTS_CACHE_ONLY=true`: the service then serves only what has
+already been rendered and refuses new text with a 409, so the app plays the
+real voice for the library and the browser voice for everything else and can
+never spend on its own. Fill the library by turning the flag off, running
+prewarm, and turning it back on.
+
 ## Banking what you have already paid for
 
 The cache lives on the server's disk: an ephemeral host wipes it on restart,

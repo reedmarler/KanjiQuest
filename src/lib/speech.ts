@@ -38,6 +38,14 @@ const VOICE_IDS: Record<SpeechVoiceGender, string> = {
   boy: 'not-anime-lightfire',
 }
 
+/**
+ * Statuses meaning "not this text, this time" rather than "the service is
+ * gone": budget reached, cache-only miss, rate limited. Treating these as an
+ * outage would stop the app asking for anything else all session — including
+ * lines the service would happily serve.
+ */
+const PER_REQUEST_REFUSALS = new Set([402, 409, 429])
+
 /** The service rejects anything outside this band, so clamp before sending. */
 const MIN_SERVER_RATE = 0.5
 const MAX_SERVER_RATE = 2
@@ -57,6 +65,16 @@ export interface SpeakOptions {
   volume?: number
   voiceId?: string
   onEnd?: () => void
+}
+
+/** Thrown for a refusal that says nothing about the service's health. */
+class RefusedOnce extends Error {
+  status: number
+
+  constructor(status: number) {
+    super(`TTS declined this request: ${status}`)
+    this.status = status
+  }
 }
 
 let serverAvailable = false
@@ -312,7 +330,10 @@ function speakFromService(
         body: JSON.stringify({ text, speed: serverRate, voice_id: voice }),
       })
         .then((res) => {
-          if (!res.ok) throw new Error(`TTS request failed: ${res.status}`)
+          if (!res.ok) {
+            if (PER_REQUEST_REFUSALS.has(res.status)) throw new RefusedOnce(res.status)
+            throw new Error(`TTS request failed: ${res.status}`)
+          }
           serverAvailable = true
           return res.blob()
         })
@@ -321,9 +342,10 @@ function speakFromService(
           playBlob(blob, volume, generation, playbackRate, onEnd)
         })
     })
-    .catch(() => {
+    .catch((error: unknown) => {
       if (generation !== speechGeneration) return
-      serverAvailable = false
+      // Keep the service marked available when it merely declined this line.
+      if (!(error instanceof RefusedOnce)) serverAvailable = false
       speakWithBrowserVoice(text, heardRate, volume, generation, onEnd)
     })
 }

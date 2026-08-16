@@ -14,7 +14,8 @@
     "audit:reachability": "tsx scripts/audit-word-reachability.ts",
     "vet:sentences": "tsx scripts/vet-sentences-openai.ts",
     "generate:audio": "tsx scripts/generate-audio.ts",
-    "harvest:audio": "tsx scripts/harvest-audio.ts"
+    "harvest:audio": "tsx scripts/harvest-audio.ts",
+    "prewarm:audio": "tsx scripts/prewarm-audio.ts"
   },
   "dependencies": {
     "react": "^19.2.7",
