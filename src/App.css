@@ -3565,6 +3565,11 @@ body:has(.dashboard) {
   background-position: center bottom;
   filter: saturate(.78) contrast(1.02) drop-shadow(0 .14rem .16rem color-mix(in srgb, #05040c 28%, transparent));
   opacity: .88;
+  /* The pose is a mid-stride sprint, but the art is one static frame — a
+     quick bounce plus a forward lean sells the motion the trail and speed
+     lines already imply, without needing a spritesheet. */
+  transform-origin: 50% 100%;
+  animation: dashboard-quest-runner-bob .56s ease-in-out infinite;
 }
 
 .dashboard-quest-guardian {
@@ -3573,6 +3578,25 @@ body:has(.dashboard) {
   bottom: -.2rem;
   width: 5.4rem;
   height: 5.4rem;
+}
+
+.dashboard-quest-aura {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: 6%;
+  width: 4.2rem;
+  height: 4.2rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--sakura-light) 40%, transparent) 0%,
+    color-mix(in srgb, var(--kyogre-light) 22%, transparent) 46%,
+    transparent 72%
+  );
+  filter: blur(.22rem);
+  transform: translateX(-50%);
+  animation: dashboard-quest-aura-pulse 2.6s ease-in-out infinite;
 }
 
 .dashboard-quest-speed-lines {
@@ -3601,6 +3625,8 @@ body:has(.dashboard) {
 .dashboard-quest-speed-lines i:nth-child(3) { top: 2.02rem; width: 2.9rem; animation-delay: -2.1s; }
 .dashboard-quest-speed-lines i:nth-child(4) { top: .72rem; width: 2.45rem; animation-delay: -.62s; }
 .dashboard-quest-speed-lines i:nth-child(5) { top: 2.42rem; width: 3.25rem; animation-delay: -1.68s; }
+.dashboard-quest-speed-lines i:nth-child(6) { top: 0; width: 1.85rem; animation-delay: -2.6s; }
+.dashboard-quest-speed-lines i:nth-child(7) { top: 1.7rem; width: 2.2rem; animation-delay: -.24s; }
 
 @keyframes dashboard-tool-wave {
   0%, 58%, 100% { transform: translateY(0); }
@@ -3616,23 +3642,20 @@ body:has(.dashboard) {
   84%, 100% { left: 52%; opacity: 0; transform: translateY(-.1rem) scaleX(.76); }
 }
 
-@keyframes dashboard-quest-runner-frames {
-  0%, 6.249% { background-position: 0 50%; }
-  6.25%, 12.499% { background-position: 6.6667% 50%; }
-  12.5%, 18.749% { background-position: 13.3333% 50%; }
-  18.75%, 24.999% { background-position: 20% 50%; }
-  25%, 31.249% { background-position: 26.6667% 50%; }
-  31.25%, 37.499% { background-position: 33.3333% 50%; }
-  37.5%, 43.749% { background-position: 40% 50%; }
-  43.75%, 49.999% { background-position: 46.6667% 50%; }
-  50%, 56.249% { background-position: 53.3333% 50%; }
-  56.25%, 62.499% { background-position: 60% 50%; }
-  62.5%, 68.749% { background-position: 66.6667% 50%; }
-  68.75%, 74.999% { background-position: 73.3333% 50%; }
-  75%, 81.249% { background-position: 80% 50%; }
-  81.25%, 87.499% { background-position: 86.6667% 50%; }
-  87.5%, 93.749% { background-position: 93.3333% 50%; }
-  93.75%, 100% { background-position: 100% 50%; }
+/* A quick sprint bounce: down into the stride, up off it, tiny forward lean
+   at the top so the static art reads as motion rather than a decal. */
+@keyframes dashboard-quest-runner-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg) scaleY(1); }
+  35% { transform: translateY(.05rem) rotate(-.6deg) scaleY(.97); }
+  62% { transform: translateY(-.16rem) rotate(1.4deg) scaleY(1.02); }
+  85% { transform: translateY(-.02rem) rotate(.4deg) scaleY(1); }
+}
+
+/* Breathes behind the sprite rather than flashing, so it reads as an aura
+   the character is carrying rather than an alert badge. */
+@keyframes dashboard-quest-aura-pulse {
+  0%, 100% { opacity: .3; transform: translateX(-50%) scale(.88); }
+  50% { opacity: .58; transform: translateX(-50%) scale(1.08); }
 }
 
 @keyframes dashboard-quest-trail-sweep {
@@ -3715,6 +3738,7 @@ body:has(.dashboard) {
   .dashboard-quest-wind-slash,
   .dashboard-quest-wind-slash > b,
   .dashboard-quest-speed-lines i,
+  .dashboard-quest-aura,
   .dashboard-quest-guardian-sprite {
     animation: none;
   }
