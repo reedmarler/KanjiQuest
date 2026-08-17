@@ -335,15 +335,15 @@ body:has(.dashboard) {
 /* The reading floats inside the run's own leading, so the gap it leaves is
    the distance from its box bottom (0.42em tall, line-height 1, offset by
    `top`) up to the top of the base text's em box. At top: -0.66em that gap
-   measured 0.261em of the sentence's font size; -0.41em leaves 0.156em — a
-   40% cut. `top` resolves against the reading's own 0.42em font size, so
+   measured 0.261em of the sentence's font size; -0.23em leaves 0.080em — a
+   70% cut. `top` resolves against the reading's own 0.42em font size, so
    0.1em of offset moves it 0.042em relative to the kanji. Only the reading
    moves: it is absolutely positioned, so the row's reserved height and the
    sentence's own line box are untouched. */
 .hero-database-full-reading {
   position: absolute;
   left: 50%;
-  top: -0.41em;
+  top: -0.23em;
   width: max-content;
   color: var(--kyogre-light);
   font-size: 0.42em;
@@ -5716,10 +5716,10 @@ body:has(.dashboard) {
     transform: translateX(-50%);
   }
 
-  /* Same 40% cut as the desktop rule. The phone offset started 0.02em higher
-     (a 0.265em gap), so it lands slightly lower here at 0.159em. */
+  /* Same 70% cut as the desktop rule. The phone offset started 0.02em higher
+     (a 0.265em gap), so it lands slightly lower here at 0.081em. */
   .hero-sentence-line.hero-database-line .hero-database-full-reading {
-    top: -0.43em;
+    top: -0.24em;
   }
 
   .control-story-topbar {
