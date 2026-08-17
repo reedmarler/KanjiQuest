@@ -26,6 +26,7 @@ import type { CardProgress } from './lib/types'
 import type { GenerationComplexity } from './lib/generationComplexity'
 import type { SentenceExercise } from './data/sentenceExercises'
 import type { DrillExercise } from './lib/drillExercises'
+import { ttsServiceUrl } from './lib/speech'
 import { Dashboard } from './components/Dashboard'
 import { SessionComplete } from './components/SessionComplete'
 import type { LibraryTab } from './components/LibraryPanel'
@@ -401,7 +402,14 @@ function App() {
             } },
             { mark: '編', title: 'Content Studio', detail: 'Add and organize your own content.', accent: 'gold', onClick: () => setView('content-studio') },
             { mark: '験', title: 'Sentence Testing', detail: 'Generate sentences by complexity level.', accent: 'kyogre', onClick: () => setView('sentence-testing') },
-            { mark: '声', title: 'Voice Test', detail: 'Compare provider voices before building audio.', accent: 'sakura', onClick: () => setView('voice-test') },
+            // Auditioning needs a live TTS service, and a deployment that
+            // ships the pre-rendered library deliberately has none — the
+            // whole point is that the site plays static clips with no
+            // service and no key. Showing the tile there offers a tool that
+            // can only ever explain why it cannot work.
+            ...(ttsServiceUrl()
+              ? [{ mark: '声', title: 'Voice Test', detail: 'Compare provider voices before building audio.', accent: 'sakura' as const, onClick: () => setView('voice-test') }]
+              : []),
           ]}
         />
       </div>
