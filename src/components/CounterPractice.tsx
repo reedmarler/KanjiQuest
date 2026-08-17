@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import {
   COUNTER_CATEGORIES,
+  COUNTER_QUIZZES,
   JAPANESE_COUNTERS,
   type CounterCategory,
   type JapaneseCounter,
@@ -25,42 +26,75 @@ function shuffled<T>(items: readonly T[]) {
 
 function CounterStudyCard({
   counter,
-  revealed,
-  onReveal,
+  selected,
+  onSelect,
 }: {
   counter: JapaneseCounter
-  revealed: boolean
-  onReveal: () => void
+  selected: string | null
+  onSelect: (option: string) => void
 }) {
+  const quiz = COUNTER_QUIZZES[counter.id]!
+  const options = useMemo(() => shuffled(quiz.options), [quiz.options])
+  const [before, after] = quiz.prompt.split('___')
+  const answered = selected !== null
+  const correct = selected === quiz.answer
+
   return (
-    <main className={`counter-study-card${revealed ? ' is-revealed' : ''}`}>
+    <main className={`counter-study-card counter-quiz-card${answered ? ' is-answered' : ''}`}>
       <div className="counter-study-card-top">
         <span className="counter-category-badge">{counter.category}</span>
-        <span className="counter-card-instruction">What does this counter count?</span>
+        <span className="counter-card-instruction">Choose the missing counter</span>
       </div>
 
-      <div className="counter-study-prompt">
-        <span className="counter-study-suffix" lang="ja">{counter.suffix}</span>
-        <span className={`counter-study-reading${revealed ? ' is-visible' : ''}`} lang="ja">
-          {counter.reading}
-        </span>
+      <div className="counter-quiz-prompt">
+        <p lang="ja">
+          <span>{before}</span>
+          <span className="counter-quiz-blank">{answered ? quiz.answer : '？'}</span>
+          <span>{after}</span>
+        </p>
+        <span>{quiz.english}</span>
       </div>
 
-      <section className={`counter-study-answer${revealed ? ' is-visible' : ''}`} aria-hidden={!revealed}>
-        <h2>{counter.counts}</h2>
-        <SpeakableWord text={counter.example.reading} className="counter-example">
-          <span className="counter-example-japanese" lang="ja">
-            <FuriganaSegment text={counter.example.japanese} reading={counter.example.reading} />
-          </span>
-          <span className="counter-example-english">{counter.example.english}</span>
-          <SpeakableCue />
-        </SpeakableWord>
-        <p className="counter-study-note">{counter.note}</p>
-      </section>
+      <div className="counter-quiz-options" role="group" aria-label="Counter choices">
+        {options.map((option) => {
+          const optionIsCorrect = option === quiz.answer
+          const optionIsSelected = option === selected
+          const stateClass = answered
+            ? optionIsCorrect
+              ? ' is-correct'
+              : optionIsSelected
+                ? ' is-wrong'
+                : ''
+            : ''
+          return (
+            <button
+              key={option}
+              type="button"
+              className={`${optionIsSelected ? 'is-selected' : ''}${stateClass}`}
+              disabled={answered}
+              onClick={() => onSelect(option)}
+            >
+              {option}
+            </button>
+          )
+        })}
+      </div>
 
-      <button type="button" className="btn btn-primary counter-reveal-button" onClick={onReveal}>
-        {revealed ? 'Hide answer' : 'Reveal counter'}
-      </button>
+      {answered && (
+        <section className={`counter-quiz-feedback${correct ? ' is-correct' : ' is-wrong'}`} aria-live="polite">
+          <div className="counter-quiz-result">
+            <strong>{correct ? 'Correct' : `Answer: ${quiz.answer}`}</strong>
+            <span><b lang="ja">{counter.suffix}</b> · {counter.reading}</span>
+          </div>
+          <SpeakableWord text={quiz.reading} className="counter-sentence-example">
+            <span className="counter-sentence-japanese" lang="ja">
+              <FuriganaSegment text={quiz.completed} reading={quiz.reading} />
+            </span>
+            <span className="counter-sentence-english">{quiz.english}</span>
+            <SpeakableCue />
+          </SpeakableWord>
+        </section>
+      )}
     </main>
   )
 }
@@ -69,7 +103,8 @@ export function CounterPractice({ onBack }: CounterPracticeProps) {
   const [category, setCategory] = useState<CategoryFilter>('All')
   const [deck, setDeck] = useState<JapaneseCounter[]>(() => [...JAPANESE_COUNTERS])
   const [index, setIndex] = useState(0)
-  const [revealed, setRevealed] = useState(false)
+  const [selected, setSelected] = useState<string | null>(null)
+  const [correctIds, setCorrectIds] = useState<Set<string>>(() => new Set())
   const [completed, setCompleted] = useState(false)
 
   const cards = useMemo(
@@ -82,14 +117,15 @@ export function CounterPractice({ onBack }: CounterPracticeProps) {
   function chooseCategory(nextCategory: CategoryFilter) {
     setCategory(nextCategory)
     setIndex(0)
-    setRevealed(false)
+    setSelected(null)
+    setCorrectIds(new Set())
     setCompleted(false)
   }
 
   function previousCounter() {
     if (completed) {
       setCompleted(false)
-      setRevealed(false)
+      setSelected(null)
       return
     }
     if (index === 0) {
@@ -97,7 +133,7 @@ export function CounterPractice({ onBack }: CounterPracticeProps) {
       return
     }
     setIndex((current) => current - 1)
-    setRevealed(false)
+    setSelected(null)
   }
 
   function nextCounter() {
@@ -106,20 +142,30 @@ export function CounterPractice({ onBack }: CounterPracticeProps) {
       return
     }
     setIndex((current) => current + 1)
-    setRevealed(false)
+    setSelected(null)
   }
 
   function shuffleDeck() {
     setDeck((current) => shuffled(current))
     setIndex(0)
-    setRevealed(false)
+    setSelected(null)
+    setCorrectIds(new Set())
     setCompleted(false)
   }
 
   function restartDeck() {
     setIndex(0)
-    setRevealed(false)
+    setSelected(null)
+    setCorrectIds(new Set())
     setCompleted(false)
+  }
+
+  function selectCounter(option: string) {
+    if (!counter || selected !== null) return
+    setSelected(option)
+    if (option === COUNTER_QUIZZES[counter.id]?.answer) {
+      setCorrectIds((current) => new Set(current).add(counter.id))
+    }
   }
 
   return (
@@ -142,7 +188,7 @@ export function CounterPractice({ onBack }: CounterPracticeProps) {
       <section className="counter-path-heading">
         <div>
           <span>33 WAYS TO COUNT</span>
-          <p>Learn what each counter counts, then reveal its reading and sound changes.</p>
+          <p>Choose the counter that completes each sentence.</p>
         </div>
         <button type="button" className="btn btn-ghost" onClick={shuffleDeck}>Shuffle</button>
       </section>
@@ -165,7 +211,9 @@ export function CounterPractice({ onBack }: CounterPracticeProps) {
         <main className="counter-study-complete">
           <span lang="ja">数</span>
           <h2>Counter path complete</h2>
-          <p>You reviewed all {cards.length} counters in {category === 'All' ? 'the full deck' : category}.</p>
+          <p>
+            {cards.filter((item) => correctIds.has(item.id)).length} of {cards.length} correct in {category === 'All' ? 'the full deck' : category}.
+          </p>
           <button type="button" className="btn btn-primary" onClick={restartDeck}>Study again</button>
           <button type="button" className="btn btn-ghost" onClick={shuffleDeck}>Shuffle and restart</button>
         </main>
@@ -173,15 +221,15 @@ export function CounterPractice({ onBack }: CounterPracticeProps) {
         <>
           <CounterStudyCard
             counter={counter}
-            revealed={revealed}
-            onReveal={() => setRevealed((current) => !current)}
+            selected={selected}
+            onSelect={selectCounter}
           />
           <div className="counter-study-navigation">
             <button type="button" className="btn btn-ghost" onClick={previousCounter}>
               {index === 0 ? 'Study tools' : 'Previous'}
             </button>
-            <button type="button" className="btn counter-next-button" onClick={nextCounter}>
-              {index + 1 >= cards.length ? 'Finish set' : 'Next counter'}
+            <button type="button" className="btn counter-next-button" onClick={nextCounter} disabled={selected === null}>
+              {selected === null ? 'Choose an answer' : index + 1 >= cards.length ? 'Finish set' : 'Next counter'}
             </button>
           </div>
         </>

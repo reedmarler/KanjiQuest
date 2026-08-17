@@ -14,6 +14,16 @@ export interface JapaneseCounter {
   note: string
 }
 
+export interface CounterQuiz {
+  /** Japanese sentence with one counter-sized blank. */
+  prompt: string
+  answer: string
+  options: readonly string[]
+  completed: string
+  reading: string
+  english: string
+}
+
 /**
  * A practical 33-counter study path. These are counters learners encounter in
  * everyday speech, schedules, shopping, travel, and common written Japanese.
@@ -327,3 +337,275 @@ export const COUNTER_CATEGORIES: readonly CounterCategory[] = [
   'Time',
   'Events & places',
 ]
+
+/**
+ * One natural context question per counter. The blank includes the numeral
+ * when the counter has a fused native form (三つ); otherwise the numeral stays
+ * in the sentence so the learner chooses only the counter suffix.
+ */
+export const COUNTER_QUIZZES: Readonly<Record<string, CounterQuiz>> = {
+  tsu: {
+    prompt: 'りんごを___買いました。',
+    answer: '三つ',
+    options: ['三つ', '三本', '三枚', '三冊'],
+    completed: 'りんごを三つ買いました。',
+    reading: 'りんごをみっつかいました。',
+    english: 'I bought three apples.',
+  },
+  ko: {
+    prompt: '卵を三___買いました。',
+    answer: '個',
+    options: ['個', '枚', '本', '杯'],
+    completed: '卵を三個買いました。',
+    reading: 'たまごをさんこかいました。',
+    english: 'I bought three eggs.',
+  },
+  nin: {
+    prompt: '家族は三___です。',
+    answer: '人',
+    options: ['人', '匹', '頭', '羽'],
+    completed: '家族は三人です。',
+    reading: 'かぞくはさんにんです。',
+    english: 'There are three people in my family.',
+  },
+  mei: {
+    prompt: 'ご予約は三___様ですね。',
+    answer: '名',
+    options: ['名', '人', '件', '室'],
+    completed: 'ご予約は三名様ですね。',
+    reading: 'ごよやくはさんめいさまですね。',
+    english: 'Your reservation is for three people, correct?',
+  },
+  hon: {
+    prompt: 'ペンを三___買いました。',
+    answer: '本',
+    options: ['本', '枚', '冊', '台'],
+    completed: 'ペンを三本買いました。',
+    reading: 'ぺんをさんぼんかいました。',
+    english: 'I bought three pens.',
+  },
+  mai: {
+    prompt: '切符を三___買いました。',
+    answer: '枚',
+    options: ['枚', '本', '冊', '着'],
+    completed: '切符を三枚買いました。',
+    reading: 'きっぷをさんまいかいました。',
+    english: 'I bought three tickets.',
+  },
+  satsu: {
+    prompt: '本を三___借りました。',
+    answer: '冊',
+    options: ['冊', '枚', '本', '曲'],
+    completed: '本を三冊借りました。',
+    reading: 'ほんをさんさつかりました。',
+    english: 'I borrowed three books.',
+  },
+  hiki: {
+    prompt: '庭に猫が三___います。',
+    answer: '匹',
+    options: ['匹', '頭', '羽', '人'],
+    completed: '庭に猫が三匹います。',
+    reading: 'にわにねこがさんびきいます。',
+    english: 'There are three cats in the garden.',
+  },
+  tou: {
+    prompt: '動物園に象が三___います。',
+    answer: '頭',
+    options: ['頭', '匹', '羽', '台'],
+    completed: '動物園に象が三頭います。',
+    reading: 'どうぶつえんにぞうがさんとういます。',
+    english: 'There are three elephants at the zoo.',
+  },
+  wa: {
+    prompt: '木に鳥が三___います。',
+    answer: '羽',
+    options: ['羽', '匹', '頭', '本'],
+    completed: '木に鳥が三羽います。',
+    reading: 'きにとりがさんわいます。',
+    english: 'There are three birds in the tree.',
+  },
+  dai: {
+    prompt: '会社は車を三___持っています。',
+    answer: '台',
+    options: ['台', '本', '枚', '軒'],
+    completed: '会社は車を三台持っています。',
+    reading: 'かいしゃはくるまをさんだいもっています。',
+    english: 'The company owns three cars.',
+  },
+  hai: {
+    prompt: 'コーヒーを三___飲みました。',
+    answer: '杯',
+    options: ['杯', '個', '本', '枚'],
+    completed: 'コーヒーを三杯飲みました。',
+    reading: 'こーひーをさんばいのみました。',
+    english: 'I drank three cups of coffee.',
+  },
+  chaku: {
+    prompt: 'シャツを三___買いました。',
+    answer: '着',
+    options: ['着', '枚', '足', '冊'],
+    completed: 'シャツを三着買いました。',
+    reading: 'しゃつをさんちゃくかいました。',
+    english: 'I bought three shirts.',
+  },
+  soku: {
+    prompt: '靴を三___試着しました。',
+    answer: '足',
+    options: ['足', '着', '個', '台'],
+    completed: '靴を三足試着しました。',
+    reading: 'くつをさんぞくしちゃくしました。',
+    english: 'I tried on three pairs of shoes.',
+  },
+  'ken-buildings': {
+    prompt: 'この通りには店が三___あります。',
+    answer: '軒',
+    options: ['軒', '室', '件', '階'],
+    completed: 'この通りには店が三軒あります。',
+    reading: 'このとおりにはみせがさんげんあります。',
+    english: 'There are three shops on this street.',
+  },
+  'kai-floors': {
+    prompt: '会議室は三___です。',
+    answer: '階',
+    options: ['階', '室', '軒', '番'],
+    completed: '会議室は三階です。',
+    reading: 'かいぎしつはさんがいです。',
+    english: 'The meeting room is on the third floor.',
+  },
+  shitsu: {
+    prompt: '空いている部屋が三___あります。',
+    answer: '室',
+    options: ['室', '軒', '階', '件'],
+    completed: '空いている部屋が三室あります。',
+    reading: 'あいているへやがさんしつあります。',
+    english: 'There are three available rooms.',
+  },
+  'ken-cases': {
+    prompt: '新しい問い合わせが三___あります。',
+    answer: '件',
+    options: ['件', '回', '度', '室'],
+    completed: '新しい問い合わせが三件あります。',
+    reading: 'あたらしいといあわせがさんけんあります。',
+    english: 'There are three new inquiries.',
+  },
+  'kai-times': {
+    prompt: 'この映画を三___見ました。',
+    answer: '回',
+    options: ['回', '曲', '件', '番'],
+    completed: 'この映画を三回見ました。',
+    reading: 'このえいがをさんかいみました。',
+    english: 'I watched this movie three times.',
+  },
+  do: {
+    prompt: '今日の気温は三___です。',
+    answer: '度',
+    options: ['度', '分', '秒', '歳'],
+    completed: '今日の気温は三度です。',
+    reading: 'きょうのきおんはさんどです。',
+    english: 'Today’s temperature is three degrees.',
+  },
+  ban: {
+    prompt: '私の整理券は三___です。',
+    answer: '番',
+    options: ['番', '回', '件', '度'],
+    completed: '私の整理券は三番です。',
+    reading: 'わたしのせいりけんはさんばんです。',
+    english: 'My numbered ticket is number three.',
+  },
+  sai: {
+    prompt: '娘は八___です。',
+    answer: '歳',
+    options: ['歳', '年', '日', 'か月'],
+    completed: '娘は八歳です。',
+    reading: 'むすめははっさいです。',
+    english: 'My daughter is eight years old.',
+  },
+  nen: {
+    prompt: '日本語を三___勉強しました。',
+    answer: '年',
+    options: ['年', 'か月', '週間', '日'],
+    completed: '日本語を三年勉強しました。',
+    reading: 'にほんごをさんねんべんきょうしました。',
+    english: 'I studied Japanese for three years.',
+  },
+  kagetsu: {
+    prompt: '日本に三___滞在します。',
+    answer: 'か月',
+    options: ['か月', '年', '日', '時間'],
+    completed: '日本に三か月滞在します。',
+    reading: 'にほんにさんかげつたいざいします。',
+    english: 'I will stay in Japan for three months.',
+  },
+  nichi: {
+    prompt: '旅行は三___間です。',
+    answer: '日',
+    options: ['日', '週間', 'か月', '年'],
+    completed: '旅行は三日間です。',
+    reading: 'りょこうはみっかかんです。',
+    english: 'The trip is three days long.',
+  },
+  shuukan: {
+    prompt: '完成まで三___かかります。',
+    answer: '週間',
+    options: ['週間', '日', '時間', '回'],
+    completed: '完成まで三週間かかります。',
+    reading: 'かんせいまでさんしゅうかんかかります。',
+    english: 'It will take three weeks to finish.',
+  },
+  jikan: {
+    prompt: '毎日三___勉強します。',
+    answer: '時間',
+    options: ['時間', '時', '分', '週間'],
+    completed: '毎日三時間勉強します。',
+    reading: 'まいにちさんじかんべんきょうします。',
+    english: 'I study for three hours every day.',
+  },
+  ji: {
+    prompt: '会議は四___に始まります。',
+    answer: '時',
+    options: ['時', '時間', '分', '回'],
+    completed: '会議は四時に始まります。',
+    reading: 'かいぎはよじにはじまります。',
+    english: 'The meeting starts at four o’clock.',
+  },
+  fun: {
+    prompt: '駅まで三___です。',
+    answer: '分',
+    options: ['分', '秒', '時間', '時'],
+    completed: '駅まで三分です。',
+    reading: 'えきまでさんぷんです。',
+    english: 'It is three minutes to the station.',
+  },
+  byou: {
+    prompt: '十___待ってください。',
+    answer: '秒',
+    options: ['秒', '分', '時', '回'],
+    completed: '十秒待ってください。',
+    reading: 'じゅうびょうまってください。',
+    english: 'Please wait ten seconds.',
+  },
+  en: {
+    prompt: 'このりんごは三百___です。',
+    answer: '円',
+    options: ['円', '個', '枚', '本'],
+    completed: 'このりんごは三百円です。',
+    reading: 'このりんごはさんびゃくえんです。',
+    english: 'This apple is three hundred yen.',
+  },
+  kyoku: {
+    prompt: 'ライブで三___歌いました。',
+    answer: '曲',
+    options: ['曲', '回', '枚', '冊'],
+    completed: 'ライブで三曲歌いました。',
+    reading: 'らいぶでさんきょくうたいました。',
+    english: 'I sang three songs at the concert.',
+  },
+  haku: {
+    prompt: '京都のホテルに三___しました。',
+    answer: '泊',
+    options: ['泊', '日', '回', '軒'],
+    completed: '京都のホテルに三泊しました。',
+    reading: 'きょうとのほてるにさんぱくしました。',
+    english: 'I stayed three nights at a hotel in Kyoto.',
+  },
+}
