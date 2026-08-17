@@ -93,9 +93,9 @@ let audioPrime: Promise<void> | null = null
 let speechGeneration = 0
 let active: { token: number; status: SpeechStatus } | null = null
 
-/** One silent sample. Playing it synchronously blesses this persistent audio
- * element on iOS; the service blob can then replace its source after fetch. */
-const SILENT_WAV = 'data:audio/wav;base64,UklGRiUAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQEAAACA'
+/** Valid 50 ms, 8 kHz PCM silence. The previous one-sample WAV could leave
+ * WebKit's play() promise pending forever, blocking every real clip behind it. */
+const SILENT_WAV = 'data:audio/wav;base64,UklGRrQBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YZABAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA'
 
 function getSharedAudio() {
   sharedAudio ??= new Audio()
@@ -107,22 +107,28 @@ function getSharedAudio() {
 /** Must be called from the original tap handler, before async TTS work. */
 function primeAudioPlayback() {
   const audio = getSharedAudio()
-  audio.onended = null
-  audio.onerror = null
-  audio.pause()
-  audio.currentTime = 0
-  audio.volume = 0
-  audio.playbackRate = 1
-  audio.src = SILENT_WAV
-  audioPrime = audio.play()
-    .then(() => {
-      audio.pause()
-      audio.currentTime = 0
-    })
-    .catch(() => {
-      // Desktop does not need the prime. On restrictive mobile browsers the
-      // later play() still reports failure through the normal finish handler.
-    })
+  try {
+    audio.onended = null
+    audio.onerror = null
+    audio.pause()
+    audio.volume = 0
+    audio.playbackRate = 1
+    audio.src = SILENT_WAV
+    const started = audio.play()
+    const settled = started && typeof started.then === 'function'
+      ? started.then(() => undefined, () => undefined)
+      : Promise.resolve()
+    // A media play promise is permitted to remain pending. Never let that
+    // browser quirk hold static clips, cached clips, and service speech hostage.
+    audioPrime = Promise.race([
+      settled,
+      new Promise<void>((resolve) => window.setTimeout(resolve, 150)),
+    ])
+  } catch {
+    // currentTime/play can throw synchronously on a fresh Safari audio element.
+    // Priming is an enhancement; ordinary playback must still proceed.
+    audioPrime = Promise.resolve()
+  }
 }
 
 const stateListeners = new Set<(active: { token: number; status: SpeechStatus } | null) => void>()
@@ -247,26 +253,37 @@ function releaseObjectUrl() {
 export function stopSpeaking() {
   speechGeneration++
   if (canUseBrowserSpeech()) window.speechSynthesis.cancel()
-  if (currentAudio) {
-    currentAudio.onended = null
-    currentAudio.onerror = null
-    currentAudio.pause()
-    currentAudio.currentTime = 0
-    currentAudio = null
+  const audio = currentAudio ?? sharedAudio
+  if (audio) {
+    audio.onended = null
+    audio.onerror = null
+    try {
+      audio.pause()
+      if (audio.readyState !== HTMLMediaElement.HAVE_NOTHING) audio.currentTime = 0
+    } catch {
+      // A detached or not-yet-loaded WebKit media element can reject seeking.
+    }
   }
+  currentAudio = null
   audioPrime = null
   releaseObjectUrl()
   setActive(null)
 }
 
-function playBlob(blob: Blob, volume: number, generation: number, playbackRate = 1, onEnd?: () => void) {
+function playBlob(
+  blob: Blob,
+  volume: number,
+  generation: number,
+  playbackRate = 1,
+  onEnd?: () => void,
+  onPlaybackError?: () => void,
+) {
   const play = () => {
     if (generation !== speechGeneration) return
 
     const url = URL.createObjectURL(blob)
     const audio = getSharedAudio()
     audio.pause()
-    audio.currentTime = 0
     audio.volume = volume
     audio.preservesPitch = true
     audio.playbackRate = playbackRate
@@ -274,19 +291,27 @@ function playBlob(blob: Blob, volume: number, generation: number, playbackRate =
     currentAudio = audio
     currentObjectUrl = url
 
-    const finish = () => {
-      if (generation !== speechGeneration) return
+    let settled = false
+    const finish = (failed = false) => {
+      if (settled || generation !== speechGeneration || currentObjectUrl !== url) return
+      settled = true
       audio.onended = null
       audio.onerror = null
       currentAudio = null
       releaseObjectUrl()
       setActive(null)
-      onEnd?.()
+      if (failed) onPlaybackError?.()
+      else onEnd?.()
     }
-    audio.onended = finish
-    audio.onerror = finish
+    audio.onended = () => finish()
+    audio.onerror = () => finish(true)
     setActive({ token: generation, status: 'playing' })
-    audio.play().catch(finish)
+    try {
+      const started = audio.play()
+      if (started && typeof started.catch === 'function') void started.catch(() => finish(true))
+    } catch {
+      finish(true)
+    }
   }
 
   void (audioPrime ?? Promise.resolve()).then(play)
@@ -341,7 +366,16 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
             if (!isAudio) throw new Error('no pre-rendered clip')
             return res.blob()
           })
-          .then((blob) => { playBlob(blob, volume, generation, playbackRate, onEnd) })
+          .then((blob) => {
+            playBlob(
+              blob,
+              volume,
+              generation,
+              playbackRate,
+              onEnd,
+              () => speakFromService(text, synthesisRate, volume, generation, voiceId, playbackRate, rate, onEnd),
+            )
+          })
       }
       return speakFromService(text, synthesisRate, volume, generation, voiceId, playbackRate, rate, onEnd)
     })
@@ -364,7 +398,7 @@ function speakFromService(
   heardRate = rate,
   onEnd?: () => void,
 ) {
-  if (!serverAvailable || !TTS_SERVER_URL) {
+  if (!TTS_SERVER_URL) {
     speakWithBrowserVoice(text, heardRate, volume, generation, onEnd)
     return
   }
@@ -375,12 +409,13 @@ function speakFromService(
   const serverRate = Math.min(MAX_SERVER_RATE, Math.max(MIN_SERVER_RATE, rate))
   const voice = voiceId ?? defaultVoiceId()
   const cacheKey = speechCacheKey(text, voice, serverRate)
+  const browserFallback = () => speakWithBrowserVoice(text, heardRate, volume, generation, onEnd)
 
   getCachedSpeech(cacheKey)
     .then((cached) => {
       if (generation !== speechGeneration) return
       if (cached) {
-        playBlob(cached, volume, generation, playbackRate, onEnd)
+        playBlob(cached, volume, generation, playbackRate, onEnd, browserFallback)
         return
       }
 
@@ -399,7 +434,7 @@ function speakFromService(
         })
         .then((blob) => {
           void putCachedSpeech(cacheKey, blob)
-          playBlob(blob, volume, generation, playbackRate, onEnd)
+          playBlob(blob, volume, generation, playbackRate, onEnd, browserFallback)
         })
     })
     .catch((error: unknown) => {
