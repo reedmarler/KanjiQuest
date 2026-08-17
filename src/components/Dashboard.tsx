@@ -1053,9 +1053,10 @@ export function Dashboard({
               <i lang="ja">法</i>
               <i lang="ja">語</i>
               <i lang="ja">漢</i>
+              <i lang="ja">数</i>
             </span>
             <span className="dashboard-feature-footer">
-              <span>4 tools</span>
+              <span>5 tools</span>
               <span aria-hidden="true">→</span>
             </span>
           </button>

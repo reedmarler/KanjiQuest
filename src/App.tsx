@@ -249,8 +249,8 @@ function App() {
             initialTopicId={questVocabTopicId}
             questTitle={activeQuest?.title}
             onBack={() => setView(practiceReturnView)}
-            onDashboard={questVocabTopicId ? () => setView('dashboard') : undefined}
-            onQuestComplete={questVocabTopicId
+            onDashboard={activeQuestId ? () => setView('dashboard') : undefined}
+            onQuestComplete={activeQuestId && questVocabTopicId
               ? () => {
                   finishQuestStep('vocab')
                   setPracticeReturnView('quests')
@@ -349,6 +349,12 @@ function App() {
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
               setView('kanji')
+            } },
+            { mark: '数', title: 'Numbers', detail: 'Drill counting words and counters.', accent: 'amber', onClick: () => {
+              setQuestVocabTopicId('numbers')
+              setActiveQuestId(undefined)
+              setPracticeReturnView('study-tools')
+              setView('vocab-practice')
             } },
           ]}
         />
@@ -542,7 +548,7 @@ function App() {
   )
 }
 
-type ToolMenuAccent = 'sakura' | 'rayquaza' | 'gold' | 'kyogre'
+type ToolMenuAccent = 'sakura' | 'rayquaza' | 'gold' | 'kyogre' | 'amber'
 
 type ToolMenuItem = {
   mark: string

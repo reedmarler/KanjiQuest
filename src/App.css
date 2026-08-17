@@ -3414,9 +3414,13 @@ body:has(.dashboard) {
   animation: dashboard-tool-wave 9.45s ease-in-out infinite;
 }
 
-.dashboard-study-tool-reel i:nth-child(1) { animation-delay: -2.205s; }
-.dashboard-study-tool-reel i:nth-child(2) { animation-delay: -1.4625s; }
-.dashboard-study-tool-reel i:nth-child(3) { animation-delay: -.7425s; }
+/* Five tool beats, then one empty step before the quest samurai joins.
+   Delays are scaled with the 50%-slower 9.45s cycle. */
+.dashboard-study-tool-reel i:nth-child(1) { animation-delay: -2.97s; }
+.dashboard-study-tool-reel i:nth-child(2) { animation-delay: -2.2275s; }
+.dashboard-study-tool-reel i:nth-child(3) { animation-delay: -1.485s; }
+.dashboard-study-tool-reel i:nth-child(4) { animation-delay: -.7425s; }
+.dashboard-study-tool-reel i:nth-child(5) { animation-delay: 0s; }
 
 .dashboard-quests-card {
   border-color: color-mix(in srgb, var(--sakura-light) 34%, var(--border));
@@ -3619,10 +3623,10 @@ body:has(.dashboard) {
   bottom: -.2rem;
   width: 5.4rem;
   height: 5.4rem;
-  /* Fifth beat in the study-tools bobble: 文 → 法 → 語 → 漢 → samurai.
-     The full sequence is 50% slower, with its stagger scaled to match. */
+  /* Study-tools bobble: 文 → 法 → 語 → 漢 → 数 → (gap) → samurai.
+     The full sequence and its gap are 50% slower than before. */
   animation: dashboard-tool-wave 9.45s ease-in-out infinite;
-  animation-delay: .7425s;
+  animation-delay: 1.485s;
 }
 
 /* Soft sakura wash with faint kanji drifting around her — same role as the
@@ -3811,12 +3815,12 @@ body:has(.dashboard) {
   }
 
   .dashboard-study-tool-reel {
-    gap: .2rem;
+    gap: .12rem;
   }
 
   .dashboard-study-tool-reel i {
-    width: 1.72rem;
-    font-size: .88rem;
+    width: 1.52rem;
+    font-size: .78rem;
   }
 }
 
@@ -8175,6 +8179,19 @@ body:has(.dashboard) {
   color: var(--kyogre-light);
 }
 
+.tool-menu-card--amber {
+  border-color: color-mix(in srgb, var(--amber-light) 30%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--amber) 10%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--amber:hover {
+  border-color: var(--amber-light);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--amber) 16%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--amber .tool-menu-mark {
+  background: color-mix(in srgb, var(--amber) 18%, var(--surface-2));
+  color: var(--amber-light);
+}
+
 .tool-menu-card b {
   display: block;
   font-size: 0.86rem;
@@ -8420,6 +8437,71 @@ body:has(.dashboard) {
 .focused-vocab-practice-mobile .focused-vocab-example {
   flex: 1 1 auto;
   min-height: 0;
+}
+
+/* Focused Vocab uses the same visual hierarchy as the standard Kanji Lab:
+   large speakable prompt, compact answer, then a two-row control dock. */
+.focused-vocab-practice-mobile .focused-vocab-standard-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.focused-vocab-practice-mobile .focused-vocab-main-furigana {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.focused-vocab-practice-mobile .focused-vocab-main-furigana .furigana-ruby rt {
+  color: var(--kyogre-light);
+  font: 600 .92rem/1 'Noto Sans JP', sans-serif;
+  letter-spacing: .08em;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.focused-vocab-practice-mobile .focused-vocab-main-word.is-furigana-visible .furigana-ruby rt {
+  opacity: 1;
+}
+
+.focused-vocab-practice-mobile .main-word-length-3 .focused-vocab-main-word {
+  font-size: 4.15rem;
+}
+
+/* Four is the capped length class, so this also safely fits longer vocab. */
+.focused-vocab-practice-mobile .main-word-length-4 .focused-vocab-main-word {
+  font-size: 3.05rem;
+}
+
+.focused-vocab-practice-mobile .focused-vocab-standard-answer {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.focused-vocab-example:not(.is-furigana-visible) .furigana-ruby rt {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.focused-vocab-example:not(.is-english-visible) .focused-vocab-example-en {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.focused-vocab-practice-mobile .focused-vocab-example {
+  justify-content: center;
+}
+
+.focused-vocab-practice-mobile .focused-vocab-example-jp-wrap {
+  flex: 0 1 auto;
+}
+
+.focused-vocab-practice-mobile .focused-vocab-example-jp {
+  font-size: 1.18rem;
+  line-height: 2;
+  text-wrap: balance;
 }
 
 .focused-vocab-reveal {
@@ -12321,11 +12403,12 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 }
 
-/* A single example owns the full tile, so four-character words can stay large. */
+/* A single example owns the full tile, so four-character words keep the same
+   character height as shorter examples instead of rendering smaller. */
 .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4,
 .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4 > span,
 .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4 .quest-kanji-example-anchor > strong {
-  font-size: 2.35rem !important;
+  font-size: 2.65rem !important;
   line-height: 1 !important;
 }
 
@@ -12458,6 +12541,39 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
   .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word.word-length-5,
   .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word.word-length-5 .quest-kanji-example-anchor > strong {
+    font-size: 1.62rem !important;
+  }
+
+  /* The longest example spans the full bottom row, so it keeps the same
+     character height as the shorter tiles above instead of shrinking. */
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-3,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-5,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word > span,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word .quest-kanji-example-anchor > strong,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-example-character {
+    font-size: 2.65rem !important;
+    line-height: 1 !important;
+    transform: none;
+  }
+
+  /* Half-width tiles still need to shrink longer words to fit the column. */
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-3,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-3 > span,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-3 .quest-kanji-example-anchor > strong {
+    font-size: 2.25rem !important;
+  }
+
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4 > span,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4 .quest-kanji-example-anchor > strong {
+    font-size: 1.9rem !important;
+  }
+
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-5,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-5 > span,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-5 .quest-kanji-example-anchor > strong {
     font-size: 1.62rem !important;
   }
 
@@ -13576,7 +13692,8 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
    never enters the card's three-row grid or its span ordering — the furigana
    there is placed by direct-child and :first-child/:last-child selectors, and
    any node added to that subtree moves the readings. */
-.quest-kanji-expanded-example.is-speakable {
+.quest-kanji-expanded-example.is-speakable,
+.focused-vocab-example.is-speakable {
   position: relative;
   cursor: pointer;
   border-radius: 10px;
@@ -13584,11 +13701,14 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 .quest-kanji-expanded-example.is-speakable:hover,
-.quest-kanji-expanded-example.is-speaking {
+.quest-kanji-expanded-example.is-speaking,
+.focused-vocab-example.is-speakable:hover,
+.focused-vocab-example.is-speaking {
   background: color-mix(in srgb, var(--kyogre) 12%, transparent);
 }
 
-.quest-kanji-expanded-example.is-speakable:focus-visible {
+.quest-kanji-expanded-example.is-speakable:focus-visible,
+.focused-vocab-example.is-speakable:focus-visible {
   outline: 2px solid var(--kyogre-light);
   outline-offset: -2px;
 }
@@ -13603,5 +13723,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   pointer-events: none;
 }
 
-.quest-kanji-expanded-example.is-speakable:hover .speakable-cue-corner { opacity: .6; }
-.quest-kanji-expanded-example.is-speaking .speakable-cue-corner { opacity: 1; color: var(--kyogre-light); }
+.quest-kanji-expanded-example.is-speakable:hover .speakable-cue-corner,
+.focused-vocab-example.is-speakable:hover .speakable-cue-corner { opacity: .6; }
+.quest-kanji-expanded-example.is-speaking .speakable-cue-corner,
+.focused-vocab-example.is-speaking .speakable-cue-corner { opacity: 1; color: var(--kyogre-light); }
