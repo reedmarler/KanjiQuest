@@ -3332,6 +3332,428 @@ body:has(.dashboard) {
   gap: 0.55rem;
 }
 
+.dashboard-feature-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: 100%;
+  min-height: 8.4rem;
+  overflow: hidden;
+  padding: .72rem .78rem .64rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  isolation: isolate;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.dashboard-feature-card:hover {
+  transform: translateY(-1px);
+}
+
+.dashboard-feature-title,
+.dashboard-feature-footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.dashboard-feature-title {
+  font-size: 1.02rem;
+  line-height: 1;
+}
+
+.dashboard-feature-footer {
+  justify-content: space-between;
+  padding-top: .38rem;
+  border-top: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent);
+  color: var(--text-muted);
+  font-size: .53rem;
+}
+
+.dashboard-feature-footer > span:last-child {
+  color: var(--text);
+  font-size: .82rem;
+}
+
+.dashboard-study-tools-card {
+  border-color: color-mix(in srgb, var(--kyogre-light) 34%, var(--border));
+  background: color-mix(in srgb, var(--surface) 92%, var(--kyogre) 8%);
+}
+
+.dashboard-study-tools-card:hover {
+  border-color: var(--kyogre-light);
+}
+
+.dashboard-study-tool-reel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  min-width: 0;
+}
+
+.dashboard-study-tool-reel i {
+  display: grid;
+  width: 2rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 34%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--kyogre) 18%);
+  color: var(--kyogre-light);
+  font: 700 1rem/1 'Noto Sans JP', sans-serif;
+  font-style: normal;
+  animation: dashboard-tool-wave 6.3s ease-in-out infinite;
+}
+
+.dashboard-study-tool-reel i:nth-child(1) { animation-delay: -1.47s; }
+.dashboard-study-tool-reel i:nth-child(2) { animation-delay: -.975s; }
+.dashboard-study-tool-reel i:nth-child(3) { animation-delay: -.495s; }
+
+.dashboard-quests-card {
+  border-color: color-mix(in srgb, var(--sakura-light) 34%, var(--border));
+  background: color-mix(in srgb, var(--surface) 94%, var(--sakura) 6%);
+}
+
+.dashboard-quests-card:hover {
+  border-color: var(--sakura-light);
+}
+
+.dashboard-quest-scene {
+  position: relative;
+  z-index: 1;
+  display: block;
+  min-height: 0;
+}
+
+.dashboard-quest-scene::before {
+  content: "";
+  position: absolute;
+  inset: -.45rem -.2rem -.25rem;
+  opacity: .24;
+  background:
+    radial-gradient(circle at 22% 40%, color-mix(in srgb, var(--sakura-light) 38%, transparent) 0 .08rem, transparent .1rem),
+    radial-gradient(circle at 51% 30%, color-mix(in srgb, var(--kyogre-light) 36%, transparent) 0 .07rem, transparent .09rem),
+    linear-gradient(135deg, transparent 0 45%, color-mix(in srgb, var(--sakura-light) 15%, transparent) 46% 48%, transparent 49%);
+  pointer-events: none;
+}
+
+.dashboard-quest-trail {
+  position: absolute;
+  right: 39%;
+  bottom: 40%;
+  left: 4%;
+  height: 1.85rem;
+  overflow: visible;
+}
+
+.dashboard-quest-trail i,
+.dashboard-quest-trail::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: .22rem;
+  left: 0;
+  height: .2rem;
+  border-radius: 50%;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--sakura-light) 42%, transparent), transparent);
+  transform: rotate(-5deg);
+}
+
+.dashboard-quest-trail i {
+  bottom: .36rem;
+  height: .08rem;
+  background: color-mix(in srgb, var(--sakura-light) 22%, transparent);
+  box-shadow: 0 0 .65rem color-mix(in srgb, var(--sakura-light) 28%, transparent);
+}
+
+.dashboard-quest-trail::after {
+  content: "";
+  position: absolute;
+  left: -4%;
+  bottom: .12rem;
+  width: 36%;
+  height: .1rem;
+  border-radius: 99px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--kyogre-light) 28%, transparent), color-mix(in srgb, var(--sakura-light) 34%, transparent), transparent);
+  box-shadow: 0 -.46rem .08rem color-mix(in srgb, var(--sakura-light) 12%, transparent);
+  opacity: 0;
+  transform: rotate(-5deg) scaleX(.55);
+  transform-origin: right center;
+  animation: dashboard-quest-trail-sweep 5.4s ease-in-out infinite;
+}
+
+.dashboard-quest-trail b {
+  position: absolute;
+  bottom: .19rem;
+  width: .34rem;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--sakura-light) 54%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--sakura) 18%);
+  box-shadow: 0 0 .45rem color-mix(in srgb, var(--sakura-light) 18%, transparent);
+  animation: dashboard-quest-checkpoint-pulse 5.4s ease-in-out infinite;
+}
+
+.dashboard-quest-trail b:nth-of-type(1) { left: 8%; }
+.dashboard-quest-trail b:nth-of-type(2) { left: 47%; bottom: .44rem; animation-delay: -1.8s; }
+.dashboard-quest-trail b:nth-of-type(3) { right: 4%; animation-delay: -3.6s; }
+
+.dashboard-quest-wind-slash {
+  position: absolute;
+  left: 2%;
+  bottom: 38%;
+  width: 2.8rem;
+  height: 1.35rem;
+  opacity: 0;
+  transform-origin: center;
+  animation: dashboard-quest-wind-dash 6.4s cubic-bezier(.42, 0, .2, 1) infinite;
+}
+
+.dashboard-quest-wind-slash > i {
+  position: absolute;
+  inset: .42rem .18rem auto 0;
+  display: block;
+  height: .34rem;
+  border-top: .1rem solid color-mix(in srgb, var(--sakura-light) 48%, transparent);
+  border-radius: 50%;
+  filter: drop-shadow(0 0 .22rem color-mix(in srgb, var(--sakura-light) 24%, transparent));
+  transform: rotate(-8deg) skewX(-24deg);
+}
+
+.dashboard-quest-wind-slash > i::after {
+  content: "";
+  position: absolute;
+  right: -.08rem;
+  top: -.29rem;
+  width: .42rem;
+  aspect-ratio: 1;
+  background: color-mix(in srgb, var(--sakura-light) 52%, transparent);
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  box-shadow: 0 0 .28rem color-mix(in srgb, var(--sakura-light) 22%, transparent);
+}
+
+.dashboard-quest-wind-slash > b {
+  position: absolute;
+  width: .28rem;
+  height: .18rem;
+  border-radius: 70% 20% 70% 20%;
+  background: color-mix(in srgb, var(--sakura-light) 48%, transparent);
+  animation: dashboard-quest-petal-spin 1.8s ease-in-out infinite alternate;
+}
+
+.dashboard-quest-wind-slash > b:nth-of-type(1) { left: .35rem; top: .12rem; }
+.dashboard-quest-wind-slash > b:nth-of-type(2) { left: 1.05rem; bottom: .06rem; animation-delay: -.28s; }
+.dashboard-quest-wind-slash > b:nth-of-type(3) { left: 1.7rem; top: .02rem; animation-delay: -.54s; }
+
+.dashboard-quest-guardian-sprite {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  background-image: url('/generated/sakura-sprint-static-v3.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center bottom;
+  filter: saturate(.78) contrast(1.02) drop-shadow(0 .14rem .16rem color-mix(in srgb, #05040c 28%, transparent));
+  opacity: .88;
+  /* Same bobble as the study-tools reel, so the dashboard's two idle motions
+     read as one house style rather than two different animation designs. */
+  animation: dashboard-tool-wave 6.3s ease-in-out infinite;
+}
+
+.dashboard-quest-guardian {
+  position: absolute;
+  right: -.1rem;
+  bottom: -.2rem;
+  width: 5.4rem;
+  height: 5.4rem;
+}
+
+.dashboard-quest-aura {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: 18%;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff6e8 0%,
+    color-mix(in srgb, var(--groudon-light) 85%, #fff) 22%,
+    var(--groudon-light) 46%,
+    color-mix(in srgb, var(--groudon) 80%, transparent) 68%,
+    transparent 78%
+  );
+  filter: blur(.16rem);
+  transform: translateX(-50%);
+  animation: dashboard-quest-aura-flicker 1.6s ease-in-out infinite;
+}
+
+.dashboard-quest-speed-lines {
+  position: absolute;
+  z-index: 0;
+  right: 62%;
+  top: 28%;
+  width: 4.4rem;
+  height: 2.7rem;
+  pointer-events: none;
+}
+
+.dashboard-quest-speed-lines i {
+  position: absolute;
+  right: 0;
+  display: block;
+  height: .1rem;
+  border-radius: 99px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--sakura-light) 30%, transparent));
+  opacity: 0;
+  animation: dashboard-quest-speed-streak 3.2s ease-out infinite;
+}
+
+.dashboard-quest-speed-lines i:nth-child(1) { top: .3rem; width: 3.7rem; }
+.dashboard-quest-speed-lines i:nth-child(2) { top: 1.18rem; width: 4.35rem; animation-delay: -1.05s; }
+.dashboard-quest-speed-lines i:nth-child(3) { top: 2.02rem; width: 2.9rem; animation-delay: -2.1s; }
+.dashboard-quest-speed-lines i:nth-child(4) { top: .72rem; width: 2.45rem; animation-delay: -.62s; }
+.dashboard-quest-speed-lines i:nth-child(5) { top: 2.42rem; width: 3.25rem; animation-delay: -1.68s; }
+
+@keyframes dashboard-tool-wave {
+  0%, 58%, 100% { transform: translateY(0); }
+  70% { transform: translateY(-.2rem); }
+  82% { transform: translateY(0); }
+}
+
+/* Fire flickers faster and less smoothly than a breathing glow — short,
+   uneven-feeling steps rather than one clean sine wave in and out. */
+@keyframes dashboard-quest-aura-flicker {
+  0%, 100% { opacity: .55; transform: translateX(-50%) scale(.92); }
+  30% { opacity: .85; transform: translateX(-50%) scale(1.06); }
+  55% { opacity: .62; transform: translateX(-50%) scale(.97); }
+  78% { opacity: .9; transform: translateX(-50%) scale(1.1); }
+}
+
+@keyframes dashboard-quest-wind-dash {
+  0%, 12% { left: 1%; opacity: 0; transform: translateY(.2rem) scaleX(.7); }
+  18% { opacity: .42; }
+  42% { transform: translateY(-.18rem) scaleX(1); }
+  68% { opacity: .34; transform: translateY(.05rem) scaleX(1.08); }
+  84%, 100% { left: 52%; opacity: 0; transform: translateY(-.1rem) scaleX(.76); }
+}
+
+@keyframes dashboard-quest-runner-frames {
+  0%, 6.249% { background-position: 0 50%; }
+  6.25%, 12.499% { background-position: 6.6667% 50%; }
+  12.5%, 18.749% { background-position: 13.3333% 50%; }
+  18.75%, 24.999% { background-position: 20% 50%; }
+  25%, 31.249% { background-position: 26.6667% 50%; }
+  31.25%, 37.499% { background-position: 33.3333% 50%; }
+  37.5%, 43.749% { background-position: 40% 50%; }
+  43.75%, 49.999% { background-position: 46.6667% 50%; }
+  50%, 56.249% { background-position: 53.3333% 50%; }
+  56.25%, 62.499% { background-position: 60% 50%; }
+  62.5%, 68.749% { background-position: 66.6667% 50%; }
+  68.75%, 74.999% { background-position: 73.3333% 50%; }
+  75%, 81.249% { background-position: 80% 50%; }
+  81.25%, 87.499% { background-position: 86.6667% 50%; }
+  87.5%, 93.749% { background-position: 93.3333% 50%; }
+  93.75%, 100% { background-position: 100% 50%; }
+}
+
+@keyframes dashboard-quest-trail-sweep {
+  0%, 12% { left: -10%; opacity: 0; transform: rotate(-5deg) scaleX(.45); }
+  22% { opacity: .34; }
+  72% { opacity: .22; }
+  88%, 100% { left: 72%; opacity: 0; transform: rotate(-5deg) scaleX(1.15); }
+}
+
+@keyframes dashboard-quest-checkpoint-pulse {
+  0%, 60%, 100% { opacity: .68; transform: scale(1); box-shadow: 0 0 .25rem color-mix(in srgb, var(--sakura-light) 10%, transparent); }
+  72% { opacity: .92; transform: scale(1.08); box-shadow: 0 0 .38rem color-mix(in srgb, var(--sakura-light) 24%, transparent); }
+}
+
+@keyframes dashboard-quest-speed-streak {
+  0% { opacity: 0; transform: translateX(-1rem) scaleX(.35); }
+  24% { opacity: .28; }
+  72% { opacity: .14; }
+  100% { opacity: 0; transform: translateX(1.1rem) scaleX(1.1); }
+}
+
+@keyframes dashboard-quest-petal-spin {
+  from { transform: translateY(-.08rem) rotate(-18deg); }
+  to { transform: translateY(.18rem) rotate(145deg); }
+}
+
+@media (max-width: 720px) {
+  .dashboard-action-primary > .dashboard-feature-card {
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+    padding: .62rem .64rem .54rem;
+  }
+
+  .dashboard-quest-guardian {
+    right: -.2rem;
+    width: 4.8rem;
+    height: 4.8rem;
+  }
+
+  .dashboard-quest-trail {
+    right: 41%;
+    left: 3%;
+  }
+
+  .dashboard-quest-wind-slash {
+    bottom: 39%;
+    width: 2.45rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .dashboard-action-primary {
+    grid-auto-rows: 7.4rem;
+  }
+
+  .dashboard-action-primary > .dashboard-feature-card {
+    padding-inline: .56rem;
+  }
+
+  .dashboard-feature-title {
+    font-size: .9rem;
+  }
+
+  .dashboard-study-tool-reel {
+    gap: .2rem;
+  }
+
+  .dashboard-study-tool-reel i {
+    width: 1.72rem;
+    font-size: .88rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-study-tool-reel i,
+  .dashboard-quest-trail i,
+  .dashboard-quest-trail::after,
+  .dashboard-quest-trail b,
+  .dashboard-quest-wind-slash,
+  .dashboard-quest-wind-slash > b,
+  .dashboard-quest-speed-lines i,
+  .dashboard-quest-aura,
+  .dashboard-quest-guardian-sprite {
+    animation: none;
+  }
+}
+
 .dashboard-action-secondary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -9225,7 +9647,7 @@ body:has(.dashboard) {
 
 @media(max-width:430px){
   .dashboard-action-primary {
-    grid-auto-rows: 6.8rem;
+    grid-auto-rows: 7.4rem;
   }
   .dashboard-action-primary > .dashboard-quest-button,
   .dashboard-action-primary > .dashboard-tool-button {
@@ -12729,6 +13151,343 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .speakable-word,
   .speakable-word-cue { transition: none; }
   .speakable-word.is-loading .speakable-word-cue { animation: none; }
+}
+
+
+/* --- Quest hub: the journey ------------------------------------------- */
+
+/* States the destination before the twelve stops to it. Without this the
+   quest list reads as chores; with it, each one is a step toward the lantern. */
+.journey-goal {
+  display: flex;
+  gap: .9rem;
+  align-items: flex-start;
+  margin-bottom: .7rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--sakura) 30%, var(--border));
+  border-radius: 16px;
+  background:
+    radial-gradient(120% 140% at 88% 0%, color-mix(in srgb, var(--sakura) 13%, transparent), transparent 62%),
+    var(--surface);
+}
+
+.journey-goal-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid color-mix(in srgb, var(--sakura) 42%, var(--border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+  color: var(--sakura-light);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.journey-goal-copy { flex: 1; min-width: 0; }
+
+.journey-goal-eyebrow {
+  color: var(--sakura-light);
+  font-size: .5rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.journey-goal-copy h1 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .5rem;
+  margin: .2rem 0 .3rem;
+  font-size: 1.12rem;
+  line-height: 1.15;
+}
+
+.journey-goal-copy h1 small {
+  color: var(--text-muted);
+  font-size: .66rem;
+  font-weight: 600;
+}
+
+.journey-goal-copy > p {
+  margin: 0 0 .68rem;
+  color: var(--text-muted);
+  font-size: .63rem;
+  line-height: 1.5;
+}
+
+.journey-goal-copy > p b { color: var(--text); font-weight: 700; }
+
+.journey-goal-track {
+  height: .34rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 20%, transparent);
+  overflow: hidden;
+}
+
+.journey-goal-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--sakura), var(--sakura-light));
+  transition: width 400ms ease;
+}
+
+.journey-goal-tally {
+  display: flex;
+  align-items: baseline;
+  gap: .34rem;
+  margin-top: .4rem;
+  color: var(--text-muted);
+  font-size: .57rem;
+}
+
+.journey-goal-tally b { color: var(--sakura-light); font-size: .8rem; }
+
+/* --- Quest hub: the road ---------------------------------------------- */
+
+.journey-road { margin-top: .9rem; }
+
+.journey-road-title {
+  margin: 0 0 .55rem;
+  color: var(--text-muted);
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.journey-chapter {
+  margin-bottom: .7rem;
+  padding: .95rem 1rem 1.05rem;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--surface);
+}
+
+/* An arc whose quests are all still locked is context, not a menu. */
+.journey-chapter.is-sealed { opacity: .62; }
+
+.journey-chapter.is-cleared {
+  border-color: color-mix(in srgb, var(--rayquaza) 34%, var(--border));
+}
+
+.journey-chapter-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: .7rem;
+  align-items: start;
+  margin-bottom: .8rem;
+}
+
+.journey-chapter-mark {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.journey-chapter-eyebrow {
+  color: var(--text-muted);
+  font-size: .48rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.journey-chapter-header h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .42rem;
+  margin: .12rem 0 .26rem;
+  font-size: .84rem;
+}
+
+.journey-chapter-header h3 small {
+  color: var(--text-muted);
+  font-size: .6rem;
+  font-weight: 600;
+}
+
+.journey-chapter-header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .58rem;
+  line-height: 1.5;
+}
+
+.journey-chapter-count {
+  color: var(--text-muted);
+  font-size: .62rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* The path itself. The connecting line is what makes a list of buttons read
+   as consecutive stops rather than a menu of options. */
+.journey-path {
+  position: relative;
+  margin: 0;
+  padding: 0 0 0 1.15rem;
+  list-style: none;
+}
+
+.journey-path::before {
+  content: '';
+  position: absolute;
+  left: .48rem;
+  top: .9rem;
+  bottom: .9rem;
+  width: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-muted) 22%, transparent);
+}
+
+.journey-path > li { position: relative; }
+
+.journey-stop {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  width: 100%;
+  margin: 0;
+  padding: .5rem .6rem;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.journey-stop-dot {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-left: -1.4rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: .58rem;
+  font-weight: 800;
+}
+
+.journey-stop-copy { display: grid; gap: .06rem; min-width: 0; }
+.journey-stop-copy b { font-size: .7rem; }
+.journey-stop-copy small { color: var(--text-muted); font-size: .54rem; }
+
+.journey-stop:not(:disabled):hover {
+  border-color: var(--border);
+  background: var(--surface-2);
+}
+
+.journey-stop.is-done .journey-stop-dot {
+  border-color: color-mix(in srgb, var(--rayquaza) 52%, var(--border));
+  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface));
+  color: var(--rayquaza-light);
+}
+
+.journey-stop.is-current {
+  border-color: color-mix(in srgb, var(--sakura) 45%, var(--border));
+  background: color-mix(in srgb, var(--sakura) 10%, var(--surface-2));
+}
+
+.journey-stop.is-current .journey-stop-dot {
+  border-color: var(--sakura);
+  background: color-mix(in srgb, var(--sakura) 26%, var(--surface));
+  color: var(--sakura-light);
+}
+
+.journey-stop:disabled { cursor: not-allowed; opacity: .5; }
+
+.journey-stop-flag {
+  margin-left: auto;
+  padding: .12rem .38rem;
+  border: 1px solid color-mix(in srgb, var(--gold, #d9b45a) 50%, var(--border));
+  border-radius: 999px;
+  color: var(--gold, #d9b45a);
+  font-size: .45rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .journey-goal { padding: .85rem .9rem; gap: .7rem; }
+  .journey-goal-mark { width: 2.5rem; height: 2.5rem; font-size: 1.25rem; }
+  .journey-goal-copy h1 { font-size: .98rem; }
+  .journey-chapter-header { grid-template-columns: auto 1fr; }
+  /* The tally would otherwise sit alone on a third column and squeeze the
+     blurb; on the mark's row it costs no width at all. */
+  .journey-chapter-count { grid-row: 1; grid-column: 2; justify-self: end; }
+}
+
+/* --- Listen cue in packed example cells -------------------------------- */
+
+/* The standard layout packs three examples into a grid, so two of them land
+   in half-width cells: the word alone fills ~133px of a 146px cell, and the
+   trailing cue overflowed and was clipped to a sliver. Inline the cue costs
+   its own width, a gap, and the matching left padding that keeps the word
+   centred — about 40px the cell does not have. Lifting it to the cell's
+   corner gives the word its full width back; the whole card stays tappable,
+   so nothing is lost but the crowding. */
+.standard-kanji-parts .quest-kanji-expanded-example {
+  position: relative;
+}
+
+/* --- Guardian bob ------------------------------------------------------ */
+
+/* A slow, shallow float so the guardian reads as standing there rather than
+   pasted on. Deliberately small and unhurried — the quest copy beside it is
+   what should hold attention, and a bigger or faster bob competes with it.
+   Transform only, so it composites without repainting the portrait. */
+@keyframes quest-guardian-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.quest-focus-guardian > img {
+  animation: quest-guardian-bob 3.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quest-focus-guardian > img { animation: none; }
+}
+
+/* --- Build badge -------------------------------------------------------- */
+
+/* Lives outside #root (see index.html) so the .app wrapper's 150% desktop
+   zoom can't scale it. Fixed, tiny, and non-interactive: it exists purely
+   so a stale cached tab is obvious at a glance, not as a UI element — it
+   must never be the thing a stray tap lands on. */
+#build-badge {
+  position: fixed;
+  top: 3px;
+  left: 5px;
+  z-index: 999999;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  color: var(--text-muted);
+  font: 700 .5rem/1.6 'Outfit', system-ui, sans-serif;
+  letter-spacing: .02em;
+  opacity: .55;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* Example cards listen as a whole. The cue is absolutely positioned so it
