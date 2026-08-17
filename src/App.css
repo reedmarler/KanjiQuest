@@ -5716,10 +5716,15 @@ body:has(.dashboard) {
     transform: translateX(-50%);
   }
 
-  /* Same 70% cut as the desktop rule. The phone offset started 0.02em higher
-     (a 0.265em gap), so it lands slightly lower here at 0.081em. */
+  /* Eased relative to the desktop rule's 70%: a 57% cut of the same 0.265em
+     starting gap, leaving 0.114em. The phone's hero font is smaller (24.3px
+     against the desktop's 29.7px), so an identical proportional cut eats
+     proportionally more of the *visible* whitespace — matching desktop's 70%
+     here left under a pixel of real ink between a reading and the kanji
+     under it, with no room for a descender-heavy kana (ゃ, っ, ん) over a
+     tall glyph. This keeps roughly 2px of ink clearance. */
   .hero-sentence-line.hero-database-line .hero-database-full-reading {
-    top: -0.24em;
+    top: -0.32em;
   }
 
   .control-story-topbar {
