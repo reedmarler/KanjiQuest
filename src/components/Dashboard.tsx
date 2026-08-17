@@ -1082,10 +1082,7 @@ export function Dashboard({
                   <i />
                   <i />
                   <i />
-                  <i />
-                  <i />
                 </span>
-                <span className="dashboard-quest-aura" />
                 <span className="dashboard-quest-guardian-sprite" />
               </span>
             </span>
