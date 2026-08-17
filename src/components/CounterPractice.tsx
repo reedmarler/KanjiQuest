@@ -170,7 +170,13 @@ export function CounterPractice({ onBack }: CounterPracticeProps) {
   return (
     <div className="counter-practice">
       <header className="counter-practice-top">
-        <button type="button" className="vocab-back-arrow" onClick={previousCounter} aria-label={index > 0 || completed ? 'Previous counter' : 'Back to study tools'}>
+        <button
+          type="button"
+          className="vocab-back-arrow"
+          onClick={onBack}
+          aria-label="Back to study tools"
+          title="Back to study tools"
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
         </button>
         <div>
@@ -223,9 +229,14 @@ export function CounterPractice({ onBack }: CounterPracticeProps) {
             selected={selected}
             onSelect={selectCounter}
           />
-          <div className="counter-study-navigation">
-            <button type="button" className="btn btn-ghost" onClick={previousCounter}>
-              {index === 0 ? 'Study tools' : 'Previous'}
+          <div className="counter-study-navigation standard-kanji-action-row">
+            <button
+              type="button"
+              className="btn btn-ghost standard-kanji-review"
+              onClick={previousCounter}
+              disabled={index === 0}
+            >
+              Previous counter
             </button>
             <button type="button" className="btn counter-next-button" onClick={nextCounter} disabled={selected === null}>
               {selected === null ? 'Choose an answer' : index + 1 >= cards.length ? 'Finish set' : 'Next counter'}
