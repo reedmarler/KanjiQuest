@@ -478,6 +478,34 @@ export function getSegmentReading(text: string): string | undefined {
   return getHeroWordReading(text)
 }
 
+/**
+ * Particles written one way and said another.
+ *
+ * は as a topic particle is "wa", and へ as a direction particle is "e".
+ * Handing the written form to a speech engine gets "ha" and "he" — audibly
+ * wrong, and wrong in the one place a learner is listening for the particle.
+ * categorySentenceEngine already spells these out as literalPart('は','わ');
+ * this is the same mapping for frames, which reach the voice by another path.
+ *
+ * を is deliberately absent: it is conventionally spelled を and engines
+ * already say "o" for it, so remapping would be a change with no gain.
+ */
+const PARTICLE_READINGS: Record<string, string> = { 'は': 'わ', 'へ': 'え' }
+
+/**
+ * What a segment should sound like, which is not always what it should look
+ * like.
+ *
+ * The mapping is applied to the resolved reading rather than as a fallback:
+ * a topic particle usually arrives with reading already set to は, which is
+ * right for the furigana — the reading of は on screen is は — and wrong for
+ * the voice. Doing this in getSegmentReading instead would print わ above は.
+ */
+export function spokenSegmentText(segment: { text: string; reading?: string }): string {
+  const resolved = segment.reading ?? getSegmentReading(segment.text) ?? segment.text
+  return PARTICLE_READINGS[resolved] ?? resolved
+}
+
 export function getHeroSlotReading(slot: HeroSlot, frame: HeroSentenceFrame): string | undefined {
   switch (slot) {
     case 'prefix':

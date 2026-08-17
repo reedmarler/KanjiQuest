@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { charLength, HERO_CHAR_WIDTH_EM, type HeroSentenceFrame, type HeroStep } from '../data/heroSentences'
 import { buildHeroStorySteps } from '../data/heroStories'
-import { getSegmentReading } from '../lib/heroSentenceGloss'
+import { getSegmentReading, spokenSegmentText } from '../lib/heroSentenceGloss'
 import { getHeroEnglish } from '../lib/heroSentenceGloss'
 import { buildHeroSteps, type HeroSwapFocus } from '../lib/heroSequence'
 import { heroSwapBlockChars } from '../lib/heroSlotResize'
@@ -238,7 +238,7 @@ export function RotatingHeroSentence({
   // Read the generator's verified kana aloud instead of asking each browser
   // voice to guess ambiguous kanji readings such as 七時 (しちじ).
   const visibleSpeechText = (frame?.segments ?? [])
-    .map((segment) => segment.reading ?? getSegmentReading(segment.text) ?? segment.text)
+    .map((segment) => spokenSegmentText(segment))
     .join('')
   useEffect(() => {
     if (visibleSpeechText) onSentenceChange?.(visibleSpeechText)
