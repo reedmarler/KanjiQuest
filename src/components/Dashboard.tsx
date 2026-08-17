@@ -1063,11 +1063,19 @@ export function Dashboard({
           <button type="button" className="dashboard-feature-card dashboard-quests-card" onClick={onOpenQuests}>
             <strong className="dashboard-feature-title">Quests</strong>
             <span className="dashboard-quest-scene" aria-hidden="true">
-              <span className="dashboard-quest-trail">
-                <i />
-                <b />
-                <b />
-                <b />
+              <span
+                className="dashboard-quest-trail"
+                style={{
+                  '--quest-progress': `${QUESTS.length === 0 ? 0 : (questsCleared / QUESTS.length) * 100}%`,
+                } as CSSProperties}
+              >
+                <span className="dashboard-quest-katana-blade"><i /></span>
+                <span className="dashboard-quest-katana-tsuba" />
+                <span className="dashboard-quest-katana-hilt">
+                  <i />
+                  <i />
+                  <i />
+                </span>
               </span>
               <span className="dashboard-quest-wind-slash">
                 <i />
@@ -1088,6 +1096,8 @@ export function Dashboard({
                   <i lang="ja">桜</i>
                   <i lang="ja">武</i>
                   <i lang="ja">気</i>
+                  <i lang="ja">侍</i>
+                  <i lang="ja">刀</i>
                 </span>
                 <span className="dashboard-quest-guardian-sprite" />
               </span>
