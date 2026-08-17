@@ -39,6 +39,7 @@ const SentenceBuilderView = lazy(() => import('./components/SentenceBuilderView'
 const SentenceTesting = lazy(() => import('./components/SentenceTesting').then((module) => ({ default: module.SentenceTesting })))
 const VoiceTest = lazy(() => import('./components/VoiceTest').then((module) => ({ default: module.VoiceTest })))
 const FocusedVocabPractice = lazy(() => import('./components/FocusedVocabPractice').then((module) => ({ default: module.FocusedVocabPractice })))
+const CounterPractice = lazy(() => import('./components/CounterPractice').then((module) => ({ default: module.CounterPractice })))
 const QuestHub = lazy(() => import('./components/QuestHub').then((module) => ({ default: module.QuestHub })))
 const QuestScene = lazy(() => import('./components/QuestScene').then((module) => ({ default: module.QuestScene })))
 const QuestCheckpoint = lazy(() => import('./components/QuestCheckpoint').then((module) => ({ default: module.QuestCheckpoint })))
@@ -49,6 +50,7 @@ type View =
   | 'dashboard'
   | 'library'
   | 'vocab-practice'
+  | 'counter-practice'
   | 'study'
   | 'study-loading'
   | 'complete'
@@ -262,6 +264,16 @@ function App() {
     )
   }
 
+  if (view === 'counter-practice') {
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Counters" />}>
+          <CounterPractice onBack={() => setView('study-tools')} />
+        </Suspense>
+      </div>
+    )
+  }
+
   if (view === 'content-studio') {
     return (
       <Suspense fallback={<RouteLoading label="Content Studio" />}>
@@ -350,10 +362,9 @@ function App() {
               setView('kanji')
             } },
             { mark: '数', title: 'Numbers', detail: 'Drill counting words and counters.', accent: 'amber', onClick: () => {
-              setQuestVocabTopicId('numbers')
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
-              setView('vocab-practice')
+              setView('counter-practice')
             } },
           ]}
         />
