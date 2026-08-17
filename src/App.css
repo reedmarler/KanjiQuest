@@ -12272,11 +12272,12 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 }
 
-/* A single example owns the full tile, so four-character words can stay large. */
+/* A single example owns the full tile, so four-character words keep the same
+   character height as shorter examples instead of rendering smaller. */
 .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4,
 .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4 > span,
 .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4 .quest-kanji-example-anchor > strong {
-  font-size: 2.35rem !important;
+  font-size: 2.65rem !important;
   line-height: 1 !important;
 }
 
@@ -12409,6 +12410,39 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
   .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word.word-length-5,
   .quest-kanji-parts.part-count-3 .quest-kanji-expanded-word.word-length-5 .quest-kanji-example-anchor > strong {
+    font-size: 1.62rem !important;
+  }
+
+  /* The longest example spans the full bottom row, so it keeps the same
+     character height as the shorter tiles above instead of shrinking. */
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-3,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-5,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word > span,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word .quest-kanji-example-anchor > strong,
+  .quest-kanji-parts.part-count-3 > article.is-longest-example .quest-kanji-expanded-examples.example-count-1 .quest-kanji-example-character {
+    font-size: 2.65rem !important;
+    line-height: 1 !important;
+    transform: none;
+  }
+
+  /* Half-width tiles still need to shrink longer words to fit the column. */
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-3,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-3 > span,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-3 .quest-kanji-example-anchor > strong {
+    font-size: 2.25rem !important;
+  }
+
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4 > span,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-4 .quest-kanji-example-anchor > strong {
+    font-size: 1.9rem !important;
+  }
+
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-5,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-5 > span,
+  .quest-kanji-parts.part-count-3 > article:not(.is-longest-example) .quest-kanji-expanded-examples.example-count-1 .quest-kanji-expanded-word.word-length-5 .quest-kanji-example-anchor > strong {
     font-size: 1.62rem !important;
   }
 
