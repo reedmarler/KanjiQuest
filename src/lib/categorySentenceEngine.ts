@@ -6307,11 +6307,20 @@ export function generateSentenceForWord(word: string, seed = 1): GeneratedPrevie
   // Scanning every pattern for a word that clears no slot's category/tag gate
   // costs seconds and can only ever fail, so rule that out with a lookup.
   if (!slotEligibleWords().has(word)) return null
+  const suitableExample = (sentence: GeneratedPreviewSentence | null): sentence is GeneratedPreviewSentence => {
+    if (!sentence || !isDashboardSentenceNatural(sentence)) return false
+    // n5-17's broad category match is useful for free-form hero variety but is
+    // too loose when a noun is forced into it: it yields context-free claims
+    // such as "tradition is rare" and "no smoking is black." Keep the frame
+    // only when the vocabulary being taught is the adjective itself.
+    if (sentence.frameId === 'n5-17' && sentence.slots.adjective?.dictionaryForm !== word) return false
+    return true
+  }
 
   const direct = (() => {
     for (let attempt = 0; attempt < SEEDS_PER_PATTERN; attempt += 1) {
       const sentence = generateCategorySentence(seed + attempt, undefined, 'N5', { requiredWord: word })
-      if (sentence && isDashboardSentenceNatural(sentence)) return sentence
+      if (suitableExample(sentence)) return sentence
     }
     return null
   })()
@@ -6322,7 +6331,7 @@ export function generateSentenceForWord(word: string, seed = 1): GeneratedPrevie
       const candidateSeed = seed + attempt * 37
       const level = patternId.startsWith('n4-') ? 'N4' : 'N5'
       const sentence = generateCategorySentence(candidateSeed, patternId, level, { requiredWord: word })
-      if (sentence && isDashboardSentenceNatural(sentence)) return sentence
+      if (suitableExample(sentence)) return sentence
     }
   }
   return null
