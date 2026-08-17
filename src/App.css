@@ -13175,12 +13175,6 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .speakable-word.is-loading .speakable-word-cue { animation: none; }
 }
 
-/* Example compounds are set far smaller than the headline word, so the cue
-   scales with them rather than looming beside a 1.5rem compound. */
-.speakable-word-compact {
-  --speakable-cue-size: .7rem;
-  gap: .2rem;
-}
 
 /* --- Quest hub: the journey ------------------------------------------- */
 
@@ -13477,16 +13471,6 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   position: relative;
 }
 
-.standard-kanji-parts .speakable-word {
-  padding-inline: .15rem;
-}
-
-.standard-kanji-parts .speakable-word-cue {
-  position: absolute;
-  top: .32rem;
-  right: .38rem;
-}
-
 /* --- Guardian bob ------------------------------------------------------ */
 
 /* A slow, shallow float so the guardian reads as standing there rather than
@@ -13527,3 +13511,37 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   pointer-events: none;
   user-select: none;
 }
+
+/* Example cards listen as a whole. The cue is absolutely positioned so it
+   never enters the card's three-row grid or its span ordering — the furigana
+   there is placed by direct-child and :first-child/:last-child selectors, and
+   any node added to that subtree moves the readings. */
+.quest-kanji-expanded-example.is-speakable {
+  position: relative;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background .15s;
+}
+
+.quest-kanji-expanded-example.is-speakable:hover,
+.quest-kanji-expanded-example.is-speaking {
+  background: color-mix(in srgb, var(--kyogre) 12%, transparent);
+}
+
+.quest-kanji-expanded-example.is-speakable:focus-visible {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: -2px;
+}
+
+.speakable-cue-corner {
+  position: absolute;
+  right: .3rem;
+  bottom: .28rem;
+  width: .72rem;
+  height: .72rem;
+  opacity: .28;
+  pointer-events: none;
+}
+
+.quest-kanji-expanded-example.is-speakable:hover .speakable-cue-corner { opacity: .6; }
+.quest-kanji-expanded-example.is-speaking .speakable-cue-corner { opacity: 1; color: var(--kyogre-light); }

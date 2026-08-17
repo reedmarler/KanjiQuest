@@ -24,7 +24,7 @@
  *   TTS_ADMIN_TOKEN=... npm run harvest:audio
  */
 import { buildHeroSteps, type HeroSwapFocus } from '../src/lib/heroSequence'
-import { getSegmentReading } from '../src/lib/heroSentenceGloss'
+import { spokenSegmentText } from '../src/lib/heroSentenceGloss'
 import type { JlptLevel } from '../src/lib/types'
 import type { WrongPool } from '../src/lib/wrongPool'
 
@@ -47,7 +47,7 @@ const MAX_TEXT_LENGTH = 400
 /** Exactly how RotatingHeroSentence builds what it sends to the voice. */
 function spokenText(step: { frame?: { segments?: { text: string; reading?: string }[] } }) {
   return (step.frame?.segments ?? [])
-    .map((segment) => segment.reading ?? getSegmentReading(segment.text) ?? segment.text)
+    .map((segment) => spokenSegmentText(segment))
     .join('')
 }
 
