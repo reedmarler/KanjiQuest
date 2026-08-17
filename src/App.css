@@ -3565,6 +3565,9 @@ body:has(.dashboard) {
   background-position: center bottom;
   filter: saturate(.78) contrast(1.02) drop-shadow(0 .14rem .16rem color-mix(in srgb, #05040c 28%, transparent));
   opacity: .88;
+  /* Same bobble as the study-tools reel, so the dashboard's two idle motions
+     read as one house style rather than two different animation designs. */
+  animation: dashboard-tool-wave 4.2s ease-in-out infinite;
 }
 
 .dashboard-quest-guardian {
@@ -3573,6 +3576,27 @@ body:has(.dashboard) {
   bottom: -.2rem;
   width: 5.4rem;
   height: 5.4rem;
+}
+
+.dashboard-quest-aura {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: 18%;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff6e8 0%,
+    color-mix(in srgb, var(--groudon-light) 85%, #fff) 22%,
+    var(--groudon-light) 46%,
+    color-mix(in srgb, var(--groudon) 80%, transparent) 68%,
+    transparent 78%
+  );
+  filter: blur(.16rem);
+  transform: translateX(-50%);
+  animation: dashboard-quest-aura-flicker 1.6s ease-in-out infinite;
 }
 
 .dashboard-quest-speed-lines {
@@ -3606,6 +3630,15 @@ body:has(.dashboard) {
   0%, 58%, 100% { transform: translateY(0); }
   70% { transform: translateY(-.2rem); }
   82% { transform: translateY(0); }
+}
+
+/* Fire flickers faster and less smoothly than a breathing glow — short,
+   uneven-feeling steps rather than one clean sine wave in and out. */
+@keyframes dashboard-quest-aura-flicker {
+  0%, 100% { opacity: .55; transform: translateX(-50%) scale(.92); }
+  30% { opacity: .85; transform: translateX(-50%) scale(1.06); }
+  55% { opacity: .62; transform: translateX(-50%) scale(.97); }
+  78% { opacity: .9; transform: translateX(-50%) scale(1.1); }
 }
 
 @keyframes dashboard-quest-wind-dash {
@@ -3715,6 +3748,7 @@ body:has(.dashboard) {
   .dashboard-quest-wind-slash,
   .dashboard-quest-wind-slash > b,
   .dashboard-quest-speed-lines i,
+  .dashboard-quest-aura,
   .dashboard-quest-guardian-sprite {
     animation: none;
   }
