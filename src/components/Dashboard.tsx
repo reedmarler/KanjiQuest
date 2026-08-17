@@ -1076,6 +1076,13 @@ export function Dashboard({
                 <b />
               </span>
               <span className="dashboard-quest-guardian">
+                <span className="dashboard-quest-speed-lines">
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                </span>
                 <span className="dashboard-quest-guardian-sprite" />
               </span>
             </span>

@@ -3411,12 +3411,12 @@ body:has(.dashboard) {
   color: var(--kyogre-light);
   font: 700 1rem/1 'Noto Sans JP', sans-serif;
   font-style: normal;
-  animation: dashboard-tool-wave 3.2s ease-in-out infinite;
+  animation: dashboard-tool-wave 4.2s ease-in-out infinite;
 }
 
-.dashboard-study-tool-reel i:nth-child(1) { animation-delay: -.75s; }
-.dashboard-study-tool-reel i:nth-child(2) { animation-delay: -.5s; }
-.dashboard-study-tool-reel i:nth-child(3) { animation-delay: -.25s; }
+.dashboard-study-tool-reel i:nth-child(1) { animation-delay: -.98s; }
+.dashboard-study-tool-reel i:nth-child(2) { animation-delay: -.65s; }
+.dashboard-study-tool-reel i:nth-child(3) { animation-delay: -.33s; }
 
 .dashboard-quests-card {
   border-color: color-mix(in srgb, var(--sakura-light) 34%, var(--border));
@@ -3475,6 +3475,22 @@ body:has(.dashboard) {
   box-shadow: 0 0 .65rem color-mix(in srgb, var(--sakura-light) 28%, transparent);
 }
 
+.dashboard-quest-trail::after {
+  content: "";
+  position: absolute;
+  left: -4%;
+  bottom: .12rem;
+  width: 36%;
+  height: .1rem;
+  border-radius: 99px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--kyogre-light) 28%, transparent), color-mix(in srgb, var(--sakura-light) 34%, transparent), transparent);
+  box-shadow: 0 -.46rem .08rem color-mix(in srgb, var(--sakura-light) 12%, transparent);
+  opacity: 0;
+  transform: rotate(-5deg) scaleX(.55);
+  transform-origin: right center;
+  animation: dashboard-quest-trail-sweep 5.4s ease-in-out infinite;
+}
+
 .dashboard-quest-trail b {
   position: absolute;
   bottom: .19rem;
@@ -3484,11 +3500,12 @@ body:has(.dashboard) {
   border-radius: 50%;
   background: color-mix(in srgb, var(--surface-2) 82%, var(--sakura) 18%);
   box-shadow: 0 0 .45rem color-mix(in srgb, var(--sakura-light) 18%, transparent);
+  animation: dashboard-quest-checkpoint-pulse 5.4s ease-in-out infinite;
 }
 
 .dashboard-quest-trail b:nth-of-type(1) { left: 8%; }
-.dashboard-quest-trail b:nth-of-type(2) { left: 47%; bottom: .44rem; }
-.dashboard-quest-trail b:nth-of-type(3) { right: 4%; }
+.dashboard-quest-trail b:nth-of-type(2) { left: 47%; bottom: .44rem; animation-delay: -1.8s; }
+.dashboard-quest-trail b:nth-of-type(3) { right: 4%; animation-delay: -3.6s; }
 
 .dashboard-quest-wind-slash {
   position: absolute;
@@ -3498,7 +3515,7 @@ body:has(.dashboard) {
   height: 1.35rem;
   opacity: 0;
   transform-origin: center;
-  animation: dashboard-quest-wind-dash 3.8s cubic-bezier(.42, 0, .2, 1) infinite;
+  animation: dashboard-quest-wind-dash 6.4s cubic-bezier(.42, 0, .2, 1) infinite;
 }
 
 .dashboard-quest-wind-slash > i {
@@ -3506,9 +3523,9 @@ body:has(.dashboard) {
   inset: .42rem .18rem auto 0;
   display: block;
   height: .34rem;
-  border-top: .12rem solid color-mix(in srgb, var(--sakura-light) 92%, white 8%);
+  border-top: .1rem solid color-mix(in srgb, var(--sakura-light) 48%, transparent);
   border-radius: 50%;
-  filter: drop-shadow(0 0 .34rem color-mix(in srgb, var(--sakura-light) 72%, transparent));
+  filter: drop-shadow(0 0 .22rem color-mix(in srgb, var(--sakura-light) 24%, transparent));
   transform: rotate(-8deg) skewX(-24deg);
 }
 
@@ -3519,9 +3536,9 @@ body:has(.dashboard) {
   top: -.29rem;
   width: .42rem;
   aspect-ratio: 1;
-  background: color-mix(in srgb, var(--sakura-light) 88%, white 12%);
+  background: color-mix(in srgb, var(--sakura-light) 52%, transparent);
   clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
-  box-shadow: 0 0 .5rem color-mix(in srgb, var(--sakura-light) 68%, transparent);
+  box-shadow: 0 0 .28rem color-mix(in srgb, var(--sakura-light) 22%, transparent);
 }
 
 .dashboard-quest-wind-slash > b {
@@ -3529,8 +3546,8 @@ body:has(.dashboard) {
   width: .28rem;
   height: .18rem;
   border-radius: 70% 20% 70% 20%;
-  background: color-mix(in srgb, var(--sakura-light) 78%, white 22%);
-  animation: dashboard-quest-petal-spin .9s ease-in-out infinite alternate;
+  background: color-mix(in srgb, var(--sakura-light) 48%, transparent);
+  animation: dashboard-quest-petal-spin 1.8s ease-in-out infinite alternate;
 }
 
 .dashboard-quest-wind-slash > b:nth-of-type(1) { left: .35rem; top: .12rem; }
@@ -3540,13 +3557,14 @@ body:has(.dashboard) {
 .dashboard-quest-guardian-sprite {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: block;
-  background-image: url('/generated/sakura-runner-spritesheet.png');
+  background-image: url('/generated/sakura-sprint-static-v3.png');
   background-repeat: no-repeat;
-  background-size: 800% 100%;
-  background-position: 0 50%;
-  filter: saturate(.92) contrast(1.05) drop-shadow(0 .18rem .2rem color-mix(in srgb, #05040c 42%, transparent));
-  animation: dashboard-quest-runner-frames .92s linear infinite;
+  background-size: contain;
+  background-position: center bottom;
+  filter: saturate(.78) contrast(1.02) drop-shadow(0 .14rem .16rem color-mix(in srgb, #05040c 28%, transparent));
+  opacity: .88;
 }
 
 .dashboard-quest-guardian {
@@ -3557,29 +3575,83 @@ body:has(.dashboard) {
   height: 5.4rem;
 }
 
+.dashboard-quest-speed-lines {
+  position: absolute;
+  z-index: 0;
+  right: 62%;
+  top: 28%;
+  width: 4.4rem;
+  height: 2.7rem;
+  pointer-events: none;
+}
+
+.dashboard-quest-speed-lines i {
+  position: absolute;
+  right: 0;
+  display: block;
+  height: .1rem;
+  border-radius: 99px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--sakura-light) 30%, transparent));
+  opacity: 0;
+  animation: dashboard-quest-speed-streak 3.2s ease-out infinite;
+}
+
+.dashboard-quest-speed-lines i:nth-child(1) { top: .3rem; width: 3.7rem; }
+.dashboard-quest-speed-lines i:nth-child(2) { top: 1.18rem; width: 4.35rem; animation-delay: -1.05s; }
+.dashboard-quest-speed-lines i:nth-child(3) { top: 2.02rem; width: 2.9rem; animation-delay: -2.1s; }
+.dashboard-quest-speed-lines i:nth-child(4) { top: .72rem; width: 2.45rem; animation-delay: -.62s; }
+.dashboard-quest-speed-lines i:nth-child(5) { top: 2.42rem; width: 3.25rem; animation-delay: -1.68s; }
+
 @keyframes dashboard-tool-wave {
   0%, 58%, 100% { transform: translateY(0); }
-  70% { transform: translateY(-.28rem); }
+  70% { transform: translateY(-.2rem); }
   82% { transform: translateY(0); }
 }
 
 @keyframes dashboard-quest-wind-dash {
   0%, 12% { left: 1%; opacity: 0; transform: translateY(.2rem) scaleX(.7); }
-  18% { opacity: 1; }
+  18% { opacity: .42; }
   42% { transform: translateY(-.18rem) scaleX(1); }
-  68% { opacity: 1; transform: translateY(.05rem) scaleX(1.08); }
+  68% { opacity: .34; transform: translateY(.05rem) scaleX(1.08); }
   84%, 100% { left: 52%; opacity: 0; transform: translateY(-.1rem) scaleX(.76); }
 }
 
 @keyframes dashboard-quest-runner-frames {
-  0%, 12.49% { background-position: 0 50%; }
-  12.5%, 24.99% { background-position: 14.2857% 50%; }
-  25%, 37.49% { background-position: 28.5714% 50%; }
-  37.5%, 49.99% { background-position: 42.8571% 50%; }
-  50%, 62.49% { background-position: 57.1429% 50%; }
-  62.5%, 74.99% { background-position: 71.4286% 50%; }
-  75%, 87.49% { background-position: 85.7143% 50%; }
-  87.5%, 100% { background-position: 100% 50%; }
+  0%, 6.249% { background-position: 0 50%; }
+  6.25%, 12.499% { background-position: 6.6667% 50%; }
+  12.5%, 18.749% { background-position: 13.3333% 50%; }
+  18.75%, 24.999% { background-position: 20% 50%; }
+  25%, 31.249% { background-position: 26.6667% 50%; }
+  31.25%, 37.499% { background-position: 33.3333% 50%; }
+  37.5%, 43.749% { background-position: 40% 50%; }
+  43.75%, 49.999% { background-position: 46.6667% 50%; }
+  50%, 56.249% { background-position: 53.3333% 50%; }
+  56.25%, 62.499% { background-position: 60% 50%; }
+  62.5%, 68.749% { background-position: 66.6667% 50%; }
+  68.75%, 74.999% { background-position: 73.3333% 50%; }
+  75%, 81.249% { background-position: 80% 50%; }
+  81.25%, 87.499% { background-position: 86.6667% 50%; }
+  87.5%, 93.749% { background-position: 93.3333% 50%; }
+  93.75%, 100% { background-position: 100% 50%; }
+}
+
+@keyframes dashboard-quest-trail-sweep {
+  0%, 12% { left: -10%; opacity: 0; transform: rotate(-5deg) scaleX(.45); }
+  22% { opacity: .34; }
+  72% { opacity: .22; }
+  88%, 100% { left: 72%; opacity: 0; transform: rotate(-5deg) scaleX(1.15); }
+}
+
+@keyframes dashboard-quest-checkpoint-pulse {
+  0%, 60%, 100% { opacity: .68; transform: scale(1); box-shadow: 0 0 .25rem color-mix(in srgb, var(--sakura-light) 10%, transparent); }
+  72% { opacity: .92; transform: scale(1.08); box-shadow: 0 0 .38rem color-mix(in srgb, var(--sakura-light) 24%, transparent); }
+}
+
+@keyframes dashboard-quest-speed-streak {
+  0% { opacity: 0; transform: translateX(-1rem) scaleX(.35); }
+  24% { opacity: .28; }
+  72% { opacity: .14; }
+  100% { opacity: 0; transform: translateX(1.1rem) scaleX(1.1); }
 }
 
 @keyframes dashboard-quest-petal-spin {
@@ -3638,8 +3710,11 @@ body:has(.dashboard) {
 @media (prefers-reduced-motion: reduce) {
   .dashboard-study-tool-reel i,
   .dashboard-quest-trail i,
+  .dashboard-quest-trail::after,
+  .dashboard-quest-trail b,
   .dashboard-quest-wind-slash,
   .dashboard-quest-wind-slash > b,
+  .dashboard-quest-speed-lines i,
   .dashboard-quest-guardian-sprite {
     animation: none;
   }
