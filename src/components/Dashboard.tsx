@@ -1085,9 +1085,9 @@ export function Dashboard({
                 </span>
                 <span className="dashboard-quest-aura">
                   <b />
-                  <i />
-                  <i />
-                  <i />
+                  <i lang="ja">桜</i>
+                  <i lang="ja">武</i>
+                  <i lang="ja">気</i>
                 </span>
                 <span className="dashboard-quest-guardian-sprite" />
               </span>
