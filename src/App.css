@@ -13736,6 +13736,7 @@ body:has(.counter-practice) .app {
 
 .counter-practice {
   display: grid;
+  align-content: start;
   gap: .72rem;
   min-height: calc(66.6667dvh - 2.25rem);
 }
