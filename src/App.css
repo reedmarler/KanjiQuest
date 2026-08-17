@@ -3414,9 +3414,12 @@ body:has(.dashboard) {
   animation: dashboard-tool-wave 6.3s ease-in-out infinite;
 }
 
-.dashboard-study-tool-reel i:nth-child(1) { animation-delay: -1.47s; }
-.dashboard-study-tool-reel i:nth-child(2) { animation-delay: -.975s; }
-.dashboard-study-tool-reel i:nth-child(3) { animation-delay: -.495s; }
+/* Five tool beats, then one empty step before the quest samurai joins. */
+.dashboard-study-tool-reel i:nth-child(1) { animation-delay: -1.98s; }
+.dashboard-study-tool-reel i:nth-child(2) { animation-delay: -1.485s; }
+.dashboard-study-tool-reel i:nth-child(3) { animation-delay: -.99s; }
+.dashboard-study-tool-reel i:nth-child(4) { animation-delay: -.495s; }
+.dashboard-study-tool-reel i:nth-child(5) { animation-delay: 0s; }
 
 .dashboard-quests-card {
   border-color: color-mix(in srgb, var(--sakura-light) 34%, var(--border));
@@ -3573,10 +3576,10 @@ body:has(.dashboard) {
   bottom: -.2rem;
   width: 5.4rem;
   height: 5.4rem;
-  /* Fifth beat in the study-tools bobble: 文 → 法 → 語 → 漢 → samurai.
-     Same wave and 0.495s step as the reel icons; delay lands after 漢. */
+  /* Study-tools bobble: 文 → 法 → 語 → 漢 → 数 → (gap) → samurai.
+     Same wave and 0.495s step as the reel icons; one empty beat after 数. */
   animation: dashboard-tool-wave 6.3s ease-in-out infinite;
-  animation-delay: .495s;
+  animation-delay: .99s;
 }
 
 /* Soft sakura wash with faint kanji drifting around her — same role as the
@@ -3763,12 +3766,12 @@ body:has(.dashboard) {
   }
 
   .dashboard-study-tool-reel {
-    gap: .2rem;
+    gap: .12rem;
   }
 
   .dashboard-study-tool-reel i {
-    width: 1.72rem;
-    font-size: .88rem;
+    width: 1.52rem;
+    font-size: .78rem;
   }
 }
 
@@ -8124,6 +8127,19 @@ body:has(.dashboard) {
 .tool-menu-card--kyogre .tool-menu-mark {
   background: color-mix(in srgb, var(--kyogre) 18%, var(--surface-2));
   color: var(--kyogre-light);
+}
+
+.tool-menu-card--amber {
+  border-color: color-mix(in srgb, var(--amber-light) 30%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--amber) 10%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--amber:hover {
+  border-color: var(--amber-light);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--amber) 16%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--amber .tool-menu-mark {
+  background: color-mix(in srgb, var(--amber) 18%, var(--surface-2));
+  color: var(--amber-light);
 }
 
 .tool-menu-card b {
