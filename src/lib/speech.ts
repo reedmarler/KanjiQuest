@@ -72,6 +72,13 @@ export interface SpeakOptions {
   synthesisRate?: number
   volume?: number
   voiceId?: string
+  /**
+   * Start browser speech inside the original click handler. Mobile Safari may
+   * reject speech started after the async static-manifest/service lookup has
+   * consumed the user gesture. Use this for generated text that cannot have a
+   * pre-rendered clip, such as vocab example sentences.
+   */
+  preferImmediateBrowser?: boolean
   onEnd?: () => void
 }
 
@@ -259,7 +266,14 @@ function playBlob(blob: Blob, volume: number, generation: number, playbackRate =
  * firing both would double up on whatever action `onEnd` triggers.
  */
 export function speakJapanese(text: string, options: SpeakOptions = {}): number {
-  const { rate = 0.9, synthesisRate = rate, volume = 1, voiceId, onEnd } = options
+  const {
+    rate = 0.9,
+    synthesisRate = rate,
+    volume = 1,
+    voiceId,
+    preferImmediateBrowser = false,
+    onEnd,
+  } = options
   // Ratio between what we render and what we play back.
   const playbackRate = synthesisRate === rate ? 1 : rate / synthesisRate
 
@@ -271,6 +285,13 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
   const generation = ++speechGeneration
 
   setActive({ token: generation, status: 'loading' })
+
+  // Generated lines are not in the static library. Starting their browser
+  // utterance synchronously preserves the tap activation required by iOS.
+  if (preferImmediateBrowser && canUseBrowserSpeech()) {
+    speakWithBrowserVoice(text, rate, volume, generation, onEnd)
+    return generation
+  }
 
   // Pre-rendered clip first: it needs no service, costs nothing to replay, and
   // is the only route that works on a static deployment. Only the fixed

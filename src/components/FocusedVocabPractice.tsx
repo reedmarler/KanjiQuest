@@ -72,6 +72,7 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
   const exampleSpeech = useSpeakable(
     example ? spokenTextForWord(example.japanese, example.reading) : '',
     !revealed,
+    true,
   )
 
   function nextCard() {
