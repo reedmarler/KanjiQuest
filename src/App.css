@@ -335,7 +335,7 @@ body:has(.dashboard) {
 .hero-database-full-reading {
   position: absolute;
   left: 50%;
-  top: -0.74em;
+  top: -0.66em;
   width: max-content;
   color: var(--kyogre-light);
   font-size: 0.42em;
@@ -5709,7 +5709,7 @@ body:has(.dashboard) {
   }
 
   .hero-sentence-line.hero-database-line .hero-database-full-reading {
-    top: -0.76em;
+    top: -0.68em;
   }
 
   .control-story-topbar {
