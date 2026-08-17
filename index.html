@@ -13,6 +13,10 @@
     <title>Kanji Quest — Learn Japanese</title>
   </head>
   <body>
+    <!-- Outside #root on purpose: the app's .app wrapper carries a 150% zoom
+         on desktop, and a badge inside it would scale with every screen
+         instead of staying a fixed, tiny corner mark. -->
+    <div id="build-badge" title="Build #%VITE_BUILD_NUMBER% · %VITE_BUILD_SHA%">#%VITE_BUILD_NUMBER%</div>
     <div id="root"></div>
     <script type="module" src="./src/main.tsx"></script>
   </body>

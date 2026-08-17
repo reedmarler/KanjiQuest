@@ -13449,3 +13449,25 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 @media (prefers-reduced-motion: reduce) {
   .quest-focus-guardian > img { animation: none; }
 }
+
+/* --- Build badge -------------------------------------------------------- */
+
+/* Lives outside #root (see index.html) so the .app wrapper's 150% desktop
+   zoom can't scale it. Fixed, tiny, and non-interactive: it exists purely
+   so a stale cached tab is obvious at a glance, not as a UI element — it
+   must never be the thing a stray tap lands on. */
+#build-badge {
+  position: fixed;
+  top: 3px;
+  left: 5px;
+  z-index: 999999;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  color: var(--text-muted);
+  font: 700 .5rem/1.6 'Outfit', system-ui, sans-serif;
+  letter-spacing: .02em;
+  opacity: .55;
+  pointer-events: none;
+  user-select: none;
+}

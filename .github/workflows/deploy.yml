@@ -21,6 +21,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: the build stamps itself with the total commit
+          # count (vite.config.ts), and the default shallow checkout would
+          # flatten that to 1 on every deploy.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
