@@ -3578,26 +3578,45 @@ body:has(.dashboard) {
   height: 5.4rem;
 }
 
+/* A ring of small blade-and-glint wisps rather than a glow blob — same shape
+   language as .dashboard-quest-wind-slash (curved arc + diamond tip), in ice
+   blue instead of sakura pink, fanned around her rather than trailing to one
+   side. Left open at the bottom where her feet meet the ground. */
 .dashboard-quest-aura {
   position: absolute;
   z-index: 0;
-  left: 50%;
-  bottom: 18%;
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    #fff6e8 0%,
-    color-mix(in srgb, var(--groudon-light) 85%, #fff) 22%,
-    var(--groudon-light) 46%,
-    color-mix(in srgb, var(--groudon) 80%, transparent) 68%,
-    transparent 78%
-  );
-  filter: blur(.16rem);
-  transform: translateX(-50%);
-  animation: dashboard-quest-aura-flicker 1.6s ease-in-out infinite;
+  inset: -.3rem;
+  pointer-events: none;
 }
+
+.dashboard-quest-aura i {
+  position: absolute;
+  width: .95rem;
+  height: .2rem;
+  border-radius: 50%;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--kyogre-light) 65%, #fff), #fff);
+  filter: drop-shadow(0 0 .14rem color-mix(in srgb, var(--kyogre-light) 55%, transparent));
+  opacity: 0;
+  animation: dashboard-quest-aura-shimmer 2.4s ease-in-out infinite;
+}
+
+.dashboard-quest-aura i::after {
+  content: "";
+  position: absolute;
+  right: -.08rem;
+  top: 50%;
+  width: .32rem;
+  aspect-ratio: 1;
+  background: #fff;
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  box-shadow: 0 0 .2rem color-mix(in srgb, var(--kyogre-light) 60%, transparent);
+  transform: translateY(-50%);
+}
+
+.dashboard-quest-aura i:nth-child(1) { top: .1rem; left: .35rem; transform: rotate(-56deg); animation-delay: -.2s; }
+.dashboard-quest-aura i:nth-child(2) { top: 1.55rem; left: -.15rem; transform: rotate(6deg); animation-delay: -1.3s; }
+.dashboard-quest-aura i:nth-child(3) { top: .1rem; right: .1rem; transform: rotate(56deg) scaleX(-1); animation-delay: -.8s; }
+.dashboard-quest-aura i:nth-child(4) { top: 1.55rem; right: -.4rem; transform: rotate(-6deg) scaleX(-1); animation-delay: -1.9s; }
 
 .dashboard-quest-speed-lines {
   position: absolute;
@@ -3634,11 +3653,14 @@ body:has(.dashboard) {
 
 /* Fire flickers faster and less smoothly than a breathing glow — short,
    uneven-feeling steps rather than one clean sine wave in and out. */
-@keyframes dashboard-quest-aura-flicker {
-  0%, 100% { opacity: .55; transform: translateX(-50%) scale(.92); }
-  30% { opacity: .85; transform: translateX(-50%) scale(1.06); }
-  55% { opacity: .62; transform: translateX(-50%) scale(.97); }
-  78% { opacity: .9; transform: translateX(-50%) scale(1.1); }
+/* Opacity only — each wisp's rotate is set once per nth-child above, and
+   animating transform here too would fight that fixed angle instead of
+   just fading the wisp in and out along it. */
+@keyframes dashboard-quest-aura-shimmer {
+  0%, 100% { opacity: 0; }
+  35% { opacity: .85; }
+  60% { opacity: .4; }
+  82% { opacity: .78; }
 }
 
 @keyframes dashboard-quest-wind-dash {
@@ -3748,7 +3770,7 @@ body:has(.dashboard) {
   .dashboard-quest-wind-slash,
   .dashboard-quest-wind-slash > b,
   .dashboard-quest-speed-lines i,
-  .dashboard-quest-aura,
+  .dashboard-quest-aura i,
   .dashboard-quest-guardian-sprite {
     animation: none;
   }
