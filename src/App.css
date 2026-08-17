@@ -8389,6 +8389,38 @@ body:has(.dashboard) {
   min-height: 0;
 }
 
+/* Focused Vocab uses the same visual hierarchy as the standard Kanji Lab:
+   large speakable prompt, compact answer, then a two-row control dock. */
+.focused-vocab-practice-mobile .focused-vocab-standard-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.focused-vocab-practice-mobile .focused-vocab-standard-reading {
+  min-height: 1.2rem;
+  margin: -.05rem auto .08rem;
+  color: var(--kyogre-light);
+  font-size: 1.06rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.focused-vocab-practice-mobile .focused-vocab-standard-answer {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.focused-vocab-practice-mobile .focused-vocab-standard-utility-row {
+  grid-template-columns: minmax(0, 24.5rem);
+}
+
+.focused-vocab-practice-mobile .focused-vocab-standard-utility-row > .kanji-learning-reveal {
+  width: 100%;
+}
+
 .focused-vocab-reveal {
   width: min(100%, 17rem);
   margin-top: auto;
@@ -13577,7 +13609,8 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
    never enters the card's three-row grid or its span ordering — the furigana
    there is placed by direct-child and :first-child/:last-child selectors, and
    any node added to that subtree moves the readings. */
-.quest-kanji-expanded-example.is-speakable {
+.quest-kanji-expanded-example.is-speakable,
+.focused-vocab-example.is-speakable {
   position: relative;
   cursor: pointer;
   border-radius: 10px;
@@ -13585,11 +13618,14 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 .quest-kanji-expanded-example.is-speakable:hover,
-.quest-kanji-expanded-example.is-speaking {
+.quest-kanji-expanded-example.is-speaking,
+.focused-vocab-example.is-speakable:hover,
+.focused-vocab-example.is-speaking {
   background: color-mix(in srgb, var(--kyogre) 12%, transparent);
 }
 
-.quest-kanji-expanded-example.is-speakable:focus-visible {
+.quest-kanji-expanded-example.is-speakable:focus-visible,
+.focused-vocab-example.is-speakable:focus-visible {
   outline: 2px solid var(--kyogre-light);
   outline-offset: -2px;
 }
@@ -13604,5 +13640,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   pointer-events: none;
 }
 
-.quest-kanji-expanded-example.is-speakable:hover .speakable-cue-corner { opacity: .6; }
-.quest-kanji-expanded-example.is-speaking .speakable-cue-corner { opacity: 1; color: var(--kyogre-light); }
+.quest-kanji-expanded-example.is-speakable:hover .speakable-cue-corner,
+.focused-vocab-example.is-speakable:hover .speakable-cue-corner { opacity: .6; }
+.quest-kanji-expanded-example.is-speaking .speakable-cue-corner,
+.focused-vocab-example.is-speaking .speakable-cue-corner { opacity: 1; color: var(--kyogre-light); }
