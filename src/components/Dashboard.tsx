@@ -1084,7 +1084,7 @@ export function Dashboard({
                   <i />
                 </span>
                 <span className="dashboard-quest-aura">
-                  <i />
+                  <b />
                   <i />
                   <i />
                   <i />
