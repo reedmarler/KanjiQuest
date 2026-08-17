@@ -7,7 +7,6 @@ import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
 
 interface FocusedVocabPracticeProps {
   onBack: () => void
-  onDashboard?: () => void
   initialTopicId?: string
   onQuestComplete?: () => void
   questTitle?: string
@@ -38,11 +37,9 @@ function shuffled<T>(items: readonly T[]) {
   return copy
 }
 
-function VocabBackButton({ onBack, questMode, hasPrevious }: { onBack: () => void; questMode: boolean; hasPrevious: boolean }) {
-  const destination = questMode ? 'Quest' : 'Dashboard'
-  const label = hasPrevious ? 'Previous word' : `Back to ${destination}`
+function VocabBackButton({ onBack }: { onBack: () => void }) {
   return (
-    <button type="button" className="vocab-back-arrow" onClick={onBack} aria-label={label} title={label}>
+    <button type="button" className="vocab-back-arrow" onClick={onBack} aria-label="Return to Dashboard" title="Return to Dashboard">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
     </button>
   )
@@ -59,7 +56,7 @@ function newSession(previousTopicId?: string, initialTopicId?: string) {
   return { topic, cards: shuffled(topic.cards) }
 }
 
-export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQuestComplete, questTitle }: FocusedVocabPracticeProps) {
+export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, questTitle }: FocusedVocabPracticeProps) {
   const isMobile = useIsMobile()
   const [session, setSession] = useState(() => newSession(undefined, initialTopicId))
   const [index, setIndex] = useState(0)
@@ -72,7 +69,6 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
   const exampleSpeech = useSpeakable(
     example ? spokenTextForWord(example.japanese, example.reading) : '',
     !revealed,
-    true,
   )
 
   function nextCard() {
@@ -118,8 +114,7 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
     return (
       <div className="grammar-practice-view kanji-lab kanji-lab-paths standard-kanji-study focused-vocab-practice-mobile">
         <div className="study-top grammar-study-top">
-          <VocabBackButton onBack={previousCard} questMode={Boolean(questTitle)} hasPrevious={completed || index > 0} />
-          {onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}
+          <VocabBackButton onBack={onBack} />
           <span className="study-progress">{Math.min(index + 1, session.cards.length)} / {session.cards.length}</span>
           <span className="study-type-badge">
             <span>Vocab</span>
@@ -227,9 +222,8 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
   return (
     <div className="grammar-practice-view focused-vocab-practice">
       <header className="focused-vocab-top">
-        <VocabBackButton onBack={previousCard} questMode={Boolean(questTitle)} hasPrevious={completed || index > 0} />
+        <VocabBackButton onBack={onBack} />
         <span>{questTitle ?? 'Focused vocab'}</span>
-        {onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}
         {!questTitle && <button type="button" className="focused-vocab-change-topic" onClick={loadNextTopic}>New topic</button>}
       </header>
 

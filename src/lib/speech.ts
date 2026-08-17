@@ -72,13 +72,6 @@ export interface SpeakOptions {
   synthesisRate?: number
   volume?: number
   voiceId?: string
-  /**
-   * Start browser speech inside the original click handler. Mobile Safari may
-   * reject speech started after the async static-manifest/service lookup has
-   * consumed the user gesture. Use this for generated text that cannot have a
-   * pre-rendered clip, such as vocab example sentences.
-   */
-  preferImmediateBrowser?: boolean
   onEnd?: () => void
 }
 
@@ -93,10 +86,44 @@ class RefusedOnce extends Error {
 }
 
 let serverAvailable = false
+let sharedAudio: HTMLAudioElement | null = null
 let currentAudio: HTMLAudioElement | null = null
 let currentObjectUrl: string | null = null
+let audioPrime: Promise<void> | null = null
 let speechGeneration = 0
 let active: { token: number; status: SpeechStatus } | null = null
+
+/** One silent sample. Playing it synchronously blesses this persistent audio
+ * element on iOS; the service blob can then replace its source after fetch. */
+const SILENT_WAV = 'data:audio/wav;base64,UklGRiUAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQEAAACA'
+
+function getSharedAudio() {
+  sharedAudio ??= new Audio()
+  sharedAudio.preload = 'auto'
+  sharedAudio.setAttribute('playsinline', '')
+  return sharedAudio
+}
+
+/** Must be called from the original tap handler, before async TTS work. */
+function primeAudioPlayback() {
+  const audio = getSharedAudio()
+  audio.onended = null
+  audio.onerror = null
+  audio.pause()
+  audio.currentTime = 0
+  audio.volume = 0
+  audio.playbackRate = 1
+  audio.src = SILENT_WAV
+  audioPrime = audio.play()
+    .then(() => {
+      audio.pause()
+      audio.currentTime = 0
+    })
+    .catch(() => {
+      // Desktop does not need the prime. On restrictive mobile browsers the
+      // later play() still reports failure through the normal finish handler.
+    })
+}
 
 const stateListeners = new Set<(active: { token: number; status: SpeechStatus } | null) => void>()
 
@@ -221,37 +248,48 @@ export function stopSpeaking() {
   speechGeneration++
   if (canUseBrowserSpeech()) window.speechSynthesis.cancel()
   if (currentAudio) {
+    currentAudio.onended = null
+    currentAudio.onerror = null
     currentAudio.pause()
     currentAudio.currentTime = 0
     currentAudio = null
   }
+  audioPrime = null
   releaseObjectUrl()
   setActive(null)
 }
 
 function playBlob(blob: Blob, volume: number, generation: number, playbackRate = 1, onEnd?: () => void) {
-  if (generation !== speechGeneration) return
+  const play = () => {
+    if (generation !== speechGeneration) return
 
-  const url = URL.createObjectURL(blob)
-  const audio = new Audio(url)
-  audio.volume = volume
-  if (playbackRate !== 1) {
+    const url = URL.createObjectURL(blob)
+    const audio = getSharedAudio()
+    audio.pause()
+    audio.currentTime = 0
+    audio.volume = volume
     audio.preservesPitch = true
     audio.playbackRate = playbackRate
-  }
-  currentAudio = audio
-  currentObjectUrl = url
+    audio.src = url
+    currentAudio = audio
+    currentObjectUrl = url
 
-  const finish = () => {
-    if (generation !== speechGeneration) return
-    releaseObjectUrl()
-    setActive(null)
-    onEnd?.()
+    const finish = () => {
+      if (generation !== speechGeneration) return
+      audio.onended = null
+      audio.onerror = null
+      currentAudio = null
+      releaseObjectUrl()
+      setActive(null)
+      onEnd?.()
+    }
+    audio.onended = finish
+    audio.onerror = finish
+    setActive({ token: generation, status: 'playing' })
+    audio.play().catch(finish)
   }
-  audio.addEventListener('ended', finish, { once: true })
-  audio.addEventListener('error', finish, { once: true })
-  setActive({ token: generation, status: 'playing' })
-  audio.play().catch(finish)
+
+  void (audioPrime ?? Promise.resolve()).then(play)
 }
 
 /**
@@ -271,7 +309,6 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
     synthesisRate = rate,
     volume = 1,
     voiceId,
-    preferImmediateBrowser = false,
     onEnd,
   } = options
   // Ratio between what we render and what we play back.
@@ -285,13 +322,7 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
   const generation = ++speechGeneration
 
   setActive({ token: generation, status: 'loading' })
-
-  // Generated lines are not in the static library. Starting their browser
-  // utterance synchronously preserves the tap activation required by iOS.
-  if (preferImmediateBrowser && canUseBrowserSpeech()) {
-    speakWithBrowserVoice(text, rate, volume, generation, onEnd)
-    return generation
-  }
+  primeAudioPlayback()
 
   // Pre-rendered clip first: it needs no service, costs nothing to replay, and
   // is the only route that works on a static deployment. Only the fixed

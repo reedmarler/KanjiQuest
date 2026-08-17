@@ -37,7 +37,7 @@ interface SpeakableWordProps {
  * lets an existing element become the control instead, and hands back a cue
  * that is positioned out of flow.
  */
-export function useSpeakable(text: string, disabled = false, preferImmediateBrowser = false) {
+export function useSpeakable(text: string, disabled = false) {
   const [supported, setSupported] = useState(canSpeakJapanese)
   const [speaking, setSpeaking] = useState<{ token: number; status: SpeechStatus } | null>(null)
 
@@ -65,7 +65,6 @@ export function useSpeakable(text: string, disabled = false, preferImmediateBrow
     }
     const token = speakJapanese(text, {
       rate: SPEECH_SPEEDS.natural,
-      preferImmediateBrowser,
       onEnd: () => setSpeaking(null),
     })
     setSpeaking({ token, status: 'loading' })
