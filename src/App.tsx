@@ -248,8 +248,7 @@ function App() {
           <FocusedVocabPractice
             initialTopicId={questVocabTopicId}
             questTitle={activeQuest?.title}
-            onBack={() => setView(practiceReturnView)}
-            onDashboard={activeQuestId ? () => setView('dashboard') : undefined}
+            onBack={() => setView('dashboard')}
             onQuestComplete={activeQuestId && questVocabTopicId
               ? () => {
                   finishQuestStep('vocab')

@@ -31,6 +31,7 @@ export function isDashboardSentenceNatural(sentence: GeneratedPreviewSentence): 
   if (/\bgo(?:es)? to the inside\b/i.test(sentence.english)) return false
   if (/^(?:Everyone|Everybody) knows it\.$/i.test(sentence.english)) return false
   if (/^(?:Oil|A cake) is not that I dislike/i.test(sentence.english)) return false
+  if (/\b(?:doed|buyed|eated|readed|writed)\b/i.test(sentence.english)) return false
 
   return true
 }

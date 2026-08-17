@@ -6,6 +6,7 @@ import { classifyVocabularyCard, refineCoarseCategory } from './vocabularyClassi
 import { inferPreferredTranslation } from '../data/preferredVocabularyTranslations'
 import type { JlptLevel, StudyCard } from './types'
 import { toHiragana } from 'wanakana'
+import { isDashboardSentenceNatural } from './dashboardSentenceQuality'
 
 export const SENTENCE_CATEGORIES = [
   'Person','Animal','Plant','Food','Drink','Medicine','Place','Building','Room','Object','Tool','Technology','Vehicle','Clothing','Furniture','Book','Document','Media','Time','Weather','Emotion','Activity','Event','Adverb','Number','Money','Language',
@@ -937,7 +938,10 @@ function requiredWordPicker(seed: number, requiredWord?: string, options: Catego
  */
 function enforceRequiredWord(sentence: GeneratedPreviewSentence | null, options: CategorySentenceOptions) {
   if (!options.requiredWord || !sentence) return sentence
-  return sentence.japanese.includes(options.requiredWord) ? sentence : null
+  const exactSlot = Object.values(sentence.slots).some((slot) => (
+    slot.dictionaryForm === options.requiredWord || slot.surface === options.requiredWord
+  ))
+  return exactSlot ? sentence : null
 }
 
 // One entry per godan row. i/a are the ます-stem and ない-stem kana; te/ta are
@@ -6270,7 +6274,7 @@ export function generateCategorySentence(seed: number, requestedPatternId?: stri
   const english=timeAdjunctEnglish
     ? `${timeAdjunctEnglish.charAt(0).toUpperCase()}${timeAdjunctEnglish.slice(1)}, ${renderedEnglish.charAt(0).toLowerCase()}${renderedEnglish.slice(1)}`
     : renderedEnglish.charAt(0).toUpperCase()+renderedEnglish.slice(1)
-  return { frameId:verb.sentencePattern, level:'N5', japanese, reading, english, slots, furigana, grammar:[{pattern:verb.sentencePattern,meaning:'Verb-selected category and tag pattern',jlpt:'N5'}], validation:[`Verb selected first: ${verb.japanese}.`,`Verb selected pattern: ${verb.sentencePattern.toUpperCase()}.`,`Slots matched allowed categories${semanticChecks.length ? ` and semantic tags (${semanticChecks.join('; ')})` : ''}.`,`Supported forms: ${verb.supportedGrammarForms.join(', ')}.`] }
+  return enforceRequiredWord({ frameId:verb.sentencePattern, level:'N5', japanese, reading, english, slots, furigana, grammar:[{pattern:verb.sentencePattern,meaning:'Verb-selected category and tag pattern',jlpt:'N5'}], validation:[`Verb selected first: ${verb.japanese}.`,`Verb selected pattern: ${verb.sentencePattern.toUpperCase()}.`,`Slots matched allowed categories${semanticChecks.length ? ` and semantic tags (${semanticChecks.join('; ')})` : ''}.`,`Supported forms: ${verb.supportedGrammarForms.join(', ')}.`] },options)
 }
 
 /**
@@ -6307,7 +6311,7 @@ export function generateSentenceForWord(word: string, seed = 1): GeneratedPrevie
   const direct = (() => {
     for (let attempt = 0; attempt < SEEDS_PER_PATTERN; attempt += 1) {
       const sentence = generateCategorySentence(seed + attempt, undefined, 'N5', { requiredWord: word })
-      if (sentence) return sentence
+      if (sentence && isDashboardSentenceNatural(sentence)) return sentence
     }
     return null
   })()
@@ -6318,7 +6322,7 @@ export function generateSentenceForWord(word: string, seed = 1): GeneratedPrevie
       const candidateSeed = seed + attempt * 37
       const level = patternId.startsWith('n4-') ? 'N4' : 'N5'
       const sentence = generateCategorySentence(candidateSeed, patternId, level, { requiredWord: word })
-      if (sentence) return sentence
+      if (sentence && isDashboardSentenceNatural(sentence)) return sentence
     }
   }
   return null
