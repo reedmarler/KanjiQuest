@@ -13430,3 +13430,22 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   top: .32rem;
   right: .38rem;
 }
+
+/* --- Guardian bob ------------------------------------------------------ */
+
+/* A slow, shallow float so the guardian reads as standing there rather than
+   pasted on. Deliberately small and unhurried — the quest copy beside it is
+   what should hold attention, and a bigger or faster bob competes with it.
+   Transform only, so it composites without repainting the portrait. */
+@keyframes quest-guardian-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.quest-focus-guardian > img {
+  animation: quest-guardian-bob 3.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quest-focus-guardian > img { animation: none; }
+}
