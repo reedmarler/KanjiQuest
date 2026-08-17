@@ -7,7 +7,7 @@ import {
   type JapaneseCounter,
 } from '../data/japaneseCounters'
 import { FuriganaSegment } from './FuriganaText'
-import { SpeakableCue, SpeakableWord } from './SpeakableWord'
+import { SpeakableWord } from './SpeakableWord'
 
 interface CounterPracticeProps {
   onBack: () => void
@@ -91,7 +91,6 @@ function CounterStudyCard({
               <FuriganaSegment text={quiz.completed} reading={quiz.reading} />
             </span>
             <span className="counter-sentence-english">{quiz.english}</span>
-            <SpeakableCue />
           </SpeakableWord>
         </section>
       )}
