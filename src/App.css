@@ -3766,12 +3766,12 @@ body:has(.dashboard) {
   }
 
   .dashboard-study-tool-reel {
-    gap: .2rem;
+    gap: .12rem;
   }
 
   .dashboard-study-tool-reel i {
-    width: 1.72rem;
-    font-size: .88rem;
+    width: 1.52rem;
+    font-size: .78rem;
   }
 }
 
