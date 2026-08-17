@@ -13727,3 +13727,375 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 .focused-vocab-example.is-speakable:hover .speakable-cue-corner { opacity: .6; }
 .quest-kanji-expanded-example.is-speaking .speakable-cue-corner,
 .focused-vocab-example.is-speaking .speakable-cue-corner { opacity: 1; color: var(--kyogre-light); }
+
+/* ── Japanese counter study ─────────────────────────────────────────────── */
+body:has(.counter-practice) .app {
+  padding-top: .75rem;
+  padding-bottom: 1.5rem;
+}
+
+.counter-practice {
+  display: grid;
+  gap: .72rem;
+  min-height: calc(66.6667dvh - 2.25rem);
+}
+
+.counter-practice-top {
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .65rem;
+}
+
+.counter-practice-top > div {
+  min-width: 0;
+}
+
+.counter-practice-top > div > span,
+.counter-path-heading span {
+  color: var(--amber-light);
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+
+.counter-practice-top h1 {
+  margin-top: .05rem;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.counter-practice-count {
+  min-width: 3.3rem;
+  color: var(--text-muted);
+  font-size: .72rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.counter-progress-bar {
+  height: .24rem;
+}
+
+.counter-progress-bar .study-progress-fill {
+  background: linear-gradient(90deg, var(--amber), var(--amber-light));
+  box-shadow: 0 0 .45rem color-mix(in srgb, var(--amber-light) 30%, transparent);
+}
+
+.counter-path-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .2rem .1rem 0;
+}
+
+.counter-path-heading p {
+  max-width: 29rem;
+  margin-top: .16rem;
+  color: var(--text-muted);
+  font-size: .72rem;
+  line-height: 1.35;
+}
+
+.counter-path-heading .btn {
+  flex: 0 0 auto;
+  min-height: 2rem;
+  padding: .38rem .7rem;
+  font-size: .66rem;
+}
+
+.counter-category-tabs {
+  display: flex;
+  gap: .35rem;
+  margin-inline: -.15rem;
+  padding: .1rem .15rem .22rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.counter-category-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.counter-category-tabs button {
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--amber-light) 22%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 92%, var(--amber) 8%);
+  color: var(--text-muted);
+  padding: .38rem .68rem;
+  font: 600 .63rem/1 'Outfit', sans-serif;
+  cursor: pointer;
+}
+
+.counter-category-tabs button.is-active {
+  border-color: color-mix(in srgb, var(--amber-light) 64%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 72%, var(--amber) 28%);
+  color: color-mix(in srgb, var(--amber-light) 75%, #fff);
+  box-shadow: 0 0 .5rem color-mix(in srgb, var(--amber) 12%, transparent);
+}
+
+.counter-study-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(7.2rem, auto) minmax(7.3rem, auto) auto;
+  gap: .65rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--amber-light) 26%, var(--border));
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 50% 23%, color-mix(in srgb, var(--amber) 12%, transparent), transparent 35%),
+    linear-gradient(145deg, color-mix(in srgb, var(--surface-2) 42%, var(--surface)), var(--surface));
+  box-shadow: var(--shadow);
+  padding: .8rem;
+}
+
+.counter-study-card::before {
+  content: "数";
+  position: absolute;
+  top: -.75rem;
+  right: -.15rem;
+  color: color-mix(in srgb, var(--amber-light) 6%, transparent);
+  font: 700 7rem/1 'Noto Sans JP', sans-serif;
+  pointer-events: none;
+}
+
+.counter-study-card-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .7rem;
+}
+
+.counter-category-badge {
+  border: 1px solid color-mix(in srgb, var(--amber-light) 30%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--amber) 14%, transparent);
+  color: var(--amber-light);
+  padding: .24rem .55rem;
+  font-size: .57rem;
+  font-weight: 700;
+}
+
+.counter-card-instruction {
+  color: var(--text-muted);
+  font-size: .62rem;
+}
+
+.counter-study-prompt {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: .2rem;
+  min-height: 7.2rem;
+}
+
+.counter-study-suffix {
+  background: linear-gradient(135deg, #fff 10%, var(--amber-light) 72%, var(--amber));
+  background-clip: text;
+  color: transparent;
+  font: 700 clamp(3.4rem, 14vw, 5rem)/1 'Noto Sans JP', sans-serif;
+  filter: drop-shadow(0 0 .5rem color-mix(in srgb, var(--amber) 15%, transparent));
+}
+
+.counter-study-reading {
+  min-height: 1.2rem;
+  color: transparent;
+  font: 600 .82rem/1.2 'Noto Sans JP', sans-serif;
+  transition: color .2s ease;
+  user-select: none;
+}
+
+.counter-study-reading.is-visible {
+  color: var(--amber-light);
+  user-select: auto;
+}
+
+.counter-study-answer {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: start;
+  gap: .55rem;
+  min-height: 7.3rem;
+  border-top: 1px solid color-mix(in srgb, var(--amber-light) 13%, transparent);
+  padding-top: .7rem;
+  opacity: 0;
+  transform: translateY(.16rem);
+  transition: opacity .2s ease, transform .2s ease;
+  visibility: hidden;
+}
+
+.counter-study-answer.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+.counter-study-answer h2 {
+  font-size: .95rem;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.counter-example {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(5rem, auto) minmax(0, 1fr) 1.2rem;
+  align-items: center;
+  gap: .65rem;
+  border: 1px solid color-mix(in srgb, var(--sakura-light) 18%, var(--border));
+  border-radius: .7rem;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--sakura) 18%);
+  padding: .58rem .65rem;
+}
+
+button.counter-example {
+  width: 100%;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.counter-example-japanese {
+  color: var(--sakura-light);
+  font: 700 1.2rem/1.4 'Noto Sans JP', sans-serif;
+}
+
+.counter-example-japanese rt {
+  color: color-mix(in srgb, var(--sakura-light) 75%, var(--text-muted));
+  font-size: .42em;
+}
+
+.counter-example-english {
+  color: var(--text-muted);
+  font-size: .68rem;
+  line-height: 1.25;
+}
+
+.counter-example .speakable-word-cue {
+  position: static;
+  width: 1rem;
+  color: var(--sakura-light);
+}
+
+.counter-study-note {
+  color: var(--text-muted);
+  font-size: .68rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.counter-reveal-button {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  border-color: color-mix(in srgb, var(--amber-light) 50%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--amber) 82%, #5e4214), var(--amber));
+}
+
+.counter-study-navigation {
+  display: grid;
+  grid-template-columns: minmax(0, .72fr) minmax(0, 1.28fr);
+  gap: .55rem;
+}
+
+.counter-study-navigation .btn {
+  min-height: 2.55rem;
+}
+
+.counter-next-button {
+  border: 1px solid color-mix(in srgb, var(--amber-light) 36%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 78%, var(--amber) 22%);
+  color: var(--amber-light);
+}
+
+.counter-study-complete {
+  display: grid;
+  justify-items: center;
+  gap: .7rem;
+  border: 1px solid color-mix(in srgb, var(--amber-light) 26%, var(--border));
+  border-radius: 1rem;
+  background: radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--amber) 18%, transparent), var(--surface) 55%);
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.counter-study-complete > span {
+  display: grid;
+  width: 4.5rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--amber-light) 38%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--amber) 18%, transparent);
+  color: var(--amber-light);
+  font: 700 2.1rem/1 'Noto Sans JP', sans-serif;
+}
+
+.counter-study-complete p {
+  max-width: 24rem;
+  color: var(--text-muted);
+  font-size: .78rem;
+}
+
+.counter-study-complete .btn {
+  width: min(100%, 17rem);
+}
+
+@media (max-width: 720px) {
+  body:has(.counter-practice) .app {
+    padding: .75rem .8rem calc(1.4rem + env(safe-area-inset-bottom));
+  }
+
+  .counter-practice {
+    gap: .58rem;
+    min-height: calc(100dvh - 2.15rem);
+  }
+
+  .counter-practice-top h1 {
+    font-size: 1.16rem;
+  }
+
+  .counter-path-heading p {
+    font-size: .66rem;
+  }
+
+  .counter-study-card {
+    grid-template-rows: auto minmax(6rem, auto) minmax(7rem, auto) auto;
+    gap: .45rem;
+    padding: .68rem;
+  }
+
+  .counter-study-prompt {
+    min-height: 6rem;
+  }
+
+  .counter-study-suffix {
+    font-size: clamp(3rem, 18vw, 4.2rem);
+  }
+
+  .counter-study-answer {
+    min-height: 7rem;
+    gap: .42rem;
+    padding-top: .55rem;
+  }
+
+  .counter-example {
+    grid-template-columns: minmax(4.5rem, auto) minmax(0, 1fr) 1rem;
+    padding: .48rem .55rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .counter-study-reading,
+  .counter-study-answer {
+    transition: none;
+  }
+}
