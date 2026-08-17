@@ -131,7 +131,7 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
           <div className="study-progress-fill" style={{ width: `${((index + 1) / session.cards.length) * 100}%` }} />
         </div>
 
-        <section className="kanji-study-navigation kanji-armory-navigation standard-kanji-navigation">
+        <section className="kanji-study-navigation">
           <div className="kanji-path-heading">
             <div>
               <span>{questTitle ? 'QUEST VOCABULARY' : '15-WORD PATH'}</span>
