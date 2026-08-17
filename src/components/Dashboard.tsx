@@ -670,18 +670,20 @@ export function Dashboard({
             )}
           </div>
         )}
-        <button
-          type="button"
-          className={`control-story-toggle control-story-top-toggle${settingsMode !== 'none' ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
-          onClick={() => selectSettingsMode(topToggleMode)}
-          role="switch"
-          aria-checked={settingsMode !== 'none'}
-          aria-label={settingsMode === 'none' ? 'Enable Story mode' : `Turn off ${HERO_MODE_LABELS[topToggleMode]} mode`}
-          title={settingsMode === 'none' ? 'Enable Story mode' : `Turn off ${HERO_MODE_LABELS[topToggleMode]} mode`}
-        >
-          <span className="control-toggle-track" aria-hidden="true"><span /></span>
-          <span>{HERO_MODE_LABELS[topToggleMode]}</span>
-        </button>
+        {settingsMode !== 'none' && (
+          <button
+            type="button"
+            className={`control-story-toggle control-story-top-toggle is-active${grammarMode ? ' is-grammar' : ''}`}
+            onClick={() => selectSettingsMode(topToggleMode)}
+            role="switch"
+            aria-checked
+            aria-label={`Turn off ${HERO_MODE_LABELS[topToggleMode]} mode`}
+            title={`Turn off ${HERO_MODE_LABELS[topToggleMode]} mode`}
+          >
+            <span className="control-toggle-track" aria-hidden="true"><span /></span>
+            <span>{HERO_MODE_LABELS[topToggleMode]}</span>
+          </button>
+        )}
       </div>
 
       <header className="hero hero-compact">
@@ -1044,20 +1046,42 @@ export function Dashboard({
 
       <div className="dashboard-action-grid">
         <div className="dashboard-action-primary">
-          <button type="button" className="dashboard-tool-button study-tools-panel is-wordmark" onClick={onOpenStudyTools}>
-            <span className="dashboard-wordmark">
-              <b>K</b><span>anji</span>
+          <button type="button" className="dashboard-feature-card dashboard-study-tools-card" onClick={onOpenStudyTools}>
+            <strong className="dashboard-feature-title">Study tools</strong>
+            <span className="dashboard-study-tool-reel" aria-hidden="true">
+              <i lang="ja">文</i>
+              <i lang="ja">法</i>
+              <i lang="ja">語</i>
+              <i lang="ja">漢</i>
             </span>
-            <span className="dashboard-wordmark-note">+ other tools</span>
+            <span className="dashboard-feature-footer">
+              <span>4 tools</span>
+              <span aria-hidden="true">→</span>
+            </span>
           </button>
 
-          <button type="button" className="dashboard-quest-button is-wordmark" onClick={onOpenQuests}>
-            <span className="dashboard-wordmark">
-              <b>Q</b><span>uests</span>
+          <button type="button" className="dashboard-feature-card dashboard-quests-card" onClick={onOpenQuests}>
+            <strong className="dashboard-feature-title">Quests</strong>
+            <span className="dashboard-quest-scene" aria-hidden="true">
+              <span className="dashboard-quest-trail">
+                <i />
+                <b />
+                <b />
+                <b />
+              </span>
+              <span className="dashboard-quest-wind-slash">
+                <i />
+                <b />
+                <b />
+                <b />
+              </span>
+              <span className="dashboard-quest-guardian">
+                <span className="dashboard-quest-guardian-sprite" />
+              </span>
             </span>
-            <span className="dashboard-wordmark-note">{questsCleared} of {QUESTS.length} cleared</span>
-            <span className="dashboard-quest-track" aria-hidden="true">
-              <span style={{ width: `${(questsCleared / QUESTS.length) * 100}%` }} />
+            <span className="dashboard-feature-footer">
+              <span>{questsCleared} of {QUESTS.length} cleared</span>
+              <span aria-hidden="true">→</span>
             </span>
           </button>
         </div>
