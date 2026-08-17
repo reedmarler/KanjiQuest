@@ -3411,12 +3411,12 @@ body:has(.dashboard) {
   color: var(--kyogre-light);
   font: 700 1rem/1 'Noto Sans JP', sans-serif;
   font-style: normal;
-  animation: dashboard-tool-wave 4.2s ease-in-out infinite;
+  animation: dashboard-tool-wave 6.3s ease-in-out infinite;
 }
 
-.dashboard-study-tool-reel i:nth-child(1) { animation-delay: -.98s; }
-.dashboard-study-tool-reel i:nth-child(2) { animation-delay: -.65s; }
-.dashboard-study-tool-reel i:nth-child(3) { animation-delay: -.33s; }
+.dashboard-study-tool-reel i:nth-child(1) { animation-delay: -1.47s; }
+.dashboard-study-tool-reel i:nth-child(2) { animation-delay: -.975s; }
+.dashboard-study-tool-reel i:nth-child(3) { animation-delay: -.495s; }
 
 .dashboard-quests-card {
   border-color: color-mix(in srgb, var(--sakura-light) 34%, var(--border));
@@ -3567,7 +3567,7 @@ body:has(.dashboard) {
   opacity: .88;
   /* Same bobble as the study-tools reel, so the dashboard's two idle motions
      read as one house style rather than two different animation designs. */
-  animation: dashboard-tool-wave 4.2s ease-in-out infinite;
+  animation: dashboard-tool-wave 6.3s ease-in-out infinite;
 }
 
 .dashboard-quest-guardian {
