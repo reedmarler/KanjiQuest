@@ -8439,35 +8439,35 @@ body:has(.dashboard) {
 
 /* Mobile Reveal card: meaning + English stay pinned near the top, and the
    example sentence centers in the remaining space down to the Hide button. */
-.focused-vocab-practice-mobile .kanji-learning-answer {
+.focused-vocab-practice-standard .kanji-learning-answer {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
 
-.focused-vocab-practice-mobile .kanji-learning-meaning {
+.focused-vocab-practice-standard .kanji-learning-meaning {
   flex: 0 0 auto;
 }
 
-.focused-vocab-practice-mobile .focused-vocab-example {
+.focused-vocab-practice-standard .focused-vocab-example {
   flex: 1 1 auto;
   min-height: 0;
 }
 
 /* Focused Vocab uses the same visual hierarchy as the standard Kanji Lab:
    large speakable prompt, compact answer, then a two-row control dock. */
-.focused-vocab-practice-mobile .focused-vocab-standard-prompt {
+.focused-vocab-practice-standard .focused-vocab-standard-prompt {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.focused-vocab-practice-mobile .focused-vocab-main-furigana {
+.focused-vocab-practice-standard .focused-vocab-main-furigana {
   display: inline-flex;
   align-items: baseline;
 }
 
-.focused-vocab-practice-mobile .focused-vocab-main-furigana .furigana-ruby rt {
+.focused-vocab-practice-standard .focused-vocab-main-furigana .furigana-ruby rt {
   color: var(--kyogre-light);
   font: 600 .92rem/1 'Noto Sans JP', sans-serif;
   letter-spacing: .08em;
@@ -8475,20 +8475,20 @@ body:has(.dashboard) {
   transition: opacity 180ms ease;
 }
 
-.focused-vocab-practice-mobile .focused-vocab-main-word.is-furigana-visible .furigana-ruby rt {
+.focused-vocab-practice-standard .focused-vocab-main-word.is-furigana-visible .furigana-ruby rt {
   opacity: 1;
 }
 
-.focused-vocab-practice-mobile .main-word-length-3 .focused-vocab-main-word {
+.focused-vocab-practice-standard .main-word-length-3 .focused-vocab-main-word {
   font-size: 4.15rem;
 }
 
 /* Four is the capped length class, so this also safely fits longer vocab. */
-.focused-vocab-practice-mobile .main-word-length-4 .focused-vocab-main-word {
+.focused-vocab-practice-standard .main-word-length-4 .focused-vocab-main-word {
   font-size: 3.05rem;
 }
 
-.focused-vocab-practice-mobile .focused-vocab-standard-answer {
+.focused-vocab-practice-standard .focused-vocab-standard-answer {
   display: flex;
   flex: 1 1 auto;
   min-height: 0;
@@ -8505,15 +8505,15 @@ body:has(.dashboard) {
   visibility: hidden;
 }
 
-.focused-vocab-practice-mobile .focused-vocab-example {
+.focused-vocab-practice-standard .focused-vocab-example {
   justify-content: center;
 }
 
-.focused-vocab-practice-mobile .focused-vocab-example-jp-wrap {
+.focused-vocab-practice-standard .focused-vocab-example-jp-wrap {
   flex: 0 1 auto;
 }
 
-.focused-vocab-practice-mobile .focused-vocab-example-jp {
+.focused-vocab-practice-standard .focused-vocab-example-jp {
   font-size: 1.18rem;
   line-height: 2;
   text-wrap: balance;
@@ -9851,7 +9851,7 @@ body:has(.dashboard) {
 @media(prefers-reduced-motion:reduce){.quest-gate-figure,.quest-gate-mist,.quest-fighter-portrait,.quest-fighter.is-attacking .quest-fighter-portrait,.quest-fighter.is-hit .quest-fighter-portrait,.quest-fighter.is-hit .quest-fighter-portrait-shell:after,.quest-fighter.is-guarded .quest-fighter-portrait,.quest-fighter.is-guarded .quest-fighter-portrait-shell:after,.quest-fighter.is-ultimate .quest-fighter-portrait,.quest-fighter.is-ultimate-hit .quest-fighter-portrait,.quest-battle-clash.player-strike,.quest-battle-clash.guardian-strike,.quest-battle-clash.kanji-ultimate,.quest-kanji-slash i,.quest-kanji-slash span,.quest-checkpoint-next.is-ultimate-ready{animation:none}.quest-kanji-slash{display:none}}
 
 /* Fixed study frames: long examples may wrap, but never resize the route. */
-.focused-vocab-card{overflow:hidden}.focused-vocab-card .focused-vocab-example{width:100%;min-height:0;max-height:8rem;overflow:hidden}.focused-vocab-example-en{display:-webkit-box;max-width:100%;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2}.focused-vocab-example-jp-wrap{overflow:hidden}.focused-vocab-example-jp{display:block;max-height:5.4rem;overflow:hidden;font-size:clamp(1.12rem,2.4vw,1.42rem);line-height:1.9;text-align:center}.focused-vocab-reveal,.focused-vocab-actions,.focused-vocab-practice-mobile .kanji-learning-controls{flex:0 0 auto}.focused-vocab-practice-mobile .kanji-learning-card,.focused-vocab-practice-mobile .kanji-learning-answer{overflow:hidden}.focused-vocab-practice-mobile .focused-vocab-example{width:100%;max-height:none;overflow:hidden}
+.focused-vocab-card{overflow:hidden}.focused-vocab-card .focused-vocab-example{width:100%;min-height:0;max-height:8rem;overflow:hidden}.focused-vocab-example-en{display:-webkit-box;max-width:100%;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2}.focused-vocab-example-jp-wrap{overflow:hidden}.focused-vocab-example-jp{display:block;max-height:5.4rem;overflow:hidden;font-size:clamp(1.12rem,2.4vw,1.42rem);line-height:1.9;text-align:center}.focused-vocab-reveal,.focused-vocab-actions,.focused-vocab-practice-standard .kanji-learning-controls{flex:0 0 auto}.focused-vocab-practice-standard .kanji-learning-card,.focused-vocab-practice-standard .kanji-learning-answer{overflow:hidden}.focused-vocab-practice-standard .focused-vocab-example{width:100%;max-height:none;overflow:hidden}
 
 /* Quest compounds show useful word readings instead of raw ON/KUN labels. */
 .quest-kanji-part-examples{align-items:center;justify-content:center;overflow:hidden}.quest-kanji-part-examples>span{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto auto;justify-items:start;gap:.02rem;min-width:0}.quest-kanji-part-examples small{grid-row:1;color:var(--kyogre-light);font:500 .59rem/1.2 'Noto Sans JP',sans-serif}.quest-kanji-part-examples b{grid-row:2;max-width:100%;overflow:hidden;font-size:1.02rem;text-overflow:ellipsis}.quest-kanji-part-examples em{grid-row:3!important;max-width:100%;font-size:.48rem}.quest-kanji-parts.is-single{grid-template-columns:minmax(0,28rem);justify-content:center}.quest-kanji-parts.is-single>article{grid-template-columns:4.2rem minmax(0,1fr);width:100%;justify-self:center}.quest-kanji-parts.is-single>article>strong{font-size:3.25rem}.quest-kanji-parts>article.has-no-examples{grid-template-columns:1fr;place-items:center}.quest-kanji-parts>article.has-no-examples>strong{grid-row:auto}

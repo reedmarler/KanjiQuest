@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { vocabFocusSets, type VocabFocusSet } from '../data/vocabFocusSets'
 import { getVocabExampleSentence } from '../lib/vocabExampleSentence'
 import { FuriganaSegment } from './FuriganaText'
@@ -10,22 +10,6 @@ interface FocusedVocabPracticeProps {
   initialTopicId?: string
   onQuestComplete?: () => void
   questTitle?: string
-}
-
-/** Matches the app's other mobile breakpoints (e.g. Kanji Lab's phone layout). */
-function useIsMobile(maxWidth = 720) {
-  const query = `(max-width: ${maxWidth}px)`
-  const [isMobile, setIsMobile] = useState(() => window.matchMedia(query).matches)
-
-  useEffect(() => {
-    const media = window.matchMedia(query)
-    const onChange = () => setIsMobile(media.matches)
-    onChange()
-    media.addEventListener('change', onChange)
-    return () => media.removeEventListener('change', onChange)
-  }, [query])
-
-  return isMobile
 }
 
 function shuffled<T>(items: readonly T[]) {
@@ -57,7 +41,6 @@ function newSession(previousTopicId?: string, initialTopicId?: string) {
 }
 
 export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, questTitle }: FocusedVocabPracticeProps) {
-  const isMobile = useIsMobile()
   const [session, setSession] = useState(() => newSession(undefined, initialTopicId))
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
@@ -110,131 +93,33 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
 
   // Kanji Lab's phone layout: reuse its prompt and control structure so Vocab
   // and Kanji behave like two decks in the same study system.
-  if (isMobile) {
-    return (
-      <div className="grammar-practice-view kanji-lab kanji-lab-paths standard-kanji-study focused-vocab-practice-mobile">
-        <div className="study-top grammar-study-top">
-          <VocabBackButton onBack={onBack} />
-          <span className="study-progress">{Math.min(index + 1, session.cards.length)} / {session.cards.length}</span>
-          <span className="study-type-badge">
-            <span>Vocab</span>
-            <span className="jlpt-badge">Path</span>
-          </span>
-        </div>
-        <div className="study-progress-bar">
-          <div className="study-progress-fill" style={{ width: `${((index + 1) / session.cards.length) * 100}%` }} />
-        </div>
-
-        <section className="kanji-study-navigation">
-          <div className="kanji-path-heading">
-            <div>
-              <span>{questTitle ? 'QUEST VOCABULARY' : '15-WORD PATH'}</span>
-              <h2>{questTitle ?? session.topic.title}</h2>
-              <p>{questTitle ? `${session.topic.cards.length} words for this quest’s story.` : session.topic.description}</p>
-            </div>
-            {!questTitle && <button type="button" onClick={loadNextTopic}>New topic</button>}
-          </div>
-        </section>
-
-        {completed ? (
-          <main className="grammar-choice-card kanji-learning-card focused-vocab-complete">
-            <span className="focused-vocab-complete-mark">語</span>
-            <h2>Set complete</h2>
-            <p>You got through all 15 words in {session.topic.title}.</p>
-            <button type="button" className="btn btn-primary" onClick={onQuestComplete ?? loadNextTopic}>
-              {onQuestComplete ? 'Read the kanji →' : 'New topic →'}
-            </button>
-            <button type="button" className="btn btn-ghost" onClick={replayTopic}>Replay this set</button>
-          </main>
-        ) : card ? (
-          <main className={`grammar-choice-card kanji-learning-card standard-kanji-card main-word-length-${Math.min([...card.front].length, 4)}${revealed ? ' is-revealed' : ''}`}>
-            <div className="standard-kanji-prompt focused-vocab-standard-prompt">
-              <p className={`kanji-learning-character standard-kanji-compound-word focused-vocab-main-word${revealed && furiganaVisible ? ' is-furigana-visible' : ''}`} lang="ja">
-                <SpeakableWord text={spokenTextForCard(card)}>
-                  <FuriganaSegment text={card.front} reading={spokenTextForCard(card)} className="focused-vocab-main-furigana" />
-                </SpeakableWord>
-              </p>
-              <div className="kanji-learning-divider" aria-hidden="true" />
-              <div className={`quest-kanji-word-answer standard-kanji-main-meaning${revealed && englishVisible ? ' is-revealed' : ''}`} aria-hidden={!revealed || !englishVisible}>
-                <span>{card.back}</span>
-              </div>
-            </div>
-
-            <div className="kanji-learning-answer standard-kanji-answer focused-vocab-standard-answer">
-              {example && (
-                <div
-                  className={`focused-vocab-example${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}${exampleSpeech.live ? ' is-speakable' : ''}${exampleSpeech.isSpeaking ? ' is-speaking' : ''}`}
-                  aria-hidden={!revealed}
-                  {...exampleSpeech.triggerProps}
-                >
-                  <div className="focused-vocab-example-jp-wrap">
-                    <span className="focused-vocab-example-jp" lang="ja">
-                      {example.segments.map((segment, index) => (
-                        <FuriganaSegment key={index} text={segment.text} reading={segment.reading} />
-                      ))}
-                    </span>
-                  </div>
-                  <span className="focused-vocab-example-en" aria-hidden={!englishVisible}>{example.english}</span>
-                  {exampleSpeech.live && <SpeakableCue className="speakable-cue-corner" />}
-                </div>
-              )}
-            </div>
-
-            <div className="kanji-learning-controls standard-kanji-controls">
-              <div className="standard-kanji-utility-row">
-                <div className="standard-kanji-display-toggles" role="group" aria-label="Display options">
-                  <button
-                    type="button"
-                    className={`btn standard-kanji-furigana-toggle${furiganaVisible ? ' is-active' : ''}`}
-                    aria-pressed={furiganaVisible}
-                    onClick={() => setFuriganaVisible((isVisible) => !isVisible)}
-                  >
-                    Furigana
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn standard-kanji-english-toggle${englishVisible ? ' is-active' : ''}`}
-                    aria-pressed={englishVisible}
-                    onClick={() => setEnglishVisible((isVisible) => !isVisible)}
-                  >
-                    English
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-primary kanji-learning-reveal"
-                  onClick={() => setRevealed((current) => !current)}
-                >
-                  {revealed ? 'Hide examples' : 'Show examples'}
-                </button>
-              </div>
-              <div className="standard-kanji-action-row">
-                <button type="button" className="btn btn-ghost standard-kanji-review" onClick={previousCard} disabled={index === 0}>Previous word</button>
-                <button type="button" className="btn kanji-learning-easy" onClick={nextCard}>Next word</button>
-              </div>
-            </div>
-          </main>
-        ) : null}
-      </div>
-    )
-  }
-
   return (
-    <div className="grammar-practice-view focused-vocab-practice">
-      <header className="focused-vocab-top">
+    <div className="grammar-practice-view kanji-lab kanji-lab-paths standard-kanji-study focused-vocab-practice-standard">
+      <div className="study-top grammar-study-top">
         <VocabBackButton onBack={onBack} />
-        <span>{questTitle ?? 'Focused vocab'}</span>
-        {!questTitle && <button type="button" className="focused-vocab-change-topic" onClick={loadNextTopic}>New topic</button>}
-      </header>
+        <span className="study-progress">{Math.min(index + 1, session.cards.length)} / {session.cards.length}</span>
+        <span className="study-type-badge">
+          <span>Vocab</span>
+          <span className="jlpt-badge">Path</span>
+        </span>
+      </div>
+      <div className="study-progress-bar">
+        <div className="study-progress-fill" style={{ width: `${((index + 1) / session.cards.length) * 100}%` }} />
+      </div>
 
-      <section className="focused-vocab-topic" aria-labelledby="focused-vocab-topic-title">
-        <span>{questTitle ? 'QUEST VOCABULARY' : '15-WORD PATH'}</span>
-        <h1 id="focused-vocab-topic-title">{questTitle ?? session.topic.title}</h1>
-        <p>{questTitle ? `${session.topic.cards.length} words for this quest’s story.` : session.topic.description}</p>
+      <section className="kanji-study-navigation">
+        <div className="kanji-path-heading">
+          <div>
+            <span>{questTitle ? 'QUEST VOCABULARY' : '15-WORD PATH'}</span>
+            <h2>{questTitle ?? session.topic.title}</h2>
+            <p>{questTitle ? `${session.topic.cards.length} words for this quest’s story.` : session.topic.description}</p>
+          </div>
+          {!questTitle && <button type="button" onClick={loadNextTopic}>New topic</button>}
+        </div>
       </section>
 
       {completed ? (
-        <section className="focused-vocab-complete">
+        <main className="grammar-choice-card kanji-learning-card focused-vocab-complete">
           <span className="focused-vocab-complete-mark">語</span>
           <h2>Set complete</h2>
           <p>You got through all 15 words in {session.topic.title}.</p>
@@ -242,26 +127,25 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
             {onQuestComplete ? 'Read the kanji →' : 'New topic →'}
           </button>
           <button type="button" className="btn btn-ghost" onClick={replayTopic}>Replay this set</button>
-        </section>
+        </main>
       ) : card ? (
-        <>
-          <div className="focused-vocab-progress" aria-label={`Word ${index + 1} of ${session.cards.length}`}>
-            <span style={{ width: `${((index + 1) / session.cards.length) * 100}%` }} />
-          </div>
-          <main className={`focused-vocab-card${revealed ? ' is-revealed' : ''}`}>
-            <div className="focused-vocab-card-meta">
-              <span>{index + 1} / {session.cards.length}</span>
-            </div>
-            <p className="focused-vocab-word" lang="ja">
-              <SpeakableWord text={spokenTextForCard(card)}>{card.front}</SpeakableWord>
+        <main className={`grammar-choice-card kanji-learning-card standard-kanji-card main-word-length-${Math.min([...card.front].length, 4)}${revealed ? ' is-revealed' : ''}`}>
+          <div className="standard-kanji-prompt focused-vocab-standard-prompt">
+            <p className={`kanji-learning-character standard-kanji-compound-word focused-vocab-main-word${revealed && furiganaVisible ? ' is-furigana-visible' : ''}`} lang="ja">
+              <SpeakableWord text={spokenTextForCard(card)}>
+                <FuriganaSegment text={card.front} reading={spokenTextForCard(card)} className="focused-vocab-main-furigana" />
+              </SpeakableWord>
             </p>
-            <div className="focused-vocab-answer" aria-live="polite">
-              <p className={revealed ? 'is-visible' : ''} lang="ja" aria-hidden={!revealed}>{card.reading}</p>
-              <strong className={revealed ? 'is-visible' : ''} aria-hidden={!revealed}>{card.back}</strong>
+            <div className="kanji-learning-divider" aria-hidden="true" />
+            <div className={`quest-kanji-word-answer standard-kanji-main-meaning${revealed && englishVisible ? ' is-revealed' : ''}`} aria-hidden={!revealed || !englishVisible}>
+              <span>{card.back}</span>
             </div>
+          </div>
+
+          <div className="kanji-learning-answer standard-kanji-answer focused-vocab-standard-answer">
             {example && (
               <div
-                className={`focused-vocab-example${revealed ? ' is-visible' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}${exampleSpeech.live ? ' is-speakable' : ''}${exampleSpeech.isSpeaking ? ' is-speaking' : ''}`}
+                className={`focused-vocab-example${revealed ? ' is-revealed' : ''}${furiganaVisible ? ' is-furigana-visible' : ''}${englishVisible ? ' is-english-visible' : ''}${exampleSpeech.live ? ' is-speakable' : ''}${exampleSpeech.isSpeaking ? ' is-speaking' : ''}`}
                 aria-hidden={!revealed}
                 {...exampleSpeech.triggerProps}
               >
@@ -276,19 +160,42 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
                 {exampleSpeech.live && <SpeakableCue className="speakable-cue-corner" />}
               </div>
             )}
-            <button
-              type="button"
-              className="btn btn-primary focused-vocab-reveal"
-              onClick={() => setRevealed((current) => !current)}
-            >
-              {revealed ? 'Hide examples' : 'Show examples'}
-            </button>
-            <div className="focused-vocab-actions">
-              <button type="button" className="btn btn-ghost" onClick={previousCard} disabled={index === 0}>Previous word</button>
-              <button type="button" className="btn focused-vocab-easy" onClick={nextCard}>Next word</button>
+          </div>
+
+          <div className="kanji-learning-controls standard-kanji-controls">
+            <div className="standard-kanji-utility-row">
+              <div className="standard-kanji-display-toggles" role="group" aria-label="Display options">
+                <button
+                  type="button"
+                  className={`btn standard-kanji-furigana-toggle${furiganaVisible ? ' is-active' : ''}`}
+                  aria-pressed={furiganaVisible}
+                  onClick={() => setFuriganaVisible((isVisible) => !isVisible)}
+                >
+                  Furigana
+                </button>
+                <button
+                  type="button"
+                  className={`btn standard-kanji-english-toggle${englishVisible ? ' is-active' : ''}`}
+                  aria-pressed={englishVisible}
+                  onClick={() => setEnglishVisible((isVisible) => !isVisible)}
+                >
+                  English
+                </button>
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary kanji-learning-reveal"
+                onClick={() => setRevealed((current) => !current)}
+              >
+                {revealed ? 'Hide examples' : 'Show examples'}
+              </button>
             </div>
-          </main>
-        </>
+            <div className="standard-kanji-action-row">
+              <button type="button" className="btn btn-ghost standard-kanji-review" onClick={previousCard} disabled={index === 0}>Previous word</button>
+              <button type="button" className="btn kanji-learning-easy" onClick={nextCard}>Next word</button>
+            </div>
+          </div>
+        </main>
       ) : null}
     </div>
   )
