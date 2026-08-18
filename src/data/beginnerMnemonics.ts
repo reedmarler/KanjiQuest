@@ -27,7 +27,7 @@ export interface BeginnerCharacter {
 
 export interface BeginnerRow {
   id: string
-  /** Row label as it appears on a kana chart, e.g. "A row", "KA row". */
+  /** Row label as it appears on a kana chart — the row's leading character itself, e.g. "あ", "か". */
   label: string
   characters: BeginnerCharacter[]
 }
@@ -43,7 +43,7 @@ export interface BeginnerDeck {
 const hiraganaRows: BeginnerRow[] = [
   {
     id: 'hiragana-a',
-    label: 'A row',
+    label: 'あ',
     characters: [
       { char: 'あ', romaji: 'a', mnemonic: 'A capital A with a curl — say "Ahh" as the doctor checks your throat.' },
       { char: 'い', romaji: 'i', mnemonic: 'Two eels swimming side by side. Two "ee"-ls, sound "i".' },
@@ -54,7 +54,7 @@ const hiraganaRows: BeginnerRow[] = [
   },
   {
     id: 'hiragana-ka',
-    label: 'KA row',
+    label: 'か',
     characters: [
       { char: 'か', romaji: 'ka', mnemonic: 'A kite with its string trailing off the side — "ka"-ite.' },
       { char: 'き', romaji: 'ki', mnemonic: 'An old-fashioned key with two teeth — "ki"-y.' },
@@ -65,7 +65,7 @@ const hiraganaRows: BeginnerRow[] = [
   },
   {
     id: 'hiragana-sa',
-    label: 'SA row',
+    label: 'さ',
     characters: [
       { char: 'さ', romaji: 'sa', mnemonic: 'A person sitting cross-legged sipping "sa"-ke.' },
       { char: 'し', romaji: 'shi', mnemonic: 'A single fishing hook dangling in the water — "shee", quiet, fish nearby.' },
@@ -76,7 +76,7 @@ const hiraganaRows: BeginnerRow[] = [
   },
   {
     id: 'hiragana-ta',
-    label: 'TA row',
+    label: 'た',
     characters: [
       { char: 'た', romaji: 'ta', mnemonic: 'A lowercase t next to a small a — literally "t-a".' },
       { char: 'ち', romaji: 'chi', mnemonic: 'A chair seen from the side, back curving over — "chi"-air.' },
@@ -87,7 +87,7 @@ const hiraganaRows: BeginnerRow[] = [
   },
   {
     id: 'hiragana-na',
-    label: 'NA row',
+    label: 'な',
     characters: [
       { char: 'な', romaji: 'na', mnemonic: 'A nun kneeling in prayer beside a cross — "na"-n.' },
       { char: 'に', romaji: 'ni', mnemonic: 'Two people kneeling on their knees — "ni"-es.' },
@@ -98,7 +98,7 @@ const hiraganaRows: BeginnerRow[] = [
   },
   {
     id: 'hiragana-ha',
-    label: 'HA row',
+    label: 'は',
     characters: [
       { char: 'は', romaji: 'ha', mnemonic: 'A lowercase h next to a small a — "h-a", ha!' },
       { char: 'ひ', romaji: 'hi', mnemonic: 'A wide grinning mouth — someone saying "hee hee".' },
@@ -109,7 +109,7 @@ const hiraganaRows: BeginnerRow[] = [
   },
   {
     id: 'hiragana-ma',
-    label: 'MA row',
+    label: 'ま',
     characters: [
       { char: 'ま', romaji: 'ma', mnemonic: 'Two arms crossed and a curl — "ma"-ma with her hair in a bun.' },
       { char: 'み', romaji: 'mi', mnemonic: 'The number 21 on its side — that is "mi"-ne, 21 is my age.' },
@@ -120,7 +120,7 @@ const hiraganaRows: BeginnerRow[] = [
   },
   {
     id: 'hiragana-ya',
-    label: 'YA row',
+    label: 'や',
     characters: [
       { char: 'や', romaji: 'ya', mnemonic: 'A yak with horns leaning to one side — "ya"-k.' },
       { char: 'ゆ', romaji: 'yu', mnemonic: 'A fish caught on a hook, swimming loop — a "u"-nique fish, "yu".' },
@@ -129,7 +129,7 @@ const hiraganaRows: BeginnerRow[] = [
   },
   {
     id: 'hiragana-ra',
-    label: 'RA row',
+    label: 'ら',
     characters: [
       { char: 'ら', romaji: 'ra', mnemonic: 'A rabbit sitting up, ear flopped forward — "ra"-bbit.' },
       { char: 'り', romaji: 'ri', mnemonic: 'Two strokes like a reed bending in the river — "ri"-ver reed.' },
@@ -140,7 +140,7 @@ const hiraganaRows: BeginnerRow[] = [
   },
   {
     id: 'hiragana-wa',
-    label: 'WA + N',
+    label: 'わ・ん',
     characters: [
       { char: 'わ', romaji: 'wa', mnemonic: 'A wine glass tipping over — "wa", spilled it.' },
       { char: 'を', romaji: 'wo', mnemonic: 'A person throwing a boomerang — "whoa", it came back.' },
@@ -152,7 +152,7 @@ const hiraganaRows: BeginnerRow[] = [
 const katakanaRows: BeginnerRow[] = [
   {
     id: 'katakana-a',
-    label: 'A row',
+    label: 'ア',
     characters: [
       { char: 'ア', romaji: 'a', mnemonic: 'An axe head on a handle — "a"-xe. Sharp and angular, like all katakana.' },
       { char: 'イ', romaji: 'i', mnemonic: 'An eagle\'s beak in profile — "ea"-gle, sound "i".' },
@@ -163,7 +163,7 @@ const katakanaRows: BeginnerRow[] = [
   },
   {
     id: 'katakana-ka',
-    label: 'KA row',
+    label: 'カ',
     characters: [
       { char: 'カ', romaji: 'ka', mnemonic: 'Same "ka"-ite as か, but folded sharp and paper-like.' },
       { char: 'キ', romaji: 'ki', mnemonic: 'A key with two notches — the angular twin of き.' },
@@ -174,7 +174,7 @@ const katakanaRows: BeginnerRow[] = [
   },
   {
     id: 'katakana-sa',
-    label: 'SA row',
+    label: 'サ',
     characters: [
       { char: 'サ', romaji: 'sa', mnemonic: 'A samurai\'s crossed swords — "sa"-murai.' },
       { char: 'シ', romaji: 'shi', mnemonic: 'Two dashes and a swoop going UP — she smiles, "shi".' },
@@ -185,7 +185,7 @@ const katakanaRows: BeginnerRow[] = [
   },
   {
     id: 'katakana-ta',
-    label: 'TA row',
+    label: 'タ',
     characters: [
       { char: 'タ', romaji: 'ta', mnemonic: 'A tie hanging with the knot at top — "ta"-ie.' },
       { char: 'チ', romaji: 'chi', mnemonic: 'A cheerleader mid-jump, arms out — "chee"-r.' },
@@ -196,7 +196,7 @@ const katakanaRows: BeginnerRow[] = [
   },
   {
     id: 'katakana-na',
-    label: 'NA row',
+    label: 'ナ',
     characters: [
       { char: 'ナ', romaji: 'na', mnemonic: 'A knife with a crossguard — "kna"-ife.' },
       { char: 'ニ', romaji: 'ni', mnemonic: 'Two straight lines — and "ni" means two in Japanese.' },
@@ -207,7 +207,7 @@ const katakanaRows: BeginnerRow[] = [
   },
   {
     id: 'katakana-ha',
-    label: 'HA row',
+    label: 'ハ',
     characters: [
       { char: 'ハ', romaji: 'ha', mnemonic: 'Two strokes like a laughing mouth open wide — "ha ha".' },
       { char: 'ヒ', romaji: 'hi', mnemonic: 'A heel of a boot in profile — "hee"-l.' },
@@ -218,7 +218,7 @@ const katakanaRows: BeginnerRow[] = [
   },
   {
     id: 'katakana-ma',
-    label: 'MA row',
+    label: 'マ',
     characters: [
       { char: 'マ', romaji: 'ma', mnemonic: 'A magic wand tip with a sparkle — "ma"-gic.' },
       { char: 'ミ', romaji: 'mi', mnemonic: 'Three lines — three stripes on a military "mi"-litary badge.' },
@@ -229,7 +229,7 @@ const katakanaRows: BeginnerRow[] = [
   },
   {
     id: 'katakana-ya',
-    label: 'YA row',
+    label: 'ヤ',
     characters: [
       { char: 'ヤ', romaji: 'ya', mnemonic: 'A yacht with a mast and boom — "ya"-cht.' },
       { char: 'ユ', romaji: 'yu', mnemonic: 'A U-turn sign drawn with straight edges — "yu".' },
@@ -238,7 +238,7 @@ const katakanaRows: BeginnerRow[] = [
   },
   {
     id: 'katakana-ra',
-    label: 'RA row',
+    label: 'ラ',
     characters: [
       { char: 'ラ', romaji: 'ra', mnemonic: 'A rabbit\'s ears folded back flat — "ra"-bbit.' },
       { char: 'リ', romaji: 'ri', mnemonic: 'Two reeds standing straight in the river — "ri"-ver.' },
@@ -249,7 +249,7 @@ const katakanaRows: BeginnerRow[] = [
   },
   {
     id: 'katakana-wa',
-    label: 'WA + N',
+    label: 'ワ・ン',
     characters: [
       { char: 'ワ', romaji: 'wa', mnemonic: 'A wine glass, angular and empty — "wa", drank it.' },
       { char: 'ヲ', romaji: 'wo', mnemonic: 'Rare in modern Japanese — a boomerang thrown flat, "whoa".' },

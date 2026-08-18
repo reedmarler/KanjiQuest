@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
+import { hiraganaUnderstandingWords } from '../data/beginnerUnderstandingWords'
 import { SpeakableWord } from './SpeakableWord'
 import { TraceCanvas } from './TraceCanvas'
 
@@ -53,7 +54,9 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   const [rowIndex, setRowIndex] = useState(0)
   const [mastery, setMastery] = useState<Record<string, number>>(() => loadNumberMap(storageKey(MASTERY_STORAGE_PREFIX, script)))
   const [traceScores, setTraceScores] = useState<Record<string, number>>(() => loadNumberMap(storageKey(TRACE_STORAGE_PREFIX, script)))
-  const [revealed, setRevealed] = useState(false)
+  const [checking, setChecking] = useState(false)
+  const [checkIndex, setCheckIndex] = useState(0)
+  const [checkRevealed, setCheckRevealed] = useState(false)
   const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(0)
 
@@ -74,7 +77,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   function openRow(index: number) {
     setRowIndex(index)
     setQueue(shuffled(deck.rows[index]!.characters))
-    setRevealed(false)
+    setChecking(false)
   }
 
   function recordTraceScore(char: string, score: number) {
@@ -107,11 +110,18 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
       // come round again in this same sitting.
       return score >= MASTERY_TARGET ? rest : [...rest, head]
     })
-    setRevealed(false)
   }
 
   const rowComplete = queue.length === 0
   const nextRowIndex = rowIndex + 1 < deck.rows.length ? rowIndex + 1 : null
+  const hasUnderstandingCheck = script === 'hiragana' && nextRowIndex === null
+  const checkWord = hiraganaUnderstandingWords[checkIndex]
+  const checkComplete = checkIndex >= hiraganaUnderstandingWords.length
+
+  function advanceCheck() {
+    setCheckRevealed(false)
+    setCheckIndex((current) => current + 1)
+  }
 
   return (
     <div className="beginner-learner">
@@ -160,7 +170,11 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
             {row.characters.map((entry) => <span key={entry.char}>{entry.char}</span>)}
           </div>
           {nextRowIndex === null ? (
-            <button type="button" className="btn btn-primary" onClick={onBack}>Finish {deck.title} &rarr;</button>
+            hasUnderstandingCheck ? (
+              <button type="button" className="btn btn-primary" onClick={() => setChecking(true)}>Understanding check &rarr;</button>
+            ) : (
+              <button type="button" className="btn btn-primary" onClick={onBack}>Finish {deck.title} &rarr;</button>
+            )
           ) : (
             <button type="button" className="btn btn-primary" onClick={() => openRow(nextRowIndex)}>
               Next: {deck.rows[nextRowIndex]!.label} &rarr;
@@ -168,8 +182,55 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
           )}
           <button type="button" className="btn btn-ghost" onClick={() => openRow(rowIndex)}>Practise this row again</button>
         </main>
+      ) : checking ? (
+        checkComplete ? (
+          <main className="beginner-card beginner-card-complete">
+            <span className="beginner-complete-mark" aria-hidden="true">&#127881;</span>
+            <h2>Understanding check complete</h2>
+            <p>You read and traced {hiraganaUnderstandingWords.length} real hiragana words.</p>
+            <button type="button" className="btn btn-primary" onClick={onBack}>Finish {deck.title} &rarr;</button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => {
+                setCheckIndex(0)
+                setCheckRevealed(false)
+              }}
+            >
+              Do it again
+            </button>
+          </main>
+        ) : checkWord ? (
+          <main className="beginner-card">
+            <span className="beginner-write-label">What does this word mean?</span>
+            <p className="beginner-char" lang="ja">
+              <SpeakableWord text={checkWord.word}>{checkWord.word}</SpeakableWord>
+            </p>
+
+            <div className="beginner-write-section">
+              <span className="beginner-write-label">Trace it</span>
+              <TraceCanvas key={checkWord.word} char={checkWord.word} />
+            </div>
+
+            {checkRevealed ? (
+              <div className="beginner-answer">
+                <p className="beginner-mnemonic">
+                  <span className="beginner-mnemonic-label">Means</span>
+                  {checkWord.meaning}
+                </p>
+                <div className="beginner-score-buttons">
+                  <button type="button" className="btn btn-primary" onClick={advanceCheck}>Next word &rarr;</button>
+                </div>
+              </div>
+            ) : (
+              <button type="button" className="btn btn-primary beginner-reveal" onClick={() => setCheckRevealed(true)}>
+                Check meaning
+              </button>
+            )}
+          </main>
+        ) : null
       ) : card ? (
-        <main className={`beginner-card${revealed ? ' is-revealed' : ''}`}>
+        <main className="beginner-card is-revealed">
           <p className="beginner-char" lang="ja">
             <SpeakableWord text={card.char}>{card.char}</SpeakableWord>
           </p>
@@ -182,26 +243,19 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
             <TraceCanvas key={card.char} char={card.char} onScored={(score) => recordTraceScore(card.char, score)} />
           </div>
 
-          {revealed ? (
-            <div className="beginner-answer">
-              <b className="beginner-romaji">{card.romaji}</b>
-              {card.meaning && <span className="beginner-meaning">{card.meaning}</span>}
-              {/* The mnemonic is the whole point of this deck — it gets the
-                  visual weight, not the romaji. */}
-              <p className="beginner-mnemonic">
-                <span className="beginner-mnemonic-label">Remember it</span>
-                {card.mnemonic}
-              </p>
-              <div className="beginner-score-buttons">
-                <button type="button" className="btn btn-ghost" onClick={() => scoreCard(false)}>Not yet</button>
-                <button type="button" className="btn btn-primary" onClick={() => scoreCard(true)}>I knew it</button>
-              </div>
+          <div className="beginner-answer">
+            {card.meaning && <span className="beginner-meaning">{card.meaning}</span>}
+            {/* The mnemonic is the whole point of this deck — it gets the
+                visual weight, not the romaji. */}
+            <p className="beginner-mnemonic">
+              <span className="beginner-mnemonic-label">Remember it</span>
+              {card.mnemonic}
+            </p>
+            <div className="beginner-score-buttons">
+              <button type="button" className="btn btn-ghost" onClick={() => scoreCard(false)}>Not yet</button>
+              <button type="button" className="btn btn-primary" onClick={() => scoreCard(true)}>I knew it</button>
             </div>
-          ) : (
-            <button type="button" className="btn btn-primary beginner-reveal" onClick={() => setRevealed(true)}>
-              Show the sound
-            </button>
-          )}
+          </div>
         </main>
       ) : null}
     </div>

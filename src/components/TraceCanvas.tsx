@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 interface TraceCanvasProps {
   char: string
-  /** Reported after every "Check my tracing" tap so the parent can persist a best score. */
+  /** Reported after every "Check" tap so the parent can persist a best score. */
   onScored?: (score: number) => void
 }
 
@@ -226,7 +226,7 @@ export function TraceCanvas({ char, onScored }: TraceCanvasProps) {
 
       <div className="trace-canvas-actions">
         <button type="button" className="btn btn-ghost" onClick={clearInk}>Clear</button>
-        <button type="button" className="btn btn-primary" onClick={checkTracing}>Check my tracing</button>
+        <button type="button" className="btn btn-primary" onClick={checkTracing}>Check</button>
       </div>
 
       {result && (
