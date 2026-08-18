@@ -87,10 +87,12 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   const [dictationResult, setDictationResult] = useState<{ score: number; passed: boolean } | null>(null)
 
   const row = deck.rows[rowIndex]!
-  // The queue is the row's characters, shuffled once per row so the learner
-  // does not simply memorise the chart order instead of the characters.
-  const [queue, setQueue] = useState<BeginnerCharacter[]>(() => shuffled(deck.rows[0]!.characters))
-  const card = queue[0]
+  // The row's characters, shuffled once per row so the learner does not
+  // simply memorise the chart order instead of the characters. cardIndex
+  // walks through it; Next/Previous just move the pointer.
+  const [cards, setCards] = useState<BeginnerCharacter[]>(() => shuffled(deck.rows[0]!.characters))
+  const [cardIndex, setCardIndex] = useState(0)
+  const card = cards[cardIndex]
 
   useEffect(() => {
     window.localStorage.setItem(storageKey(MASTERY_STORAGE_PREFIX, script), JSON.stringify(mastery))
@@ -102,7 +104,8 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
 
   function openRow(index: number) {
     setRowIndex(index)
-    setQueue(shuffled(deck.rows[index]!.characters))
+    setCards(shuffled(deck.rows[index]!.characters))
+    setCardIndex(0)
     setQuizWords(null)
   }
 
@@ -139,30 +142,22 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
     }))
   }
 
-  function scoreCard(known: boolean) {
+  function goNext() {
     if (!card) return
-    setMastery((current) => ({
-      ...current,
-      // A miss resets to zero rather than decrementing: the point of the
-      // mnemonic is instant recognition, and "almost knew it" is still a miss.
-      [card.char]: known ? (current[card.char] ?? 0) + 1 : 0,
-    }))
+    setMastery((current) => ({ ...current, [card.char]: MASTERY_TARGET }))
     setStreak((current) => {
-      const next = known ? current + 1 : 0
+      const next = current + 1
       setBestStreak((best) => Math.max(best, next))
       return next
     })
-    setQueue((current) => {
-      const [head, ...rest] = current
-      if (!head) return current
-      const score = known ? (mastery[head.char] ?? 0) + 1 : 0
-      // Mastered cards leave the queue; missed ones go to the back so they
-      // come round again in this same sitting.
-      return score >= MASTERY_TARGET ? rest : [...rest, head]
-    })
+    setCardIndex((current) => current + 1)
   }
 
-  const rowComplete = queue.length === 0
+  function goPrevious() {
+    setCardIndex((current) => Math.max(0, current - 1))
+  }
+
+  const rowComplete = cardIndex >= cards.length
   const nextRowIndex = rowIndex + 1 < deck.rows.length ? rowIndex + 1 : null
   const rowNeedsQuiz = script === 'hiragana' && !quizzedRows[rowIndex]
   const traceWords = quizWords?.slice(0, -1) ?? []
@@ -235,7 +230,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
             </p>
 
             <div className="beginner-write-section">
-              <StrokeOrderAnimation key={currentTraceWord.word} word={currentTraceWord.word} />
+              <StrokeOrderAnimation word={currentTraceWord.word} />
               <TraceCanvas key={currentTraceWord.word} char={currentTraceWord.word} />
             </div>
 
@@ -306,15 +301,15 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               into. Keyed on the character so a fresh canvas loads per card. */}
           <div className="beginner-write-section">
             <span className="beginner-write-label">Practice writing it</span>
-            {script === 'hiragana' && <StrokeOrderAnimation key={card.char} word={card.char} />}
+            {script === 'hiragana' && <StrokeOrderAnimation word={card.char} />}
             <TraceCanvas key={card.char} char={card.char} onScored={(score) => recordTraceScore(card.char, score)} />
           </div>
 
           <div className="beginner-answer">
             {card.meaning && <span className="beginner-meaning">{card.meaning}</span>}
             <div className="beginner-score-buttons">
-              <button type="button" className="btn btn-ghost" onClick={() => scoreCard(false)}>Not yet</button>
-              <button type="button" className="btn btn-primary" onClick={() => scoreCard(true)}>I knew it</button>
+              <button type="button" className="btn btn-ghost" onClick={goPrevious} disabled={cardIndex === 0}>Previous</button>
+              <button type="button" className="btn btn-primary" onClick={goNext}>Next</button>
             </div>
           </div>
         </main>

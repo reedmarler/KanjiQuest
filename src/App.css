@@ -5195,6 +5195,11 @@ body:has(.dashboard) {
   transform: scale(0.98);
 }
 
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, var(--kyogre), var(--kyogre-light));
   color: white;

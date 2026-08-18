@@ -13,8 +13,11 @@ interface StrokeOrderAnimationProps {
 
 /** How long each stroke takes to draw. Slow on purpose — the point is to watch it. */
 const STROKE_DURATION_MS = 550
-/** Pause between strokes, and between characters, so each one reads as distinct. */
-const STROKE_GAP_MS = 220
+/** How much earlier the next stroke starts, before the current one finishes
+ *  drawing — real handwriting doesn't stop dead between strokes, so the next
+ *  one begins its own draw while the previous is still finishing. */
+const STROKE_OVERLAP_MS = 260
+/** Pause between characters, so each one in a word still reads as distinct. */
 const CHAR_GAP_MS = 400
 
 /**
@@ -37,12 +40,13 @@ export function StrokeOrderAnimation({ word }: StrokeOrderAnimationProps) {
     const strokes = hiraganaStrokes[chars[activeChar]!] ?? []
     const timers: ReturnType<typeof setTimeout>[] = []
 
+    const strokeInterval = STROKE_DURATION_MS - STROKE_OVERLAP_MS
     strokes.forEach((_, strokeIndex) => {
-      const delay = strokeIndex * (STROKE_DURATION_MS + STROKE_GAP_MS)
+      const delay = strokeIndex * strokeInterval
       timers.push(setTimeout(() => setActiveStroke(strokeIndex), delay))
     })
 
-    const totalDuration = strokes.length * (STROKE_DURATION_MS + STROKE_GAP_MS) + CHAR_GAP_MS
+    const totalDuration = (strokes.length - 1) * strokeInterval + STROKE_DURATION_MS + CHAR_GAP_MS
     timers.push(setTimeout(() => {
       setActiveStroke(-1)
       setActiveChar((current) => current + 1)
