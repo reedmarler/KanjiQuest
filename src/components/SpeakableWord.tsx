@@ -100,27 +100,6 @@ export function SpeakableCue({ className }: { className?: string }) {
   )
 }
 
-/**
- * A speaker-only trigger, for places where the word itself is already shown
- * some other way (e.g. drawn stroke-by-stroke) and doesn't need to double as
- * a second, redundant copy of the text just to be tappable.
- */
-export function SpeakerButton({ text, className }: { text: string; className?: string }) {
-  const { live, isSpeaking, toggle } = useSpeakable(text)
-  if (!live) return null
-  return (
-    <button
-      type="button"
-      className={`speaker-button${isSpeaking ? ' is-speaking' : ''}${className ? ` ${className}` : ''}`}
-      aria-label={isSpeaking ? `Stop ${text}` : `Listen to ${text}`}
-      title="Tap to listen"
-      onClick={toggle}
-    >
-      <SpeakableCue />
-    </button>
-  )
-}
-
 export function SpeakableWord({ text, children, disabled = false, className }: SpeakableWordProps) {
   const [supported, setSupported] = useState(canSpeakJapanese)
   const [speaking, setSpeaking] = useState<{ token: number; status: SpeechStatus } | null>(null)

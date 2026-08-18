@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
 import { hiraganaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
 import { speakJapanese } from '../lib/speech'
-import { SpeakableWord, SpeakerButton } from './SpeakableWord'
+import { SpeakableWord } from './SpeakableWord'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { TraceCanvas } from './TraceCanvas'
 
@@ -203,10 +203,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
         quizPhase === 'trace' && currentTraceWord ? (
           <main className="beginner-card">
             <span className="beginner-write-label">Row quiz — word {quizTraceIndex + 1} of {traceWords.length}</span>
-            <div className="beginner-char-stage">
-              <StrokeOrderAnimation word={currentTraceWord.word} size="hero" />
-              <SpeakerButton text={currentTraceWord.word} />
-            </div>
+            <StrokeOrderAnimation word={currentTraceWord.word} size="hero" />
 
             <div className="beginner-write-section">
               <span className="beginner-write-label">Trace it</span>
@@ -296,12 +293,8 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
           {script === 'hiragana' ? (
             // Drawing the character already shows it — a second, plain copy
             // of the same character right above would just be redundant, so
-            // the stroke animation replaces the flashcard's usual big glyph
-            // and the speaker becomes its own small button.
-            <div className="beginner-char-stage">
-              <StrokeOrderAnimation word={card.char} size="hero" />
-              <SpeakerButton text={card.char} />
-            </div>
+            // the stroke animation replaces the flashcard's usual big glyph.
+            <StrokeOrderAnimation word={card.char} size="hero" />
           ) : (
             <p className="beginner-char" lang="ja">
               <SpeakableWord text={card.char}>{card.char}</SpeakableWord>
