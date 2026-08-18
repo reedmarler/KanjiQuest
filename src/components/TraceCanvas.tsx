@@ -4,6 +4,8 @@ interface TraceCanvasProps {
   char: string
   /** Reported after every "Check" tap so the parent can persist a best score. */
   onScored?: (score: number) => void
+  /** false for dictation: a blank slate with no printed guide to trace over. */
+  showGuide?: boolean
 }
 
 /** Fixed logical resolution both canvases and the glyph mask are computed in. */
@@ -76,7 +78,7 @@ function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HT
   }
 }
 
-export function TraceCanvas({ char, onScored }: TraceCanvasProps) {
+export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasProps) {
   const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const inkCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const masksRef = useRef<GlyphMasks | null>(null)
@@ -96,16 +98,18 @@ export function TraceCanvas({ char, onScored }: TraceCanvasProps) {
     if (guide) {
       const ctx = guide.getContext('2d')!
       ctx.clearRect(0, 0, SIZE, SIZE)
-      ctx.fillStyle = 'rgba(148, 148, 168, 0.38)'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.font = `${Math.round(SIZE * 0.74)}px 'Noto Sans JP', sans-serif`
-      ctx.fillText(char, SIZE / 2, SIZE / 2 + SIZE * 0.04)
+      if (showGuide) {
+        ctx.fillStyle = 'rgba(148, 148, 168, 0.38)'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.font = `${Math.round(SIZE * 0.74)}px 'Noto Sans JP', sans-serif`
+        ctx.fillText(char, SIZE / 2, SIZE / 2 + SIZE * 0.04)
+      }
     }
 
     const ink = inkCanvasRef.current
     if (ink) ink.getContext('2d')!.clearRect(0, 0, SIZE, SIZE)
-  }, [char])
+  }, [char, showGuide])
 
   function clearInk() {
     const ink = inkCanvasRef.current
@@ -200,7 +204,8 @@ export function TraceCanvas({ char, onScored }: TraceCanvasProps) {
       score >= 85 ? 'Beautiful! That looks just right.'
       : score >= 65 ? 'Good tracing — a little more practice and it will be automatic.'
       : coverage < 0.6 ? 'You missed part of the character — trace the whole shape.'
-      : 'Keep your strokes closer to the gray guide.'
+      : showGuide ? 'Keep your strokes closer to the gray guide.'
+      : 'Not quite — listen again and try writing it from memory.'
 
     setResult({ score, message })
     onScored?.(score)
@@ -216,7 +221,7 @@ export function TraceCanvas({ char, onScored }: TraceCanvasProps) {
           height={SIZE}
           className="trace-canvas-layer trace-canvas-ink"
           role="img"
-          aria-label={`Trace ${char} here`}
+          aria-label={showGuide ? `Trace ${char} here` : 'Write the word you just heard here'}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}

@@ -1,10 +1,12 @@
 /**
- * Understanding-check words for the Beginner Zone.
+ * Row-quiz words for the Beginner Zone.
  *
- * Once a learner has been through every hiragana row, recognising single
- * characters in isolation is not the same as reading. These are short,
- * everyday words built only from characters taught in the hiragana rows, so
- * a learner traces and reads something that actually means something.
+ * After every hiragana row the learner gets a small quiz built only from
+ * characters they have actually seen so far — the あ row's quiz can only use
+ * あいうえお, the か row's quiz can use あいうえお plus かきくけこ, and so on.
+ * Every word here uses only the 46 plain hiragana this app teaches (no
+ * dakuten/handakuten/youon), so a word is always a valid subset match once
+ * its characters have all been introduced.
  */
 
 export interface UnderstandingWord {
@@ -12,21 +14,54 @@ export interface UnderstandingWord {
   meaning: string
 }
 
-export const hiraganaUnderstandingWords: UnderstandingWord[] = [
-  { word: 'あう', meaning: 'to meet' },
+export const hiraganaWordBank: UnderstandingWord[] = [
+  { word: 'あい', meaning: 'love' },
   { word: 'いえ', meaning: 'house' },
   { word: 'うえ', meaning: 'up / above' },
+  { word: 'あお', meaning: 'blue' },
+  { word: 'あう', meaning: 'to meet' },
+  { word: 'おい', meaning: 'nephew' },
+  { word: 'かお', meaning: 'face' },
+  { word: 'いか', meaning: 'squid' },
+  { word: 'あか', meaning: 'red' },
+  { word: 'かき', meaning: 'persimmon' },
+  { word: 'きく', meaning: 'to listen' },
+  { word: 'さけ', meaning: 'alcohol' },
   { word: 'あさ', meaning: 'morning' },
-  { word: 'くつ', meaning: 'shoes' },
   { word: 'さかな', meaning: 'fish' },
-  { word: 'てがみ', meaning: 'letter' },
-  { word: 'とけい', meaning: 'clock / watch' },
+  { word: 'くさ', meaning: 'grass' },
+  { word: 'すし', meaning: 'sushi' },
+  { word: 'せかい', meaning: 'world' },
+  { word: 'そら', meaning: 'sky' },
+  { word: 'うそ', meaning: 'lie' },
+  { word: 'たこ', meaning: 'octopus' },
+  { word: 'いち', meaning: 'one' },
+  { word: 'くつ', meaning: 'shoes' },
+  { word: 'とけい', meaning: 'clock' },
+  { word: 'なつ', meaning: 'summer' },
+  { word: 'いぬ', meaning: 'dog' },
   { word: 'ねこ', meaning: 'cat' },
+  { word: 'きのう', meaning: 'yesterday' },
   { word: 'はな', meaning: 'flower' },
+  { word: 'はと', meaning: 'pigeon' },
   { word: 'ひと', meaning: 'person' },
-  { word: 'まど', meaning: 'window' },
+  { word: 'ふね', meaning: 'boat' },
+  { word: 'へや', meaning: 'room' },
+  { word: 'ほし', meaning: 'star' },
+  { word: 'まつ', meaning: 'pine tree' },
   { word: 'みみ', meaning: 'ear' },
+  { word: 'むし', meaning: 'bug' },
+  { word: 'くも', meaning: 'cloud' },
+  { word: 'もも', meaning: 'peach' },
   { word: 'やま', meaning: 'mountain' },
   { word: 'ゆき', meaning: 'snow' },
   { word: 'よる', meaning: 'night' },
+  { word: 'さくら', meaning: 'cherry blossom' },
+  { word: 'とり', meaning: 'bird' },
+  { word: 'くるま', meaning: 'car' },
+  { word: 'そと', meaning: 'outside' },
+  { word: 'わたし', meaning: 'I / me' },
+  { word: 'かわ', meaning: 'river' },
+  { word: 'こころ', meaning: 'heart' },
+  { word: 'ふゆ', meaning: 'winter' },
 ]

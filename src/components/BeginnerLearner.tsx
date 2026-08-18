@@ -1,8 +1,38 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
-import { hiraganaUnderstandingWords } from '../data/beginnerUnderstandingWords'
+import { hiraganaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
+import { speakJapanese } from '../lib/speech'
 import { SpeakableWord } from './SpeakableWord'
+import { StrokeFillAnimation } from './StrokeFillAnimation'
 import { TraceCanvas } from './TraceCanvas'
+
+/** How many words the trace-and-recall part of a row quiz shows before the
+ *  blank-slate dictation word that actually passes the quiz. */
+const QUIZ_TRACE_WORDS = 2
+/** Dictation score needed to pass a row quiz — generous, since writing a
+ *  whole word from memory after five new characters is genuinely hard. */
+const QUIZ_PASS_SCORE = 45
+
+function shuffled<T>(items: readonly T[]) {
+  const copy = [...items]
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const next = Math.floor(Math.random() * (index + 1))
+    ;[copy[index], copy[next]] = [copy[next]!, copy[index]!]
+  }
+  return copy
+}
+
+/** Words usable once `rows[0..rowIndex]` are learned, preferring ones that
+ *  actually exercise a character from the row just finished so the quiz
+ *  tests new content rather than only what was already known. */
+function pickQuizWords(rows: { characters: BeginnerCharacter[] }[], rowIndex: number): UnderstandingWord[] {
+  const available = new Set(rows.slice(0, rowIndex + 1).flatMap((r) => r.characters.map((c) => c.char)))
+  const newChars = new Set(rows[rowIndex]!.characters.map((c) => c.char))
+  const eligible = hiraganaWordBank.filter((entry) => [...entry.word].every((ch) => available.has(ch)))
+  const preferred = eligible.filter((entry) => [...entry.word].some((ch) => newChars.has(ch)))
+  const pool = preferred.length >= QUIZ_TRACE_WORDS + 1 ? preferred : eligible
+  return shuffled(pool).slice(0, QUIZ_TRACE_WORDS + 1)
+}
 
 interface BeginnerLearnerProps {
   script: BeginnerScript
@@ -40,25 +70,21 @@ function loadNumberMap(key: string): Record<string, number> {
   }
 }
 
-function shuffled<T>(items: readonly T[]) {
-  const copy = [...items]
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const next = Math.floor(Math.random() * (index + 1))
-    ;[copy[index], copy[next]] = [copy[next]!, copy[index]!]
-  }
-  return copy
-}
-
 export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   const deck = useMemo(() => getBeginnerDeck(script), [script])
   const [rowIndex, setRowIndex] = useState(0)
   const [mastery, setMastery] = useState<Record<string, number>>(() => loadNumberMap(storageKey(MASTERY_STORAGE_PREFIX, script)))
   const [traceScores, setTraceScores] = useState<Record<string, number>>(() => loadNumberMap(storageKey(TRACE_STORAGE_PREFIX, script)))
-  const [checking, setChecking] = useState(false)
-  const [checkIndex, setCheckIndex] = useState(0)
-  const [checkRevealed, setCheckRevealed] = useState(false)
   const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(0)
+  // Rows the learner has already passed a quiz for, this session — not
+  // persisted, so returning later re-quizzes a row, which is fine practice.
+  const [quizzedRows, setQuizzedRows] = useState<Record<number, boolean>>({})
+  const [quizWords, setQuizWords] = useState<UnderstandingWord[] | null>(null)
+  const [quizPhase, setQuizPhase] = useState<'trace' | 'dictation'>('trace')
+  const [quizTraceIndex, setQuizTraceIndex] = useState(0)
+  const [quizRevealed, setQuizRevealed] = useState(false)
+  const [dictationResult, setDictationResult] = useState<{ score: number; passed: boolean } | null>(null)
 
   const row = deck.rows[rowIndex]!
   // The queue is the row's characters, shuffled once per row so the learner
@@ -77,7 +103,31 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   function openRow(index: number) {
     setRowIndex(index)
     setQueue(shuffled(deck.rows[index]!.characters))
-    setChecking(false)
+    setQuizWords(null)
+  }
+
+  function startQuiz(index: number) {
+    setQuizWords(pickQuizWords(deck.rows, index))
+    setQuizPhase('trace')
+    setQuizTraceIndex(0)
+    setQuizRevealed(false)
+    setDictationResult(null)
+  }
+
+  function advanceQuizTrace() {
+    setQuizRevealed(false)
+    setQuizTraceIndex((current) => {
+      const next = current + 1
+      if (next >= (quizWords?.length ?? 1) - 1) {
+        setQuizPhase('dictation')
+      }
+      return next
+    })
+  }
+
+  function finishQuiz() {
+    setQuizzedRows((current) => ({ ...current, [rowIndex]: true }))
+    setQuizWords(null)
   }
 
   function recordTraceScore(char: string, score: number) {
@@ -114,14 +164,10 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
 
   const rowComplete = queue.length === 0
   const nextRowIndex = rowIndex + 1 < deck.rows.length ? rowIndex + 1 : null
-  const hasUnderstandingCheck = script === 'hiragana' && nextRowIndex === null
-  const checkWord = hiraganaUnderstandingWords[checkIndex]
-  const checkComplete = checkIndex >= hiraganaUnderstandingWords.length
-
-  function advanceCheck() {
-    setCheckRevealed(false)
-    setCheckIndex((current) => current + 1)
-  }
+  const rowNeedsQuiz = script === 'hiragana' && !quizzedRows[rowIndex]
+  const traceWords = quizWords?.slice(0, -1) ?? []
+  const dictationWord = quizWords?.[quizWords.length - 1] ?? null
+  const currentTraceWord = traceWords[quizTraceIndex]
 
   return (
     <div className="beginner-learner">
@@ -169,12 +215,10 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
           <div className="beginner-complete-chars" lang="ja" aria-hidden="true">
             {row.characters.map((entry) => <span key={entry.char}>{entry.char}</span>)}
           </div>
-          {nextRowIndex === null ? (
-            hasUnderstandingCheck ? (
-              <button type="button" className="btn btn-primary" onClick={() => setChecking(true)}>Understanding check &rarr;</button>
-            ) : (
-              <button type="button" className="btn btn-primary" onClick={onBack}>Finish {deck.title} &rarr;</button>
-            )
+          {rowNeedsQuiz ? (
+            <button type="button" className="btn btn-primary" onClick={() => startQuiz(rowIndex)}>Row quiz &rarr;</button>
+          ) : nextRowIndex === null ? (
+            <button type="button" className="btn btn-primary" onClick={onBack}>Finish {deck.title} &rarr;</button>
           ) : (
             <button type="button" className="btn btn-primary" onClick={() => openRow(nextRowIndex)}>
               Next: {deck.rows[nextRowIndex]!.label} &rarr;
@@ -182,50 +226,72 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
           )}
           <button type="button" className="btn btn-ghost" onClick={() => openRow(rowIndex)}>Practise this row again</button>
         </main>
-      ) : checking ? (
-        checkComplete ? (
-          <main className="beginner-card beginner-card-complete">
-            <span className="beginner-complete-mark" aria-hidden="true">&#127881;</span>
-            <h2>Understanding check complete</h2>
-            <p>You read and traced {hiraganaUnderstandingWords.length} real hiragana words.</p>
-            <button type="button" className="btn btn-primary" onClick={onBack}>Finish {deck.title} &rarr;</button>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={() => {
-                setCheckIndex(0)
-                setCheckRevealed(false)
-              }}
-            >
-              Do it again
-            </button>
-          </main>
-        ) : checkWord ? (
+      ) : quizWords ? (
+        quizPhase === 'trace' && currentTraceWord ? (
           <main className="beginner-card">
-            <span className="beginner-write-label">What does this word mean?</span>
+            <span className="beginner-write-label">Row quiz — word {quizTraceIndex + 1} of {traceWords.length}</span>
             <p className="beginner-char" lang="ja">
-              <SpeakableWord text={checkWord.word}>{checkWord.word}</SpeakableWord>
+              <SpeakableWord text={currentTraceWord.word}>{currentTraceWord.word}</SpeakableWord>
             </p>
 
             <div className="beginner-write-section">
-              <span className="beginner-write-label">Trace it</span>
-              <TraceCanvas key={checkWord.word} char={checkWord.word} />
+              <StrokeFillAnimation key={currentTraceWord.word} char={currentTraceWord.word} />
+              <TraceCanvas key={currentTraceWord.word} char={currentTraceWord.word} />
             </div>
 
-            {checkRevealed ? (
+            {quizRevealed ? (
               <div className="beginner-answer">
                 <p className="beginner-mnemonic">
                   <span className="beginner-mnemonic-label">Means</span>
-                  {checkWord.meaning}
+                  {currentTraceWord.meaning}
                 </p>
                 <div className="beginner-score-buttons">
-                  <button type="button" className="btn btn-primary" onClick={advanceCheck}>Next word &rarr;</button>
+                  <button type="button" className="btn btn-primary" onClick={advanceQuizTrace}>Next word &rarr;</button>
                 </div>
               </div>
             ) : (
-              <button type="button" className="btn btn-primary beginner-reveal" onClick={() => setCheckRevealed(true)}>
+              <button type="button" className="btn btn-primary beginner-reveal" onClick={() => setQuizRevealed(true)}>
                 Check meaning
               </button>
+            )}
+          </main>
+        ) : dictationWord ? (
+          <main className="beginner-card">
+            <span className="beginner-write-label">Listen, then write it from memory</span>
+            <button
+              type="button"
+              className="btn btn-primary beginner-reveal"
+              onClick={() => speakJapanese(dictationWord.word)}
+            >
+              &#128264; Play the word
+            </button>
+
+            <div className="beginner-write-section">
+              <TraceCanvas
+                key={dictationWord.word}
+                char={dictationWord.word}
+                showGuide={false}
+                onScored={(score) => setDictationResult({ score, passed: score >= QUIZ_PASS_SCORE })}
+              />
+            </div>
+
+            {dictationResult && (
+              <div className="beginner-answer">
+                <p className="beginner-char" lang="ja">{dictationWord.word}</p>
+                <p className="beginner-mnemonic">
+                  <span className="beginner-mnemonic-label">Means</span>
+                  {dictationWord.meaning}
+                </p>
+                {dictationResult.passed ? (
+                  <div className="beginner-score-buttons">
+                    <button type="button" className="btn btn-primary" onClick={finishQuiz}>Quiz passed &rarr;</button>
+                  </div>
+                ) : (
+                  <div className="beginner-score-buttons">
+                    <button type="button" className="btn btn-ghost" onClick={() => setDictationResult(null)}>Try again</button>
+                  </div>
+                )}
+              </div>
             )}
           </main>
         ) : null
@@ -240,17 +306,12 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               into. Keyed on the character so a fresh canvas loads per card. */}
           <div className="beginner-write-section">
             <span className="beginner-write-label">Practice writing it</span>
+            <StrokeFillAnimation key={card.char} char={card.char} />
             <TraceCanvas key={card.char} char={card.char} onScored={(score) => recordTraceScore(card.char, score)} />
           </div>
 
           <div className="beginner-answer">
             {card.meaning && <span className="beginner-meaning">{card.meaning}</span>}
-            {/* The mnemonic is the whole point of this deck — it gets the
-                visual weight, not the romaji. */}
-            <p className="beginner-mnemonic">
-              <span className="beginner-mnemonic-label">Remember it</span>
-              {card.mnemonic}
-            </p>
             <div className="beginner-score-buttons">
               <button type="button" className="btn btn-ghost" onClick={() => scoreCard(false)}>Not yet</button>
               <button type="button" className="btn btn-primary" onClick={() => scoreCard(true)}>I knew it</button>

@@ -14688,6 +14688,14 @@ button.counter-example {
   text-transform: uppercase;
 }
 
+.beginner-stroke-fill {
+  width: min(100%, 10rem);
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
 .trace-canvas {
   display: flex;
   flex-direction: column;
