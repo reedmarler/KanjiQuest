@@ -14699,6 +14699,13 @@ button.counter-example {
   justify-content: center;
   gap: 0.35rem;
   width: min(100%, 12rem);
+  cursor: pointer;
+}
+
+.stroke-order-animation:focus-visible {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: 3px;
+  border-radius: 10px;
 }
 
 .stroke-order-char {
@@ -14707,6 +14714,7 @@ button.counter-example {
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface-2);
+  pointer-events: none;
 }
 
 .stroke-order-path {
@@ -14717,12 +14725,6 @@ button.counter-example {
   stroke-linejoin: round;
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
-  transition-property: stroke-dashoffset;
-  transition-timing-function: ease-in-out;
-}
-
-.stroke-order-path.is-drawn {
-  stroke-dashoffset: 0;
 }
 
 .trace-canvas {

@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { HIRAGANA_STROKE_VIEWBOX, hiraganaStrokes } from '../data/hiraganaStrokes'
 
 /** Forces every path's stroke-dasharray/offset math onto the same scale
  *  (via the SVG `pathLength` attribute) regardless of the stroke's actual
- *  geometric length, so the CSS transition below needs no DOM measurement. */
+ *  geometric length, so the draw animation below needs no DOM measurement. */
 const NORMALIZED_PATH_LENGTH = 1000
 
 interface StrokeOrderAnimationProps {
@@ -11,58 +11,91 @@ interface StrokeOrderAnimationProps {
   word: string
 }
 
+/** Beat before the first stroke starts, so the learner has a moment to look
+ *  at the blank box before anything moves. */
+const START_DELAY_MS = 1000
 /** How long each stroke takes to draw. Slow on purpose — the point is to watch it. */
-const STROKE_DURATION_MS = 550
+const STROKE_DURATION_MS = 1100
 /** How much earlier the next stroke starts, before the current one finishes
  *  drawing — real handwriting doesn't stop dead between strokes, so the next
  *  one begins its own draw while the previous is still finishing. */
-const STROKE_OVERLAP_MS = 260
+const STROKE_OVERLAP_MS = 350
+const STROKE_INTERVAL_MS = STROKE_DURATION_MS - STROKE_OVERLAP_MS
 /** Pause between characters, so each one in a word still reads as distinct. */
-const CHAR_GAP_MS = 400
+const CHAR_GAP_MS = 500
 
 /**
  * Draws each character stroke-by-stroke, in the real stroke order and
  * direction, using KanjiVG path data (see `../data/hiraganaStrokes.ts`) — an
- * SVG line-draw animation via `stroke-dashoffset`, not a simulation.
+ * SVG line-draw animation via `stroke-dashoffset`.
+ *
+ * Every path is driven directly through refs rather than a CSS class tied to
+ * React state. Toggling a class on and off lets the *same* transition run
+ * backwards whenever state resets (e.g. a fully-drawn character snapping back
+ * to hidden animates in reverse, right before the real forward draw starts —
+ * which read as the animation "starting backwards"). Driving it imperatively
+ * lets every replay force strokes to their hidden state with transitions
+ * switched off first, guaranteeing the only motion anyone sees is forward.
  */
 export function StrokeOrderAnimation({ word }: StrokeOrderAnimationProps) {
   const chars = useMemo(() => [...word].filter((ch) => hiraganaStrokes[ch]), [word])
-  const [activeChar, setActiveChar] = useState(0)
-  const [activeStroke, setActiveStroke] = useState(-1)
+  const pathRefs = useRef(new Map<string, SVGPathElement>())
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [replayToken, setReplayToken] = useState(0)
 
   useEffect(() => {
-    setActiveChar(0)
-    setActiveStroke(-1)
-  }, [word])
-
-  useEffect(() => {
-    if (activeChar >= chars.length) return
-    const strokes = hiraganaStrokes[chars[activeChar]!] ?? []
     const timers: ReturnType<typeof setTimeout>[] = []
+    const paths = [...pathRefs.current.values()]
 
-    const strokeInterval = STROKE_DURATION_MS - STROKE_OVERLAP_MS
-    strokes.forEach((_, strokeIndex) => {
-      const delay = strokeIndex * strokeInterval
-      timers.push(setTimeout(() => setActiveStroke(strokeIndex), delay))
+    // Snap every stroke to hidden with no transition, then force a reflow so
+    // the browser commits that state before the transition is switched back
+    // on — otherwise the browser coalesces the "hide" and "reveal" into one
+    // animated jump, which is the reverse-draw bug described above.
+    paths.forEach((path) => {
+      path.style.transition = 'none'
+      path.style.strokeDashoffset = String(NORMALIZED_PATH_LENGTH)
+    })
+    void containerRef.current?.offsetHeight
+    paths.forEach((path) => {
+      path.style.transition = `stroke-dashoffset ${STROKE_DURATION_MS}ms ease-in-out`
     })
 
-    const totalDuration = (strokes.length - 1) * strokeInterval + STROKE_DURATION_MS + CHAR_GAP_MS
-    timers.push(setTimeout(() => {
-      setActiveStroke(-1)
-      setActiveChar((current) => current + 1)
-    }, totalDuration))
+    let cursor = START_DELAY_MS
+    chars.forEach((ch, charIndex) => {
+      const strokes = hiraganaStrokes[ch] ?? []
+      strokes.forEach((_, strokeIndex) => {
+        const delay = cursor + strokeIndex * STROKE_INTERVAL_MS
+        timers.push(setTimeout(() => {
+          const path = pathRefs.current.get(`${charIndex}-${strokeIndex}`)
+          if (path) path.style.strokeDashoffset = '0'
+        }, delay))
+      })
+      const charDuration = strokes.length === 0 ? 0 : (strokes.length - 1) * STROKE_INTERVAL_MS + STROKE_DURATION_MS
+      cursor += charDuration + CHAR_GAP_MS
+    })
 
     return () => timers.forEach(clearTimeout)
-  }, [activeChar, chars])
+  }, [chars, replayToken])
 
   if (chars.length === 0) return null
 
   return (
-    <div className="stroke-order-animation">
+    <div
+      ref={containerRef}
+      className="stroke-order-animation"
+      role="button"
+      tabIndex={0}
+      aria-label="Replay how to write this"
+      title="Tap to replay"
+      onClick={() => setReplayToken((current) => current + 1)}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        setReplayToken((current) => current + 1)
+      }}
+    >
       {chars.map((ch, charIndex) => {
         const strokes = hiraganaStrokes[ch] ?? []
-        const isDone = charIndex < activeChar
-        const isActive = charIndex === activeChar
         return (
           <svg
             key={`${ch}-${charIndex}`}
@@ -70,18 +103,19 @@ export function StrokeOrderAnimation({ word }: StrokeOrderAnimationProps) {
             className="stroke-order-char"
             aria-hidden="true"
           >
-            {strokes.map((d, strokeIndex) => {
-              const drawn = isDone || (isActive && strokeIndex <= activeStroke)
-              return (
-                <path
-                  key={strokeIndex}
-                  d={d}
-                  pathLength={NORMALIZED_PATH_LENGTH}
-                  className={`stroke-order-path${drawn ? ' is-drawn' : ''}`}
-                  style={{ transitionDuration: `${STROKE_DURATION_MS}ms` }}
-                />
-              )
-            })}
+            {strokes.map((d, strokeIndex) => (
+              <path
+                key={strokeIndex}
+                ref={(el) => {
+                  const refKey = `${charIndex}-${strokeIndex}`
+                  if (el) pathRefs.current.set(refKey, el)
+                  else pathRefs.current.delete(refKey)
+                }}
+                d={d}
+                pathLength={NORMALIZED_PATH_LENGTH}
+                className="stroke-order-path"
+              />
+            ))}
           </svg>
         )
       })}
