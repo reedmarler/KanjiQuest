@@ -64,27 +64,42 @@ function minimumSpeechRateForSentence(text: string, playbackRate: HeroPlaybackRa
 const HERO_SPEECH_VOLUMES = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] as const
 type HeroSpeechVolume = typeof HERO_SPEECH_VOLUMES[number]
 type StoryPlaybackMode = 'repeat' | 'shuffle'
-type HeroSettingsMode = 'none' | 'story' | 'grammar' | 'star'
+type HeroSettingsMode = 'none' | 'picking' | 'story' | 'grammar' | 'star'
 
 // Particles has no focus yet: swapping は for を changes the grammatical role
 // rather than the word, so the drill needs wrong-but-plausible forms that the
 // generator deliberately never produces. The button stays visible and inert
 // rather than silently doing nothing when pressed.
-// What the top-right toggle says and switches off. It follows whichever mode
-// is running rather than always offering Story, so there is one place to leave
-// the mode you are actually in. With no mode active it offers Story, which is
-// where it started.
+// What the top-right toggle says once a specific mode is running, and what it
+// switches off. Off, and while a mode is still being picked, it just reads
+// 'Mode' — the toggle is always on screen now, so it no longer defaults to
+// Story the moment it is switched on.
 const HERO_MODE_LABELS: Record<Exclude<HeroSettingsMode, 'none'>, string> = {
+  picking: 'Mode',
   story: 'Story',
   grammar: 'Grammar',
   star: 'Star',
 }
 
-const HERO_SWAP_FOCUS_OPTIONS: ReadonlyArray<{ focus: HeroSwapFocus | null; label: string }> = [
-  { focus: 'verb', label: 'Verbs' },
+// The choices behind the 'Pick a mode' quick-select, in the same order as
+// the icon row inside the expanded settings panel.
+const PICK_MODE_OPTIONS: ReadonlyArray<{ mode: Exclude<HeroSettingsMode, 'none' | 'picking'>; label: string }> = [
+  { mode: 'story', label: 'Story' },
+  { mode: 'grammar', label: 'Grammar' },
+  { mode: 'star', label: 'Star' },
+]
+
+const HERO_SWAP_FOCUS_OPTIONS: ReadonlyArray<{ focus: HeroSwapFocus | null; label: string; disabledReason?: string }> = [
   { focus: 'noun', label: 'Nouns' },
-  { focus: null, label: 'Particles' },
-  { focus: 'adjective', label: 'Adjectives' },
+  { focus: null, label: 'Particles', disabledReason: 'Particle swapping is not wired up yet' },
+  { focus: 'verb', label: 'Verbs' },
+  // Placeholder, same as Particles above: visible so the option is known to
+  // exist, disabled because auxiliary-verb swapping is not wired up yet.
+  { focus: null, label: 'Auxiliary Verbs', disabledReason: 'Auxiliary verb swapping is not wired up yet' },
+  { focus: 'adjective', label: 'I-Adjectives' },
+  // Placeholder, same as Particles above: visible so the option is known to
+  // exist, disabled because adverb swapping is not wired up yet.
+  { focus: null, label: 'Adverbs', disabledReason: 'Adverb swapping is not wired up yet' },
 ]
 
 const COMPLEXITY_DISPLAY: Record<GenerationComplexity, { level: string; name: string; description: string }> = {
@@ -393,13 +408,21 @@ export function Dashboard({
   const [storyPlaybackMode, setStoryPlaybackMode] = useState<StoryPlaybackMode>('repeat')
   const [storyQuickSelectOpen, setStoryQuickSelectOpen] = useState(false)
   const [focusQuickSelectOpen, setFocusQuickSelectOpen] = useState(false)
+  const [pickModeQuickSelectOpen, setPickModeQuickSelectOpen] = useState(false)
+  // Lets an already-active mode (story/grammar/star) be swapped for another
+  // without switching the drill off first — separate from pickModeQuickSelect,
+  // which only exists while no mode has been chosen yet.
+  const [swapModeQuickSelectOpen, setSwapModeQuickSelectOpen] = useState(false)
   const focusQuickSelectRef = useRef<HTMLDivElement | null>(null)
   const storyQuickSelectRef = useRef<HTMLDivElement | null>(null)
+  const pickModeQuickSelectRef = useRef<HTMLDivElement | null>(null)
+  const swapModeQuickSelectRef = useRef<HTMLDivElement | null>(null)
   const storiesAtLevel = useMemo(() => getHeroStoriesForLevel(storyLevel), [storyLevel])
   const selectedStoryTitle = storiesAtLevel.find((story) => story.id === storyId)?.shortTitle ?? 'Guided reading'
-  // The top-right toggle follows the running mode so it can switch that mode
-  // off; with none running it stays the Story entry point it has always been.
-  const topToggleMode: Exclude<HeroSettingsMode, 'none'> = settingsMode === 'none' ? 'story' : settingsMode
+  // The top-right toggle is always visible. Off is 'none'; on with no mode
+  // chosen yet is 'picking', which surfaces the mode name-button below rather
+  // than guessing which mode the learner wants.
+  const modeToggleOn = settingsMode !== 'none'
   const activeFocusLabel = HERO_SWAP_FOCUS_OPTIONS.find((option) => option.focus === swapFocus)?.label ?? 'Choose focus'
   const storyRolloverId = useMemo(() => {
     if (!storyMode || storyPlaybackMode === 'repeat' || storiesAtLevel.length < 2) return storyId
@@ -414,6 +437,19 @@ export function Dashboard({
       if (next !== 'grammar') setFocusQuickSelectOpen(false)
       return next
     })
+  }
+
+  // The permanent top-right toggle only ever fully switches the drill on or
+  // off; it never picks a specific mode itself, so turning it on lands on
+  // 'picking' and waits for a choice from the name-button it reveals.
+  function toggleModeOn() {
+    // Neither popup can stay meaningfully open once the drill is off or back
+    // to unpicked — closing both here rather than conditionally is simpler
+    // and correct, since this function's 'next' is never 'story' or 'grammar'.
+    setStoryQuickSelectOpen(false)
+    setFocusQuickSelectOpen(false)
+    setSwapModeQuickSelectOpen(false)
+    setSettingsMode((current) => (current === 'none' ? 'picking' : 'none'))
   }
   const [paused, setPaused] = useState(false)
   const [playbackRate, setPlaybackRate] = useState<HeroPlaybackRate>(savedPlaybackRate)
@@ -455,11 +491,12 @@ export function Dashboard({
   }, [storiesAtLevel, storyId])
 
   useEffect(() => {
-    if (!storyQuickSelectOpen && !focusQuickSelectOpen) return
+    if (!storyQuickSelectOpen && !focusQuickSelectOpen && !pickModeQuickSelectOpen && !swapModeQuickSelectOpen) return
 
-    // One handler for both menus: whichever is open closes on an outside
-    // pointer or Escape, and only one can be open at a time since the modes
-    // are mutually exclusive.
+    // One handler for all four menus: whichever is open closes on an
+    // outside pointer or Escape. The mode-settings menus (story/focus) and
+    // the mode-picker menus (pick/swap) are each mutually exclusive with
+    // their own pair, since they render for opposite settingsMode states.
     const closeOnOutsidePointer = (event: PointerEvent) => {
       if (!storyQuickSelectRef.current?.contains(event.target as Node)) {
         setStoryQuickSelectOpen(false)
@@ -467,11 +504,19 @@ export function Dashboard({
       if (!focusQuickSelectRef.current?.contains(event.target as Node)) {
         setFocusQuickSelectOpen(false)
       }
+      if (!pickModeQuickSelectRef.current?.contains(event.target as Node)) {
+        setPickModeQuickSelectOpen(false)
+      }
+      if (!swapModeQuickSelectRef.current?.contains(event.target as Node)) {
+        setSwapModeQuickSelectOpen(false)
+      }
     }
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
       setStoryQuickSelectOpen(false)
       setFocusQuickSelectOpen(false)
+      setPickModeQuickSelectOpen(false)
+      setSwapModeQuickSelectOpen(false)
     }
 
     document.addEventListener('pointerdown', closeOnOutsidePointer)
@@ -480,7 +525,7 @@ export function Dashboard({
       document.removeEventListener('pointerdown', closeOnOutsidePointer)
       document.removeEventListener('keydown', closeOnEscape)
     }
-  }, [storyQuickSelectOpen, focusQuickSelectOpen])
+  }, [storyQuickSelectOpen, focusQuickSelectOpen, pickModeQuickSelectOpen, swapModeQuickSelectOpen])
 
   function toggleFurigana() {
     setFuriganaOn((on) => !on)
@@ -648,7 +693,7 @@ export function Dashboard({
                 role="menu"
                 aria-label="Grammar focus"
               >
-                {HERO_SWAP_FOCUS_OPTIONS.map(({ focus, label }) => (
+                {HERO_SWAP_FOCUS_OPTIONS.map(({ focus, label, disabledReason }) => (
                   <button
                     key={label}
                     type="button"
@@ -656,7 +701,7 @@ export function Dashboard({
                     role="menuitemradio"
                     aria-checked={focus ? swapFocus === focus : false}
                     disabled={!focus}
-                    title={focus ? undefined : 'Particle swapping is not wired up yet'}
+                    title={focus ? undefined : disabledReason}
                     onClick={focus ? () => {
                       setSwapFocus((current) => (current === focus ? null : focus))
                       setFocusQuickSelectOpen(false)
@@ -670,20 +715,102 @@ export function Dashboard({
             )}
           </div>
         )}
-        {settingsMode !== 'none' && (
+        {settingsMode === 'picking' && (
+          <div className="control-story-quick-select is-picking" ref={pickModeQuickSelectRef}>
+            <button
+              type="button"
+              className={`control-story-name-button${pickModeQuickSelectOpen ? ' is-open' : ''}`}
+              onClick={() => setPickModeQuickSelectOpen((open) => !open)}
+              aria-label="Pick a mode"
+              aria-haspopup="menu"
+              aria-expanded={pickModeQuickSelectOpen}
+              aria-controls="pick-mode-quick-select-menu"
+              title="Pick a mode"
+            >
+              <span className="control-story-name-mark" aria-hidden="true">&#36984;</span>
+              <span className="control-story-name-text">Pick a mode</span>
+              <span className="control-story-name-chevron" aria-hidden="true">&#9662;</span>
+            </button>
+            {pickModeQuickSelectOpen && (
+              <div
+                className="control-story-quick-menu"
+                id="pick-mode-quick-select-menu"
+                role="menu"
+                aria-label="Sentence modes"
+              >
+                {PICK_MODE_OPTIONS.map(({ mode, label }) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      selectSettingsMode(mode)
+                      setPickModeQuickSelectOpen(false)
+                    }}
+                  >
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="control-story-toggle-stack">
           <button
             type="button"
-            className={`control-story-toggle control-story-top-toggle is-active${grammarMode ? ' is-grammar' : ''}`}
-            onClick={() => selectSettingsMode(topToggleMode)}
+            className={`control-story-toggle control-story-top-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
+            onClick={toggleModeOn}
             role="switch"
-            aria-checked
-            aria-label={`Turn off ${HERO_MODE_LABELS[topToggleMode]} mode`}
-            title={`Turn off ${HERO_MODE_LABELS[topToggleMode]} mode`}
+            aria-checked={modeToggleOn}
+            aria-label={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
+            title={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
           >
             <span className="control-toggle-track" aria-hidden="true"><span /></span>
-            <span>{HERO_MODE_LABELS[topToggleMode]}</span>
+            <span>{modeToggleOn ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>] : 'Mode'}</span>
           </button>
-        )}
+          {modeToggleOn && settingsMode !== 'picking' && (
+            <div className="control-story-quick-select is-swap" ref={swapModeQuickSelectRef}>
+              <button
+                type="button"
+                className={`control-swap-mode-button${swapModeQuickSelectOpen ? ' is-open' : ''}`}
+                onClick={() => setSwapModeQuickSelectOpen((open) => !open)}
+                aria-label={`Swap mode. Current mode: ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]}`}
+                aria-haspopup="menu"
+                aria-expanded={swapModeQuickSelectOpen}
+                aria-controls="swap-mode-quick-select-menu"
+                title="Swap mode"
+              >
+                <span aria-hidden="true">&#8646;</span>
+                <span>Swap</span>
+              </button>
+              {swapModeQuickSelectOpen && (
+                <div
+                  className="control-story-quick-menu"
+                  id="swap-mode-quick-select-menu"
+                  role="menu"
+                  aria-label="Sentence modes"
+                >
+                  {PICK_MODE_OPTIONS.map(({ mode, label }) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={settingsMode === mode}
+                      className={settingsMode === mode ? 'is-active' : ''}
+                      onClick={() => {
+                        if (mode !== settingsMode) selectSettingsMode(mode)
+                        setSwapModeQuickSelectOpen(false)
+                      }}
+                    >
+                      <span>{label}</span>
+                      {settingsMode === mode && <span aria-hidden="true">&#10003;</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <header className="hero hero-compact">
@@ -935,7 +1062,7 @@ export function Dashboard({
 
                   {grammarMode && (
                     <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
-                      {HERO_SWAP_FOCUS_OPTIONS.map(({ focus, label }) => (
+                      {HERO_SWAP_FOCUS_OPTIONS.map(({ focus, label, disabledReason }) => (
                         <button
                           key={label}
                           type="button"
@@ -945,7 +1072,7 @@ export function Dashboard({
                           // off, so the same button both enters and leaves it.
                           onClick={focus ? () => setSwapFocus((current) => (current === focus ? null : focus)) : undefined}
                           disabled={!focus}
-                          title={focus ? undefined : 'Particle swapping is not wired up yet'}
+                          title={focus ? undefined : disabledReason}
                         >
                           {label}
                         </button>

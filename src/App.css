@@ -2161,6 +2161,43 @@ body:has(.dashboard) {
   pointer-events: auto;
 }
 
+.control-story-toggle-stack {
+  position: relative;
+}
+
+.control-story-toggle-stack .control-story-quick-select.is-swap {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.3rem;
+}
+
+.control-swap-mode-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.26rem;
+  height: 1.3rem;
+  box-sizing: border-box;
+  padding: 0 0.4rem;
+  border: 1px solid color-mix(in srgb, var(--rayquaza-light) 30%, var(--border));
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--rayquaza) 10%, var(--surface-2));
+  color: var(--rayquaza-light);
+  font: 700 0.55rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+  white-space: nowrap;
+}
+
+.control-swap-mode-button:hover,
+.control-swap-mode-button.is-open {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 58%, var(--border));
+  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface-2));
+  color: color-mix(in srgb, var(--rayquaza-light) 86%, white);
+}
+
 .control-audio-buttons {
   display: flex;
   align-items: center;
@@ -2668,8 +2705,11 @@ body:has(.dashboard) {
 
 .hero-swap-mode-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
+  /* Six options now live where four used to: three columns keep this at two
+     rows, matching the original four-button footprint, rather than adding a
+     third row below it. */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
   min-height: 5.2rem;
 }
 
@@ -2698,14 +2738,17 @@ body:has(.dashboard) {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   min-height: 2.4rem;
-  padding: 0.45rem 0.5rem;
+  padding: 0.4rem 0.3rem;
   border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
   border-radius: 0.55rem;
   background: color-mix(in srgb, var(--surface-2) 88%, transparent);
   color: var(--text-muted);
-  font: 700 0.62rem/1.1 'Outfit', system-ui, sans-serif;
-  letter-spacing: 0.02em;
+  /* Narrower at three per row than the original two-per-row buttons, so the
+     longest label ("Auxiliary Verbs") still fits without truncating. */
+  font: 700 0.52rem/1.1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.01em;
   cursor: pointer;
   transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
 }
