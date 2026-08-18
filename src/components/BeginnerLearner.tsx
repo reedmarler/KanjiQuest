@@ -9,20 +9,15 @@ interface BeginnerLearnerProps {
 }
 
 /**
- * Mastery is per character and survives reloads, because a beginner working
- * through 46 characters will not do it in one sitting. Keyed by script so the
- * three decks never overwrite each other.
+ * Mastery and trace scores are per character and survive reloads, because a
+ * beginner working through 46 characters will not do it in one sitting.
+ * Keyed by script so the three decks never overwrite each other.
  */
 const MASTERY_STORAGE_PREFIX = 'kq-beginner-mastery-'
 const TRACE_STORAGE_PREFIX = 'kq-beginner-trace-'
 
 /** How many correct recalls in a row retire a character from the row. */
 const MASTERY_TARGET = 2
-
-/** Trace score (0-100) at or above which a character counts as "traced well". */
-const TRACE_TARGET = 65
-
-type BeginnerMode = 'learn' | 'write'
 
 function storageKey(prefix: string, script: BeginnerScript) {
   return `${prefix}${script}`
@@ -55,21 +50,18 @@ function shuffled<T>(items: readonly T[]) {
 
 export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   const deck = useMemo(() => getBeginnerDeck(script), [script])
-  const [mode, setMode] = useState<BeginnerMode>('learn')
   const [rowIndex, setRowIndex] = useState(0)
   const [mastery, setMastery] = useState<Record<string, number>>(() => loadNumberMap(storageKey(MASTERY_STORAGE_PREFIX, script)))
   const [traceScores, setTraceScores] = useState<Record<string, number>>(() => loadNumberMap(storageKey(TRACE_STORAGE_PREFIX, script)))
   const [revealed, setRevealed] = useState(false)
   const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(0)
-  const [traceIndex, setTraceIndex] = useState(0)
 
   const row = deck.rows[rowIndex]!
   // The queue is the row's characters, shuffled once per row so the learner
   // does not simply memorise the chart order instead of the characters.
   const [queue, setQueue] = useState<BeginnerCharacter[]>(() => shuffled(deck.rows[0]!.characters))
   const card = queue[0]
-  const traceChar = row.characters[traceIndex]
 
   useEffect(() => {
     window.localStorage.setItem(storageKey(MASTERY_STORAGE_PREFIX, script), JSON.stringify(mastery))
@@ -83,12 +75,6 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
     setRowIndex(index)
     setQueue(shuffled(deck.rows[index]!.characters))
     setRevealed(false)
-    setTraceIndex(0)
-  }
-
-  function switchMode(next: BeginnerMode) {
-    setMode(next)
-    setTraceIndex(0)
   }
 
   function recordTraceScore(char: string, score: number) {
@@ -124,10 +110,8 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
     setRevealed(false)
   }
 
-  const rowMastered = row.characters.filter((entry) => (mastery[entry.char] ?? 0) >= MASTERY_TARGET).length
   const rowComplete = queue.length === 0
   const nextRowIndex = rowIndex + 1 < deck.rows.length ? rowIndex + 1 : null
-  const rowTraced = row.characters.filter((entry) => (traceScores[entry.char] ?? 0) >= TRACE_TARGET).length
 
   return (
     <div className="beginner-learner">
@@ -137,42 +121,15 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
           <span>Back</span>
         </button>
         <span className="beginner-learner-title">{deck.title}</span>
-        {mode === 'learn' ? (
-          <span className="beginner-streak" title="Correct in a row">
-            <span aria-hidden="true">&#128293;</span>
-            <b>{streak}</b>
-          </span>
-        ) : (
-          <span className="beginner-streak beginner-streak-placeholder" aria-hidden="true" />
-        )}
-      </div>
-
-      <div className="beginner-mode-tabs" role="tablist" aria-label="Practice mode">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mode === 'learn'}
-          className={`beginner-mode-tab${mode === 'learn' ? ' is-active' : ''}`}
-          onClick={() => switchMode('learn')}
-        >
-          Learn
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mode === 'write'}
-          className={`beginner-mode-tab${mode === 'write' ? ' is-active' : ''}`}
-          onClick={() => switchMode('write')}
-        >
-          Write
-        </button>
+        <span className="beginner-streak" title="Correct in a row">
+          <span aria-hidden="true">&#128293;</span>
+          <b>{streak}</b>
+        </span>
       </div>
 
       <div className="beginner-row-tabs" role="tablist" aria-label={`${deck.title} rows`}>
         {deck.rows.map((entry, index) => {
-          const masteredCount = mode === 'learn'
-            ? entry.characters.filter((c) => (mastery[c.char] ?? 0) >= MASTERY_TARGET).length
-            : entry.characters.filter((c) => (traceScores[c.char] ?? 0) >= TRACE_TARGET).length
+          const masteredCount = entry.characters.filter((c) => (mastery[c.char] ?? 0) >= MASTERY_TARGET).length
           const done = masteredCount === entry.characters.length
           return (
             <button
@@ -182,7 +139,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               aria-selected={index === rowIndex}
               className={`beginner-row-tab${index === rowIndex ? ' is-active' : ''}${done ? ' is-done' : ''}`}
               onClick={() => openRow(index)}
-              title={`${entry.label} — ${masteredCount}/${entry.characters.length} ${mode === 'learn' ? 'learned' : 'traced well'}`}
+              title={`${entry.label} — ${masteredCount}/${entry.characters.length} learned`}
             >
               <span>{entry.label}</span>
               <small>{masteredCount}/{entry.characters.length}</small>
@@ -191,37 +148,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
         })}
       </div>
 
-      {mode === 'write' ? (
-        traceChar ? (
-          <main className="beginner-card beginner-trace-card">
-            <p className="beginner-trace-hint">
-              Trace <b lang="ja">{traceChar.char}</b> ({traceChar.romaji}) over the gray guide.
-            </p>
-            <TraceCanvas key={traceChar.char} char={traceChar.char} onScored={(score) => recordTraceScore(traceChar.char, score)} />
-            <div className="beginner-trace-nav">
-              <button
-                type="button"
-                className="btn btn-ghost"
-                onClick={() => setTraceIndex((current) => Math.max(0, current - 1))}
-                disabled={traceIndex === 0}
-              >
-                &larr; Previous
-              </button>
-              <span className="beginner-card-footer">
-                {row.label} &middot; {rowTraced} of {row.characters.length} traced well
-              </span>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => setTraceIndex((current) => Math.min(row.characters.length - 1, current + 1))}
-                disabled={traceIndex >= row.characters.length - 1}
-              >
-                Next &rarr;
-              </button>
-            </div>
-          </main>
-        ) : null
-      ) : rowComplete ? (
+      {rowComplete ? (
         <main className="beginner-card beginner-card-complete">
           <span className="beginner-complete-mark" aria-hidden="true">&#127881;</span>
           <h2>{row.label} learned</h2>
@@ -247,6 +174,14 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
             <SpeakableWord text={card.char}>{card.char}</SpeakableWord>
           </p>
 
+          {/* Writing lives right under the character itself — trace it while
+              it's fresh on screen, rather than as a separate mode to switch
+              into. Keyed on the character so a fresh canvas loads per card. */}
+          <div className="beginner-write-section">
+            <span className="beginner-write-label">Practice writing it</span>
+            <TraceCanvas key={card.char} char={card.char} onScored={(score) => recordTraceScore(card.char, score)} />
+          </div>
+
           {revealed ? (
             <div className="beginner-answer">
               <b className="beginner-romaji">{card.romaji}</b>
@@ -267,10 +202,6 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               Show the sound
             </button>
           )}
-
-          <p className="beginner-card-footer">
-            {row.label} &middot; {rowMastered} of {row.characters.length} learned &middot; {queue.length} left this round
-          </p>
         </main>
       ) : null}
     </div>

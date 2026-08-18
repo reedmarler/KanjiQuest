@@ -14634,12 +14634,6 @@ button.counter-example {
   width: 100%;
 }
 
-.beginner-card-footer {
-  margin: 0.15rem 0 0;
-  color: var(--text-muted);
-  font: 600 0.56rem/1.3 'Outfit', system-ui, sans-serif;
-}
-
 .beginner-card-complete .beginner-complete-mark {
   font-size: 2.6rem;
 }
@@ -14670,56 +14664,28 @@ button.counter-example {
   width: 100%;
 }
 
-.beginner-streak-placeholder {
-  visibility: hidden;
-}
-
-.beginner-mode-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.35rem;
-  padding: 0.2rem;
-  border: 1px solid var(--border);
-  border-radius: 0.65rem;
-  background: var(--surface-2);
-}
-
-.beginner-mode-tab {
-  padding: 0.4rem 0;
-  border: none;
-  border-radius: 0.5rem;
-  background: transparent;
-  color: var(--text-muted);
-  font: 750 0.68rem/1 'Outfit', system-ui, sans-serif;
-  cursor: pointer;
-  transition: background 140ms ease, color 140ms ease;
-}
-
-.beginner-mode-tab.is-active {
-  background: var(--surface);
-  color: var(--sakura);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
-}
-
 /* ---------------------------------------------------------------------------
    Trace canvas
    A guide layer (the printed glyph, faint) and an ink layer (the learner's
    strokes) sit in the same grid cell so the two line up pixel for pixel.
    --------------------------------------------------------------------------- */
 
-.beginner-trace-card {
-  gap: 0.6rem;
+.beginner-write-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  margin: 0.1rem 0 0.2rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
 }
 
-.beginner-trace-hint {
-  margin: 0;
+.beginner-write-label {
   color: var(--text-muted);
-  font: 600 0.75rem/1.4 'Outfit', system-ui, sans-serif;
-}
-
-.beginner-trace-hint b {
-  color: var(--text);
-  font: 700 1.05rem/1 'Noto Sans JP', sans-serif;
+  font: 800 0.5rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .trace-canvas {
@@ -14799,18 +14765,6 @@ button.counter-example {
   color: var(--sakura);
 }
 
-.beginner-trace-nav {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-}
-
-.beginner-trace-nav .beginner-card-footer {
-  text-align: center;
-}
-
 @media (max-width: 430px) {
   .beginner-learner {
     padding: 0.6rem 0.65rem 1.2rem;
@@ -14822,10 +14776,5 @@ button.counter-example {
 
   .beginner-romaji {
     font-size: 1.45rem;
-  }
-
-  .beginner-trace-nav {
-    grid-template-columns: 1fr;
-    text-align: center;
   }
 }
