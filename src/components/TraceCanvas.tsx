@@ -1,0 +1,240 @@
+import { useEffect, useRef, useState } from 'react'
+
+interface TraceCanvasProps {
+  char: string
+  /** Reported after every "Check my tracing" tap so the parent can persist a best score. */
+  onScored?: (score: number) => void
+}
+
+/** Fixed logical resolution both canvases and the glyph mask are computed in. */
+const SIZE = 300
+const INK_WIDTH = 18
+/** How far (in px) a stroke may wander from the printed glyph and still count as "on the line". */
+const TOLERANCE_RADIUS = 8
+/** How far ink is allowed to spread when checking glyph coverage, forgiving normal stroke width. */
+const COVERAGE_RADIUS = 6
+
+interface GlyphMasks {
+  /** True where the printed character itself has ink — used to score coverage. */
+  raw: Uint8Array
+  /** `raw` dilated outward — used to score whether the learner's strokes stayed on target. */
+  tolerance: Uint8Array
+  rawCount: number
+}
+
+function dilate(mask: Uint8Array, size: number, radius: number): Uint8Array {
+  let current = mask
+  for (let pass = 0; pass < radius; pass += 1) {
+    const next = new Uint8Array(current.length)
+    for (let y = 0; y < size; y += 1) {
+      for (let x = 0; x < size; x += 1) {
+        const i = y * size + x
+        if (current[i]) {
+          next[i] = 1
+          continue
+        }
+        const up = y > 0 && current[i - size]
+        const down = y < size - 1 && current[i + size]
+        const left = x > 0 && current[i - 1]
+        const right = x < size - 1 && current[i + 1]
+        next[i] = up || down || left || right ? 1 : 0
+      }
+    }
+    current = next
+  }
+  return current
+}
+
+function buildGlyphMasks(char: string): GlyphMasks {
+  const canvas = document.createElement('canvas')
+  canvas.width = SIZE
+  canvas.height = SIZE
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })!
+  ctx.clearRect(0, 0, SIZE, SIZE)
+  ctx.fillStyle = '#000'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.font = `${Math.round(SIZE * 0.74)}px 'Noto Sans JP', sans-serif`
+  ctx.fillText(char, SIZE / 2, SIZE / 2 + SIZE * 0.04)
+  const { data } = ctx.getImageData(0, 0, SIZE, SIZE)
+  const raw = new Uint8Array(SIZE * SIZE)
+  let rawCount = 0
+  for (let i = 0; i < raw.length; i += 1) {
+    if (data[i * 4 + 3] > 40) {
+      raw[i] = 1
+      rawCount += 1
+    }
+  }
+  return { raw, tolerance: dilate(raw, SIZE, TOLERANCE_RADIUS), rawCount }
+}
+
+function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) {
+  const rect = canvas.getBoundingClientRect()
+  return {
+    x: ((event.clientX - rect.left) / rect.width) * canvas.width,
+    y: ((event.clientY - rect.top) / rect.height) * canvas.height,
+  }
+}
+
+export function TraceCanvas({ char, onScored }: TraceCanvasProps) {
+  const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  const inkCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  const masksRef = useRef<GlyphMasks | null>(null)
+  const drawingRef = useRef(false)
+  const lastPointRef = useRef<{ x: number; y: number } | null>(null)
+  const hasInkRef = useRef(false)
+  const [result, setResult] = useState<{ score: number; message: string } | null>(null)
+
+  // A new character means a fresh guide, a fresh mask, and a blank page —
+  // stale ink from the previous character must not leak into this score.
+  useEffect(() => {
+    masksRef.current = buildGlyphMasks(char)
+    hasInkRef.current = false
+    setResult(null)
+
+    const guide = guideCanvasRef.current
+    if (guide) {
+      const ctx = guide.getContext('2d')!
+      ctx.clearRect(0, 0, SIZE, SIZE)
+      ctx.fillStyle = 'rgba(148, 148, 168, 0.38)'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.font = `${Math.round(SIZE * 0.74)}px 'Noto Sans JP', sans-serif`
+      ctx.fillText(char, SIZE / 2, SIZE / 2 + SIZE * 0.04)
+    }
+
+    const ink = inkCanvasRef.current
+    if (ink) ink.getContext('2d')!.clearRect(0, 0, SIZE, SIZE)
+  }, [char])
+
+  function clearInk() {
+    const ink = inkCanvasRef.current
+    if (!ink) return
+    ink.getContext('2d')!.clearRect(0, 0, SIZE, SIZE)
+    hasInkRef.current = false
+    setResult(null)
+  }
+
+  function handlePointerDown(event: React.PointerEvent<HTMLCanvasElement>) {
+    const canvas = inkCanvasRef.current
+    if (!canvas) return
+    // Capture keeps the stroke going if a finger slides off the canvas edge.
+    // It can fail for pointer types that never registered as "active" (some
+    // stylus/touch edge cases) — that shouldn't block the stroke itself.
+    try {
+      canvas.setPointerCapture(event.pointerId)
+    } catch {
+      // Drawing still works without capture; it just won't follow the
+      // pointer past the canvas bounds.
+    }
+    drawingRef.current = true
+    hasInkRef.current = true
+    const point = pointFromEvent(event, canvas)
+    lastPointRef.current = point
+    const ctx = canvas.getContext('2d')!
+    ctx.fillStyle = '#e0447a'
+    ctx.beginPath()
+    ctx.arc(point.x, point.y, INK_WIDTH / 2, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  function handlePointerMove(event: React.PointerEvent<HTMLCanvasElement>) {
+    if (!drawingRef.current) return
+    const canvas = inkCanvasRef.current
+    if (!canvas) return
+    const point = pointFromEvent(event, canvas)
+    const last = lastPointRef.current
+    const ctx = canvas.getContext('2d')!
+    ctx.strokeStyle = '#e0447a'
+    ctx.lineWidth = INK_WIDTH
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.beginPath()
+    ctx.moveTo(last?.x ?? point.x, last?.y ?? point.y)
+    ctx.lineTo(point.x, point.y)
+    ctx.stroke()
+    lastPointRef.current = point
+  }
+
+  function handlePointerUp() {
+    drawingRef.current = false
+    lastPointRef.current = null
+  }
+
+  function checkTracing() {
+    const ink = inkCanvasRef.current
+    const masks = masksRef.current
+    if (!ink || !masks || !hasInkRef.current) {
+      setResult({ score: 0, message: 'Trace the character first.' })
+      return
+    }
+
+    const ctx = ink.getContext('2d', { willReadFrequently: true })!
+    const { data } = ctx.getImageData(0, 0, SIZE, SIZE)
+    const inkMask = new Uint8Array(SIZE * SIZE)
+    let inkTotal = 0
+    let inkOnTarget = 0
+    for (let i = 0; i < inkMask.length; i += 1) {
+      if (data[i * 4 + 3] > 40) {
+        inkMask[i] = 1
+        inkTotal += 1
+        if (masks.tolerance[i]) inkOnTarget += 1
+      }
+    }
+
+    if (inkTotal === 0) {
+      setResult({ score: 0, message: 'Trace the character first.' })
+      return
+    }
+
+    const precision = inkOnTarget / inkTotal
+    const inkSpread = dilate(inkMask, SIZE, COVERAGE_RADIUS)
+    let covered = 0
+    for (let i = 0; i < masks.raw.length; i += 1) {
+      if (masks.raw[i] && inkSpread[i]) covered += 1
+    }
+    const coverage = masks.rawCount > 0 ? covered / masks.rawCount : 0
+    const score = Math.round(Math.min(1, precision) * 55 + Math.min(1, coverage) * 45)
+
+    const message =
+      score >= 85 ? 'Beautiful! That looks just right.'
+      : score >= 65 ? 'Good tracing — a little more practice and it will be automatic.'
+      : coverage < 0.6 ? 'You missed part of the character — trace the whole shape.'
+      : 'Keep your strokes closer to the gray guide.'
+
+    setResult({ score, message })
+    onScored?.(score)
+  }
+
+  return (
+    <div className="trace-canvas">
+      <div className="trace-canvas-stack" style={{ touchAction: 'none' }}>
+        <canvas ref={guideCanvasRef} width={SIZE} height={SIZE} className="trace-canvas-layer trace-canvas-guide" aria-hidden="true" />
+        <canvas
+          ref={inkCanvasRef}
+          width={SIZE}
+          height={SIZE}
+          className="trace-canvas-layer trace-canvas-ink"
+          role="img"
+          aria-label={`Trace ${char} here`}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+        />
+      </div>
+
+      <div className="trace-canvas-actions">
+        <button type="button" className="btn btn-ghost" onClick={clearInk}>Clear</button>
+        <button type="button" className="btn btn-primary" onClick={checkTracing}>Check my tracing</button>
+      </div>
+
+      {result && (
+        <p className={`trace-canvas-result${result.score >= 85 ? ' is-great' : result.score >= 65 ? ' is-good' : ' is-retry'}`}>
+          <b>{result.score}</b>
+          <span>{result.message}</span>
+        </p>
+      )}
+    </div>
+  )
+}
