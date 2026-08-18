@@ -13485,6 +13485,28 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 .speakable-word.is-speaking { background: color-mix(in srgb, var(--kyogre) 20%, transparent); }
 .speakable-word.is-speaking .speakable-word-cue { opacity: 1; color: var(--kyogre-light); }
 
+/* Icon-only trigger for places that already show the word some other way
+   (e.g. drawn stroke by stroke) and just need a way to hear it too. */
+.speaker-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background .15s, transform .1s, color .15s;
+}
+
+.speaker-button .speakable-word-cue { width: 1.1rem; height: 1.1rem; opacity: 1; }
+.speaker-button:hover { background: color-mix(in srgb, var(--kyogre) 14%, var(--surface-2)); color: var(--text); }
+.speaker-button:active { transform: scale(.94); }
+.speaker-button:focus-visible { outline: 2px solid var(--kyogre-light); outline-offset: 2px; }
+.speaker-button.is-speaking { color: var(--kyogre-light); border-color: color-mix(in srgb, var(--kyogre) 45%, var(--border)); }
+
 @keyframes speakable-word-pulse {
   0%, 100% { opacity: .35; }
   50% { opacity: 1; }
@@ -14587,6 +14609,13 @@ button.counter-example {
   font: 400 clamp(5rem, 22vw, 8rem)/1 'Noto Sans JP', sans-serif;
 }
 
+.beginner-char-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 .beginner-answer {
   display: flex;
   flex-direction: column;
@@ -14715,6 +14744,21 @@ button.counter-example {
   border-radius: 10px;
   background: var(--surface-2);
   pointer-events: none;
+}
+
+.stroke-order-animation.is-hero {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: min(100%, 22rem);
+}
+
+.stroke-order-animation.is-hero .stroke-order-char {
+  width: clamp(4.5rem, 22vw, 7.5rem);
+  border-radius: 14px;
+}
+
+.stroke-order-animation.is-hero .stroke-order-path {
+  stroke-width: 4.5;
 }
 
 .stroke-order-path {

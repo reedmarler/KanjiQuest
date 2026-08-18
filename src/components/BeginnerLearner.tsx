@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
 import { hiraganaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
 import { speakJapanese } from '../lib/speech'
-import { SpeakableWord } from './SpeakableWord'
+import { SpeakableWord, SpeakerButton } from './SpeakableWord'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { TraceCanvas } from './TraceCanvas'
 
@@ -199,38 +199,17 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
         })}
       </div>
 
-      {rowComplete ? (
-        <main className="beginner-card beginner-card-complete">
-          <span className="beginner-complete-mark" aria-hidden="true">&#127881;</span>
-          <h2>{row.label} learned</h2>
-          <p>
-            You recalled all {row.characters.length} characters
-            {bestStreak > 1 ? ` with a best streak of ${bestStreak}` : ''}.
-          </p>
-          <div className="beginner-complete-chars" lang="ja" aria-hidden="true">
-            {row.characters.map((entry) => <span key={entry.char}>{entry.char}</span>)}
-          </div>
-          {rowNeedsQuiz ? (
-            <button type="button" className="btn btn-primary" onClick={() => startQuiz(rowIndex)}>Row quiz &rarr;</button>
-          ) : nextRowIndex === null ? (
-            <button type="button" className="btn btn-primary" onClick={onBack}>Finish {deck.title} &rarr;</button>
-          ) : (
-            <button type="button" className="btn btn-primary" onClick={() => openRow(nextRowIndex)}>
-              Next: {deck.rows[nextRowIndex]!.label} &rarr;
-            </button>
-          )}
-          <button type="button" className="btn btn-ghost" onClick={() => openRow(rowIndex)}>Practise this row again</button>
-        </main>
-      ) : quizWords ? (
+      {quizWords ? (
         quizPhase === 'trace' && currentTraceWord ? (
           <main className="beginner-card">
             <span className="beginner-write-label">Row quiz — word {quizTraceIndex + 1} of {traceWords.length}</span>
-            <p className="beginner-char" lang="ja">
-              <SpeakableWord text={currentTraceWord.word}>{currentTraceWord.word}</SpeakableWord>
-            </p>
+            <div className="beginner-char-stage">
+              <StrokeOrderAnimation word={currentTraceWord.word} size="hero" />
+              <SpeakerButton text={currentTraceWord.word} />
+            </div>
 
             <div className="beginner-write-section">
-              <StrokeOrderAnimation word={currentTraceWord.word} />
+              <span className="beginner-write-label">Trace it</span>
               <TraceCanvas key={currentTraceWord.word} char={currentTraceWord.word} />
             </div>
 
@@ -290,18 +269,50 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
             )}
           </main>
         ) : null
+      ) : rowComplete ? (
+        <main className="beginner-card beginner-card-complete">
+          <span className="beginner-complete-mark" aria-hidden="true">&#127881;</span>
+          <h2>{row.label} learned</h2>
+          <p>
+            You recalled all {row.characters.length} characters
+            {bestStreak > 1 ? ` with a best streak of ${bestStreak}` : ''}.
+          </p>
+          <div className="beginner-complete-chars" lang="ja" aria-hidden="true">
+            {row.characters.map((entry) => <span key={entry.char}>{entry.char}</span>)}
+          </div>
+          {rowNeedsQuiz ? (
+            <button type="button" className="btn btn-primary" onClick={() => startQuiz(rowIndex)}>Row quiz &rarr;</button>
+          ) : nextRowIndex === null ? (
+            <button type="button" className="btn btn-primary" onClick={onBack}>Finish {deck.title} &rarr;</button>
+          ) : (
+            <button type="button" className="btn btn-primary" onClick={() => openRow(nextRowIndex)}>
+              Next: {deck.rows[nextRowIndex]!.label} &rarr;
+            </button>
+          )}
+          <button type="button" className="btn btn-ghost" onClick={() => openRow(rowIndex)}>Practise this row again</button>
+        </main>
       ) : card ? (
         <main className="beginner-card is-revealed">
-          <p className="beginner-char" lang="ja">
-            <SpeakableWord text={card.char}>{card.char}</SpeakableWord>
-          </p>
+          {script === 'hiragana' ? (
+            // Drawing the character already shows it — a second, plain copy
+            // of the same character right above would just be redundant, so
+            // the stroke animation replaces the flashcard's usual big glyph
+            // and the speaker becomes its own small button.
+            <div className="beginner-char-stage">
+              <StrokeOrderAnimation word={card.char} size="hero" />
+              <SpeakerButton text={card.char} />
+            </div>
+          ) : (
+            <p className="beginner-char" lang="ja">
+              <SpeakableWord text={card.char}>{card.char}</SpeakableWord>
+            </p>
+          )}
 
           {/* Writing lives right under the character itself — trace it while
               it's fresh on screen, rather than as a separate mode to switch
               into. Keyed on the character so a fresh canvas loads per card. */}
           <div className="beginner-write-section">
             <span className="beginner-write-label">Practice writing it</span>
-            {script === 'hiragana' && <StrokeOrderAnimation word={card.char} />}
             <TraceCanvas key={card.char} char={card.char} onScored={(score) => recordTraceScore(card.char, score)} />
           </div>
 

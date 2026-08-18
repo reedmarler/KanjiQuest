@@ -9,6 +9,10 @@ const NORMALIZED_PATH_LENGTH = 1000
 interface StrokeOrderAnimationProps {
   /** One or more hiragana characters. Unknown characters (no stroke data) are skipped. */
   word: string
+  /** 'hero' takes over the spot the plain character used to sit in, so
+   *  showing the word once (drawn) replaces showing it twice (drawn + as
+   *  plain speakable text). Defaults to the small inline preview size. */
+  size?: 'default' | 'hero'
 }
 
 /** Beat before the first stroke starts, so the learner has a moment to look
@@ -37,7 +41,7 @@ const CHAR_GAP_MS = 500
  * lets every replay force strokes to their hidden state with transitions
  * switched off first, guaranteeing the only motion anyone sees is forward.
  */
-export function StrokeOrderAnimation({ word }: StrokeOrderAnimationProps) {
+export function StrokeOrderAnimation({ word, size = 'default' }: StrokeOrderAnimationProps) {
   const chars = useMemo(() => [...word].filter((ch) => hiraganaStrokes[ch]), [word])
   const pathRefs = useRef(new Map<string, SVGPathElement>())
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -82,7 +86,7 @@ export function StrokeOrderAnimation({ word }: StrokeOrderAnimationProps) {
   return (
     <div
       ref={containerRef}
-      className="stroke-order-animation"
+      className={`stroke-order-animation${size === 'hero' ? ' is-hero' : ''}`}
       role="button"
       tabIndex={0}
       aria-label="Replay how to write this"
