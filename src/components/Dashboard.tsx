@@ -375,7 +375,7 @@ interface DashboardProps {
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
   onOpenQuests: () => void
-  onOpenAchievements: () => void
+  onOpenBeginnerZone: () => void
   onOpenStudyTools: () => void
   onOpenAdditionalTools: () => void
   onOpenFavoriteWords: () => void
@@ -386,7 +386,7 @@ export function Dashboard({
   learnedCount,
   totalCards,
   onOpenQuests,
-  onOpenAchievements,
+  onOpenBeginnerZone,
   onOpenStudyTools,
   onOpenAdditionalTools,
   onOpenFavoriteWords,
@@ -650,6 +650,28 @@ export function Dashboard({
                 role="menu"
                 aria-label={`${storyLevel} stories`}
               >
+                <div className="control-story-quick-menu-levels" role="group" aria-label="Story difficulty">
+                  {STORY_LEVEL_DISPLAY.map(({ level, name }) => {
+                    const hasStories = getHeroStoriesForLevel(level).length > 0
+                    return (
+                      <button
+                        key={level}
+                        type="button"
+                        className={`control-story-quick-menu-level${level === storyLevel ? ' is-active' : ''}`}
+                        aria-pressed={level === storyLevel}
+                        aria-label={`${level} ${name}${hasStories ? '' : ': coming soon'}`}
+                        title={hasStories ? `${level} ${name}` : `${level} ${name} coming soon`}
+                        // Switching level re-populates the story grid below
+                        // without closing the menu, so picking a level and a
+                        // story happens in one open/close cycle.
+                        onClick={() => setStoryLevel(level)}
+                        disabled={!hasStories}
+                      >
+                        {level}
+                      </button>
+                    )
+                  })}
+                </div>
                 {storiesAtLevel.map((story) => (
                   <button
                     key={story.id}
@@ -1238,10 +1260,13 @@ export function Dashboard({
         </div>
 
         <div className="dashboard-action-secondary">
-          <button type="button" className="dashboard-achievement-button" onClick={onOpenAchievements}>
-            <span className="dashboard-achievement-mark" aria-hidden="true">&#35465;</span>
+          {/* Reuses the achievement button's classes: they carry the shared
+              secondary-tile layout, and the beginner modifier only restyles
+              the accent colour on top. */}
+          <button type="button" className="dashboard-achievement-button dashboard-beginner-button" onClick={onOpenBeginnerZone}>
+            <span className="dashboard-achievement-mark dashboard-beginner-mark" aria-hidden="true" lang="ja">&#12354;</span>
             <span>
-              <b>Achievements</b>
+              <b>Beginner zone</b>
             </span>
           </button>
 

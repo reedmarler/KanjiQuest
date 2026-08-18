@@ -16,7 +16,7 @@ export function AchievementsPanel({ onBack, ...context }: AchievementsPanelProps
   return (
     <main className="achievements-page">
       <header className="quest-topbar">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        <button type="button" className="btn btn-ghost" onClick={onBack}>← Back</button>
         <span>{unlocked} / {achievements.length} unlocked</span>
       </header>
 

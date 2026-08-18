@@ -29,6 +29,7 @@ import type { DrillExercise } from './lib/drillExercises'
 import { Dashboard } from './components/Dashboard'
 import { SessionComplete } from './components/SessionComplete'
 import type { LibraryTab } from './components/LibraryPanel'
+import type { BeginnerScript } from './data/beginnerMnemonics'
 import './App.css'
 
 const ContentStudio = lazy(() => import('./components/ContentStudio').then((module) => ({ default: module.ContentStudio })))
@@ -45,6 +46,7 @@ const QuestScene = lazy(() => import('./components/QuestScene').then((module) =>
 const QuestCheckpoint = lazy(() => import('./components/QuestCheckpoint').then((module) => ({ default: module.QuestCheckpoint })))
 const FavoriteWordsPage = lazy(() => import('./components/FavoriteWordsPage').then((module) => ({ default: module.FavoriteWordsPage })))
 const AchievementsPanel = lazy(() => import('./components/AchievementsPanel').then((module) => ({ default: module.AchievementsPanel })))
+const BeginnerLearner = lazy(() => import('./components/BeginnerLearner').then((module) => ({ default: module.BeginnerLearner })))
 
 type View =
   | 'dashboard'
@@ -66,6 +68,8 @@ type View =
   | 'study-tools'
   | 'additional-tools'
   | 'favorite-words'
+  | 'beginner-zone'
+  | 'beginner-learner'
 
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
@@ -87,6 +91,7 @@ function App() {
   const [questProgress, setQuestProgress] = useState(loadQuestProgress)
   const [achievementMetrics, setAchievementMetrics] = useState(loadAchievementMetrics)
   const [practiceReturnView, setPracticeReturnView] = useState<View>('dashboard')
+  const [beginnerScript, setBeginnerScript] = useState<BeginnerScript>('hiragana')
 
   // This is a single-page app, so route changes otherwise retain whatever
   // scroll offset the previous screen left behind. Run before paint so each
@@ -324,7 +329,7 @@ function App() {
       <div className="app">
         <Suspense fallback={<RouteLoading label="Achievements" />}>
           <AchievementsPanel
-            onBack={() => setView('dashboard')}
+            onBack={() => setView('additional-tools')}
             learnedCards={learnedCount}
             favoriteSentences={favoriteSentences.length}
             questProgress={questProgress}
@@ -372,6 +377,43 @@ function App() {
     )
   }
 
+  if (view === 'beginner-zone') {
+    return (
+      <div className="app">
+        <ToolMenuPage
+          title="Beginner zone"
+          eyebrow="START HERE"
+          description="Never read Japanese before? Learn every character by the picture it hides."
+          onBack={() => setView('dashboard')}
+          tools={[
+            { mark: 'あ', title: 'Hiragana', detail: 'The 46 rounded characters, five at a time.', accent: 'sakura', onClick: () => {
+              setBeginnerScript('hiragana')
+              setView('beginner-learner')
+            } },
+            { mark: 'ア', title: 'Katakana', detail: 'The angular script for foreign words and names.', accent: 'kyogre', onClick: () => {
+              setBeginnerScript('katakana')
+              setView('beginner-learner')
+            } },
+            { mark: '一', title: 'First Kanji', detail: 'Thirty starter kanji you can actually picture.', accent: 'gold', onClick: () => {
+              setBeginnerScript('kanji')
+              setView('beginner-learner')
+            } },
+          ]}
+        />
+      </div>
+    )
+  }
+
+  if (view === 'beginner-learner') {
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Beginner zone" />}>
+          <BeginnerLearner script={beginnerScript} onBack={() => setView('beginner-zone')} />
+        </Suspense>
+      </div>
+    )
+  }
+
   if (view === 'favorite-words') {
     return (
       <div className="app">
@@ -399,6 +441,7 @@ function App() {
               setLibraryTab('categories')
               setView('library')
             } },
+            { mark: '誉', title: 'Achievements', detail: 'Every quest, story, and hard-won reading.', accent: 'amber', onClick: () => setView('achievements') },
             { mark: '編', title: 'Content Studio', detail: 'Add and organize your own content.', accent: 'gold', onClick: () => setView('content-studio') },
             { mark: '験', title: 'Sentence Testing', detail: 'Generate sentences by complexity level.', accent: 'kyogre', onClick: () => setView('sentence-testing') },
             { mark: '声', title: 'Voice Test', detail: 'Compare provider voices before building audio.', accent: 'sakura', onClick: () => setView('voice-test') },
@@ -546,7 +589,7 @@ function App() {
         learnedCount={learnedCount}
         totalCards={CARD_TOTAL}
         onOpenQuests={() => setView('quests')}
-        onOpenAchievements={() => setView('achievements')}
+        onOpenBeginnerZone={() => setView('beginner-zone')}
         onOpenStudyTools={() => setView('study-tools')}
         onOpenAdditionalTools={() => setView('additional-tools')}
         onOpenFavoriteWords={() => setView('favorite-words')}

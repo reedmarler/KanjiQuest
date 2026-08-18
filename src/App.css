@@ -2170,6 +2170,8 @@ body:has(.dashboard) {
   top: 100%;
   right: 0;
   margin-top: 0.3rem;
+  width: max-content;
+  max-width: none;
 }
 
 .control-swap-mode-button {
@@ -2405,6 +2407,45 @@ body:has(.dashboard) {
   border-radius: 0.55rem;
   background: color-mix(in srgb, var(--surface-2) 96%, black);
   box-shadow: 0 0.75rem 1.8rem rgba(0, 0, 0, 0.38);
+}
+
+.control-story-quick-menu-levels {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 0.3rem;
+  margin-bottom: 0.3rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--rayquaza-light) 20%, var(--border));
+}
+
+.control-story-quick-menu-level {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 1.55rem;
+  padding: 0 0.2rem;
+  border: 1px solid color-mix(in srgb, var(--rayquaza-light) 24%, var(--border));
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--text-muted);
+  font: 700 0.56rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.control-story-quick-menu-level:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 46%, var(--border));
+  color: var(--text);
+}
+
+.control-story-quick-menu-level.is-active {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 60%, transparent);
+  background: color-mix(in srgb, var(--rayquaza) 22%, transparent);
+  color: var(--rayquaza-light);
+}
+
+.control-story-quick-menu-level:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .control-story-quick-menu button {
@@ -3365,6 +3406,27 @@ body:has(.dashboard) {
 .dashboard-achievement-button small { color: var(--gold); }
 .dashboard-achievement-button b { font-size: .7rem; }
 .dashboard-achievement-button em { color: var(--text-muted); font-size: .54rem; font-style: normal; }
+
+/* Beginner zone borrows the achievement tile's layout but wears the sakura
+   accent, so the two secondary tiles read as different destinations. */
+.dashboard-beginner-button {
+  border-color: color-mix(in srgb, var(--sakura) 34%, var(--border));
+  background: linear-gradient(100deg, color-mix(in srgb, var(--sakura) 8%, var(--surface)), var(--surface));
+}
+
+.dashboard-beginner-button:hover {
+  border-color: var(--sakura);
+  background: linear-gradient(100deg, color-mix(in srgb, var(--sakura) 13%, var(--surface)), var(--surface));
+}
+
+.dashboard-beginner-mark {
+  background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+  color: var(--sakura);
+}
+
+.dashboard-beginner-button small {
+  color: var(--sakura);
+}
 
 .progress-compact {
   margin-bottom: 0.6rem;
@@ -5778,7 +5840,15 @@ body:has(.dashboard) {
   .control-story-topbar:has(.control-story-quick-select) {
     justify-content: space-between;
   }
-  .control-story-quick-select {
+  /* The 'pick a mode' button is short and unlike the story/grammar
+     settings buttons never needs the space-between spread to make room for
+     a long title — packing it flush against the toggle keeps the two
+     related controls visually together instead of pinned to opposite
+     screen edges. */
+  .control-story-topbar:has(.control-story-quick-select.is-picking) {
+    justify-content: flex-end;
+  }
+  .control-story-quick-select:not(.is-swap) {
     min-width: 0;
     max-width: calc(100% - 4.5rem);
   }
@@ -8520,6 +8590,19 @@ body:has(.dashboard) {
 
 .focused-vocab-practice-standard .focused-vocab-main-word.is-furigana-visible .furigana-ruby rt {
   opacity: 1;
+}
+
+/* Longer words get a smaller font-size so they still fit on one line, but the
+   line box that produces (font-size * line-height:1) would otherwise shrink
+   with them and make the card bounce shorter/taller as the learner works
+   through the deck. Pinning every word to the same reserved height — the
+   tallest case, the unscaled 1-2 char size below — and centering the
+   (possibly smaller) glyphs inside it keeps the card height constant. */
+.focused-vocab-practice-standard .focused-vocab-main-word {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(4.5rem, 11vh, 6.5rem);
 }
 
 .focused-vocab-practice-standard .main-word-length-3 .focused-vocab-main-word {
@@ -14361,5 +14444,242 @@ button.counter-example {
 @media (prefers-reduced-motion: reduce) {
   .counter-quiz-options button {
     transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Beginner zone
+   The learner is deliberately sparse: one huge character, one mnemonic, two
+   buttons. Absolute beginners are the audience, so nothing competes with the
+   character on screen.
+   --------------------------------------------------------------------------- */
+
+.beginner-learner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  width: min(100%, 34rem);
+  margin-inline: auto;
+  padding: 0.8rem 0.9rem 1.4rem;
+}
+
+.beginner-learner-top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.beginner-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.5rem 0.3rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-muted);
+  font: 650 0.6rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.beginner-back:hover {
+  border-color: var(--sakura);
+  color: var(--text);
+}
+
+.beginner-back svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.beginner-learner-title {
+  color: var(--text);
+  font: 800 0.9rem/1 'Outfit', system-ui, sans-serif;
+  text-align: center;
+}
+
+.beginner-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--amber, var(--gold)) 34%, var(--border));
+  border-radius: 999px;
+  color: var(--gold);
+  font: 800 0.7rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-row-tabs {
+  display: flex;
+  gap: 0.3rem;
+  padding-bottom: 0.25rem;
+  overflow-x: auto;
+}
+
+.beginner-row-tab {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 0.15rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-muted);
+  font: 700 0.56rem/1 'Outfit', system-ui, sans-serif;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+}
+
+.beginner-row-tab small {
+  color: color-mix(in srgb, var(--text-muted) 80%, transparent);
+  font-size: 0.48rem;
+}
+
+.beginner-row-tab:hover {
+  border-color: color-mix(in srgb, var(--sakura) 50%, var(--border));
+  color: var(--text);
+}
+
+.beginner-row-tab.is-active {
+  border-color: var(--sakura);
+  background: color-mix(in srgb, var(--sakura) 14%, transparent);
+  color: var(--text);
+}
+
+/* A finished row keeps its green tick colour even when another row is open,
+   so progress across the whole chart stays visible at a glance. */
+.beginner-row-tab.is-done {
+  border-color: color-mix(in srgb, var(--rayquaza) 55%, var(--border));
+  color: var(--rayquaza-light);
+}
+
+.beginner-row-tab.is-done small {
+  color: var(--rayquaza-light);
+}
+
+.beginner-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 1.3rem 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.beginner-char {
+  margin: 0;
+  color: var(--text);
+  font: 400 clamp(5rem, 22vw, 8rem)/1 'Noto Sans JP', sans-serif;
+}
+
+.beginner-answer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.beginner-romaji {
+  color: var(--sakura);
+  font: 800 1.7rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.beginner-meaning {
+  color: var(--text-muted);
+  font: 650 0.75rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-mnemonic {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+  margin: 0.15rem 0 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--border));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--gold) 7%, var(--surface-2));
+  color: var(--text);
+  font: 500 0.82rem/1.5 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-mnemonic-label {
+  color: var(--gold);
+  font: 800 0.5rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.beginner-score-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.2rem;
+}
+
+.beginner-reveal {
+  width: 100%;
+}
+
+.beginner-card-footer {
+  margin: 0.15rem 0 0;
+  color: var(--text-muted);
+  font: 600 0.56rem/1.3 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-card-complete .beginner-complete-mark {
+  font-size: 2.6rem;
+}
+
+.beginner-card-complete h2 {
+  margin: 0;
+  color: var(--text);
+  font: 800 1.1rem/1.2 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-card-complete p {
+  margin: 0;
+  color: var(--text-muted);
+  font: 500 0.75rem/1.45 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-complete-chars {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+  margin: 0.2rem 0 0.3rem;
+  color: var(--sakura);
+  font: 400 2rem/1 'Noto Sans JP', sans-serif;
+}
+
+.beginner-card-complete .btn {
+  width: 100%;
+}
+
+@media (max-width: 430px) {
+  .beginner-learner {
+    padding: 0.6rem 0.65rem 1.2rem;
+  }
+
+  .beginner-mnemonic {
+    font-size: 0.76rem;
+  }
+
+  .beginner-romaji {
+    font-size: 1.45rem;
   }
 }
