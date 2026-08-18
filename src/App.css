@@ -14688,12 +14688,36 @@ button.counter-example {
   text-transform: uppercase;
 }
 
-.beginner-stroke-fill {
-  width: min(100%, 10rem);
+.stroke-order-animation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  width: min(100%, 12rem);
+}
+
+.stroke-order-char {
+  width: 3.6rem;
   aspect-ratio: 1;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--surface-2);
+}
+
+.stroke-order-path {
+  fill: none;
+  stroke: #e0447a;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  transition-property: stroke-dashoffset;
+  transition-timing-function: ease-in-out;
+}
+
+.stroke-order-path.is-drawn {
+  stroke-dashoffset: 0;
 }
 
 .trace-canvas {

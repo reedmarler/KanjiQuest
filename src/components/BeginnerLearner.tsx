@@ -3,7 +3,7 @@ import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '..
 import { hiraganaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
 import { speakJapanese } from '../lib/speech'
 import { SpeakableWord } from './SpeakableWord'
-import { StrokeFillAnimation } from './StrokeFillAnimation'
+import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { TraceCanvas } from './TraceCanvas'
 
 /** How many words the trace-and-recall part of a row quiz shows before the
@@ -235,7 +235,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
             </p>
 
             <div className="beginner-write-section">
-              <StrokeFillAnimation key={currentTraceWord.word} char={currentTraceWord.word} />
+              <StrokeOrderAnimation key={currentTraceWord.word} word={currentTraceWord.word} />
               <TraceCanvas key={currentTraceWord.word} char={currentTraceWord.word} />
             </div>
 
@@ -306,7 +306,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               into. Keyed on the character so a fresh canvas loads per card. */}
           <div className="beginner-write-section">
             <span className="beginner-write-label">Practice writing it</span>
-            <StrokeFillAnimation key={card.char} char={card.char} />
+            {script === 'hiragana' && <StrokeOrderAnimation key={card.char} word={card.char} />}
             <TraceCanvas key={card.char} char={card.char} onScored={(score) => recordTraceScore(card.char, score)} />
           </div>
 
