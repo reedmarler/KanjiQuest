@@ -2162,14 +2162,12 @@ body:has(.dashboard) {
 }
 
 .control-story-toggle-stack {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .control-story-toggle-stack .control-story-quick-select.is-swap {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 0.3rem;
   width: max-content;
   max-width: none;
 }
@@ -5842,7 +5840,7 @@ body:has(.dashboard) {
     min-height: 0;
     gap: 0.32rem;
   }
-  .control-story-topbar:has(.control-story-quick-select) {
+  .control-story-topbar:has(> .control-story-quick-select:not(.is-swap)) {
     justify-content: space-between;
   }
   .control-story-quick-select:not(.is-swap) {
