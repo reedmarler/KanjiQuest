@@ -17,6 +17,20 @@ const INK_WIDTH = 18
 const TOLERANCE_RADIUS = 8
 /** How far ink is allowed to spread when checking glyph coverage, forgiving normal stroke width. */
 const COVERAGE_RADIUS = 6
+/** How much of a cell's height the printed/mask glyph fills. */
+const GLYPH_FONT_RATIO = 0.82
+
+const SCORE_RANKS = [
+  { min: 92, label: 'Excellent', tier: 'is-great' },
+  { min: 84, label: 'Great', tier: 'is-great' },
+  { min: 70, label: 'Good', tier: 'is-good' },
+  { min: 50, label: 'Okay', tier: 'is-good' },
+  { min: 0, label: 'Keep practicing', tier: 'is-retry' },
+] as const
+
+function rankForScore(score: number) {
+  return SCORE_RANKS.find((rank) => score >= rank.min)!
+}
 
 interface GlyphMasks {
   /** True where the printed character itself has ink — used to score coverage. */
@@ -58,7 +72,7 @@ function buildGlyphMasks(chars: string[], width: number, height: number): GlyphM
   ctx.fillStyle = '#000'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.font = `${Math.round(SIZE * 0.74)}px 'Noto Sans JP', sans-serif`
+  ctx.font = `${Math.round(SIZE * GLYPH_FONT_RATIO)}px 'Noto Sans JP', sans-serif`
   chars.forEach((ch, index) => {
     const cellCenterX = SIZE * (index + 0.5)
     ctx.fillText(ch, cellCenterX, height / 2 + SIZE * 0.04)
@@ -90,7 +104,7 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
   const drawingRef = useRef(false)
   const lastPointRef = useRef<{ x: number; y: number } | null>(null)
   const hasInkRef = useRef(false)
-  const [result, setResult] = useState<{ score: number; message: string } | null>(null)
+  const [result, setResult] = useState<{ score: number } | null>(null)
 
   const chars = [...char]
   const charCount = Math.max(1, chars.length)
@@ -99,7 +113,7 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
   // A single character keeps its original large square; a word gets one
   // square cell per character instead of squeezing every glyph into that
   // same square, which was both illegible and threw off trace scoring.
-  const stackWidthRem = charCount <= 1 ? 17 : charCount * 9
+  const stackWidthRem = charCount <= 1 ? 21 : charCount * 11
 
   // A new character means a fresh guide, a fresh mask, and a blank page —
   // stale ink from the previous character must not leak into this score.
@@ -116,7 +130,7 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
         ctx.fillStyle = 'rgba(148, 148, 168, 0.38)'
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.font = `${Math.round(SIZE * 0.74)}px 'Noto Sans JP', sans-serif`
+        ctx.font = `${Math.round(SIZE * GLYPH_FONT_RATIO)}px 'Noto Sans JP', sans-serif`
         chars.forEach((ch, index) => {
           ctx.fillText(ch, SIZE * (index + 0.5), height / 2 + SIZE * 0.04)
         })
@@ -185,7 +199,7 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
     const ink = inkCanvasRef.current
     const masks = masksRef.current
     if (!ink || !masks || !hasInkRef.current) {
-      setResult({ score: 0, message: 'Trace the character first.' })
+      setResult({ score: 0 })
       return
     }
 
@@ -203,7 +217,7 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
     }
 
     if (inkTotal === 0) {
-      setResult({ score: 0, message: 'Trace the character first.' })
+      setResult({ score: 0 })
       return
     }
 
@@ -216,14 +230,7 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
     const coverage = masks.rawCount > 0 ? covered / masks.rawCount : 0
     const score = Math.round(Math.min(1, precision) * 55 + Math.min(1, coverage) * 45)
 
-    const message =
-      score >= 85 ? 'Beautiful! That looks just right.'
-      : score >= 65 ? 'Good tracing — a little more practice and it will be automatic.'
-      : coverage < 0.6 ? 'You missed part of the character — trace the whole shape.'
-      : showGuide ? 'Keep your strokes closer to the gray guide.'
-      : 'Not quite — listen again and try writing it from memory.'
-
-    setResult({ score, message })
+    setResult({ score })
     onScored?.(score)
   }
 
@@ -247,8 +254,9 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
           onPointerLeave={handlePointerUp}
         />
         {result && (
-          <span className={`trace-canvas-score${result.score >= 85 ? ' is-great' : result.score >= 65 ? ' is-good' : ' is-retry'}`}>
-            {result.score}
+          <span className={`trace-canvas-score ${rankForScore(result.score).tier}`}>
+            <b>{result.score}</b>
+            <em>{rankForScore(result.score).label}</em>
           </span>
         )}
       </div>
@@ -257,12 +265,6 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
         <button type="button" className="btn btn-ghost" onClick={clearInk}>Clear</button>
         <button type="button" className="btn btn-primary" onClick={checkTracing}>Check</button>
       </div>
-
-      {result && (
-        <p className={`trace-canvas-result${result.score >= 85 ? ' is-great' : result.score >= 65 ? ' is-good' : ' is-retry'}`}>
-          {result.message}
-        </p>
-      )}
     </div>
   )
 }
