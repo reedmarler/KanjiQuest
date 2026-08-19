@@ -17,10 +17,10 @@ interface StrokeOrderAnimationProps {
 
 /** Beat before the first stroke starts, so the learner has a moment to look
  *  at the blank box before anything moves. */
-const START_DELAY_MS = 1000
+const START_DELAY_MS = 50
 /** How long each stroke takes to draw. Slow on purpose — the point is to watch it.
  *  Beginner zone runs at half speed (2x duration) to make strokes easier to follow. */
-const STROKE_DURATION_MS = 2200
+const STROKE_DURATION_MS = 4100
 /** How much earlier the next stroke starts, before the current one finishes
  *  drawing — real handwriting doesn't stop dead between strokes, so the next
  *  one begins its own draw while the previous is still finishing. */
@@ -58,7 +58,10 @@ export function StrokeOrderAnimation({ word, size = 'default' }: StrokeOrderAnim
     // animated jump, which is the reverse-draw bug described above.
     paths.forEach((path) => {
       path.style.transition = 'none'
-      path.style.strokeDashoffset = String(NORMALIZED_PATH_LENGTH)
+      // Mid-gap (see .stroke-order-path in App.css) rather than right at the
+      // dash length, so there's room on both sides before the pattern wraps
+      // back into the dash zone and exposes a stray dot.
+      path.style.strokeDashoffset = String(NORMALIZED_PATH_LENGTH * 3)
     })
     void containerRef.current?.offsetHeight
     paths.forEach((path) => {

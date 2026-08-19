@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
 import { hiraganaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
 import { speakJapanese } from '../lib/speech'
+import { SPEECH_SPEEDS } from '../lib/speechSpeeds'
 import { SpeakableWord } from './SpeakableWord'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
-import { TraceCanvas } from './TraceCanvas'
+import { TraceCanvas, type TraceCanvasHandle } from './TraceCanvas'
 
 /** How many words the trace-and-recall part of a row quiz shows before the
  *  blank-slate dictation word that actually passes the quiz. */
@@ -85,12 +86,13 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   const [quizTraceIndex, setQuizTraceIndex] = useState(0)
   const [quizRevealed, setQuizRevealed] = useState(false)
   const [dictationResult, setDictationResult] = useState<{ score: number; passed: boolean } | null>(null)
+  const traceRef = useRef<TraceCanvasHandle>(null)
 
   const row = deck.rows[rowIndex]!
   // The row's characters, shuffled once per row so the learner does not
   // simply memorise the chart order instead of the characters. cardIndex
   // walks through it; Next/Previous just move the pointer.
-  const [cards, setCards] = useState<BeginnerCharacter[]>(() => shuffled(deck.rows[0]!.characters))
+  const [cards, setCards] = useState<BeginnerCharacter[]>(() => deck.rows[0]!.characters)
   const [cardIndex, setCardIndex] = useState(0)
   const card = cards[cardIndex]
 
@@ -104,7 +106,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
 
   function openRow(index: number) {
     setRowIndex(index)
-    setCards(shuffled(deck.rows[index]!.characters))
+    setCards(deck.rows[index]!.characters)
     setCardIndex(0)
     setQuizWords(null)
   }
@@ -126,6 +128,11 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
       }
       return next
     })
+  }
+
+  function goPreviousQuizTrace() {
+    setQuizRevealed(false)
+    setQuizTraceIndex((current) => Math.max(0, current - 1))
   }
 
   function finishQuiz() {
@@ -202,36 +209,56 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
       {quizWords ? (
         quizPhase === 'trace' && currentTraceWord ? (
           <main className="beginner-card">
-            <span className="beginner-write-label">Row quiz — word {quizTraceIndex + 1} of {traceWords.length}</span>
-            <button
-              type="button"
-              className="btn btn-ghost beginner-play-word"
-              onClick={() => speakJapanese(currentTraceWord.word)}
-            >
-              &#128264; Play the word
-            </button>
-            <StrokeOrderAnimation word={currentTraceWord.word} size="hero" />
-
-            <div className="beginner-write-section">
-              <span className="beginner-write-label">Trace it</span>
-              <TraceCanvas key={currentTraceWord.word} char={currentTraceWord.word} />
+            {/* Just Previous and Check meaning / Next word up top now — Play
+                moved onto the example itself (tapping it both replays the
+                stroke animation and speaks the word) and Check moved into
+                the tracing panel's own top strip, so this row stays light
+                and the examples/tracing box below get the space instead. */}
+            <div className="beginner-top-actions beginner-top-actions--tight">
+              <button
+                type="button"
+                className="btn btn-ghost beginner-action-btn"
+                onClick={goPreviousQuizTrace}
+                disabled={quizTraceIndex === 0}
+              >
+                Previous
+              </button>
+              {quizRevealed ? (
+                <button type="button" className="btn btn-primary beginner-action-btn beginner-action-btn-green" onClick={advanceQuizTrace}>Next word &rarr;</button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-primary beginner-action-btn beginner-action-btn-green beginner-check-meaning-btn"
+                  onClick={() => setQuizRevealed(true)}
+                >
+                  Check meaning
+                </button>
+              )}
             </div>
 
-            {quizRevealed ? (
-              <div className="beginner-answer">
-                <p className="beginner-mnemonic">
-                  <span className="beginner-mnemonic-label">Means</span>
-                  {currentTraceWord.meaning}
-                </p>
-                <div className="beginner-score-buttons">
-                  <button type="button" className="btn btn-primary" onClick={advanceQuizTrace}>Next word &rarr;</button>
-                </div>
+            <div className="beginner-write-stack">
+              <div
+                className="beginner-quiz-example"
+                onClick={() => speakJapanese(currentTraceWord.word, { rate: SPEECH_SPEEDS.learning, synthesisRate: SPEECH_SPEEDS.natural })}
+              >
+                <StrokeOrderAnimation word={currentTraceWord.word} size="hero" />
               </div>
-            ) : (
-              <button type="button" className="btn btn-primary beginner-reveal" onClick={() => setQuizRevealed(true)}>
-                Check meaning
-              </button>
-            )}
+              <div className="beginner-write-section">
+                {/* The meaning shows inside the tracing panel's top strip
+                    once revealed — no separate "Means" box or extra copy
+                    of the word, so the rest of the card stays dedicated
+                    to writing. Check lives in that same strip (compact,
+                    swapping for the score once tapped) instead of its own
+                    row above. */}
+                <TraceCanvas
+                  key={currentTraceWord.word}
+                  char={currentTraceWord.word}
+                  hideActions
+                  compactCheck
+                  topLabel={quizRevealed ? currentTraceWord.meaning : undefined}
+                />
+              </div>
+            </div>
           </main>
         ) : dictationWord ? (
           <main className="beginner-card">
@@ -239,7 +266,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
             <button
               type="button"
               className="btn btn-primary beginner-reveal"
-              onClick={() => speakJapanese(dictationWord.word)}
+              onClick={() => speakJapanese(dictationWord.word, { rate: SPEECH_SPEEDS.learning, synthesisRate: SPEECH_SPEEDS.natural })}
             >
               &#128264; Play the word
             </button>
@@ -297,32 +324,45 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
         </main>
       ) : card ? (
         <main className="beginner-card is-revealed">
-          {script === 'hiragana' ? (
-            // Drawing the character already shows it — a second, plain copy
-            // of the same character right above would just be redundant, so
-            // the stroke animation replaces the flashcard's usual big glyph.
-            <StrokeOrderAnimation word={card.char} size="hero" />
-          ) : (
+          {script !== 'hiragana' && (
             <p className="beginner-char" lang="ja">
               <SpeakableWord text={card.char}>{card.char}</SpeakableWord>
             </p>
           )}
 
-          {/* Writing lives right under the character itself — trace it while
-              it's fresh on screen, rather than as a separate mode to switch
-              into. Keyed on the character so a fresh canvas loads per card. */}
-          <div className="beginner-write-section">
-            <span className="beginner-write-label">Practice writing it</span>
-            <TraceCanvas key={card.char} char={card.char} onScored={(score) => recordTraceScore(card.char, score)} />
+          {/* Previous, Check, and Next all sit above the writing area — Check
+              drives the TraceCanvas below via a ref instead of the canvas's
+              own internal button — so the two squares get the maximum
+              vertical space instead of competing with a button row. */}
+          <div className="beginner-top-actions">
+            <button type="button" className="btn btn-ghost beginner-action-btn" onClick={goPrevious} disabled={cardIndex === 0}>Previous</button>
+            <button type="button" className="btn btn-primary beginner-action-btn" onClick={() => traceRef.current?.check()}>Check</button>
+            <button type="button" className="btn btn-primary beginner-action-btn beginner-action-btn-green" onClick={goNext}>Next</button>
           </div>
 
-          <div className="beginner-answer">
-            {card.meaning && <span className="beginner-meaning">{card.meaning}</span>}
-            <div className="beginner-score-buttons">
-              <button type="button" className="btn btn-ghost" onClick={goPrevious} disabled={cardIndex === 0}>Previous</button>
-              <button type="button" className="btn btn-primary" onClick={goNext}>Next</button>
+          {/* Writing lives right under the character itself — trace it while
+              it's fresh on screen, rather than as a separate mode to switch
+              into. Keyed on the character so a fresh canvas loads per card.
+              On desktop the example and the tracing box sit side by side,
+              with tracing given most of the width since it's what you use. */}
+          <div className="beginner-write-layout">
+            {script === 'hiragana' && <StrokeOrderAnimation word={card.char} size="hero" />}
+            <div className="beginner-write-section">
+              <TraceCanvas
+                key={card.char}
+                ref={traceRef}
+                char={card.char}
+                hideActions
+                onScored={(score) => recordTraceScore(card.char, score)}
+              />
             </div>
           </div>
+
+          {card.meaning && (
+            <div className="beginner-answer">
+              <span className="beginner-meaning">{card.meaning}</span>
+            </div>
+          )}
         </main>
       ) : null}
     </div>

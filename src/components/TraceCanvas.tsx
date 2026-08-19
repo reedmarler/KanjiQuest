@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 interface TraceCanvasProps {
   char: string
@@ -6,6 +6,22 @@ interface TraceCanvasProps {
   onScored?: (score: number) => void
   /** false for dictation: a blank slate with no printed guide to trace over. */
   showGuide?: boolean
+  /** When the parent renders its own Clear/Check buttons (via the ref handle
+   *  below) instead of the ones normally shown inside the canvas. */
+  hideActions?: boolean
+  /** With hideActions, also show a small Check button in the canvas's own
+   *  top strip (left slot) instead of relying on the parent to trigger it
+   *  via the ref handle — it swaps for the score badge once there's a
+   *  result. */
+  compactCheck?: boolean
+  /** Shown centered in the top strip of the canvas, between the score badge
+   *  and Clear — e.g. the row quiz's revealed English meaning. */
+  topLabel?: string
+}
+
+export interface TraceCanvasHandle {
+  check: () => void
+  clear: () => void
 }
 
 /** Logical resolution a single character's cell is computed in — a word of
@@ -97,7 +113,10 @@ function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HT
   }
 }
 
-export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasProps) {
+export const TraceCanvas = forwardRef<TraceCanvasHandle, TraceCanvasProps>(function TraceCanvas(
+  { char, onScored, showGuide = true, hideActions = false, compactCheck = false, topLabel },
+  ref,
+) {
   const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const inkCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const masksRef = useRef<GlyphMasks | null>(null)
@@ -113,7 +132,7 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
   // A single character keeps its original large square; a word gets one
   // square cell per character instead of squeezing every glyph into that
   // same square, which was both illegible and threw off trace scoring.
-  const stackWidthRem = charCount <= 1 ? 21 : charCount * 11
+  const stackWidthRem = charCount <= 1 ? 21 : charCount * 15
 
   // A new character means a fresh guide, a fresh mask, and a blank page —
   // stale ink from the previous character must not leak into this score.
@@ -234,8 +253,17 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
     onScored?.(score)
   }
 
+  useImperativeHandle(ref, () => ({ check: checkTracing, clear: clearInk }))
+
   return (
     <div className="trace-canvas">
+      {!hideActions && (
+        <div className="trace-canvas-actions">
+          <button type="button" className="btn btn-ghost beginner-action-btn" onClick={clearInk}>Clear</button>
+          <button type="button" className="btn btn-primary beginner-action-btn" onClick={checkTracing}>Check</button>
+        </div>
+      )}
+
       <div
         className="trace-canvas-stack"
         style={{ touchAction: 'none', aspectRatio: `${width} / ${height}`, width: `min(100%, ${stackWidthRem}rem)` }}
@@ -253,18 +281,30 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
         />
-        {result && (
-          <span className={`trace-canvas-score ${rankForScore(result.score).tier}`}>
-            <b>{result.score}</b>
-            <em>{rankForScore(result.score).label}</em>
-          </span>
-        )}
-      </div>
-
-      <div className="trace-canvas-actions">
-        <button type="button" className="btn btn-ghost" onClick={clearInk}>Clear</button>
-        <button type="button" className="btn btn-primary" onClick={checkTracing}>Check</button>
+        {/* One top strip so the score badge, the revealed meaning, and Clear
+            share a row instead of independently-placed corner overlays.
+            Each piece is pinned to its own grid column explicitly — with
+            grid auto-placement instead, Clear (often the only one present)
+            would land in whichever column comes first, not its own. */}
+        <div className="trace-canvas-top-row">
+          {result ? (
+            <span className={`trace-canvas-score ${rankForScore(result.score).tier}`}>
+              <b>{result.score}</b>
+              <em>{rankForScore(result.score).label}</em>
+            </span>
+          ) : (
+            compactCheck && (
+              <button type="button" className="trace-canvas-check" onClick={checkTracing}>Check</button>
+            )
+          )}
+          {topLabel && <span className="trace-canvas-top-label">{topLabel}</span>}
+          {hideActions && (
+            <button type="button" className="trace-canvas-clear" onClick={clearInk} aria-label="Clear">
+              &#8635; Clear
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
-}
+})
