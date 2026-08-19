@@ -113,6 +113,22 @@ body:has(.beginner-learner) .app {
   body:has(.beginner-learner) .app {
     zoom: 1;
   }
+
+  /* The flashcard stacks a large stroke-order glyph directly above an
+     equally large trace canvas — sized generously for a full-height phone
+     screen, that combination is taller than a typical desktop window even
+     at 1x zoom. Trim both so the whole card fits without scrolling. */
+  body:has(.beginner-learner) .stroke-order-animation.is-hero {
+    width: min(100%, 20rem);
+  }
+
+  body:has(.beginner-learner) .stroke-order-animation.is-hero .stroke-order-char {
+    width: clamp(5.5rem, 20vw, 7rem);
+  }
+
+  body:has(.beginner-learner) .trace-canvas-stack {
+    width: min(100%, 13rem) !important;
+  }
 }
 
 body:has(.quest-hub) .app {
