@@ -64,7 +64,11 @@ export function useSpeakable(text: string, disabled = false) {
       return
     }
     const token = speakJapanese(text, {
-      rate: SPEECH_SPEEDS.natural,
+      // Slower than the voice's own pace by default — easier to follow while
+      // learning. Synthesizing at natural speed and slowing on playback
+      // reuses the same pre-rendered clip instead of costing a second render.
+      rate: SPEECH_SPEEDS.learning,
+      synthesisRate: SPEECH_SPEEDS.natural,
       onEnd: () => setSpeaking(null),
     })
     setSpeaking({ token, status: 'loading' })
@@ -138,7 +142,8 @@ export function SpeakableWord({ text, children, disabled = false, className }: S
           return
         }
         const token = speakJapanese(text, {
-          rate: SPEECH_SPEEDS.natural,
+          rate: SPEECH_SPEEDS.learning,
+          synthesisRate: SPEECH_SPEEDS.natural,
           onEnd: () => setSpeaking(null),
         })
         setSpeaking({ token, status: 'loading' })
