@@ -14653,6 +14653,10 @@ button.counter-example {
   text-transform: uppercase;
 }
 
+.beginner-next-btn {
+  background: linear-gradient(135deg, var(--rayquaza), var(--rayquaza-light));
+}
+
 .beginner-score-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
