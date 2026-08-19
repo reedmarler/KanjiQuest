@@ -16,6 +16,7 @@
  *   # with the TTS service running (see backend/tts_service/README.md)
  *   npm run generate:audio -- --scope=focus     # 342 focus-set words
  *   npm run generate:audio -- --scope=examples  # vocab example sentences only
+ *   npm run generate:audio -- --scope=beginner  # beginner-zone quiz word bank only
  *   npm run generate:audio -- --scope=all       # every study card + example sentences (default)
  *   npm run generate:audio -- --dry-run         # count and price it, render nothing
  *
@@ -26,6 +27,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { allCards } from '../src/data'
+import { hiraganaWordBank } from '../src/data/beginnerUnderstandingWords'
 import { vocabFocusSets } from '../src/data/vocabFocusSets'
 import { kanjiLabEntries } from '../src/lib/kanjiLabCatalog'
 import { spokenTextForCard, spokenTextForWord } from '../src/lib/spokenText'
@@ -42,7 +44,7 @@ const args = process.argv.slice(2)
 const flag = (name: string) => args.find((a) => a.startsWith(`--${name}=`))?.split('=')[1]
 const has = (name: string) => args.includes(`--${name}`)
 
-const scope = (flag('scope') ?? 'all') as 'focus' | 'kanji' | 'examples' | 'all'
+const scope = (flag('scope') ?? 'all') as 'focus' | 'kanji' | 'examples' | 'beginner' | 'all'
 const serviceUrl = flag('service') ?? process.env.TTS_API_URL ?? 'http://127.0.0.1:8001'
 const voiceId = flag('voice') ?? process.env.TTS_VOICE_ID ?? ''
 const dryRun = has('dry-run')
@@ -85,6 +87,9 @@ function collectTexts(): string[] {
       const example = getVocabExampleSentence(card)
       if (example) texts.push(spokenTextForWord(example.japanese, example.reading))
     }
+  }
+  if (scope === 'all' || scope === 'beginner') {
+    for (const word of hiraganaWordBank) texts.push(spokenTextForWord(word.word))
   }
 
   return [...new Set(texts.map((t) => t.trim()).filter(Boolean))]
@@ -196,5 +201,5 @@ if (prune) {
 }
 
 console.log(`\nrendered ${rendered}, cached ${skipped}, failed ${failed}`)
-console.log(`manifest: ${done.length} playable texts -> ${path.relative(process.cwd(), MANIFEST_PATH)}`)
+console.log(`manifest: ${manifest.keys.length} playable texts -> ${path.relative(process.cwd(), MANIFEST_PATH)}`)
 if (failed) process.exitCode = 1
