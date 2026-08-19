@@ -18,15 +18,16 @@ interface StrokeOrderAnimationProps {
 /** Beat before the first stroke starts, so the learner has a moment to look
  *  at the blank box before anything moves. */
 const START_DELAY_MS = 1000
-/** How long each stroke takes to draw. Slow on purpose — the point is to watch it. */
-const STROKE_DURATION_MS = 1100
+/** How long each stroke takes to draw. Slow on purpose — the point is to watch it.
+ *  Beginner zone runs at half speed (2x duration) to make strokes easier to follow. */
+const STROKE_DURATION_MS = 2200
 /** How much earlier the next stroke starts, before the current one finishes
  *  drawing — real handwriting doesn't stop dead between strokes, so the next
  *  one begins its own draw while the previous is still finishing. */
-const STROKE_OVERLAP_MS = 350
+const STROKE_OVERLAP_MS = 700
 const STROKE_INTERVAL_MS = STROKE_DURATION_MS - STROKE_OVERLAP_MS
 /** Pause between characters, so each one in a word still reads as distinct. */
-const CHAR_GAP_MS = 500
+const CHAR_GAP_MS = 1000
 
 /**
  * Draws each character stroke-by-stroke, in the real stroke order and
