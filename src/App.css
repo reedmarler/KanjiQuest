@@ -5845,14 +5845,6 @@ body:has(.dashboard) {
   .control-story-topbar:has(.control-story-quick-select) {
     justify-content: space-between;
   }
-  /* The 'pick a mode' button is short and unlike the story/grammar
-     settings buttons never needs the space-between spread to make room for
-     a long title — packing it flush against the toggle keeps the two
-     related controls visually together instead of pinned to opposite
-     screen edges. */
-  .control-story-topbar:has(.control-story-quick-select.is-picking) {
-    justify-content: flex-end;
-  }
   .control-story-quick-select:not(.is-swap) {
     min-width: 0;
     max-width: calc(100% - 4.5rem);
