@@ -203,6 +203,13 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
         quizPhase === 'trace' && currentTraceWord ? (
           <main className="beginner-card">
             <span className="beginner-write-label">Row quiz — word {quizTraceIndex + 1} of {traceWords.length}</span>
+            <button
+              type="button"
+              className="btn btn-ghost beginner-play-word"
+              onClick={() => speakJapanese(currentTraceWord.word)}
+            >
+              &#128264; Play the word
+            </button>
             <StrokeOrderAnimation word={currentTraceWord.word} size="hero" />
 
             <div className="beginner-write-section">

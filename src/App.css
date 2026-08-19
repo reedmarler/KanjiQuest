@@ -14632,6 +14632,11 @@ button.counter-example {
   width: 100%;
 }
 
+.beginner-play-word {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.7rem;
+}
+
 .beginner-card-complete .beginner-complete-mark {
   font-size: 2.6rem;
 }
