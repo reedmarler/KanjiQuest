@@ -100,19 +100,12 @@ body:has(.kanji-lab) .app {
   padding-bottom: 1.4rem;
 }
 
-/* Hiragana/Katakana learner: the 150% desktop zoom that suits prose-heavy
-   views blows the character grid up far past what's needed, so drop back
-   to 1x here (mobile is already 1x via the breakpoint above) and trim the
-   leftover top padding the same way the other compact tool views do. */
+/* Trim the leftover top padding the same way the other compact tool views do
+   (mobile is already 1x zoom via the breakpoint above; on desktop this view
+   keeps the standard 150% zoom every other tool view uses). */
 body:has(.beginner-learner) .app {
   padding-top: 0.75rem;
   padding-bottom: 1.4rem;
-}
-
-@media (min-width: 721px) {
-  body:has(.beginner-learner) .app {
-    zoom: 1;
-  }
 }
 
 body:has(.quest-hub) .app {
