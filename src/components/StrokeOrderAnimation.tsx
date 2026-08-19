@@ -99,31 +99,38 @@ export function StrokeOrderAnimation({ word, size = 'default' }: StrokeOrderAnim
         setReplayToken((current) => current + 1)
       }}
     >
-      {chars.map((ch, charIndex) => {
-        const strokes = hiraganaStrokes[ch] ?? []
-        return (
-          <svg
-            key={`${ch}-${charIndex}`}
-            viewBox={`0 0 ${HIRAGANA_STROKE_VIEWBOX} ${HIRAGANA_STROKE_VIEWBOX}`}
-            className="stroke-order-char"
-            aria-hidden="true"
-          >
-            {strokes.map((d, strokeIndex) => (
-              <path
-                key={strokeIndex}
-                ref={(el) => {
-                  const refKey = `${charIndex}-${strokeIndex}`
-                  if (el) pathRefs.current.set(refKey, el)
-                  else pathRefs.current.delete(refKey)
-                }}
-                d={d}
-                pathLength={NORMALIZED_PATH_LENGTH}
-                className="stroke-order-path"
-              />
-            ))}
-          </svg>
-        )
-      })}
+      <div className="stroke-order-chars">
+        {chars.map((ch, charIndex) => {
+          const strokes = hiraganaStrokes[ch] ?? []
+          return (
+            <svg
+              key={`${ch}-${charIndex}`}
+              viewBox={`0 0 ${HIRAGANA_STROKE_VIEWBOX} ${HIRAGANA_STROKE_VIEWBOX}`}
+              className="stroke-order-char"
+              aria-hidden="true"
+            >
+              {strokes.map((d, strokeIndex) => (
+                <path
+                  key={strokeIndex}
+                  ref={(el) => {
+                    const refKey = `${charIndex}-${strokeIndex}`
+                    if (el) pathRefs.current.set(refKey, el)
+                    else pathRefs.current.delete(refKey)
+                  }}
+                  d={d}
+                  pathLength={NORMALIZED_PATH_LENGTH}
+                  className="stroke-order-path"
+                />
+              ))}
+            </svg>
+          )
+        })}
+      </div>
+      {size === 'hero' && (
+        <span className="stroke-order-replay-hint" aria-hidden="true">
+          &#8635; Tap to replay
+        </span>
+      )}
     </div>
   )
 }

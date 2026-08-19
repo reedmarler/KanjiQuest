@@ -8,7 +8,9 @@ interface TraceCanvasProps {
   showGuide?: boolean
 }
 
-/** Fixed logical resolution both canvases and the glyph mask are computed in. */
+/** Logical resolution a single character's cell is computed in — a word of
+ *  several characters gets that many cells laid out in a row, so each glyph
+ *  keeps its natural proportions instead of being squeezed into one square. */
 const SIZE = 300
 const INK_WIDTH = 18
 /** How far (in px) a stroke may wander from the printed glyph and still count as "on the line". */
@@ -24,21 +26,21 @@ interface GlyphMasks {
   rawCount: number
 }
 
-function dilate(mask: Uint8Array, size: number, radius: number): Uint8Array {
+function dilate(mask: Uint8Array, width: number, height: number, radius: number): Uint8Array {
   let current = mask
   for (let pass = 0; pass < radius; pass += 1) {
     const next = new Uint8Array(current.length)
-    for (let y = 0; y < size; y += 1) {
-      for (let x = 0; x < size; x += 1) {
-        const i = y * size + x
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const i = y * width + x
         if (current[i]) {
           next[i] = 1
           continue
         }
-        const up = y > 0 && current[i - size]
-        const down = y < size - 1 && current[i + size]
+        const up = y > 0 && current[i - width]
+        const down = y < height - 1 && current[i + width]
         const left = x > 0 && current[i - 1]
-        const right = x < size - 1 && current[i + 1]
+        const right = x < width - 1 && current[i + 1]
         next[i] = up || down || left || right ? 1 : 0
       }
     }
@@ -47,19 +49,22 @@ function dilate(mask: Uint8Array, size: number, radius: number): Uint8Array {
   return current
 }
 
-function buildGlyphMasks(char: string): GlyphMasks {
+function buildGlyphMasks(chars: string[], width: number, height: number): GlyphMasks {
   const canvas = document.createElement('canvas')
-  canvas.width = SIZE
-  canvas.height = SIZE
+  canvas.width = width
+  canvas.height = height
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!
-  ctx.clearRect(0, 0, SIZE, SIZE)
+  ctx.clearRect(0, 0, width, height)
   ctx.fillStyle = '#000'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   ctx.font = `${Math.round(SIZE * 0.74)}px 'Noto Sans JP', sans-serif`
-  ctx.fillText(char, SIZE / 2, SIZE / 2 + SIZE * 0.04)
-  const { data } = ctx.getImageData(0, 0, SIZE, SIZE)
-  const raw = new Uint8Array(SIZE * SIZE)
+  chars.forEach((ch, index) => {
+    const cellCenterX = SIZE * (index + 0.5)
+    ctx.fillText(ch, cellCenterX, height / 2 + SIZE * 0.04)
+  })
+  const { data } = ctx.getImageData(0, 0, width, height)
+  const raw = new Uint8Array(width * height)
   let rawCount = 0
   for (let i = 0; i < raw.length; i += 1) {
     if (data[i * 4 + 3] > 40) {
@@ -67,7 +72,7 @@ function buildGlyphMasks(char: string): GlyphMasks {
       rawCount += 1
     }
   }
-  return { raw, tolerance: dilate(raw, SIZE, TOLERANCE_RADIUS), rawCount }
+  return { raw, tolerance: dilate(raw, width, height, TOLERANCE_RADIUS), rawCount }
 }
 
 function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) {
@@ -87,34 +92,45 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
   const hasInkRef = useRef(false)
   const [result, setResult] = useState<{ score: number; message: string } | null>(null)
 
+  const chars = [...char]
+  const charCount = Math.max(1, chars.length)
+  const width = SIZE * charCount
+  const height = SIZE
+  // A single character keeps its original large square; a word gets one
+  // square cell per character instead of squeezing every glyph into that
+  // same square, which was both illegible and threw off trace scoring.
+  const stackWidthRem = charCount <= 1 ? 17 : charCount * 9
+
   // A new character means a fresh guide, a fresh mask, and a blank page —
   // stale ink from the previous character must not leak into this score.
   useEffect(() => {
-    masksRef.current = buildGlyphMasks(char)
+    masksRef.current = buildGlyphMasks(chars, width, height)
     hasInkRef.current = false
     setResult(null)
 
     const guide = guideCanvasRef.current
     if (guide) {
       const ctx = guide.getContext('2d')!
-      ctx.clearRect(0, 0, SIZE, SIZE)
+      ctx.clearRect(0, 0, width, height)
       if (showGuide) {
         ctx.fillStyle = 'rgba(148, 148, 168, 0.38)'
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.font = `${Math.round(SIZE * 0.74)}px 'Noto Sans JP', sans-serif`
-        ctx.fillText(char, SIZE / 2, SIZE / 2 + SIZE * 0.04)
+        chars.forEach((ch, index) => {
+          ctx.fillText(ch, SIZE * (index + 0.5), height / 2 + SIZE * 0.04)
+        })
       }
     }
 
     const ink = inkCanvasRef.current
-    if (ink) ink.getContext('2d')!.clearRect(0, 0, SIZE, SIZE)
+    if (ink) ink.getContext('2d')!.clearRect(0, 0, width, height)
   }, [char, showGuide])
 
   function clearInk() {
     const ink = inkCanvasRef.current
     if (!ink) return
-    ink.getContext('2d')!.clearRect(0, 0, SIZE, SIZE)
+    ink.getContext('2d')!.clearRect(0, 0, width, height)
     hasInkRef.current = false
     setResult(null)
   }
@@ -174,8 +190,8 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
     }
 
     const ctx = ink.getContext('2d', { willReadFrequently: true })!
-    const { data } = ctx.getImageData(0, 0, SIZE, SIZE)
-    const inkMask = new Uint8Array(SIZE * SIZE)
+    const { data } = ctx.getImageData(0, 0, width, height)
+    const inkMask = new Uint8Array(width * height)
     let inkTotal = 0
     let inkOnTarget = 0
     for (let i = 0; i < inkMask.length; i += 1) {
@@ -192,7 +208,7 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
     }
 
     const precision = inkOnTarget / inkTotal
-    const inkSpread = dilate(inkMask, SIZE, COVERAGE_RADIUS)
+    const inkSpread = dilate(inkMask, width, height, COVERAGE_RADIUS)
     let covered = 0
     for (let i = 0; i < masks.raw.length; i += 1) {
       if (masks.raw[i] && inkSpread[i]) covered += 1
@@ -213,12 +229,15 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
 
   return (
     <div className="trace-canvas">
-      <div className="trace-canvas-stack" style={{ touchAction: 'none' }}>
-        <canvas ref={guideCanvasRef} width={SIZE} height={SIZE} className="trace-canvas-layer trace-canvas-guide" aria-hidden="true" />
+      <div
+        className="trace-canvas-stack"
+        style={{ touchAction: 'none', aspectRatio: `${width} / ${height}`, width: `min(100%, ${stackWidthRem}rem)` }}
+      >
+        <canvas ref={guideCanvasRef} width={width} height={height} className="trace-canvas-layer trace-canvas-guide" aria-hidden="true" />
         <canvas
           ref={inkCanvasRef}
-          width={SIZE}
-          height={SIZE}
+          width={width}
+          height={height}
           className="trace-canvas-layer trace-canvas-ink"
           role="img"
           aria-label={showGuide ? `Trace ${char} here` : 'Write the word you just heard here'}
@@ -227,6 +246,11 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
         />
+        {result && (
+          <span className={`trace-canvas-score${result.score >= 85 ? ' is-great' : result.score >= 65 ? ' is-good' : ' is-retry'}`}>
+            {result.score}
+          </span>
+        )}
       </div>
 
       <div className="trace-canvas-actions">
@@ -236,8 +260,7 @@ export function TraceCanvas({ char, onScored, showGuide = true }: TraceCanvasPro
 
       {result && (
         <p className={`trace-canvas-result${result.score >= 85 ? ' is-great' : result.score >= 65 ? ' is-good' : ' is-retry'}`}>
-          <b>{result.score}</b>
-          <span>{result.message}</span>
+          {result.message}
         </p>
       )}
     </div>

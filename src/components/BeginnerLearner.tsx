@@ -248,11 +248,11 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
 
             {dictationResult && (
               <div className="beginner-answer">
-                <p className="beginner-char" lang="ja">{dictationWord.word}</p>
                 <p className="beginner-mnemonic">
                   <span className="beginner-mnemonic-label">Means</span>
                   {dictationWord.meaning}
                 </p>
+                <p className="beginner-char" lang="ja">{dictationWord.word}</p>
                 {dictationResult.passed ? (
                   <div className="beginner-score-buttons">
                     <button type="button" className="btn btn-primary" onClick={finishQuiz}>Quiz passed &rarr;</button>
