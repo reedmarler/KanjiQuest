@@ -8570,6 +8570,7 @@ body:has(.dashboard) {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-top: 1.3rem;
 }
 
 .focused-vocab-practice-standard .focused-vocab-main-furigana {
@@ -8583,6 +8584,7 @@ body:has(.dashboard) {
   letter-spacing: .08em;
   opacity: 0;
   transition: opacity 180ms ease;
+  transform: translateY(.3em);
 }
 
 .focused-vocab-practice-standard .focused-vocab-main-word.is-furigana-visible .furigana-ruby rt {

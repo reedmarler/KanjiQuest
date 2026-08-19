@@ -3146,7 +3146,11 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     // which lacks the 'human' tag other entries have but is exactly the word
     // this pattern most needs (おなかが痛い is the textbook example).
     const bodyParts = bodyPartPool(vocabulary)
-    const subject = pick(humans, 1501, 'subject')
+    // A body part hurting is an individual complaint — "the family's ear
+    // hurts" doesn't identify whose ear, so collective nouns like 家族/両親
+    // are excluded the same way n3-12 excludes them from single-person traits.
+    const individualSubjects = humans.filter(word => !['家族','両親','人々'].includes(word.japanese))
+    const subject = pick(individualSubjects.length ? individualSubjects : humans, 1501, 'subject')
     const bodyPart = pick(bodyParts, 1502, 'object')
     if (!subject || !bodyPart) return null
     const subjectEnglish = englishPhrase(subject,'subject')
