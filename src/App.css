@@ -100,6 +100,37 @@ body:has(.kanji-lab) .app {
   padding-bottom: 1.4rem;
 }
 
+/* Hiragana/Katakana learner: the 150% desktop zoom that suits prose-heavy
+   views blows the character grid up far past what's needed, so drop back
+   to 1x here (mobile is already 1x via the breakpoint above) and trim the
+   leftover top padding the same way the other compact tool views do. */
+body:has(.beginner-learner) .app {
+  padding-top: 0.75rem;
+  padding-bottom: 1.4rem;
+}
+
+@media (min-width: 721px) {
+  body:has(.beginner-learner) .app {
+    zoom: 1;
+  }
+
+  /* The flashcard stacks a large stroke-order glyph directly above an
+     equally large trace canvas — sized generously for a full-height phone
+     screen, that combination is taller than a typical desktop window even
+     at 1x zoom. Trim both so the whole card fits without scrolling. */
+  body:has(.beginner-learner) .stroke-order-animation.is-hero {
+    width: min(100%, 20rem);
+  }
+
+  body:has(.beginner-learner) .stroke-order-animation.is-hero .stroke-order-char {
+    width: clamp(5.5rem, 20vw, 7rem);
+  }
+
+  body:has(.beginner-learner) .trace-canvas-stack {
+    width: min(100%, 13rem) !important;
+  }
+}
+
 body:has(.quest-hub) .app {
   padding-top: 1rem;
   padding-bottom: 2rem;
@@ -8568,6 +8599,7 @@ body:has(.dashboard) {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-top: 1.3rem;
 }
 
 .focused-vocab-practice-standard .focused-vocab-main-furigana {
@@ -8581,6 +8613,7 @@ body:has(.dashboard) {
   letter-spacing: .08em;
   opacity: 0;
   transition: opacity 180ms ease;
+  transform: translateY(.3em);
 }
 
 .focused-vocab-practice-standard .focused-vocab-main-word.is-furigana-visible .furigana-ruby rt {
@@ -14616,6 +14649,10 @@ button.counter-example {
   font: 800 0.5rem/1 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.beginner-next-btn {
+  background: linear-gradient(135deg, var(--rayquaza), var(--rayquaza-light));
 }
 
 .beginner-score-buttons {

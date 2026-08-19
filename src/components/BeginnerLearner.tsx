@@ -320,7 +320,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
             {card.meaning && <span className="beginner-meaning">{card.meaning}</span>}
             <div className="beginner-score-buttons">
               <button type="button" className="btn btn-ghost" onClick={goPrevious} disabled={cardIndex === 0}>Previous</button>
-              <button type="button" className="btn btn-primary" onClick={goNext}>Next</button>
+              <button type="button" className="btn btn-primary beginner-next-btn" onClick={goNext}>Next</button>
             </div>
           </div>
         </main>
