@@ -15,19 +15,21 @@
  * Usage:
  *   # with the TTS service running (see backend/tts_service/README.md)
  *   npm run generate:audio -- --scope=focus     # 342 focus-set words
- *   npm run generate:audio -- --scope=all       # every study card (default)
+ *   npm run generate:audio -- --scope=examples  # vocab example sentences only
+ *   npm run generate:audio -- --scope=all       # every study card + example sentences (default)
  *   npm run generate:audio -- --dry-run         # count and price it, render nothing
  *
  * Re-running skips clips already on disk, so it is resumable and safe to run
  * again after adding content — only the new words are billed.
  */
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { allCards } from '../src/data'
 import { vocabFocusSets } from '../src/data/vocabFocusSets'
 import { kanjiLabEntries } from '../src/lib/kanjiLabCatalog'
 import { spokenTextForCard, spokenTextForWord } from '../src/lib/spokenText'
+import { getVocabExampleSentence } from '../src/lib/vocabExampleSentence'
 
 const AUDIO_DIR = path.resolve(import.meta.dirname, '../public/audio')
 const MANIFEST_PATH = path.join(AUDIO_DIR, 'manifest.json')
@@ -40,7 +42,7 @@ const args = process.argv.slice(2)
 const flag = (name: string) => args.find((a) => a.startsWith(`--${name}=`))?.split('=')[1]
 const has = (name: string) => args.includes(`--${name}`)
 
-const scope = (flag('scope') ?? 'all') as 'focus' | 'kanji' | 'all'
+const scope = (flag('scope') ?? 'all') as 'focus' | 'kanji' | 'examples' | 'all'
 const serviceUrl = flag('service') ?? process.env.TTS_API_URL ?? 'http://127.0.0.1:8001'
 const voiceId = flag('voice') ?? process.env.TTS_VOICE_ID ?? ''
 const dryRun = has('dry-run')
@@ -76,8 +78,13 @@ function collectTexts(): string[] {
   if (scope === 'kanji' || scope === 'all') {
     for (const entry of kanjiLabEntries) texts.push(spokenTextForWord(entry.example.word, entry.example.reading))
   }
-  if (scope === 'all') {
-    for (const card of allCards) texts.push(spokenTextForCard(card))
+  if (scope === 'all' || scope === 'examples') {
+    for (const card of allCards) {
+      if (scope === 'all') texts.push(spokenTextForCard(card))
+      if (card.type !== 'vocab') continue
+      const example = getVocabExampleSentence(card)
+      if (example) texts.push(spokenTextForWord(example.japanese, example.reading))
+    }
   }
 
   return [...new Set(texts.map((t) => t.trim()).filter(Boolean))]
@@ -153,18 +160,34 @@ for (const [index, text] of texts.entries()) {
   }
 }
 
+// This run only ever covers one scope's worth of texts, so a key rendered by
+// an earlier run (a different scope, or a re-render after adding content)
+// would otherwise vanish the moment a narrower scope runs afterward. Keep any
+// previously published key whose files are still on disk, and let this run's
+// results add to that rather than replace it.
+let previousKeys: string[] = []
+if (existsSync(MANIFEST_PATH)) {
+  try {
+    const previous = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')) as { keys?: string[] }
+    previousKeys = (previous.keys ?? []).filter((key) =>
+      Object.keys(SPEEDS).every((speedName) => existsSync(path.join(AUDIO_DIR, `${key}-${speedName}.${extension}`))))
+  } catch {
+    // A missing or corrupt manifest just means nothing carries forward.
+  }
+}
+
 // Only keys with every speed present go in the manifest: a partial entry would
 // have the client confidently request a file that isn't there.
 const manifest = {
   voice: voiceId || '(service default)',
   ext: extension,
   speeds: SPEEDS,
-  keys: done.sort(),
+  keys: [...new Set([...previousKeys, ...done])].sort(),
 }
 writeFileSync(MANIFEST_PATH, `${JSON.stringify(manifest)}\n`)
 
 if (prune) {
-  const wanted = new Set(done.flatMap((key) => Object.keys(SPEEDS).map((s) => `${key}-${s}.${extension}`)))
+  const wanted = new Set(manifest.keys.flatMap((key) => Object.keys(SPEEDS).map((s) => `${key}-${s}.${extension}`)))
   for (const file of readdirSync(AUDIO_DIR)) {
     if (file === 'manifest.json' || wanted.has(file)) continue
     unlinkSync(path.join(AUDIO_DIR, file))

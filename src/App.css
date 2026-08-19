@@ -7984,6 +7984,27 @@ body:has(.dashboard) {
   border-top: 1px dashed var(--border);
 }
 
+.vocab-list-example.is-speakable {
+  position: relative;
+  cursor: pointer;
+  padding-right: 1.1rem;
+  border-radius: 8px;
+  transition: background .15s;
+}
+
+.vocab-list-example.is-speakable:hover,
+.vocab-list-example.is-speaking {
+  background: color-mix(in srgb, var(--kyogre) 12%, transparent);
+}
+
+.vocab-list-example.is-speakable:focus-visible {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: -2px;
+}
+
+.vocab-list-example.is-speakable:hover .speakable-cue-corner { opacity: .6; }
+.vocab-list-example.is-speaking .speakable-cue-corner { opacity: 1; color: var(--kyogre-light); }
+
 .vocab-list-example-jp {
   font: 500 0.85rem 'Noto Sans JP', sans-serif;
   color: var(--text);

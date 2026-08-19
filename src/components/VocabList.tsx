@@ -10,6 +10,8 @@ import type { JlptLevel } from '../lib/types'
 import type { SentenceExercise } from '../data/sentenceExercises'
 import type { StudyCard } from '../lib/types'
 import { getVocabExampleSentence } from '../lib/vocabExampleSentence'
+import { SpeakableCue, useSpeakable } from './SpeakableWord'
+import { spokenTextForWord } from '../lib/spokenText'
 
 interface VocabListProps {
   onBack?: () => void
@@ -22,6 +24,21 @@ const RENDER_BATCH_SIZE = 160
 function sentencePreview(exercise: SentenceExercise): string {
   if (exercise.segments) return exercise.segments.join('')
   return exercise.english
+}
+
+function VocabListExample({ example }: { example: { japanese: string; reading: string; english: string } }) {
+  const speech = useSpeakable(spokenTextForWord(example.japanese, example.reading))
+  return (
+    <div
+      className={`vocab-list-example${speech.live ? ' is-speakable' : ''}${speech.isSpeaking ? ' is-speaking' : ''}`}
+      {...speech.triggerProps}
+    >
+      <span className="vocab-list-example-jp" lang="ja">{example.japanese}</span>
+      <span className="vocab-list-example-reading" lang="ja">{example.reading}</span>
+      <span className="vocab-list-example-en">{example.english}</span>
+      {speech.live && <SpeakableCue className="speakable-cue-corner" />}
+    </div>
+  )
 }
 
 function ContentSection({
@@ -75,13 +92,7 @@ function ContentSection({
                   {card.hint && (
                     <span className="vocab-list-hint">{card.hint}</span>
                   )}
-                  {example && (
-                    <div className="vocab-list-example">
-                      <span className="vocab-list-example-jp" lang="ja">{example.japanese}</span>
-                      <span className="vocab-list-example-reading" lang="ja">{example.reading}</span>
-                      <span className="vocab-list-example-en">{example.english}</span>
-                    </div>
-                  )}
+                  {example && <VocabListExample example={example} />}
                 </li>
               )
             })}
