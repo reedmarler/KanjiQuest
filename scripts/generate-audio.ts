@@ -105,15 +105,17 @@ function collectTexts(): string[] {
  * With nothing around it, a hosted engine has no sentence to pace against —
  * it either clips the vowel short or, worse, guesses at what word the
  * fragment might belong to and hallucinates a syllable onto the end (はと
- * alone came back as "hatoku"). previous_text/next_text shape the model's
- * prosody without being spoken themselves, so `text` alone is still what
- * gets rendered — this is silent stage-setting, not padding baked into the
- * audio. Longer text already reads as a complete phrase and needs none of
- * this.
+ * alone came back as "hatoku"). next_text alone signals "a sentence-final
+ * full stop follows" without embedding the word mid-sentence — a full
+ * previous_text carrier phrase ("This is the word ___") made the model
+ * speak it at fast, fluent, conversational pace instead of the isolated,
+ * clearly-enunciated one a flashcard needs. previous_text/next_text are
+ * never spoken or billed, so `text` alone is still what gets rendered.
+ * Longer text already reads as a complete phrase and needs none of this.
  */
-function speechContext(text: string): { previous_text?: string; next_text?: string } {
+function speechContext(text: string): { next_text?: string } {
   if ([...text].length > 2) return {}
-  return { previous_text: 'これは、', next_text: 'という言葉です。' }
+  return { next_text: '。' }
 }
 
 async function synthesize(text: string, speed: number): Promise<{ audio: Buffer; ext: string }> {
