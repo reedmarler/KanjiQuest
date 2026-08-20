@@ -58,6 +58,15 @@ export async function findStaticAudio(text: string, rate: number): Promise<strin
   const speedName = speedNameFor(rate)
   if (!speedName) return undefined
 
+  // A single isolated kana character gives the hosted voice no word to
+  // pace against — tuning prompts to fix it only traded one failure mode
+  // for another (clipped, then mispronounced, then rushed), and it never
+  // came out reliably right. The browser's own Japanese voice, despite
+  // being generally worse, is oddly more consistent for a bare phoneme
+  // than a fluency-tuned cloned voice is. Real words (2+ characters) are
+  // unaffected and keep using the pre-rendered clip.
+  if ([...text.trim()].length === 1) return undefined
+
   const loaded = await loadManifest()
   if (!loaded) return undefined
   // A render may cover only some speeds, so trust the manifest over the
