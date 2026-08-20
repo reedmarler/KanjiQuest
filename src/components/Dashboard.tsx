@@ -778,18 +778,9 @@ export function Dashboard({
           </div>
         )}
         <div className="control-story-toggle-stack">
-          <button
-            type="button"
-            className={`control-story-toggle control-story-top-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
-            onClick={toggleModeOn}
-            role="switch"
-            aria-checked={modeToggleOn}
-            aria-label={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
-            title={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
-          >
-            <span className="control-toggle-track" aria-hidden="true"><span /></span>
-            <span>{modeToggleOn ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>] : 'Mode'}</span>
-          </button>
+          {/* Swap sits before the mode switch so it appears to the toggle's
+              left once a mode is running (especially on mobile, where the
+              switch stays pinned to the top-left). */}
           {modeToggleOn && settingsMode !== 'picking' && (
             <div className="control-story-quick-select is-swap" ref={swapModeQuickSelectRef}>
               <button
@@ -832,6 +823,18 @@ export function Dashboard({
               )}
             </div>
           )}
+          <button
+            type="button"
+            className={`control-story-toggle control-story-top-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
+            onClick={toggleModeOn}
+            role="switch"
+            aria-checked={modeToggleOn}
+            aria-label={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
+            title={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
+          >
+            <span className="control-toggle-track" aria-hidden="true"><span /></span>
+            <span>{modeToggleOn ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>] : 'Mode'}</span>
+          </button>
         </div>
       </div>
 
