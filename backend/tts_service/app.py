@@ -77,6 +77,12 @@ class SpeakRequest(BaseModel):
     style_weight: float = Field(default=1.0, ge=0.0, le=20.0)
     noise_scale: float = Field(default=0.6, ge=0.0, le=1.0)
     noise_scale_w: float = Field(default=0.8, ge=0.0, le=1.0)
+    # Hosted-provider-only. Surrounding text that shapes prosody without
+    # being spoken itself — the fix for an isolated word/character getting
+    # no context to pace against and clipping or mispronouncing. Honoured by
+    # the ElevenLabs provider, ignored by local.
+    previous_text: str = Field(default="", max_length=200)
+    next_text: str = Field(default="", max_length=200)
 
     def engine_options(self) -> dict[str, float | str]:
         return {
@@ -84,6 +90,8 @@ class SpeakRequest(BaseModel):
             "style_weight": self.style_weight,
             "noise_scale": self.noise_scale,
             "noise_scale_w": self.noise_scale_w,
+            "previous_text": self.previous_text,
+            "next_text": self.next_text,
         }
 
 

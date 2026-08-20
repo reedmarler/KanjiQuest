@@ -77,18 +77,32 @@ class ElevenLabsProvider(TTSProvider):
                 raise ValueError("No ElevenLabs voices available on this account")
             voice = available[0]
 
+        body: dict[str, object] = {
+            "text": text,
+            "model_id": self._model_id,
+            "voice_settings": {
+                "stability": 0.5,
+                "similarity_boost": 0.75,
+                "speed": max(MIN_SPEED, min(MAX_SPEED, speed)),
+            },
+        }
+        # Surrounding text the model uses to shape prosody without speaking
+        # it — an isolated word or single character otherwise gets no
+        # context to pace against, and clips short or mispronounces itself
+        # (observed: はと alone came back as "hatoku"). A generic carrier
+        # phrase is enough; it only needs to read as "mid-sentence", not as
+        # any particular real sentence.
+        previous_text = str((options or {}).get("previous_text", "")).strip()
+        next_text = str((options or {}).get("next_text", "")).strip()
+        if previous_text:
+            body["previous_text"] = previous_text
+        if next_text:
+            body["next_text"] = next_text
+
         response = self._client.post(
             f"{API_ROOT}/text-to-speech/{voice}",
             headers={"xi-api-key": self._api_key, "accept": "audio/mpeg"},
-            json={
-                "text": text,
-                "model_id": self._model_id,
-                "voice_settings": {
-                    "stability": 0.5,
-                    "similarity_boost": 0.75,
-                    "speed": max(MIN_SPEED, min(MAX_SPEED, speed)),
-                },
-            },
+            json=body,
         )
         if response.status_code >= 400:
             # Log the status but not the body — provider errors can echo

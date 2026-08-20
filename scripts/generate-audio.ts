@@ -101,23 +101,26 @@ function collectTexts(): string[] {
 }
 
 /**
- * What actually gets sent to the voice, vs. `text` (what the clip is cached
- * and matched by). A single isolated character gives a hosted engine no
- * surrounding context to pace against, so it tends to clip the vowel short —
- * a trailing full stop asks for a natural close without adding an audible
- * sound of its own. Keying the cache on the original bare character means
- * the app's lookup (spokenTextForWord's own output) never has to know this
- * padding exists.
+ * Silent framing for isolated short text (single kana, 2-character words).
+ * With nothing around it, a hosted engine has no sentence to pace against —
+ * it either clips the vowel short or, worse, guesses at what word the
+ * fragment might belong to and hallucinates a syllable onto the end (はと
+ * alone came back as "hatoku"). previous_text/next_text shape the model's
+ * prosody without being spoken themselves, so `text` alone is still what
+ * gets rendered — this is silent stage-setting, not padding baked into the
+ * audio. Longer text already reads as a complete phrase and needs none of
+ * this.
  */
-function textToSpeak(text: string): string {
-  return [...text].length <= 2 ? `${text}。` : text
+function speechContext(text: string): { previous_text?: string; next_text?: string } {
+  if ([...text].length > 2) return {}
+  return { previous_text: 'これは、', next_text: 'という言葉です。' }
 }
 
 async function synthesize(text: string, speed: number): Promise<{ audio: Buffer; ext: string }> {
   const response = await fetch(`${serviceUrl}/speak`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: textToSpeak(text), speed, voice_id: voiceId }),
+    body: JSON.stringify({ text, speed, voice_id: voiceId, ...speechContext(text) }),
   })
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText} for ${JSON.stringify(text)}`)
@@ -139,7 +142,9 @@ const owed = texts.flatMap((text) =>
       const existing = ['mp3', 'wav', 'ogg'].some((ext) => existsSync(path.join(AUDIO_DIR, `${key}-${speedName}.${ext}`)))
       return !existing || (redoShort && [...text].length <= 2)
     })
-    .map((speedName) => ({ text: textToSpeak(text), speedName })))
+    .map((speedName) => ({ text, speedName })))
+// previous_text/next_text aren't spoken, so ElevenLabs doesn't bill for
+// them — only the actual synthesized text counts.
 const owedCharacters = owed.reduce((sum, { text }) => sum + [...text].length, 0)
 
 console.log(`scope           ${scope}`)
