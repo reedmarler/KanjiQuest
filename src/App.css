@@ -5847,11 +5847,17 @@ body:has(.dashboard) {
     top: 0;
     min-height: 0;
     gap: 0.32rem;
+    justify-content: flex-start;
   }
-  .control-story-topbar:has(> .control-story-quick-select:not(.is-swap)) {
-    justify-content: space-between;
+  /* Keep Mode (and Swap, when a mode is on) pinned to the top-left. Story /
+     grammar / pick chips still use the opposite corner so they don't shove
+     the toggle inward. */
+  .control-story-toggle-stack {
+    order: 0;
   }
   .control-story-quick-select:not(.is-swap) {
+    order: 1;
+    margin-left: auto;
     min-width: 0;
     max-width: calc(100% - 4.5rem);
   }
