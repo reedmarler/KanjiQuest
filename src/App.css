@@ -14782,10 +14782,29 @@ button.counter-example {
    shrinking to the example's own size, which left it hugging the left edge
    instead of centered. */
 .beginner-quiz-example {
+  position: relative;
   display: flex;
   justify-content: center;
   width: 100%;
   cursor: pointer;
+}
+
+/* Same wrapper, for the plain flashcard's hiragana display rather than the
+   row quiz — tapping the stroke animation replays it and speaks the
+   character, since drawing it shows the shape but not the sound. */
+.beginner-char-listen {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  cursor: pointer;
+}
+
+.beginner-quiz-example .speakable-cue-corner,
+.beginner-char-listen .speakable-cue-corner {
+  right: .6rem;
+  bottom: .1rem;
+  opacity: .45;
 }
 
 .beginner-write-stack .stroke-order-animation.is-hero {

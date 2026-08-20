@@ -3,7 +3,7 @@ import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '..
 import { hiraganaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
 import { speakJapanese } from '../lib/speech'
 import { SPEECH_SPEEDS } from '../lib/speechSpeeds'
-import { SpeakableWord } from './SpeakableWord'
+import { SpeakableCue, SpeakableWord } from './SpeakableWord'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { TraceCanvas, type TraceCanvasHandle } from './TraceCanvas'
 
@@ -242,6 +242,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
                 onClick={() => speakJapanese(currentTraceWord.word, { rate: SPEECH_SPEEDS.learning, synthesisRate: SPEECH_SPEEDS.natural })}
               >
                 <StrokeOrderAnimation word={currentTraceWord.word} size="hero" />
+                <SpeakableCue className="speakable-cue-corner" />
               </div>
               <div className="beginner-write-section">
                 {/* The meaning shows inside the tracing panel's top strip
@@ -346,7 +347,19 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               On desktop the example and the tracing box sit side by side,
               with tracing given most of the width since it's what you use. */}
           <div className="beginner-write-layout">
-            {script === 'hiragana' && <StrokeOrderAnimation word={card.char} size="hero" />}
+            {script === 'hiragana' && (
+              // Drawing the stroke order shows the character, but not how it
+              // sounds — tapping it (same as tapping the word in the row
+              // quiz) speaks it, so this is the only place to hear it before
+              // writing it from memory.
+              <div
+                className="beginner-char-listen"
+                onClick={() => speakJapanese(card.char, { rate: SPEECH_SPEEDS.learning, synthesisRate: SPEECH_SPEEDS.natural })}
+              >
+                <StrokeOrderAnimation word={card.char} size="hero" />
+                <SpeakableCue className="speakable-cue-corner" />
+              </div>
+            )}
             <div className="beginner-write-section">
               <TraceCanvas
                 key={card.char}
