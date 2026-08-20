@@ -19,9 +19,13 @@
  *   npm run generate:audio -- --scope=beginner  # beginner-zone quiz word bank only
  *   npm run generate:audio -- --scope=all       # every study card + example sentences (default)
  *   npm run generate:audio -- --dry-run         # count and price it, render nothing
+ *   npm run generate:audio -- --redo-short      # re-cut already-rendered 1-2 char clips
  *
  * Re-running skips clips already on disk, so it is resumable and safe to run
- * again after adding content — only the new words are billed.
+ * again after adding content — only the new words are billed. --redo-short
+ * is the one exception: combine it with a --scope to re-bill and overwrite
+ * that scope's 1-2 character clips even though they already exist, for ones
+ * rendered before the trailing-pause padding below existed.
  */
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
@@ -49,6 +53,7 @@ const serviceUrl = flag('service') ?? process.env.TTS_API_URL ?? 'http://127.0.0
 const voiceId = flag('voice') ?? process.env.TTS_VOICE_ID ?? ''
 const dryRun = has('dry-run')
 const prune = has('prune')
+const redoShort = has('redo-short')
 
 // The 🐢 button slows the natural clip with the audio element's playbackRate,
 // so one render covers both buttons — half the clips, half the credits, half
@@ -95,11 +100,24 @@ function collectTexts(): string[] {
   return [...new Set(texts.map((t) => t.trim()).filter(Boolean))]
 }
 
+/**
+ * What actually gets sent to the voice, vs. `text` (what the clip is cached
+ * and matched by). A single isolated character gives a hosted engine no
+ * surrounding context to pace against, so it tends to clip the vowel short —
+ * a trailing full stop asks for a natural close without adding an audible
+ * sound of its own. Keying the cache on the original bare character means
+ * the app's lookup (spokenTextForWord's own output) never has to know this
+ * padding exists.
+ */
+function textToSpeak(text: string): string {
+  return [...text].length <= 2 ? `${text}。` : text
+}
+
 async function synthesize(text: string, speed: number): Promise<{ audio: Buffer; ext: string }> {
   const response = await fetch(`${serviceUrl}/speak`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, speed, voice_id: voiceId }),
+    body: JSON.stringify({ text: textToSpeak(text), speed, voice_id: voiceId }),
   })
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText} for ${JSON.stringify(text)}`)
@@ -110,15 +128,27 @@ async function synthesize(text: string, speed: number): Promise<{ audio: Buffer;
 }
 
 const texts = collectTexts()
-const characters = texts.reduce((sum, text) => sum + [...text].length, 0)
-const clips = texts.length * Object.keys(SPEEDS).length
+
+// What this run will *actually* pay for — a clip already on disk is a skip
+// unless --redo-short reclaims it, so pricing off every text in the scope
+// (as if starting from zero) wildly overstates the real cost on any rerun.
+const owed = texts.flatMap((text) =>
+  (Object.keys(SPEEDS) as SpeedName[])
+    .filter((speedName) => {
+      const key = keyFor(text)
+      const existing = ['mp3', 'wav', 'ogg'].some((ext) => existsSync(path.join(AUDIO_DIR, `${key}-${speedName}.${ext}`)))
+      return !existing || (redoShort && [...text].length <= 2)
+    })
+    .map((speedName) => ({ text: textToSpeak(text), speedName })))
+const owedCharacters = owed.reduce((sum, { text }) => sum + [...text].length, 0)
 
 console.log(`scope           ${scope}`)
 console.log(`unique texts    ${texts.length.toLocaleString()}`)
-console.log(`characters      ${characters.toLocaleString()}`)
-console.log(`clips to render ${clips.toLocaleString()} (${Object.keys(SPEEDS).join(' + ')})`)
-console.log(`credits         ${(characters * Object.keys(SPEEDS).length).toLocaleString()} at 1/char, ` +
-  `${(characters * Object.keys(SPEEDS).length / 2).toLocaleString()} at 0.5/char (turbo/flash)`)
+console.log(`clips already cached ${(texts.length * Object.keys(SPEEDS).length - owed.length).toLocaleString()}`)
+console.log(`clips to actually render ${owed.length.toLocaleString()} (${Object.keys(SPEEDS).join(' + ')})`)
+console.log(`characters to bill ${owedCharacters.toLocaleString()}`)
+console.log(`credits         ${owedCharacters.toLocaleString()} at 1/char, ` +
+  `${(owedCharacters / 2).toLocaleString()} at 0.5/char (turbo/flash)`)
 
 if (dryRun) {
   console.log('\n--dry-run: nothing rendered.')
@@ -139,9 +169,12 @@ for (const [index, text] of texts.entries()) {
 
   for (const [speedName, speed] of Object.entries(SPEEDS) as [SpeedName, number][]) {
     // Any existing extension counts as a hit, so switching providers doesn't
-    // silently re-bill everything.
+    // silently re-bill everything. --redo-short bypasses that hit for very
+    // short texts specifically, so an already-rendered clip that clipped its
+    // vowel short (no surrounding context to pace against) can be re-cut with
+    // textToSpeak's trailing pause instead of living with the old take.
     const existing = ['mp3', 'wav', 'ogg'].find((ext) => existsSync(path.join(AUDIO_DIR, `${key}-${speedName}.${ext}`)))
-    if (existing) {
+    if (existing && !(redoShort && [...text].length <= 2)) {
       extension = existing
       skipped += 1
       continue
