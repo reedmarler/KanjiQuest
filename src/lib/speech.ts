@@ -73,6 +73,12 @@ export interface SpeakOptions {
   volume?: number
   voiceId?: string
   onEnd?: () => void
+  /** Skips the pre-rendered clip and the live service, going straight to
+   *  the browser's own voice. For text this hosted voice handles badly
+   *  regardless of provider tuning (isolated hiragana words, observed
+   *  mispronouncing outright rather than just sounding rushed or clipped) —
+   *  an explicit opt-out rather than something speakJapanese guesses at. */
+  forceBrowser?: boolean
 }
 
 /** Thrown for a refusal that says nothing about the service's health. */
@@ -335,6 +341,7 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
     volume = 1,
     voiceId,
     onEnd,
+    forceBrowser = false,
   } = options
   // Ratio between what we render and what we play back.
   const playbackRate = synthesisRate === rate ? 1 : rate / synthesisRate
@@ -348,6 +355,11 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
 
   setActive({ token: generation, status: 'loading' })
   primeAudioPlayback()
+
+  if (forceBrowser) {
+    speakWithBrowserVoice(text, rate, volume, generation, onEnd)
+    return generation
+  }
 
   // Pre-rendered clip first: it needs no service, costs nothing to replay, and
   // is the only route that works on a static deployment. Only the fixed

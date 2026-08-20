@@ -1,18 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
 import { hiraganaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
 import { speakJapanese } from '../lib/speech'
 import { SPEECH_SPEEDS } from '../lib/speechSpeeds'
-import { SpeakableCue, SpeakableWord } from './SpeakableWord'
+import { BeginnerFinalChallenge } from './BeginnerFinalChallenge'
+import { SpeakableWord } from './SpeakableWord'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
-import { TraceCanvas, type TraceCanvasHandle } from './TraceCanvas'
+import { TraceCanvas } from './TraceCanvas'
 
 /** How many words the trace-and-recall part of a row quiz shows before the
- *  blank-slate dictation word that actually passes the quiz. */
+ *  blank-slate dictation word that closes out the quiz. */
 const QUIZ_TRACE_WORDS = 2
-/** Dictation score needed to pass a row quiz — generous, since writing a
- *  whole word from memory after five new characters is genuinely hard. */
-const QUIZ_PASS_SCORE = 45
+
+/** Every listen button in this view forces the browser's own voice rather
+ *  than the app's usual ElevenLabs clips — the hosted voice, tuned for
+ *  fluent sentences, handled bare hiragana and hiragana-only words badly
+ *  (clipped, then mispronounced, then just wrong) no matter how the
+ *  request was tuned. A single character also gets no surrounding word to
+ *  give the ear a beat to catch it in, so it needs to be slower than the
+ *  pace a whole word reads fine at. */
+const SINGLE_CHARACTER_SPEECH_RATE = 0.5
 
 function shuffled<T>(items: readonly T[]) {
   const copy = [...items]
@@ -41,12 +48,11 @@ interface BeginnerLearnerProps {
 }
 
 /**
- * Mastery and trace scores are per character and survive reloads, because a
- * beginner working through 46 characters will not do it in one sitting.
- * Keyed by script so the three decks never overwrite each other.
+ * Mastery is per character and survives reloads, because a beginner working
+ * through 46 characters will not do it in one sitting. Keyed by script so the
+ * three decks never overwrite each other.
  */
 const MASTERY_STORAGE_PREFIX = 'kq-beginner-mastery-'
-const TRACE_STORAGE_PREFIX = 'kq-beginner-trace-'
 
 /** How many correct recalls in a row retire a character from the row. */
 const MASTERY_TARGET = 2
@@ -75,18 +81,16 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   const deck = useMemo(() => getBeginnerDeck(script), [script])
   const [rowIndex, setRowIndex] = useState(0)
   const [mastery, setMastery] = useState<Record<string, number>>(() => loadNumberMap(storageKey(MASTERY_STORAGE_PREFIX, script)))
-  const [traceScores, setTraceScores] = useState<Record<string, number>>(() => loadNumberMap(storageKey(TRACE_STORAGE_PREFIX, script)))
   const [streak, setStreak] = useState(0)
-  const [bestStreak, setBestStreak] = useState(0)
   // Rows the learner has already passed a quiz for, this session — not
   // persisted, so returning later re-quizzes a row, which is fine practice.
   const [quizzedRows, setQuizzedRows] = useState<Record<number, boolean>>({})
+  const [challengeOpen, setChallengeOpen] = useState(false)
   const [quizWords, setQuizWords] = useState<UnderstandingWord[] | null>(null)
   const [quizPhase, setQuizPhase] = useState<'trace' | 'dictation'>('trace')
   const [quizTraceIndex, setQuizTraceIndex] = useState(0)
   const [quizRevealed, setQuizRevealed] = useState(false)
-  const [dictationResult, setDictationResult] = useState<{ score: number; passed: boolean } | null>(null)
-  const traceRef = useRef<TraceCanvasHandle>(null)
+  const [dictationRevealed, setDictationRevealed] = useState(false)
 
   const row = deck.rows[rowIndex]!
   // The row's characters, shuffled once per row so the learner does not
@@ -100,10 +104,6 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
     window.localStorage.setItem(storageKey(MASTERY_STORAGE_PREFIX, script), JSON.stringify(mastery))
   }, [mastery, script])
 
-  useEffect(() => {
-    window.localStorage.setItem(storageKey(TRACE_STORAGE_PREFIX, script), JSON.stringify(traceScores))
-  }, [traceScores, script])
-
   function openRow(index: number) {
     setRowIndex(index)
     setCards(deck.rows[index]!.characters)
@@ -116,7 +116,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
     setQuizPhase('trace')
     setQuizTraceIndex(0)
     setQuizRevealed(false)
-    setDictationResult(null)
+    setDictationRevealed(false)
   }
 
   function advanceQuizTrace() {
@@ -140,23 +140,10 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
     setQuizWords(null)
   }
 
-  function recordTraceScore(char: string, score: number) {
-    setTraceScores((current) => ({
-      ...current,
-      // Keep the learner's personal best rather than their latest attempt —
-      // a single rough retry right after a clean trace shouldn't erase it.
-      [char]: Math.max(current[char] ?? 0, score),
-    }))
-  }
-
   function goNext() {
     if (!card) return
     setMastery((current) => ({ ...current, [card.char]: MASTERY_TARGET }))
-    setStreak((current) => {
-      const next = current + 1
-      setBestStreak((best) => Math.max(best, next))
-      return next
-    })
+    setStreak((current) => current + 1)
     setCardIndex((current) => current + 1)
   }
 
@@ -206,29 +193,41 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
         })}
       </div>
 
-      {quizWords ? (
+      {challengeOpen ? (
+        <BeginnerFinalChallenge deck={deck} onExit={() => { setChallengeOpen(false); openRow(0) }} />
+      ) : quizWords ? (
         quizPhase === 'trace' && currentTraceWord ? (
           <main className="beginner-card">
-            {/* Just Previous and Check meaning / Next word up top now — Play
-                moved onto the example itself (tapping it both replays the
-                stroke animation and speaks the word) and Check moved into
-                the tracing panel's own top strip, so this row stays light
-                and the examples/tracing box below get the space instead. */}
+            {/* Previous, the speaker, and Check meaning / Next word share one
+                row. Hearing the word is the point of this screen, so the
+                speaker is the prominent middle element and the two nav
+                buttons flanking it are the same size as each other. */}
             <div className="beginner-top-actions beginner-top-actions--tight">
               <button
                 type="button"
-                className="btn btn-ghost beginner-action-btn"
+                className="btn btn-ghost beginner-action-btn beginner-quiz-nav-btn"
                 onClick={goPreviousQuizTrace}
                 disabled={quizTraceIndex === 0}
               >
                 Previous
               </button>
+              <button
+                type="button"
+                className="beginner-speak-btn beginner-speak-btn--quiz"
+                onClick={() => speakJapanese(currentTraceWord.word, { rate: SPEECH_SPEEDS.learning, forceBrowser: true })}
+                aria-label={`Play the word ${currentTraceWord.word}`}
+              >
+                <span aria-hidden="true">&#128266;</span>
+                <em>Listen</em>
+              </button>
               {quizRevealed ? (
-                <button type="button" className="btn btn-primary beginner-action-btn beginner-action-btn-green" onClick={advanceQuizTrace}>Next word &rarr;</button>
+                <button type="button" className="btn btn-primary beginner-action-btn beginner-action-btn-green beginner-quiz-nav-btn" onClick={advanceQuizTrace}>
+                  Next word &rarr;
+                </button>
               ) : (
                 <button
                   type="button"
-                  className="btn btn-primary beginner-action-btn beginner-action-btn-green beginner-check-meaning-btn"
+                  className="btn btn-primary beginner-action-btn beginner-action-btn-green beginner-quiz-nav-btn"
                   onClick={() => setQuizRevealed(true)}
                 >
                   Check meaning
@@ -236,92 +235,92 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               )}
             </div>
 
+            {/* The meaning gets its own full-width line rather than sitting
+                inside the tracing panel — at this size it would cover the
+                learner's own writing and collide with Clear. */}
+            {quizRevealed && <p className="beginner-quiz-meaning">{currentTraceWord.meaning}</p>}
+
             <div className="beginner-write-stack">
-              <div
-                className="beginner-quiz-example"
-                onClick={() => speakJapanese(currentTraceWord.word, { rate: SPEECH_SPEEDS.learning, synthesisRate: SPEECH_SPEEDS.natural })}
-              >
+              <div className="beginner-quiz-example">
                 <StrokeOrderAnimation word={currentTraceWord.word} size="hero" />
-                <SpeakableCue className="speakable-cue-corner" />
               </div>
               <div className="beginner-write-section">
-                {/* The meaning shows inside the tracing panel's top strip
-                    once revealed — no separate "Means" box or extra copy
-                    of the word, so the rest of the card stays dedicated
-                    to writing. Check lives in that same strip (compact,
-                    swapping for the score once tapped) instead of its own
-                    row above. */}
-                <TraceCanvas
-                  key={currentTraceWord.word}
-                  char={currentTraceWord.word}
-                  hideActions
-                  compactCheck
-                  topLabel={quizRevealed ? currentTraceWord.meaning : undefined}
-                />
+                <TraceCanvas key={currentTraceWord.word} char={currentTraceWord.word} />
               </div>
             </div>
           </main>
         ) : dictationWord ? (
           <main className="beginner-card">
-            <span className="beginner-write-label">Listen, then write it from memory</span>
-            <button
-              type="button"
-              className="btn btn-primary beginner-reveal"
-              onClick={() => speakJapanese(dictationWord.word, { rate: SPEECH_SPEEDS.learning, synthesisRate: SPEECH_SPEEDS.natural })}
-            >
-              &#128264; Play the word
-            </button>
+            {/* Listen → write from memory → reveal. Before revealing, the
+                only thing on screen is the speaker and a blank box, so the
+                task is unambiguous; revealing puts the real word (drawn
+                stroke by stroke) right beside their attempt to compare
+                against, rather than scoring it out of a hundred. */}
+            <span className="beginner-write-label">
+              {dictationRevealed ? 'Compare yours with the answer' : 'Listen, then write it from memory'}
+            </span>
 
-            <div className="beginner-write-section">
-              <TraceCanvas
-                key={dictationWord.word}
-                char={dictationWord.word}
-                showGuide={false}
-                onScored={(score) => setDictationResult({ score, passed: score >= QUIZ_PASS_SCORE })}
-              />
+            <div className="beginner-top-actions beginner-top-actions--tight">
+              <span />
+              <button
+                type="button"
+                className="beginner-speak-btn beginner-speak-btn--quiz"
+                onClick={() => speakJapanese(dictationWord.word, { rate: SPEECH_SPEEDS.learning, forceBrowser: true })}
+                aria-label={`Play the word ${dictationWord.word}`}
+              >
+                <span aria-hidden="true">&#128266;</span>
+                <em>Listen</em>
+              </button>
+              {dictationRevealed ? (
+                <button type="button" className="btn btn-primary beginner-action-btn beginner-action-btn-green beginner-quiz-nav-btn" onClick={finishQuiz}>
+                  Finish quiz &rarr;
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-primary beginner-action-btn beginner-action-btn-green beginner-quiz-nav-btn"
+                  onClick={() => setDictationRevealed(true)}
+                >
+                  Show answer
+                </button>
+              )}
             </div>
 
-            {dictationResult && (
-              <div className="beginner-answer">
-                <p className="beginner-mnemonic">
-                  <span className="beginner-mnemonic-label">Means</span>
-                  {dictationWord.meaning}
-                </p>
-                <p className="beginner-char" lang="ja">{dictationWord.word}</p>
-                {dictationResult.passed ? (
-                  <div className="beginner-score-buttons">
-                    <button type="button" className="btn btn-primary" onClick={finishQuiz}>Quiz passed &rarr;</button>
-                  </div>
-                ) : (
-                  <div className="beginner-score-buttons">
-                    <button type="button" className="btn btn-ghost" onClick={() => setDictationResult(null)}>Try again</button>
-                  </div>
-                )}
+            {dictationRevealed && <p className="beginner-quiz-meaning">{dictationWord.meaning}</p>}
+
+            {/* Same stacked layout as the trace phase — the two-column
+                flashcard layout sizes each glyph for a single character, so
+                a two-kana word wrapped into a giant vertical pile there. */}
+            <div className="beginner-write-stack">
+              {dictationRevealed && (
+                <div className="beginner-quiz-example">
+                  <StrokeOrderAnimation word={dictationWord.word} size="hero" />
+                </div>
+              )}
+              <div className="beginner-write-section">
+                <TraceCanvas key={dictationWord.word} char={dictationWord.word} showGuide={false} />
               </div>
-            )}
+            </div>
           </main>
         ) : null
       ) : rowComplete ? (
         <main className="beginner-card beginner-card-complete">
           <span className="beginner-complete-mark" aria-hidden="true">&#127881;</span>
-          <h2>{row.label} learned</h2>
-          <p>
-            You recalled all {row.characters.length} characters
-            {bestStreak > 1 ? ` with a best streak of ${bestStreak}` : ''}.
-          </p>
-          <div className="beginner-complete-chars" lang="ja" aria-hidden="true">
+          <h2>You learned</h2>
+          <div className="beginner-complete-chars" lang="ja">
             {row.characters.map((entry) => <span key={entry.char}>{entry.char}</span>)}
           </div>
+          <p>{rowNeedsQuiz ? 'Let’s build words.' : 'Keep going.'}</p>
           {rowNeedsQuiz ? (
             <button type="button" className="btn btn-primary" onClick={() => startQuiz(rowIndex)}>Row quiz &rarr;</button>
           ) : nextRowIndex === null ? (
-            <button type="button" className="btn btn-primary" onClick={onBack}>Finish {deck.title} &rarr;</button>
+            <button type="button" className="btn btn-primary" onClick={() => setChallengeOpen(true)}>Final challenge &rarr;</button>
           ) : (
             <button type="button" className="btn btn-primary" onClick={() => openRow(nextRowIndex)}>
               Next: {deck.rows[nextRowIndex]!.label} &rarr;
             </button>
           )}
-          <button type="button" className="btn btn-ghost" onClick={() => openRow(rowIndex)}>Practise this row again</button>
+          <button type="button" className="btn btn-ghost" onClick={() => openRow(rowIndex)}>Practice this row again</button>
         </main>
       ) : card ? (
         <main className="beginner-card is-revealed">
@@ -331,13 +330,26 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
             </p>
           )}
 
-          {/* Previous, Check, and Next all sit above the writing area — Check
-              drives the TraceCanvas below via a ref instead of the canvas's
-              own internal button — so the two squares get the maximum
-              vertical space instead of competing with a button row. */}
+          {/* Previous, a prominent speaker button, and Next sit above the
+              writing area. Hearing the character is the point of this
+              button, so it's bigger and louder than the nav buttons either
+              side of it — Check moved into the tracing panel itself
+              (compactCheck below) so this row stays about pronunciation,
+              not scoring. */}
           <div className="beginner-top-actions">
             <button type="button" className="btn btn-ghost beginner-action-btn" onClick={goPrevious} disabled={cardIndex === 0}>Previous</button>
-            <button type="button" className="btn btn-primary beginner-action-btn" onClick={() => traceRef.current?.check()}>Check</button>
+            <button
+              type="button"
+              className="beginner-speak-btn"
+              // Slower than the app's usual "learning" pace — a single
+              // character has no surrounding word to give the ear a beat to
+              // catch it in, so the standard slowdown still reads as rushed
+              // here even though it's plenty for whole words elsewhere.
+              onClick={() => speakJapanese(card.char, { rate: SINGLE_CHARACTER_SPEECH_RATE, forceBrowser: true })}
+              aria-label={`Play the sound for ${card.char}`}
+            >
+              &#128266;
+            </button>
             <button type="button" className="btn btn-primary beginner-action-btn beginner-action-btn-green" onClick={goNext}>Next</button>
           </div>
 
@@ -348,26 +360,12 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               with tracing given most of the width since it's what you use. */}
           <div className="beginner-write-layout">
             {script === 'hiragana' && (
-              // Drawing the stroke order shows the character, but not how it
-              // sounds — tapping it (same as tapping the word in the row
-              // quiz) speaks it, so this is the only place to hear it before
-              // writing it from memory.
-              <div
-                className="beginner-char-listen"
-                onClick={() => speakJapanese(card.char, { rate: SPEECH_SPEEDS.learning, synthesisRate: SPEECH_SPEEDS.natural })}
-              >
+              <div className="beginner-char-listen">
                 <StrokeOrderAnimation word={card.char} size="hero" />
-                <SpeakableCue className="speakable-cue-corner" />
               </div>
             )}
             <div className="beginner-write-section">
-              <TraceCanvas
-                key={card.char}
-                ref={traceRef}
-                char={card.char}
-                hideActions
-                onScored={(score) => recordTraceScore(card.char, score)}
-              />
+              <TraceCanvas key={card.char} char={card.char} />
             </div>
           </div>
 
