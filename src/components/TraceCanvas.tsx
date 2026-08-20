@@ -1,27 +1,9 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 interface TraceCanvasProps {
   char: string
-  /** Reported after every "Check" tap so the parent can persist a best score. */
-  onScored?: (score: number) => void
   /** false for dictation: a blank slate with no printed guide to trace over. */
   showGuide?: boolean
-  /** When the parent renders its own Clear/Check buttons (via the ref handle
-   *  below) instead of the ones normally shown inside the canvas. */
-  hideActions?: boolean
-  /** With hideActions, also show a small Check button in the canvas's own
-   *  top strip (left slot) instead of relying on the parent to trigger it
-   *  via the ref handle — it swaps for the score badge once there's a
-   *  result. */
-  compactCheck?: boolean
-  /** Shown centered in the top strip of the canvas, between the score badge
-   *  and Clear — e.g. the row quiz's revealed English meaning. */
-  topLabel?: string
-}
-
-export interface TraceCanvasHandle {
-  check: () => void
-  clear: () => void
 }
 
 /** Logical resolution a single character's cell is computed in — a word of
@@ -29,81 +11,8 @@ export interface TraceCanvasHandle {
  *  keeps its natural proportions instead of being squeezed into one square. */
 const SIZE = 300
 const INK_WIDTH = 18
-/** How far (in px) a stroke may wander from the printed glyph and still count as "on the line". */
-const TOLERANCE_RADIUS = 8
-/** How far ink is allowed to spread when checking glyph coverage, forgiving normal stroke width. */
-const COVERAGE_RADIUS = 6
-/** How much of a cell's height the printed/mask glyph fills. */
+/** How much of a cell's height the printed guide glyph fills. */
 const GLYPH_FONT_RATIO = 0.82
-
-const SCORE_RANKS = [
-  { min: 92, label: 'Excellent', tier: 'is-great' },
-  { min: 84, label: 'Great', tier: 'is-great' },
-  { min: 70, label: 'Good', tier: 'is-good' },
-  { min: 50, label: 'Okay', tier: 'is-good' },
-  { min: 0, label: 'Keep practicing', tier: 'is-retry' },
-] as const
-
-function rankForScore(score: number) {
-  return SCORE_RANKS.find((rank) => score >= rank.min)!
-}
-
-interface GlyphMasks {
-  /** True where the printed character itself has ink — used to score coverage. */
-  raw: Uint8Array
-  /** `raw` dilated outward — used to score whether the learner's strokes stayed on target. */
-  tolerance: Uint8Array
-  rawCount: number
-}
-
-function dilate(mask: Uint8Array, width: number, height: number, radius: number): Uint8Array {
-  let current = mask
-  for (let pass = 0; pass < radius; pass += 1) {
-    const next = new Uint8Array(current.length)
-    for (let y = 0; y < height; y += 1) {
-      for (let x = 0; x < width; x += 1) {
-        const i = y * width + x
-        if (current[i]) {
-          next[i] = 1
-          continue
-        }
-        const up = y > 0 && current[i - width]
-        const down = y < height - 1 && current[i + width]
-        const left = x > 0 && current[i - 1]
-        const right = x < width - 1 && current[i + 1]
-        next[i] = up || down || left || right ? 1 : 0
-      }
-    }
-    current = next
-  }
-  return current
-}
-
-function buildGlyphMasks(chars: string[], width: number, height: number): GlyphMasks {
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  const ctx = canvas.getContext('2d', { willReadFrequently: true })!
-  ctx.clearRect(0, 0, width, height)
-  ctx.fillStyle = '#000'
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  ctx.font = `${Math.round(SIZE * GLYPH_FONT_RATIO)}px 'Noto Sans JP', sans-serif`
-  chars.forEach((ch, index) => {
-    const cellCenterX = SIZE * (index + 0.5)
-    ctx.fillText(ch, cellCenterX, height / 2 + SIZE * 0.04)
-  })
-  const { data } = ctx.getImageData(0, 0, width, height)
-  const raw = new Uint8Array(width * height)
-  let rawCount = 0
-  for (let i = 0; i < raw.length; i += 1) {
-    if (data[i * 4 + 3] > 40) {
-      raw[i] = 1
-      rawCount += 1
-    }
-  }
-  return { raw, tolerance: dilate(raw, width, height, TOLERANCE_RADIUS), rawCount }
-}
 
 function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) {
   const rect = canvas.getBoundingClientRect()
@@ -113,17 +22,20 @@ function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HT
   }
 }
 
-export const TraceCanvas = forwardRef<TraceCanvasHandle, TraceCanvasProps>(function TraceCanvas(
-  { char, onScored, showGuide = true, hideActions = false, compactCheck = false, topLabel },
-  ref,
-) {
+/**
+ * A place to practice writing a character, deliberately unscored.
+ *
+ * An earlier version graded each attempt out of 100 by comparing ink coverage
+ * against a rendered glyph mask. It was harsh on genuinely legible handwriting
+ * — a correctly formed character drawn slightly off-centre scored badly — and
+ * a discouraging number next to a beginner's first ever あ works against the
+ * point. Writing it and seeing it beside the real thing is the exercise.
+ */
+export function TraceCanvas({ char, showGuide = true }: TraceCanvasProps) {
   const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const inkCanvasRef = useRef<HTMLCanvasElement | null>(null)
-  const masksRef = useRef<GlyphMasks | null>(null)
   const drawingRef = useRef(false)
   const lastPointRef = useRef<{ x: number; y: number } | null>(null)
-  const hasInkRef = useRef(false)
-  const [result, setResult] = useState<{ score: number } | null>(null)
 
   const chars = [...char]
   const charCount = Math.max(1, chars.length)
@@ -131,16 +43,12 @@ export const TraceCanvas = forwardRef<TraceCanvasHandle, TraceCanvasProps>(funct
   const height = SIZE
   // A single character keeps its original large square; a word gets one
   // square cell per character instead of squeezing every glyph into that
-  // same square, which was both illegible and threw off trace scoring.
+  // same square, which was illegible.
   const stackWidthRem = charCount <= 1 ? 21 : charCount * 15
 
-  // A new character means a fresh guide, a fresh mask, and a blank page —
-  // stale ink from the previous character must not leak into this score.
+  // A new character means a fresh guide and a blank page — stale ink from the
+  // previous character must not linger under the next one.
   useEffect(() => {
-    masksRef.current = buildGlyphMasks(chars, width, height)
-    hasInkRef.current = false
-    setResult(null)
-
     const guide = guideCanvasRef.current
     if (guide) {
       const ctx = guide.getContext('2d')!
@@ -164,8 +72,6 @@ export const TraceCanvas = forwardRef<TraceCanvasHandle, TraceCanvasProps>(funct
     const ink = inkCanvasRef.current
     if (!ink) return
     ink.getContext('2d')!.clearRect(0, 0, width, height)
-    hasInkRef.current = false
-    setResult(null)
   }
 
   function handlePointerDown(event: React.PointerEvent<HTMLCanvasElement>) {
@@ -181,7 +87,6 @@ export const TraceCanvas = forwardRef<TraceCanvasHandle, TraceCanvasProps>(funct
       // pointer past the canvas bounds.
     }
     drawingRef.current = true
-    hasInkRef.current = true
     const point = pointFromEvent(event, canvas)
     lastPointRef.current = point
     const ctx = canvas.getContext('2d')!
@@ -214,56 +119,8 @@ export const TraceCanvas = forwardRef<TraceCanvasHandle, TraceCanvasProps>(funct
     lastPointRef.current = null
   }
 
-  function checkTracing() {
-    const ink = inkCanvasRef.current
-    const masks = masksRef.current
-    if (!ink || !masks || !hasInkRef.current) {
-      setResult({ score: 0 })
-      return
-    }
-
-    const ctx = ink.getContext('2d', { willReadFrequently: true })!
-    const { data } = ctx.getImageData(0, 0, width, height)
-    const inkMask = new Uint8Array(width * height)
-    let inkTotal = 0
-    let inkOnTarget = 0
-    for (let i = 0; i < inkMask.length; i += 1) {
-      if (data[i * 4 + 3] > 40) {
-        inkMask[i] = 1
-        inkTotal += 1
-        if (masks.tolerance[i]) inkOnTarget += 1
-      }
-    }
-
-    if (inkTotal === 0) {
-      setResult({ score: 0 })
-      return
-    }
-
-    const precision = inkOnTarget / inkTotal
-    const inkSpread = dilate(inkMask, width, height, COVERAGE_RADIUS)
-    let covered = 0
-    for (let i = 0; i < masks.raw.length; i += 1) {
-      if (masks.raw[i] && inkSpread[i]) covered += 1
-    }
-    const coverage = masks.rawCount > 0 ? covered / masks.rawCount : 0
-    const score = Math.round(Math.min(1, precision) * 55 + Math.min(1, coverage) * 45)
-
-    setResult({ score })
-    onScored?.(score)
-  }
-
-  useImperativeHandle(ref, () => ({ check: checkTracing, clear: clearInk }))
-
   return (
     <div className="trace-canvas">
-      {!hideActions && (
-        <div className="trace-canvas-actions">
-          <button type="button" className="btn btn-ghost beginner-action-btn" onClick={clearInk}>Clear</button>
-          <button type="button" className="btn btn-primary beginner-action-btn" onClick={checkTracing}>Check</button>
-        </div>
-      )}
-
       <div
         className="trace-canvas-stack"
         style={{ touchAction: 'none', aspectRatio: `${width} / ${height}`, width: `min(100%, ${stackWidthRem}rem)` }}
@@ -281,30 +138,10 @@ export const TraceCanvas = forwardRef<TraceCanvasHandle, TraceCanvasProps>(funct
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
         />
-        {/* One top strip so the score badge, the revealed meaning, and Clear
-            share a row instead of independently-placed corner overlays.
-            Each piece is pinned to its own grid column explicitly — with
-            grid auto-placement instead, Clear (often the only one present)
-            would land in whichever column comes first, not its own. */}
-        <div className="trace-canvas-top-row">
-          {result ? (
-            <span className={`trace-canvas-score ${rankForScore(result.score).tier}`}>
-              <b>{result.score}</b>
-              <em>{rankForScore(result.score).label}</em>
-            </span>
-          ) : (
-            compactCheck && (
-              <button type="button" className="trace-canvas-check" onClick={checkTracing}>Check</button>
-            )
-          )}
-          {topLabel && <span className="trace-canvas-top-label">{topLabel}</span>}
-          {hideActions && (
-            <button type="button" className="trace-canvas-clear" onClick={clearInk} aria-label="Clear">
-              &#8635; Clear
-            </button>
-          )}
-        </div>
+        <button type="button" className="trace-canvas-clear" onClick={clearInk} aria-label="Clear">
+          &#8635; Clear
+        </button>
       </div>
     </div>
   )
-})
+}

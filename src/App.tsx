@@ -47,6 +47,7 @@ const QuestCheckpoint = lazy(() => import('./components/QuestCheckpoint').then((
 const FavoriteWordsPage = lazy(() => import('./components/FavoriteWordsPage').then((module) => ({ default: module.FavoriteWordsPage })))
 const AchievementsPanel = lazy(() => import('./components/AchievementsPanel').then((module) => ({ default: module.AchievementsPanel })))
 const BeginnerLearner = lazy(() => import('./components/BeginnerLearner').then((module) => ({ default: module.BeginnerLearner })))
+const BeginnerSpeedRun = lazy(() => import('./components/BeginnerSpeedRun').then((module) => ({ default: module.BeginnerSpeedRun })))
 
 type View =
   | 'dashboard'
@@ -70,6 +71,7 @@ type View =
   | 'favorite-words'
   | 'beginner-zone'
   | 'beginner-learner'
+  | 'beginner-speed-run'
 
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
@@ -398,6 +400,9 @@ function App() {
               setBeginnerScript('kanji')
               setView('beginner-learner')
             } },
+            { mark: '⚡', title: 'Speed Run', detail: 'A kana flashes, then vanishes — name it before it fades.', accent: 'rayquaza', onClick: () => {
+              setView('beginner-speed-run')
+            } },
           ]}
         />
       </div>
@@ -409,6 +414,16 @@ function App() {
       <div className="app">
         <Suspense fallback={<RouteLoading label="Beginner zone" />}>
           <BeginnerLearner script={beginnerScript} onBack={() => setView('beginner-zone')} />
+        </Suspense>
+      </div>
+    )
+  }
+
+  if (view === 'beginner-speed-run') {
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Speed Run" />}>
+          <BeginnerSpeedRun onBack={() => setView('beginner-zone')} />
         </Suspense>
       </div>
     )

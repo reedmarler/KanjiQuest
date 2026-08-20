@@ -102,6 +102,14 @@ export function StrokeOrderAnimation({ word, size = 'default' }: StrokeOrderAnim
         setReplayToken((current) => current + 1)
       }}
     >
+      {/* Sits above the characters and inside the box (positioned by CSS), so
+          the hint reads as a caption on the example rather than a separate
+          line of UI pushing the writing area down. */}
+      {size === 'hero' && (
+        <span className="stroke-order-replay-hint" aria-hidden="true">
+          &#8635; Tap to replay
+        </span>
+      )}
       <div className="stroke-order-chars">
         {chars.map((ch, charIndex) => {
           const strokes = hiraganaStrokes[ch] ?? []
@@ -129,11 +137,6 @@ export function StrokeOrderAnimation({ word, size = 'default' }: StrokeOrderAnim
           )
         })}
       </div>
-      {size === 'hero' && (
-        <span className="stroke-order-replay-hint" aria-hidden="true">
-          &#8635; Tap to replay
-        </span>
-      )}
     </div>
   )
 }
