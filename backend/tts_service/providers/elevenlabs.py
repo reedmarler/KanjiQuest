@@ -67,9 +67,8 @@ class ElevenLabsProvider(TTSProvider):
         speed: float,
         options: Mapping[str, float | str] | None = None,
     ) -> Synthesis:
-        # Style-BERT-VITS2's style/noise knobs have no hosted equivalent;
-        # ignoring them keeps one call signature across providers.
-        del options
+        # Style-BERT-VITS2's style/noise knobs have no hosted equivalent and
+        # are ignored below; only previous_text/next_text are read.
         voice = voice_id or self._default_voice
         if not voice:
             available = self.voices()
