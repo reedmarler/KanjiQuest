@@ -5847,17 +5847,22 @@ body:has(.dashboard) {
     top: 0;
     min-height: 0;
     gap: 0.32rem;
-    justify-content: flex-start;
   }
-  /* Keep Mode (and Swap, when a mode is on) pinned to the top-left. Story /
-     grammar / pick chips still use the opposite corner so they don't shove
-     the toggle inward. */
+  .control-story-topbar:has(> .control-story-quick-select:not(.is-swap)) {
+    justify-content: space-between;
+  }
+  /* Keep Mode pinned to the top-right with Swap stacked underneath it.
+     Story / grammar / pick chips take the opposite corner. */
   .control-story-toggle-stack {
-    order: 0;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  /* The stacked Swap row adds a second line to the topbar, which would
+     otherwise run into the title below it. */
+  .dashboard:has(.control-story-toggle-stack > .control-story-quick-select.is-swap) {
+    padding-top: 3.3rem;
   }
   .control-story-quick-select:not(.is-swap) {
-    order: 1;
-    margin-left: auto;
     min-width: 0;
     max-width: calc(100% - 4.5rem);
   }
