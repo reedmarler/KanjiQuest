@@ -5812,7 +5812,9 @@ body:has(.dashboard) {
 @media (max-width: 720px) {
   .hero h1 { font-size: 2rem; }
   .dashboard {
-    padding-top: 1.9rem;
+    /* Reserved for the topbar's tallest state (Mode + Swap stacked) so
+       picking a mode never shifts the page underneath it. */
+    padding-top: 3.3rem;
   }
   .hero-compact h1 {
     padding-inline: 0;
@@ -5899,11 +5901,6 @@ body:has(.dashboard) {
   .control-story-toggle-stack {
     flex-direction: column;
     align-items: flex-end;
-  }
-  /* The stacked Swap row adds a second line to the topbar, which would
-     otherwise run into the title below it. */
-  .dashboard:has(.control-story-toggle-stack > .control-story-quick-select.is-swap) {
-    padding-top: 3.3rem;
   }
   .control-story-quick-select:not(.is-swap) {
     min-width: 0;
