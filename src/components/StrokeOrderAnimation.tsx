@@ -13,6 +13,12 @@ interface StrokeOrderAnimationProps {
    *  showing the word once (drawn) replaces showing it twice (drawn + as
    *  plain speakable text). Defaults to the small inline preview size. */
   size?: 'default' | 'hero'
+  /** Scales stroke and gap timing without changing the teaching-speed default. */
+  durationScale?: number
+  /** Additional delay before this character begins, useful for staggered rows. */
+  startDelayMs?: number
+  /** Allows a parent control to own clicks and keyboard behavior. */
+  interactive?: boolean
 }
 
 /** Beat before the first stroke starts, so the learner has a moment to look
@@ -25,9 +31,23 @@ const STROKE_DURATION_MS = 4100
  *  drawing — real handwriting doesn't stop dead between strokes, so the next
  *  one begins its own draw while the previous is still finishing. */
 const STROKE_OVERLAP_MS = 700
-const STROKE_INTERVAL_MS = STROKE_DURATION_MS - STROKE_OVERLAP_MS
 /** Pause between characters, so each one in a word still reads as distinct. */
 const CHAR_GAP_MS = 1000
+
+/** Total visible playback time, used when several standalone animations must
+ *  run one after another instead of beginning together. */
+export function getStrokeOrderAnimationDuration(word: string, durationScale = 1) {
+  const chars = [...word].filter((ch) => hiraganaStrokes[ch])
+  const strokeDuration = STROKE_DURATION_MS * durationScale
+  const strokeInterval = (STROKE_DURATION_MS - STROKE_OVERLAP_MS) * durationScale
+
+  return chars.reduce((total, ch, index) => {
+    const strokeCount = hiraganaStrokes[ch]?.length ?? 0
+    const charDuration = strokeCount === 0 ? 0 : (strokeCount - 1) * strokeInterval + strokeDuration
+    const gap = index < chars.length - 1 ? CHAR_GAP_MS * durationScale : 0
+    return total + charDuration + gap
+  }, START_DELAY_MS)
+}
 
 /**
  * Draws each character stroke-by-stroke, in the real stroke order and
@@ -42,7 +62,13 @@ const CHAR_GAP_MS = 1000
  * lets every replay force strokes to their hidden state with transitions
  * switched off first, guaranteeing the only motion anyone sees is forward.
  */
-export function StrokeOrderAnimation({ word, size = 'default' }: StrokeOrderAnimationProps) {
+export function StrokeOrderAnimation({
+  word,
+  size = 'default',
+  durationScale = 1,
+  startDelayMs = 0,
+  interactive = true,
+}: StrokeOrderAnimationProps) {
   const chars = useMemo(() => [...word].filter((ch) => hiraganaStrokes[ch]), [word])
   const pathRefs = useRef(new Map<string, SVGPathElement>())
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -64,26 +90,29 @@ export function StrokeOrderAnimation({ word, size = 'default' }: StrokeOrderAnim
       path.style.strokeDashoffset = String(NORMALIZED_PATH_LENGTH * 3)
     })
     void containerRef.current?.offsetHeight
+    const strokeDuration = STROKE_DURATION_MS * durationScale
+    const strokeInterval = (STROKE_DURATION_MS - STROKE_OVERLAP_MS) * durationScale
+
     paths.forEach((path) => {
-      path.style.transition = `stroke-dashoffset ${STROKE_DURATION_MS}ms ease-in-out`
+      path.style.transition = `stroke-dashoffset ${strokeDuration}ms ease-in-out`
     })
 
-    let cursor = START_DELAY_MS
+    let cursor = START_DELAY_MS + startDelayMs
     chars.forEach((ch, charIndex) => {
       const strokes = hiraganaStrokes[ch] ?? []
       strokes.forEach((_, strokeIndex) => {
-        const delay = cursor + strokeIndex * STROKE_INTERVAL_MS
+        const delay = cursor + strokeIndex * strokeInterval
         timers.push(setTimeout(() => {
           const path = pathRefs.current.get(`${charIndex}-${strokeIndex}`)
           if (path) path.style.strokeDashoffset = '0'
         }, delay))
       })
-      const charDuration = strokes.length === 0 ? 0 : (strokes.length - 1) * STROKE_INTERVAL_MS + STROKE_DURATION_MS
-      cursor += charDuration + CHAR_GAP_MS
+      const charDuration = strokes.length === 0 ? 0 : (strokes.length - 1) * strokeInterval + strokeDuration
+      cursor += charDuration + CHAR_GAP_MS * durationScale
     })
 
     return () => timers.forEach(clearTimeout)
-  }, [chars, replayToken])
+  }, [chars, durationScale, replayToken, startDelayMs])
 
   if (chars.length === 0) return null
 
@@ -91,16 +120,16 @@ export function StrokeOrderAnimation({ word, size = 'default' }: StrokeOrderAnim
     <div
       ref={containerRef}
       className={`stroke-order-animation${size === 'hero' ? ' is-hero' : ''}`}
-      role="button"
-      tabIndex={0}
-      aria-label="Replay how to write this"
-      title="Tap to replay"
-      onClick={() => setReplayToken((current) => current + 1)}
-      onKeyDown={(event) => {
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-label={interactive ? 'Replay how to write this' : undefined}
+      title={interactive ? 'Tap to replay' : undefined}
+      onClick={interactive ? () => setReplayToken((current) => current + 1) : undefined}
+      onKeyDown={interactive ? (event) => {
         if (event.key !== 'Enter' && event.key !== ' ') return
         event.preventDefault()
         setReplayToken((current) => current + 1)
-      }}
+      } : undefined}
     >
       {/* Sits above the characters and inside the box (positioned by CSS), so
           the hint reads as a caption on the example rather than a separate

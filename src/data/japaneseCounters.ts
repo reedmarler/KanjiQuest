@@ -609,3 +609,139 @@ export const COUNTER_QUIZZES: Readonly<Record<string, CounterQuiz>> = {
     english: 'I stayed three nights at a hotel in Kyoto.',
   },
 }
+
+/** Alternate contexts used on later passes through the counter deck. */
+export const COUNTER_QUIZ_VARIANTS: Readonly<Partial<Record<string, readonly CounterQuiz[]>>> = {
+  tsu: [{
+    prompt: 'ケーキを___ください。', answer: '二つ', options: ['二つ', '二個', '二枚', '二本'],
+    completed: 'ケーキを二つください。', reading: 'けーきをふたつください。', english: 'Please give me two cakes.',
+  }],
+  ko: [{
+    prompt: '箱にみかんが六___入っています。', answer: '個', options: ['個', '枚', '本', '杯'],
+    completed: '箱にみかんが六個入っています。', reading: 'はこにみかんがろっこはいっています。', english: 'There are six mandarins in the box.',
+  }],
+  nin: [{
+    prompt: '教室に学生が四___います。', answer: '人', options: ['人', '匹', '頭', '羽'],
+    completed: '教室に学生が四人います。', reading: 'きょうしつにがくせいがよにんいます。', english: 'There are four students in the classroom.',
+  }],
+  mei: [{
+    prompt: '会議には十___が参加します。', answer: '名', options: ['名', '人', '件', '室'],
+    completed: '会議には十名が参加します。', reading: 'かいぎにはじゅうめいがさんかします。', english: 'Ten people will attend the meeting.',
+  }],
+  hon: [{
+    prompt: '傘を一___持ってきました。', answer: '本', options: ['本', '枚', '冊', '台'],
+    completed: '傘を一本持ってきました。', reading: 'かさをいっぽんもってきました。', english: 'I brought one umbrella.',
+  }],
+  mai: [{
+    prompt: '紙を五___使いました。', answer: '枚', options: ['枚', '本', '冊', '着'],
+    completed: '紙を五枚使いました。', reading: 'かみをごまいつかいました。', english: 'I used five sheets of paper.',
+  }],
+  satsu: [{
+    prompt: '雑誌を二___読みました。', answer: '冊', options: ['冊', '枚', '本', '曲'],
+    completed: '雑誌を二冊読みました。', reading: 'ざっしをにさつよみました。', english: 'I read two magazines.',
+  }],
+  hiki: [{
+    prompt: '玄関に犬が一___います。', answer: '匹', options: ['匹', '頭', '羽', '人'],
+    completed: '玄関に犬が一匹います。', reading: 'げんかんにいぬがいっぴきいます。', english: 'There is one dog by the entrance.',
+  }],
+  tou: [{
+    prompt: '牧場に牛が二___います。', answer: '頭', options: ['頭', '匹', '羽', '台'],
+    completed: '牧場に牛が二頭います。', reading: 'ぼくじょうにうしがにとういます。', english: 'There are two cows on the farm.',
+  }],
+  wa: [{
+    prompt: '湖に白鳥が二___います。', answer: '羽', options: ['羽', '匹', '頭', '本'],
+    completed: '湖に白鳥が二羽います。', reading: 'みずうみにはくちょうがにわいます。', english: 'There are two swans on the lake.',
+  }],
+  dai: [{
+    prompt: '新しいパソコンを二___注文しました。', answer: '台', options: ['台', '本', '枚', '軒'],
+    completed: '新しいパソコンを二台注文しました。', reading: 'あたらしいぱそこんをにだいちゅうもんしました。', english: 'I ordered two new computers.',
+  }],
+  hai: [{
+    prompt: '水を一___ください。', answer: '杯', options: ['杯', '個', '本', '枚'],
+    completed: '水を一杯ください。', reading: 'みずをいっぱいください。', english: 'Please give me a glass of water.',
+  }],
+  chaku: [{
+    prompt: '旅行にコートを二___持っていきます。', answer: '着', options: ['着', '枚', '足', '冊'],
+    completed: '旅行にコートを二着持っていきます。', reading: 'りょこうにこーとをにちゃくもっていきます。', english: 'I will take two coats on the trip.',
+  }],
+  soku: [{
+    prompt: '靴下を二___買いました。', answer: '足', options: ['足', '着', '個', '台'],
+    completed: '靴下を二足買いました。', reading: 'くつしたをにそくかいました。', english: 'I bought two pairs of socks.',
+  }],
+  'ken-buildings': [{
+    prompt: '駅の近くにホテルが二___あります。', answer: '軒', options: ['軒', '室', '件', '階'],
+    completed: '駅の近くにホテルが二軒あります。', reading: 'えきのちかくにほてるがにけんあります。', english: 'There are two hotels near the station.',
+  }],
+  'kai-floors': [{
+    prompt: 'レストランは五___にあります。', answer: '階', options: ['階', '室', '軒', '番'],
+    completed: 'レストランは五階にあります。', reading: 'れすとらんはごかいにあります。', english: 'The restaurant is on the fifth floor.',
+  }],
+  shitsu: [{
+    prompt: 'このホテルには会議室が五___あります。', answer: '室', options: ['室', '軒', '階', '件'],
+    completed: 'このホテルには会議室が五室あります。', reading: 'このほてるにはかいぎしつがごしつあります。', english: 'This hotel has five meeting rooms.',
+  }],
+  'ken-cases': [{
+    prompt: '検索結果が百___ありました。', answer: '件', options: ['件', '回', '度', '室'],
+    completed: '検索結果が百件ありました。', reading: 'けんさくけっかがひゃっけんありました。', english: 'There were one hundred search results.',
+  }],
+  'kai-times': [{
+    prompt: '日本へ二___来たことがあります。', answer: '回', options: ['回', '曲', '件', '番'],
+    completed: '日本へ二回来たことがあります。', reading: 'にほんへにかいきたことがあります。', english: 'I have been to Japan twice.',
+  }],
+  do: [{
+    prompt: 'もう一___説明してください。', answer: '度', options: ['度', '分', '秒', '歳'],
+    completed: 'もう一度説明してください。', reading: 'もういちどせつめいしてください。', english: 'Please explain it one more time.',
+  }],
+  ban: [{
+    prompt: '次は五___の方です。', answer: '番', options: ['番', '回', '件', '度'],
+    completed: '次は五番の方です。', reading: 'つぎはごばんのかたです。', english: 'Number five is next.',
+  }],
+  sai: [{
+    prompt: '弟は十___になりました。', answer: '歳', options: ['歳', '年', '日', 'か月'],
+    completed: '弟は十歳になりました。', reading: 'おとうとはじゅっさいになりました。', english: 'My younger brother turned ten.',
+  }],
+  nen: [{
+    prompt: '東京に五___住んでいます。', answer: '年', options: ['年', 'か月', '週間', '日'],
+    completed: '東京に五年住んでいます。', reading: 'とうきょうにごねんすんでいます。', english: 'I have lived in Tokyo for five years.',
+  }],
+  kagetsu: [{
+    prompt: '研修は二___続きます。', answer: 'か月', options: ['か月', '年', '日', '時間'],
+    completed: '研修は二か月続きます。', reading: 'けんしゅうはにかげつつづきます。', english: 'The training lasts two months.',
+  }],
+  nichi: [{
+    prompt: '仕事を四___休みました。', answer: '日', options: ['日', '週間', 'か月', '年'],
+    completed: '仕事を四日休みました。', reading: 'しごとをよっかやすみました。', english: 'I took four days off work.',
+  }],
+  shuukan: [{
+    prompt: '北海道を二___旅行しました。', answer: '週間', options: ['週間', '日', '時間', '回'],
+    completed: '北海道を二週間旅行しました。', reading: 'ほっかいどうをにしゅうかんりょこうしました。', english: 'I traveled around Hokkaido for two weeks.',
+  }],
+  jikan: [{
+    prompt: '昨夜は八___寝ました。', answer: '時間', options: ['時間', '時', '分', '週間'],
+    completed: '昨夜は八時間寝ました。', reading: 'さくやははちじかんねました。', english: 'I slept for eight hours last night.',
+  }],
+  ji: [{
+    prompt: '店は九___に開きます。', answer: '時', options: ['時', '時間', '分', '回'],
+    completed: '店は九時に開きます。', reading: 'みせはくじにひらきます。', english: 'The shop opens at nine o’clock.',
+  }],
+  fun: [{
+    prompt: 'バスを十___待ちました。', answer: '分', options: ['分', '秒', '時間', '時'],
+    completed: 'バスを十分待ちました。', reading: 'ばすをじゅっぷんまちました。', english: 'I waited ten minutes for the bus.',
+  }],
+  byou: [{
+    prompt: '百メートルを十二___で走りました。', answer: '秒', options: ['秒', '分', '時', '回'],
+    completed: '百メートルを十二秒で走りました。', reading: 'ひゃくめーとるをじゅうにびょうではしりました。', english: 'I ran one hundred meters in twelve seconds.',
+  }],
+  en: [{
+    prompt: '入場料は千___です。', answer: '円', options: ['円', '個', '枚', '本'],
+    completed: '入場料は千円です。', reading: 'にゅうじょうりょうはせんえんです。', english: 'Admission is one thousand yen.',
+  }],
+  kyoku: [{
+    prompt: 'このアルバムには十___入っています。', answer: '曲', options: ['曲', '回', '枚', '冊'],
+    completed: 'このアルバムには十曲入っています。', reading: 'このあるばむにはじゅっきょくはいっています。', english: 'This album contains ten songs.',
+  }],
+  haku: [{
+    prompt: '大阪に二___する予定です。', answer: '泊', options: ['泊', '日', '回', '軒'],
+    completed: '大阪に二泊する予定です。', reading: 'おおさかににはくするよていです。', english: 'I plan to stay two nights in Osaka.',
+  }],
+}

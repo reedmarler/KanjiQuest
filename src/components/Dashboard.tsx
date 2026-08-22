@@ -17,7 +17,6 @@ import {
   stopSpeaking,
   watchSpeechSupport,
 } from '../lib/speech'
-import { SpeakButtons } from './SpeakButtons'
 import { FavoriteWordsPanel } from './FavoriteWordsPanel'
 
 const HERO_SPEECH_STORAGE_KEY = 'kanji-quest-hero-speech-v1'
@@ -376,8 +375,9 @@ interface DashboardProps {
   progress: Record<string, CardProgress>
   onOpenQuests: () => void
   onOpenBeginnerZone: () => void
-  onOpenStudyTools: () => void
   onOpenAdditionalTools: () => void
+  onOpenStudyTools: () => void
+  onOpenPicturePractice: () => void
   onOpenFavoriteWords: () => void
   questProgress: QuestProgress
 }
@@ -387,8 +387,9 @@ export function Dashboard({
   totalCards,
   onOpenQuests,
   onOpenBeginnerZone,
-  onOpenStudyTools,
   onOpenAdditionalTools,
+  onOpenStudyTools,
+  onOpenPicturePractice,
   onOpenFavoriteWords,
   questProgress,
   wrongPool,
@@ -1115,9 +1116,6 @@ export function Dashboard({
             <div className="voice-settings-panel" id="hero-voice-settings" aria-label="Playback settings">
                 <div className="voice-settings-header">
                   <span className="control-group-label">Playback</span>
-                  {/* Reads whatever sentence is on screen right now, so the
-                      buttons double as a preview while adjusting the sliders. */}
-                  <SpeakButtons className="voice-settings-speak" text={spokenSentence} />
                   <button
                     type="button"
                     className="voice-settings-reset"
@@ -1270,8 +1268,15 @@ export function Dashboard({
             </span>
           </button>
 
-          <button type="button" className="dashboard-additional" onClick={onOpenAdditionalTools}>
-            <span className="dashboard-additional-mark-main" aria-hidden="true">&#20182;</span>
+          <button type="button" className="dashboard-additional dashboard-picture-button" onClick={onOpenPicturePractice}>
+            <span className="dashboard-additional-mark-main" aria-hidden="true">絵</span>
+            <span className="dashboard-additional-heading">
+              <b>Picture mode</b>
+            </span>
+          </button>
+
+          <button type="button" className="dashboard-additional dashboard-additional-tools-button" onClick={onOpenAdditionalTools}>
+            <span className="dashboard-additional-mark-main" aria-hidden="true" lang="ja">他</span>
             <span className="dashboard-additional-heading">
               <b>Additional</b>
             </span>

@@ -104,8 +104,17 @@ body:has(.kanji-lab) .app {
    (mobile is already 1x zoom via the breakpoint above; on desktop this view
    keeps the standard 150% zoom every other tool view uses). */
 body:has(.beginner-learner) .app {
-  padding-top: 0.75rem;
+  padding-top: 0.25rem;
   padding-bottom: 1.4rem;
+}
+
+body:has(.beginner-word-writing-card) .app,
+.beginner-learner:has(.beginner-word-writing-card) {
+  padding-bottom: 0;
+}
+
+.app.beginner-zone-page {
+  padding-top: 0.5rem;
 }
 
 body:has(.quest-hub) .app {
@@ -2157,10 +2166,10 @@ body:has(.dashboard) {
   right: 0;
   z-index: 12;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-end;
   gap: 0.28rem;
-  min-height: 1.85rem;
+  min-height: 2.7rem;
   pointer-events: none;
 }
 
@@ -2171,11 +2180,13 @@ body:has(.dashboard) {
 
 .control-story-toggle-stack {
   display: flex;
-  align-items: center;
-  gap: 0.3rem;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
 }
 
 .control-story-toggle-stack .control-story-quick-select.is-swap {
+  pointer-events: auto;
   width: max-content;
   max-width: none;
 }
@@ -2186,14 +2197,15 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.26rem;
-  height: 1.3rem;
+  min-width: 3.65rem;
+  height: 1.2rem;
   box-sizing: border-box;
-  padding: 0 0.4rem;
-  border: 1px solid color-mix(in srgb, var(--rayquaza-light) 30%, var(--border));
+  padding: 0 0.38rem;
+  border: 1px solid color-mix(in srgb, var(--sakura-light) 38%, var(--border));
   border-radius: 0.55rem;
-  background: color-mix(in srgb, var(--rayquaza) 10%, var(--surface-2));
-  color: var(--rayquaza-light);
-  font: 700 0.55rem/1 'Outfit', system-ui, sans-serif;
+  background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+  color: var(--sakura-light);
+  font: 700 0.5rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
   transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
   white-space: nowrap;
@@ -2201,9 +2213,9 @@ body:has(.dashboard) {
 
 .control-swap-mode-button:hover,
 .control-swap-mode-button.is-open {
-  border-color: color-mix(in srgb, var(--rayquaza-light) 58%, var(--border));
-  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface-2));
-  color: color-mix(in srgb, var(--rayquaza-light) 86%, white);
+  border-color: color-mix(in srgb, var(--sakura-light) 62%, var(--border));
+  background: color-mix(in srgb, var(--sakura) 24%, var(--surface-2));
+  color: color-mix(in srgb, var(--sakura-light) 88%, white);
 }
 
 .control-audio-buttons {
@@ -4033,11 +4045,34 @@ body:has(.dashboard) {
   transform: translateY(-1px);
 }
 
+.dashboard-action-secondary > .dashboard-additional-tools-button {
+  grid-column: 1;
+  border-color: color-mix(in srgb, var(--gold) 28%, var(--border));
+}
+
+.dashboard-action-secondary > .dashboard-additional-tools-button:hover {
+  border-color: var(--gold);
+}
+
+.dashboard-action-secondary .dashboard-additional-tools-button .dashboard-additional-mark-main {
+  background: color-mix(in srgb, var(--gold) 15%, var(--surface-2));
+  color: var(--gold);
+}
+
+.dashboard-action-secondary > .dashboard-picture-button:hover {
+  border-color: var(--sakura-light);
+}
+
 .dashboard-action-secondary .dashboard-achievement-mark,
 .dashboard-action-secondary .dashboard-additional-mark-main {
   width: 1.45rem;
   border-radius: 7px;
   font-size: 0.78rem;
+}
+
+.dashboard-action-secondary .dashboard-picture-button .dashboard-additional-mark-main {
+  background: color-mix(in srgb, var(--sakura) 18%, var(--surface-2));
+  color: var(--sakura-light);
 }
 
 .dashboard-action-secondary .dashboard-achievement-button b,
@@ -13905,104 +13940,194 @@ body:has(.counter-practice) .app {
 .counter-practice {
   display: grid;
   align-content: start;
-  gap: .72rem;
+  gap: .55rem;
   min-height: calc(66.6667dvh - 2.25rem);
 }
 
 .counter-practice-top {
   display: grid;
-  grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+  grid-template-columns: 2.4rem minmax(8rem, 1fr) auto;
   align-items: center;
   gap: .65rem;
 }
 
-.counter-practice-top > div {
+.counter-practice-title {
   min-width: 0;
 }
 
-.counter-practice-top > div > span,
-.counter-path-heading span {
-  color: var(--amber-light);
-  font-size: .58rem;
-  font-weight: 700;
-  letter-spacing: .16em;
-}
-
 .counter-practice-top h1 {
-  margin-top: .05rem;
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   line-height: 1.1;
 }
 
-.counter-practice-count {
-  min-width: 3.3rem;
-  color: var(--text-muted);
-  font-size: .72rem;
-  font-weight: 700;
-  text-align: right;
+.counter-shuffle-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .3rem;
+  min-width: 4.35rem;
+  height: 2rem;
+  box-sizing: border-box;
+  padding: 0 .42rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 24%, var(--border));
+  border-radius: .55rem;
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  color: color-mix(in srgb, var(--text-muted) 78%, transparent);
+  font: 700 .58rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
 }
 
-.counter-progress-bar {
-  height: .24rem;
+.counter-shuffle-toggle:hover {
+  border-color: color-mix(in srgb, var(--amber-light) 34%, var(--border));
+  background: color-mix(in srgb, var(--amber) 7%, var(--surface-2));
+  color: var(--text);
 }
 
-.counter-progress-bar .study-progress-fill {
-  background: linear-gradient(90deg, var(--amber), var(--amber-light));
-  box-shadow: 0 0 .45rem color-mix(in srgb, var(--amber-light) 30%, transparent);
+.counter-shuffle-toggle.is-active {
+  border-color: color-mix(in srgb, var(--amber-light) 52%, transparent);
+  background: color-mix(in srgb, var(--amber) 14%, var(--surface-2));
+  color: var(--amber-light);
 }
 
-.counter-path-heading {
+.counter-shuffle-toggle .control-toggle-track {
+  width: 1.12rem;
+  height: .6rem;
+  padding: .08rem;
+}
+
+.counter-shuffle-toggle .control-toggle-track > span {
+  width: .44rem;
+  height: .44rem;
+}
+
+.counter-shuffle-toggle.is-active .control-toggle-track {
+  background: color-mix(in srgb, var(--amber) 38%, transparent);
+}
+
+.counter-shuffle-toggle.is-active .control-toggle-track > span {
+  background: var(--amber-light);
+  transform: translateX(.52rem);
+}
+
+.counter-header-actions {
   display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: .2rem .1rem 0;
-}
-
-.counter-path-heading p {
-  max-width: 29rem;
-  margin-top: .16rem;
-  color: var(--text-muted);
-  font-size: .72rem;
-  line-height: 1.35;
-}
-
-.counter-path-heading .btn {
-  flex: 0 0 auto;
-  min-height: 2rem;
-  padding: .38rem .7rem;
-  font-size: .66rem;
-}
-
-.counter-category-tabs {
-  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: .35rem;
-  margin-inline: -.15rem;
-  padding: .1rem .15rem .22rem;
-  overflow-x: auto;
-  scrollbar-width: none;
 }
 
-.counter-category-tabs::-webkit-scrollbar {
-  display: none;
+.counter-category-picker {
+  position: relative;
 }
 
-.counter-category-tabs button {
+.counter-category-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .3rem;
+  width: fit-content;
+  max-width: 9rem;
+  height: 2rem;
+  box-sizing: border-box;
+  padding: 0 .42rem;
+  border: 1px solid color-mix(in srgb, var(--amber-light) 34%, var(--border));
+  border-radius: .55rem;
+  background: color-mix(in srgb, var(--amber) 12%, var(--surface-2));
+  color: var(--amber-light);
+  font: 700 .58rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.counter-category-button:hover,
+.counter-category-button.is-open {
+  border-color: color-mix(in srgb, var(--amber-light) 62%, var(--border));
+  background: color-mix(in srgb, var(--amber) 22%, var(--surface-2));
+}
+
+.counter-category-button-mark {
+  display: grid;
   flex: 0 0 auto;
-  border: 1px solid color-mix(in srgb, var(--amber-light) 22%, var(--border));
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 92%, var(--amber) 8%);
+  place-items: center;
+  width: .9rem;
+  height: .9rem;
+  border-radius: .3rem;
+  background: color-mix(in srgb, var(--amber) 30%, transparent);
+  color: var(--text);
+  font: 800 .58rem/1 'Noto Sans JP', sans-serif;
+}
+
+.counter-category-button-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.counter-category-button-chevron {
+  flex: 0 0 auto;
   color: var(--text-muted);
-  padding: .38rem .68rem;
-  font: 600 .63rem/1 'Outfit', sans-serif;
+  transition: transform 140ms ease;
+}
+
+.counter-category-button.is-open .counter-category-button-chevron {
+  transform: rotate(180deg);
+}
+
+.counter-category-menu {
+  position: absolute;
+  z-index: 30;
+  top: 2.28rem;
+  right: 0;
+  display: grid;
+  gap: .22rem;
+  width: 12rem;
+  padding: .4rem;
+  border: 1px solid color-mix(in srgb, var(--amber-light) 34%, var(--border));
+  border-radius: .55rem;
+  background: color-mix(in srgb, var(--surface-2) 96%, black);
+  box-shadow: 0 .75rem 1.8rem rgba(0, 0, 0, .38);
+}
+
+.counter-category-menu button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) .75rem;
+  align-items: center;
+  gap: .35rem;
+  min-height: 2rem;
+  padding: .4rem .5rem;
+  border: 1px solid transparent;
+  border-radius: .4rem;
+  background: transparent;
+  color: var(--text-muted);
+  font: 650 .61rem/1.15 'Outfit', system-ui, sans-serif;
+  text-align: left;
   cursor: pointer;
 }
 
-.counter-category-tabs button.is-active {
-  border-color: color-mix(in srgb, var(--amber-light) 64%, transparent);
-  background: color-mix(in srgb, var(--surface-2) 72%, var(--amber) 28%);
-  color: color-mix(in srgb, var(--amber-light) 75%, #fff);
-  box-shadow: 0 0 .5rem color-mix(in srgb, var(--amber) 12%, transparent);
+.counter-category-menu button:hover,
+.counter-category-menu button:focus-visible {
+  border-color: color-mix(in srgb, var(--amber-light) 34%, transparent);
+  background: color-mix(in srgb, var(--amber) 14%, transparent);
+  color: var(--text);
+  outline: none;
+}
+
+.counter-category-menu button.is-active {
+  border-color: color-mix(in srgb, var(--amber-light) 42%, transparent);
+  background: color-mix(in srgb, var(--amber) 22%, transparent);
+  color: var(--amber-light);
+}
+
+.counter-category-menu button > span + span {
+  text-align: center;
+}
+
+.counter-category-menu-count {
+  color: var(--amber-light);
+  font-size: .56rem;
+  font-weight: 750;
 }
 
 .counter-study-card {
@@ -14039,6 +14164,29 @@ body:has(.counter-practice) .app {
   gap: .7rem;
 }
 
+.counter-card-display-options {
+  position: relative;
+  z-index: 2;
+}
+
+.counter-card-display-options .control-chip {
+  border-color: color-mix(in srgb, var(--text-muted) 24%, var(--border));
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  color: color-mix(in srgb, var(--text-muted) 78%, transparent);
+}
+
+.counter-card-display-options .control-chip:hover {
+  border-color: color-mix(in srgb, var(--amber-light) 34%, var(--border));
+  background: color-mix(in srgb, var(--amber) 7%, var(--surface-2));
+  color: var(--text);
+}
+
+.counter-card-display-options .control-chip.is-active {
+  border-color: color-mix(in srgb, var(--amber-light) 52%, transparent);
+  background: color-mix(in srgb, var(--amber) 14%, var(--surface-2));
+  color: var(--amber-light);
+}
+
 .counter-category-badge {
   border: 1px solid color-mix(in srgb, var(--amber-light) 30%, transparent);
   border-radius: 999px;
@@ -14047,11 +14195,6 @@ body:has(.counter-practice) .app {
   padding: .24rem .55rem;
   font-size: .57rem;
   font-weight: 700;
-}
-
-.counter-card-instruction {
-  color: var(--text-muted);
-  font-size: .62rem;
 }
 
 .counter-study-prompt {
@@ -14187,35 +14330,108 @@ button.counter-example {
 
 .counter-study-complete {
   display: grid;
-  justify-items: center;
-  gap: .7rem;
+  grid-template-rows: auto 1fr auto;
+  align-items: center;
+  gap: 1.15rem;
+  height: 24.7rem;
+  box-sizing: border-box;
   border: 1px solid color-mix(in srgb, var(--amber-light) 26%, var(--border));
   border-radius: 1rem;
-  background: radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--amber) 18%, transparent), var(--surface) 55%);
-  padding: 2rem 1rem;
-  text-align: center;
+  background:
+    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--amber) 15%, transparent), transparent 34%),
+    linear-gradient(145deg, color-mix(in srgb, var(--surface-2) 42%, var(--surface)), var(--surface));
+  box-shadow: var(--shadow);
+  padding: 1.35rem;
 }
 
-.counter-study-complete > span {
+.counter-complete-heading {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  width: 100%;
+}
+
+.counter-complete-mark {
   display: grid;
-  width: 4.5rem;
-  aspect-ratio: 1;
+  flex: 0 0 auto;
+  width: 3.25rem;
+  height: 3.25rem;
   place-items: center;
   border: 1px solid color-mix(in srgb, var(--amber-light) 38%, transparent);
-  border-radius: 50%;
+  border-radius: .7rem;
   background: color-mix(in srgb, var(--amber) 18%, transparent);
   color: var(--amber-light);
-  font: 700 2.1rem/1 'Noto Sans JP', sans-serif;
+  font: 700 1.55rem/1 'Noto Sans JP', sans-serif;
 }
 
-.counter-study-complete p {
-  max-width: 24rem;
+.counter-complete-heading > div {
+  min-width: 0;
+}
+
+.counter-complete-heading > div > span {
+  color: var(--amber-light);
+  font: 750 .58rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.counter-complete-heading h2 {
+  margin-top: .15rem;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.counter-complete-heading p {
+  margin-top: .22rem;
   color: var(--text-muted);
-  font-size: .78rem;
+  font-size: .7rem;
 }
 
-.counter-study-complete .btn {
-  width: min(100%, 17rem);
+.counter-complete-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  border-top: 1px solid color-mix(in srgb, var(--amber-light) 16%, var(--border));
+  border-bottom: 1px solid color-mix(in srgb, var(--amber-light) 16%, var(--border));
+  padding-block: 1.15rem;
+}
+
+.counter-complete-stats > div {
+  display: grid;
+  justify-items: center;
+  gap: .3rem;
+  min-width: 0;
+  border-right: 1px solid color-mix(in srgb, var(--amber-light) 14%, var(--border));
+}
+
+.counter-complete-stats > div:last-child {
+  border-right: 0;
+}
+
+.counter-complete-stats strong {
+  color: var(--text);
+  font: 750 1.65rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.counter-complete-stats span {
+  color: var(--text-muted);
+  font: 700 .6rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.counter-complete-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
+  width: 100%;
+}
+
+.counter-complete-actions .btn {
+  width: 100%;
+  min-height: 2.85rem;
+}
+
+.counter-complete-actions .btn-primary {
+  border-color: color-mix(in srgb, var(--amber-light) 62%, var(--border));
+  background: color-mix(in srgb, var(--amber) 32%, var(--surface-2));
+  color: color-mix(in srgb, var(--amber-light) 82%, white);
 }
 
 @media (max-width: 720px) {
@@ -14228,12 +14444,27 @@ button.counter-example {
     min-height: calc(100dvh - 2.15rem);
   }
 
-  .counter-practice-top h1 {
-    font-size: 1.16rem;
+  .counter-study-complete {
+    height: 23.6rem;
+    padding: 1rem;
   }
 
-  .counter-path-heading p {
-    font-size: .66rem;
+  .counter-complete-actions {
+    gap: .5rem;
+  }
+
+  .counter-practice-top {
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .counter-header-actions {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+
+  .counter-practice-top h1 {
+    font-size: 1.08rem;
   }
 
   .counter-study-card {
@@ -14271,9 +14502,11 @@ button.counter-example {
 
 /* Sentence quiz replaces the original explanation-heavy reveal card. */
 .counter-study-card.counter-quiz-card {
-  grid-template-rows: auto auto auto minmax(5.4rem, auto);
+  grid-template-rows: 1.5rem minmax(5.2rem, 1fr) auto 4.7rem;
   gap: .7rem;
-  min-height: 22rem;
+  height: 24.7rem;
+  min-height: 0;
+  box-sizing: border-box;
 }
 
 .counter-quiz-prompt {
@@ -14287,20 +14520,72 @@ button.counter-example {
 }
 
 .counter-quiz-prompt p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 5rem);
+  height: 3.8rem;
+  box-sizing: border-box;
   color: var(--text);
   font: 700 clamp(1.42rem, 5vw, 2rem)/1.55 'Noto Sans JP', sans-serif;
+  white-space: nowrap;
+}
+
+.counter-quiz-prompt p[role='button'] {
+  border-radius: .35rem;
+  cursor: pointer;
+  transition: color 140ms ease, text-shadow 140ms ease;
+}
+
+.counter-quiz-prompt p[role='button']:hover,
+.counter-quiz-prompt p[role='button']:focus-visible,
+.counter-quiz-prompt p.is-speaking {
+  color: var(--amber-light);
+  text-shadow: 0 0 .55rem color-mix(in srgb, var(--amber) 28%, transparent);
+  outline: none;
+}
+
+.counter-prompt-furigana {
+  display: inline;
+}
+
+.counter-quiz-prompt rt {
+  color: color-mix(in srgb, var(--amber-light) 72%, var(--text-muted));
+  font-size: .42em;
+}
+
+.counter-quiz-prompt .is-furigana-hidden rt {
+  visibility: hidden;
 }
 
 .counter-quiz-blank {
   display: inline-grid;
-  min-width: 2.65rem;
+  grid-template-areas: "answer";
+  width: max-content;
   min-height: 2.3rem;
-  margin-inline: .12rem;
   place-items: center;
   border-bottom: .14rem solid var(--amber-light);
   color: var(--amber-light);
   line-height: 1;
   text-shadow: 0 0 .4rem color-mix(in srgb, var(--amber) 24%, transparent);
+}
+
+.counter-quiz-blank-ruby {
+  ruby-align: center;
+}
+
+.counter-quiz-blank-reading {
+  visibility: hidden;
+  font-size: .42em;
+}
+
+.counter-quiz-blank-answer,
+.counter-quiz-answer-display {
+  grid-area: answer;
+}
+
+.counter-quiz-blank-answer {
+  visibility: hidden;
 }
 
 .counter-quiz-prompt > span {
@@ -14312,24 +14597,24 @@ button.counter-example {
   position: relative;
   z-index: 1;
   display: grid;
+  grid-row: 3;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: .48rem;
 }
 
 .counter-quiz-options button {
-  min-height: 2.8rem;
+  min-height: 3.25rem;
   border: 1px solid color-mix(in srgb, var(--amber-light) 24%, var(--border));
   border-radius: .7rem;
   background: color-mix(in srgb, var(--surface-2) 86%, var(--amber) 14%);
   color: var(--text);
-  font: 700 1.18rem/1 'Noto Sans JP', sans-serif;
+  font: 700 1.28rem/1 'Noto Sans JP', sans-serif;
   cursor: pointer;
   transition: border-color .15s ease, background .15s ease, transform .15s ease;
 }
 
 .counter-quiz-options button:not(:disabled):hover {
   border-color: var(--amber-light);
-  transform: translateY(-1px);
 }
 
 .counter-quiz-options button.is-correct {
@@ -14356,36 +14641,11 @@ button.counter-example {
   position: relative;
   z-index: 1;
   display: grid;
-  align-content: start;
+  grid-row: 4;
+  align-content: center;
   gap: .48rem;
   border-top: 1px solid color-mix(in srgb, var(--amber-light) 13%, transparent);
-  padding-top: .58rem;
-}
-
-.counter-quiz-result {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .65rem;
-  font-size: .68rem;
-}
-
-.counter-quiz-result strong {
-  color: var(--rayquaza-light);
-  font-size: .75rem;
-}
-
-.counter-quiz-feedback.is-wrong .counter-quiz-result strong {
-  color: var(--groudon-light);
-}
-
-.counter-quiz-result span {
-  color: var(--text-muted);
-}
-
-.counter-quiz-result b {
-  color: var(--amber-light);
-  font: 700 .82rem/1 'Noto Sans JP', sans-serif;
+  padding: .25rem 0 0;
 }
 
 .counter-sentence-example {
@@ -14403,6 +14663,39 @@ button.counter-example {
   font-family: inherit;
   text-align: left;
   cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+.counter-question-english.is-hidden,
+.counter-sentence-english.is-hidden {
+  visibility: hidden;
+}
+
+.counter-sentence-example:hover,
+.counter-sentence-example:focus-visible {
+  border-color: color-mix(in srgb, var(--sakura-light) 58%, var(--border));
+  background: color-mix(in srgb, var(--surface-2) 76%, var(--sakura) 24%);
+  outline: none;
+}
+
+.counter-sentence-example:active {
+  transform: scale(.995);
+}
+
+.counter-quiz-feedback.is-correct .counter-sentence-example {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 52%, var(--border));
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--rayquaza) 18%);
+}
+
+.counter-quiz-feedback.is-correct .counter-sentence-example:hover,
+.counter-quiz-feedback.is-correct .counter-sentence-example:focus-visible {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 78%, var(--border));
+  background: color-mix(in srgb, var(--surface-2) 72%, var(--rayquaza) 28%);
+}
+
+.counter-quiz-feedback.is-correct .counter-sentence-japanese,
+.counter-quiz-feedback.is-correct .counter-sentence-example .speakable-word-cue {
+  color: var(--rayquaza-light);
 }
 
 .counter-sentence-japanese {
@@ -14413,6 +14706,10 @@ button.counter-example {
 .counter-sentence-japanese rt {
   color: color-mix(in srgb, var(--sakura-light) 72%, var(--text-muted));
   font-size: .42em;
+}
+
+.counter-sentence-japanese.is-furigana-hidden rt {
+  visibility: hidden;
 }
 
 .counter-sentence-english {
@@ -14435,9 +14732,10 @@ button.counter-example {
 
 @media (max-width: 720px) {
   .counter-study-card.counter-quiz-card {
-    grid-template-rows: auto auto auto minmax(5rem, auto);
+    grid-template-rows: 1.5rem minmax(4.5rem, 1fr) auto 4.7rem;
     gap: .55rem;
-    min-height: 20.5rem;
+    height: 23.6rem;
+    min-height: 0;
   }
 
   .counter-quiz-prompt {
@@ -14445,12 +14743,14 @@ button.counter-example {
   }
 
   .counter-quiz-prompt p {
+    width: calc(100% - 1rem);
+    height: 3.4rem;
     font-size: clamp(1.22rem, 6.4vw, 1.62rem);
   }
 
   .counter-quiz-options button {
-    min-height: 2.55rem;
-    font-size: 1.05rem;
+    min-height: 3rem;
+    font-size: 1.14rem;
   }
 
   .counter-sentence-example {
@@ -14487,8 +14787,8 @@ button.counter-example {
   gap: 0.5rem;
   width: min(100%, 34rem);
   margin-inline: auto;
-  margin-top: 0.5rem;
-  padding: 0.6rem 0.9rem 0.8rem;
+  margin-top: 0;
+  padding: 0.2rem 0.9rem 0.8rem;
 }
 
 @media (min-width: 720px) {
@@ -14502,6 +14802,35 @@ button.counter-example {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.6rem;
+}
+
+.beginner-top-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.beginner-reset-progress {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.8rem;
+  padding: 0 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--groudon-light) 65%, var(--border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--groudon) 13%, transparent);
+  color: var(--groudon-light);
+  font: 750 0.58rem/1 'Outfit', system-ui, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.beginner-reset-progress:hover,
+.beginner-reset-progress:focus-visible {
+  border-color: var(--groudon-light);
+  background: color-mix(in srgb, var(--groudon) 22%, transparent);
 }
 
 .beginner-back {
@@ -14684,34 +15013,245 @@ button.counter-example {
   font-size: 0.7rem;
 }
 
-.beginner-card-complete .beginner-complete-mark {
-  font-size: 2.6rem;
-}
-
-.beginner-card-complete h2 {
-  margin: 0;
-  color: var(--text);
-  font: 800 1.1rem/1.2 'Outfit', system-ui, sans-serif;
-}
-
-.beginner-card-complete p {
-  margin: 0;
-  color: var(--text-muted);
-  font: 500 0.75rem/1.45 'Outfit', system-ui, sans-serif;
+.beginner-card-complete {
+  gap: 0;
+  min-height: 22rem;
+  justify-content: flex-start;
+  padding: 1.6rem 1.75rem 1.35rem;
 }
 
 .beginner-complete-chars {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  margin: 0.2rem 0 0.3rem;
-  color: var(--sakura);
-  font: 400 2rem/1 'Noto Sans JP', sans-serif;
+  gap: 0.5rem;
+  min-height: 3.35rem;
+  margin-bottom: 0;
 }
 
-.beginner-card-complete .btn {
+.beginner-complete-chars button {
+  display: grid;
+  place-items: center;
+  width: 3.35rem;
+  height: 3.35rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--sakura);
+  font: 500 2.35rem/1 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+.beginner-complete-chars button:hover,
+.beginner-complete-chars button:focus-visible {
+  border-color: color-mix(in srgb, var(--sakura) 45%, var(--border));
+  background: color-mix(in srgb, var(--sakura) 8%, transparent);
+}
+
+.beginner-complete-chars button:active {
+  transform: scale(0.96);
+}
+
+.beginner-complete-chars button span {
+  display: block;
+}
+
+.beginner-complete-chars.is-writing button > span {
+  animation: beginner-placeholder-writing 360ms ease-out both;
+}
+
+@keyframes beginner-placeholder-writing {
+  from {
+    opacity: 0.2;
+    transform: translateY(0.15rem) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.beginner-complete-chars .stroke-order-animation {
+  width: 3.35rem;
+  cursor: inherit;
+  pointer-events: none;
+}
+
+.beginner-complete-chars .stroke-order-char {
+  width: 3.35rem;
+  border-color: transparent;
+  background: transparent;
+  border-radius: 0;
+}
+
+.beginner-complete-quiz-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2.15rem;
+}
+
+.beginner-complete-quiz-kicker {
+  color: var(--text-muted);
+  font: 700 0.65rem/1 'Outfit', system-ui, sans-serif;
+  text-transform: uppercase;
+}
+
+.beginner-complete-quiz-cue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.15rem;
+  color: var(--text-muted);
+  font: 700 0.72rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-complete-quiz-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 4.25rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.beginner-complete-quiz-icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+  font-size: 1.2rem;
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+.beginner-complete-quiz-step:hover .beginner-complete-quiz-icon,
+.beginner-complete-quiz-step:focus-visible .beginner-complete-quiz-icon {
+  border-color: color-mix(in srgb, var(--sakura) 45%, var(--border));
+  background: color-mix(in srgb, var(--sakura) 8%, var(--surface-2));
+}
+
+.beginner-complete-quiz-step:active .beginner-complete-quiz-icon {
+  transform: scale(0.94);
+}
+
+.beginner-complete-quiz-plus {
+  margin-bottom: 1.25rem;
+  color: color-mix(in srgb, var(--text-muted) 60%, transparent);
+  font: 600 1rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-complete-write-icon {
+  color: var(--sakura);
+  font: 700 1.3rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-complete-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 1.25rem;
   width: 100%;
+  margin-top: auto;
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+.beginner-complete-actions .btn {
+  min-height: 2.8rem;
+  border-radius: 5px;
+}
+
+.beginner-complete-actions .btn-primary {
+  grid-column: 2;
+  justify-self: end;
+  width: min(100%, 17rem);
+}
+
+.beginner-complete-actions .btn-ghost {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  width: min(100%, 11rem);
+  padding: 0.45rem 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.beginner-listening-check {
+  min-height: 22rem;
+  justify-content: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.75rem 1.25rem;
+}
+
+.beginner-listening-check-label {
+  color: var(--text-muted);
+  font: 800 0.65rem/1 'Outfit', system-ui, sans-serif;
+  text-transform: uppercase;
+}
+
+.beginner-listening-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  width: min(100%, 26rem);
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.beginner-listening-options button {
+  min-height: 4.75rem;
+  padding: 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+.beginner-listening-options button:hover,
+.beginner-listening-options button:focus-visible {
+  border-color: var(--kyogre-light);
+}
+
+.beginner-listening-options button:active {
+  transform: scale(0.97);
+}
+
+.beginner-listening-options button.is-correct {
+  border-color: var(--rayquaza-light);
+  background: color-mix(in srgb, var(--rayquaza) 14%, var(--surface-2));
+}
+
+.beginner-listening-options button.is-wrong {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface-2));
+}
+
+.beginner-listening-options button span {
+  font: 700 clamp(1.35rem, 4.5vw, 1.9rem)/1 'Noto Sans JP', sans-serif;
+}
+
+.beginner-listening-continue {
+  width: min(100%, 11.5rem);
+  min-height: 2.35rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
 }
 
 /* ---------------------------------------------------------------------------
@@ -14753,6 +15293,11 @@ button.counter-example {
   cursor: pointer;
 }
 
+.beginner-quiz-example.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* The revealed English meaning is the payoff of the screen, so it is sized to
    be read at a glance. It gets its own full-width line above the boxes rather
    than living inside the tracing panel, where at this size it covered the
@@ -14764,6 +15309,26 @@ button.counter-example {
   font: 700 clamp(1.5rem, 6vw, 2.5rem)/1.1 'Outfit', system-ui, sans-serif;
   text-align: center;
   text-transform: capitalize;
+}
+
+.beginner-quiz-meaning--in-write-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  width: min(70%, 18rem);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: clamp(0.9rem, 2.3vw, 1.15rem);
+  line-height: 1.1;
+}
+
+.beginner-quiz-picture {
+  flex: 0 0 auto;
+  font: 700 1.05rem/1 'Noto Color Emoji', 'Segoe UI Emoji', 'Outfit', system-ui, sans-serif;
 }
 
 /* Same wrapper, for the plain flashcard's hiragana display rather than the
@@ -14792,6 +15357,26 @@ button.counter-example {
   width: min(100%, 9.2rem);
 }
 
+.beginner-static-word-example {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  width: min(100%, 28rem);
+}
+
+.beginner-static-word-example span {
+  display: grid;
+  place-items: center;
+  width: clamp(5.4rem, 24vw, 8.3rem);
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-2);
+  color: var(--sakura);
+  font: 800 clamp(3.3rem, 12vw, 5.4rem)/1 'Noto Sans JP', sans-serif;
+}
+
 .beginner-write-section {
   display: flex;
   flex-direction: column;
@@ -14818,6 +15403,14 @@ button.counter-example {
   width: min(100%, 21rem);
 }
 
+.beginner-write-layout .beginner-static-word-example {
+  width: min(100%, 21rem);
+}
+
+.beginner-write-layout .beginner-static-word-example span {
+  width: min(100%, 21rem);
+}
+
 /* On wide screens the example and the tracing box sit side by side at
    equal width, example on the left. */
 @media (min-width: 720px) {
@@ -14829,6 +15422,11 @@ button.counter-example {
   }
 
   .beginner-write-layout .stroke-order-animation.is-hero {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .beginner-write-layout .beginner-static-word-example {
     width: 100%;
     min-width: 0;
   }
@@ -14862,6 +15460,22 @@ button.counter-example {
   font-size: 0.7rem;
 }
 
+.beginner-quiz-listen-group {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.beginner-quiz-replay-note {
+  color: var(--text-muted);
+  font: 700 0.62rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
 /* Deliberately louder than the nav buttons either side of it — hearing the
    character is the whole point of this button, so it reads as the star of
    the row rather than a third peer action. */
@@ -14889,12 +15503,18 @@ button.counter-example {
   letter-spacing: 0.04em;
 }
 
-/* The quiz screens lean on listening even harder than the flashcards, so the
-   speaker there gets extra size and a stronger halo. */
+/* The quiz screen already centers attention on audio, so keep this prominent
+   without letting the button crowd the word and writing area below. */
 .beginner-speak-btn--quiz {
-  width: 11rem;
-  height: 3.4rem;
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--kyogre) 22%, transparent);
+  gap: 0.28rem;
+  width: 6.7rem;
+  height: 2.25rem;
+  font-size: 1rem;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--kyogre) 18%, transparent);
+}
+
+.beginner-speak-btn--quiz em {
+  font-size: 0.66rem;
 }
 
 .beginner-speak-btn:hover {
@@ -14971,6 +15591,27 @@ button.counter-example {
   white-space: nowrap;
 }
 
+.beginner-quiz-example .stroke-order-animation.is-hero {
+  width: min(100%, 28rem);
+  gap: 0.45rem;
+}
+
+.beginner-quiz-example .stroke-order-animation.is-hero .stroke-order-char {
+  width: clamp(5.4rem, 24vw, 8.3rem);
+}
+
+.beginner-quiz-example .beginner-static-word-example {
+  width: min(100%, 28rem);
+}
+
+.beginner-quiz-example .beginner-static-word-example span {
+  width: clamp(5.4rem, 24vw, 8.3rem);
+}
+
+.beginner-quiz-example .stroke-order-replay-hint {
+  display: none;
+}
+
 .stroke-order-animation.is-hero .stroke-order-char {
   width: clamp(2rem, 6vw, 2.6rem);
   border-radius: 16px;
@@ -15038,6 +15679,19 @@ button.counter-example {
   color: var(--text);
 }
 
+.trace-canvas-overlay {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding-inline: 3.25rem;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
 .trace-canvas-layer {
   position: absolute;
   inset: 0;
@@ -15057,7 +15711,7 @@ button.counter-example {
 
 @media (max-width: 430px) {
   .beginner-learner {
-    padding: 0.6rem 0.65rem 1.2rem;
+    padding: 0.2rem 0.65rem 1.2rem;
   }
 
   .beginner-mnemonic {
@@ -15123,6 +15777,12 @@ button.counter-example {
   border-color: var(--sakura);
 }
 
+.beginner-challenge-choice.is-selected {
+  border-color: var(--sakura-light);
+  background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--sakura) 24%, transparent);
+}
+
 .beginner-challenge-choice:disabled {
   cursor: default;
 }
@@ -15155,70 +15815,69 @@ button.counter-example {
 
 /* Speed Run setup */
 
-.beginner-speedrun-setup h2 {
-  margin: 0.2rem 0 0;
+.beginner-speedrun-setup .picture-setup-controls {
+  gap: 1.45rem;
+  margin-top: 1.2rem;
 }
 
-.beginner-speedrun-setup > p {
-  margin: 0 0 0.4rem;
-  color: var(--text-muted);
-  font-size: 0.8rem;
+.picture-segmented.beginner-speedrun-script-selector button.is-active {
+  background: color-mix(in srgb, var(--sakura) 20%, var(--surface));
+  color: var(--sakura-light);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sakura) 55%, transparent);
 }
 
-.beginner-speedrun-group {
+.picture-count-selector.beginner-speedrun-count-selector {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.picture-count-selector.beginner-speedrun-count-selector button.is-active {
+  background: color-mix(in srgb, var(--groudon) 22%, var(--surface));
+  color: var(--groudon-light);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--groudon-light) 48%, transparent);
+}
+
+.picture-count-selector.beginner-speedrun-speed-selector {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.picture-count-selector.beginner-speedrun-speed-selector button.is-active {
+  background: color-mix(in srgb, var(--kyogre) 24%, var(--surface));
+  color: var(--kyogre-light);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kyogre-light) 52%, transparent);
+}
+
+.picture-count-selector.beginner-speedrun-speed-selector button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
-  width: 100%;
-  margin-top: 0.5rem;
-}
-
-.beginner-speedrun-options {
-  display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
+  gap: 0.18rem;
+  min-width: 0;
+  padding-inline: 0.2rem;
 }
 
-.beginner-speedrun-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  min-width: 5.5rem;
-  padding: 0.6rem 0.9rem;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface-2);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+.picture-count-selector.beginner-speedrun-speed-selector b {
+  font: 700 0.62rem/1 'Outfit', system-ui, sans-serif;
 }
 
-.beginner-speedrun-option b {
-  color: var(--text);
-  font: 700 1.15rem/1 'Noto Sans JP', sans-serif;
+.beginner-speedrun-setup .picture-setup-start {
+  width: min(100%, 9rem);
+  min-height: 2.25rem;
+  margin-top: 0.65rem;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.78rem;
 }
 
-.beginner-speedrun-option span {
-  font: 650 0.58rem/1 'Outfit', system-ui, sans-serif;
-}
-
-.beginner-speedrun-option:hover {
-  border-color: color-mix(in srgb, var(--sakura) 50%, var(--border));
-}
-
-.beginner-speedrun-option.is-active {
-  border-color: var(--rayquaza);
-  background: color-mix(in srgb, var(--rayquaza) 16%, var(--surface-2));
-  color: var(--rayquaza-light);
+@media (max-width: 520px) {
+  .picture-count-selector.beginner-speedrun-speed-selector {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 /* Speed Run play */
 
 .beginner-speedrun-stage {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15232,7 +15891,7 @@ button.counter-example {
    look" is the honest difficulty knob rather than a hard on/off blink. */
 .beginner-speedrun-flash {
   color: var(--text);
-  font: 400 clamp(4.5rem, 16vw, 7rem)/1 'Noto Sans JP', sans-serif;
+  font: 500 clamp(3.4rem, 12vw, 5.2rem)/1 'Noto Sans JP', sans-serif;
   animation: beginner-speedrun-flash-out linear forwards;
 }
 
@@ -15244,6 +15903,36 @@ button.counter-example {
 .beginner-speedrun-stage-hint {
   color: var(--text-muted);
   font: 700 1rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-speedrun-answer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.beginner-speedrun-answer b {
+  color: var(--text);
+  font: 500 clamp(3.4rem, 12vw, 5.2rem)/1 'Noto Sans JP', sans-serif;
+}
+
+.beginner-speedrun-answer small {
+  position: absolute;
+  top: calc(50% + 3.05rem);
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--text-muted);
+  font: 650 0.82rem/1.2 'Outfit', system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+.beginner-speedrun-answer.is-correct b {
+  color: var(--rayquaza-light);
+}
+
+.beginner-speedrun-answer.is-wrong b {
+  color: var(--sakura-light);
 }
 
 .beginner-speedrun-quit {
@@ -15259,6 +15948,140 @@ button.counter-example {
 .beginner-speedrun-quit:hover {
   border-color: var(--sakura);
   color: var(--text);
+}
+
+.beginner-speedrun-header-settings {
+  padding: 0.28rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font: 700 0.62rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.beginner-speedrun-header-settings:hover {
+  border-color: var(--sakura);
+  color: var(--text);
+}
+
+.beginner-speedrun-reflash {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.beginner-speedrun-reflash span {
+  font-size: 0.72rem;
+}
+
+.beginner-speedrun-reflash:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.beginner-speedrun-reflash:disabled:hover {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.beginner-speedrun-play {
+  position: relative;
+  overflow: hidden;
+}
+
+.beginner-speedrun-adjuster {
+  display: grid;
+  grid-template-columns: 1.65rem 4.5rem 1.65rem;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.beginner-speedrun-adjuster button {
+  display: grid;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text);
+  font: 700 0.85rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.beginner-speedrun-adjuster button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.beginner-speedrun-adjuster span {
+  color: var(--text-muted);
+  font: 700 0.62rem/1 'Outfit', system-ui, sans-serif;
+  text-align: center;
+}
+
+.beginner-speedrun-settings-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 0.8rem;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(4px);
+}
+
+.beginner-speedrun-settings {
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 25rem);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.beginner-speedrun-settings > header,
+.beginner-speedrun-settings > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.beginner-speedrun-settings > header b {
+  font: 800 0.85rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-speedrun-settings > header button {
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.beginner-speedrun-settings .picture-setup-controls {
+  gap: 1rem;
+  margin-top: 0;
+}
+
+.beginner-speedrun-settings > footer {
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+.beginner-speedrun-settings > footer .btn {
+  width: auto;
+  min-width: 6rem;
+  border-radius: 6px;
 }
 
 .beginner-speedrun-footer {
@@ -15277,6 +16100,177 @@ button.counter-example {
   color: var(--text);
   font: 650 0.9rem/1.2 'Outfit', system-ui, sans-serif;
   text-align: center;
+}
+
+/* Picture Mode */
+
+.picture-practice-setup {
+  gap: 1rem;
+  padding: 1.1rem 1rem 1rem;
+}
+
+.picture-setup-preview {
+  display: grid;
+  grid-template-rows: 1.5rem 4.4rem 1rem;
+  place-items: center;
+  width: 8rem;
+}
+
+.picture-setup-preview b {
+  color: var(--text);
+  font: 700 1.05rem/1 'Noto Sans JP', sans-serif;
+}
+
+.picture-setup-preview > span {
+  font: 700 3.7rem/1 'Noto Color Emoji', 'Segoe UI Emoji', 'Noto Sans JP', sans-serif;
+}
+
+.picture-setup-preview small {
+  color: var(--text-muted);
+  font: 650 0.68rem/1 'Outfit', system-ui, sans-serif;
+  text-transform: capitalize;
+}
+
+.picture-setup-controls {
+  display: grid;
+  gap: 1.35rem;
+  width: min(100%, 24rem);
+  margin-top: 0.75rem;
+}
+
+.picture-setup-field {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.picture-setup-field legend {
+  margin: 0 0 1rem;
+  padding: 0;
+  color: var(--text-muted);
+  font: 700 0.65rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.picture-segmented,
+.picture-count-selector {
+  display: grid;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface-2) 80%, var(--surface));
+}
+
+.picture-segmented {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.picture-count-selector {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.picture-segmented button,
+.picture-count-selector button {
+  min-height: 2.3rem;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-muted);
+  font: 700 0.75rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.picture-segmented button span {
+  margin-right: 0.3rem;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+.picture-count-selector button {
+  font-size: 0.9rem;
+}
+
+.picture-segmented button:hover,
+.picture-count-selector button:hover {
+  color: var(--text);
+}
+
+.picture-segmented button.is-active,
+.picture-count-selector button.is-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 4px color-mix(in srgb, #000 28%, transparent);
+}
+
+.picture-setup-start {
+  width: min(100%, 12rem);
+}
+
+.picture-practice-note {
+  margin: 0.2rem 0 0;
+  color: var(--sakura-light);
+  font: 700 0.68rem/1.25 'Outfit', system-ui, sans-serif;
+  text-align: center;
+}
+
+.picture-practice-card {
+  gap: 0.7rem;
+}
+
+.picture-practice-answer,
+.picture-practice-meaning {
+  min-height: 1.4rem;
+  color: transparent;
+  text-align: center;
+  transition: color 140ms ease;
+}
+
+.picture-practice-answer {
+  margin-top: -1.7rem;
+  font: 700 1.5rem/1 'Noto Sans JP', sans-serif;
+}
+
+.picture-practice-meaning {
+  font: 650 0.95rem/1.2 'Outfit', system-ui, sans-serif;
+  text-transform: capitalize;
+}
+
+.picture-practice-answer.is-visible,
+.picture-practice-meaning.is-visible {
+  color: var(--text);
+}
+
+.picture-practice-card .beginner-challenge-choices {
+  margin-top: -0.15rem;
+}
+
+.picture-practice-action {
+  min-width: 8.1rem;
+  margin-top: -0.55rem;
+  padding: 0.675rem 1.35rem;
+  font-size: 0.855rem;
+}
+
+.picture-practice-image {
+  display: grid;
+  place-items: center;
+  width: min(100%, 18rem);
+  min-height: clamp(8rem, 28vh, 12rem);
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--sakura-light) 24%, var(--border));
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--sakura) 18%, transparent), transparent 55%),
+    color-mix(in srgb, var(--surface-2) 86%, var(--surface));
+}
+
+.picture-practice-image span {
+  color: var(--text);
+  font: 700 clamp(4.8rem, 16vw, 7.4rem)/1 'Noto Color Emoji', 'Segoe UI Emoji', 'Noto Sans JP', sans-serif;
+  transform: translateY(-0.65rem);
 }
 
 @media (prefers-reduced-motion: reduce) {

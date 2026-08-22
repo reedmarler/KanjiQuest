@@ -48,6 +48,7 @@ const FavoriteWordsPage = lazy(() => import('./components/FavoriteWordsPage').th
 const AchievementsPanel = lazy(() => import('./components/AchievementsPanel').then((module) => ({ default: module.AchievementsPanel })))
 const BeginnerLearner = lazy(() => import('./components/BeginnerLearner').then((module) => ({ default: module.BeginnerLearner })))
 const BeginnerSpeedRun = lazy(() => import('./components/BeginnerSpeedRun').then((module) => ({ default: module.BeginnerSpeedRun })))
+const PicturePractice = lazy(() => import('./components/PicturePractice').then((module) => ({ default: module.PicturePractice })))
 
 type View =
   | 'dashboard'
@@ -72,6 +73,7 @@ type View =
   | 'beginner-zone'
   | 'beginner-learner'
   | 'beginner-speed-run'
+  | 'picture-practice'
 
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
@@ -381,7 +383,7 @@ function App() {
 
   if (view === 'beginner-zone') {
     return (
-      <div className="app">
+      <div className="app beginner-zone-page">
         <ToolMenuPage
           title="Beginner zone"
           eyebrow="START HERE"
@@ -424,6 +426,16 @@ function App() {
       <div className="app">
         <Suspense fallback={<RouteLoading label="Speed Run" />}>
           <BeginnerSpeedRun onBack={() => setView('beginner-zone')} />
+        </Suspense>
+      </div>
+    )
+  }
+
+  if (view === 'picture-practice') {
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Picture Mode" />}>
+          <PicturePractice onBack={() => setView('dashboard')} />
         </Suspense>
       </div>
     )
@@ -605,8 +617,9 @@ function App() {
         totalCards={CARD_TOTAL}
         onOpenQuests={() => setView('quests')}
         onOpenBeginnerZone={() => setView('beginner-zone')}
-        onOpenStudyTools={() => setView('study-tools')}
         onOpenAdditionalTools={() => setView('additional-tools')}
+        onOpenStudyTools={() => setView('study-tools')}
+        onOpenPicturePractice={() => setView('picture-practice')}
         onOpenFavoriteWords={() => setView('favorite-words')}
         questProgress={questProgress}
         wrongPool={wrongPool}
