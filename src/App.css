@@ -5812,7 +5812,9 @@ body:has(.dashboard) {
 @media (max-width: 720px) {
   .hero h1 { font-size: 2rem; }
   .dashboard {
-    padding-top: 1.9rem;
+    /* Reserved for the topbar's tallest state (Mode + Swap stacked) so
+       picking a mode never shifts the page underneath it. */
+    padding-top: 3.3rem;
   }
   .hero-compact h1 {
     padding-inline: 0;
@@ -5890,17 +5892,17 @@ body:has(.dashboard) {
     top: 0;
     min-height: 0;
     gap: 0.32rem;
-    justify-content: flex-start;
   }
-  /* Keep Mode (and Swap, when a mode is on) pinned to the top-left. Story /
-     grammar / pick chips still use the opposite corner so they don't shove
-     the toggle inward. */
+  .control-story-topbar:has(> .control-story-quick-select:not(.is-swap)) {
+    justify-content: space-between;
+  }
+  /* Keep Mode pinned to the top-right with Swap stacked underneath it.
+     Story / grammar / pick chips take the opposite corner. */
   .control-story-toggle-stack {
-    order: 0;
+    flex-direction: column;
+    align-items: flex-end;
   }
   .control-story-quick-select:not(.is-swap) {
-    order: 1;
-    margin-left: auto;
     min-width: 0;
     max-width: calc(100% - 4.5rem);
   }
@@ -5919,11 +5921,25 @@ body:has(.dashboard) {
     font-size: 0.52rem;
   }
   .control-story-quick-menu {
-    left: 0;
-    right: auto;
     width: min(calc(100vw - 2rem), 20rem);
     max-height: min(18rem, calc(100dvh - 7rem));
     overflow-y: auto;
+  }
+  /* Story / grammar / pick chips anchor top-left, so their menu grows
+     from the left edge. Swap anchors top-right with the toggle, so its
+     menu must grow from the right edge instead or it runs off-screen. */
+  .control-story-quick-select:not(.is-swap) .control-story-quick-menu {
+    left: 0;
+    right: auto;
+  }
+  .control-story-quick-select.is-swap .control-story-quick-menu {
+    left: auto;
+    right: 0;
+    /* Swap only ever lists the 3 short mode names, and it sits closer
+       to the screen edge than the toggle-stack's own inset accounts
+       for — the wider shared width would still clip past the left
+       edge even right-anchored. */
+    width: min(calc(100vw - 5.5rem), 13rem);
   }
   .control-story-quick-menu button > span:first-child {
     overflow: hidden;
