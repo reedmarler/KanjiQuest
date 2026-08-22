@@ -2122,6 +2122,7 @@ body:has(.dashboard) {
 .hero-settings-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(14rem, 0.7fr);
+  grid-template-rows: 2.75rem auto;
   grid-template-areas: "difficulty voice" "story voice";
   align-items: start;
   gap: 0.55rem;
@@ -2189,7 +2190,12 @@ body:has(.dashboard) {
   gap: 0.2rem;
 }
 
+.control-story-toggle-stack .control-story-top-toggle {
+  order: 0;
+}
+
 .control-story-toggle-stack .control-story-quick-select.is-swap {
+  order: 1;
   pointer-events: auto;
   width: max-content;
   max-width: none;
@@ -2358,6 +2364,12 @@ body:has(.dashboard) {
   padding: 0 0.38rem;
   border-radius: 0.55rem;
   font-size: 0.5rem;
+}
+
+.control-story-top-toggle.is-active {
+  justify-content: center;
+  width: 4.45rem;
+  min-width: 4.45rem;
 }
 
 .control-story-top-toggle .control-toggle-track {
@@ -6010,6 +6022,7 @@ body:has(.dashboard) {
   }
   .hero-settings-layout {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(3, auto);
     grid-template-areas: "difficulty" "voice" "story";
   }
   .control-group {

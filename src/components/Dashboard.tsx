@@ -1,4 +1,4 @@
-﻿import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+﻿import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
 import { isQuestComplete, type QuestProgress } from '../lib/questProgress'
@@ -7,7 +7,6 @@ import { GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexi
 import { HERO_STORY_DEFINITIONS, HERO_STORY_LEVELS, getHeroStoriesForLevel } from '../data/heroStories'
 import {
   HERO_PLAYBACK_RATES,
-  HERO_SPEED_STORAGE_KEY,
   type HeroPlaybackRate,
 } from '../lib/heroPlayback'
 import {
@@ -20,8 +19,6 @@ import {
 import { FavoriteWordsPanel } from './FavoriteWordsPanel'
 
 const HERO_SPEECH_STORAGE_KEY = 'kanji-quest-hero-speech-v1'
-const HERO_SPEECH_RATE_STORAGE_KEY = 'kanji-quest-hero-speech-rate-v2'
-const HERO_SPEECH_VOLUME_STORAGE_KEY = 'kanji-quest-hero-speech-volume-v1'
 /** Voice speeds, slowest to fastest. Labeled 1x is 30% slower than the engine's natural pace. */
 const HERO_SPEECH_RATES = [
   0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1, 1.25, 1.5, 1.75, 2, 2.5, 3,
@@ -121,16 +118,6 @@ function speechVolumeIcon(volume: number): string {
   if (volume === 0) return '\uD83D\uDD07'
   if (volume < 0.5) return '\uD83D\uDD09'
   return '\uD83D\uDD0A'
-}
-
-function savedSpeechRate(): HeroSpeechRate {
-  const stored = Number(window.localStorage.getItem(HERO_SPEECH_RATE_STORAGE_KEY))
-  return HERO_SPEECH_RATES.find((rate) => rate === stored) ?? 1
-}
-
-function savedSpeechVolume(): HeroSpeechVolume {
-  const stored = Number(window.localStorage.getItem(HERO_SPEECH_VOLUME_STORAGE_KEY))
-  return HERO_SPEECH_VOLUMES.find((volume) => volume === stored) ?? 1
 }
 
 import type { HeroSwapFocus } from '../lib/heroSequence'
@@ -360,14 +347,6 @@ function DashboardHeroSentence({
   )
 }
 
-const HERO_ROTATIONS_PER_SPEED_BUMP = 300
-
-function savedPlaybackRate(): HeroPlaybackRate {
-  if (typeof window === 'undefined') return 1
-  const stored = Number(window.localStorage.getItem(HERO_SPEED_STORAGE_KEY))
-  return HERO_PLAYBACK_RATES.includes(stored as HeroPlaybackRate) ? stored as HeroPlaybackRate : 1
-}
-
 interface DashboardProps {
   learnedCount: number
   totalCards: number
@@ -453,15 +432,15 @@ export function Dashboard({
     setSettingsMode((current) => (current === 'none' ? 'picking' : 'none'))
   }
   const [paused, setPaused] = useState(false)
-  const [playbackRate, setPlaybackRate] = useState<HeroPlaybackRate>(savedPlaybackRate)
+  const [playbackRate, setPlaybackRate] = useState<HeroPlaybackRate>(1)
   const [rewindSignal, setRewindSignal] = useState(0)
   const [advanceSignal, setAdvanceSignal] = useState(0)
   const [canRewindSentence, setCanRewindSentence] = useState(false)
   const [speechOn, setSpeechOn] = useState(() => window.localStorage.getItem(HERO_SPEECH_STORAGE_KEY) === 'true')
   const [speechSupported, setSpeechSupported] = useState(canSpeakJapanese)
   const [spokenSentence, setSpokenSentence] = useState('')
-  const [speechRate, setSpeechRate] = useState<HeroSpeechRate>(savedSpeechRate)
-  const [speechVolume, setSpeechVolume] = useState<HeroSpeechVolume>(savedSpeechVolume)
+  const [speechRate, setSpeechRate] = useState<HeroSpeechRate>(1)
+  const [speechVolume, setSpeechVolume] = useState<HeroSpeechVolume>(0.5)
   const [settingsExpanded, setSettingsExpanded] = useState(false)
   // Lets the speak-on-new-sentence effect read current settings without taking
   // them as dependencies, so slider changes do not restart active speech.
@@ -549,12 +528,10 @@ export function Dashboard({
 
   function changeSpeechRate(rate: HeroSpeechRate) {
     setSpeechRate(rate)
-    window.localStorage.setItem(HERO_SPEECH_RATE_STORAGE_KEY, String(rate))
   }
 
   function changeSpeechVolume(volume: HeroSpeechVolume) {
     setSpeechVolume(volume)
-    window.localStorage.setItem(HERO_SPEECH_VOLUME_STORAGE_KEY, String(volume))
   }
 
   function resetSliders() {
@@ -605,25 +582,9 @@ export function Dashboard({
   // Leaving the dashboard mid-sentence should not keep talking.
   useEffect(() => stopSpeaking, [])
 
-  useEffect(() => {
-    window.localStorage.setItem(HERO_SPEED_STORAGE_KEY, String(playbackRate))
-  }, [playbackRate])
-
   const speedIndex = HERO_PLAYBACK_RATES.indexOf(playbackRate)
   const speechRateIndex = HERO_SPEECH_RATES.indexOf(speechRate)
   const speechVolumeIndex = HERO_SPEECH_VOLUMES.indexOf(speechVolume)
-
-  const rotationCountRef = useRef(0)
-  const handleRotate = useCallback(() => {
-    rotationCountRef.current += 1
-    if (rotationCountRef.current < HERO_ROTATIONS_PER_SPEED_BUMP) return
-    rotationCountRef.current = 0
-    setPlaybackRate((current) => {
-      const currentIndex = HERO_PLAYBACK_RATES.indexOf(current)
-      const nextRate = HERO_PLAYBACK_RATES[currentIndex + 1]
-      return nextRate ?? current
-    })
-  }, [])
 
   return (
     <div className="dashboard">
@@ -779,9 +740,8 @@ export function Dashboard({
           </div>
         )}
         <div className="control-story-toggle-stack">
-          {/* Swap sits before the mode switch so it appears to the toggle's
-              left once a mode is running (especially on mobile, where the
-              switch stays pinned to the top-left). */}
+          {/* CSS keeps the mode switch first and places Swap directly beneath
+              it once a specific mode is running. */}
           {modeToggleOn && settingsMode !== 'picking' && (
             <div className="control-story-quick-select is-swap" ref={swapModeQuickSelectRef}>
               <button
@@ -854,7 +814,6 @@ export function Dashboard({
           onStoryRollover={setStoryId}
           paused={paused}
           playbackRate={playbackRate}
-          onRotate={handleRotate}
           rewindSignal={rewindSignal}
           advanceSignal={advanceSignal}
           onCanRewindChange={setCanRewindSentence}
