@@ -4,6 +4,7 @@ import { createGeneratedGrammarDrillBatch } from '../lib/generatedPracticeDrills
 import type { GenerationComplexity } from '../lib/generationComplexity'
 import { getQuestById } from '../data/questCampaign'
 import { ChoiceDrill, loadLevelPreference } from './ChoiceDrill'
+import { AppBackButton, AppDashboardButton } from './AppBackButton'
 
 interface GrammarPracticeProps {
   onBack: () => void
@@ -82,7 +83,10 @@ export function GrammarPractice({ onBack, onDashboard, isFavorite, onToggleFavor
     const progress = (completedBatches / GRAMMAR_BATCH_COUNT) * 100
     return (
       <div className="practice-loading">
-        <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        <div className="app-nav-actions">
+          <AppBackButton onClick={onBack} aria-label="Back to Study Tools" />
+          {onDashboard && <AppDashboardButton onClick={onDashboard} />}
+        </div>
         <section className="practice-loading-card" role="status" aria-live="polite">
           <span className="practice-loading-mark">文法</span>
           <h1>Grammar</h1>
@@ -109,6 +113,7 @@ export function GrammarPractice({ onBack, onDashboard, isFavorite, onToggleFavor
       isFavorite={isFavorite}
       onToggleFavorite={onToggleFavorite}
       onBack={onBack}
+      onDashboard={onDashboard}
     />
   )
 }

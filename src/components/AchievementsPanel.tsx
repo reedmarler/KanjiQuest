@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { buildAchievements, type AchievementCategory, type AchievementContext } from '../data/achievements'
+import { AppBackButton } from './AppBackButton'
 
 interface AchievementsPanelProps extends AchievementContext {
   onBack: () => void
@@ -16,7 +17,7 @@ export function AchievementsPanel({ onBack, ...context }: AchievementsPanelProps
   return (
     <main className="achievements-page">
       <header className="quest-topbar">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>← Back</button>
+        <AppBackButton onClick={onBack} />
         <span>{unlocked} / {achievements.length} unlocked</span>
       </header>
 

@@ -3,6 +3,7 @@ import type { DrillExercise } from '../lib/drillExercises'
 import { complexityDetails, GENERATION_COMPLEXITIES, type GenerationComplexity } from '../lib/generationComplexity'
 import { FuriganaSegment } from './FuriganaText'
 import { shuffle } from '../lib/quiz'
+import { AppBackButton, AppDashboardButton } from './AppBackButton'
 
 const MAX_HINTS = 2
 const DEFAULT_SESSION_SIZE = 15
@@ -408,7 +409,10 @@ export function ChoiceDrill({
   if (loadingNextPool) {
     return (
       <div className="practice-loading">
-        <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        <div className="app-nav-actions">
+          <AppBackButton onClick={onBack} />
+          {onDashboard && <AppDashboardButton onClick={onDashboard} />}
+        </div>
         <section className="practice-loading-card" role="status" aria-live="polite">
           <span className="practice-loading-mark">{finishMark}</span>
           <h1>{badgeLabel}</h1>
@@ -424,14 +428,17 @@ export function ChoiceDrill({
   if (finished) {
     return (
       <div className="grammar-practice-view">
-        <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        <div className="app-nav-actions">
+          <AppBackButton onClick={onBack} />
+          {onDashboard && <AppDashboardButton onClick={onDashboard} />}
+        </div>
         <section className="grammar-finish-card">
           <span className="grammar-finish-mark">{finishMark}</span>
           <h1>{finishTitle}</h1>
           <p>You got <strong>{correctCount}</strong> of {exercises.length} {finishNoun} right.</p>
           <div className="grammar-finish-actions">
             <button className="btn btn-primary" onClick={onFinishAction ?? restart}>{finishActionLabel ?? 'Practice again'}</button>
-            <button className="btn btn-secondary" onClick={onBack}>Dashboard</button>
+            <button className="btn btn-secondary" onClick={onBack}>Back</button>
           </div>
         </section>
       </div>
@@ -441,8 +448,10 @@ export function ChoiceDrill({
   return (
     <div className={`grammar-practice-view${showFurigana ? '' : ' is-furigana-hidden'}`}>
       <div className="study-top grammar-study-top">
-        <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
-        {onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}
+        <div className="app-nav-actions">
+          <AppBackButton onClick={onBack} />
+          {onDashboard && <AppDashboardButton onClick={onDashboard} />}
+        </div>
         <span className="study-progress">
           {infiniteMode ? `${infiniteCompletedCount + 1} / ∞` : `${currentIndex + 1} / ${exercises.length}`}
         </span>
@@ -645,11 +654,13 @@ export function ChoiceDrill({
           </button>
           <button
             type="button"
-            className="btn btn-secondary"
+            className={`control-chip control-chip-compact app-display-toggle${showFurigana ? ' is-active' : ''}`}
             onClick={toggleFurigana}
             aria-pressed={showFurigana}
+            aria-label="Toggle furigana"
+            title="Furigana"
           >
-            {showFurigana ? 'Hide Furigana' : 'Show Furigana'}
+            ふり
           </button>
         </div>
       </main>

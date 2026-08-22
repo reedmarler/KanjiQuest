@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from 'react'
+import { AppBackButton } from './AppBackButton'
 
 const WordCategories = lazy(() => import('./WordCategories').then((module) => ({ default: module.WordCategories })))
 const VocabList = lazy(() => import('./VocabList').then((module) => ({ default: module.VocabList })))
@@ -16,7 +17,7 @@ export function LibraryPanel({ initialTab, onBack }: LibraryPanelProps) {
   return (
     <div className="library-panel">
       <header className="library-panel-header">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
         <div>
           <h1>Study Library</h1>
           <p>Browse your vocabulary by level or by part of speech.</p>

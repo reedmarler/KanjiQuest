@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { getQuestById } from '../data/questCampaign'
 import { FuriganaSegment } from './FuriganaText'
+import { AppBackButton } from './AppBackButton'
 
 interface QuestSceneProps {
   questId?: string
@@ -21,7 +22,7 @@ export function QuestScene({ questId, onBack, onDashboard, onContinue }: QuestSc
   return (
     <main className="quest-scene-reader">
       <header className="quest-topbar">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>← Quest</button>
+        <AppBackButton onClick={onBack} aria-label="Back to Quest" />
         {onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}
         <div className="quest-reader-toggles">
           <button type="button" className={`btn btn-ghost${furiganaVisible ? ' is-active' : ''}`} onClick={() => { setFuriganaVisible((visible) => !visible); setFuriganaUsed(true) }}>

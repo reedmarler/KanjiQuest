@@ -4,9 +4,11 @@ import { getVocabExampleSentence } from '../lib/vocabExampleSentence'
 import { FuriganaSegment } from './FuriganaText'
 import { SpeakableCue, SpeakableWord, useSpeakable } from './SpeakableWord'
 import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
+import { AppBackButton, AppDashboardButton } from './AppBackButton'
 
 interface FocusedVocabPracticeProps {
   onBack: () => void
+  onDashboard: () => void
   initialTopicId?: string
   onQuestComplete?: () => void
   questTitle?: string
@@ -21,14 +23,6 @@ function shuffled<T>(items: readonly T[]) {
   return copy
 }
 
-function VocabBackButton({ onBack }: { onBack: () => void }) {
-  return (
-    <button type="button" className="vocab-back-arrow" onClick={onBack} aria-label="Return to Dashboard" title="Return to Dashboard">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-    </button>
-  )
-}
-
 function newSession(previousTopicId?: string, initialTopicId?: string) {
   const requestedTopic = initialTopicId ? vocabFocusSets.find((topic) => topic.id === initialTopicId) : undefined
   if (requestedTopic) return { topic: requestedTopic, cards: shuffled(requestedTopic.cards) }
@@ -40,7 +34,7 @@ function newSession(previousTopicId?: string, initialTopicId?: string) {
   return { topic, cards: shuffled(topic.cards) }
 }
 
-export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, questTitle }: FocusedVocabPracticeProps) {
+export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQuestComplete, questTitle }: FocusedVocabPracticeProps) {
   const [session, setSession] = useState(() => newSession(undefined, initialTopicId))
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
@@ -96,7 +90,10 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
   return (
     <div className="grammar-practice-view kanji-lab kanji-lab-paths standard-kanji-study focused-vocab-practice-standard">
       <div className="study-top grammar-study-top">
-        <VocabBackButton onBack={onBack} />
+        <div className="app-nav-actions">
+          <AppBackButton onClick={onBack} aria-label={questTitle ? 'Back to Quest' : 'Back to Study Tools'} />
+          <AppDashboardButton onClick={onDashboard} />
+        </div>
         <span className="study-progress">{Math.min(index + 1, session.cards.length)} / {session.cards.length}</span>
         <span className="study-type-badge">
           <span>Vocab</span>

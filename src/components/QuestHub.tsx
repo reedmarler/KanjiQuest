@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { CAMPAIGN_ARCS, CAMPAIGN_GOAL, QUESTS, isQuestUnlocked } from '../data/questCampaign'
 import { completedQuestSteps, isQuestComplete, QUEST_STEPS, type QuestProgress, type QuestStep } from '../lib/questProgress'
 import { earnedRelics } from '../lib/relics'
+import { AppBackButton } from './AppBackButton'
 
 interface QuestHubProps {
   onBack: () => void
@@ -46,7 +47,7 @@ export function QuestHub({ onBack, onOpenVocab, onOpenKanji, onOpenGrammar, onOp
   return (
     <main className="quest-hub quest-hub-simple">
       <header className="quest-topbar">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>Back to dashboard</button>
+        <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
         <span>{clearedCount} / {QUESTS.length} quests complete</span>
       </header>
 

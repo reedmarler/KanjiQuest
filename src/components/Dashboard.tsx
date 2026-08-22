@@ -827,7 +827,7 @@ export function Dashboard({
           <div className="control-group control-group-primary-options" role="group" aria-label="Display options">
             <button
               type="button"
-              className={`control-chip control-chip-compact${furiganaActive ? ' is-active' : ''}`}
+              className={`control-chip control-chip-compact app-display-toggle${furiganaActive ? ' is-active' : ''}`}
               onClick={toggleFurigana}
               aria-pressed={furiganaActive}
               aria-label="Toggle furigana"
@@ -837,7 +837,7 @@ export function Dashboard({
             </button>
             <button
               type="button"
-              className={`control-chip control-chip-compact${englishOn ? ' is-active' : ''}`}
+              className={`control-chip control-chip-compact app-display-toggle${englishOn ? ' is-active' : ''}`}
               onClick={toggleEnglish}
               aria-pressed={englishOn}
               aria-label="Toggle English translation"
@@ -1225,14 +1225,14 @@ export function Dashboard({
           <button type="button" className="dashboard-achievement-button dashboard-beginner-button" onClick={onOpenBeginnerZone}>
             <span className="dashboard-achievement-mark dashboard-beginner-mark" aria-hidden="true" lang="ja">&#12354;</span>
             <span>
-              <b>Beginner zone</b>
+              <b>Beginner Zone</b>
             </span>
           </button>
 
           <button type="button" className="dashboard-additional dashboard-picture-button" onClick={onOpenPicturePractice}>
             <span className="dashboard-additional-mark-main" aria-hidden="true">絵</span>
             <span className="dashboard-additional-heading">
-              <b>Picture mode</b>
+              <b>Picture Mode</b>
             </span>
           </button>
 

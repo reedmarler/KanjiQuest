@@ -3,6 +3,7 @@ import { getQuestById, type GuardianAttack, type GuardianBattleStyle } from '../
 import type { DrillExercise } from '../lib/drillExercises'
 import { kitsuneLuckChance, perfectEdgeThreshold, twinStrikeInterval, type RelicLoadout } from '../lib/relics'
 import { GuardianSprite, hasGuardianSprite } from './GuardianSprite'
+import { AppBackButton } from './AppBackButton'
 
 interface QuestCheckpointProps {
   questId?: string
@@ -210,7 +211,7 @@ export function QuestCheckpoint({ questId, onBack, onDashboard, onComplete, load
   return (
     <main className="quest-checkpoint quest-battle-page">
       <header className="quest-topbar">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>← Quest</button>
+        <AppBackButton onClick={onBack} aria-label="Back to Quest" />
         {onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}
         {phase !== 'intro' && <span>{`Battle · Attempt ${attempt}`}</span>}
       </header>

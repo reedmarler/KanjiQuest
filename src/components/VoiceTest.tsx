@@ -12,6 +12,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { ttsServiceUrl } from '../lib/speech'
+import { AppBackButton } from './AppBackButton'
 
 const STORAGE_KEY = 'kanji-quest-voice-test-v1'
 
@@ -151,7 +152,7 @@ export function VoiceTest({ onBack }: { onBack: () => void }) {
   return (
     <section className="voice-test" aria-labelledby="voice-test-title">
       <header className="voice-test-top">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>← Back</button>
+        <AppBackButton onClick={onBack} />
         <h2 id="voice-test-title" className="voice-test-title">Voice Test</h2>
       </header>
 

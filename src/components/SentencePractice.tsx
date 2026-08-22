@@ -1,4 +1,5 @@
 import { GENERATED_BUILDER_SESSION_SIZE } from '../lib/generatedSentenceExercises'
+import { AppBackButton } from './AppBackButton'
 
 interface SentencePracticeProps {
   onStartBuilder: () => void
@@ -9,7 +10,7 @@ export function SentencePractice({ onStartBuilder, onBack }: SentencePracticePro
   return (
     <div className="kanji-lab sentence-practice">
       <header className="kanji-lab-header">
-        <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
         <div>
           <h1>Sentence Practice</h1>
           <p className="kanji-lab-sub">Build real sentences — English meaning shown after each one</p>

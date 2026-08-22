@@ -69,6 +69,7 @@ body {
 }
 
 .app {
+  position: relative;
   max-width: 720px;
   margin: 0 auto;
   padding: 2rem 1.25rem calc(3rem + env(safe-area-inset-bottom));
@@ -87,16 +88,16 @@ body {
 
 /* Keep Sentence Builder visually identical to the former 150% browser-zoom view. */
 body:has(.sentence-view) .app {
-  padding-top: 1.05rem;
+  padding-top: 1rem;
 }
 
 body:has(.grammar-practice-view) .app {
-  padding-top: 0.75rem;
+  padding-top: 1rem;
   padding-bottom: 1.4rem;
 }
 
 body:has(.kanji-lab) .app {
-  padding-top: 0.75rem;
+  padding-top: 1rem;
   padding-bottom: 1.4rem;
 }
 
@@ -104,8 +105,13 @@ body:has(.kanji-lab) .app {
    (mobile is already 1x zoom via the breakpoint above; on desktop this view
    keeps the standard 150% zoom every other tool view uses). */
 body:has(.beginner-learner) .app {
-  padding-top: 0.25rem;
+  padding-top: 1rem;
   padding-bottom: 1.4rem;
+}
+
+body:has(.picture-practice) .app {
+  padding-top: 1rem;
+  padding-bottom: 0;
 }
 
 body:has(.beginner-word-writing-card) .app,
@@ -113,12 +119,30 @@ body:has(.beginner-word-writing-card) .app,
   padding-bottom: 0;
 }
 
-.app.beginner-zone-page {
+.app.beginner-zone-page,
+.app.study-tools-page {
   padding-top: 0.5rem;
 }
 
-.app.study-tools-page {
-  padding-top: 0.5rem;
+.beginner-zone-page .tool-menu-page,
+.study-tools-page .tool-menu-page {
+  gap: 0.35rem;
+}
+
+.beginner-zone-page .app-back-button,
+.study-tools-page .app-back-button {
+  position: relative;
+  top: 0.3rem;
+}
+
+.beginner-zone-page .tool-menu-heading,
+.study-tools-page .tool-menu-heading {
+  margin-top: -0.45rem;
+  padding: 0 0.15rem 0.15rem;
+}
+
+.study-tools-page .tool-menu-heading > small {
+  display: none;
 }
 
 body:has(.quest-hub) .app {
@@ -2558,6 +2582,17 @@ body:has(.dashboard) {
 .control-group-primary-options .control-chip-compact {
   width: 3.475rem;
   min-width: 3.475rem;
+  padding: 0;
+  justify-content: center;
+  border-radius: 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.app-display-toggle {
+  width: 3.475rem;
+  min-width: 3.475rem;
+  height: 2rem;
   padding: 0;
   justify-content: center;
   border-radius: 0.55rem;
@@ -8242,7 +8277,7 @@ body:has(.dashboard) {
   margin: 0 auto;
 }
 
-.back-button {
+.app-back-button {
   display: inline-flex;
   align-items: center;
   justify-self: start;
@@ -8253,24 +8288,47 @@ body:has(.dashboard) {
   border-radius: 999px;
   background: var(--surface);
   color: var(--text);
-  font: 700 0.7rem inherit;
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
   letter-spacing: 0.01em;
+  white-space: nowrap;
+  flex: 0 0 auto;
   cursor: pointer;
   transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 160ms ease;
 }
 
-.back-button:hover {
+.app-back-button:hover {
   border-color: var(--kyogre-light);
   color: var(--kyogre-light);
   background: color-mix(in srgb, var(--kyogre) 10%, var(--surface));
-  transform: translateX(-1px);
 }
 
-.back-button:active {
-  transform: translateX(-1px) scale(0.97);
+.app-back-button:active {
+  transform: scale(0.97);
 }
 
-.back-button-icon {
+.app-back-slot {
+  display: inline-flex;
+  width: 4.4rem;
+  height: 2.1rem;
+  flex: 0 0 auto;
+}
+
+.app .app-back-slot > .app-back-button {
+  position: absolute;
+  z-index: 20;
+  top: 1rem;
+  left: 1.25rem;
+}
+
+.app-back-button:focus-visible {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: 2px;
+}
+
+.app-back-button svg {
   width: 0.85rem;
   height: 0.85rem;
   fill: none;
@@ -8278,6 +8336,54 @@ body:has(.dashboard) {
   stroke-width: 2.6;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.app-nav-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.app-dashboard-button {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex: 0 0 auto;
+  padding: 0.28rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.app-dashboard-button:hover {
+  border-color: var(--kyogre-light);
+  background: color-mix(in srgb, var(--kyogre) 10%, var(--surface));
+  transform: translateY(-1px);
+}
+
+.app-dashboard-button:active {
+  transform: scale(0.97);
+}
+
+.app-dashboard-button:focus-visible {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: 2px;
+}
+
+.app-dashboard-button span {
+  display: block;
+  background: linear-gradient(135deg, var(--kyogre-light), var(--sakura));
+  background-clip: text;
+  color: transparent;
+  font: 700 0.95rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .tool-menu-heading {
@@ -8308,7 +8414,42 @@ body:has(.dashboard) {
 .tool-menu-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.6rem;
+  column-gap: 16px;
+  row-gap: 16px;
+}
+
+.tool-menu-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.tool-menu-footer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--kyogre-light);
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 400;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.tool-menu-footer button:hover {
+  color: var(--text);
+}
+
+.tool-menu-footer button:focus-visible {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: 2px;
 }
 
 .tool-menu-card {
@@ -12939,28 +13080,13 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   gap: .5rem;
 }
 
-.standard-kanji-display-toggles {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: color-mix(in srgb, var(--surface-2) 78%, transparent);
+.standard-kanji-dashboard-toggles {
+  justify-self: center;
+  flex-wrap: nowrap;
 }
 
-.standard-kanji-display-toggles > .btn {
-  min-height: 2rem;
-  padding: .32rem .72rem;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--text-muted);
-  box-shadow: none;
-  font-size: .56rem;
-}
-
-.standard-kanji-display-toggles > .btn + .btn {
-  border-left: 1px solid var(--border);
+.standard-kanji-dashboard-toggles .control-chip-compact {
+  height: 2rem;
 }
 
 .standard-kanji-utility-row > .kanji-learning-reveal {
@@ -13112,22 +13238,11 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
 .voice-settings-speak .speak-button-icon { font-size: .7rem; }
 
-.standard-kanji-furigana-toggle.is-active,
-.standard-kanji-furigana-toggle[aria-pressed='true'],
-.standard-kanji-english-toggle.is-active,
-.standard-kanji-english-toggle[aria-pressed='true'] {
-  border-color: var(--kyogre-light);
-  background: color-mix(in srgb, var(--kyogre) 20%, var(--surface-2));
-  color: var(--kyogre-light);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kyogre-light) 24%, transparent);
-}
-
 @media (max-width: 720px) {
   .standard-kanji-utility-row {
     grid-template-columns: minmax(0, 1fr) minmax(8rem, 1fr);
   }
 
-  .standard-kanji-display-toggles > .btn,
   .standard-kanji-utility-row > .kanji-learning-reveal {
     padding-inline: .35rem;
     font-size: .52rem;
@@ -13964,7 +14079,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
 /* ── Japanese counter study ─────────────────────────────────────────────── */
 body:has(.counter-practice) .app {
-  padding-top: .75rem;
+  padding-top: 1rem;
   padding-bottom: 1.5rem;
 }
 
@@ -13977,7 +14092,7 @@ body:has(.counter-practice) .app {
 
 .counter-practice-top {
   display: grid;
-  grid-template-columns: 2.4rem minmax(8rem, 1fr) auto;
+  grid-template-columns: auto minmax(8rem, 1fr) auto;
   align-items: center;
   gap: .65rem;
 }
@@ -14467,7 +14582,7 @@ button.counter-example {
 
 @media (max-width: 720px) {
   body:has(.counter-practice) .app {
-    padding: .75rem .8rem calc(1.4rem + env(safe-area-inset-bottom));
+    padding: 1rem .8rem calc(1.4rem + env(safe-area-inset-bottom));
   }
 
   .counter-practice {
@@ -14485,7 +14600,7 @@ button.counter-example {
   }
 
   .counter-practice-top {
-    grid-template-columns: 2.4rem minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
   }
 
@@ -14819,7 +14934,7 @@ button.counter-example {
   width: min(100%, 34rem);
   margin-inline: auto;
   margin-top: 0;
-  padding: 0.2rem 0.9rem 0.8rem;
+  padding: 0.2rem 0 0.8rem;
 }
 
 @media (min-width: 720px) {
@@ -14968,6 +15083,11 @@ button.counter-example {
   border-radius: 14px;
   background: var(--surface);
   text-align: center;
+}
+
+.beginner-learner--hiragana > .beginner-card.is-revealed,
+.beginner-learner--katakana > .beginner-card.is-revealed {
+  padding-bottom: 1rem;
 }
 
 .beginner-char {
@@ -15869,9 +15989,42 @@ button.counter-example {
 
 /* Speed Run setup */
 
+.picture-practice-setup.beginner-speedrun-setup {
+  padding-bottom: 1.2rem;
+}
+
+.beginner-speedrun-setup-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 3.25rem;
+}
+
+.beginner-speedrun-setup-preview b {
+  font: 800 1.65rem/1 'Noto Sans JP', sans-serif;
+}
+
+.beginner-speedrun-setup-preview span {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.beginner-speedrun-setup .picture-setup-field:nth-child(3) {
+  margin-top: clamp(0px, calc(66.6667dvh - 480px), 2rem);
+}
+
+.beginner-speedrun-setup .picture-setup-field legend {
+  font-size: 0.76rem;
+}
+
 .beginner-speedrun-setup .picture-setup-controls {
-  gap: 1.45rem;
-  margin-top: 1.2rem;
+  gap: 1rem;
+  margin-top: 0.85rem;
+}
+
+.picture-segmented.beginner-speedrun-script-selector--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .picture-segmented.beginner-speedrun-script-selector button.is-active {
@@ -16138,6 +16291,88 @@ button.counter-example {
   border-radius: 6px;
 }
 
+.beginner-speedrun-complete {
+  justify-content: center;
+  gap: 1.15rem;
+  min-height: 22rem;
+  padding: 2rem 1.5rem;
+}
+
+.beginner-speedrun-result-heading {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+}
+
+.beginner-speedrun-result-heading > span {
+  color: var(--text-muted);
+  font: 800 0.65rem/1 'Outfit', system-ui, sans-serif;
+  text-transform: uppercase;
+}
+
+.beginner-speedrun-result-score {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  color: var(--rayquaza-light);
+}
+
+.beginner-speedrun-result-score strong {
+  font: 800 4.5rem/0.95 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-speedrun-result-score small {
+  color: var(--text-muted);
+  font: 700 1.35rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-speedrun-result-heading p {
+  color: var(--text);
+  font: 700 0.9rem/1.2 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-speedrun-result-mode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: min(100%, 21rem);
+  margin: 0;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font: 700 0.72rem/1.2 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-speedrun-result-mode span {
+  color: var(--rayquaza-light);
+}
+
+.beginner-speedrun-result-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  width: min(100%, 21rem);
+}
+
+.beginner-speedrun-result-actions .btn {
+  min-height: 2.65rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.76rem;
+}
+
+.beginner-speedrun-result-actions .btn-ghost {
+  border: 1px solid var(--border);
+}
+
+@media (max-width: 420px) {
+  .beginner-speedrun-result-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
 .beginner-speedrun-footer {
   display: flex;
   flex-direction: column;
@@ -16159,37 +16394,20 @@ button.counter-example {
 /* Picture Mode */
 
 .picture-practice-setup {
-  gap: 1rem;
-  padding: 1.1rem 1rem 1rem;
+  gap: 0.65rem;
+  padding: 0.4rem 1rem 0.35rem;
 }
 
-.picture-setup-preview {
-  display: grid;
-  grid-template-rows: 1.5rem 4.4rem 1rem;
-  place-items: center;
-  width: 8rem;
-}
-
-.picture-setup-preview b {
-  color: var(--text);
-  font: 700 1.05rem/1 'Noto Sans JP', sans-serif;
-}
-
-.picture-setup-preview > span {
-  font: 700 3.7rem/1 'Noto Color Emoji', 'Segoe UI Emoji', 'Noto Sans JP', sans-serif;
-}
-
-.picture-setup-preview small {
-  color: var(--text-muted);
-  font: 650 0.68rem/1 'Outfit', system-ui, sans-serif;
-  text-transform: capitalize;
+.picture-practice {
+  padding-inline: 0;
+  padding-bottom: 0;
 }
 
 .picture-setup-controls {
   display: grid;
-  gap: 1.35rem;
+  gap: 2rem;
   width: min(100%, 24rem);
-  margin-top: 0.75rem;
+  margin-top: 0;
 }
 
 .picture-setup-field {
@@ -16206,6 +16424,29 @@ button.counter-example {
   padding: 0;
   color: var(--text-muted);
   font: 700 0.65rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.picture-practice-setup .picture-setup-field:nth-child(2) {
+  margin-top: clamp(0px, calc(66.6667dvh - 480px), 2rem);
+}
+
+.picture-practice-setup .picture-setup-field:nth-child(2) legend,
+.picture-practice-setup .picture-setup-field:nth-child(3) legend {
+  font-size: 0.76rem;
+}
+
+.picture-practice-setup .picture-segmented button,
+.picture-practice-setup .picture-count-selector button {
+  min-height: 2.1rem;
+  font-size: 0.9rem;
+}
+
+.picture-practice-setup .picture-segmented button span {
+  font-size: 1rem;
+}
+
+.picture-practice-setup .picture-count-selector button {
+  font-size: 1.05rem;
 }
 
 .picture-segmented,
@@ -16228,7 +16469,7 @@ button.counter-example {
 
 .picture-segmented button,
 .picture-count-selector button {
-  min-height: 2.3rem;
+  min-height: 1.45rem;
   border: 0;
   border-radius: 5px;
   background: transparent;
@@ -16252,6 +16493,17 @@ button.counter-example {
   color: var(--text);
 }
 
+.picture-segmented button:disabled,
+.picture-count-selector button:disabled {
+  color: color-mix(in srgb, var(--text-muted) 42%, transparent);
+  cursor: not-allowed;
+}
+
+.picture-segmented button:disabled:hover,
+.picture-count-selector button:disabled:hover {
+  color: color-mix(in srgb, var(--text-muted) 42%, transparent);
+}
+
 .picture-segmented button.is-active,
 .picture-count-selector button.is-active {
   background: var(--surface);
@@ -16265,10 +16517,76 @@ button.counter-example {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kyogre-light) 52%, transparent);
 }
 
+.picture-category-options {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  row-gap: 0.65rem;
+  column-gap: 0.25rem;
+}
+
+.picture-category-options button {
+  display: grid;
+  gap: 0.1rem;
+  justify-items: center;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.picture-category-options button > span {
+  display: grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface-2) 76%, transparent);
+  font: 700 1.05rem/1 'Noto Sans JP', sans-serif;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.picture-category-options button small {
+  width: 100%;
+  overflow: hidden;
+  font: 650 0.55rem/1 'Outfit', system-ui, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 140ms ease;
+}
+
+.picture-category-options button:hover > span {
+  border-color: color-mix(in srgb, var(--kyogre-light) 65%, var(--border));
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.picture-category-options button.is-active > span {
+  border-color: var(--kyogre-light);
+  background: color-mix(in srgb, var(--kyogre) 30%, var(--surface));
+  color: var(--text);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--kyogre-light) 18%, transparent);
+}
+
+.picture-category-options button.is-active small {
+  color: var(--kyogre-light);
+}
+
+.picture-category-options button:focus-visible {
+  outline: none;
+}
+
+.picture-category-options button:focus-visible > span {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: 2px;
+}
+
 .picture-setup-start {
   width: min(100%, 9rem);
   min-height: 2.25rem;
-  margin-top: 0.65rem;
+  margin-top: 0.25rem;
   padding: 0.45rem 0.8rem;
   font-size: 0.78rem;
 }

@@ -4,6 +4,7 @@ import { hiraganaWordBank, katakanaWordBank, type UnderstandingWord } from '../d
 import { speakJapanese } from '../lib/speech'
 import { SPEECH_SPEEDS } from '../lib/speechSpeeds'
 import { BeginnerFinalChallenge } from './BeginnerFinalChallenge'
+import { AppBackButton } from './AppBackButton'
 import { getStrokeOrderAnimationDuration, StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { TraceCanvas } from './TraceCanvas'
 
@@ -354,12 +355,9 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
     : quizWords?.[0] ?? null
 
   return (
-    <div className="beginner-learner">
+    <div className={`beginner-learner beginner-learner--${script}`}>
       <div className="beginner-learner-top">
-        <button type="button" className="beginner-back" onClick={onBack} aria-label="Back to Beginner Zone">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-          <span>Back</span>
-        </button>
+        <AppBackButton onClick={onBack} aria-label="Back to Beginner Zone" />
         <span className="beginner-learner-title">{deck.title}</span>
         <div className="beginner-top-tools">
           <button type="button" className="beginner-reset-progress" onClick={resetProgress} aria-label={`Reset ${deck.title} progress`}>

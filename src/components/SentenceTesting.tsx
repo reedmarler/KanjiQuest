@@ -10,6 +10,7 @@ import {
   type GenerationComplexity,
 } from '../lib/generationComplexity'
 import { FuriganaSentence } from './FuriganaText'
+import { AppBackButton } from './AppBackButton'
 
 const DEFAULT_BATCH_SIZE = 15
 const BATCH_SIZE_OPTIONS = [15, 100] as const
@@ -97,7 +98,7 @@ export function SentenceTesting({ onBack }: { onBack: () => void }) {
   return (
     <section className="sentence-testing" aria-labelledby="sentence-testing-title">
       <header className="sentence-testing-top">
-        <button type="button" className="btn btn-ghost sentence-testing-back" onClick={onBack}>← Dashboard</button>
+        <AppBackButton className="sentence-testing-back" onClick={onBack} aria-label="Back to Dashboard" />
         <div className="sentence-testing-controls">
           <button
             type="button"

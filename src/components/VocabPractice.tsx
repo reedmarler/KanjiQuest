@@ -3,6 +3,7 @@ import type { DrillExercise } from '../lib/drillExercises'
 import { createGeneratedVocabDrillBatch } from '../lib/generatedPracticeDrills'
 import type { GenerationComplexity } from '../lib/generationComplexity'
 import { ChoiceDrill, loadLevelPreference } from './ChoiceDrill'
+import { AppBackButton } from './AppBackButton'
 
 interface VocabPracticeProps {
   onBack: () => void
@@ -61,7 +62,7 @@ export function VocabPractice({ onBack, isFavorite, onToggleFavorite }: VocabPra
     const progress = (completedBatches / VOCAB_BATCH_COUNT) * 100
     return (
       <div className="practice-loading">
-        <button className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        <AppBackButton onClick={onBack} />
         <section className="practice-loading-card" role="status" aria-live="polite">
           <span className="practice-loading-mark">語</span>
           <h1>Vocab</h1>

@@ -1,7 +1,7 @@
 const HIRAGANA_RECORDINGS: Record<string, string> = {
   'あ': 'a.mp3',
   'い': 'i.mp3',
-  'う': 'u.mp3',
+  'う': 'u-v2.mp3',
   'え': 'e.mp3',
   'お': 'o.mp3',
   'か': 'ka.mp3',

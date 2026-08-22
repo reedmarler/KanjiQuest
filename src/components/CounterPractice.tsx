@@ -10,9 +10,11 @@ import {
 } from '../data/japaneseCounters'
 import { FuriganaSegment, getFuriganaRuns } from './FuriganaText'
 import { SpeakableWord, useSpeakable } from './SpeakableWord'
+import { AppBackButton, AppDashboardButton } from './AppBackButton'
 
 interface CounterPracticeProps {
   onBack: () => void
+  onDashboard: () => void
 }
 
 type CategoryFilter = 'All' | CounterCategory
@@ -247,7 +249,7 @@ function CounterStudyCard({
   )
 }
 
-export function CounterPractice({ onBack }: CounterPracticeProps) {
+export function CounterPractice({ onBack, onDashboard }: CounterPracticeProps) {
   const [category, setCategory] = useState<CategoryFilter>('All')
   const [deck, setDeck] = useState<JapaneseCounter[]>(() => [...JAPANESE_COUNTERS])
   const [index, setIndex] = useState(0)
@@ -364,15 +366,10 @@ export function CounterPractice({ onBack }: CounterPracticeProps) {
   return (
     <div className="counter-practice">
       <header className="counter-practice-top">
-        <button
-          type="button"
-          className="vocab-back-arrow"
-          onClick={onBack}
-          aria-label="Back to study tools"
-          title="Back to study tools"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-        </button>
+        <div className="app-nav-actions">
+          <AppBackButton onClick={onBack} aria-label="Back to Study Tools" />
+          <AppDashboardButton onClick={onDashboard} />
+        </div>
         <div className="counter-practice-title">
           <h1>Japanese counters</h1>
         </div>

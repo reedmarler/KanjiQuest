@@ -5,6 +5,7 @@ import {
   buildGeneratedBuilderExercises,
 } from '../lib/generatedSentenceExercises'
 import type { SentenceExercise } from '../data/sentenceExercises'
+import { AppBackButton } from './AppBackButton'
 
 export const BATCH_CHECK_SIZE = 10
 
@@ -64,7 +65,7 @@ export function SentenceBatchCheck({ onBack }: SentenceBatchCheckProps) {
   return (
     <div className="kanji-lab sentence-batch-check">
       <header className="kanji-lab-header">
-        <button className="btn btn-ghost" onClick={onBack}>← Sentence Practice</button>
+        <AppBackButton onClick={onBack} aria-label="Back to Sentence Practice" />
         <div>
           <h1>Translation Check</h1>
           <p className="kanji-lab-sub">

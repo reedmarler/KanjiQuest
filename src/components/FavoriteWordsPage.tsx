@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { allCards } from '../data'
 import { useFavoriteWords } from '../lib/favoriteWords'
 import type { StudyCard } from '../lib/types'
+import { AppBackButton } from './AppBackButton'
 
 interface FavoriteWordsPageProps {
   onBack: () => void
@@ -75,7 +76,7 @@ export function FavoriteWordsPage({ onBack }: FavoriteWordsPageProps) {
   return (
     <div className="vocab-list-page favorite-words-page">
       <header className="kanji-lab-header">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>← Dashboard</button>
+        <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
         <div>
           <h1>Favorite Words</h1>
           <p className="kanji-lab-sub">

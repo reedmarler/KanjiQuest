@@ -5,6 +5,7 @@ import { FuriganaSegment, hasKanji } from './FuriganaText'
 import { shuffle } from '../lib/quiz'
 import type { SentenceExercise } from '../data/sentenceExercises'
 import { complexityDetails, GENERATION_COMPLEXITIES, type GenerationComplexity } from '../lib/generationComplexity'
+import { AppBackButton, AppDashboardButton } from './AppBackButton'
 
 const SPEECH_RATES = [0.9, 0.75, 0.6] as const
 const HIDE_WORDS_STORAGE_KEY = 'kanji-quest-sentence-builder-hide-words-v1'
@@ -165,6 +166,7 @@ interface SentenceBuilderViewProps {
   onPrevious: () => void
   onSkip: () => void
   onExit: () => void
+  onDashboard: () => void
   selectedLevels: readonly GenerationComplexity[]
   enabledLevels: readonly GenerationComplexity[]
   onApplyLevels: (levels: readonly GenerationComplexity[]) => void
@@ -396,6 +398,7 @@ export function SentenceBuilderView({
   onPrevious,
   onSkip,
   onExit,
+  onDashboard,
   selectedLevels,
   enabledLevels,
   onApplyLevels,
@@ -711,7 +714,10 @@ export function SentenceBuilderView({
       tabIndex={-1}
     >
       <div className="study-top">
-        <button className="btn btn-ghost" onClick={onExit}>← Exit</button>
+        <div className="app-nav-actions">
+          <AppBackButton onClick={onExit} aria-label="Back to Study Tools" />
+          <AppDashboardButton onClick={onDashboard} />
+        </div>
         <span className="study-progress">{infiniteMode ? `${current + 1} / ∞` : `${current + 1} / ${total}`}</span>
         <div className="builder-top-controls">
           <button
@@ -929,11 +935,14 @@ export function SentenceBuilderView({
                 {hideJapanese ? 'Show Words' : 'Hide Words'}
               </button>
               <button
-                className="btn btn-secondary"
+                type="button"
+                className={`control-chip control-chip-compact app-display-toggle${showFurigana ? ' is-active' : ''}`}
                 onClick={() => setShowFurigana((shown) => !shown)}
                 aria-pressed={showFurigana}
+                aria-label="Toggle furigana"
+                title="Furigana"
               >
-                {showFurigana ? 'Hide Furigana' : 'Show Furigana'}
+                ふり
               </button>
             </div>
           </>
@@ -1038,11 +1047,14 @@ export function SentenceBuilderView({
               {hideJapanese ? 'Show Words' : 'Hide Words'}
             </button>
             <button
-              className="btn btn-secondary"
+              type="button"
+              className={`control-chip control-chip-compact app-display-toggle${showFurigana ? ' is-active' : ''}`}
               onClick={() => setShowFurigana((shown) => !shown)}
               aria-pressed={showFurigana}
+              aria-label="Toggle furigana"
+              title="Furigana"
             >
-              {showFurigana ? 'Hide Furigana' : 'Show Furigana'}
+              ふり
             </button>
           </div>
           </>

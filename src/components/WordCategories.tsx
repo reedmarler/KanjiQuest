@@ -3,6 +3,7 @@ import { allCards } from '../data'
 import { useFavoriteWords } from '../lib/favoriteWords'
 import { WORD_CATEGORY_ORDER as CATEGORY_ORDER, classifyPartOfSpeech, type WordCategory } from '../lib/partOfSpeech'
 import type { StudyCard } from '../lib/types'
+import { AppBackButton } from './AppBackButton'
 
 interface WordCategoriesProps {
   onBack?: () => void
@@ -53,9 +54,7 @@ export function WordCategories({ onBack, embedded = false }: WordCategoriesProps
   return (
     <div className="vocab-list-page word-categories-page">
       {!embedded && <header className="kanji-lab-header">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>
-          ← Dashboard
-        </button>
+        <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
         <div>
           <h1>Word Categories</h1>
           <p className="kanji-lab-sub">All {totalWords} vocabulary words, grouped by part of speech</p>

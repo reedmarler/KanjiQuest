@@ -7,6 +7,7 @@ import { kanjiLabEntries, type KanjiLabEntry } from '../lib/kanjiLabCatalog'
 import type { JlptLevel } from '../lib/types'
 import { SpeakableCue, SpeakableWord, useSpeakable } from './SpeakableWord'
 import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
+import { AppBackButton, AppDashboardButton } from './AppBackButton'
 
 interface KanjiLabProps {
   onBack: () => void
@@ -648,15 +649,13 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
   return (
     <div className="grammar-practice-view kanji-lab kanji-lab-paths standard-kanji-study">
       <div className="study-top grammar-study-top">
-        <button
-          type="button"
-          className="vocab-back-arrow"
-          onClick={questMode ? onBack : (onDashboard ?? onBack)}
-          aria-label={questMode ? 'Back to Quest' : 'Back to Dashboard'}
-          title={questMode ? 'Back to Quest' : 'Back to Dashboard'}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-        </button>
+        <div className="app-nav-actions">
+          <AppBackButton
+            onClick={onBack}
+            aria-label={questMode ? 'Back to Quest' : 'Back to Study Tools'}
+          />
+          {onDashboard && <AppDashboardButton onClick={onDashboard} />}
+        </div>
         <span className="study-progress">{index + 1} / {entries.length}</span>
         {/* A quest fixes its own deck, so the path and level pickers would be
             levers that quietly abandon the quest. It gets an identity badge
@@ -828,22 +827,26 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
         </div>
         <div className="kanji-learning-controls standard-kanji-controls">
           <div className="standard-kanji-utility-row">
-            <div className="standard-kanji-display-toggles" role="group" aria-label="Display options">
+            <div className="standard-kanji-dashboard-toggles control-group control-group-primary-options" role="group" aria-label="Display options">
               <button
                 type="button"
-                className={`btn standard-kanji-furigana-toggle${furiganaVisible ? ' is-active' : ''}`}
+                className={`control-chip control-chip-compact app-display-toggle${furiganaVisible ? ' is-active' : ''}`}
                 aria-pressed={furiganaVisible}
+                aria-label="Toggle furigana"
+                title="Furigana"
                 onClick={() => setFuriganaVisible((isVisible) => !isVisible)}
               >
-                Furigana
+                ふり
               </button>
               <button
                 type="button"
-                className={`btn standard-kanji-english-toggle${englishVisible ? ' is-active' : ''}`}
+                className={`control-chip control-chip-compact app-display-toggle${englishVisible ? ' is-active' : ''}`}
                 aria-pressed={englishVisible}
+                aria-label="Toggle English translation"
+                title="English"
                 onClick={() => setEnglishVisible((isVisible) => !isVisible)}
               >
-                English
+                EN
               </button>
             </div>
             <button

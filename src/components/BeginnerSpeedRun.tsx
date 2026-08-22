@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { getBeginnerDeck } from '../data/beginnerMnemonics'
-import { hiraganaWordBank } from '../data/beginnerUnderstandingWords'
+import { getBeginnerDeck, type BeginnerScript } from '../data/beginnerMnemonics'
+import { hiraganaWordBank, katakanaWordBank } from '../data/beginnerUnderstandingWords'
+import { AppBackButton, AppDashboardButton } from './AppBackButton'
 
 /**
  * Recognition under time pressure, which is a different skill from the
@@ -20,8 +21,15 @@ type LevelId = (typeof LEVELS)[number]['id']
 /** 1 kana drills single characters; 2 kana only ever flashes real two-kana
  *  words, so the speed drill doubles as vocabulary rather than showing
  *  meaningless pairs. */
-type SpeedScript = 'hiragana' | 'kanji'
+type SpeedScript = BeginnerScript
 type CharacterCount = 1 | 2 | 3 | 4
+
+const SETUP_PREVIEWS: Record<CharacterCount, { image: string; text: Record<SpeedScript, string> }> = {
+  1: { image: '🌳', text: { hiragana: 'き', katakana: 'キ', kanji: '木' } },
+  2: { image: '⭐', text: { hiragana: 'ほし', katakana: 'ホシ', kanji: '流星' } },
+  3: { image: '🐟', text: { hiragana: 'さかな', katakana: 'サカナ', kanji: '熱帯魚' } },
+  4: { image: '✈️', text: { hiragana: 'ひこうき', katakana: 'ヒコウキ', kanji: '紙飛行機' } },
+}
 
 const ROUNDS = 10
 const CHOICE_COUNT = 4
@@ -40,13 +48,6 @@ interface Prompt {
    *  drill is training. */
   gloss: string
 }
-
-const ONE_KANA_WORDS: Prompt[] = [
-  { text: 'え', gloss: 'picture' },
-  { text: 'て', gloss: 'hand' },
-  { text: 'め', gloss: 'eye' },
-  { text: 'き', gloss: 'tree' },
-]
 
 const TWO_KANJI_WORDS: Prompt[] = [
   { text: '日本', gloss: 'Japan' },
@@ -97,6 +98,21 @@ const FOUR_KANA_WORDS: Prompt[] = [
   { text: 'おいしい', gloss: 'delicious' },
 ]
 
+const FOUR_KATAKANA_WORDS: Prompt[] = [
+  { text: 'アメリカ', gloss: 'America' },
+  { text: 'コンビニ', gloss: 'convenience store' },
+  { text: 'パソコン', gloss: 'computer' },
+  { text: 'エアコン', gloss: 'air conditioner' },
+  { text: 'タクシー', gloss: 'taxi' },
+  { text: 'コーヒー', gloss: 'coffee' },
+  { text: 'セーター', gloss: 'sweater' },
+  { text: 'スポーツ', gloss: 'sports' },
+  { text: 'アパート', gloss: 'apartment' },
+  { text: 'スカート', gloss: 'skirt' },
+  { text: 'スーパー', gloss: 'supermarket' },
+  { text: 'ジュース', gloss: 'juice' },
+]
+
 function shuffled<T>(items: readonly T[]) {
   const copy = [...items]
   for (let index = copy.length - 1; index > 0; index -= 1) {
@@ -107,31 +123,44 @@ function shuffled<T>(items: readonly T[]) {
 }
 
 function buildPool(script: SpeedScript, count: CharacterCount): Prompt[] {
-  if (script === 'kanji') {
-    if (count === 4) return FOUR_KANJI_WORDS
-    if (count === 3) return THREE_KANJI_WORDS
-    if (count === 2) return TWO_KANJI_WORDS
-    return getBeginnerDeck('kanji').rows
+  if (count === 1) {
+    return getBeginnerDeck(script).rows
       .flatMap((row) => row.characters)
       .map((entry) => ({ text: entry.char, gloss: entry.meaning ?? '' }))
   }
 
-  if (count > 1) {
-    if (count === 4) return FOUR_KANA_WORDS
-    return hiraganaWordBank
-      .filter((entry) => [...entry.word].length === count)
-      .map((entry) => ({ text: entry.word, gloss: entry.meaning }))
+  if (script === 'kanji') {
+    if (count === 4) return FOUR_KANJI_WORDS
+    if (count === 3) return THREE_KANJI_WORDS
+    if (count === 2) return TWO_KANJI_WORDS
   }
-  return ONE_KANA_WORDS
+
+  const wordBank = script === 'katakana' ? katakanaWordBank : hiraganaWordBank
+  const words = wordBank
+    .filter((entry) => [...entry.word].length === count)
+    .map((entry) => ({ text: entry.word, gloss: entry.meaning }))
+
+  if (script === 'hiragana' && count === 4) {
+    const merged = [...FOUR_KANA_WORDS, ...words]
+    return merged.filter((entry, index) => merged.findIndex((candidate) => candidate.text === entry.text) === index)
+  }
+
+  if (script === 'katakana' && count === 4) {
+    const merged = [...FOUR_KATAKANA_WORDS, ...words]
+    return merged.filter((entry, index) => merged.findIndex((candidate) => candidate.text === entry.text) === index)
+  }
+
+  return words
 }
 
 type Phase = 'idle' | 'lead' | 'flash' | 'choosing' | 'answered' | 'done'
 
 interface BeginnerSpeedRunProps {
   onBack: () => void
+  onDashboard: () => void
 }
 
-export function BeginnerSpeedRun({ onBack }: BeginnerSpeedRunProps) {
+export function BeginnerSpeedRun({ onBack, onDashboard }: BeginnerSpeedRunProps) {
   const [script, setScript] = useState<SpeedScript>('hiragana')
   const [characterCount, setCharacterCount] = useState<CharacterCount>(1)
   const [level, setLevel] = useState<LevelId>('steady')
@@ -143,24 +172,14 @@ export function BeginnerSpeedRun({ onBack }: BeginnerSpeedRunProps) {
   const [picked, setPicked] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
+  const answerPoolRef = useRef<Prompt[]>([])
+  const answerQueueRef = useRef<Prompt[]>([])
+  const lastAnswerRef = useRef<string | null>(null)
 
   const pool = useMemo(() => buildPool(script, characterCount), [script, characterCount])
+  const previousPoolRef = useRef(pool)
   const flashMs = LEVELS.find((entry) => entry.id === level)!.flashMs
-  const setupPreview = script === 'hiragana'
-    ? characterCount === 1
-      ? { text: 'き', image: '🌳', meaning: 'tree' }
-      : characterCount === 2
-        ? { text: 'ほし', image: '⭐', meaning: 'star' }
-        : characterCount === 3
-          ? { text: 'さかな', image: '🐟', meaning: 'fish' }
-          : { text: 'ひこうき', image: '✈️', meaning: 'airplane' }
-    : characterCount === 1
-      ? { text: '木', image: '🌳', meaning: 'tree' }
-      : characterCount === 2
-        ? { text: '日本', image: '🗾', meaning: 'Japan' }
-        : characterCount === 3
-          ? { text: '新幹線', image: '🚄', meaning: 'bullet train' }
-          : { text: '天気予報', image: '🌤️', meaning: 'weather forecast' }
+  const setupPreview = SETUP_PREVIEWS[characterCount]
 
   // Any pending flash/settle timer must die with the component (or with a
   // restart), otherwise a stale timer advances a run that no longer exists.
@@ -171,14 +190,33 @@ export function BeginnerSpeedRun({ onBack }: BeginnerSpeedRunProps) {
 
   useEffect(() => clearTimers, [])
 
+  useEffect(() => {
+    const poolChanged = previousPoolRef.current !== pool
+    previousPoolRef.current = pool
+    if (!poolChanged || phase === 'idle' || phase === 'done') return
+    answerPoolRef.current = pool
+    answerQueueRef.current = []
+    lastAnswerRef.current = null
+  }, [phase, pool])
+
   function scheduleFlash(duration = flashMs) {
     timersRef.current.push(setTimeout(() => setPhase('flash'), LEAD_IN_MS))
     timersRef.current.push(setTimeout(() => setPhase('choosing'), LEAD_IN_MS + duration + SETTLE_MS))
   }
 
+  function refillAnswerQueue() {
+    const queue = shuffled(answerPoolRef.current)
+    if (queue.length > 1 && queue[0]?.text === lastAnswerRef.current) {
+      ;[queue[0], queue[1]] = [queue[1]!, queue[0]!]
+    }
+    answerQueueRef.current = queue
+  }
+
   function askRound(nextRound: number) {
     clearTimers()
-    const answer = pool[Math.floor(Math.random() * pool.length)]!
+    if (answerQueueRef.current.length === 0) refillAnswerQueue()
+    const answer = answerQueueRef.current.shift()!
+    lastAnswerRef.current = answer.text
     const distractors = shuffled(pool.filter((entry) => entry.text !== answer.text)).slice(0, CHOICE_COUNT - 1)
     setPrompt(answer)
     setChoices(shuffled([answer, ...distractors]))
@@ -189,6 +227,9 @@ export function BeginnerSpeedRun({ onBack }: BeginnerSpeedRunProps) {
   }
 
   function start() {
+    answerPoolRef.current = pool
+    answerQueueRef.current = []
+    lastAnswerRef.current = null
     setCorrect(0)
     askRound(1)
   }
@@ -256,10 +297,10 @@ export function BeginnerSpeedRun({ onBack }: BeginnerSpeedRunProps) {
   return (
     <div className="beginner-learner">
       <div className="beginner-learner-top">
-        <button type="button" className="beginner-back" onClick={onBack} aria-label="Back to Beginner Zone">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-          <span>Back</span>
-        </button>
+        <div className="app-nav-actions">
+          <AppBackButton onClick={onBack} aria-label="Back to previous page" />
+          <AppDashboardButton onClick={onDashboard} />
+        </div>
         <span className="beginner-learner-title">{phase === 'idle' ? '' : 'Speed Run'}</span>
         {phase === 'idle' || phase === 'done' ? (
           <span />
@@ -273,17 +314,19 @@ export function BeginnerSpeedRun({ onBack }: BeginnerSpeedRunProps) {
       {phase === 'idle' ? (
         <main className="beginner-card picture-practice-setup beginner-speedrun-setup" aria-label="Speed run settings">
           <div className="picture-setup-preview beginner-speedrun-setup-preview" aria-hidden="true">
-            <b lang="ja">{setupPreview.text}</b>
+            <b lang="ja">{setupPreview.text[script]}</b>
             <span>{setupPreview.image}</span>
-            <small>{setupPreview.meaning}</small>
           </div>
 
           <div className="picture-setup-controls">
             <fieldset className="picture-setup-field">
               <legend>Writing</legend>
-              <div className="picture-segmented beginner-speedrun-script-selector">
+              <div className="picture-segmented beginner-speedrun-script-selector beginner-speedrun-script-selector--three">
                 <button type="button" className={script === 'hiragana' ? 'is-active' : ''} onClick={() => setScript('hiragana')} aria-pressed={script === 'hiragana'}>
                   <span lang="ja">あ</span> Hiragana
+                </button>
+                <button type="button" className={script === 'katakana' ? 'is-active' : ''} onClick={() => setScript('katakana')} aria-pressed={script === 'katakana'}>
+                  <span lang="ja">ア</span> Katakana
                 </button>
                 <button type="button" className={script === 'kanji' ? 'is-active' : ''} onClick={() => setScript('kanji')} aria-pressed={script === 'kanji'}>
                   <span lang="ja">漢</span> Kanji
@@ -292,7 +335,7 @@ export function BeginnerSpeedRun({ onBack }: BeginnerSpeedRunProps) {
             </fieldset>
 
             <fieldset className="picture-setup-field">
-              <legend>{script === 'hiragana' ? 'Kana' : 'Kanji'} per flash</legend>
+              <legend>{script === 'kanji' ? 'Kanji' : 'Kana'} per flash</legend>
               <div className="picture-count-selector beginner-speedrun-count-selector">
                 {([1, 2, 3, 4] as const).map((count) => (
                   <button key={count} type="button" className={characterCount === count ? 'is-active' : ''} onClick={() => setCharacterCount(count)} aria-pressed={characterCount === count}>
@@ -319,13 +362,26 @@ export function BeginnerSpeedRun({ onBack }: BeginnerSpeedRunProps) {
           </button>
         </main>
       ) : phase === 'done' ? (
-        <main className="beginner-card beginner-card-complete">
-          <span className="beginner-complete-mark" aria-hidden="true">{correct === ROUNDS ? '🏆' : '⚡'}</span>
-          <h2>{correct === ROUNDS ? 'Flawless' : 'Run complete'}</h2>
-          <p className="beginner-challenge-score">{correct} / {ROUNDS}</p>
-          <p>{LEVELS.find((entry) => entry.id === level)!.label} · {characterCount} {script === 'hiragana' ? 'kana' : 'kanji'}</p>
-          <button type="button" className="btn btn-primary" onClick={start}>Run it again</button>
-          <button type="button" className="btn btn-ghost" onClick={quitToSetup}>Change settings</button>
+        <main className="beginner-card beginner-speedrun-complete">
+          <header className="beginner-speedrun-result-heading">
+            <span>Run complete</span>
+            <div className="beginner-speedrun-result-score">
+              <strong>{correct}</strong>
+              <small>/ {ROUNDS}</small>
+            </div>
+            <p>{correct === ROUNDS ? 'Perfect recall.' : correct >= 7 ? 'Strong run.' : correct >= 4 ? 'Good momentum.' : 'Keep building speed.'}</p>
+          </header>
+          <p className="beginner-speedrun-result-mode">
+            {LEVELS.find((entry) => entry.id === level)!.label}
+            <span aria-hidden="true">·</span>
+            {script === 'hiragana' ? 'Hiragana' : script === 'katakana' ? 'Katakana' : 'Kanji'}
+            <span aria-hidden="true">·</span>
+            {characterCount} {script === 'kanji' ? 'kanji' : 'kana'}
+          </p>
+          <div className="beginner-speedrun-result-actions">
+            <button type="button" className="btn btn-primary beginner-action-btn-green" onClick={start}>Run again</button>
+            <button type="button" className="btn btn-ghost" onClick={quitToSetup}>Change settings</button>
+          </div>
         </main>
       ) : (
         <main className="beginner-card beginner-speedrun-play">
@@ -392,7 +448,7 @@ export function BeginnerSpeedRun({ onBack }: BeginnerSpeedRunProps) {
           </div>
 
           <div className="beginner-speedrun-footer">
-            <span className="beginner-speedrun-gloss" />
+            <span className="beginner-speedrun-gloss">{round} / {ROUNDS}</span>
             <button
               type="button"
               className="btn btn-primary beginner-action-btn beginner-action-btn-green"
@@ -414,8 +470,9 @@ export function BeginnerSpeedRun({ onBack }: BeginnerSpeedRunProps) {
                 <div className="picture-setup-controls">
                   <fieldset className="picture-setup-field">
                     <legend>Writing</legend>
-                    <div className="picture-segmented beginner-speedrun-script-selector">
+                    <div className="picture-segmented beginner-speedrun-script-selector beginner-speedrun-script-selector--three">
                       <button type="button" className={script === 'hiragana' ? 'is-active' : ''} onClick={() => setScript('hiragana')} aria-pressed={script === 'hiragana'}><span lang="ja">あ</span> Hiragana</button>
+                      <button type="button" className={script === 'katakana' ? 'is-active' : ''} onClick={() => setScript('katakana')} aria-pressed={script === 'katakana'}><span lang="ja">ア</span> Katakana</button>
                       <button type="button" className={script === 'kanji' ? 'is-active' : ''} onClick={() => setScript('kanji')} aria-pressed={script === 'kanji'}><span lang="ja">漢</span> Kanji</button>
                     </div>
                   </fieldset>

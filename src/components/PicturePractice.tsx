@@ -1,17 +1,32 @@
 import { useMemo, useState } from 'react'
-import { pictureVocabulary } from '../data/pictureVocabulary'
+import { pictureVocabulary, type PictureVocabularyEntry } from '../data/pictureVocabulary'
+import { AppBackButton } from './AppBackButton'
 
 type PictureScript = 'hiragana' | 'kanji'
 type PictureLength = 1 | 2 | 3 | 4
+type PictureCategory = PictureVocabularyEntry['category']
+type PictureCategoryChoice = 'all' | PictureCategory
 
 interface PicturePrompt {
   text: string
   meaning: string
   image: string
+  category: PictureVocabularyEntry['category']
 }
 
 const ROUNDS = 10
 const CHOICE_COUNT = 4
+const CATEGORY_OPTIONS: Array<{ value: PictureCategoryChoice, label: string, icon: string }> = [
+  { value: 'all', label: 'All', icon: '✦' },
+  { value: 'animals', label: 'Animals', icon: '🐾' },
+  { value: 'body', label: 'Body', icon: '✋' },
+  { value: 'food', label: 'Food', icon: '🍙' },
+  { value: 'nature', label: 'Nature', icon: '🍃' },
+  { value: 'objects', label: 'Objects', icon: '🎒' },
+  { value: 'people', label: 'People', icon: '人' },
+  { value: 'places', label: 'Places', icon: '⛩️' },
+  { value: 'transport', label: 'Transport', icon: '🚃' },
+]
 
 function shuffled<T>(items: readonly T[]) {
   const copy = [...items]
@@ -22,12 +37,24 @@ function shuffled<T>(items: readonly T[]) {
   return copy
 }
 
-function buildPool(script: PictureScript, length: PictureLength) {
+function buildPool(script: PictureScript, length: PictureLength, category: PictureCategoryChoice = 'all') {
   return pictureVocabulary.flatMap((entry) => {
     const text = script === 'hiragana' ? entry.kana : entry.kanji
-    if (!text || [...text].length !== length) return []
-    return [{ text, meaning: entry.meaning, image: entry.image }]
+    if (!text || [...text].length !== length || (category !== 'all' && entry.category !== category)) return []
+    return [{ text, meaning: entry.meaning, image: entry.image, category: entry.category }]
   })
+}
+
+function compatibleLengths(script: PictureScript, category: PictureCategoryChoice) {
+  return ([1, 2, 3, 4] as const).filter(
+    (length) => buildPool(script, length, category).length >= CHOICE_COUNT,
+  )
+}
+
+function closestLength(current: PictureLength, choices: readonly PictureLength[]) {
+  return choices.reduce((closest, candidate) => (
+    Math.abs(candidate - current) < Math.abs(closest - current) ? candidate : closest
+  ))
 }
 
 interface PicturePracticeProps {
@@ -37,6 +64,7 @@ interface PicturePracticeProps {
 export function PicturePractice({ onBack }: PicturePracticeProps) {
   const [script, setScript] = useState<PictureScript>('hiragana')
   const [length, setLength] = useState<PictureLength>(2)
+  const [category, setCategory] = useState<PictureCategoryChoice>('all')
   const [round, setRound] = useState(0)
   const [correct, setCorrect] = useState(0)
   const [prompt, setPrompt] = useState<PicturePrompt | null>(null)
@@ -45,17 +73,25 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
   const [picked, setPicked] = useState<string | null>(null)
   const [done, setDone] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [settingsSnapshot, setSettingsSnapshot] = useState<{ script: PictureScript, length: PictureLength } | null>(null)
+  const [settingsSnapshot, setSettingsSnapshot] = useState<{
+    script: PictureScript
+    length: PictureLength
+    category: PictureCategoryChoice
+  } | null>(null)
 
-  const pool = useMemo(() => buildPool(script, length), [script, length])
+  const pool = useMemo(() => buildPool(script, length, category), [script, length, category])
   const ready = pool.length >= CHOICE_COUNT
-  const setupPreview = script === 'hiragana'
-    ? { text: 'さくら', meaning: 'cherry blossom', image: '🌸' }
-    : { text: '新幹線', meaning: 'bullet train', image: '🚄' }
+  const categoryLabel = CATEGORY_OPTIONS.find((option) => option.value === category)?.label ?? 'All'
 
   function askRound(nextRound: number, sourcePool = pool) {
     const answer = sourcePool[Math.floor(Math.random() * sourcePool.length)]!
-    const distractors = shuffled(sourcePool.filter((entry) => entry.text !== answer.text)).slice(0, CHOICE_COUNT - 1)
+    const sameCategory = shuffled(sourcePool.filter(
+      (entry) => entry.text !== answer.text && entry.category === answer.category,
+    ))
+    const fallback = shuffled(sourcePool.filter(
+      (entry) => entry.text !== answer.text && entry.category !== answer.category,
+    ))
+    const distractors = [...sameCategory, ...fallback].slice(0, CHOICE_COUNT - 1)
     setPrompt(answer)
     setChoices(shuffled([answer, ...distractors]))
     setSelected(null)
@@ -85,12 +121,14 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
   }
 
   function openSettings() {
-    setSettingsSnapshot({ script, length })
+    setSettingsSnapshot({ script, length, category })
     setSettingsOpen(true)
   }
 
   function closeSettings() {
-    const changed = settingsSnapshot?.script !== script || settingsSnapshot?.length !== length
+    const changed = settingsSnapshot?.script !== script
+      || settingsSnapshot?.length !== length
+      || settingsSnapshot?.category !== category
     setSettingsOpen(false)
     setSettingsSnapshot(null)
     if (changed && ready) {
@@ -103,14 +141,48 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
     if (settingsSnapshot) {
       setScript(settingsSnapshot.script)
       setLength(settingsSnapshot.length)
+      setCategory(settingsSnapshot.category)
     }
     setSettingsOpen(false)
     setSettingsSnapshot(null)
   }
 
-  function resetSetup(nextScript = script, nextLength = length) {
+  function changeSettings(nextScript: PictureScript, nextLength: PictureLength) {
+    if (buildPool(nextScript, nextLength, category).length < CHOICE_COUNT) return
     setScript(nextScript)
     setLength(nextLength)
+  }
+
+  function chooseScript(nextScript: PictureScript) {
+    const lengths = compatibleLengths(nextScript, category)
+    if (lengths.length === 0) return
+    setScript(nextScript)
+    setLength(lengths.includes(length) ? length : closestLength(length, lengths))
+  }
+
+  function chooseCategory(nextCategory: PictureCategoryChoice) {
+    if (nextCategory === 'all') {
+      setCategory('all')
+      return
+    }
+
+    let nextScript = script
+    let lengths = compatibleLengths(nextScript, nextCategory)
+    if (lengths.length === 0) {
+      nextScript = script === 'hiragana' ? 'kanji' : 'hiragana'
+      lengths = compatibleLengths(nextScript, nextCategory)
+    }
+    if (lengths.length === 0) return
+
+    setCategory(nextCategory)
+    setScript(nextScript)
+    setLength(lengths.includes(length) ? length : closestLength(length, lengths))
+  }
+
+  function resetSetup(nextScript = script, nextLength = length, nextCategory = category) {
+    setScript(nextScript)
+    setLength(nextLength)
+    setCategory(nextCategory)
     setRound(0)
     setCorrect(0)
     setPrompt(null)
@@ -125,10 +197,7 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
   return (
     <div className="beginner-learner picture-practice">
       <div className="beginner-learner-top">
-        <button type="button" className="beginner-back" onClick={onBack} aria-label="Back to dashboard">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-          <span>Back</span>
-        </button>
+        <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
         <span className="beginner-learner-title">{round > 0 ? 'Picture Mode' : ''}</span>
         {round > 0 && !done ? (
           <button type="button" className="beginner-speedrun-header-settings" onClick={openSettings}>Settings</button>
@@ -137,20 +206,26 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
 
       {round === 0 ? (
         <main className="beginner-card picture-practice-setup" aria-label="Picture practice settings">
-          <div className="picture-setup-preview" aria-hidden="true">
-            <b lang="ja">{setupPreview.text}</b>
-            <span>{setupPreview.image}</span>
-            <small>{setupPreview.meaning}</small>
-          </div>
-
           <div className="picture-setup-controls">
+            <fieldset className="picture-setup-field">
+              <legend>Category</legend>
+              <div className="picture-category-options" role="group" aria-label="Picture category">
+                {CATEGORY_OPTIONS.map((option) => (
+                  <button key={option.value} type="button" className={category === option.value ? 'is-active' : ''} onClick={() => chooseCategory(option.value)} aria-pressed={category === option.value} title={option.label}>
+                    <span aria-hidden="true">{option.icon}</span>
+                    <small>{option.label}</small>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
             <fieldset className="picture-setup-field">
               <legend>Writing</legend>
               <div className="picture-segmented beginner-speedrun-script-selector">
-                <button type="button" className={script === 'hiragana' ? 'is-active' : ''} onClick={() => resetSetup('hiragana', length)} aria-pressed={script === 'hiragana'}>
+                <button type="button" className={script === 'hiragana' ? 'is-active' : ''} onClick={() => chooseScript('hiragana')} aria-pressed={script === 'hiragana'} disabled={compatibleLengths('hiragana', category).length === 0}>
                   <span lang="ja">あ</span> Hiragana
                 </button>
-                <button type="button" className={script === 'kanji' ? 'is-active' : ''} onClick={() => resetSetup('kanji', length)} aria-pressed={script === 'kanji'}>
+                <button type="button" className={script === 'kanji' ? 'is-active' : ''} onClick={() => chooseScript('kanji')} aria-pressed={script === 'kanji'} disabled={compatibleLengths('kanji', category).length === 0}>
                   <span lang="ja">漢</span> Kanji
                 </button>
               </div>
@@ -160,7 +235,7 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
               <legend>{script === 'hiragana' ? 'Kana' : 'Kanji'} per answer</legend>
               <div className="picture-count-selector beginner-speedrun-count-selector picture-practice-count-selector">
                 {([1, 2, 3, 4] as const).map((item) => (
-                  <button key={item} type="button" className={length === item ? 'is-active' : ''} onClick={() => resetSetup(script, item)} aria-pressed={length === item} aria-label={`${item} ${script === 'hiragana' ? 'kana' : 'kanji'}`}>
+                  <button key={item} type="button" className={length === item ? 'is-active' : ''} onClick={() => changeSettings(script, item)} aria-pressed={length === item} aria-label={`${item} ${script === 'hiragana' ? 'kana' : 'kanji'}`} disabled={buildPool(script, item, category).length < CHOICE_COUNT}>
                     {item}
                   </button>
                 ))}
@@ -178,7 +253,7 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
           <span className="beginner-complete-mark" aria-hidden="true">絵</span>
           <h2>{correct === ROUNDS ? 'Perfect match' : 'Picture run complete'}</h2>
           <p className="beginner-challenge-score">{correct} / {ROUNDS}</p>
-          <p>{script === 'hiragana' ? 'Hiragana' : 'Kanji'} · {length} {script === 'hiragana' ? 'kana' : 'kanji'}</p>
+          <p>{script === 'hiragana' ? 'Hiragana' : 'Kanji'} · {length} {script === 'hiragana' ? 'kana' : 'kanji'} · {categoryLabel}</p>
           <button type="button" className="btn btn-primary" onClick={start}>Run it again</button>
           <button type="button" className="btn btn-ghost" onClick={() => resetSetup()}>Change settings</button>
         </main>
@@ -240,10 +315,22 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
 
                 <div className="picture-setup-controls">
                   <fieldset className="picture-setup-field">
+                    <legend>Category</legend>
+                    <div className="picture-category-options" role="group" aria-label="Picture category">
+                      {CATEGORY_OPTIONS.map((option) => (
+                        <button key={option.value} type="button" className={category === option.value ? 'is-active' : ''} onClick={() => chooseCategory(option.value)} aria-pressed={category === option.value} title={option.label}>
+                          <span aria-hidden="true">{option.icon}</span>
+                          <small>{option.label}</small>
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <fieldset className="picture-setup-field">
                     <legend>Writing</legend>
                     <div className="picture-segmented beginner-speedrun-script-selector">
-                      <button type="button" className={script === 'hiragana' ? 'is-active' : ''} onClick={() => setScript('hiragana')} aria-pressed={script === 'hiragana'}><span lang="ja">あ</span> Hiragana</button>
-                      <button type="button" className={script === 'kanji' ? 'is-active' : ''} onClick={() => setScript('kanji')} aria-pressed={script === 'kanji'}><span lang="ja">漢</span> Kanji</button>
+                      <button type="button" className={script === 'hiragana' ? 'is-active' : ''} onClick={() => chooseScript('hiragana')} aria-pressed={script === 'hiragana'} disabled={compatibleLengths('hiragana', category).length === 0}><span lang="ja">あ</span> Hiragana</button>
+                      <button type="button" className={script === 'kanji' ? 'is-active' : ''} onClick={() => chooseScript('kanji')} aria-pressed={script === 'kanji'} disabled={compatibleLengths('kanji', category).length === 0}><span lang="ja">漢</span> Kanji</button>
                     </div>
                   </fieldset>
 
@@ -251,7 +338,7 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
                     <legend>{script === 'hiragana' ? 'Kana' : 'Kanji'} per answer</legend>
                     <div className="picture-count-selector picture-practice-count-selector">
                       {([1, 2, 3, 4] as const).map((item) => (
-                        <button key={item} type="button" className={length === item ? 'is-active' : ''} onClick={() => setLength(item)} aria-pressed={length === item}>{item}</button>
+                        <button key={item} type="button" className={length === item ? 'is-active' : ''} onClick={() => changeSettings(script, item)} aria-pressed={length === item} disabled={buildPool(script, item, category).length < CHOICE_COUNT}>{item}</button>
                       ))}
                     </div>
                   </fieldset>

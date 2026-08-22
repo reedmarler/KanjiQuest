@@ -8,6 +8,7 @@ import {
 } from '../lib/contentCatalog'
 import type { JlptLevel } from '../lib/types'
 import type { SentenceExercise } from '../data/sentenceExercises'
+import { AppBackButton } from './AppBackButton'
 import type { StudyCard } from '../lib/types'
 import { getVocabExampleSentence } from '../lib/vocabExampleSentence'
 import { SpeakableCue, useSpeakable } from './SpeakableWord'
@@ -130,9 +131,7 @@ export function VocabList({ onBack, embedded = false }: VocabListProps) {
   return (
     <div className="vocab-list-page">
       {!embedded && <header className="kanji-lab-header">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>
-          ← Dashboard
-        </button>
+        <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
         <div>
           <h1>Vocab List</h1>
           <p className="kanji-lab-sub">

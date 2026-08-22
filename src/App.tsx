@@ -27,6 +27,7 @@ import type { GenerationComplexity } from './lib/generationComplexity'
 import type { SentenceExercise } from './data/sentenceExercises'
 import type { DrillExercise } from './lib/drillExercises'
 import { Dashboard } from './components/Dashboard'
+import { AppBackButton } from './components/AppBackButton'
 import { SessionComplete } from './components/SessionComplete'
 import type { LibraryTab } from './components/LibraryPanel'
 import type { BeginnerScript } from './data/beginnerMnemonics'
@@ -260,7 +261,8 @@ function App() {
           <FocusedVocabPractice
             initialTopicId={questVocabTopicId}
             questTitle={activeQuest?.title}
-            onBack={() => setView('dashboard')}
+            onBack={() => setView(practiceReturnView)}
+            onDashboard={() => setView('dashboard')}
             onQuestComplete={activeQuestId && questVocabTopicId
               ? () => {
                   finishQuestStep('vocab')
@@ -278,7 +280,7 @@ function App() {
     return (
       <div className="app">
         <Suspense fallback={<RouteLoading label="Counters" />}>
-          <CounterPractice onBack={() => setView('study-tools')} />
+          <CounterPractice onBack={() => setView('study-tools')} onDashboard={() => setView('dashboard')} />
         </Suspense>
       </div>
     )
@@ -381,6 +383,11 @@ function App() {
               setView('grammar')
             } },
           ]}
+          footerAction={{
+            prompt: 'Too hard?',
+            label: 'Check out the Beginner Zone',
+            onClick: () => setView('beginner-zone'),
+          }}
         />
       </div>
     )
@@ -390,28 +397,32 @@ function App() {
     return (
       <div className="app beginner-zone-page">
         <ToolMenuPage
-          title="Beginner zone"
-          eyebrow="START HERE"
-          description="Never read Japanese before? Learn every character by the picture it hides."
+          title="Beginner Zone"
+          description="Learn Japanese through memorable character pictures."
           onBack={() => setView('dashboard')}
           tools={[
-            { mark: 'あ', title: 'Hiragana', detail: 'The 46 rounded characters, five at a time.', accent: 'sakura', onClick: () => {
+            { mark: 'あ', title: 'Hiragana', detail: 'Learn the 46 rounded characters.', accent: 'sakura', onClick: () => {
               setBeginnerScript('hiragana')
               setView('beginner-learner')
             } },
-            { mark: 'ア', title: 'Katakana', detail: 'The angular script for foreign words and names.', accent: 'kyogre', onClick: () => {
+            { mark: 'ア', title: 'Katakana', detail: 'Learn the script used for foreign words.', accent: 'kyogre', onClick: () => {
               setBeginnerScript('katakana')
               setView('beginner-learner')
             } },
-            { mark: '一', title: 'First Kanji', detail: 'Thirty starter kanji you can actually picture.', accent: 'gold', onClick: () => {
+            { mark: '一', title: 'First Kanji', detail: 'Learn 30 memorable starter kanji.', accent: 'gold', onClick: () => {
               setBeginnerScript('kanji')
               setView('beginner-learner')
             } },
-            { mark: '⚡', title: 'Speed Run', detail: 'A kana flashes, then vanishes — name it before it fades.', accent: 'rayquaza', onClick: () => {
+            { mark: '⚡', title: 'Speed Run', detail: 'Name each kana before it fades.', accent: 'rayquaza', onClick: () => {
               setSpeedRunReturnView('beginner-zone')
               setView('beginner-speed-run')
             } },
           ]}
+          footerAction={{
+            prompt: 'Too easy?',
+            label: 'Check out Study Tools',
+            onClick: () => setView('study-tools'),
+          }}
         />
       </div>
     )
@@ -420,7 +431,7 @@ function App() {
   if (view === 'beginner-learner') {
     return (
       <div className="app">
-        <Suspense fallback={<RouteLoading label="Beginner zone" />}>
+        <Suspense fallback={<RouteLoading label="Beginner Zone" />}>
           <BeginnerLearner script={beginnerScript} onBack={() => setView('beginner-zone')} />
         </Suspense>
       </div>
@@ -431,7 +442,7 @@ function App() {
     return (
       <div className="app">
         <Suspense fallback={<RouteLoading label="Speed Run" />}>
-          <BeginnerSpeedRun onBack={() => setView(speedRunReturnView)} />
+          <BeginnerSpeedRun onBack={() => setView(speedRunReturnView)} onDashboard={() => setView('dashboard')} />
         </Suspense>
       </div>
     )
@@ -551,7 +562,7 @@ function App() {
         <Suspense fallback={<RouteLoading label="Grammar" />}>
           <GrammarPractice
             onBack={() => setView(practiceReturnView)}
-            onDashboard={activeQuestId ? () => setView('dashboard') : undefined}
+            onDashboard={() => setView('dashboard')}
             isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
             onToggleFavorite={toggleDrillFavorite}
             questId={activeQuestId}
@@ -600,6 +611,7 @@ function App() {
               onPrevious={goToPreviousSentence}
               onSkip={advanceOrComplete}
               onExit={() => setView(exitView)}
+              onDashboard={() => setView('dashboard')}
               selectedLevels={builderLevels}
               enabledLevels={GENERATION_COMPLEXITIES}
               onApplyLevels={applyBuilderLevels}
@@ -651,23 +663,24 @@ function ToolMenuPage({
   description,
   tools,
   onBack,
+  footerAction,
 }: {
   title: string
-  eyebrow: string
+  eyebrow?: string
   description: string
   tools: ToolMenuItem[]
   onBack: () => void
+  footerAction?: {
+    prompt: string
+    label: string
+    onClick: () => void
+  }
 }) {
   return (
     <main className="tool-menu-page">
-      <button type="button" className="back-button" onClick={onBack} aria-label="Back">
-        <svg className="back-button-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <polyline points="15 5 8 12 15 19" />
-        </svg>
-        <span>Back</span>
-      </button>
+      <AppBackButton onClick={onBack} />
       <section className="tool-menu-heading">
-        <small>{eyebrow}</small>
+        {eyebrow && <small>{eyebrow}</small>}
         <h1>{title}</h1>
         <p>{description}</p>
       </section>
@@ -682,6 +695,15 @@ function ToolMenuPage({
           </button>
         ))}
       </div>
+      {footerAction && (
+        <div className="tool-menu-footer">
+          <span>{footerAction.prompt}</span>
+          <button type="button" onClick={footerAction.onClick}>
+            {footerAction.label}
+            <span aria-hidden="true">&rarr;</span>
+          </button>
+        </div>
+      )}
     </main>
   )
 }
