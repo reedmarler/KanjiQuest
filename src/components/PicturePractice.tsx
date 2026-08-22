@@ -91,6 +91,8 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
   const [selected, setSelected] = useState<string | null>(null)
   const [picked, setPicked] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsSnapshot, setSettingsSnapshot] = useState<{ script: PictureScript, length: PictureLength } | null>(null)
 
   const pool = useMemo(() => buildPool(script, length), [script, length])
   const ready = pool.length >= CHOICE_COUNT
@@ -98,9 +100,9 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
     ? { text: 'さくら', meaning: 'cherry blossom', image: '🌸' }
     : { text: '新幹線', meaning: 'bullet train', image: '🚄' }
 
-  function askRound(nextRound: number) {
-    const answer = pool[Math.floor(Math.random() * pool.length)]!
-    const distractors = shuffled(pool.filter((entry) => entry.text !== answer.text)).slice(0, CHOICE_COUNT - 1)
+  function askRound(nextRound: number, sourcePool = pool) {
+    const answer = sourcePool[Math.floor(Math.random() * sourcePool.length)]!
+    const distractors = shuffled(sourcePool.filter((entry) => entry.text !== answer.text)).slice(0, CHOICE_COUNT - 1)
     setPrompt(answer)
     setChoices(shuffled([answer, ...distractors]))
     setSelected(null)
@@ -129,6 +131,30 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
     askRound(round + 1)
   }
 
+  function openSettings() {
+    setSettingsSnapshot({ script, length })
+    setSettingsOpen(true)
+  }
+
+  function closeSettings() {
+    const changed = settingsSnapshot?.script !== script || settingsSnapshot?.length !== length
+    setSettingsOpen(false)
+    setSettingsSnapshot(null)
+    if (changed && ready) {
+      setCorrect(0)
+      askRound(1, pool)
+    }
+  }
+
+  function cancelSettings() {
+    if (settingsSnapshot) {
+      setScript(settingsSnapshot.script)
+      setLength(settingsSnapshot.length)
+    }
+    setSettingsOpen(false)
+    setSettingsSnapshot(null)
+  }
+
   function resetSetup(nextScript = script, nextLength = length) {
     setScript(nextScript)
     setLength(nextLength)
@@ -139,6 +165,8 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
     setSelected(null)
     setPicked(null)
     setDone(false)
+    setSettingsOpen(false)
+    setSettingsSnapshot(null)
   }
 
   return (
@@ -150,10 +178,7 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
         </button>
         <span className="beginner-learner-title">{round > 0 ? 'Picture Mode' : ''}</span>
         {round > 0 && !done ? (
-          <span className="beginner-streak" title="Correct so far">
-            <span aria-hidden="true">絵</span>
-            <b>{correct}</b>
-          </span>
+          <button type="button" className="beginner-speedrun-header-settings" onClick={openSettings}>Settings</button>
         ) : <span />}
       </div>
 
@@ -168,7 +193,7 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
           <div className="picture-setup-controls">
             <fieldset className="picture-setup-field">
               <legend>Writing</legend>
-              <div className="picture-segmented">
+              <div className="picture-segmented beginner-speedrun-script-selector">
                 <button type="button" className={script === 'hiragana' ? 'is-active' : ''} onClick={() => resetSetup('hiragana', length)} aria-pressed={script === 'hiragana'}>
                   <span lang="ja">あ</span> Hiragana
                 </button>
@@ -180,7 +205,7 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
 
             <fieldset className="picture-setup-field">
               <legend>{script === 'hiragana' ? 'Kana' : 'Kanji'} per answer</legend>
-              <div className="picture-count-selector">
+              <div className="picture-count-selector beginner-speedrun-count-selector picture-practice-count-selector">
                 {([1, 2, 3, 4] as const).map((item) => (
                   <button key={item} type="button" className={length === item ? 'is-active' : ''} onClick={() => resetSetup(script, item)} aria-pressed={length === item} aria-label={`${item} ${script === 'hiragana' ? 'kana' : 'kanji'}`}>
                     {item}
@@ -192,7 +217,7 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
 
           {!ready && <p className="picture-practice-note">More pictures are needed for this setting.</p>}
           <button type="button" className="btn btn-primary beginner-action-btn-green picture-setup-start" onClick={start} disabled={!ready}>
-            Start {ROUNDS} rounds →
+            Start
           </button>
         </main>
       ) : done ? (
@@ -206,11 +231,6 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
         </main>
       ) : (
         <main className="beginner-card beginner-challenge picture-practice-card">
-          <div className="beginner-challenge-top">
-            <span className="beginner-write-label">Round {round} of {ROUNDS}</span>
-            <button type="button" className="beginner-speedrun-quit" onClick={() => resetSetup()}>Quit</button>
-          </div>
-
           <div className={`picture-practice-answer${picked ? ' is-visible' : ''}`} lang="ja" aria-live="polite">
             {picked ? prompt?.text : '\u00a0'}
           </div>
@@ -256,6 +276,42 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
               </button>
             )}
           </div>
+
+          {settingsOpen && (
+            <div className="beginner-speedrun-settings-backdrop">
+              <section className="beginner-speedrun-settings" role="dialog" aria-modal="true" aria-label="Picture mode settings">
+                <header>
+                  <b>Picture settings</b>
+                  <button type="button" onClick={cancelSettings} aria-label="Close settings">&times;</button>
+                </header>
+
+                <div className="picture-setup-controls">
+                  <fieldset className="picture-setup-field">
+                    <legend>Writing</legend>
+                    <div className="picture-segmented beginner-speedrun-script-selector">
+                      <button type="button" className={script === 'hiragana' ? 'is-active' : ''} onClick={() => setScript('hiragana')} aria-pressed={script === 'hiragana'}><span lang="ja">あ</span> Hiragana</button>
+                      <button type="button" className={script === 'kanji' ? 'is-active' : ''} onClick={() => setScript('kanji')} aria-pressed={script === 'kanji'}><span lang="ja">漢</span> Kanji</button>
+                    </div>
+                  </fieldset>
+
+                  <fieldset className="picture-setup-field">
+                    <legend>{script === 'hiragana' ? 'Kana' : 'Kanji'} per answer</legend>
+                    <div className="picture-count-selector picture-practice-count-selector">
+                      {([1, 2, 3, 4] as const).map((item) => (
+                        <button key={item} type="button" className={length === item ? 'is-active' : ''} onClick={() => setLength(item)} aria-pressed={length === item}>{item}</button>
+                      ))}
+                    </div>
+                  </fieldset>
+                  {!ready && <p className="picture-practice-note">More pictures are needed for this setting.</p>}
+                </div>
+
+                <footer>
+                  <button type="button" className="btn btn-ghost" onClick={() => resetSetup()}>Quit run</button>
+                  <button type="button" className="btn btn-primary beginner-action-btn-green" onClick={closeSettings} disabled={!ready}>Done</button>
+                </footer>
+              </section>
+            </div>
+          )}
         </main>
       )}
     </div>

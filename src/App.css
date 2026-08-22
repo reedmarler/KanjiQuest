@@ -117,6 +117,10 @@ body:has(.beginner-word-writing-card) .app,
   padding-top: 0.5rem;
 }
 
+.app.study-tools-page {
+  padding-top: 0.5rem;
+}
+
 body:has(.quest-hub) .app {
   padding-top: 1rem;
   padding-bottom: 2rem;
@@ -2777,14 +2781,6 @@ body:has(.dashboard) {
   align-items: center;
   justify-items: center;
   min-height: 5.2rem;
-}
-
-.hero-mode-panel-hint {
-  margin: 0;
-  color: color-mix(in srgb, var(--text-muted) 72%, transparent);
-  font: italic 500 0.72rem/1.2 'Outfit', system-ui, sans-serif;
-  letter-spacing: 0.02em;
-  text-align: center;
 }
 
 .hero-mode-panel-slot > .control-story-options,
@@ -16211,8 +16207,18 @@ button.counter-example {
   box-shadow: 0 1px 4px color-mix(in srgb, #000 28%, transparent);
 }
 
+.picture-count-selector.picture-practice-count-selector button.is-active {
+  background: color-mix(in srgb, var(--kyogre) 24%, var(--surface));
+  color: var(--kyogre-light);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kyogre-light) 52%, transparent);
+}
+
 .picture-setup-start {
-  width: min(100%, 12rem);
+  width: min(100%, 9rem);
+  min-height: 2.25rem;
+  margin-top: 0.65rem;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.78rem;
 }
 
 .picture-practice-note {
@@ -16235,7 +16241,7 @@ button.counter-example {
 }
 
 .picture-practice-answer {
-  margin-top: -1.7rem;
+  margin-top: 0;
   font: 700 1.5rem/1 'Noto Sans JP', sans-serif;
 }
 

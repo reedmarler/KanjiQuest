@@ -1015,7 +1015,8 @@ export function Dashboard({
                   </div>
                 </div>
 
-                <div className="hero-mode-panel-slot">
+                {(storyMode || grammarMode || settingsMode === 'star') && (
+                  <div className="hero-mode-panel-slot">
                   {storyMode && (
                     <div className="control-story-options">
                       <div className="control-story-setting">
@@ -1110,10 +1111,8 @@ export function Dashboard({
                     <FavoriteWordsPanel onManage={onOpenFavoriteWords} />
                   )}
 
-                  {!storyMode && !grammarMode && settingsMode !== 'star' && (
-                    <p className="hero-mode-panel-hint">Try a mode</p>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
 
             <div className="voice-settings-panel" id="hero-voice-settings" aria-label="Playback settings">
