@@ -48,6 +48,7 @@ const FavoriteWordsPage = lazy(() => import('./components/FavoriteWordsPage').th
 const AchievementsPanel = lazy(() => import('./components/AchievementsPanel').then((module) => ({ default: module.AchievementsPanel })))
 const BeginnerLearner = lazy(() => import('./components/BeginnerLearner').then((module) => ({ default: module.BeginnerLearner })))
 const BeginnerSpeedRun = lazy(() => import('./components/BeginnerSpeedRun').then((module) => ({ default: module.BeginnerSpeedRun })))
+const PicturePractice = lazy(() => import('./components/PicturePractice').then((module) => ({ default: module.PicturePractice })))
 
 type View =
   | 'dashboard'
@@ -72,6 +73,7 @@ type View =
   | 'beginner-zone'
   | 'beginner-learner'
   | 'beginner-speed-run'
+  | 'picture-practice'
 
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
@@ -94,6 +96,7 @@ function App() {
   const [achievementMetrics, setAchievementMetrics] = useState(loadAchievementMetrics)
   const [practiceReturnView, setPracticeReturnView] = useState<View>('dashboard')
   const [beginnerScript, setBeginnerScript] = useState<BeginnerScript>('hiragana')
+  const [speedRunReturnView, setSpeedRunReturnView] = useState<'beginner-zone' | 'study-tools'>('beginner-zone')
 
   // This is a single-page app, so route changes otherwise retain whatever
   // scroll offset the previous screen left behind. Run before paint so each
@@ -344,18 +347,17 @@ function App() {
 
   if (view === 'study-tools') {
     return (
-      <div className="app">
+      <div className="app study-tools-page">
         <ToolMenuPage
           title="Study tools"
           eyebrow="STUDY MODES"
           description="Choose a focused drill."
           onBack={() => setView('dashboard')}
           tools={[
-            { mark: '文', title: 'Sentences', detail: 'Build Japanese sentence order.', accent: 'sakura', onClick: () => startSentenceMode('study-tools') },
-            { mark: '文法', title: 'Grammar', detail: 'Practice patterns and particles.', accent: 'rayquaza', onClick: () => {
+            { mark: '漢', title: 'Kanji', detail: 'Study kanji readings and forms.', accent: 'kyogre', onClick: () => {
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
-              setView('grammar')
+              setView('kanji')
             } },
             { mark: '語彙', title: 'Vocab', detail: 'Drill focused word groups.', accent: 'gold', onClick: () => {
               setQuestVocabTopicId(undefined)
@@ -363,15 +365,20 @@ function App() {
               setPracticeReturnView('study-tools')
               setView('vocab-practice')
             } },
-            { mark: '漢', title: 'Kanji', detail: 'Study kanji readings and forms.', accent: 'kyogre', onClick: () => {
-              setActiveQuestId(undefined)
-              setPracticeReturnView('study-tools')
-              setView('kanji')
-            } },
             { mark: '数', title: 'Numbers', detail: 'Drill counting words and counters.', accent: 'amber', onClick: () => {
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
               setView('counter-practice')
+            } },
+            { mark: '⚡', title: 'Speed Run', detail: 'A kana flashes, then vanishes — name it before it fades.', accent: 'rayquaza', onClick: () => {
+              setSpeedRunReturnView('study-tools')
+              setView('beginner-speed-run')
+            } },
+            { mark: '文', title: 'Sentences', detail: 'Build Japanese sentence order.', accent: 'sakura', onClick: () => startSentenceMode('study-tools') },
+            { mark: '文法', title: 'Grammar', detail: 'Practice patterns and particles.', accent: 'rayquaza', onClick: () => {
+              setActiveQuestId(undefined)
+              setPracticeReturnView('study-tools')
+              setView('grammar')
             } },
           ]}
         />
@@ -381,7 +388,7 @@ function App() {
 
   if (view === 'beginner-zone') {
     return (
-      <div className="app">
+      <div className="app beginner-zone-page">
         <ToolMenuPage
           title="Beginner zone"
           eyebrow="START HERE"
@@ -401,6 +408,7 @@ function App() {
               setView('beginner-learner')
             } },
             { mark: '⚡', title: 'Speed Run', detail: 'A kana flashes, then vanishes — name it before it fades.', accent: 'rayquaza', onClick: () => {
+              setSpeedRunReturnView('beginner-zone')
               setView('beginner-speed-run')
             } },
           ]}
@@ -423,7 +431,17 @@ function App() {
     return (
       <div className="app">
         <Suspense fallback={<RouteLoading label="Speed Run" />}>
-          <BeginnerSpeedRun onBack={() => setView('beginner-zone')} />
+          <BeginnerSpeedRun onBack={() => setView(speedRunReturnView)} />
+        </Suspense>
+      </div>
+    )
+  }
+
+  if (view === 'picture-practice') {
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Picture Mode" />}>
+          <PicturePractice onBack={() => setView('dashboard')} />
         </Suspense>
       </div>
     )
@@ -605,8 +623,9 @@ function App() {
         totalCards={CARD_TOTAL}
         onOpenQuests={() => setView('quests')}
         onOpenBeginnerZone={() => setView('beginner-zone')}
-        onOpenStudyTools={() => setView('study-tools')}
         onOpenAdditionalTools={() => setView('additional-tools')}
+        onOpenStudyTools={() => setView('study-tools')}
+        onOpenPicturePractice={() => setView('picture-practice')}
         onOpenFavoriteWords={() => setView('favorite-words')}
         questProgress={questProgress}
         wrongPool={wrongPool}

@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { type ReactNode, useEffect, useRef } from 'react'
 
 interface TraceCanvasProps {
   char: string
   /** false for dictation: a blank slate with no printed guide to trace over. */
   showGuide?: boolean
+  overlay?: ReactNode
 }
 
 /** Logical resolution a single character's cell is computed in — a word of
@@ -31,7 +32,7 @@ function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HT
  * a discouraging number next to a beginner's first ever あ works against the
  * point. Writing it and seeing it beside the real thing is the exercise.
  */
-export function TraceCanvas({ char, showGuide = true }: TraceCanvasProps) {
+export function TraceCanvas({ char, showGuide = true, overlay }: TraceCanvasProps) {
   const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const inkCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const drawingRef = useRef(false)
@@ -141,6 +142,7 @@ export function TraceCanvas({ char, showGuide = true }: TraceCanvasProps) {
         <button type="button" className="trace-canvas-clear" onClick={clearInk} aria-label="Clear">
           &#8635; Clear
         </button>
+        {overlay && <div className="trace-canvas-overlay">{overlay}</div>}
       </div>
     </div>
   )
