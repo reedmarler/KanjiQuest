@@ -13,6 +13,7 @@
  * fine for a key — hence the key living only in the service's environment.
  */
 
+import { findBeginnerAudio, type BeginnerAudioKind } from './beginnerAudio'
 import { getCachedSpeech, putCachedSpeech, speechCacheKey } from './speechCache'
 import { findStaticAudio } from './staticAudio'
 import { SPEECH_SPEEDS, type SpeechSpeed } from './speechSpeeds'
@@ -79,6 +80,9 @@ export interface SpeakOptions {
    *  mispronouncing outright rather than just sounding rushed or clipped) —
    *  an explicit opt-out rather than something speakJapanese guesses at. */
   forceBrowser?: boolean
+  /** Prefer an approved Beginner Mode recording of this kind while retaining
+   *  the normal speech fallback when no exact recording exists. */
+  beginnerRecordingKind?: BeginnerAudioKind
 }
 
 /** Thrown for a refusal that says nothing about the service's health. */
@@ -342,6 +346,7 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
     voiceId,
     onEnd,
     forceBrowser = false,
+    beginnerRecordingKind,
   } = options
   // Ratio between what we render and what we play back.
   const playbackRate = synthesisRate === rate ? 1 : rate / synthesisRate
@@ -355,6 +360,32 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
 
   setActive({ token: generation, status: 'loading' })
   primeAudioPlayback()
+
+  const beginnerUrl = beginnerRecordingKind ? findBeginnerAudio(text, beginnerRecordingKind) : undefined
+  if (beginnerUrl) {
+    fetch(beginnerUrl)
+      .then((res) => {
+        const isAudio = res.ok && (res.headers.get('content-type') ?? '').startsWith('audio/')
+        if (!isAudio) throw new Error('no Beginner Mode recording')
+        return res.blob()
+      })
+      .then((blob) => {
+        if (generation !== speechGeneration) return
+        playBlob(
+          blob,
+          volume,
+          generation,
+          1,
+          onEnd,
+          () => speakWithBrowserVoice(text, rate, volume, generation, onEnd),
+        )
+      })
+      .catch(() => {
+        if (generation !== speechGeneration) return
+        speakWithBrowserVoice(text, rate, volume, generation, onEnd)
+      })
+    return generation
+  }
 
   if (forceBrowser) {
     speakWithBrowserVoice(text, rate, volume, generation, onEnd)

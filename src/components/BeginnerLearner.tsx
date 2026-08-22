@@ -33,6 +33,8 @@ const WORD_PICTURE: Record<string, string> = {
   あか: '🔴',
   かき: '🟠',
   きく: '👂',
+  こえ: '🗣️',
+  けいこ: '🥋',
   さけ: '🍶',
   あさ: '🌅',
   さかな: '🐟',
@@ -44,6 +46,7 @@ const WORD_PICTURE: Record<string, string> = {
   たこ: '🐙',
   いち: '1',
   くつ: '👟',
+  て: '✋',
   とけい: '🕒',
   なつ: '☀️',
   いぬ: '🐶',
@@ -53,22 +56,27 @@ const WORD_PICTURE: Record<string, string> = {
   はと: '🕊️',
   ひと: '🧍',
   ふね: '⛵',
+  へた: '😅',
   へや: '🚪',
   ほし: '⭐',
   まつ: '🌲',
   みみ: '👂',
   むし: '🐞',
+  め: '👁️',
   くも: '☁️',
   もも: '🍑',
   やま: '⛰️',
   ゆき: '❄️',
+  よむ: '📖',
   よる: '🌙',
   さくら: '🌸',
   とり: '🐦',
   くるま: '🚗',
+  これ: '👉',
   そと: '🏞️',
   わたし: '🧍',
   かわ: '🌊',
+  ほん: '📕',
   こころ: '💗',
   ふゆ: '☃️',
   アイ: '👁️',
@@ -101,6 +109,59 @@ const WORD_PICTURE: Record<string, string> = {
   ワイン: '🍷',
   カワ: '🌊',
   オン: '🔛',
+  かぎ: '🔑',
+  えいが: '🎬',
+  りんご: '🍎',
+  げた: '🩴',
+  ごま: '⚫',
+  ぐみ: '🍬',
+  かぜ: '💨',
+  ひざ: '🦵',
+  じかん: '🕐',
+  みず: '💧',
+  ぞう: '🐘',
+  ざる: '🧺',
+  だれ: '❓',
+  うで: '💪',
+  まど: '🪟',
+  つづく: '➡️',
+  はなぢ: '🩸',
+  ちぢむ: '↘️',
+  ばら: '🌹',
+  くび: '👤',
+  ぶた: '🐷',
+  かべ: '🧱',
+  ぼうし: '👒',
+  ぱぱ: '👨',
+  ぴかぴか: '✨',
+  ぷにぷに: '🫧',
+  ぺこぺこ: '🍽️',
+  ぽかぽか: '♨️',
+  ガム: '🍬',
+  ギア: '⚙️',
+  グミ: '🍬',
+  ゲタ: '🩴',
+  ゴマ: '⚫',
+  ザル: '🧺',
+  ジム: '🏋️',
+  ズル: '🃏',
+  ゼロ: '0',
+  ゾウ: '🐘',
+  ダム: '🌊',
+  ヅラ: '💇',
+  デモ: '📣',
+  ドア: '🚪',
+  ダンス: '💃',
+  バス: '🚌',
+  ビル: '🏢',
+  ブタ: '🐷',
+  ベル: '🔔',
+  ボタン: '🔘',
+  パン: '🍞',
+  ピザ: '🍕',
+  プロ: '🏅',
+  ペン: '🖊️',
+  ポスト: '📮',
 }
 
 function shuffled<T>(items: readonly T[]) {
@@ -133,7 +194,7 @@ function BeginnerWordExample({
   script: BeginnerScript
   durationScale?: number
 }) {
-  if (script === 'hiragana') {
+  if (script !== 'kanji') {
     return <StrokeOrderAnimation word={word} size="hero" durationScale={durationScale} />
   }
   return (
@@ -337,7 +398,11 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
             <button
               type="button"
               className="beginner-speak-btn beginner-speak-btn--quiz"
-              onClick={() => speakJapanese(listeningWord.word, { rate: SPEECH_SPEEDS.learning, forceBrowser: true })}
+              onClick={() => speakJapanese(listeningWord.word, {
+                rate: SPEECH_SPEEDS.learning,
+                forceBrowser: true,
+                beginnerRecordingKind: 'word',
+              })}
               aria-label="Play the listening word"
             >
               <span aria-hidden="true">&#128266;</span>
@@ -355,7 +420,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
                     onClick={() => setListeningChoice(option.word)}
                     aria-pressed={selected}
                   >
-                    <span lang="ja">{option.word}</span>
+                    <span lang="ja" data-kana-count={Math.min([...option.word].length, 4)}>{option.word}</span>
                   </button>
                 )
               })}
@@ -398,7 +463,11 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
                 <button
                   type="button"
                   className="beginner-speak-btn beginner-speak-btn--quiz"
-                  onClick={() => speakJapanese(currentTraceWord.word, { rate: SPEECH_SPEEDS.learning, forceBrowser: true })}
+                  onClick={() => speakJapanese(currentTraceWord.word, {
+                    rate: SPEECH_SPEEDS.learning,
+                    forceBrowser: true,
+                    beginnerRecordingKind: 'word',
+                  })}
                   aria-label={`Play the word ${currentTraceWord.word}`}
                 >
                   <span aria-hidden="true">&#128266;</span>
@@ -422,12 +491,17 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
 
             <div className="beginner-write-stack">
               <div className="beginner-quiz-example">
-                <BeginnerWordExample word={currentTraceWord.word} script={script} />
+                <BeginnerWordExample
+                  word={currentTraceWord.word}
+                  script={script}
+                  durationScale={2 / 3}
+                />
               </div>
               <div className="beginner-write-section">
                 <TraceCanvas
                   key={currentTraceWord.word}
                   char={currentTraceWord.word}
+                  compactSingleCharacter={[...currentTraceWord.word].length === 1}
                   overlay={quizRevealed ? meaningOverlay(currentTraceWord) : null}
                 />
               </div>
@@ -445,10 +519,14 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               <button
                 key={entry.char}
                 type="button"
-                onClick={() => speakJapanese(entry.char, { rate: SINGLE_CHARACTER_SPEECH_RATE, forceBrowser: true })}
+                onClick={() => speakJapanese(entry.char, {
+                  rate: SINGLE_CHARACTER_SPEECH_RATE,
+                  forceBrowser: true,
+                  beginnerRecordingKind: 'kana',
+                })}
                 aria-label={`Hear ${entry.char}`}
               >
-                {completionWritingReplay > 0 && script === 'hiragana' ? (
+                {completionWritingReplay > 0 && script !== 'kanji' ? (
                   <StrokeOrderAnimation
                     word={entry.char}
                     durationScale={COMPLETION_WRITING_DURATION_SCALE}
@@ -475,6 +553,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
                 onClick={() => speakJapanese(row.characters.map((entry) => entry.char).join('、'), {
                   rate: SINGLE_CHARACTER_SPEECH_RATE,
                   forceBrowser: true,
+                  beginnerRecordingKind: 'row',
                 })}
                 aria-label="Hear all characters"
               >
@@ -523,7 +602,11 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               // character has no surrounding word to give the ear a beat to
               // catch it in, so the standard slowdown still reads as rushed
               // here even though it's plenty for whole words elsewhere.
-              onClick={() => speakJapanese(card.char, { rate: SINGLE_CHARACTER_SPEECH_RATE, forceBrowser: true })}
+              onClick={() => speakJapanese(card.char, {
+                rate: SINGLE_CHARACTER_SPEECH_RATE,
+                forceBrowser: true,
+                beginnerRecordingKind: 'kana',
+              })}
               aria-label={`Play the sound for ${card.char}`}
             >
               &#128266;

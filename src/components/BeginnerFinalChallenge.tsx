@@ -112,7 +112,11 @@ export function BeginnerFinalChallenge({ deck, onExit }: BeginnerFinalChallengeP
           <button
             type="button"
             className="beginner-speak-btn beginner-speak-btn--quiz"
-            onClick={() => speakJapanese(question.answer.char, { rate: SPEECH_SPEEDS.learning, synthesisRate: SPEECH_SPEEDS.natural })}
+            onClick={() => speakJapanese(question.answer.char, {
+              rate: SPEECH_SPEEDS.learning,
+              synthesisRate: SPEECH_SPEEDS.natural,
+              beginnerRecordingKind: 'kana',
+            })}
             aria-label="Play the sound"
           >
             <span aria-hidden="true">&#128266;</span>

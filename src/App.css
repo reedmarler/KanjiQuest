@@ -15258,7 +15258,17 @@ button.counter-example {
 }
 
 .beginner-listening-options button span {
-  font: 700 clamp(1.35rem, 4.5vw, 1.9rem)/1 'Noto Sans JP', sans-serif;
+  display: block;
+  font: 700 1.9rem/1 'Noto Sans JP', sans-serif;
+  white-space: nowrap;
+}
+
+.beginner-listening-options button span[data-kana-count="3"] {
+  font-size: 1.5rem;
+}
+
+.beginner-listening-options button span[data-kana-count="4"] {
+  font-size: 1.2rem;
 }
 
 .beginner-listening-continue {
@@ -15613,6 +15623,19 @@ button.counter-example {
 
 .beginner-quiz-example .stroke-order-animation.is-hero .stroke-order-char {
   width: clamp(5.4rem, 24vw, 8.3rem);
+}
+
+.beginner-quiz-example .stroke-order-animation.is-hero[data-char-count="4"] {
+  width: min(100%, 36rem);
+}
+
+.beginner-quiz-example .stroke-order-animation.is-hero[data-char-count="4"] .stroke-order-chars {
+  flex-wrap: nowrap;
+  gap: 0.45rem;
+}
+
+.beginner-quiz-example .stroke-order-animation.is-hero[data-char-count="4"] .stroke-order-char {
+  width: min(calc((100% - 1.35rem) / 4), 8rem);
 }
 
 .beginner-quiz-example .beginner-static-word-example {

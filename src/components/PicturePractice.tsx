@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { pictureVocabulary } from '../data/pictureVocabulary'
 
 type PictureScript = 'hiragana' | 'kanji'
 type PictureLength = 1 | 2 | 3 | 4
@@ -12,57 +13,6 @@ interface PicturePrompt {
 const ROUNDS = 10
 const CHOICE_COUNT = 4
 
-const HIRAGANA_PICTURES: PicturePrompt[] = [
-  { text: 'え', meaning: 'picture', image: '🖼️' },
-  { text: 'て', meaning: 'hand', image: '✋' },
-  { text: 'め', meaning: 'eye', image: '👁️' },
-  { text: 'き', meaning: 'tree', image: '🌳' },
-  { text: 'あい', meaning: 'love', image: '❤️' },
-  { text: 'いえ', meaning: 'house', image: '🏠' },
-  { text: 'あお', meaning: 'blue', image: '🔵' },
-  { text: 'かお', meaning: 'face', image: '🙂' },
-  { text: 'あか', meaning: 'red', image: '🔴' },
-  { text: 'くつ', meaning: 'shoes', image: '👟' },
-  { text: 'はな', meaning: 'flower', image: '🌸' },
-  { text: 'ほし', meaning: 'star', image: '⭐' },
-  { text: 'そら', meaning: 'sky', image: '☁️' },
-  { text: 'ゆき', meaning: 'snow', image: '❄️' },
-  { text: 'かわ', meaning: 'river', image: '🌊' },
-  { text: 'とり', meaning: 'bird', image: '🐦' },
-  { text: 'さかな', meaning: 'fish', image: '🐟' },
-  { text: 'とけい', meaning: 'clock', image: '🕒' },
-  { text: 'くるま', meaning: 'car', image: '🚗' },
-  { text: 'こころ', meaning: 'heart', image: '💗' },
-  { text: 'さくら', meaning: 'cherry blossom', image: '🌸' },
-  { text: 'わたし', meaning: 'I / me', image: '🧍' },
-]
-
-const KANJI_PICTURES: PicturePrompt[] = [
-  { text: '一', meaning: 'one', image: '1' },
-  { text: '山', meaning: 'mountain', image: '⛰️' },
-  { text: '水', meaning: 'water', image: '💧' },
-  { text: '火', meaning: 'fire', image: '🔥' },
-  { text: '木', meaning: 'tree', image: '🌳' },
-  { text: '手', meaning: 'hand', image: '✋' },
-  { text: '本', meaning: 'book', image: '📘' },
-  { text: '雨', meaning: 'rain', image: '🌧️' },
-  { text: '電話', meaning: 'phone', image: '☎️' },
-  { text: '学校', meaning: 'school', image: '🏫' },
-  { text: '先生', meaning: 'teacher', image: '🧑‍🏫' },
-  { text: '電車', meaning: 'train', image: '🚃' },
-  { text: '時間', meaning: 'time', image: '🕒' },
-  { text: '日本', meaning: 'Japan', image: '🗾' },
-  { text: '図書館', meaning: 'library', image: '📚' },
-  { text: '自転車', meaning: 'bicycle', image: '🚲' },
-  { text: '新幹線', meaning: 'bullet train', image: '🚄' },
-  { text: '美術館', meaning: 'art museum', image: '🏛️' },
-  { text: '郵便局', meaning: 'post office', image: '🏣' },
-  { text: '消防車', meaning: 'fire engine', image: '🚒' },
-  { text: '救急車', meaning: 'ambulance', image: '🚑' },
-  { text: '運動会', meaning: 'sports day', image: '🏃' },
-  { text: '飛行機', meaning: 'airplane', image: '✈️' },
-]
-
 function shuffled<T>(items: readonly T[]) {
   const copy = [...items]
   for (let index = copy.length - 1; index > 0; index -= 1) {
@@ -73,8 +23,11 @@ function shuffled<T>(items: readonly T[]) {
 }
 
 function buildPool(script: PictureScript, length: PictureLength) {
-  const source = script === 'hiragana' ? HIRAGANA_PICTURES : KANJI_PICTURES
-  return source.filter((entry) => [...entry.text].length === length)
+  return pictureVocabulary.flatMap((entry) => {
+    const text = script === 'hiragana' ? entry.kana : entry.kanji
+    if (!text || [...text].length !== length) return []
+    return [{ text, meaning: entry.meaning, image: entry.image }]
+  })
 }
 
 interface PicturePracticeProps {

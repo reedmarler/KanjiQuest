@@ -5,6 +5,9 @@ interface TraceCanvasProps {
   /** false for dictation: a blank slate with no printed guide to trace over. */
   showGuide?: boolean
   overlay?: ReactNode
+  /** Keeps a one-character vocabulary exercise from using the larger square
+   *  intended for the main character-writing lesson. */
+  compactSingleCharacter?: boolean
 }
 
 /** Logical resolution a single character's cell is computed in — a word of
@@ -32,7 +35,7 @@ function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HT
  * a discouraging number next to a beginner's first ever あ works against the
  * point. Writing it and seeing it beside the real thing is the exercise.
  */
-export function TraceCanvas({ char, showGuide = true, overlay }: TraceCanvasProps) {
+export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false }: TraceCanvasProps) {
   const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const inkCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const drawingRef = useRef(false)
@@ -45,7 +48,9 @@ export function TraceCanvas({ char, showGuide = true, overlay }: TraceCanvasProp
   // A single character keeps its original large square; a word gets one
   // square cell per character instead of squeezing every glyph into that
   // same square, which was illegible.
-  const stackWidthRem = charCount <= 1 ? 21 : charCount * 15
+  const stackWidthRem = charCount <= 1
+    ? (compactSingleCharacter ? 13 : 21)
+    : charCount * 15
 
   // A new character means a fresh guide and a blank page — stale ink from the
   // previous character must not linger under the next one.

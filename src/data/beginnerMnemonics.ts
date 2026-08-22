@@ -147,6 +147,61 @@ const hiraganaRows: BeginnerRow[] = [
       { char: 'ん', romaji: 'n', mnemonic: 'A single lazy squiggle — the sound you hum, "nnn".' },
     ],
   },
+  {
+    id: 'hiragana-ga',
+    label: 'が',
+    characters: [
+      { char: 'が', romaji: 'ga', mnemonic: 'Add dakuten to か: the two marks make "ka" buzz into "ga".' },
+      { char: 'ぎ', romaji: 'gi', mnemonic: 'Add dakuten to き: "ki" becomes the voiced sound "gi".' },
+      { char: 'ぐ', romaji: 'gu', mnemonic: 'Add dakuten to く: "ku" becomes the voiced sound "gu".' },
+      { char: 'げ', romaji: 'ge', mnemonic: 'Add dakuten to け: "ke" becomes the voiced sound "ge".' },
+      { char: 'ご', romaji: 'go', mnemonic: 'Add dakuten to こ: "ko" becomes the voiced sound "go".' },
+    ],
+  },
+  {
+    id: 'hiragana-za',
+    label: 'ざ',
+    characters: [
+      { char: 'ざ', romaji: 'za', mnemonic: 'Add dakuten to さ: "sa" buzzes into "za".' },
+      { char: 'じ', romaji: 'ji', mnemonic: 'Add dakuten to し: "shi" becomes "ji".' },
+      { char: 'ず', romaji: 'zu', mnemonic: 'Add dakuten to す: "su" becomes "zu".' },
+      { char: 'ぜ', romaji: 'ze', mnemonic: 'Add dakuten to せ: "se" becomes "ze".' },
+      { char: 'ぞ', romaji: 'zo', mnemonic: 'Add dakuten to そ: "so" becomes "zo".' },
+    ],
+  },
+  {
+    id: 'hiragana-da',
+    label: 'だ',
+    characters: [
+      { char: 'だ', romaji: 'da', mnemonic: 'Add dakuten to た: "ta" becomes "da".' },
+      { char: 'ぢ', romaji: 'ji', mnemonic: 'Add dakuten to ち: this uncommon kana is usually pronounced "ji".' },
+      { char: 'づ', romaji: 'zu', mnemonic: 'Add dakuten to つ: this uncommon kana is usually pronounced "zu".' },
+      { char: 'で', romaji: 'de', mnemonic: 'Add dakuten to て: "te" becomes "de".' },
+      { char: 'ど', romaji: 'do', mnemonic: 'Add dakuten to と: "to" becomes "do".' },
+    ],
+  },
+  {
+    id: 'hiragana-ba',
+    label: 'ば',
+    characters: [
+      { char: 'ば', romaji: 'ba', mnemonic: 'Add dakuten to は: "ha" becomes "ba".' },
+      { char: 'び', romaji: 'bi', mnemonic: 'Add dakuten to ひ: "hi" becomes "bi".' },
+      { char: 'ぶ', romaji: 'bu', mnemonic: 'Add dakuten to ふ: "fu" becomes "bu".' },
+      { char: 'べ', romaji: 'be', mnemonic: 'Add dakuten to へ: "he" becomes "be".' },
+      { char: 'ぼ', romaji: 'bo', mnemonic: 'Add dakuten to ほ: "ho" becomes "bo".' },
+    ],
+  },
+  {
+    id: 'hiragana-pa',
+    label: 'ぱ',
+    characters: [
+      { char: 'ぱ', romaji: 'pa', mnemonic: 'Add the small handakuten circle to は: "ha" pops into "pa".' },
+      { char: 'ぴ', romaji: 'pi', mnemonic: 'Add the small circle to ひ: "hi" pops into "pi".' },
+      { char: 'ぷ', romaji: 'pu', mnemonic: 'Add the small circle to ふ: "fu" pops into "pu".' },
+      { char: 'ぺ', romaji: 'pe', mnemonic: 'Add the small circle to へ: "he" pops into "pe".' },
+      { char: 'ぽ', romaji: 'po', mnemonic: 'Add the small circle to ほ: "ho" pops into "po".' },
+    ],
+  },
 ]
 
 const katakanaRows: BeginnerRow[] = [
@@ -256,6 +311,61 @@ const katakanaRows: BeginnerRow[] = [
       { char: 'ン', romaji: 'n', mnemonic: 'Two dashes swooping UP — hum "nnn". Compare ソ, which swoops down.' },
     ],
   },
+  {
+    id: 'katakana-ga',
+    label: 'ガ',
+    characters: [
+      { char: 'ガ', romaji: 'ga', mnemonic: 'Add dakuten to カ: "ka" buzzes into "ga".' },
+      { char: 'ギ', romaji: 'gi', mnemonic: 'Add dakuten to キ: "ki" becomes "gi".' },
+      { char: 'グ', romaji: 'gu', mnemonic: 'Add dakuten to ク: "ku" becomes "gu".' },
+      { char: 'ゲ', romaji: 'ge', mnemonic: 'Add dakuten to ケ: "ke" becomes "ge".' },
+      { char: 'ゴ', romaji: 'go', mnemonic: 'Add dakuten to コ: "ko" becomes "go".' },
+    ],
+  },
+  {
+    id: 'katakana-za',
+    label: 'ザ',
+    characters: [
+      { char: 'ザ', romaji: 'za', mnemonic: 'Add dakuten to サ: "sa" buzzes into "za".' },
+      { char: 'ジ', romaji: 'ji', mnemonic: 'Add dakuten to シ: "shi" becomes "ji".' },
+      { char: 'ズ', romaji: 'zu', mnemonic: 'Add dakuten to ス: "su" becomes "zu".' },
+      { char: 'ゼ', romaji: 'ze', mnemonic: 'Add dakuten to セ: "se" becomes "ze".' },
+      { char: 'ゾ', romaji: 'zo', mnemonic: 'Add dakuten to ソ: "so" becomes "zo".' },
+    ],
+  },
+  {
+    id: 'katakana-da',
+    label: 'ダ',
+    characters: [
+      { char: 'ダ', romaji: 'da', mnemonic: 'Add dakuten to タ: "ta" becomes "da".' },
+      { char: 'ヂ', romaji: 'ji', mnemonic: 'Add dakuten to チ: this uncommon kana is usually pronounced "ji".' },
+      { char: 'ヅ', romaji: 'zu', mnemonic: 'Add dakuten to ツ: this uncommon kana is usually pronounced "zu".' },
+      { char: 'デ', romaji: 'de', mnemonic: 'Add dakuten to テ: "te" becomes "de".' },
+      { char: 'ド', romaji: 'do', mnemonic: 'Add dakuten to ト: "to" becomes "do".' },
+    ],
+  },
+  {
+    id: 'katakana-ba',
+    label: 'バ',
+    characters: [
+      { char: 'バ', romaji: 'ba', mnemonic: 'Add dakuten to ハ: "ha" becomes "ba".' },
+      { char: 'ビ', romaji: 'bi', mnemonic: 'Add dakuten to ヒ: "hi" becomes "bi".' },
+      { char: 'ブ', romaji: 'bu', mnemonic: 'Add dakuten to フ: "fu" becomes "bu".' },
+      { char: 'ベ', romaji: 'be', mnemonic: 'Add dakuten to ヘ: "he" becomes "be".' },
+      { char: 'ボ', romaji: 'bo', mnemonic: 'Add dakuten to ホ: "ho" becomes "bo".' },
+    ],
+  },
+  {
+    id: 'katakana-pa',
+    label: 'パ',
+    characters: [
+      { char: 'パ', romaji: 'pa', mnemonic: 'Add the small handakuten circle to ハ: "ha" pops into "pa".' },
+      { char: 'ピ', romaji: 'pi', mnemonic: 'Add the small circle to ヒ: "hi" pops into "pi".' },
+      { char: 'プ', romaji: 'pu', mnemonic: 'Add the small circle to フ: "fu" pops into "pu".' },
+      { char: 'ペ', romaji: 'pe', mnemonic: 'Add the small circle to ヘ: "he" pops into "pe".' },
+      { char: 'ポ', romaji: 'po', mnemonic: 'Add the small circle to ホ: "ho" pops into "po".' },
+    ],
+  },
 ]
 
 const kanjiRows: BeginnerRow[] = [
@@ -331,13 +441,13 @@ export const beginnerDecks: BeginnerDeck[] = [
   {
     script: 'hiragana',
     title: 'Hiragana',
-    description: 'The 46 rounded characters every Japanese sentence is built from.',
+    description: 'The rounded kana and voiced sounds every Japanese sentence is built from.',
     rows: hiraganaRows,
   },
   {
     script: 'katakana',
     title: 'Katakana',
-    description: 'The angular script used for foreign words, names, and sound effects.',
+    description: 'The angular kana and voiced sounds used for foreign words, names, and effects.',
     rows: katakanaRows,
   },
   {

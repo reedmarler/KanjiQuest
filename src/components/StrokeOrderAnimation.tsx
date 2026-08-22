@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { HIRAGANA_STROKE_VIEWBOX, hiraganaStrokes } from '../data/hiraganaStrokes'
+import { katakanaStrokes } from '../data/katakanaStrokes'
+
+const kanaStrokes: Record<string, string[]> = {
+  ...hiraganaStrokes,
+  ...katakanaStrokes,
+}
 
 /** Forces every path's stroke-dasharray/offset math onto the same scale
  *  (via the SVG `pathLength` attribute) regardless of the stroke's actual
@@ -7,7 +13,7 @@ import { HIRAGANA_STROKE_VIEWBOX, hiraganaStrokes } from '../data/hiraganaStroke
 const NORMALIZED_PATH_LENGTH = 1000
 
 interface StrokeOrderAnimationProps {
-  /** One or more hiragana characters. Unknown characters (no stroke data) are skipped. */
+  /** One or more kana characters. Unknown characters (no stroke data) are skipped. */
   word: string
   /** 'hero' takes over the spot the plain character used to sit in, so
    *  showing the word once (drawn) replaces showing it twice (drawn + as
@@ -23,7 +29,7 @@ interface StrokeOrderAnimationProps {
 
 /** Beat before the first stroke starts, so the learner has a moment to look
  *  at the blank box before anything moves. */
-const START_DELAY_MS = 50
+const START_DELAY_MS = 0
 /** How long each stroke takes to draw. Slow on purpose — the point is to watch it.
  *  Beginner zone runs at half speed (2x duration) to make strokes easier to follow. */
 const STROKE_DURATION_MS = 4100
@@ -37,12 +43,12 @@ const CHAR_GAP_MS = 1000
 /** Total visible playback time, used when several standalone animations must
  *  run one after another instead of beginning together. */
 export function getStrokeOrderAnimationDuration(word: string, durationScale = 1) {
-  const chars = [...word].filter((ch) => hiraganaStrokes[ch])
+  const chars = [...word].filter((ch) => kanaStrokes[ch])
   const strokeDuration = STROKE_DURATION_MS * durationScale
   const strokeInterval = (STROKE_DURATION_MS - STROKE_OVERLAP_MS) * durationScale
 
   return chars.reduce((total, ch, index) => {
-    const strokeCount = hiraganaStrokes[ch]?.length ?? 0
+    const strokeCount = kanaStrokes[ch]?.length ?? 0
     const charDuration = strokeCount === 0 ? 0 : (strokeCount - 1) * strokeInterval + strokeDuration
     const gap = index < chars.length - 1 ? CHAR_GAP_MS * durationScale : 0
     return total + charDuration + gap
@@ -50,7 +56,7 @@ export function getStrokeOrderAnimationDuration(word: string, durationScale = 1)
 }
 
 /**
- * Draws each character stroke-by-stroke, in the real stroke order and
+ * Draws each hiragana or katakana character stroke-by-stroke, in the real stroke order and
  * direction, using KanjiVG path data (see `../data/hiraganaStrokes.ts`) — an
  * SVG line-draw animation via `stroke-dashoffset`.
  *
@@ -69,7 +75,7 @@ export function StrokeOrderAnimation({
   startDelayMs = 0,
   interactive = true,
 }: StrokeOrderAnimationProps) {
-  const chars = useMemo(() => [...word].filter((ch) => hiraganaStrokes[ch]), [word])
+  const chars = useMemo(() => [...word].filter((ch) => kanaStrokes[ch]), [word])
   const pathRefs = useRef(new Map<string, SVGPathElement>())
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [replayToken, setReplayToken] = useState(0)
@@ -99,7 +105,7 @@ export function StrokeOrderAnimation({
 
     let cursor = START_DELAY_MS + startDelayMs
     chars.forEach((ch, charIndex) => {
-      const strokes = hiraganaStrokes[ch] ?? []
+      const strokes = kanaStrokes[ch] ?? []
       strokes.forEach((_, strokeIndex) => {
         const delay = cursor + strokeIndex * strokeInterval
         timers.push(setTimeout(() => {
@@ -120,6 +126,7 @@ export function StrokeOrderAnimation({
     <div
       ref={containerRef}
       className={`stroke-order-animation${size === 'hero' ? ' is-hero' : ''}`}
+      data-char-count={Math.min(chars.length, 4)}
       role={interactive ? 'button' : undefined}
       tabIndex={interactive ? 0 : undefined}
       aria-label={interactive ? 'Replay how to write this' : undefined}
@@ -141,7 +148,7 @@ export function StrokeOrderAnimation({
       )}
       <div className="stroke-order-chars">
         {chars.map((ch, charIndex) => {
-          const strokes = hiraganaStrokes[ch] ?? []
+          const strokes = kanaStrokes[ch] ?? []
           return (
             <svg
               key={`${ch}-${charIndex}`}
