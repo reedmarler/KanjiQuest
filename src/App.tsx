@@ -43,6 +43,7 @@ const VoiceTest = lazy(() => import('./components/VoiceTest').then((module) => (
 const FocusedVocabPractice = lazy(() => import('./components/FocusedVocabPractice').then((module) => ({ default: module.FocusedVocabPractice })))
 const CounterPractice = lazy(() => import('./components/CounterPractice').then((module) => ({ default: module.CounterPractice })))
 const QuestHub = lazy(() => import('./components/QuestHub').then((module) => ({ default: module.QuestHub })))
+const MapView = lazy(() => import('./components/MapView').then((module) => ({ default: module.MapView })))
 const QuestScene = lazy(() => import('./components/QuestScene').then((module) => ({ default: module.QuestScene })))
 const QuestCheckpoint = lazy(() => import('./components/QuestCheckpoint').then((module) => ({ default: module.QuestCheckpoint })))
 const FavoriteWordsPage = lazy(() => import('./components/FavoriteWordsPage').then((module) => ({ default: module.FavoriteWordsPage })))
@@ -65,6 +66,7 @@ type View =
   | 'sentence-testing'
   | 'voice-test'
   | 'quests'
+  | 'ink-road'
   | 'quest-scene'
   | 'quest-checkpoint'
   | 'achievements'
@@ -294,12 +296,23 @@ function App() {
     )
   }
 
+  if (view === 'ink-road') {
+    return (
+      <div className="app ink-road-page">
+        <Suspense fallback={<RouteLoading label="The Ink Road" />}>
+          <MapView onBack={() => setView('quests')} />
+        </Suspense>
+      </div>
+    )
+  }
+
   if (view === 'quests') {
     return (
       <div className="app">
         <Suspense fallback={<RouteLoading label="Quests" />}>
           <QuestHub
             onBack={() => setView('dashboard')}
+            onOpenInkRoad={() => setView('ink-road')}
             progress={questProgress}
             onOpenVocab={(topicId, questId) => {
               setQuestVocabTopicId(topicId)

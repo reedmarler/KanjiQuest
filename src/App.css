@@ -16660,3 +16660,293 @@ button.counter-example {
     animation: none;
   }
 }
+
+/* ==========================================================================
+   The Ink Road — world map preview
+   The scroll is drawn in light on the app's dark ground rather than ink on
+   paper: same reading (road, fog, seal), but it belongs to this app's palette
+   instead of importing a second one.
+   ========================================================================== */
+
+/* The map owns the viewport: the shared page padding and desktop zoom would
+   both crop the scroll and leave the stop labels running off the edge. */
+.app.ink-road-page {
+  max-width: none;
+  padding: 0;
+  /* A fixed height, not a minimum: the map scrolls inside itself, and a page
+     scrollbar on top of that steals width from the header and clips it. */
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  zoom: 1;
+}
+
+.ink-road {
+  --ink-paper: var(--surface);
+  --ink-fog-near: var(--surface-2);
+  --ink-fog-far: var(--bg);
+  --ink-line: var(--text);
+  --ink-faint: var(--border);
+  --ink-soft: var(--text-muted);
+  --ink-seal: var(--groudon);
+  --ink-lit: var(--amber-light);
+
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  background: var(--ink-paper);
+}
+
+.ink-road-hud {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  /* Grid children default to min-width: auto, so without this the header sizes
+     to its content and pushes the counts past the right edge. */
+  min-width: 0;
+}
+
+/* The shared back button pins itself to the page corner; in the map's own
+   header it has to sit in the flow, or it lands on top of the region name.
+   Matches the specificity of `.app .app-back-slot > .app-back-button`. */
+.app.ink-road-page .app-back-slot > .app-back-button {
+  position: relative;
+  top: auto;
+  left: auto;
+}
+
+.ink-road-hud .app-back-slot { flex: none; }
+
+.ink-road-place {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.ink-road-place b {
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.ink-road-place span {
+  /* Without min-width the region name refuses to shrink and pushes the counts
+     off the right edge. It truncates; the counts never do. */
+  min-width: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ink-road-stats {
+  flex: none;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ink-road-stats b { color: var(--text); }
+
+.ink-road-scroll {
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+.ink-road-map {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* --- the road ------------------------------------------------------------ */
+
+.ink-road-bleed {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 10;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+
+.ink-road-faint {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1 9;
+  opacity: 0.7;
+}
+
+.ink-road-line {
+  fill: none;
+  stroke: var(--ink-line);
+  stroke-width: 4;
+  stroke-linecap: round;
+  /* The drawn road has to read as drawn at a glance, so it carries a little
+     light of its own against the dotted road ahead. */
+  filter: drop-shadow(0 0 5px rgba(255, 255, 254, 0.35));
+  transition: stroke-dashoffset 1100ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- scenery -------------------------------------------------------------- */
+
+.ink-prop {
+  stroke: var(--ink-soft);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  fill: none;
+  transition: opacity 600ms ease;
+}
+
+.ink-prop-fill { fill: var(--ink-paper); }
+.ink-prop-roof { fill: var(--ink-soft); fill-opacity: 0.22; }
+.ink-prop-paddy { fill: var(--ink-soft); fill-opacity: 0.07; }
+
+.ink-prop.is-pine,
+.ink-prop.is-grass,
+.ink-prop.is-paddy { stroke-width: 1.1; }
+
+.ink-prop-glow {
+  stroke: none;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+.ink-prop.is-lit { stroke: var(--ink-lit); }
+.ink-prop.is-lit .ink-prop-roof { fill: var(--ink-lit); fill-opacity: 0.18; }
+.ink-prop.is-lit .ink-prop-glow { opacity: 1; }
+
+/* --- nodes ---------------------------------------------------------------- */
+
+.ink-node { cursor: pointer; }
+
+.ink-node-halo { fill: var(--ink-paper); fill-opacity: 0.92; }
+
+.ink-node-mark {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 2 3;
+}
+
+.ink-node-fill { fill: var(--ink-line); }
+
+.ink-node-seal { fill: var(--ink-seal); }
+
+.ink-node.is-inked .ink-node-mark,
+.ink-node.is-thin .ink-node-mark { fill: var(--ink-line); }
+
+.ink-node-name {
+  fill: var(--text);
+  font-size: 12px;
+  paint-order: stroke;
+  stroke: var(--ink-paper);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.ink-node.is-open .ink-node-mark,
+.ink-node.is-inked .ink-node-mark,
+.ink-node.is-thin .ink-node-mark {
+  stroke: var(--ink-line);
+  stroke-dasharray: none;
+}
+
+.ink-node.is-open .ink-node-mark { stroke: var(--ink-seal); }
+.ink-node.is-open .ink-node-fill { fill: var(--ink-seal); }
+.ink-node.is-open .ink-node-name { fill: var(--ink-seal); }
+
+/* Cleared but lapsing: still solid, ringed so it reads as needing a visit. */
+.ink-node.is-thin .ink-node-halo {
+  stroke: var(--ink-soft);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 3;
+}
+
+.ink-node:focus-visible { outline: none; }
+.ink-node:focus-visible .ink-node-halo {
+  stroke: var(--accent-2);
+  stroke-width: 2;
+  stroke-dasharray: none;
+}
+
+.ink-road-token line { stroke: var(--ink-seal); stroke-width: 2; stroke-linecap: round; }
+.ink-road-token circle:last-child { fill: var(--ink-seal); }
+
+.ink-road-fog { transition: transform 1000ms cubic-bezier(0.33, 0, 0.2, 1); }
+
+/* --- chrome --------------------------------------------------------------- */
+
+.ink-road-cta {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+}
+
+.ink-road-cta .btn { width: 100%; }
+
+.ink-road-route {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ink-road-demo {
+  flex: none;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font: inherit;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+.ink-road-demo:hover { color: var(--text); border-color: var(--text-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-road-line,
+  .ink-road-fog,
+  .ink-prop,
+  .ink-prop-glow {
+    transition-duration: 1ms;
+  }
+}
+
+.quest-topbar-preview {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.quest-topbar-preview small { color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.quest-topbar-preview:hover { border-color: var(--text-muted); }

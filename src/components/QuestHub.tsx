@@ -6,6 +6,7 @@ import { AppBackButton } from './AppBackButton'
 
 interface QuestHubProps {
   onBack: () => void
+  onOpenInkRoad: () => void
   onOpenVocab: (topicId: string, questId: string) => void
   onOpenKanji: (questId: string) => void
   onOpenGrammar: (questId: string) => void
@@ -22,7 +23,7 @@ const STEP_DETAILS: ReadonlyArray<{ id: QuestStep; number: string; title: string
   { id: 'checkpoint', number: '05', title: 'Guardian battle', description: 'Prove mastery and break the seal.' },
 ]
 
-export function QuestHub({ onBack, onOpenVocab, onOpenKanji, onOpenGrammar, onOpenScene, onOpenCheckpoint, progress }: QuestHubProps) {
+export function QuestHub({ onBack, onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGrammar, onOpenScene, onOpenCheckpoint, progress }: QuestHubProps) {
   const questComplete = useMemo(() => (questId: string) => isQuestComplete(progress, questId), [progress])
   const unlocked = useMemo(() => QUESTS.filter((quest) => isQuestUnlocked(quest, questComplete)), [questComplete])
   const furthest = unlocked.find((quest) => !questComplete(quest.id)) ?? unlocked[unlocked.length - 1] ?? QUESTS[0]!
@@ -49,6 +50,11 @@ export function QuestHub({ onBack, onOpenVocab, onOpenKanji, onOpenGrammar, onOp
       <header className="quest-topbar">
         <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
         <span>{clearedCount} / {QUESTS.length} quests complete</span>
+        {/* The map is a preview sitting beside this list, not a replacement:
+            the point is to compare walking a road against reading a list. */}
+        <button type="button" className="quest-topbar-preview" onClick={onOpenInkRoad}>
+          Ink Road <small>preview</small>
+        </button>
       </header>
 
       {/* Why any of this matters. The relics were already the goal mechanically
