@@ -13,6 +13,7 @@
     "audit:sentences": "tsx scripts/audit-sentence-regressions.ts",
     "audit:reachability": "tsx scripts/audit-word-reachability.ts",
     "audit:map-state": "tsx scripts/audit-map-state.ts",
+    "generate:kanji-cards": "tsx scripts/generate-kanji-character-cards.ts",
     "validate:pictures": "tsx scripts/validate-picture-vocabulary.ts",
     "vet:sentences": "tsx scripts/vet-sentences-openai.ts",
     "generate:audio": "tsx scripts/generate-audio.ts",

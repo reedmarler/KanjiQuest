@@ -1,6 +1,13 @@
 import type { StudyCard } from '../lib/types'
+import { kanjiCharacterCards } from './kanjiCharacterCards.generated'
 
-export const kanjiCards: StudyCard[] = [
+/**
+ * The curated deck: single characters chosen for teaching, plus the compounds
+ * that carry the upper levels. Kept separate from the generated character cards
+ * so the generator can tell what it still needs to cover — merging the two into
+ * one array would make it think its own output was already hand-authored.
+ */
+export const handAuthoredKanjiCards: StudyCard[] = [
   // N5
   { id: 'kanji-n5-ichi', type: 'kanji', front: '一', reading: 'ichi', back: 'one', jlpt: 'N5' },
   { id: 'kanji-n5-hito', type: 'kanji', front: '人', reading: 'hito / jin', back: 'person', jlpt: 'N5' },
@@ -137,3 +144,9 @@ export const kanjiCards: StudyCard[] = [
   { id: 'kanji-n1-kyokutan', type: 'kanji', front: '極端', reading: 'kyokutan', back: 'extreme', jlpt: 'N1' },
   { id: 'kanji-n1-enshou', type: 'kanji', front: '演繹', reading: 'enshaku', back: 'deduction / reasoning', jlpt: 'N1' },
 ]
+
+/**
+ * Every Kanji Path character now has a card, and so an id the scheduler can
+ * track. Everything downstream reads `kanjiCards`, so nothing else changes.
+ */
+export const kanjiCards: StudyCard[] = [...handAuthoredKanjiCards, ...kanjiCharacterCards]
