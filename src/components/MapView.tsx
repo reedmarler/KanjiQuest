@@ -233,20 +233,38 @@ export function MapView({ onBack }: MapViewProps) {
     return near.length ? `M${near.concat(far).join('L')}Z` : ''
   }, [eye, view])
 
-  // The drawn part of the road stops where the traveller has actually got to.
+  /*
+   * The drawn part of the road is a brush stroke laid along the path, not the
+   * path itself: narrower than the road, with a width that breathes along its
+   * length. A full-width slab was the brightest and least interesting thing in
+   * the frame, and it crowded out the village and the lantern.
+   */
   const inkRibbon = useMemo(() => {
     const near: string[] = []
     const far: string[] = []
     const end = Math.min(travelled, eye + DRAW_DISTANCE)
-    for (let u = Math.max(eye + NEAR_CULL, 0); u < end; u += 6) {
+    for (let u = Math.max(eye + NEAR_CULL, 0); u < end; u += 5) {
       const depth = u - eye
       const centre = laneOffset(u)
-      const left = view(depth, centre - ROAD_HALF_WIDTH + 1.5)
-      const right = view(depth, centre + ROAD_HALF_WIDTH - 1.5)
+      const half = ROAD_HALF_WIDTH * (0.46 + 0.07 * Math.sin(u / 23) + 0.04 * Math.sin(u / 9))
+      const left = view(depth, centre - half)
+      const right = view(depth, centre + half)
       near.push(`${left.x.toFixed(1)} ${left.y.toFixed(1)}`)
       far.unshift(`${right.x.toFixed(1)} ${right.y.toFixed(1)}`)
     }
     return near.length ? `M${near.concat(far).join('L')}Z` : ''
+  }, [eye, travelled, view])
+
+  /** Worn patches along the walked stretch, so it reads as trodden. */
+  const treads = useMemo(() => {
+    const marks: { x: number; y: number; rx: number; ry: number }[] = []
+    const end = Math.min(travelled, eye + 520)
+    for (let u = Math.max(eye + NEAR_CULL, 0); u < end; u += 34) {
+      const depth = u - eye
+      const point = view(depth, laneOffset(u) + Math.sin(u / 17) * ROAD_HALF_WIDTH * 0.3)
+      marks.push({ x: point.x, y: point.y, rx: 2.4 * point.scale, ry: 0.9 * point.scale })
+    }
+    return marks
   }, [eye, travelled, view])
 
   // Painter's algorithm: everything on the ground, furthest drawn first.
@@ -442,6 +460,11 @@ export function MapView({ onBack }: MapViewProps) {
 
             {ribbon && <path className="ink-road-surface" d={ribbon} />}
             {inkRibbon && <path className="ink-road-drawn" d={inkRibbon} />}
+            <g className="ink-road-tread">
+              {treads.map((mark, index) => (
+                <ellipse key={index} cx={mark.x} cy={mark.y} rx={mark.rx} ry={mark.ry} />
+              ))}
+            </g>
 
             {drawables.map((item) => (
               <g key={item.key}>{item.node}</g>

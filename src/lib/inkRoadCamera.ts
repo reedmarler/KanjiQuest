@@ -27,7 +27,7 @@ const CAMERA_HEIGHT = 88
 /** Keeps the point directly under the camera from projecting to infinity. */
 const NEAR = 40
 
-export const ROAD_HALF_WIDTH = 10
+export const ROAD_HALF_WIDTH = 7
 
 export interface Projected {
   x: number
