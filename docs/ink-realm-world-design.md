@@ -465,8 +465,13 @@ map tell the truth.
 
 ### Open decisions
 
-1. **Thread-set authoring.** 60 waypoints × ~15 items is ~900 curated items.
-   Auto-assign from the existing JLPT-tagged decks first, hand-tune later.
+1. **Thread-set authoring — bigger than it looked.** Measured by
+   `npm run audit:map-state`: the twelve topics in use supply **204 threads
+   total** (15 vocabulary cards each, plus a handful of kanji), and **156 of the
+   characters in `kanjiFocusSets` have no card in `kanji.ts`**, so they cannot
+   carry ink. At ~17 threads a topic that is *one* waypoint each, not six.
+   Regions 2-6 need roughly 5x the current kanji card coverage before the road
+   has enough stops to be a road.
 2. **Existing players.** Derive their region from current SRS maturity and drop
    them in with the road behind them already inked. Never restart anyone.
 3. **Shrine difficulty.** Start generous. A shrine that gates a fog-lift is the
