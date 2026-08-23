@@ -16692,8 +16692,7 @@ button.counter-example {
   --ink-lit: var(--amber-light);
 
   display: grid;
-  /* header · horizon · the scroll (the only flexible row) · the button */
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   height: 100%;
   background: var(--ink-paper);
 }
@@ -16758,6 +16757,7 @@ button.counter-example {
 
 .ink-road-scroll {
   min-width: 0;
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
@@ -16810,9 +16810,9 @@ button.counter-example {
   transition: opacity 600ms ease;
 }
 
-.ink-prop-fill { fill: var(--ink-paper); }
+.ink-prop-fill { fill: var(--ink-fog-near); }
 .ink-prop-roof { fill: var(--ink-soft); fill-opacity: 0.22; }
-.ink-prop-paddy { fill: var(--ink-soft); fill-opacity: 0.07; }
+.ink-prop-paddy { fill: var(--ink-soft); fill-opacity: 0.06; stroke: none; }
 
 .ink-prop.is-pine,
 .ink-prop.is-grass,
@@ -16820,19 +16820,18 @@ button.counter-example {
 
 .ink-prop-glow {
   stroke: none;
-  opacity: 0;
-  transition: opacity 900ms ease;
+  fill: url(#ink-lamp);
 }
 
 .ink-prop.is-lit { stroke: var(--ink-lit); }
 .ink-prop.is-lit .ink-prop-roof { fill: var(--ink-lit); fill-opacity: 0.18; }
-.ink-prop.is-lit .ink-prop-glow { opacity: 1; }
 
 /* --- nodes ---------------------------------------------------------------- */
 
 .ink-node { cursor: pointer; }
 
-.ink-node-halo { fill: var(--ink-paper); fill-opacity: 0.92; }
+.ink-node-shadow { fill: #000; fill-opacity: 0.28; stroke: none; }
+.ink-node-post { stroke: var(--ink-soft); stroke-width: 1.4; }
 
 .ink-node-mark {
   fill: none;
@@ -16842,12 +16841,12 @@ button.counter-example {
   stroke-dasharray: 2 3;
 }
 
-.ink-node-fill { fill: var(--ink-line); }
-
 .ink-node-seal { fill: var(--ink-seal); }
 
 .ink-node.is-inked .ink-node-mark,
 .ink-node.is-thin .ink-node-mark { fill: var(--ink-line); }
+.ink-node.is-open .ink-node-mark { fill: var(--ink-seal); }
+.ink-node.is-fogged .ink-node-mark { fill: none; }
 
 .ink-node-name {
   fill: var(--text);
@@ -16866,7 +16865,6 @@ button.counter-example {
 }
 
 .ink-node.is-open .ink-node-mark { stroke: var(--ink-seal); }
-.ink-node.is-open .ink-node-fill { fill: var(--ink-seal); }
 .ink-node.is-open .ink-node-name { fill: var(--ink-seal); }
 
 /* Cleared but lapsing: still solid, ringed so it reads as needing a visit. */
@@ -16958,46 +16956,35 @@ button.counter-example {
    so progress shows up on the destination and not only on the traveller.
    -------------------------------------------------------------------------- */
 
-.ink-road-horizon {
-  position: relative;
+.ink-road-rail { position: relative; }
+
+/* The view stays put while the rail scrolls under it — scrolling moves the
+   camera up the road rather than panning a picture of it. */
+.ink-road-camera {
+  position: sticky;
+  top: 0;
   display: block;
   width: 100%;
-  min-width: 0;
-  padding: 0;
-  border: none;
-  border-bottom: 1px solid var(--border);
-  background: linear-gradient(to bottom, var(--bg), var(--ink-fog-near));
-  cursor: pointer;
-  overflow: hidden;
+  /* Height is set from the scroller's measured window — see MapView. */
 }
 
-.ink-road-horizon svg {
-  display: block;
-  width: 100%;
-  height: auto;
+.ink-ground { fill: color-mix(in srgb, var(--ink-fog-near) 82%, #000); }
+
+.horizon-ridge { fill: var(--surface-2); stroke: none; opacity: 0.85; }
+
+/* The road surface, and the part of it already drawn. */
+.ink-road-surface {
+  fill: var(--ink-faint);
+  fill-opacity: 0.55;
+  stroke: var(--ink-soft);
+  stroke-width: 0.6;
+  stroke-opacity: 0.5;
 }
 
-.ink-road-horizon:hover { background: linear-gradient(to bottom, var(--bg), var(--surface-2)); }
-.ink-road-horizon:focus-visible { outline: 2px solid var(--accent-2); outline-offset: -2px; }
-
-.horizon-ridge {
-  fill: var(--surface-2);
-  stroke: none;
-  opacity: 0.85;
+.ink-road-drawn {
+  fill: var(--ink-line);
+  fill-opacity: 0.62;
 }
-
-.ink-road-seals {
-  position: absolute;
-  right: 12px;
-  bottom: 8px;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.ink-road-seals b { color: var(--text); }
 
 .hollow-lantern {
   /* Cold at zero seals, lamp-warm at nine. One value drives the whole object. */
