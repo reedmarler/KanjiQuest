@@ -471,6 +471,7 @@ map tell the truth.
    them in with the road behind them already inked. Never restart anyone.
 3. **Shrine difficulty.** Start generous. A shrine that gates a fog-lift is the
    worst place in the app to be unfair.
-4. **N2/N1 region length.** Nine waypoints per region will not carry N1's volume;
-   the northern regions likely need a different node density, or repeatable
-   nodes.
+4. **Northern volume — deferred.** The three northern regions are sketched, not
+   scoped. Build regions 1–6 (kana through N3) against this spec; N2/N1 content
+   lands later and may want a different node density or repeatable nodes.
+   Nothing in the traversal rules changes either way.
