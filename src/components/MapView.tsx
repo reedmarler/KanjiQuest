@@ -4,9 +4,16 @@ import { buildRoad, pointAtLength, roadX, seededRandom, stopLengths, type RoadPo
 import { demoProgress } from '../lib/inkRoadDemo'
 import { deriveMapState, type NodeState } from '../lib/mapState'
 import { AppBackButton } from './AppBackButton'
+import { HollowLantern } from './HollowLantern'
 
 const MAP_HEIGHT = 1560
 const START_WALKED = 4
+
+/** Room above the northernmost stop for the destination to hang in. */
+const SKY = 210
+
+/** Regions on the finished road; each one's shrine returns a seal. */
+const TOTAL_SEALS = 9
 
 interface Prop {
   kind: 'lantern' | 'house' | 'pine' | 'grass' | 'paddy'
@@ -130,7 +137,7 @@ export function MapView({ onBack }: MapViewProps) {
   const [named, setNamed] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  const road = useMemo(() => buildRoad(MAP_HEIGHT), [])
+  const road = useMemo(() => buildRoad(MAP_HEIGHT, SKY), [])
   const lengths = useMemo(() => stopLengths(road, INK_ROAD_WAYPOINTS.length), [road])
   const points = useMemo(() => lengths.map((length) => pointAtLength(road, length)), [road, lengths])
   const scenery = useMemo(() => buildScenery(points, MAP_HEIGHT), [points])
@@ -154,6 +161,18 @@ export function MapView({ onBack }: MapViewProps) {
   const token = pointAtLength(road, travelled)
   const inked = travelled
   const finished = walked >= INK_ROAD_WAYPOINTS.length
+
+  // One seal per region cleared. Nothing else on the map counts toward it, so
+  // the number only moves when a shrine falls.
+  const seals = state.regions.filter((entry) => entry.cleared).length
+
+  /*
+   * The count is exact; the glow is not. Linear warmth makes the first seal a
+   * 11% change nobody can see, which quietly teaches that clearing a region
+   * does nothing to the destination. A square-root curve puts the visible
+   * reward early and still lands at full flame on the ninth.
+   */
+  const warmth = Math.sqrt(seals / TOTAL_SEALS)
 
   // Open on the traveller rather than the top of the scroll: the map's job is
   // to answer "where do I go today" before anything else.
@@ -179,6 +198,21 @@ export function MapView({ onBack }: MapViewProps) {
           <b>{Math.round(region.ink * 100)}%</b> ink · <b>{state.due}</b> due
         </div>
       </header>
+
+      {/* Pinned so the destination never scrolls away — the road always has a
+          visible end, even standing at the first stop. */}
+      <button
+        type="button"
+        className="ink-road-horizon"
+        onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label={`The Hollow Lantern. ${seals} of ${TOTAL_SEALS} seals recovered. Scroll to the far end of the road.`}
+      >
+        <svg viewBox="0 0 360 74" aria-hidden="true">
+          <path className="horizon-ridge" d="M-10 74 L40 44 L86 62 L140 30 L196 58 L250 36 L300 60 L370 40 L370 74 Z" />
+          <HollowLantern x={180} y={34} height={40} warmth={warmth} idPrefix="horizon" />
+        </svg>
+        <span className="ink-road-seals"><b>{seals}</b> / {TOTAL_SEALS} seals</span>
+      </button>
 
       <div className="ink-road-scroll" ref={scrollRef}>
         <svg
@@ -295,6 +329,10 @@ export function MapView({ onBack }: MapViewProps) {
           <g className="ink-road-fog" style={{ transform: `translateY(${token.y - 140 - MAP_HEIGHT}px)` }}>
             <rect x={-20} y={0} width={road.width + 40} height={MAP_HEIGHT} fill="url(#ink-fog)" />
           </g>
+
+          {/* Drawn after the fog on purpose: the road ahead is hidden, the
+              place you are walking to never is. */}
+          <HollowLantern x={roadX(SKY) + 8} y={SKY - 118} height={116} warmth={warmth} idPrefix="sky" />
         </svg>
       </div>
 

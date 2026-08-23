@@ -16692,7 +16692,8 @@ button.counter-example {
   --ink-lit: var(--amber-light);
 
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  /* header · horizon · the scroll (the only flexible row) · the button */
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   height: 100%;
   background: var(--ink-paper);
 }
@@ -16950,3 +16951,90 @@ button.counter-example {
 
 .quest-topbar-preview small { color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; }
 .quest-topbar-preview:hover { border-color: var(--text-muted); }
+
+/* --- the destination ------------------------------------------------------
+   The lantern is the only thing on the map that is always visible: fog hides
+   the road ahead, never where the road is going. It warms as seals come back,
+   so progress shows up on the destination and not only on the traveller.
+   -------------------------------------------------------------------------- */
+
+.ink-road-horizon {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(to bottom, var(--bg), var(--ink-fog-near));
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.ink-road-horizon svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ink-road-horizon:hover { background: linear-gradient(to bottom, var(--bg), var(--surface-2)); }
+.ink-road-horizon:focus-visible { outline: 2px solid var(--accent-2); outline-offset: -2px; }
+
+.horizon-ridge {
+  fill: var(--surface-2);
+  stroke: none;
+  opacity: 0.85;
+}
+
+.ink-road-seals {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ink-road-seals b { color: var(--text); }
+
+.hollow-lantern {
+  /* Cold at zero seals, lamp-warm at nine. One value drives the whole object. */
+  --lantern-ink: color-mix(in srgb, var(--ink-lit) calc(var(--lantern-warmth) * 100%), var(--ink-soft));
+  transition: opacity 900ms ease;
+}
+
+.lantern-body {
+  fill: var(--ink-paper);
+  fill-opacity: 0.72;
+  stroke: var(--lantern-ink);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+
+.lantern-cap {
+  fill: var(--lantern-ink);
+  fill-opacity: 0.55;
+}
+
+.lantern-rib,
+.lantern-cord {
+  stroke: var(--lantern-ink);
+  stroke-width: 1.1;
+  stroke-opacity: 0.75;
+  fill: none;
+}
+
+.lantern-flame {
+  fill: var(--ink-lit);
+  transition: opacity 900ms ease;
+}
+
+.lantern-halo { transition: opacity 900ms ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hollow-lantern,
+  .lantern-flame,
+  .lantern-halo { transition-duration: 1ms; }
+}

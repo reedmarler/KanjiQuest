@@ -33,12 +33,17 @@ export function roadX(y: number): number {
   return WIDTH / 2 + 58 * Math.sin(y / 235) + 16 * Math.sin(y / 88)
 }
 
-export function buildRoad(height: number): Road {
+/**
+ * `skyMargin` reserves room at the top of the scroll for the destination, which
+ * has to sit above the road rather than on it — you should be able to see where
+ * you are going from the first stop.
+ */
+export function buildRoad(height: number, skyMargin: number = MARGIN): Road {
   const points: RoadPoint[] = []
   let d = ''
   let total = 0
 
-  for (let y = height - MARGIN; y >= MARGIN; y -= STEP) {
+  for (let y = height - MARGIN; y >= skyMargin; y -= STEP) {
     const x = roadX(y)
     const previous = points[points.length - 1]
     if (previous) total += Math.hypot(x - previous.x, y - previous.y)
