@@ -17,6 +17,7 @@ import {
   stopPositions,
 } from '../lib/inkRoadCamera'
 import { demoProgress } from '../lib/inkRoadDemo'
+import { studyProgress, subscribeToProgress } from '../lib/studyRecord'
 import { deriveMapState, type NodeState } from '../lib/mapState'
 import { AppBackButton } from './AppBackButton'
 import { HollowLantern } from './HollowLantern'
@@ -139,10 +140,19 @@ const NODE_LABEL: Record<NodeState, string> = {
 
 interface MapViewProps {
   onBack: () => void
+  /** Opens the study screen that feeds this region's threads. */
+  onStudy: () => void
 }
 
-export function MapView({ onBack }: MapViewProps) {
+export function MapView({ onBack, onStudy }: MapViewProps) {
   const [walked, setWalked] = useState(START_WALKED)
+  /*
+   * The map reads the scheduler now. Demo mode stays because a learner who has
+   * never studied kana would otherwise open the road and find every stop
+   * fogged, which shows nothing about whether walking one is worth doing.
+   */
+  const [demo, setDemo] = useState(false)
+  const [progress, setProgress] = useState(studyProgress)
   const [named, setNamed] = useState<string | null>(null)
   const [camera, setCamera] = useState(0)
   /*
@@ -158,13 +168,17 @@ export function MapView({ onBack }: MapViewProps) {
   const scenery = useMemo(() => buildScenery(stops), [stops])
 
   const state = useMemo(
-    () => deriveMapState(demoProgress(INK_ROAD_WAYPOINTS, walked), INK_ROAD_WAYPOINTS, INK_ROAD_REGIONS),
-    [walked],
+    () => deriveMapState(
+      demo ? demoProgress(INK_ROAD_WAYPOINTS, walked) : progress,
+      INK_ROAD_WAYPOINTS,
+      INK_ROAD_REGIONS,
+    ),
+    [demo, progress, walked],
   )
 
   const region = state.regions[0]!
   const frontierIndex = Math.max(0, INK_ROAD_WAYPOINTS.findIndex((waypoint) => waypoint.id === state.frontierId))
-  const finished = walked >= INK_ROAD_WAYPOINTS.length
+  const finished = demo ? walked >= INK_ROAD_WAYPOINTS.length : state.frontierId === null
 
   // How far along the road the session actually got: everything behind the
   // frontier, plus the share of the stop being studied that is already inked.
@@ -187,6 +201,10 @@ export function MapView({ onBack }: MapViewProps) {
   }, [])
 
   useEffect(() => () => cancelAnimationFrame(frame.current), [])
+
+  // Every write replaces the stored object, so this hands the view a new
+  // identity to render from rather than a counter to invalidate a memo with.
+  useEffect(() => subscribeToProgress(() => setProgress(studyProgress())), [])
 
   useEffect(() => {
     const scroll = scrollRef.current
@@ -487,15 +505,29 @@ export function MapView({ onBack }: MapViewProps) {
         <button
           type="button"
           className="btn btn-primary"
-          disabled={finished}
-          onClick={() => setWalked((count) => Math.min(INK_ROAD_WAYPOINTS.length, count + 1))}
+          disabled={demo && finished}
+          onClick={() => {
+            if (demo) setWalked((count) => Math.min(INK_ROAD_WAYPOINTS.length, count + 1))
+            else onStudy()
+          }}
         >
-          {finished ? 'Road complete' : <>Continue <span aria-hidden="true">·</span> {WAYPOINT_NAMES[state.frontierId ?? ''] ?? ''}</>}
+          {demo && finished ? 'Road complete' : <>Continue <span aria-hidden="true">·</span> {WAYPOINT_NAMES[state.frontierId ?? ''] ?? ''}</>}
         </button>
         <div className="ink-road-route">
-          <span>{finished ? 'The fog is lifted' : `Route · ${state.waypoints[frontierIndex]!.kind === 'shrine' ? 'shrine trial' : '2 stops · 8 min'}`}</span>
-          <button type="button" className="ink-road-demo" onClick={() => setWalked(START_WALKED)}>
-            Demo data · reset
+          <span>
+            {demo
+              ? 'Demo history'
+              : state.due > 0
+                ? `${state.due} due · ${region.waypointsCleared}/${region.waypointCount} stops`
+                : `${region.waypointsCleared}/${region.waypointCount} stops cleared`}
+          </span>
+          <button
+            type="button"
+            className="ink-road-demo"
+            aria-pressed={demo}
+            onClick={() => { setDemo((on) => !on); setWalked(START_WALKED) }}
+          >
+            {demo ? 'Show my progress' : 'Preview with demo data'}
           </button>
         </div>
       </footer>

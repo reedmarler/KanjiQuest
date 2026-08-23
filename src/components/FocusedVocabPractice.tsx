@@ -5,6 +5,7 @@ import { FuriganaSegment } from './FuriganaText'
 import { SpeakableCue, SpeakableWord, useSpeakable } from './SpeakableWord'
 import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
 import { AppBackButton, AppDashboardButton } from './AppBackButton'
+import { recordAnswer, recordSeen } from '../lib/studyRecord'
 
 interface FocusedVocabPracticeProps {
   onBack: () => void
@@ -55,6 +56,22 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
     }
     setIndex((current) => current + 1)
     setRevealed(false)
+  }
+
+  /*
+   * Skipping past a word without looking is evidence of exposure and nothing
+   * more, so it records a first sighting rather than a pass. Grading only
+   * appears once the answer is showing — there is nothing to be honest about
+   * until the learner has seen what they were trying to recall.
+   */
+  function skipCard() {
+    if (card) recordSeen(card.id)
+    nextCard()
+  }
+
+  function gradeCard(knew: boolean) {
+    if (card) recordAnswer(card.id, knew ? 'good' : 'again')
+    nextCard()
   }
 
   function previousCard() {
@@ -189,7 +206,14 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
             </div>
             <div className="standard-kanji-action-row">
               <button type="button" className="btn btn-ghost standard-kanji-review" onClick={previousCard} disabled={index === 0}>Previous word</button>
-              <button type="button" className="btn kanji-learning-easy" onClick={nextCard}>Next word</button>
+              {revealed ? (
+                <div className="focused-vocab-grade" role="group" aria-label="Did you know this word?">
+                  <button type="button" className="btn focused-vocab-again" onClick={() => gradeCard(false)}>Again</button>
+                  <button type="button" className="btn kanji-learning-easy" onClick={() => gradeCard(true)}>Got it</button>
+                </div>
+              ) : (
+                <button type="button" className="btn kanji-learning-easy" onClick={skipCard}>Next word</button>
+              )}
             </div>
           </div>
         </main>

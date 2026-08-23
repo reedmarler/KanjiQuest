@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
+import { recordAnswer } from '../lib/studyRecord'
 import { hiraganaWordBank, katakanaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
 import { speakJapanese } from '../lib/speech'
 import { SPEECH_SPEEDS } from '../lib/speechSpeeds'
@@ -338,6 +339,13 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   function goNext() {
     if (!card) return
     setMastery((current) => ({ ...current, [card.char]: MASTERY_TARGET }))
+    /*
+     * Moving on from a character is the learner saying they have it, and the
+     * kana deck's own card ids are `hiragana-あ` — so the same click that
+     * retires it from the row can put it into the scheduler, where the rest of
+     * the app (and the map's ink) can finally see it.
+     */
+    if (script === 'hiragana' || script === 'katakana') recordAnswer(`${script}-${card.char}`, 'good')
     setCardIndex((current) => current + 1)
   }
 

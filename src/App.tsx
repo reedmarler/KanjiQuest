@@ -300,7 +300,7 @@ function App() {
     return (
       <div className="app ink-road-page">
         <Suspense fallback={<RouteLoading label="The Ink Road" />}>
-          <MapView onBack={() => setView('quests')} />
+          <MapView onBack={() => setView('quests')} onStudy={() => setView('beginner-zone')} />
         </Suspense>
       </div>
     )

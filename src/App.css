@@ -17042,3 +17042,20 @@ button.counter-example {
   .lantern-flame,
   .lantern-halo { transition-duration: 1ms; }
 }
+
+/* Grading appears only once the answer is showing, so the two buttons take the
+   place the single Next held rather than adding a row. */
+.focused-vocab-grade {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.focused-vocab-again {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.focused-vocab-again:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
