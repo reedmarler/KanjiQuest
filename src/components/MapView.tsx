@@ -43,21 +43,41 @@ interface Prop {
   stop?: number
 }
 
+/** Nothing may sit closer to another prop than this, in world units. */
+const PROP_CLEARANCE = 22
+
 function buildScenery(stops: readonly number[]): Prop[] {
   const random = seededRandom(20260823)
   const props: Prop[] = []
 
+  /*
+   * Random placement put houses on top of each other: two props a few units
+   * apart in depth overlap almost exactly on screen, which is what turned each
+   * village into a pile of outlines. Everything goes through this.
+   */
+  const place = (candidate: Prop) => {
+    const clash = props.some(
+      (existing) =>
+        Math.abs(existing.u - candidate.u) < PROP_CLEARANCE &&
+        Math.abs(existing.v - candidate.v) < PROP_CLEARANCE,
+    )
+    if (!clash) props.push(candidate)
+    return !clash
+  }
+
   stops.forEach((u, index) => {
     const side = index % 2 === 0 ? -1 : 1
-    props.push({ kind: 'lantern', u: u + 4, v: laneOffset(u) + side * 26, size: 13, stop: index })
+    place({ kind: 'lantern', u: u + 4, v: laneOffset(u) + side * 26, size: 13, stop: index })
 
+    // Houses line the roadside at a set-back, spaced along it rather than
+    // scattered around the stop, so a village reads as a street.
     const houses = 2 + Math.floor(random() * 2)
     for (let count = 0; count < houses; count += 1) {
-      const at = u + random() * 70 - 35
-      props.push({
+      const at = u - 34 + count * 34
+      place({
         kind: 'house',
         u: at,
-        v: laneOffset(at) + side * (40 + random() * 34),
+        v: laneOffset(at) + side * (46 + (count % 2) * 24 + random() * 8),
         size: 17 + random() * 6,
         stop: index,
       })
@@ -68,33 +88,45 @@ function buildScenery(stops: readonly number[]): Prop[] {
   for (let u = 20; u < ROAD_LENGTH + 400; u += 26) {
     for (let count = 0; count < 2; count += 1) {
       const at = u + random() * 22 - 11
-      const v = laneOffset(at) + (random() * 190 - 95)
-      if (Math.abs(v - laneOffset(at)) < ROAD_HALF_WIDTH + 6) continue
+      const centre = laneOffset(at)
+      const offset = (ROAD_HALF_WIDTH + 8 + random() * 84) * (random() > 0.5 ? 1 : -1)
       const roll = random()
-      if (roll > 0.6) props.push({ kind: 'pine', u: at, v, size: 15 + random() * 8 })
-      else if (roll > 0.06) props.push({ kind: 'grass', u: at, v, size: 4 })
-      else props.push({ kind: 'paddy', u: at, v, size: 24 + random() * 14 })
+      if (roll > 0.6) place({ kind: 'pine', u: at, v: centre + offset, size: 15 + random() * 8 })
+      else if (roll > 0.06) place({ kind: 'grass', u: at, v: centre + offset, size: 4 })
+      // Fields stay near the road: far out to the side there is no ground
+      // detail left to read them against, and they float as bare diamonds.
+      else if (Math.abs(offset) < 68) {
+        place({ kind: 'paddy', u: at, v: centre + offset * 0.8, size: 26 + random() * 12 })
+      }
     }
   }
 
   return props
 }
 
-/** A flat patch on the ground plane, corners projected individually. */
-function paddyQuad(prop: Prop, eye: number, eyeLateral: number): string {
-  const halfLength = prop.size * 0.7
-  const halfWidth = prop.size * 0.55
-  const corners = [
-    [prop.u - halfLength, prop.v - halfWidth],
-    [prop.u + halfLength, prop.v - halfWidth],
-    [prop.u + halfLength, prop.v + halfWidth],
-    [prop.u - halfLength, prop.v + halfWidth],
-  ] as const
-  const points = corners.map(([u, v]) => {
-    const point = project(Math.max(6, u - eye), v - eyeLateral)
+/**
+ * A flat patch on the ground plane: its outer bund, then furrows running across
+ * it. The furrows are what sell it as lying flat — a bare quad at a wide angle
+ * just reads as a diamond floating over the ground.
+ */
+function paddyPaths(prop: Prop, eye: number, eyeLateral: number): { bund: string; furrows: string } {
+  const halfLength = prop.size * 0.5
+  const halfWidth = prop.size * 0.62
+  const at = (u: number, v: number) => {
+    const point = project(Math.max(8, u - eye), v - eyeLateral)
     return `${point.x.toFixed(1)} ${point.y.toFixed(1)}`
-  })
-  return `M${points.join('L')}Z`
+  }
+
+  const bund = `M${at(prop.u - halfLength, prop.v - halfWidth)}L${at(prop.u + halfLength, prop.v - halfWidth)}L${at(prop.u + halfLength, prop.v + halfWidth)}L${at(prop.u - halfLength, prop.v + halfWidth)}Z`
+
+  const furrows = [0.28, 0.5, 0.72]
+    .map((t) => {
+      const u = prop.u - halfLength + t * halfLength * 2
+      return `M${at(u, prop.v - halfWidth)}L${at(u, prop.v + halfWidth)}`
+    })
+    .join('')
+
+  return { bund, furrows }
 }
 
 const NODE_LABEL: Record<NodeState, string> = {
@@ -241,13 +273,34 @@ export function MapView({ onBack }: MapViewProps) {
               <circle className="ink-prop-glow" cx={base.x} cy={(base.y + top.y) / 2} r={prop.size * base.scale} />
             )}
             {prop.kind === 'paddy' ? (
-              <path className="ink-prop-paddy" d={paddyQuad(prop, eye, eyeLateral)} />
+              (() => {
+                const paths = paddyPaths(prop, eye, eyeLateral)
+                return (
+                  <>
+                    <path className="ink-prop-paddy" d={paths.bund} />
+                    <path className="ink-prop-furrow" d={paths.furrows} />
+                  </>
+                )
+              })()
             ) : prop.kind === 'grass' ? (
               <path d={`M${base.x} ${base.y} l${-width * 0.5} ${top.y - base.y} M${base.x} ${base.y} l0 ${(top.y - base.y) * 1.1} M${base.x} ${base.y} l${width * 0.5} ${top.y - base.y}`} />
             ) : prop.kind === 'pine' ? (
-              <path
-                d={`M${base.x} ${base.y} L${base.x - width * 0.75} ${base.y - (base.y - top.y) * 0.45} L${base.x} ${top.y} L${base.x + width * 0.75} ${base.y - (base.y - top.y) * 0.45} Z`}
-              />
+              /* Three stacked tiers over a trunk. The previous single kite
+                 shape read as a diamond floating over the ground, not a tree. */
+              <>
+                <line x1={base.x} y1={base.y} x2={base.x} y2={base.y - (base.y - top.y) * 0.3} />
+                {[0, 1, 2].map((tier) => {
+                  const spread = width * (0.9 - tier * 0.26)
+                  const foot = base.y - (base.y - top.y) * (0.26 + tier * 0.24)
+                  const peak = base.y - (base.y - top.y) * (0.58 + tier * 0.21)
+                  return (
+                    <path
+                      key={tier}
+                      d={`M${base.x - spread} ${foot} L${base.x} ${peak} L${base.x + spread} ${foot} Z`}
+                    />
+                  )
+                })}
+              </>
             ) : prop.kind === 'lantern' ? (
               <>
                 <line x1={base.x} y1={base.y} x2={base.x} y2={top.y} />

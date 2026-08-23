@@ -16812,7 +16812,22 @@ button.counter-example {
 
 .ink-prop-fill { fill: var(--ink-fog-near); }
 .ink-prop-roof { fill: var(--ink-soft); fill-opacity: 0.22; }
-.ink-prop-paddy { fill: var(--ink-soft); fill-opacity: 0.06; stroke: none; }
+.ink-prop-paddy {
+  fill: var(--ink-soft);
+  fill-opacity: 0.07;
+  stroke: var(--ink-soft);
+  stroke-width: 0.7;
+  stroke-opacity: 0.35;
+}
+
+/* Furrows read as lines lying on the ground, which is what stops a field at a
+   wide angle looking like a diamond hanging in the air. */
+.ink-prop-furrow {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 0.5;
+  stroke-opacity: 0.28;
+}
 
 .ink-prop.is-pine,
 .ink-prop.is-grass,
