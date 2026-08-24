@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { INK_ROAD_REGIONS, INK_ROAD_WAYPOINTS, TSUZURI_BAND, TSUZURI_JAPANESE, WAYPOINT_NAMES } from '../data/inkRoad'
+import { INK_ROAD_REGIONS, INK_ROAD_WAYPOINTS, TSUZURI_BAND, TSUZURI_JAPANESE, WAYPOINT_NAMES, paletteFor } from '../data/inkRoad'
 import {
   CAMERA_TRAIL,
   HORIZON,
@@ -21,6 +21,7 @@ import { studyProgress, subscribeToProgress } from '../lib/studyRecord'
 import { deriveMapState, type NodeState } from '../lib/mapState'
 import { AppBackButton } from './AppBackButton'
 import { HollowLantern } from './HollowLantern'
+import { PropShape, type Prop } from './InkRoadProps'
 
 const START_WALKED = 4
 
@@ -32,17 +33,6 @@ const SCROLL_SCALE = 1.15
 
 /** Beyond this the ground has nothing left to draw; stop projecting it. */
 const DRAW_DISTANCE = 1500
-
-type PropKind = 'lantern' | 'house' | 'pine' | 'grass' | 'paddy'
-
-interface Prop {
-  kind: PropKind
-  u: number
-  v: number
-  size: number
-  /** Lanterns and houses belong to a stop and light when it clears. */
-  stop?: number
-}
 
 /** Nothing may sit closer to another prop than this, in world units. */
 const PROP_CLEARANCE = 22
@@ -68,7 +58,8 @@ function buildScenery(stops: readonly number[]): Prop[] {
 
   stops.forEach((u, index) => {
     const side = index % 2 === 0 ? -1 : 1
-    place({ kind: 'lantern', u: u + 4, v: laneOffset(u) + side * 26, size: 13, stop: index })
+    place({ kind: 'toro', u: u + 4, v: laneOffset(u) + side * 26, size: 15, stop: index })
+    place({ kind: 'sakura', u: u - 18, v: laneOffset(u - 18) - side * 38, size: 19, stop: index })
 
     // Houses line the roadside at a set-back, spaced along it rather than
     // scattered around the stop, so a village reads as a street.
@@ -85,6 +76,10 @@ function buildScenery(stops: readonly number[]): Prop[] {
     }
   })
 
+  // A gate on the road at the region's threshold, the way the reference frames
+  // a street with one.
+  place({ kind: 'torii', u: 26, v: laneOffset(26), size: 22 })
+
   // Ground cover along the whole road, stepping clear of the road surface.
   for (let u = 20; u < ROAD_LENGTH + 400; u += 26) {
     for (let count = 0; count < 2; count += 1) {
@@ -92,7 +87,8 @@ function buildScenery(stops: readonly number[]): Prop[] {
       const centre = laneOffset(at)
       const offset = (ROAD_HALF_WIDTH + 8 + random() * 84) * (random() > 0.5 ? 1 : -1)
       const roll = random()
-      if (roll > 0.6) place({ kind: 'pine', u: at, v: centre + offset, size: 15 + random() * 8 })
+      if (roll > 0.78) place({ kind: 'sakura', u: at, v: centre + offset, size: 15 + random() * 7 })
+      else if (roll > 0.6) place({ kind: 'pine', u: at, v: centre + offset, size: 15 + random() * 8 })
       else if (roll > 0.06) place({ kind: 'grass', u: at, v: centre + offset, size: 4 })
       // Fields stay near the road: far out to the side there is no ground
       // detail left to read them against, and they float as bare diamonds.
@@ -184,6 +180,17 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
   // frontier, plus the share of the stop being studied that is already inked.
   const behind = frontierIndex > 0 ? stops[frontierIndex - 1]! : 0
   const travelled = behind + (stops[frontierIndex]! - behind) * state.waypoints[frontierIndex]!.ink
+
+  // The region's own light, applied as custom properties the shapes read.
+  const palette = paletteFor(region.id)
+  const light = {
+    ['--ink-fog-far' as string]: palette.skyFar,
+    ['--ink-fog-near' as string]: palette.skyNear,
+    ['--ink-ground' as string]: palette.ground,
+    ['--ink-line' as string]: palette.ink,
+    ['--ink-lit' as string]: palette.lit,
+    ['--sakura' as string]: palette.bloom,
+  }
 
   const seals = state.regions.filter((entry) => entry.cleared).length
   // Exact count, eased glow: a linear first-of-nine is a change nobody sees.
@@ -305,7 +312,7 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
         u: prop.u,
         node: (
           <g className={`ink-prop is-${prop.kind}${lit ? ' is-lit' : ''}`} opacity={opacity}>
-            {prop.kind === 'lantern' && lit && (
+            {prop.kind === 'toro' && lit && (
               <circle className="ink-prop-glow" cx={base.x} cy={(base.y + top.y) / 2} r={prop.size * base.scale} />
             )}
             {prop.kind === 'paddy' ? (
@@ -318,51 +325,8 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
                   </>
                 )
               })()
-            ) : prop.kind === 'grass' ? (
-              <path d={`M${base.x} ${base.y} l${-width * 0.5} ${top.y - base.y} M${base.x} ${base.y} l0 ${(top.y - base.y) * 1.1} M${base.x} ${base.y} l${width * 0.5} ${top.y - base.y}`} />
-            ) : prop.kind === 'pine' ? (
-              /* Three stacked tiers over a trunk. The previous single kite
-                 shape read as a diamond floating over the ground, not a tree. */
-              <>
-                <line x1={base.x} y1={base.y} x2={base.x} y2={base.y - (base.y - top.y) * 0.3} />
-                {[0, 1, 2].map((tier) => {
-                  const spread = width * (0.9 - tier * 0.26)
-                  const foot = base.y - (base.y - top.y) * (0.26 + tier * 0.24)
-                  const peak = base.y - (base.y - top.y) * (0.58 + tier * 0.21)
-                  return (
-                    <path
-                      key={tier}
-                      d={`M${base.x - spread} ${foot} L${base.x} ${peak} L${base.x + spread} ${foot} Z`}
-                    />
-                  )
-                })}
-              </>
-            ) : prop.kind === 'lantern' ? (
-              <>
-                <line x1={base.x} y1={base.y} x2={base.x} y2={top.y} />
-                <rect
-                  className="ink-prop-fill"
-                  x={base.x - width * 0.5}
-                  y={top.y}
-                  width={Math.max(1, width)}
-                  height={Math.max(1, (base.y - top.y) * 0.4)}
-                  rx={1}
-                />
-              </>
             ) : (
-              <>
-                <path
-                  className="ink-prop-roof"
-                  d={`M${base.x - width} ${base.y - (base.y - top.y) * 0.55} L${base.x} ${top.y} L${base.x + width} ${base.y - (base.y - top.y) * 0.55} Z`}
-                />
-                <rect
-                  className="ink-prop-fill"
-                  x={base.x - width * 0.75}
-                  y={base.y - (base.y - top.y) * 0.55}
-                  width={Math.max(1, width * 1.5)}
-                  height={Math.max(1, (base.y - top.y) * 0.55)}
-                />
-              </>
+              <PropShape kind={prop.kind} base={base} top={top} width={width} />
             )}
           </g>
         ),
@@ -429,7 +393,7 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
   const lantern = view(LANTERN_DISTANCE - eye, eyeLateral, LANTERN_LIFT)
 
   return (
-    <main className="ink-road">
+    <main className="ink-road" style={light}>
       <header className="ink-road-hud">
         <AppBackButton onClick={onBack} aria-label="Back to Quests" />
         <div className="ink-road-place">

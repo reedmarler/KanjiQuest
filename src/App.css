@@ -16983,7 +16983,7 @@ button.counter-example {
   /* Height is set from the scroller's measured window — see MapView. */
 }
 
-.ink-ground { fill: color-mix(in srgb, var(--ink-fog-near) 82%, #000); }
+.ink-ground { fill: var(--ink-ground); }
 
 .horizon-ridge { fill: var(--surface-2); stroke: none; opacity: 0.85; }
 
@@ -17059,3 +17059,48 @@ button.counter-example {
   border-color: var(--danger);
   color: var(--danger);
 }
+
+/* --- roadside props -------------------------------------------------------
+   Shapes taken from the reference art: tiled roofs with flicked eaves, stone
+   tōrō, sakura whose blossom reads as mass. Colours stay on the app's dark
+   palette; each region will bring its own light later.
+   -------------------------------------------------------------------------- */
+
+.ink-prop-eave,
+.ink-prop-trunk,
+.ink-prop-post {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.ink-prop-light {
+  fill: var(--ink-fog-near);
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+}
+
+.ink-prop.is-lit .ink-prop-light {
+  fill: var(--ink-lit);
+  fill-opacity: 0.85;
+  stroke: var(--ink-lit);
+}
+
+.ink-prop-blossom {
+  fill: var(--sakura);
+  fill-opacity: 0.15;
+  stroke: none;
+}
+
+.ink-prop.is-lit .ink-prop-blossom { fill-opacity: 0.3; }
+
+.ink-prop-lintel {
+  fill: none;
+  stroke: var(--ink-seal);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-opacity: 0.85;
+}
+
+.ink-prop.is-torii .ink-prop-post { stroke: var(--ink-seal); stroke-width: 1.6; }

@@ -51,3 +51,43 @@ export const WAYPOINT_NAMES: Record<string, string> = {
   ...Object.fromEntries(stopThreads.map((_, index) => [`tsuzuri-${index + 1}`, STOP_NAMES[index] ?? `Stop ${index + 1}`])),
   'tsuzuri-shrine': 'Village Shrine',
 }
+
+/**
+ * Each region's light.
+ *
+ * The map is dark because the app is, but the regions are meant to differ —
+ * Tsuzuri at dawn, the Market Road at noon, Shizukudani in mist. Keeping the
+ * light as data means that is a palette entry per region rather than a rewrite
+ * of the view: `MapView` sets these as custom properties and every shape reads
+ * them.
+ */
+export interface RegionPalette {
+  /** Sky at the top of the frame, and where it meets the horizon. */
+  skyFar: string
+  skyNear: string
+  /** The ground plane the road lies on. */
+  ground: string
+  /** Ink: the drawn road, cleared marks, anything the learner has restored. */
+  ink: string
+  /** Lamp light — tōrō, windows, the lantern's flame. */
+  lit: string
+  /** Blossom and other seasonal colour. */
+  bloom: string
+}
+
+const DAWN: RegionPalette = {
+  skyFar: '#0e1220',
+  skyNear: '#1b2033',
+  ground: '#141a24',
+  ink: '#fffffe',
+  lit: '#e8c25a',
+  bloom: '#ff8ba7',
+}
+
+export const REGION_PALETTES: Record<string, RegionPalette> = {
+  tsuzuri: DAWN,
+}
+
+export function paletteFor(regionId: string): RegionPalette {
+  return REGION_PALETTES[regionId] ?? DAWN
+}
