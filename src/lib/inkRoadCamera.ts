@@ -55,13 +55,33 @@ export function laneOffset(u: number): number {
   return 30 * Math.sin(u / 170) + 11 * Math.sin(u / 64)
 }
 
-/** Total length of the region's road in world units. */
-export const ROAD_LENGTH = 900
+/** Distance between one stop and the next, in world units. */
+const STOP_SPACING = 150
 
-/** Where each stop sits along the road, evenly spread with room at both ends. */
-export function stopPositions(count: number): number[] {
-  if (count === 1) return [ROAD_LENGTH / 2]
-  return Array.from({ length: count }, (_, index) => 70 + (index / (count - 1)) * (ROAD_LENGTH - 140))
+/** Extra road at a region boundary, so crossing one is a walk and not a step. */
+const REGION_GAP = 130
+
+const ROAD_START = 80
+
+/**
+ * Where every stop sits on one continuous road.
+ *
+ * The regions are not separate maps: they are stretches of the same road, so a
+ * boundary is simply a longer gap between two stops. That keeps the camera, the
+ * fog and the destination working across the whole journey without any of them
+ * knowing regions exist.
+ */
+export function stopPositions(regionIds: readonly string[]): number[] {
+  let u = ROAD_START
+  return regionIds.map((regionId, index) => {
+    if (index > 0) u += STOP_SPACING + (regionId === regionIds[index - 1] ? 0 : REGION_GAP)
+    return u
+  })
+}
+
+/** How far the drawn world extends past the last stop. */
+export function roadLength(stops: readonly number[]): number {
+  return (stops[stops.length - 1] ?? 0) + 260
 }
 
 /**

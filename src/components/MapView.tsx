@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { INK_ROAD_REGIONS, INK_ROAD_WAYPOINTS, TSUZURI_BAND, TSUZURI_JAPANESE, WAYPOINT_NAMES, paletteFor } from '../data/inkRoad'
+import { INK_ROAD_REGIONS, INK_ROAD_WAYPOINTS, WAYPOINT_NAMES, lookFor } from '../data/inkRoad'
 import {
   CAMERA_TRAIL,
   HORIZON,
@@ -8,7 +8,7 @@ import {
   LANTERN_SIZE,
   NEAR_CULL,
   ROAD_HALF_WIDTH,
-  ROAD_LENGTH,
+  roadLength,
   seededRandom,
   VIEW_HEIGHT,
   VIEW_WIDTH,
@@ -37,7 +37,7 @@ const DRAW_DISTANCE = 1500
 /** Nothing may sit closer to another prop than this, in world units. */
 const PROP_CLEARANCE = 22
 
-function buildScenery(stops: readonly number[]): Prop[] {
+function buildScenery(stops: readonly number[], regionIds: readonly string[], end: number): Prop[] {
   const random = seededRandom(20260823)
   const props: Prop[] = []
 
@@ -62,26 +62,34 @@ function buildScenery(stops: readonly number[]): Prop[] {
     place({ kind: 'sakura', u: u - 18, v: laneOffset(u - 18) - side * 38, size: 19, stop: index })
 
     // Houses line the roadside at a set-back, spaced along it rather than
-    // scattered around the stop, so a village reads as a street.
-    const houses = 2 + Math.floor(random() * 2)
+    // scattered around the stop, so a village reads as a street. The market
+    // crowds closer to the road than the village does.
+    const market = regionIds[index] === 'market'
+    const houses = (market ? 3 : 2) + Math.floor(random() * 2)
     for (let count = 0; count < houses; count += 1) {
-      const at = u - 34 + count * 34
+      const at = u - 34 + count * (market ? 26 : 34)
       place({
         kind: 'house',
         u: at,
-        v: laneOffset(at) + side * (46 + (count % 2) * 24 + random() * 8),
+        v: laneOffset(at) + side * ((market ? 34 : 46) + (count % 2) * 24 + random() * 8),
         size: 17 + random() * 6,
         stop: index,
       })
     }
   })
 
-  // A gate on the road at the region's threshold, the way the reference frames
-  // a street with one.
+  // A gate at the start of the road, and another wherever a region begins.
   place({ kind: 'torii', u: 26, v: laneOffset(26), size: 22 })
+  regionIds.forEach((regionId, index) => {
+    if (index === 0 || regionId === regionIds[index - 1]) return
+    // Set back from the first stop of the new region, or the gate and that
+    // stop's marker land on top of each other.
+    const at = stops[index - 1]! + (stops[index]! - stops[index - 1]!) * 0.34
+    place({ kind: 'torii', u: at, v: laneOffset(at), size: 24 })
+  })
 
   // Ground cover along the whole road, stepping clear of the road surface.
-  for (let u = 20; u < ROAD_LENGTH + 400; u += 26) {
+  for (let u = 20; u < end; u += 26) {
     for (let count = 0; count < 2; count += 1) {
       const at = u + random() * 22 - 11
       const centre = laneOffset(at)
@@ -160,8 +168,10 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const frame = useRef(0)
 
-  const stops = useMemo(() => stopPositions(INK_ROAD_WAYPOINTS.length), [])
-  const scenery = useMemo(() => buildScenery(stops), [stops])
+  const regionIds = useMemo(() => INK_ROAD_WAYPOINTS.map((waypoint) => waypoint.regionId), [])
+  const stops = useMemo(() => stopPositions(regionIds), [regionIds])
+  const end = useMemo(() => roadLength(stops), [stops])
+  const scenery = useMemo(() => buildScenery(stops, regionIds, end), [end, regionIds, stops])
 
   const state = useMemo(
     () => deriveMapState(
@@ -172,7 +182,10 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
     [demo, progress, walked],
   )
 
-  const region = state.regions[0]!
+  const frontierRegionId = INK_ROAD_WAYPOINTS.find((waypoint) => waypoint.id === state.frontierId)?.regionId
+    ?? INK_ROAD_REGIONS[INK_ROAD_REGIONS.length - 1]!.id
+  const region = state.regions.find((entry) => entry.id === frontierRegionId) ?? state.regions[0]!
+  const look = lookFor(region.id)
   const frontierIndex = Math.max(0, INK_ROAD_WAYPOINTS.findIndex((waypoint) => waypoint.id === state.frontierId))
   const finished = demo ? walked >= INK_ROAD_WAYPOINTS.length : state.frontierId === null
 
@@ -182,7 +195,7 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
   const travelled = behind + (stops[frontierIndex]! - behind) * state.waypoints[frontierIndex]!.ink
 
   // The region's own light, applied as custom properties the shapes read.
-  const palette = paletteFor(region.id)
+  const palette = look.palette
   const light = {
     ['--ink-fog-far' as string]: palette.skyFar,
     ['--ink-fog-near' as string]: palette.skyNear,
@@ -247,7 +260,7 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
   const ribbon = useMemo(() => {
     const near: string[] = []
     const far: string[] = []
-    for (let u = Math.max(eye + NEAR_CULL, 0); u < Math.min(eye + DRAW_DISTANCE, ROAD_LENGTH + 260); u += 8) {
+    for (let u = Math.max(eye + NEAR_CULL, 0); u < Math.min(eye + DRAW_DISTANCE, end); u += 8) {
       const depth = u - eye
       const centre = laneOffset(u)
       const left = view(depth, centre - ROAD_HALF_WIDTH)
@@ -256,7 +269,7 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
       far.unshift(`${right.x.toFixed(1)} ${right.y.toFixed(1)}`)
     }
     return near.length ? `M${near.concat(far).join('L')}Z` : ''
-  }, [eye, view])
+  }, [end, eye, view])
 
   /*
    * The drawn part of the road is a brush stroke laid along the path, not the
@@ -296,8 +309,11 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
   const drawables = useMemo(() => {
     const items: { key: string; u: number; node: React.ReactNode }[] = []
 
+    const sealedFrom = state.waypoints.find((waypoint) => waypoint.node === 'sealed')
+    const sealedAt = sealedFrom ? stops[state.waypoints.indexOf(sealedFrom)]! : Infinity
+
     scenery.forEach((prop, index) => {
-      if (!visible(prop.u)) return
+      if (!visible(prop.u) || prop.u > sealedAt - 40) return
       const depth = prop.u - eye
       const base = view(depth, prop.v)
       const top = view(depth, prop.v, prop.size)
@@ -335,7 +351,7 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
 
     INK_ROAD_WAYPOINTS.forEach((waypoint, index) => {
       const u = stops[index]!
-      if (!visible(u)) return
+      if (!visible(u) || u > sealedAt - 40) return
       const depth = u - eye
       const centre = laneOffset(u)
       const ground = view(depth, centre)
@@ -397,8 +413,8 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
       <header className="ink-road-hud">
         <AppBackButton onClick={onBack} aria-label="Back to Quests" />
         <div className="ink-road-place">
-          <b lang="ja">{TSUZURI_JAPANESE}</b>
-          <span>{region.title} · {TSUZURI_BAND}</span>
+          <b lang="ja">{look.japanese}</b>
+          <span>{region.title} · {look.band}</span>
         </div>
         <div className="ink-road-stats">
           <b>{Math.round(region.ink * 100)}%</b> ink · <b>{seals}</b>/{TOTAL_SEALS} seals
@@ -408,7 +424,7 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
       <div className="ink-road-scroll" ref={scrollRef} onScroll={onScroll}>
         {/* A tall rail gives the scroll its range; the view itself stays put and
             re-renders from the camera, so scrolling walks rather than pans. */}
-        <div className="ink-road-rail" style={{ height: (ROAD_LENGTH + 260) * SCROLL_SCALE }}>
+        <div className="ink-road-rail" style={{ height: (end) * SCROLL_SCALE }}>
           <svg
             className="ink-road-camera"
             style={{ height: viewport }}
