@@ -189,9 +189,11 @@ interface MapViewProps {
   onBack: () => void
   /** Opens the study screen that feeds this region's threads. */
   onStudy: () => void
+  /** Opens the trial standing between this region and the next. */
+  onShrine: (regionId: string) => void
 }
 
-export function MapView({ onBack, onStudy }: MapViewProps) {
+export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
   const [walked, setWalked] = useState(START_WALKED)
   /*
    * The map reads the scheduler now. Demo mode stays because a learner who has
@@ -539,6 +541,7 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
           disabled={demo && finished}
           onClick={() => {
             if (demo) setWalked((count) => Math.min(INK_ROAD_WAYPOINTS.length, count + 1))
+            else if (state.waypoints[frontierIndex]!.kind === 'shrine') onShrine(region.id)
             else onStudy()
           }}
         >

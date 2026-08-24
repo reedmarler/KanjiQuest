@@ -44,6 +44,7 @@ const FocusedVocabPractice = lazy(() => import('./components/FocusedVocabPractic
 const CounterPractice = lazy(() => import('./components/CounterPractice').then((module) => ({ default: module.CounterPractice })))
 const QuestHub = lazy(() => import('./components/QuestHub').then((module) => ({ default: module.QuestHub })))
 const MapView = lazy(() => import('./components/MapView').then((module) => ({ default: module.MapView })))
+const ShrineTrial = lazy(() => import('./components/ShrineTrial').then((module) => ({ default: module.ShrineTrial })))
 const QuestScene = lazy(() => import('./components/QuestScene').then((module) => ({ default: module.QuestScene })))
 const QuestCheckpoint = lazy(() => import('./components/QuestCheckpoint').then((module) => ({ default: module.QuestCheckpoint })))
 const FavoriteWordsPage = lazy(() => import('./components/FavoriteWordsPage').then((module) => ({ default: module.FavoriteWordsPage })))
@@ -67,6 +68,7 @@ type View =
   | 'voice-test'
   | 'quests'
   | 'ink-road'
+  | 'shrine-trial'
   | 'quest-scene'
   | 'quest-checkpoint'
   | 'achievements'
@@ -99,6 +101,7 @@ function App() {
   const [achievementMetrics, setAchievementMetrics] = useState(loadAchievementMetrics)
   const [practiceReturnView, setPracticeReturnView] = useState<View>('dashboard')
   const [beginnerScript, setBeginnerScript] = useState<BeginnerScript>('hiragana')
+  const [shrineRegionId, setShrineRegionId] = useState('tsuzuri')
   const [speedRunReturnView, setSpeedRunReturnView] = useState<'beginner-zone' | 'study-tools'>('beginner-zone')
 
   // This is a single-page app, so route changes otherwise retain whatever
@@ -300,7 +303,25 @@ function App() {
     return (
       <div className="app ink-road-page">
         <Suspense fallback={<RouteLoading label="The Ink Road" />}>
-          <MapView onBack={() => setView('quests')} onStudy={() => setView('beginner-zone')} />
+          <MapView
+            onBack={() => setView('quests')}
+            onStudy={() => setView('beginner-zone')}
+            onShrine={(regionId) => { setShrineRegionId(regionId); setView('shrine-trial') }}
+          />
+        </Suspense>
+      </div>
+    )
+  }
+
+  if (view === 'shrine-trial') {
+    return (
+      <div className="app ink-road-page">
+        <Suspense fallback={<RouteLoading label="The Shrine" />}>
+          <ShrineTrial
+            regionId={shrineRegionId}
+            onBack={() => setView('ink-road')}
+            onDone={() => setView('ink-road')}
+          />
         </Suspense>
       </div>
     )

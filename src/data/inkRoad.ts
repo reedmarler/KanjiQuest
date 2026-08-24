@@ -108,11 +108,29 @@ const REGIONS: RoadRegion[] = [
 ]
 
 /**
+ * The card a shrine owns, and the only one its trial can ink.
+ *
+ * A shrine that only sampled its region's threads would clear itself the moment
+ * the stops did — the sample is already inked by then, so there would be
+ * nothing to pass. This token has no card in any deck, so it stays unwritten
+ * until the trial grades it, and an unwritten thread blocks clearing however
+ * high the ink runs. The gate lives in the scheduler with everything else
+ * rather than in a flag beside it, which also means a shrine passed long ago
+ * eventually comes due again.
+ */
+export function shrineTokenId(regionId: string): string {
+  return `shrine-${regionId}`
+}
+
+/**
  * A shrine tests its region rather than adding to it, so it draws a sample from
- * every stop instead of owning threads of its own.
+ * every stop, plus the token the trial answers for.
  */
 function shrineThreads(region: RoadRegion): string[] {
-  return region.stops.flatMap((stop) => stop.threads.filter((_, index) => index % 4 === 0))
+  return [
+    ...region.stops.flatMap((stop) => stop.threads.filter((_, index) => index % 4 === 0)),
+    shrineTokenId(region.id),
+  ]
 }
 
 export const INK_ROAD_REGIONS: readonly Region[] = REGIONS.map((region) => ({
