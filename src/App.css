@@ -17104,3 +17104,29 @@ button.counter-example {
 }
 
 .ink-prop.is-torii .ink-prop-post { stroke: var(--ink-seal); stroke-width: 1.6; }
+
+/* Market stalls: canvas over a counter, with a shop curtain hung across it. */
+.ink-prop-awning {
+  fill: var(--ink-soft);
+  fill-opacity: 0.28;
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+
+.ink-prop-noren {
+  fill: var(--sakura);
+  fill-opacity: 0.2;
+  stroke: none;
+}
+
+.ink-prop-banner {
+  fill: var(--ink-fog-near);
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+
+.ink-prop.is-lit .ink-prop-awning { fill: var(--ink-lit); fill-opacity: 0.3; stroke: var(--ink-lit); }
+.ink-prop.is-lit .ink-prop-noren { fill-opacity: 0.4; }
+.ink-prop.is-lit .ink-prop-banner { stroke: var(--ink-lit); }

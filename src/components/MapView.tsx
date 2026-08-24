@@ -47,10 +47,13 @@ function buildScenery(stops: readonly number[], regionIds: readonly string[], en
    * village into a pile of outlines. Everything goes through this.
    */
   const place = (candidate: Prop) => {
+    // A market row is meant to be shoulder to shoulder; everything else needs
+    // room or it renders as a pile.
+    const clearance = candidate.kind === 'stall' || candidate.kind === 'banner' ? 12 : PROP_CLEARANCE
     const clash = props.some(
       (existing) =>
-        Math.abs(existing.u - candidate.u) < PROP_CLEARANCE &&
-        Math.abs(existing.v - candidate.v) < PROP_CLEARANCE,
+        Math.abs(existing.u - candidate.u) < clearance &&
+        Math.abs(existing.v - candidate.v) < clearance,
     )
     if (!clash) props.push(candidate)
     return !clash
@@ -61,17 +64,57 @@ function buildScenery(stops: readonly number[], regionIds: readonly string[], en
     place({ kind: 'toro', u: u + 4, v: laneOffset(u) + side * 26, size: 15, stop: index })
     place({ kind: 'sakura', u: u - 18, v: laneOffset(u - 18) - side * 38, size: 19, stop: index })
 
+    /*
+     * A village is buildings set back from the road; a market is stalls pressed
+     * up against both sides of it, with banners between them. Density is what
+     * distinguishes the two regions, so it is placement rather than palette
+     * that has to carry it.
+     */
+    if (regionIds[index] === 'market') {
+      for (let count = 0; count < 6; count += 1) {
+        const at = u - 42 + count * 18
+        const stallSide = count % 2 === 0 ? -1 : 1
+        place({
+          kind: 'stall',
+          u: at,
+          v: laneOffset(at) + stallSide * (26 + random() * 8),
+          size: 15 + random() * 4,
+          stop: index,
+        })
+      }
+      for (let count = 0; count < 2; count += 1) {
+        const at = u - 30 + count * 46
+        place({
+          kind: 'banner',
+          u: at,
+          v: laneOffset(at) + (count % 2 === 0 ? -1 : 1) * 19,
+          size: 24 + random() * 6,
+          stop: index,
+        })
+      }
+      // Roofs behind the stalls, so the street has a town behind it.
+      for (let count = 0; count < 3; count += 1) {
+        const at = u - 30 + count * 30
+        place({
+          kind: 'house',
+          u: at,
+          v: laneOffset(at) + (count % 2 === 0 ? -1 : 1) * (62 + random() * 22),
+          size: 19 + random() * 6,
+          stop: index,
+        })
+      }
+      return
+    }
+
     // Houses line the roadside at a set-back, spaced along it rather than
-    // scattered around the stop, so a village reads as a street. The market
-    // crowds closer to the road than the village does.
-    const market = regionIds[index] === 'market'
-    const houses = (market ? 3 : 2) + Math.floor(random() * 2)
+    // scattered around the stop, so a village reads as a street.
+    const houses = 2 + Math.floor(random() * 2)
     for (let count = 0; count < houses; count += 1) {
-      const at = u - 34 + count * (market ? 26 : 34)
+      const at = u - 34 + count * 34
       place({
         kind: 'house',
         u: at,
-        v: laneOffset(at) + side * ((market ? 34 : 46) + (count % 2) * 24 + random() * 8),
+        v: laneOffset(at) + side * (46 + (count % 2) * 24 + random() * 8),
         size: 17 + random() * 6,
         stop: index,
       })
@@ -405,7 +448,13 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
     return items.sort((a, b) => b.u - a.u)
   }, [eye, eyeLateral, named, scenery, state, stops, travelled, view, visible, walked])
 
-  const traveller = view(Math.max(20, travelled - eye), laneOffset(travelled))
+  /*
+   * Scroll ahead of the traveller and they are behind the camera, where there
+   * is no projection. Clamping the depth pinned them to the near plane instead,
+   * so a huge marker sat off the road at the bottom of the frame.
+   */
+  const travellerDepth = travelled - eye
+  const traveller = travellerDepth > 16 ? view(travellerDepth, laneOffset(travelled)) : null
   const lantern = view(LANTERN_DISTANCE - eye, eyeLateral, LANTERN_LIFT)
 
   return (
@@ -468,11 +517,13 @@ export function MapView({ onBack, onStudy }: MapViewProps) {
               <g key={item.key}>{item.node}</g>
             ))}
 
-            <g className="ink-road-token">
-              <ellipse className="ink-node-shadow" cx={traveller.x} cy={traveller.y} rx={Math.max(2, 6 * traveller.scale)} ry={Math.max(1, 2.4 * traveller.scale)} />
-              <line x1={traveller.x} y1={traveller.y} x2={traveller.x} y2={traveller.y - 11 * traveller.scale} />
-              <circle cx={traveller.x} cy={traveller.y - 13 * traveller.scale} r={Math.max(2, 3.4 * traveller.scale)} />
-            </g>
+            {traveller && (
+              <g className="ink-road-token">
+                <ellipse className="ink-node-shadow" cx={traveller.x} cy={traveller.y} rx={Math.max(2, 6 * traveller.scale)} ry={Math.max(1, 2.4 * traveller.scale)} />
+                <line x1={traveller.x} y1={traveller.y} x2={traveller.x} y2={traveller.y - 11 * traveller.scale} />
+                <circle cx={traveller.x} cy={traveller.y - 13 * traveller.scale} r={Math.max(2, 3.4 * traveller.scale)} />
+              </g>
+            )}
 
             {/* Distance haze sits on the horizon, so the far road fades rather
                 than ending in a hard line. */}

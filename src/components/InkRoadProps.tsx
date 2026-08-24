@@ -10,14 +10,14 @@ import type { Projected } from '../lib/inkRoadCamera'
  * camera — it only has to look right between two heights.
  */
 
-export type PropKind = 'toro' | 'house' | 'sakura' | 'pine' | 'grass' | 'paddy' | 'torii'
+export type PropKind = 'toro' | 'house' | 'sakura' | 'pine' | 'grass' | 'paddy' | 'torii' | 'stall' | 'banner'
 
 export interface Prop {
   kind: PropKind
   u: number
   v: number
   size: number
-  /** Tōrō and houses belong to a stop and light when it clears. */
+  /** Tōrō, houses and stalls belong to a stop and light when it clears. */
   stop?: number
 }
 
@@ -142,7 +142,58 @@ function Torii({ base, top, width }: ShapeProps) {
   )
 }
 
+/**
+ * A market stall: awning on posts, a counter under it, and a noren hung across
+ * the front. The village is buildings set back from the road; the market is
+ * this, crowded up against it, which is what makes one busier than the other
+ * without either of them saying so.
+ */
+function Stall({ base, top, width }: ShapeProps) {
+  const height = base.y - top.y
+  const awningY = top.y + height * 0.22
+  const counterY = base.y - height * 0.3
+  const scallop = width * 0.5
+
+  return (
+    <>
+      <line className="ink-prop-post" x1={base.x - width} y1={base.y} x2={base.x - width} y2={awningY} />
+      <line className="ink-prop-post" x1={base.x + width} y1={base.y} x2={base.x + width} y2={awningY} />
+
+      {/* Awning, with the scalloped hem the reference stalls have. */}
+      <path
+        className="ink-prop-awning"
+        d={`M${base.x - width * 1.24} ${awningY} Q${base.x} ${top.y} ${base.x + width * 1.24} ${awningY} q${-scallop * 0.5} ${height * 0.06} ${-scallop} 0 q${-scallop * 0.5} ${height * 0.06} ${-scallop} 0 q${-scallop * 0.5} ${height * 0.06} ${-scallop} 0 q${-scallop * 0.5} ${height * 0.06} ${-scallop} 0 Z`}
+      />
+
+      {/* Noren, split down the middle the way a shop curtain hangs. */}
+      <path
+        className="ink-prop-noren"
+        d={`M${base.x - width * 0.82} ${awningY + height * 0.1} L${base.x - width * 0.06} ${awningY + height * 0.1} L${base.x - width * 0.06} ${counterY} L${base.x - width * 0.82} ${counterY} Z M${base.x + width * 0.06} ${awningY + height * 0.1} L${base.x + width * 0.82} ${awningY + height * 0.1} L${base.x + width * 0.82} ${counterY} L${base.x + width * 0.06} ${counterY} Z`}
+      />
+
+      <rect className="ink-prop-fill" x={base.x - width * 1.02} y={counterY} width={width * 2.04} height={Math.max(1, base.y - counterY)} />
+      <line className="ink-prop-eave" x1={base.x - width * 1.06} y1={counterY} x2={base.x + width * 1.06} y2={counterY} />
+    </>
+  )
+}
+
+/** A nobori: the tall narrow banner that stands outside a shop. */
+function Banner({ base, top, width }: ShapeProps) {
+  const height = base.y - top.y
+  return (
+    <>
+      <line className="ink-prop-post" x1={base.x} y1={base.y} x2={base.x} y2={top.y} />
+      <path
+        className="ink-prop-banner"
+        d={`M${base.x} ${top.y + height * 0.04} L${base.x + width * 1.1} ${top.y + height * 0.08} L${base.x + width * 1.1} ${base.y - height * 0.24} L${base.x} ${base.y - height * 0.3} Z`}
+      />
+    </>
+  )
+}
+
 const SHAPES: Record<Exclude<PropKind, 'paddy'>, (props: ShapeProps) => React.ReactElement> = {
+  stall: Stall,
+  banner: Banner,
   house: House,
   toro: Toro,
   sakura: Sakura,
