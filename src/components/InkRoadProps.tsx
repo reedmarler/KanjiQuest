@@ -221,3 +221,56 @@ export function PropShape({ kind, base, top, width }: ShapeProps & { kind: Exclu
   const Shape = SHAPES[kind]
   return <Shape base={base} top={top} width={width} />
 }
+
+/**
+ * The traveller, from behind.
+ *
+ * A pin marker said "you are here" without saying who — the reference is always
+ * a figure with a cloak seen from the back, and at this camera distance there is
+ * room for one. Built from the same base and top points as everything else, so
+ * it sizes itself by distance like any other thing standing on the ground.
+ */
+export function Traveller({ base, top, width }: ShapeProps) {
+  const height = base.y - top.y
+  const shoulder = top.y + height * 0.26
+  const hem = base.y - height * 0.16
+
+  return (
+    <g className="ink-traveller">
+      <ellipse className="traveller-shadow" cx={base.x} cy={base.y} rx={width * 1.1} ry={Math.max(0.6, width * 0.34)} />
+
+      {/* Legs first, so the cloak hangs over them. */}
+      <rect className="traveller-leg" x={base.x - width * 0.4} y={hem} width={Math.max(0.8, width * 0.3)} height={base.y - hem} />
+      <rect className="traveller-leg" x={base.x + width * 0.12} y={hem} width={Math.max(0.8, width * 0.3)} height={base.y - hem} />
+
+      {/* The sword rides at the hip, angled the way the reference carries it. */}
+      <line
+        className="traveller-blade"
+        x1={base.x - width * 0.9}
+        y1={hem + height * 0.04}
+        x2={base.x + width * 0.5}
+        y2={base.y - height * 0.34}
+        strokeWidth={Math.max(0.6, width * 0.12)}
+      />
+
+      {/* Cloak: shoulders down to a flared hem, with the trailing edge lifted. */}
+      <path
+        className="traveller-cloak"
+        d={`M${base.x - width * 0.72} ${shoulder}
+            Q${base.x} ${shoulder - height * 0.08} ${base.x + width * 0.72} ${shoulder}
+            L${base.x + width * 1.02} ${hem + height * 0.06}
+            Q${base.x} ${hem + height * 0.16} ${base.x - width * 1.06} ${hem}
+            Z`}
+      />
+
+      <circle className="traveller-head" cx={base.x} cy={top.y + height * 0.17} r={Math.max(0.8, width * 0.34)} />
+
+      {/* The crest, which is most of the silhouette at a distance. */}
+      <path
+        className="traveller-crest"
+        d={`M${base.x - width * 0.3} ${top.y + height * 0.14} Q${base.x - width * 0.86} ${top.y - height * 0.02} ${base.x - width * 0.5} ${top.y - height * 0.14} M${base.x + width * 0.3} ${top.y + height * 0.14} Q${base.x + width * 0.86} ${top.y - height * 0.02} ${base.x + width * 0.5} ${top.y - height * 0.14}`}
+        strokeWidth={Math.max(0.7, width * 0.17)}
+      />
+    </g>
+  )
+}

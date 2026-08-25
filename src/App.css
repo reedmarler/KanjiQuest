@@ -17251,3 +17251,11 @@ button.counter-example {
 @media (prefers-reduced-motion: reduce) {
   .ink-petal { animation: none; opacity: 0.5; }
 }
+
+/* The traveller, seen from behind. Vermilion so "you" stays the one red thing. */
+.traveller-shadow { fill: #000; fill-opacity: 0.22; }
+.traveller-cloak { fill: var(--ink-seal); }
+.traveller-head { fill: var(--prop-dark); }
+.traveller-leg { fill: var(--prop-dark); }
+.traveller-crest { fill: none; stroke: var(--ink-seal); stroke-linecap: round; }
+.traveller-blade { stroke: var(--prop-dark); stroke-linecap: round; }

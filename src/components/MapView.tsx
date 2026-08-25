@@ -8,6 +8,7 @@ import {
   LANTERN_SIZE,
   NEAR_CULL,
   ROAD_HALF_WIDTH,
+  TRAVELLER_HEIGHT,
   roadLength,
   seededRandom,
   VIEW_HEIGHT,
@@ -21,7 +22,7 @@ import { studyProgress, subscribeToProgress } from '../lib/studyRecord'
 import { deriveMapState, type NodeState } from '../lib/mapState'
 import { AppBackButton } from './AppBackButton'
 import { HollowLantern } from './HollowLantern'
-import { PropShape, type Prop } from './InkRoadProps'
+import { PropShape, Traveller, type Prop } from './InkRoadProps'
 
 const START_WALKED = 4
 
@@ -536,7 +537,7 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
               <rect className="ink-node-seal" x={ground.x + radius * 1.4} y={ground.y - radius * 1.1} width={Math.max(2, radius * 0.9)} height={Math.max(2, radius * 0.9)} rx={1} />
             )}
             {showName && ground.scale > 0.35 && (
-              <text className="ink-node-name" x={ground.x} y={ground.y - radius * 3.6} textAnchor="middle">
+              <text className="ink-node-name" x={ground.x} y={ground.y - radius * 5.6} textAnchor="middle">
                 {name}
               </text>
             )}
@@ -554,7 +555,12 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
    * so a huge marker sat off the road at the bottom of the frame.
    */
   const travellerDepth = travelled - eye
-  const traveller = travellerDepth > 16 ? view(travellerDepth, laneOffset(travelled)) : null
+  const traveller = travellerDepth > 16
+    ? {
+        base: view(travellerDepth, laneOffset(travelled)),
+        top: view(travellerDepth, laneOffset(travelled), TRAVELLER_HEIGHT),
+      }
+    : null
   const lantern = view(LANTERN_DISTANCE - eye, eyeLateral, LANTERN_LIFT)
 
   return (
@@ -673,11 +679,11 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
             <Petals />
 
             {traveller && (
-              <g className="ink-road-token">
-                <ellipse className="ink-node-shadow" cx={traveller.x} cy={traveller.y} rx={Math.max(2, 6 * traveller.scale)} ry={Math.max(1, 2.4 * traveller.scale)} />
-                <line x1={traveller.x} y1={traveller.y} x2={traveller.x} y2={traveller.y - 11 * traveller.scale} />
-                <circle cx={traveller.x} cy={traveller.y - 13 * traveller.scale} r={Math.max(2, 3.4 * traveller.scale)} />
-              </g>
+              <Traveller
+                base={traveller.base}
+                top={traveller.top}
+                width={Math.max(1.4, 9 * traveller.base.scale)}
+              />
             )}
 
             {/*
