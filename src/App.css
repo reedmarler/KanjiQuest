@@ -16851,6 +16851,7 @@ button.counter-example {
 }
 
 .ink-node-seal { fill: var(--ink-seal); }
+.ink-node-cap { fill: var(--ink-mark); stroke: none; }
 
 .ink-node.is-inked .ink-node-mark,
 .ink-node.is-thin .ink-node-mark { fill: var(--ink-mark); }
@@ -17252,10 +17253,30 @@ button.counter-example {
   .ink-petal { animation: none; opacity: 0.5; }
 }
 
-/* The traveller, seen from behind. Vermilion so "you" stays the one red thing. */
-.traveller-shadow { fill: #000; fill-opacity: 0.22; }
-.traveller-cloak { fill: var(--ink-seal); }
-.traveller-head { fill: var(--prop-dark); }
-.traveller-leg { fill: var(--prop-dark); }
-.traveller-crest { fill: none; stroke: var(--ink-seal); stroke-linecap: round; }
-.traveller-blade { stroke: var(--prop-dark); stroke-linecap: round; }
+/* --- the traveller --------------------------------------------------------
+   The hero keeps her own colours in every region: pink lamellar, a white
+   blossom mon, a scarf a shade hotter than the armour. She should look the
+   same walking out of a spring village as into an evening market.
+   -------------------------------------------------------------------------- */
+
+.ink-traveller {
+  --hero-pink: #e0508a;
+  --hero-deep: #a82d63;
+  --hero-scarf: #f0629b;
+  --hero-pale: #ded7d2;
+  --hero-dark: #40252e;
+  --hero-steel: #e6ecf2;
+  --hero-gold: #c9a227;
+}
+
+.hero-shadow { fill: #000; fill-opacity: 0.22; }
+.hero-armour { fill: var(--hero-pink); }
+.hero-plate { fill: var(--hero-deep); }
+.hero-scarf { fill: var(--hero-scarf); }
+.hero-mon { fill: #fff; fill-opacity: 0.92; }
+.hero-leg { fill: var(--hero-pale); }
+.hero-boot { fill: var(--hero-dark); }
+.hero-lace { stroke: var(--hero-deep); stroke-opacity: 0.85; }
+.hero-crest { fill: var(--hero-pink); }
+.hero-saya { stroke: var(--hero-dark); stroke-linecap: round; }
+.hero-blade { stroke: var(--hero-steel); stroke-linecap: round; }

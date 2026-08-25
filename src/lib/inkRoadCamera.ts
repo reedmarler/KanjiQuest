@@ -19,7 +19,7 @@ export const VIEW_HEIGHT = 620
 export const HORIZON = 172
 
 /** Bigger focal length = a longer lens = less violent foreshortening. */
-const FOCAL = 260
+const FOCAL = 290
 
 /** How far the camera floats above the road surface, in world units. */
 const CAMERA_HEIGHT = 74
@@ -96,14 +96,14 @@ export const LANTERN_SIZE = 540
 /**
  * How far the camera trails the traveller.
  *
- * Close enough to be over their shoulder rather than watching from a hill: at
+ * Close enough to be over her shoulder rather than watching from a hill: at
  * 130 the figure was a distant marker and the road read as a diagram of a
  * journey instead of a walk along one.
  */
-export const CAMERA_TRAIL = 86
+export const CAMERA_TRAIL = 54
 
 /** The traveller's height in world units, for sizing the sprite. */
-export const TRAVELLER_HEIGHT = 30
+export const TRAVELLER_HEIGHT = 34
 
 /**
  * The nearest ground the view draws, chosen so the road runs off the bottom of

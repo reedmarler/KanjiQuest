@@ -371,7 +371,13 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
     [eyeLateral],
   )
 
-  const visible = useCallback((u: number) => u - eye > 46 && u - eye < DRAW_DISTANCE, [eye])
+  /*
+   * How near a prop may come before it is culled. At 46 the closest forty units
+   * of road were bare ground, so the frame's whole lower third was empty; the
+   * reference has the near trees running right past the camera and framing the
+   * road, which is what depth in a flat-shaded scene comes from.
+   */
+  const visible = useCallback((u: number) => u - eye > 16 && u - eye < DRAW_DISTANCE, [eye])
 
   // The road surface, as a ribbon narrowing into the distance.
   const ribbon = useMemo(() => {
@@ -527,10 +533,26 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
                 d={`M${ground.x - radius * 1.6} ${ground.y} L${ground.x - radius * 1.6} ${ground.y - radius * 2.4} M${ground.x + radius * 1.6} ${ground.y} L${ground.x + radius * 1.6} ${ground.y - radius * 2.4} M${ground.x - radius * 2.1} ${ground.y - radius * 2.4} L${ground.x + radius * 2.1} ${ground.y - radius * 2.4} M${ground.x - radius * 2.4} ${ground.y - radius * 3.1} L${ground.x + radius * 2.4} ${ground.y - radius * 3.1}`}
               />
             ) : (
+              /*
+               * A roadside marker: a post, a paper panel and a small cap. A
+               * disc on a stick was the same information and read as a
+               * lollipop standing in a field.
+               */
               <>
                 <ellipse className="ink-node-shadow" cx={ground.x} cy={ground.y + radius * 0.3} rx={radius * 1.5} ry={radius * 0.5} />
                 <line className="ink-node-post" x1={ground.x} y1={ground.y} x2={ground.x} y2={ground.y - radius * 2.2} />
-                <ellipse className="ink-node-mark" cx={ground.x} cy={ground.y - radius * 2.6} rx={radius * 0.9} ry={radius * 0.9} />
+                <rect
+                  className="ink-node-mark"
+                  x={ground.x - radius * 0.75}
+                  y={ground.y - radius * 3.6}
+                  width={radius * 1.5}
+                  height={radius * 1.5}
+                  rx={radius * 0.3}
+                />
+                <path
+                  className="ink-node-cap"
+                  d={`M${ground.x - radius * 1.15} ${ground.y - radius * 3.6} L${ground.x + radius * 1.15} ${ground.y - radius * 3.6} L${ground.x + radius * 0.55} ${ground.y - radius * 4.25} L${ground.x - radius * 0.55} ${ground.y - radius * 4.25} Z`}
+                />
               </>
             )}
             {node.cleared && !node.due && (

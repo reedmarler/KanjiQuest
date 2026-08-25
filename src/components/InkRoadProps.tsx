@@ -223,53 +223,100 @@ export function PropShape({ kind, base, top, width }: ShapeProps & { kind: Exclu
 }
 
 /**
- * The traveller, from behind.
+ * The traveller, from behind — modelled on the reference character rather than
+ * invented: a pink lamellar kabuto with antler kuwagata and a white blossom
+ * mon, a scarf streaming to one side, flared skirt plates, and a drawn blade.
  *
- * A pin marker said "you are here" without saying who — the reference is always
- * a figure with a cloak seen from the back, and at this camera distance there is
- * room for one. Built from the same base and top points as everything else, so
- * it sizes itself by distance like any other thing standing on the ground.
+ * The silhouette does the work at this size. Crest, scarf and skirt are what
+ * survive at forty pixels tall; the lacing bands only read once the traveller
+ * is close, which is exactly when there is room for them.
+ *
+ * Its colours are its own rather than the region's: the hero should look the
+ * same walking out of a spring village as into an evening market.
  */
 export function Traveller({ base, top, width }: ShapeProps) {
   const height = base.y - top.y
-  const shoulder = top.y + height * 0.26
-  const hem = base.y - height * 0.16
+  /** Fractions of the figure's height, measured up from the ground. */
+  const at = (fraction: number) => base.y - height * fraction
+  /*
+   * Every horizontal measure is a fraction of the figure's height too. The
+   * reference is more than three times as tall as she is wide, and sizing the
+   * armour off a separate width made her square — a pink box with antlers.
+   * `width` only sets a floor, so she still reads when she is a few pixels tall.
+   */
+  const span = Math.max(height, width * 3.3)
+  const x = (fraction: number) => base.x + span * fraction
+  const thick = (fraction: number) => Math.max(0.5, span * fraction)
 
   return (
     <g className="ink-traveller">
-      <ellipse className="traveller-shadow" cx={base.x} cy={base.y} rx={width * 1.1} ry={Math.max(0.6, width * 0.34)} />
+      <ellipse className="hero-shadow" cx={base.x} cy={base.y} rx={span * 0.15} ry={Math.max(0.5, span * 0.04)} />
 
-      {/* Legs first, so the cloak hangs over them. */}
-      <rect className="traveller-leg" x={base.x - width * 0.4} y={hem} width={Math.max(0.8, width * 0.3)} height={base.y - hem} />
-      <rect className="traveller-leg" x={base.x + width * 0.12} y={hem} width={Math.max(0.8, width * 0.3)} height={base.y - hem} />
+      {/* Sheathed sword, crossing behind her before the armour covers the middle. */}
+      <line className="hero-saya" x1={x(-0.23)} y1={at(0.33)} x2={x(0.08)} y2={at(0.47)} strokeWidth={thick(0.026)} />
 
-      {/* The sword rides at the hip, angled the way the reference carries it. */}
-      <line
-        className="traveller-blade"
-        x1={base.x - width * 0.9}
-        y1={hem + height * 0.04}
-        x2={base.x + width * 0.5}
-        y2={base.y - height * 0.34}
-        strokeWidth={Math.max(0.6, width * 0.12)}
+      {/* Scarf: the one loose thing on her, streaming off to the left. */}
+      <path
+        className="hero-scarf"
+        d={`M${x(-0.02)} ${at(0.7)}
+            C${x(-0.16)} ${at(0.74)} ${x(-0.29)} ${at(0.71)} ${x(-0.39)} ${at(0.63)}
+            C${x(-0.28)} ${at(0.64)} ${x(-0.15)} ${at(0.63)} ${x(-0.02)} ${at(0.61)} Z`}
+      />
+      <path
+        className="hero-scarf"
+        d={`M${x(-0.04)} ${at(0.64)}
+            C${x(-0.14)} ${at(0.63)} ${x(-0.22)} ${at(0.58)} ${x(-0.26)} ${at(0.5)}
+            C${x(-0.19)} ${at(0.56)} ${x(-0.11)} ${at(0.58)} ${x(-0.05)} ${at(0.58)} Z`}
       />
 
-      {/* Cloak: shoulders down to a flared hem, with the trailing edge lifted. */}
+      {/* Legs, one ahead of the other, and the boots under them. */}
+      <rect className="hero-leg" x={x(-0.075)} y={at(0.32)} width={thick(0.055)} height={height * 0.22} />
+      <rect className="hero-leg" x={x(0.022)} y={at(0.32)} width={thick(0.055)} height={height * 0.22} />
+      <rect className="hero-boot" x={x(-0.086)} y={at(0.11)} width={thick(0.077)} height={height * 0.11} rx={0.6} />
+      <rect className="hero-boot" x={x(0.012)} y={at(0.11)} width={thick(0.077)} height={height * 0.11} rx={0.6} />
+
+      {/* Kusazuri: the flared skirt plates. */}
+      <path className="hero-plate" d={`M${x(-0.075)} ${at(0.46)} L${x(0.075)} ${at(0.46)} L${x(0.1)} ${at(0.3)} L${x(-0.1)} ${at(0.3)} Z`} />
+      <line className="hero-lace" x1={x(-0.092)} y1={at(0.36)} x2={x(0.092)} y2={at(0.36)} strokeWidth={thick(0.014)} />
+
+      {/* Dō: the body, laced in rows across the back. */}
+      <path className="hero-armour" d={`M${x(-0.072)} ${at(0.62)} L${x(0.072)} ${at(0.62)} L${x(0.08)} ${at(0.46)} L${x(-0.08)} ${at(0.46)} Z`} />
+      <line className="hero-lace" x1={x(-0.076)} y1={at(0.57)} x2={x(0.076)} y2={at(0.57)} strokeWidth={thick(0.013)} />
+      <line className="hero-lace" x1={x(-0.078)} y1={at(0.52)} x2={x(0.078)} y2={at(0.52)} strokeWidth={thick(0.013)} />
+
+      {/* Sode: shoulder plates, angled down and out. */}
+      <path className="hero-plate" d={`M${x(-0.155)} ${at(0.625)} L${x(-0.05)} ${at(0.645)} L${x(-0.056)} ${at(0.52)} L${x(-0.165)} ${at(0.475)} Z`} />
+      <path className="hero-plate" d={`M${x(0.155)} ${at(0.625)} L${x(0.05)} ${at(0.645)} L${x(0.056)} ${at(0.52)} L${x(0.165)} ${at(0.475)} Z`} />
+
+      {/* Drawn blade, out to the right where the far hand carries it. */}
+      <line className="hero-saya" x1={x(0.07)} y1={at(0.44)} x2={x(0.115)} y2={at(0.48)} strokeWidth={thick(0.024)} />
+      <line className="hero-blade" x1={x(0.115)} y1={at(0.48)} x2={x(0.3)} y2={at(0.68)} strokeWidth={thick(0.018)} />
+
+      {/* Shikoro: a short flared neck guard under the bowl. */}
+      <path className="hero-plate" d={`M${x(-0.078)} ${at(0.68)} L${x(0.078)} ${at(0.68)} L${x(0.095)} ${at(0.6)} L${x(-0.095)} ${at(0.6)} Z`} />
+
+      {/* Kabuto: a deep bowl, with the blossom mon on the back of it. */}
       <path
-        className="traveller-cloak"
-        d={`M${base.x - width * 0.72} ${shoulder}
-            Q${base.x} ${shoulder - height * 0.08} ${base.x + width * 0.72} ${shoulder}
-            L${base.x + width * 1.02} ${hem + height * 0.06}
-            Q${base.x} ${hem + height * 0.16} ${base.x - width * 1.06} ${hem}
-            Z`}
+        className="hero-armour"
+        d={`M${x(-0.113)} ${at(0.68)}
+            Q${x(-0.118)} ${at(0.845)} ${base.x} ${at(0.845)}
+            Q${x(0.118)} ${at(0.845)} ${x(0.113)} ${at(0.68)} Z`}
       />
+      {span > 12 && <circle className="hero-mon" cx={base.x} cy={at(0.76)} r={span * 0.032} />}
 
-      <circle className="traveller-head" cx={base.x} cy={top.y + height * 0.17} r={Math.max(0.8, width * 0.34)} />
-
-      {/* The crest, which is most of the silhouette at a distance. */}
+      {/*
+        Kuwagata: what you recognise her by at any distance. Stroked with a
+        branching tine they read as antlers; the reference is two tapered
+        blades, wide where they meet the bowl and drawn to a point.
+      */}
       <path
-        className="traveller-crest"
-        d={`M${base.x - width * 0.3} ${top.y + height * 0.14} Q${base.x - width * 0.86} ${top.y - height * 0.02} ${base.x - width * 0.5} ${top.y - height * 0.14} M${base.x + width * 0.3} ${top.y + height * 0.14} Q${base.x + width * 0.86} ${top.y - height * 0.02} ${base.x + width * 0.5} ${top.y - height * 0.14}`}
-        strokeWidth={Math.max(0.7, width * 0.17)}
+        className="hero-crest"
+        d={`M${x(-0.025)} ${at(0.795)}
+            Q${x(-0.115)} ${at(0.87)} ${x(-0.155)} ${at(1.01)}
+            Q${x(-0.12)} ${at(0.89)} ${x(-0.08)} ${at(0.785)} Z
+            M${x(0.025)} ${at(0.795)}
+            Q${x(0.115)} ${at(0.87)} ${x(0.155)} ${at(1.01)}
+            Q${x(0.12)} ${at(0.89)} ${x(0.08)} ${at(0.785)} Z`}
       />
     </g>
   )
