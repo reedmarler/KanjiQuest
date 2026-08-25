@@ -167,6 +167,7 @@ function buildScenery(stops: readonly number[], regionIds: readonly string[], en
       if (roll > 0.78) place({ kind: 'sakura', u: at, v: centre + offset, size: 15 + random() * 7 })
       else if (roll > 0.6) place({ kind: 'pine', u: at, v: centre + offset, size: 15 + random() * 8 })
       else if (roll > 0.06) place({ kind: 'grass', u: at, v: centre + offset, size: 4 + random() * 3 })
+      else if (roll > 0.03) place({ kind: 'meadow', u: at, v: centre + offset * 1.3, size: 90 + random() * 70 })
       // Fields stay near the road: far out to the side there is no ground
       // detail left to read them against, and they float as bare diamonds.
       else if (Math.abs(offset) < 68) {
@@ -201,6 +202,45 @@ function paddyPaths(prop: Prop, eye: number, eyeLateral: number): { bund: string
     .join('')
 
   return { bund, furrows }
+}
+
+/**
+ * Petals in the air.
+ *
+ * Deliberately in screen space: a petal drifting past the camera has no place
+ * on the ground to belong to, and pinning them to world positions made them
+ * jump whenever the camera moved. Seeded so the drift is the same every load.
+ */
+function Petals() {
+  const petals = useMemo(() => {
+    const random = seededRandom(9152)
+    return Array.from({ length: 16 }, () => ({
+      x: random() * VIEW_WIDTH,
+      size: 1.6 + random() * 2.4,
+      delay: -random() * 18,
+      duration: 11 + random() * 9,
+      drift: 12 + random() * 26,
+    }))
+  }, [])
+
+  return (
+    <g className="ink-petals" aria-hidden="true">
+      {petals.map((petal, index) => (
+        <g
+          key={index}
+          className="ink-petal"
+          style={{
+            ['--petal-x' as string]: `${petal.x}px`,
+            ['--petal-drift' as string]: `${petal.drift}px`,
+            animationDelay: `${petal.delay}s`,
+            animationDuration: `${petal.duration}s`,
+          }}
+        >
+          <ellipse rx={petal.size} ry={petal.size * 0.62} />
+        </g>
+      ))}
+    </g>
+  )
 }
 
 const NODE_LABEL: Record<NodeState, string> = {
@@ -629,6 +669,8 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
                 />
               )
             })()}
+
+            <Petals />
 
             {traveller && (
               <g className="ink-road-token">

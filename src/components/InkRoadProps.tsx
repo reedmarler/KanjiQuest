@@ -13,7 +13,7 @@ import type { Projected } from '../lib/inkRoadCamera'
  * heights.
  */
 
-export type PropKind = 'toro' | 'house' | 'sakura' | 'pine' | 'grass' | 'paddy' | 'torii' | 'stall' | 'banner'
+export type PropKind = 'toro' | 'house' | 'sakura' | 'pine' | 'grass' | 'paddy' | 'torii' | 'stall' | 'banner' | 'meadow'
 
 export interface Prop {
   kind: PropKind
@@ -94,6 +94,18 @@ function Sakura({ base, top, width }: ShapeProps) {
           cx={base.x + width * crown.dx}
           cy={top.y + height * crown.dy}
           r={Math.max(0.7, width * crown.r)}
+        />
+      ))}
+      {/* Brighter flecks, so a crown is blossom rather than a disc of pink. */}
+      {width > 5 && [
+        { dx: -0.34, dy: 0.24 }, { dx: 0.28, dy: 0.3 }, { dx: -0.06, dy: 0.46 },
+      ].map((fleck, index) => (
+        <circle
+          key={`fleck-${index}`}
+          className="fill-bloom-fleck"
+          cx={base.x + width * fleck.dx}
+          cy={top.y + height * fleck.dy}
+          r={Math.max(0.5, width * 0.15)}
         />
       ))}
     </>
@@ -188,7 +200,13 @@ function Banner({ base, top, width }: ShapeProps) {
   )
 }
 
+/** A broad soft patch of ground, so a field has variation rather than one green. */
+function Meadow({ base, width }: ShapeProps) {
+  return <ellipse className="fill-meadow" cx={base.x} cy={base.y} rx={width} ry={Math.max(0.8, width * 0.22)} />
+}
+
 const SHAPES: Record<Exclude<PropKind, 'paddy'>, (props: ShapeProps) => React.ReactElement> = {
+  meadow: Meadow,
   stall: Stall,
   banner: Banner,
   house: House,

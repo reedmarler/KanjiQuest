@@ -17224,3 +17224,30 @@ button.counter-example {
   stroke-width: 0.6;
   stroke-opacity: 0.35;
 }
+
+/* Blossom flecks, meadow patches, and petals in the air. */
+.ink-prop .fill-bloom-fleck { fill: #fff; fill-opacity: 0.5; }
+.ink-prop .fill-meadow { fill: var(--prop-mid); fill-opacity: 0.1; }
+
+.ink-petals { pointer-events: none; }
+
+.ink-petal {
+  transform: translate(var(--petal-x), -20px);
+  animation-name: ink-petal-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.ink-petal ellipse { fill: var(--sakura); fill-opacity: 0.75; }
+
+@keyframes ink-petal-fall {
+  0% { transform: translate(var(--petal-x), -20px) rotate(0deg); opacity: 0; }
+  8% { opacity: 0.9; }
+  50% { transform: translate(calc(var(--petal-x) + var(--petal-drift)), 320px) rotate(180deg); }
+  92% { opacity: 0.9; }
+  100% { transform: translate(var(--petal-x), 660px) rotate(360deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-petal { animation: none; opacity: 0.5; }
+}
