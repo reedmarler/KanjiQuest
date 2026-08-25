@@ -61,8 +61,8 @@ function buildScenery(stops: readonly number[], regionIds: readonly string[], en
 
   stops.forEach((u, index) => {
     const side = index % 2 === 0 ? -1 : 1
-    place({ kind: 'toro', u: u + 4, v: laneOffset(u) + side * 26, size: 15, stop: index })
-    place({ kind: 'sakura', u: u - 18, v: laneOffset(u - 18) - side * 38, size: 19, stop: index })
+    place({ kind: 'toro', u: u + 4, v: laneOffset(u) + side * 24, size: 15, stop: index })
+
 
     /*
      * A village is buildings set back from the road; a market is stalls pressed
@@ -121,6 +121,32 @@ function buildScenery(stops: readonly number[], regionIds: readonly string[], en
     }
   })
 
+  /*
+   * A continuous avenue down the village stretch. Planting only at the stops
+   * gave clusters with bare road between them; the reference's sakura run the
+   * whole way, in matched pairs, which is most of why its path reads as a road
+   * through somewhere rather than a line across a field.
+   */
+  const villageStops = stops.filter((_, index) => regionIds[index] !== 'market')
+  if (villageStops.length) {
+    const from = villageStops[0]! - 60
+    const to = villageStops[villageStops.length - 1]! + 40
+    for (let at = from; at < to; at += 30) {
+      for (const treeSide of [-1, 1]) {
+        const nearest = stops.reduce((best, stop, index) => (
+          Math.abs(stop - at) < Math.abs(stops[best]! - at) ? index : best
+        ), 0)
+        place({
+          kind: 'sakura',
+          u: at,
+          v: laneOffset(at) + treeSide * (29 + (Math.round(at / 30) % 2) * 6),
+          size: 21,
+          stop: nearest,
+        })
+      }
+    }
+  }
+
   // A gate at the start of the road, and another wherever a region begins.
   place({ kind: 'torii', u: 26, v: laneOffset(26), size: 22 })
   regionIds.forEach((regionId, index) => {
@@ -132,15 +158,15 @@ function buildScenery(stops: readonly number[], regionIds: readonly string[], en
   })
 
   // Ground cover along the whole road, stepping clear of the road surface.
-  for (let u = 20; u < end; u += 26) {
-    for (let count = 0; count < 2; count += 1) {
+  for (let u = 20; u < end; u += 18) {
+    for (let count = 0; count < 3; count += 1) {
       const at = u + random() * 22 - 11
       const centre = laneOffset(at)
       const offset = (ROAD_HALF_WIDTH + 8 + random() * 84) * (random() > 0.5 ? 1 : -1)
       const roll = random()
       if (roll > 0.78) place({ kind: 'sakura', u: at, v: centre + offset, size: 15 + random() * 7 })
       else if (roll > 0.6) place({ kind: 'pine', u: at, v: centre + offset, size: 15 + random() * 8 })
-      else if (roll > 0.06) place({ kind: 'grass', u: at, v: centre + offset, size: 4 })
+      else if (roll > 0.06) place({ kind: 'grass', u: at, v: centre + offset, size: 4 + random() * 3 })
       // Fields stay near the road: far out to the side there is no ground
       // detail left to read them against, and they float as bare diamonds.
       else if (Math.abs(offset) < 68) {
@@ -251,6 +277,8 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
     ['--prop-light' as string]: palette.propLight,
     ['--prop-mid' as string]: palette.propMid,
     ['--prop-dark' as string]: palette.propDark,
+    ['--ink-mark' as string]: palette.mark,
+    ['--ink-peak' as string]: palette.peak ?? palette.propLight,
   }
 
   const seals = state.regions.filter((entry) => entry.cleared).length
@@ -339,6 +367,21 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
       far.unshift(`${right.x.toFixed(1)} ${right.y.toFixed(1)}`)
     }
     return near.length ? `M${near.concat(far).join('L')}Z` : ''
+  }, [eye, travelled, view])
+
+  /** Joints across the paving, so the path reads as laid stone. */
+  const slabs = useMemo(() => {
+    const lines: string[] = []
+    const end = Math.min(travelled, eye + 620)
+    for (let u = Math.ceil((eye + NEAR_CULL) / 26) * 26; u < end; u += 26) {
+      const depth = u - eye
+      const centre = laneOffset(u)
+      const half = ROAD_HALF_WIDTH * 0.5
+      const left = view(depth, centre - half)
+      const right = view(depth, centre + half)
+      lines.push(`M${left.x.toFixed(1)} ${left.y.toFixed(1)}L${right.x.toFixed(1)} ${right.y.toFixed(1)}`)
+    }
+    return lines.join('')
   }, [eye, travelled, view])
 
   /** Worn patches along the walked stretch, so it reads as trodden. */
@@ -542,6 +585,10 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
                 cheapest honest depth cue a landscape has. */}
             <path className="horizon-ridge is-far" d={`M-10 ${HORIZON} L38 ${HORIZON - 46} L96 ${HORIZON - 20} L150 ${HORIZON - 52} L214 ${HORIZON - 24} L276 ${HORIZON - 44} L370 ${HORIZON - 18} L370 ${HORIZON} Z`} />
             <path className="horizon-ridge is-mid" d={`M-10 ${HORIZON} L52 ${HORIZON - 30} L118 ${HORIZON - 12} L176 ${HORIZON - 34} L244 ${HORIZON - 14} L310 ${HORIZON - 28} L370 ${HORIZON - 10} L370 ${HORIZON} Z`} />
+            {/* The far peak the reference always has somewhere in frame. */}
+            <path className="horizon-peak" d={`M232 ${HORIZON} L296 ${HORIZON - 74} L360 ${HORIZON} Z`} />
+            <path className="horizon-snow" d={`M279 ${HORIZON - 54} L296 ${HORIZON - 74} L313 ${HORIZON - 54} Q305 ${HORIZON - 49} 296 ${HORIZON - 53} Q287 ${HORIZON - 49} 279 ${HORIZON - 54} Z`} />
+
             <path className="horizon-ridge is-near" d={`M-10 ${HORIZON} L70 ${HORIZON - 16} L140 ${HORIZON - 6} L206 ${HORIZON - 18} L280 ${HORIZON - 7} L370 ${HORIZON - 14} L370 ${HORIZON} Z`} />
 
             {/* Far away and small until the regions between here and it are done. */}
@@ -549,6 +596,7 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
 
             {ribbon && <path className="ink-road-surface" d={ribbon} />}
             {inkRibbon && <path className="ink-road-drawn" d={inkRibbon} />}
+            {slabs && <path className="ink-road-slabs" d={slabs} />}
             <g className="ink-road-tread">
               {treads.map((mark, index) => (
                 <ellipse key={index} cx={mark.x} cy={mark.y} rx={mark.rx} ry={mark.ry} />
@@ -595,7 +643,15 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
               the whole scene is atmospheric perspective: far things sink into
               the sky's colour, near things are untouched.
             */}
-            <rect x={0} y={HORIZON - 10} width={VIEW_WIDTH} height={VIEW_HEIGHT - HORIZON + 10} fill="url(#ink-haze)" pointerEvents="none" />
+            <rect
+              x={0}
+              y={HORIZON - 10}
+              width={VIEW_WIDTH}
+              height={VIEW_HEIGHT - HORIZON + 10}
+              fill="url(#ink-haze)"
+              opacity={palette.haze}
+              pointerEvents="none"
+            />
           </svg>
         </div>
       </div>

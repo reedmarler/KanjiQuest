@@ -53,31 +53,57 @@ export interface RegionPalette {
   propLight: string
   propMid: string
   propDark: string
+  /**
+   * Ink is the road's own colour, which in daylight is pale stone — so marks
+   * and the traveller need their own value or they vanish into it. Dark regions
+   * set this the same as `ink`; bright ones invert it.
+   */
+  mark: string
+  /** Snowline on the far peak, when the region has one. */
+  peak?: string
+  /**
+   * How heavily distance washes out, 0–1.
+   *
+   * A dark region can take a strong haze because its fog colour is close to its
+   * ground; in daylight the sky is far lighter than the grass, so the same
+   * value buries the whole middle distance in mist.
+   */
+  haze: number
 }
 
-const DAWN: RegionPalette = {
-  skyFar: '#0d1120',
-  skyNear: '#28304a',
-  ground: '#171d2b',
-  ink: '#fffffe',
-  lit: '#f0c96a',
-  bloom: '#ff8ba7',
-  propLight: '#4a5675',
-  propMid: '#333c56',
-  propDark: '#222a3e',
+/**
+ * Tsuzuri in spring daylight, taken from the reference: blue sky over pale
+ * distance, green verges, dark tiled roofs above cream walls, a stone path, and
+ * sakura either side of the road.
+ */
+const SPRING_DAY: RegionPalette = {
+  skyFar: '#5aa7dd',
+  skyNear: '#cbe4f2',
+  ground: '#6c9f4c',
+  ink: '#efe7d6',
+  lit: '#ffd166',
+  bloom: '#f7a6c9',
+  propLight: '#e8e1d1',
+  propMid: '#9a7350',
+  propDark: '#333b46',
+  mark: '#2b3340',
+  peak: '#eef6fb',
+  haze: 0.5,
 }
 
-/** Later in the day and further from home: warmer ground, dustier sky. */
-const MARKET_NOON: RegionPalette = {
-  skyFar: '#1b1a2e',
-  skyNear: '#453247',
-  ground: '#2a2130',
-  ink: '#fff6e8',
-  lit: '#f7b45c',
-  bloom: '#e0705f',
-  propLight: '#6d5164',
-  propMid: '#4c3a4c',
-  propDark: '#332635',
+/** Late afternoon over the market: the same day, lower and warmer. */
+const MARKET_AFTERNOON: RegionPalette = {
+  skyFar: '#e8a45c',
+  skyNear: '#f7ddb4',
+  ground: '#8a8347',
+  ink: '#f6ecd8',
+  lit: '#ffc861',
+  bloom: '#e8836a',
+  propLight: '#e2d3ba',
+  propMid: '#9c6a44',
+  propDark: '#3d3037',
+  mark: '#33262b',
+  haze: 0.52,
 }
 
 interface RoadRegion {
@@ -103,7 +129,7 @@ const REGIONS: RoadRegion[] = [
     title: 'Tsuzuri Village',
     japanese: '綴村',
     band: 'kana',
-    palette: DAWN,
+    palette: SPRING_DAY,
     stops: named(TSUZURI_STOPS, chunkThreads(hiraganaCards.map((card) => card.id), 8)),
     shrine: 'Village Shrine',
   },
@@ -112,7 +138,7 @@ const REGIONS: RoadRegion[] = [
     title: 'The Market Road',
     japanese: '市の道',
     band: 'N5',
-    palette: MARKET_NOON,
+    palette: MARKET_AFTERNOON,
     stops: named(MARKET_STOPS, [
       ...chunkThreads(topicThreads('food'), 15),
       ...chunkThreads(topicThreads('shopping'), 15),
@@ -185,5 +211,5 @@ const LOOKS: Record<string, RegionLook> = Object.fromEntries(
 )
 
 export function lookFor(regionId: string): RegionLook {
-  return LOOKS[regionId] ?? { japanese: '綴村', band: 'kana', palette: DAWN }
+  return LOOKS[regionId] ?? { japanese: '綴村', band: 'kana', palette: SPRING_DAY }
 }
