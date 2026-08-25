@@ -248,6 +248,9 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
     ['--ink-line' as string]: palette.ink,
     ['--ink-lit' as string]: palette.lit,
     ['--sakura' as string]: palette.bloom,
+    ['--prop-light' as string]: palette.propLight,
+    ['--prop-mid' as string]: palette.propMid,
+    ['--prop-dark' as string]: palette.propDark,
   }
 
   const seals = state.regions.filter((entry) => entry.cleared).length
@@ -351,11 +354,14 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
   }, [eye, travelled, view])
 
   // Painter's algorithm: everything on the ground, furthest drawn first.
+  /** Where the road stops being drawn because the region beyond it is sealed. */
+  const sealedAt = useMemo(() => {
+    const sealed = state.waypoints.find((waypoint) => waypoint.node === 'sealed')
+    return sealed ? stops[state.waypoints.indexOf(sealed)]! : Infinity
+  }, [state.waypoints, stops])
+
   const drawables = useMemo(() => {
     const items: { key: string; u: number; node: React.ReactNode }[] = []
-
-    const sealedFrom = state.waypoints.find((waypoint) => waypoint.node === 'sealed')
-    const sealedAt = sealedFrom ? stops[state.waypoints.indexOf(sealedFrom)]! : Infinity
 
     scenery.forEach((prop, index) => {
       if (!visible(prop.u) || prop.u > sealedAt - 40) return
@@ -373,6 +379,15 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
         u: prop.u,
         node: (
           <g className={`ink-prop is-${prop.kind}${lit ? ' is-lit' : ''}`} opacity={opacity}>
+            {prop.kind !== 'paddy' && prop.kind !== 'grass' && (
+              <ellipse
+                className="ink-prop-contact"
+                cx={base.x}
+                cy={base.y}
+                rx={Math.max(1, width * 1.5)}
+                ry={Math.max(0.5, width * 0.42)}
+              />
+            )}
             {prop.kind === 'toro' && lit && (
               <circle className="ink-prop-glow" cx={base.x} cy={(base.y + top.y) / 2} r={prop.size * base.scale} />
             )}
@@ -448,7 +463,7 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
     })
 
     return items.sort((a, b) => b.u - a.u)
-  }, [eye, eyeLateral, named, scenery, state, stops, travelled, view, visible, walked])
+  }, [eye, eyeLateral, named, scenery, sealedAt, state, stops, travelled, view, visible, walked])
 
   /*
    * Scroll ahead of the traveller and they are behind the camera, where there
@@ -475,7 +490,15 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
       <div className="ink-road-scroll" ref={scrollRef} onScroll={onScroll}>
         {/* A tall rail gives the scroll its range; the view itself stays put and
             re-renders from the camera, so scrolling walks rather than pans. */}
-        <div className="ink-road-rail" style={{ height: (end) * SCROLL_SCALE }}>
+        {/*
+          The rail stops at the seal. Running it the full length of the road let
+          the camera scroll into a region that is deliberately not drawn, so the
+          world simply ran out — the fog bank has to be the last thing ahead.
+        */}
+        <div
+          className="ink-road-rail"
+          style={{ height: Math.min(end, Number.isFinite(sealedAt) ? sealedAt - 30 : end) * SCROLL_SCALE }}
+        >
           <svg
             className="ink-road-camera"
             style={{ height: viewport }}
@@ -487,22 +510,39 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
             <defs>
               <linearGradient id="ink-sky" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="var(--ink-fog-far)" />
-                <stop offset="100%" stopColor="var(--ink-fog-near)" />
+                {/* The warm cast low in the sky is what makes it a time of day
+                    rather than a background colour — spread wide, because a
+                    narrow stop reads as a drawn line rather than as light. */}
+                <stop offset="70%" stopColor="var(--ink-fog-near)" />
+                <stop offset="100%" stopColor="color-mix(in srgb, var(--ink-fog-near) 82%, var(--ink-lit))" />
               </linearGradient>
               <radialGradient id="ink-lamp">
                 <stop offset="0%" stopColor="var(--ink-lit)" stopOpacity="0.4" />
                 <stop offset="55%" stopColor="var(--ink-lit)" stopOpacity="0.12" />
                 <stop offset="100%" stopColor="var(--ink-lit)" stopOpacity="0" />
               </radialGradient>
+              <linearGradient id="ink-seal-fog" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--ink-fog-near)" stopOpacity="0" />
+                <stop offset="45%" stopColor="var(--ink-fog-near)" stopOpacity="0.72" />
+                <stop offset="100%" stopColor="var(--ink-fog-near)" stopOpacity="0.95" />
+              </linearGradient>
               <linearGradient id="ink-haze" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--ink-fog-near)" stopOpacity="0.95" />
+                <stop offset="0%" stopColor="var(--ink-fog-near)" stopOpacity="0.96" />
+                <stop offset="12%" stopColor="var(--ink-fog-near)" stopOpacity="0.72" />
+                <stop offset="34%" stopColor="var(--ink-fog-near)" stopOpacity="0.3" />
+                <stop offset="62%" stopColor="var(--ink-fog-near)" stopOpacity="0.06" />
                 <stop offset="100%" stopColor="var(--ink-fog-near)" stopOpacity="0" />
               </linearGradient>
             </defs>
 
-            <rect x={0} y={0} width={VIEW_WIDTH} height={HORIZON} fill="url(#ink-sky)" />
+            <rect x={0} y={0} width={VIEW_WIDTH} height={HORIZON + 2} fill="url(#ink-sky)" />
             <rect className="ink-ground" x={0} y={HORIZON} width={VIEW_WIDTH} height={VIEW_HEIGHT - HORIZON} />
-            <path className="horizon-ridge" d={`M-10 ${HORIZON} L46 ${HORIZON - 30} L104 ${HORIZON - 12} L168 ${HORIZON - 38} L232 ${HORIZON - 16} L292 ${HORIZON - 34} L370 ${HORIZON - 14} L370 ${HORIZON} Z`} />
+
+            {/* Three ridgelines, each paler than the one in front, which is the
+                cheapest honest depth cue a landscape has. */}
+            <path className="horizon-ridge is-far" d={`M-10 ${HORIZON} L38 ${HORIZON - 46} L96 ${HORIZON - 20} L150 ${HORIZON - 52} L214 ${HORIZON - 24} L276 ${HORIZON - 44} L370 ${HORIZON - 18} L370 ${HORIZON} Z`} />
+            <path className="horizon-ridge is-mid" d={`M-10 ${HORIZON} L52 ${HORIZON - 30} L118 ${HORIZON - 12} L176 ${HORIZON - 34} L244 ${HORIZON - 14} L310 ${HORIZON - 28} L370 ${HORIZON - 10} L370 ${HORIZON} Z`} />
+            <path className="horizon-ridge is-near" d={`M-10 ${HORIZON} L70 ${HORIZON - 16} L140 ${HORIZON - 6} L206 ${HORIZON - 18} L280 ${HORIZON - 7} L370 ${HORIZON - 14} L370 ${HORIZON} Z`} />
 
             {/* Far away and small until the regions between here and it are done. */}
             <HollowLantern x={lantern.x} y={lantern.y} height={LANTERN_SIZE * lantern.scale} warmth={warmth} idPrefix="sky" />
@@ -519,6 +559,29 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
               <g key={item.key}>{item.node}</g>
             ))}
 
+            {(() => {
+              /*
+               * Past a sealed region nothing is drawn, which left the road
+               * running into plain darkness. Fog is what the design says is
+               * there, so it has to be visible: a bank standing across the road
+               * at the seal, sized by its distance like everything else.
+               */
+              if (!Number.isFinite(sealedAt)) return null
+              const depth = sealedAt - 60 - eye
+              if (depth < 20 || depth > DRAW_DISTANCE) return null
+              const foot = view(depth, laneOffset(sealedAt))
+              const height = Math.max(24, 150 * foot.scale)
+              return (
+                <rect
+                  className="ink-road-seal-fog"
+                  x={-20}
+                  y={foot.y - height}
+                  width={VIEW_WIDTH + 40}
+                  height={height + 8}
+                />
+              )
+            })()}
+
             {traveller && (
               <g className="ink-road-token">
                 <ellipse className="ink-node-shadow" cx={traveller.x} cy={traveller.y} rx={Math.max(2, 6 * traveller.scale)} ry={Math.max(1, 2.4 * traveller.scale)} />
@@ -527,9 +590,12 @@ export function MapView({ onBack, onStudy, onShrine }: MapViewProps) {
               </g>
             )}
 
-            {/* Distance haze sits on the horizon, so the far road fades rather
-                than ending in a hard line. */}
-            <rect x={0} y={HORIZON - 6} width={VIEW_WIDTH} height={96} fill="url(#ink-haze)" pointerEvents="none" />
+            {/*
+              Distance is height in this projection, so one vertical wash over
+              the whole scene is atmospheric perspective: far things sink into
+              the sky's colour, near things are untouched.
+            */}
+            <rect x={0} y={HORIZON - 10} width={VIEW_WIDTH} height={VIEW_HEIGHT - HORIZON + 10} fill="url(#ink-haze)" pointerEvents="none" />
           </svg>
         </div>
       </div>

@@ -45,25 +45,39 @@ export interface RegionPalette {
   lit: string
   /** Blossom and other seasonal colour. */
   bloom: string
+  /**
+   * Three tones for solid shapes: a lit face, a body, and a roof or shadow
+   * side. Outlines alone read as a wireframe however good the shapes are —
+   * what makes a scene look built is value separation under one light.
+   */
+  propLight: string
+  propMid: string
+  propDark: string
 }
 
 const DAWN: RegionPalette = {
-  skyFar: '#0e1220',
-  skyNear: '#1b2033',
-  ground: '#141a24',
+  skyFar: '#0d1120',
+  skyNear: '#28304a',
+  ground: '#171d2b',
   ink: '#fffffe',
-  lit: '#e8c25a',
+  lit: '#f0c96a',
   bloom: '#ff8ba7',
+  propLight: '#4a5675',
+  propMid: '#333c56',
+  propDark: '#222a3e',
 }
 
 /** Later in the day and further from home: warmer ground, dustier sky. */
 const MARKET_NOON: RegionPalette = {
-  skyFar: '#171a2b',
-  skyNear: '#2a2536',
-  ground: '#221c26',
+  skyFar: '#1b1a2e',
+  skyNear: '#453247',
+  ground: '#2a2130',
   ink: '#fff6e8',
-  lit: '#f0a94e',
+  lit: '#f7b45c',
   bloom: '#e0705f',
+  propLight: '#6d5164',
+  propMid: '#4c3a4c',
+  propDark: '#332635',
 }
 
 interface RoadRegion {

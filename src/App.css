@@ -16799,47 +16799,41 @@ button.counter-example {
   transition: stroke-dashoffset 1100ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- scenery -------------------------------------------------------------- */
+/* --- scenery -------------------------------------------------------------
+   Solid shapes in three tones under one light from the left, plus a contact
+   shadow so nothing floats. Outlines at a single value read as a wireframe
+   however good the shapes are.
+   -------------------------------------------------------------------------- */
 
-.ink-prop {
-  stroke: var(--ink-soft);
-  stroke-width: 1.4;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  fill: none;
-  transition: opacity 600ms ease;
-}
+.ink-prop { transition: opacity 600ms ease; }
 
-.ink-prop-fill { fill: var(--ink-fog-near); }
-.ink-prop-roof { fill: var(--ink-soft); fill-opacity: 0.22; }
-.ink-prop-paddy {
-  fill: var(--ink-soft);
-  fill-opacity: 0.07;
-  stroke: var(--ink-soft);
-  stroke-width: 0.7;
-  stroke-opacity: 0.35;
-}
+.ink-prop .fill-light { fill: var(--prop-light); }
+.ink-prop .fill-mid { fill: var(--prop-mid); }
+.ink-prop .fill-dark { fill: var(--prop-dark); }
+.ink-prop .fill-seal { fill: var(--ink-seal); }
+.ink-prop .fill-bloom { fill: var(--sakura); fill-opacity: 0.5; }
+.ink-prop .fill-bloom-light { fill: var(--sakura); fill-opacity: 0.78; }
+.ink-prop .fill-awning { fill: var(--prop-light); }
+.ink-prop .fill-noren { fill: var(--sakura); fill-opacity: 0.32; }
 
-/* Furrows read as lines lying on the ground, which is what stops a field at a
-   wide angle looking like a diamond hanging in the air. */
-.ink-prop-furrow {
-  fill: none;
-  stroke: var(--ink-soft);
-  stroke-width: 0.5;
-  stroke-opacity: 0.28;
-}
+/* Unlit windows and lantern boxes are just another dark face. */
+.ink-prop .fill-lamp { fill: var(--prop-dark); }
 
-.ink-prop.is-pine,
-.ink-prop.is-grass,
-.ink-prop.is-paddy { stroke-width: 1.1; }
+.ink-prop .stroke-dark { stroke: var(--prop-dark); fill: none; stroke-linecap: round; }
+.ink-prop .stroke-mid { stroke: var(--prop-mid); fill: none; stroke-linecap: round; }
 
-.ink-prop-glow {
-  stroke: none;
-  fill: url(#ink-lamp);
-}
+.ink-prop-contact { fill: #000; fill-opacity: 0.16; }
 
-.ink-prop.is-lit { stroke: var(--ink-lit); }
-.ink-prop.is-lit .ink-prop-roof { fill: var(--ink-lit); fill-opacity: 0.18; }
+.ink-prop-glow { stroke: none; fill: url(#ink-lamp); }
+
+/* A cleared stop lights its own windows, not its whole silhouette. */
+.ink-prop.is-lit .fill-lamp { fill: var(--ink-lit); }
+.ink-prop.is-lit .fill-light { fill: color-mix(in srgb, var(--prop-light) 74%, var(--ink-lit)); }
+.ink-prop.is-lit .fill-awning { fill: color-mix(in srgb, var(--prop-light) 60%, var(--ink-lit)); }
+.ink-prop.is-lit .fill-noren { fill-opacity: 0.5; }
+
+.ink-prop-paddy { fill: var(--prop-dark); fill-opacity: 0.55; stroke: none; }
+.ink-prop-furrow { fill: none; stroke: var(--prop-mid); stroke-width: 0.5; stroke-opacity: 0.5; }
 
 /* --- nodes ---------------------------------------------------------------- */
 
@@ -16985,20 +16979,20 @@ button.counter-example {
 
 .ink-ground { fill: var(--ink-ground); }
 
-.horizon-ridge { fill: var(--surface-2); stroke: none; opacity: 0.85; }
+.horizon-ridge { stroke: none; }
+.horizon-ridge.is-far { fill: var(--prop-dark); opacity: 0.34; }
+.horizon-ridge.is-mid { fill: var(--prop-dark); opacity: 0.55; }
+.horizon-ridge.is-near { fill: var(--prop-dark); opacity: 0.78; }
 
 /* The road surface, and the part of it already drawn. */
 .ink-road-surface {
-  fill: var(--ink-faint);
-  fill-opacity: 0.4;
-  stroke: var(--ink-soft);
-  stroke-width: 0.5;
-  stroke-opacity: 0.4;
+  fill: color-mix(in srgb, var(--ink-ground) 82%, var(--prop-light));
+  stroke: none;
 }
 
 .ink-road-drawn {
-  fill: var(--ink-line);
-  fill-opacity: 0.5;
+  fill: color-mix(in srgb, var(--ink-line) 88%, var(--ink-lit));
+  fill-opacity: 0.42;
 }
 
 .ink-road-tread { fill: var(--ink-line); fill-opacity: 0.16; }
@@ -17213,3 +17207,9 @@ button.counter-example {
 }
 
 .shrine-trial-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+
+/* The wall of mist where the road is sealed. */
+.ink-road-seal-fog {
+  fill: url(#ink-seal-fog);
+  pointer-events: none;
+}
