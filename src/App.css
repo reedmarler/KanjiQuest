@@ -8309,18 +8309,48 @@ body:has(.dashboard) {
   transform: scale(0.97);
 }
 
+/*
+ * The top-left pair: Back, then KQ.
+ *
+ * Both are pinned to the page frame rather than laid out in the row they sit
+ * in. Only the Back button used to be, and the KQ button rode along in the
+ * flow after a spacer — so its position came from whatever inset each view's
+ * own header had. It overlapped the Back pill on Numbers, sat twelve pixels
+ * clear of it on Speed Run, and dropped four pixels below it wherever the row
+ * was taller than the buttons. Pinning both means the pair is the same
+ * distance apart, and level, on every screen that shows it.
+ */
+:root {
+  --app-nav-top: 1rem;
+  --app-nav-left: 1.25rem;
+  --app-nav-gap: 0.35rem;
+  /* The Back pill's rendered width. It is all rem inside — padding, icon,
+     label — so this holds at every viewport, but it is a measurement: if the
+     button's padding or label changes, remeasure it. The old 4.4rem was 0.3rem
+     short, which is why the KQ button could land on top of the pill. */
+  --app-back-width: 4.75rem;
+}
+
 .app-back-slot {
   display: inline-flex;
-  width: 4.4rem;
+  width: var(--app-back-width);
   height: 2.1rem;
   flex: 0 0 auto;
 }
 
-.app .app-back-slot > .app-back-button {
+.app .app-back-slot > .app-back-button,
+.app .app-nav-actions > .app-dashboard-button {
   position: absolute;
   z-index: 20;
-  top: 1rem;
-  left: 1.25rem;
+  top: var(--app-nav-top);
+}
+
+.app .app-back-slot > .app-back-button {
+  left: var(--app-nav-left);
+}
+
+.app .app-nav-actions > .app-dashboard-button {
+  left: calc(var(--app-nav-left) + var(--app-back-width) + var(--app-nav-gap));
 }
 
 .app-back-button:focus-visible {
@@ -8342,8 +8372,14 @@ body:has(.dashboard) {
   display: inline-flex;
   align-items: center;
   justify-self: start;
-  gap: 0.35rem;
+  gap: var(--app-nav-gap);
   min-width: 0;
+}
+
+/* Pinned buttons take no room, so the row has to hold the pair's width open or
+   whatever follows slides underneath them. */
+.app .app-nav-actions:has(.app-dashboard-button) {
+  min-width: calc(var(--app-back-width) + var(--app-nav-gap) + 2.1rem);
 }
 
 .app-dashboard-button {
@@ -16711,7 +16747,8 @@ button.counter-example {
 /* The shared back button pins itself to the page corner; in the map's own
    header it has to sit in the flow, or it lands on top of the region name.
    Matches the specificity of `.app .app-back-slot > .app-back-button`. */
-.app.ink-road-page .app-back-slot > .app-back-button {
+.app.ink-road-page .app-back-slot > .app-back-button,
+.app.ink-road-page .app-nav-actions > .app-dashboard-button {
   position: relative;
   top: auto;
   left: auto;
