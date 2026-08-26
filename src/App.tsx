@@ -53,6 +53,15 @@ const BeginnerLearner = lazy(() => import('./components/BeginnerLearner').then((
 const BeginnerSpeedRun = lazy(() => import('./components/BeginnerSpeedRun').then((module) => ({ default: module.BeginnerSpeedRun })))
 const PicturePractice = lazy(() => import('./components/PicturePractice').then((module) => ({ default: module.PicturePractice })))
 
+/*
+ * Copies of two tools, kept in Additional so they can be modernised before
+ * anything changes in the versions people study with. Same markup and class
+ * names to start with, no shared code, so a rewrite in the lab cannot reach
+ * the live screen.
+ */
+const SentenceBuilderLab = lazy(() => import('./components/labs/SentenceBuilderLab').then((module) => ({ default: module.SentenceBuilderLab })))
+const GrammarPracticeLab = lazy(() => import('./components/labs/GrammarPracticeLab').then((module) => ({ default: module.GrammarPracticeLab })))
+
 type View =
   | 'dashboard'
   | 'library'
@@ -79,6 +88,7 @@ type View =
   | 'beginner-learner'
   | 'beginner-speed-run'
   | 'picture-practice'
+  | 'grammar-lab'
 
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
@@ -103,6 +113,13 @@ function App() {
   const [beginnerScript, setBeginnerScript] = useState<BeginnerScript>('hiragana')
   const [shrineRegionId, setShrineRegionId] = useState('tsuzuri')
   const [speedRunReturnView, setSpeedRunReturnView] = useState<'beginner-zone' | 'study-tools'>('beginner-zone')
+  /*
+   * Whether the sentence session on screen is the lab copy. The lab runs on
+   * the same session machinery as the real builder — same exercises, same
+   * navigation — so what it is testing is the screen, not a second pipeline
+   * behind it.
+   */
+  const [sentenceLab, setSentenceLab] = useState(false)
 
   // This is a single-page app, so route changes otherwise retain whatever
   // scroll offset the previous screen left behind. Run before paint so each
@@ -166,7 +183,8 @@ function App() {
     setView('study')
   }
 
-  const startSentenceMode = useCallback((returnTo: View = 'dashboard') => {
+  const startSentenceMode = useCallback((returnTo: View = 'dashboard', lab = false) => {
+    setSentenceLab(lab)
     setExitView(returnTo)
     setView('study-loading')
     void import('./lib/sentenceLab').then(({ buildSentenceSession }) => {
@@ -523,8 +541,26 @@ function App() {
             { mark: '編', title: 'Content Studio', detail: 'Add and organize your own content.', accent: 'gold', onClick: () => setView('content-studio') },
             { mark: '験', title: 'Sentence Testing', detail: 'Generate sentences by complexity level.', accent: 'kyogre', onClick: () => setView('sentence-testing') },
             { mark: '声', title: 'Voice Test', detail: 'Compare provider voices before building audio.', accent: 'sakura', onClick: () => setView('voice-test') },
+            /* Copies to redesign in. Changes here reach nothing people study with. */
+            { mark: '文', title: 'Sentences (lab)', detail: 'A copy of the sentence builder to rework.', accent: 'rayquaza', onClick: () => startSentenceMode('additional-tools', true) },
+            { mark: '文法', title: 'Grammar (lab)', detail: 'A copy of grammar practice to rework.', accent: 'amber', onClick: () => setView('grammar-lab') },
           ]}
         />
+      </div>
+    )
+  }
+
+  if (view === 'grammar-lab') {
+    return (
+      <div className="app tool-lab">
+        <Suspense fallback={<RouteLoading label="Grammar (lab)" />}>
+          <GrammarPracticeLab
+            onBack={() => setView('additional-tools')}
+            onDashboard={() => setView('dashboard')}
+            isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
+            onToggleFavorite={toggleDrillFavorite}
+          />
+        </Suspense>
       </div>
     )
   }
@@ -633,10 +669,11 @@ function App() {
   const item = session[currentIndex]
   if (view === 'study' && item) {
     if (item.kind === 'sentence-builder') {
+      const Builder = sentenceLab ? SentenceBuilderLab : SentenceBuilderView
       return (
-        <div className="app">
-          <Suspense fallback={<RouteLoading label="Sentence Builder" />}>
-            <SentenceBuilderView
+        <div className={sentenceLab ? 'app tool-lab' : 'app'}>
+          <Suspense fallback={<RouteLoading label={sentenceLab ? 'Sentence Builder (lab)' : 'Sentence Builder'} />}>
+            <Builder
               key={item.exercise.id}
               exercise={item.exercise}
               current={currentIndex}

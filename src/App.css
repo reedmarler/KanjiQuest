@@ -8331,6 +8331,23 @@ body:has(.dashboard) {
   --app-back-width: 4.75rem;
 }
 
+/* ---------------------------------------------------------------------------
+   Tool labs
+
+   The Additional tab carries copies of the sentence builder and grammar
+   practice, to be reworked before anything changes in the tools people study
+   with. The copies are separate components but start with the original's
+   markup and class names, so they open looking identical — which also means a
+   rule written for the original still reaches them.
+
+   Restyle them from here: `.tool-lab .whatever { }` outranks the plain
+   `.whatever` above and applies only inside a lab. When a change is worth
+   keeping, move it out of this block and drop the prefix.
+   --------------------------------------------------------------------------- */
+.tool-lab {
+  /* Nothing yet — the labs open as exact copies. Style below this line. */
+}
+
 .app-back-slot {
   display: inline-flex;
   width: var(--app-back-width);
