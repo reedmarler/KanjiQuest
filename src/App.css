@@ -8345,7 +8345,115 @@ body:has(.dashboard) {
    keeping, move it out of this block and drop the prefix.
    --------------------------------------------------------------------------- */
 .tool-lab {
-  /* Nothing yet — the labs open as exact copies. Style below this line. */
+  /* Page frame only; the per-tool work is below. */
+}
+
+/* --- Sentences (lab): Kanji Lab's shape ------------------------------------
+   Kanji Lab is a top row, a progress bar, a heading band carrying the mark,
+   the title and the controls, then one card holding only the study content.
+   The sentence builder had the heading, the instruction and three floating
+   buttons inside its card, and the exercise in a second card nested in that
+   one. The band is built from Kanji Lab's own classes in the lab's JSX; what
+   is left here is the card. */
+/* The band itself. `.kanji-armory-navigation` gives it a bordered, tinted box
+   by default; Kanji Lab strips that back to a bare row through its own
+   `.standard-kanji-navigation`, and these are that rule's values, restated
+   rather than borrowed — taking the class would drag Kanji Lab's card styling
+   in behind it. */
+.tool-lab .sentence-lab-navigation {
+  margin-bottom: 0.18rem;
+  padding: 0.22rem 0 0.42rem;
+  border: 0;
+  background: transparent;
+}
+
+.tool-lab .sentence-lab-navigation .kanji-path-heading {
+  grid-template-columns: 3.35rem minmax(0, 1fr) auto;
+  gap: 0.62rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.tool-lab .sentence-lab-navigation .kanji-armory-mark {
+  width: 3.35rem;
+  height: 2.15rem;
+  aspect-ratio: auto;
+  font-size: 1.08rem !important;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.tool-lab .sentence-lab-navigation .kanji-path-heading h2 {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.1;
+}
+
+/* Kanji Lab hides this line; the sentence builder's is an instruction rather
+   than a description, so it stays — but it has to wrap, since the one-line
+   ellipsis it inherits cut it to "Click the words or type the s…" on a phone. */
+.tool-lab .sentence-lab-navigation .kanji-path-heading p {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.tool-lab .sentence-lab-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tool-lab .sentence-lab-actions .sentence-back-button,
+.tool-lab .sentence-lab-actions .sentence-new-button,
+.tool-lab .sentence-lab-actions .sentence-favorite-button {
+  position: static;
+  display: inline-grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 1.8rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.tool-lab .sentence-lab-actions .sentence-favorite-button.is-favorite {
+  color: var(--gold);
+}
+
+/* One card, sized and centred like Kanji Lab's. Kanji Lab's card is a block,
+   where `margin: 0 auto` centres a full-width box under its cap; this one is a
+   flex item, where an auto cross-axis margin cancels the stretch and leaves it
+   shrink-to-fit — hence the explicit width. */
+.tool-lab .sentence-card {
+  width: 100%;
+  max-width: 47rem;
+  margin: 0 auto 1rem;
+  padding: clamp(0.95rem, 3vw, 1.55rem);
+  background:
+    radial-gradient(circle at top right, rgba(255, 211, 107, 0.11), transparent 35%),
+    var(--surface);
+}
+
+.tool-lab .sentence-view .sentence-card {
+  padding-top: clamp(0.95rem, 3vw, 1.55rem);
+}
+
+/* The exercise had its own bordered panel inside the card, which read as a
+   card in a card. Kanji Lab frames the study area once; so does this now. */
+.tool-lab .sentence-builder-panel {
+  max-width: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .app-back-slot {

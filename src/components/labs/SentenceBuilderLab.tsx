@@ -725,7 +725,7 @@ export function SentenceBuilderLab({
       ref={viewRef}
       tabIndex={-1}
     >
-      <div className="study-top">
+      <div className="study-top grammar-study-top">
         <div className="app-nav-actions">
           <AppBackButton onClick={onExit} aria-label="Back to Study Tools" />
           <AppDashboardButton onClick={onDashboard} />
@@ -813,26 +813,34 @@ export function SentenceBuilderLab({
         <div className="study-progress-fill" style={{ width: `${((current + 1) / total) * 100}%` }} />
       </div>
 
-      <div className="sentence-card">
-        <p className="sentence-prompt">
-          <span>Sentence Builder</span>
-          <span>/</span>
-          <span>文章作り</span>
-        </p>
-        <div className="sentence-header-actions">
-          <button
-            type="button"
-            className="sentence-back-button"
-            onClick={onPrevious}
-            disabled={current === 0}
-            title={current === 0 ? 'First sentence' : 'Go back to the previous sentence'}
-          >
-            <svg className="sentence-back-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <polyline points="15 5 8 12 15 19" />
-            </svg>
-          </button>
-          <div className="sentence-top-right-actions">
-            <button className="sentence-new-button" onClick={onSkip}>
+      {/*
+        Kanji Lab's shape. There, what the screen is and the controls that act
+        on it sit in a band of their own between the progress bar and the card,
+        and the card holds nothing but the exercise. Here all of it was inside
+        the card — the title and its Japanese, the instruction under it, and
+        the previous/replay/favourite buttons floating over its top corners —
+        so the exercise started a third of the way down its own card.
+      */}
+      <section className="kanji-study-navigation kanji-armory-navigation sentence-lab-navigation">
+        <div className="kanji-path-heading">
+          <span className="kanji-armory-mark" aria-hidden="true">文</span>
+          <div>
+            <h2>Sentence Builder</h2>
+            <p>Click the words or type the sentence</p>
+          </div>
+          <div className="sentence-lab-actions">
+            <button
+              type="button"
+              className="sentence-back-button"
+              onClick={onPrevious}
+              disabled={current === 0}
+              title={current === 0 ? 'First sentence' : 'Go back to the previous sentence'}
+            >
+              <svg className="sentence-back-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="15 5 8 12 15 19" />
+              </svg>
+            </button>
+            <button type="button" className="sentence-new-button" onClick={onSkip} title="A different sentence">
               ↻
             </button>
             <button
@@ -847,7 +855,9 @@ export function SentenceBuilderLab({
             </button>
           </div>
         </div>
-        <p className="sentence-builder-help">Click the words or type the sentence</p>
+      </section>
+
+      <div className="sentence-card">
         {!answered && (
           <>
             <div className="sentence-builder-panel">
