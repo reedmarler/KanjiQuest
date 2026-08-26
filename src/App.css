@@ -15933,20 +15933,31 @@ button.counter-example {
    screen's worth of content is a screen.
    --------------------------------------------------------------------------- */
 @media (max-width: 720px) {
+  /* Three equal columns, and each control fills its own. Sized to their text
+     the three came out at three different widths — Previous half again as wide
+     as Next — which read as three unrelated controls rather than one row. The
+     row keeps the speaker's height, so nothing below it moves, and the speaker
+     stays the loudest of the three on its fill and its ring rather than on
+     taking half again the width of the buttons either side of it. */
   .beginner-top-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.35rem;
   }
 
-  .beginner-action-btn {
-    min-width: 0;
-    padding-inline: 0.55rem;
+  .beginner-top-actions .beginner-action-btn:first-child,
+  .beginner-top-actions .beginner-action-btn:last-child {
+    justify-self: stretch;
   }
 
-  /* Still the loudest of the three, but 9rem of it pushed Next off the edge. */
-  .beginner-speak-btn {
-    width: auto;
-    min-width: 6rem;
-    padding-inline: 1rem;
+  .beginner-top-actions .beginner-action-btn,
+  .beginner-top-actions .beginner-speak-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    height: 3rem;
+    padding-inline: 0.4rem;
   }
 
   /* The quiz row carries a caption as well, and that is what landed on top of
