@@ -62,10 +62,6 @@ type HeroSpeechVolume = typeof HERO_SPEECH_VOLUMES[number]
 type StoryPlaybackMode = 'repeat' | 'shuffle'
 type HeroSettingsMode = 'none' | 'picking' | 'story' | 'grammar' | 'star'
 
-// Particles has no focus yet: swapping は for を changes the grammatical role
-// rather than the word, so the drill needs wrong-but-plausible forms that the
-// generator deliberately never produces. The button stays visible and inert
-// rather than silently doing nothing when pressed.
 // What the top-right toggle says once a specific mode is running, and what it
 // switches off. Off, and while a mode is still being picked, it just reads
 // 'Mode' — the toggle is always on screen now, so it no longer defaults to
@@ -85,17 +81,20 @@ const PICK_MODE_OPTIONS: ReadonlyArray<{ mode: Exclude<HeroSettingsMode, 'none' 
   { mode: 'star', label: 'Star' },
 ]
 
+/*
+ * Each of these holds the sentence still and works one part of speech, except
+ * Particles: which particle a noun takes is decided by the predicate — 山に登る
+ * but 高校で飲む — so swapping it inside a fixed sentence produces Japanese
+ * that is simply wrong. That one contrasts across sentences instead, each step
+ * reaching for a particle the last one did not use.
+ */
 const HERO_SWAP_FOCUS_OPTIONS: ReadonlyArray<{ focus: HeroSwapFocus | null; label: string; disabledReason?: string }> = [
   { focus: 'noun', label: 'Nouns' },
-  { focus: null, label: 'Particles', disabledReason: 'Particle swapping is not wired up yet' },
+  { focus: 'particle', label: 'Particles' },
   { focus: 'verb', label: 'Verbs' },
-  // Placeholder, same as Particles above: visible so the option is known to
-  // exist, disabled because auxiliary-verb swapping is not wired up yet.
-  { focus: null, label: 'Auxiliary Verbs', disabledReason: 'Auxiliary verb swapping is not wired up yet' },
+  { focus: 'auxiliary', label: 'Auxiliary Verbs' },
   { focus: 'adjective', label: 'I-Adjectives' },
-  // Placeholder, same as Particles above: visible so the option is known to
-  // exist, disabled because adverb swapping is not wired up yet.
-  { focus: null, label: 'Adverbs', disabledReason: 'Adverb swapping is not wired up yet' },
+  { focus: 'adverb', label: 'Adverbs' },
 ]
 
 const COMPLEXITY_DISPLAY: Record<GenerationComplexity, { level: string; name: string; description: string }> = {
@@ -120,7 +119,7 @@ function speechVolumeIcon(volume: number): string {
   return '\uD83D\uDD0A'
 }
 
-import type { HeroSwapFocus } from '../lib/heroSequence'
+import { HERO_FOCUS_LEVELS, focusAvailableAt, type HeroSwapFocus } from '../lib/heroSequence'
 const RotatingHeroSentence = lazy(() => import('./RotatingHeroSentence').then((module) => ({ default: module.RotatingHeroSentence })))
 
 function ProgressRunnerVideo() {
@@ -403,7 +402,27 @@ export function Dashboard({
   // chosen yet is 'picking', which surfaces the mode name-button below rather
   // than guessing which mode the learner wants.
   const modeToggleOn = settingsMode !== 'none'
+  // Raising the complexity can take the level out from under a chosen drill —
+  // plain verb conjugation only exists at N5 — and leaving it selected would
+  // build an empty stream. Drop back to the ordinary sweep instead.
+  useEffect(() => {
+    setSwapFocus((current) => (current && !focusAvailableAt(current, heroJlptForComplexity(complexity)) ? null : current))
+  }, [complexity])
+
   const activeFocusLabel = HERO_SWAP_FOCUS_OPTIONS.find((option) => option.focus === swapFocus)?.label ?? 'Choose focus'
+  /*
+   * A focus with no pattern to run on at this level would build an empty
+   * stream, and an empty stream is a blank hero — so it is closed off here
+   * rather than offered and broken. `npm run audit:hero-focus` is what decides
+   * which those are, and fails if this stops matching the generator.
+   */
+  const heroLevel = heroJlptForComplexity(complexity)
+  const focusOptions = HERO_SWAP_FOCUS_OPTIONS.map((option) => {
+    if (!option.focus) return option
+    if (focusAvailableAt(option.focus, heroLevel)) return option
+    const levels = HERO_FOCUS_LEVELS[option.focus].join(', ')
+    return { ...option, focus: null, disabledReason: `${option.label} has no patterns at ${heroLevel} — this drill runs at ${levels}` }
+  })
   const storyRolloverId = useMemo(() => {
     if (!storyMode || storyPlaybackMode === 'repeat' || storiesAtLevel.length < 2) return storyId
     const alternatives = storiesAtLevel.filter((story) => story.id !== storyId)
@@ -677,7 +696,7 @@ export function Dashboard({
                 role="menu"
                 aria-label="Grammar focus"
               >
-                {HERO_SWAP_FOCUS_OPTIONS.map(({ focus, label, disabledReason }) => (
+                {focusOptions.map(({ focus, label, disabledReason }) => (
                   <button
                     key={label}
                     type="button"
@@ -1048,7 +1067,7 @@ export function Dashboard({
 
                   {grammarMode && (
                     <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
-                      {HERO_SWAP_FOCUS_OPTIONS.map(({ focus, label, disabledReason }) => (
+                      {focusOptions.map(({ focus, label, disabledReason }) => (
                         <button
                           key={label}
                           type="button"

@@ -144,10 +144,139 @@ function changedSegmentKeys(previous: HeroSentenceFrame, current: HeroSentenceFr
  * and works the chosen part of speech repeatedly, which is what makes a
  * conjugation drill a drill.
  */
-export type HeroSwapFocus = 'verb' | 'noun' | 'adjective'
+export type HeroSwapFocus = 'verb' | 'noun' | 'adjective' | 'adverb' | 'auxiliary' | 'particle'
 
 /** How many rotations a focused sentence gets before the stream moves on. */
 const FOCUS_ROTATIONS = 5
+
+/**
+ * Whether this sentence's predicate carries a grammar auxiliary rather than a
+ * plain conjugation.
+ *
+ * Both cases rotate the same `ending` slot, but they are different drills. On
+ * an N5 pattern the ending walks the bare verb's own inflections — 着ます,
+ * 着ました, 着ません, 着ない, 着た — and the generator marks it with an
+ * inflection name. On a pattern built around an auxiliary the ending walks
+ * that auxiliary instead — 預けたいです, 預けたくないです, 預けたかったです —
+ * and the generator marks it with the pattern's own id, because the form
+ * belongs to the pattern. That marker is the split.
+ */
+function hasGrammarAuxiliary(sentence: GeneratedPreviewSentence): boolean {
+  const ending = sentence.slots['ending']
+  return Boolean(ending && ending.pos === 'verb' && ending.conjugation === sentence.frameId)
+}
+
+/** True when the sentence shows a case particle of its own, between slots. */
+function particleSegments(sentence: GeneratedPreviewSentence): string[] {
+  return sentence.furigana
+    .filter((part) => !part.slot && CASE_PARTICLES.has(part.text.trim()))
+    .map((part) => part.text.trim())
+}
+
+/**
+ * The particles the drill contrasts. Deliberately the case markers only: these
+ * are the ones whose choice changes what a noun is doing in the sentence,
+ * which is the thing being practised.
+ */
+const CASE_PARTICLES = new Set(['は', 'が', 'を', 'に', 'で', 'へ', 'と', 'から', 'まで', 'より', 'の'])
+
+/**
+ * Which slots a focus rotates, in the order it rotates them. Empty means the
+ * sentence cannot serve the focus and the stream should move to another
+ * pattern; a focus that deliberately does not rotate (particles, below) is
+ * asked about through `focusRotatesInPlace` instead.
+ */
+export const HERO_FOCUS_SLOTS: Record<HeroSwapFocus, string> = {
+  noun: 'every slot that is not the predicate or its ending',
+  verb: 'ending, on patterns whose ending is a plain verb conjugation',
+  adjective: 'adjective and ending, alternating',
+  adverb: 'adverb',
+  auxiliary: 'ending, on patterns built around a grammar auxiliary',
+  particle: 'none — the sentence changes instead',
+}
+
+/**
+ * The levels where a focus has patterns to run on at all.
+ *
+ * These are not preferences — they are what the generator can currently do,
+ * measured by `npm run audit:hero-focus`, which fails if this table drifts
+ * from what it finds. They matter because a focus with no serving pattern
+ * produces an empty stream, and an empty stream is a blank hero: the drill
+ * has to be closed off at those levels rather than offered and broken.
+ *
+ * The thin ones are thin for a reason. Plain verb conjugation only exists at
+ * N5 because every pattern above it wraps the predicate in a grammar form, and
+ * that form is what the auxiliary drill rotates instead. Adjective predicates
+ * and the one adverb-bearing pattern are both N5-only in the pattern catalog.
+ */
+export const HERO_FOCUS_LEVELS: Record<HeroSwapFocus, readonly JlptLevel[]> = {
+  noun: ['N5', 'N4', 'N3', 'N2', 'N1'],
+  particle: ['N5', 'N4', 'N3', 'N2', 'N1'],
+  verb: ['N5'],
+  auxiliary: ['N4', 'N2'],
+  adjective: ['N5'],
+  adverb: ['N5'],
+}
+
+export function focusAvailableAt(focus: HeroSwapFocus, level: JlptLevel): boolean {
+  return HERO_FOCUS_LEVELS[focus].includes(level)
+}
+
+/** Particles are contrasted across sentences, not swapped inside one. */
+export function focusRotatesInPlace(focus: HeroSwapFocus): boolean {
+  return focus !== 'particle'
+}
+
+/**
+ * The slots a focus would rotate on this sentence, empty when it cannot serve
+ * the focus at all. Exported for the depth audit, which needs the same answer
+ * the stream builder gets.
+ */
+export function focusSlotsFor(sentence: GeneratedPreviewSentence, focus: HeroSwapFocus): string[] {
+  const slots = orderedSwappableSlotKeys(sentence)
+  if (focus === 'verb') {
+    // Endings only. The verb itself stays put so the conjugation is the one
+    // thing changing, which is the whole point of the drill. Patterns whose
+    // ending is an auxiliary belong to that drill instead, or the two modes
+    // would be the same mode on the same sentences. The ending slot has to
+    // exist: several N4 patterns bake the form into the verb and expose no
+    // ending, so asking to rotate one there yields a sentence that never
+    // moves — a drill in name only.
+    if (!slots.includes('verb') || !sentence.slots['ending'] || hasGrammarAuxiliary(sentence)) return []
+    return ['ending']
+  }
+  if (focus === 'auxiliary') {
+    // ～たい, ～ている, ～てもいい, ～なければならない, ～べき: the pattern
+    // supplies the auxiliary and the ending slot inflects it.
+    if (!hasGrammarAuxiliary(sentence)) return []
+    return ['ending']
+  }
+  if (focus === 'adjective') {
+    // Alternate the adjective and its ending: 面白いです → 新しいです →
+    // 新しくないです. Both halves of an adjective predicate get practised.
+    if (!slots.includes('adjective')) return []
+    return ['adjective', 'ending']
+  }
+  if (focus === 'adverb') {
+    if (!slots.includes('adverb')) return []
+    return ['adverb']
+  }
+  // Particles rotate nothing; `focusServes` is what answers for them.
+  if (focus === 'particle') return []
+  // Nouns: every slot that is not the predicate or its ending.
+  return slots.filter((slot) => slot !== 'verb' && slot !== 'adjective' && slot !== 'ending' && slot !== 'adverb')
+}
+
+/** Whether this sentence can carry the focus at all. */
+export function focusServes(sentence: GeneratedPreviewSentence, focus: HeroSwapFocus): boolean {
+  if (focus === 'particle') return particleSegments(sentence).length > 0
+  return focusSlotsFor(sentence, focus).length > 0
+}
+
+/** The case particles this sentence shows, for the contrast stream and audit. */
+export function particlesIn(sentence: GeneratedPreviewSentence): string[] {
+  return particleSegments(sentence)
+}
 
 /**
  * The sweep queue for a focused sentence, or null when this sentence cannot
@@ -156,24 +285,19 @@ const FOCUS_ROTATIONS = 5
  * the learner cannot practise on.
  */
 function focusedSweepQueue(sentence: GeneratedPreviewSentence, focus: HeroSwapFocus): string[] | null {
-  const slots = orderedSwappableSlotKeys(sentence)
-  if (focus === 'verb') {
-    // Endings only. The verb itself stays put so the conjugation is the one
-    // thing changing, which is the whole point of the drill.
-    if (!slots.includes('verb')) return null
-    return Array.from({ length: FOCUS_ROTATIONS }, () => 'ending')
-  }
-  if (focus === 'adjective') {
-    // Alternate the adjective and its ending: 面白いです → 新しいです →
-    // 新しくないです. Both halves of an adjective predicate get practised.
-    if (!slots.includes('adjective')) return null
-    return Array.from({ length: FOCUS_ROTATIONS }, (_, index) => (index % 2 === 0 ? 'adjective' : 'ending'))
-  }
-  // Nouns: every slot that is not the predicate or its ending, cycled until the
-  // rotation budget is spent. A one-noun sentence still gets five turns at it.
-  const nouns = slots.filter((slot) => slot !== 'verb' && slot !== 'adjective' && slot !== 'ending')
-  if (!nouns.length) return null
-  return Array.from({ length: FOCUS_ROTATIONS }, (_, index) => nouns[index % nouns.length]!)
+  /*
+   * Particles are the one part of speech that cannot be swapped in place.
+   * Which particle a noun takes is decided by the predicate — 山に登る but
+   * 高校で飲む — so replacing it inside a fixed sentence produces Japanese
+   * that is simply wrong, which is why the generator will not do it. The drill
+   * is a contrast instead: no rotations, and the stream builder picks each next
+   * pattern for a particle the last one did not use.
+   */
+  if (focus === 'particle') return particleSegments(sentence).length ? [] : null
+
+  const slots = focusSlotsFor(sentence, focus)
+  if (!slots.length) return null
+  return Array.from({ length: FOCUS_ROTATIONS }, (_, index) => slots[index % slots.length]!)
 }
 
 function orderedSwappableSlotKeys(sentence: GeneratedPreviewSentence): string[] {
@@ -367,15 +491,27 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
   // seeded off the stream's own seed so two streams don't all start the same
   // direction, but stable within one stream (no Math.random mid-render).
   let sweepForward = Math.abs(sequenceSeed) % 2 === 0
+  /** Particles shown by the previous step, so the next one can differ. */
+  let lastParticles = new Set<string>()
 
   // Each pass appends a base sentence plus however many rotations that sentence
   // supports, so the bound is on emitted steps rather than on passes.
   for (let index = 0; steps.length < stepCount; index++) {
     // A coprime stride walks through every available pattern before repeating.
     const pattern = patterns[(start + index * stride) % patterns.length]!
-    // A level whose patterns all fail to generate would otherwise spin forever
-    // now that the loop counts steps instead of passes.
-    if (index >= stepCount * 4) break
+    /*
+     * A level whose patterns all fail to generate would otherwise spin forever
+     * now that the loop counts steps instead of passes. The bound has to clear
+     * the whole pattern list as well as the step budget: the stride is coprime,
+     * so every pattern is reached within `patterns.length` passes, and a focus
+     * that only one pattern serves — adverbs, on n5-09 — was starved at small
+     * step counts, which is exactly what the hero's two-step first build asks
+     * for. It came back empty, and an empty stream is a blank hero. Three laps
+     * rather than one, because each lap re-enters a pattern on fresh seeds:
+     * the one adverb pattern can fail to rotate on a given seed, and with a
+     * single lap that failure was the whole stream.
+     */
+    if (index >= Math.max(stepCount * 4, patterns.length * 3)) break
     const candidates: GeneratedPreviewSentence[] = []
     // Rotation has to re-enter the generator on the *same* seed that produced
     // the chosen sentence, holding every other slot fixed, so remember which
@@ -418,8 +554,21 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
     const favouringCandidates = favouriteWords.size
       ? pool.filter((candidate) => [...favouriteWords].some((word) => candidate.japanese.includes(word)))
       : []
-    const sentence = selectMostDiverse(favouringCandidates.length ? favouringCandidates : pool, tracker)
+    /*
+     * The particle drill is a contrast rather than a swap, so its variety has
+     * to come from which sentence is chosen. Prefer a candidate showing a
+     * particle the last step did not, and fall back to any that shows one at
+     * all rather than blanking the step.
+     */
+    let biasedPool = favouringCandidates.length ? favouringCandidates : pool
+    if (focus === 'particle') {
+      const carrying = biasedPool.filter((candidate) => particlesIn(candidate).length)
+      const fresh = carrying.filter((candidate) => particlesIn(candidate).some((particle) => !lastParticles.has(particle)))
+      biasedPool = fresh.length ? fresh : carrying
+    }
+    const sentence = selectMostDiverse(biasedPool, tracker)
     if (!sentence) continue
+    if (focus === 'particle') lastParticles = new Set(particlesIn(sentence))
     tracker.add(sentence)
     {
       if (linkedFormCandidates.length) {
@@ -470,6 +619,7 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
     const baseSeed = seedBySentence.get(sentence)
     let slotSeeds: Record<string, number> = {}
     let avoidWords: Record<string, string> = {}
+    let rotations = 0
     const endingHistory: string[] = []
     for (let position = 0; baseSeed !== undefined && position < sweepQueue.length && steps.length < stepCount; position++) {
       const slot = sweepQueue[position]!
@@ -488,8 +638,17 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
         slotWidths: HERO_SLOT_WIDTHS,
         templateRefresh: false,
       })
+      rotations += 1
       current = next.frame
     }
+    /*
+     * A focused sentence that produced no rotation is a still frame wearing a
+     * drill's name: the slot was there but every candidate for it failed the
+     * naturalness or single-slot check. Drop it and let the walk find a
+     * sentence that can actually be worked. Particles are exempt — that drill
+     * is the sentence changing, so it has no rotations by design.
+     */
+    if (focus && focus !== 'particle' && rotations === 0) steps.pop()
   }
 
   return steps
@@ -512,7 +671,23 @@ export function buildHeroSteps(
   const cached = STEPS_CACHE.get(cacheKey)
   if (cached) return cached
 
-  const steps = buildDatabaseHeroSteps(level, sequenceSeed, stepCount, focus, favouriteWords)
+  /*
+   * A focus that no pattern at this level can serve builds nothing, and an
+   * empty stream does not just look blank — the hero stops there. It only
+   * auto-advances with two steps or more, so it never reaches the rollover
+   * that would carry it to the next level, and the blank is permanent.
+   *
+   * The dashboard already closes a focus off at levels it cannot serve, but
+   * the two can disagree for a moment: raising the difficulty switches the
+   * requested level immediately while the hero keeps showing the old one until
+   * its replacement stream is ready. Falling back to the ordinary sweep means
+   * the worst case in that moment is a drill that has not started yet, rather
+   * than a dashboard with nothing on it.
+   */
+  const focused = buildDatabaseHeroSteps(level, sequenceSeed, stepCount, focus, favouriteWords)
+  const steps = focus && !focused.length
+    ? buildDatabaseHeroSteps(level, sequenceSeed, stepCount, undefined, favouriteWords)
+    : focused
   STEPS_CACHE.set(cacheKey, steps)
   return steps
 }
