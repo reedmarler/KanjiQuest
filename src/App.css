@@ -15856,6 +15856,9 @@ button.counter-example {
 
 .trace-canvas-stack {
   position: relative;
+  /* TraceCanvas sets --trace-stack-max (its natural size) and --trace-cells
+     (how many cells are stacked down the page, 1 when they run across). */
+  width: min(100%, var(--trace-stack-max, 21rem));
   border: 1px dashed color-mix(in srgb, var(--sakura) 40%, var(--border));
   border-radius: 12px;
   background: var(--surface-2);
@@ -15917,6 +15920,119 @@ button.counter-example {
 .trace-canvas-ink {
   cursor: crosshair;
   touch-action: none;
+}
+
+/* ---------------------------------------------------------------------------
+   The beginner deck on a phone
+
+   Every screen in this deck was laid out for a width it does not get on a
+   phone. The top rows are three fixed-width controls that come to more than
+   the viewport, so they overlapped; the flashcard's example and tracing box
+   are each capped in rem alone, so together they were taller than the screen.
+   The sizes here are capped against the viewport's own height as well, so a
+   screen's worth of content is a screen.
+   --------------------------------------------------------------------------- */
+@media (max-width: 720px) {
+  .beginner-top-actions {
+    gap: 0.35rem;
+  }
+
+  .beginner-action-btn {
+    min-width: 0;
+    padding-inline: 0.55rem;
+  }
+
+  /* Still the loudest of the three, but 9rem of it pushed Next off the edge. */
+  .beginner-speak-btn {
+    width: auto;
+    min-width: 6rem;
+    padding-inline: 1rem;
+  }
+
+  /* The quiz row carries a caption as well, and that is what landed on top of
+     the buttons either side of it. The speaker reads as tappable without it,
+     and the example above it keeps its own replay hint. */
+  .beginner-quiz-replay-note {
+    display: none;
+  }
+
+  .beginner-quiz-nav-btn {
+    width: auto;
+    padding-inline: 0.5rem;
+    font-size: 0.64rem;
+  }
+
+  /* The flashcard: the example and the box you copy it into, on one screen.
+     21rem each is 756px of squares on an 852px phone, so the box was always
+     half off the bottom. */
+  .beginner-write-layout .stroke-order-animation.is-hero,
+  .beginner-write-layout .stroke-order-animation.is-hero .stroke-order-char,
+  .beginner-write-layout .beginner-static-word-example,
+  .beginner-write-layout .beginner-static-word-example span,
+  .beginner-write-layout .trace-canvas-stack {
+    width: min(100%, var(--trace-stack-max, 21rem), 33dvh);
+  }
+
+  /* A word written down the page instead of across it: every cell is as wide
+     as the panel, so what has to be capped is the height of the whole stack. */
+  .trace-canvas-stack.is-vertical {
+    width: min(100%, var(--trace-stack-max), calc(56dvh / var(--trace-cells)));
+  }
+
+  /* The revealed meaning shares the panel's top edge with Clear. Centred in a
+     panel this narrow it ran underneath the button, so it takes the left of
+     the strip and leaves the corner to Clear. */
+  .trace-canvas-overlay {
+    justify-content: flex-start;
+    padding-inline: 0.7rem 5.2rem;
+  }
+
+  .beginner-quiz-meaning--in-write-box {
+    width: auto;
+    max-width: 100%;
+    text-align: left;
+  }
+
+  /* The row's characters belong on one line: the row is the unit being
+     learned, and あいうえお broken as four and one reads as two groups. */
+  .beginner-complete-chars {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+    width: 100%;
+  }
+
+  .beginner-complete-chars button {
+    flex: 1 1 0;
+    width: auto;
+    height: auto;
+    min-width: 0;
+    max-width: 3.35rem;
+    aspect-ratio: 1;
+    font-size: clamp(1.5rem, 9vw, 2.35rem);
+  }
+
+  .beginner-complete-chars .stroke-order-animation,
+  .beginner-complete-chars .stroke-order-char {
+    width: 100%;
+  }
+
+  .beginner-card-complete {
+    padding-inline: 1rem;
+  }
+
+  /* Two buttons side by side leaves each about seven characters wide, which
+     broke "Start listening + writing" over four lines and turned it into a
+     block. One under the other, they read as what they are. */
+  .beginner-complete-actions {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+
+  .beginner-complete-actions .btn-primary {
+    grid-column: 1;
+    justify-self: stretch;
+    width: 100%;
+  }
 }
 
 @media (max-width: 430px) {

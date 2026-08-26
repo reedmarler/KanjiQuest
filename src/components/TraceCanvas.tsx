@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 
 interface TraceCanvasProps {
   char: string
@@ -17,6 +17,29 @@ const SIZE = 300
 const INK_WIDTH = 18
 /** How much of a cell's height the printed guide glyph fills. */
 const GLYPH_FONT_RATIO = 0.82
+
+/** The app's phone breakpoint, the same one App.css drops the zoom at. */
+const NARROW = '(max-width: 720px)'
+
+/**
+ * A word's cells run left to right on a wide screen and top to bottom on a
+ * phone. Laid out in a row on a phone, a two-character word had to share the
+ * screen's width between both glyphs and came out half the size of the single
+ * characters the learner had just been practising; down the page each cell is
+ * as wide as the panel. The canvas is one bitmap, so this cannot be a media
+ * query — its dimensions change, not just its layout.
+ */
+function useNarrowViewport() {
+  const [narrow, setNarrow] = useState(() => window.matchMedia(NARROW).matches)
+  useEffect(() => {
+    const list = window.matchMedia(NARROW)
+    const update = () => setNarrow(list.matches)
+    update()
+    list.addEventListener('change', update)
+    return () => list.removeEventListener('change', update)
+  }, [])
+  return narrow
+}
 
 function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) {
   const rect = canvas.getBoundingClientRect()
@@ -43,14 +66,16 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
 
   const chars = [...char]
   const charCount = Math.max(1, chars.length)
-  const width = SIZE * charCount
-  const height = SIZE
+  const vertical = useNarrowViewport() && charCount > 1
+  const width = vertical ? SIZE : SIZE * charCount
+  const height = vertical ? SIZE * charCount : SIZE
   // A single character keeps its original large square; a word gets one
   // square cell per character instead of squeezing every glyph into that
-  // same square, which was illegible.
+  // same square, which was illegible. Stacked, the width is one cell's worth
+  // and CSS caps it against the viewport's height instead.
   const stackWidthRem = charCount <= 1
     ? (compactSingleCharacter ? 13 : 21)
-    : charCount * 15
+    : vertical ? 21 : charCount * 15
 
   // A new character means a fresh guide and a blank page — stale ink from the
   // previous character must not linger under the next one.
@@ -65,14 +90,16 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
         ctx.textBaseline = 'middle'
         ctx.font = `${Math.round(SIZE * GLYPH_FONT_RATIO)}px 'Noto Sans JP', sans-serif`
         chars.forEach((ch, index) => {
-          ctx.fillText(ch, SIZE * (index + 0.5), height / 2 + SIZE * 0.04)
+          const cell = SIZE * (index + 0.5)
+          if (vertical) ctx.fillText(ch, width / 2, cell + SIZE * 0.04)
+          else ctx.fillText(ch, cell, height / 2 + SIZE * 0.04)
         })
       }
     }
 
     const ink = inkCanvasRef.current
     if (ink) ink.getContext('2d')!.clearRect(0, 0, width, height)
-  }, [char, showGuide])
+  }, [char, showGuide, vertical])
 
   function clearInk() {
     const ink = inkCanvasRef.current
@@ -128,8 +155,15 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
   return (
     <div className="trace-canvas">
       <div
-        className="trace-canvas-stack"
-        style={{ touchAction: 'none', aspectRatio: `${width} / ${height}`, width: `min(100%, ${stackWidthRem}rem)` }}
+        className={`trace-canvas-stack${vertical ? ' is-vertical' : ''}`}
+        style={{
+          touchAction: 'none',
+          aspectRatio: `${width} / ${height}`,
+          // A custom property rather than a width, so a media query can cap a
+          // stacked word against the viewport's height without !important.
+          ['--trace-stack-max' as string]: `${stackWidthRem}rem`,
+          ['--trace-cells' as string]: vertical ? charCount : 1,
+        }}
       >
         <canvas ref={guideCanvasRef} width={width} height={height} className="trace-canvas-layer trace-canvas-guide" aria-hidden="true" />
         <canvas
