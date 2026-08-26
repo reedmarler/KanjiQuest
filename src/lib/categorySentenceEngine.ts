@@ -3221,8 +3221,8 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   if (patternId === 'n5-39') {
     // まず本を読みます — ordering an action rather than dating it, so there is
     // no particle and no tense to agree with.
-    let index = Math.abs(options.slotSeeds?.ending ?? seed + 1660) % SEQUENCE_ADVERBIALS.length
-    if (options.avoidWords?.ending && SEQUENCE_ADVERBIALS[index]!.japanese === options.avoidWords.ending) {
+    let index = Math.abs(options.slotSeeds?.sequence ?? options.slotSeeds?.ending ?? seed + 1660) % SEQUENCE_ADVERBIALS.length
+    if (options.avoidWords?.sequence && SEQUENCE_ADVERBIALS[index]!.japanese === options.avoidWords.sequence) {
       index = (index + 1) % SEQUENCE_ADVERBIALS.length
     }
     const step = SEQUENCE_ADVERBIALS[index]!
@@ -3838,9 +3838,14 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     // negative or a variety adjective, bail so another seed or pattern can try.
     const requiredDegree=options.requiredWord ? degreeAdverbs.find(entry => entry.japanese===options.requiredWord) : undefined
     if (requiredDegree && (adjective.noDegree||form.english==='is not')) return null
-    const degree=requiredDegree ?? (adjective.noDegree||form.english==='is not'||Math.abs(seed+583)%3===0
-      ? null
-      : degreeAdverbs[Math.abs(seed+584)%degreeAdverbs.length]!)
+    const canTakeDegree=!adjective.noDegree&&form.english!=='is not'
+    const degreeSeed=options.slotSeeds?.adverb ?? seed+584
+    let degree=requiredDegree ?? (canTakeDegree
+      ? degreeAdverbs[Math.abs(degreeSeed)%degreeAdverbs.length]!
+      : null)
+    if (!requiredDegree&&degree&&options.avoidWords?.adverb===degree.japanese) {
+      degree=degreeAdverbs[(Math.abs(degreeSeed)+1)%degreeAdverbs.length]!
+    }
     const topicEnglish=abstractTopicEnglish(primaryEnglishGloss(topic.preferredTranslation||topic.english))
     const plural=isPluralPhrase(topicEnglish)
     const copula=form.english==='was'?(plural?'were':'was'):form.english==='is not'?(plural?'are not':'is not'):(plural?'are':'is')

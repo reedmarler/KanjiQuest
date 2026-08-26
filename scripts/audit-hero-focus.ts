@@ -35,12 +35,12 @@ interface SlotReading {
   usable: Set<string>
 }
 
-function baseSentence(patternId: string, level: JlptLevel, jlpt: JlptLevel) {
+function baseSentence(patternId: string, level: JlptLevel, jlpt: JlptLevel, focus?: HeroSwapFocus) {
   for (let attempt = 0; attempt < BASE_ATTEMPTS; attempt += 1) {
     const seed = 4001 + attempt * 733
     try {
       const sentence = generatePreviewSentence(jlpt, seed, undefined, patternId, true)
-      if (sentence.japanese && isDashboardSentenceNatural(sentence)) return { sentence, seed }
+      if (sentence.japanese && isDashboardSentenceNatural(sentence) && (!focus || focusServes(sentence, focus))) return { sentence, seed }
     } catch { /* this seed's tag rules ruled every combination out */ }
   }
   return null
@@ -53,7 +53,9 @@ function surfaceOf(sentence: GeneratedPreviewSentence, slot: string): string | u
 
 function readSlot(patternId: string, level: JlptLevel, baseSeed: number, base: GeneratedPreviewSentence, slot: string): SlotReading {
   const anchor = slot === 'ending'
-    ? (base.furigana.some((part) => part.slot === 'adjective') ? 'adjective' : 'verb')
+    ? (base.furigana.some((part) => part.slot === 'adjective')
+      ? 'adjective'
+      : base.furigana.some((part) => part.slot === 'verb') ? 'verb' : 'ending')
     : slot
   const forms = new Set<string>()
   const usable = new Set<string>()
@@ -107,24 +109,26 @@ for (const level of LEVELS) {
     const found = baseSentence(pattern.id, level, pattern.jlpt)
     if (!found) continue
     generated += 1
-    const { sentence, seed } = found
+    const { sentence } = found
     const present = new Set(sentence.furigana.map((part) => part.slot).filter(Boolean) as string[])
 
     for (const focus of FOCUSES) {
-      if (!focusServes(sentence, focus)) continue
+      const focusedFound = focusServes(sentence, focus) ? found : baseSentence(pattern.id, level, pattern.jlpt, focus)
+      if (!focusedFound) continue
+      const { sentence: focusedSentence, seed: focusedSeed } = focusedFound
       const row = rows.get(focus)!
       if (focus === 'particle') {
         // Particles are contrasted between sentences, so a pattern's depth is
         // how many distinct case markers it puts on screen.
-        const shown = new Set(particlesIn(sentence))
+        const shown = new Set(particlesIn(focusedSentence))
         shown.forEach((particle) => particleTally.add(particle))
         row.patterns += 1
         row.reach.push(shown.size)
         row.shown.push(shown.size)
         continue
       }
-      const slots = focusSlotsFor(sentence, focus)
-      const readings = [...new Set(slots)].map((slot) => readSlot(pattern.id, level, seed, sentence, slot))
+      const slots = focusSlotsFor(focusedSentence, focus)
+      const readings = [...new Set(slots)].map((slot) => readSlot(pattern.id, level, focusedSeed, focusedSentence, slot))
       const reach = readings.reduce((sum, reading) => sum + reading.forms.size, 0)
       const shown = readings.reduce((sum, reading) => sum + reading.usable.size, 0)
       // A slot with one reachable form is not a rotation; it is a still frame.
@@ -193,18 +197,36 @@ console.log('\nThe offered levels match what the generator can serve.')
  * one-pattern adverb drill did until the pattern walk was given more laps.
  */
 let empty = 0
+const unexpectedChanges: string[] = []
+const allowedChangedKeys: Partial<Record<HeroSwapFocus, ReadonlySet<string>>> = {
+  verb: new Set(['verb', 'ending']),
+  adjective: new Set(['adjective', 'ending']),
+  adverb: new Set(['adverb', 'sequence']),
+  auxiliary: new Set(['verb', 'ending']),
+}
 for (const focus of FOCUSES) {
   for (const level of HERO_FOCUS_LEVELS[focus]) {
     for (let seed = 0; seed < 6; seed += 1) {
-      if (buildHeroSteps({} as WrongPool, {}, level, seed, 2, focus).length === 0) {
+      const steps = buildHeroSteps({} as WrongPool, {}, level, seed, 2, focus)
+      if (steps.length === 0) {
         console.error(`  ${focus} at ${level} builds nothing on seed ${seed}`)
         empty += 1
+      }
+      const allowed = allowedChangedKeys[focus]
+      if (allowed) {
+        const unexpected = steps.flatMap((step) => step.changed).filter((key) => !allowed.has(key))
+        if (unexpected.length) unexpectedChanges.push(`${focus} at ${level} seed ${seed}: ${unexpected.join(', ')}`)
       }
     }
   }
 }
 if (empty) {
   console.error(`\n${empty} offered focus/level/seed combinations build an empty stream, which paints a blank hero.`)
+  process.exit(1)
+}
+if (unexpectedChanges.length) {
+  console.error('\nA focused stream changed slots outside its stated drill:')
+  unexpectedChanges.forEach((message) => console.error(`  ${message}`))
   process.exit(1)
 }
 console.log('Every offered focus builds a first stream on every seed tried.')

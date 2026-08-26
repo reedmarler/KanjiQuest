@@ -5845,7 +5845,8 @@ body:has(.dashboard) {
 }
 
 @media (max-width: 720px) {
-  .hero h1 { font-size: 2rem; }
+  .hero h1,
+  .tool-menu-heading h1 { font-size: 2rem; }
   .dashboard {
     /* Reserved for the topbar's tallest state (Mode + Swap stacked) so
        picking a mode never shifts the page underneath it. */
@@ -8563,8 +8564,9 @@ body:has(.dashboard) {
 
 .tool-menu-heading h1 {
   color: var(--text);
-  font-size: 1.55rem;
-  line-height: 1.05;
+  font-size: 2.5rem;
+  line-height: 1.18;
+  padding-bottom: 0.06em;
 }
 
 .tool-menu-heading p {
@@ -15758,6 +15760,33 @@ button.counter-example {
     min-width: 0;
     padding-top: 0;
     border-top: none;
+  }
+}
+
+/* On phones, the animated hiragana is a compact reference while the space
+   the learner actually writes in gets the useful width. Keep Katakana and
+   First Kanji unchanged until their denser character layouts need the same
+   treatment. */
+@media (max-width: 719px) {
+  body:has(.beginner-learner--hiragana) .app {
+    padding-inline: 0.65rem;
+  }
+
+  .beginner-learner--hiragana {
+    padding-inline: 0;
+  }
+
+  .beginner-learner--hiragana > .beginner-card.is-revealed {
+    padding-inline: 0.4rem;
+  }
+
+  .beginner-learner--hiragana .beginner-write-layout .beginner-char-listen .stroke-order-animation.is-hero,
+  .beginner-learner--hiragana .beginner-write-layout .beginner-char-listen .stroke-order-char {
+    width: min(52vw, 11rem);
+  }
+
+  .beginner-learner--hiragana .beginner-write-layout .beginner-write-section {
+    padding-top: 0.4rem;
   }
 }
 

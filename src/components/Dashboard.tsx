@@ -402,12 +402,18 @@ export function Dashboard({
   // chosen yet is 'picking', which surfaces the mode name-button below rather
   // than guessing which mode the learner wants.
   const modeToggleOn = settingsMode !== 'none'
-  // Raising the complexity can take the level out from under a chosen drill —
-  // plain verb conjugation only exists at N5 — and leaving it selected would
-  // build an empty stream. Drop back to the ordinary sweep instead.
+  // Entering Grammar mode should start a drill, not leave the ordinary sweep
+  // running under a Grammar label. Likewise, raising the complexity can take
+  // the level out from under a chosen drill; fall back to the first focus the
+  // new level can serve instead of silently dropping out of focused practice.
   useEffect(() => {
-    setSwapFocus((current) => (current && !focusAvailableAt(current, heroJlptForComplexity(complexity)) ? null : current))
-  }, [complexity])
+    const level = heroJlptForComplexity(complexity)
+    setSwapFocus((current) => {
+      if (current && focusAvailableAt(current, level)) return current
+      if (!grammarMode) return current
+      return HERO_SWAP_FOCUS_OPTIONS.find((option) => option.focus && focusAvailableAt(option.focus, level))?.focus ?? null
+    })
+  }, [complexity, grammarMode])
 
   const activeFocusLabel = HERO_SWAP_FOCUS_OPTIONS.find((option) => option.focus === swapFocus)?.label ?? 'Choose focus'
   /*

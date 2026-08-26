@@ -180,6 +180,12 @@ function particleSegments(sentence: GeneratedPreviewSentence): string[] {
  */
 const CASE_PARTICLES = new Set(['は', 'が', 'を', 'に', 'で', 'へ', 'と', 'から', 'まで', 'より', 'の'])
 
+/** Existing generated frames whose predicate is an adjective even though the
+ *  older frame schema exposes the complete predicate through `ending` rather
+ *  than an `adjective` slot. They are still safe single-slot rotations: the
+ *  subject/topic stays fixed while the description changes. */
+const ADJECTIVE_ENDING_PATTERNS = new Set(['n4-29', 'n4-30', 'n4-33'])
+
 /**
  * Which slots a focus rotates, in the order it rotates them. Empty means the
  * sentence cannot serve the focus and the stream should move to another
@@ -189,8 +195,8 @@ const CASE_PARTICLES = new Set(['は', 'が', 'を', 'に', 'で', 'へ', 'と',
 export const HERO_FOCUS_SLOTS: Record<HeroSwapFocus, string> = {
   noun: 'every slot that is not the predicate or its ending',
   verb: 'ending, on patterns whose ending is a plain verb conjugation',
-  adjective: 'adjective and ending, alternating',
-  adverb: 'adverb',
+  adjective: 'adjective or complete adjective predicate, including its ending',
+  adverb: 'manner, degree, and sequence adverbials',
   auxiliary: 'ending, on patterns built around a grammar auxiliary',
   particle: 'none — the sentence changes instead',
 }
@@ -204,18 +210,18 @@ export const HERO_FOCUS_SLOTS: Record<HeroSwapFocus, string> = {
  * produces an empty stream, and an empty stream is a blank hero: the drill
  * has to be closed off at those levels rather than offered and broken.
  *
- * The thin ones are thin for a reason. Plain verb conjugation only exists at
- * N5 because every pattern above it wraps the predicate in a grammar form, and
- * that form is what the auxiliary drill rotates instead. Adjective predicates
- * and the one adverb-bearing pattern are both N5-only in the pattern catalog.
+ * Plain verb conjugation only exists at N5 because every pattern above it wraps
+ * the predicate in a grammar form, and that form is what the auxiliary drill
+ * rotates instead. Adjective predicates and degree adverbs also have reviewed
+ * N4 frames; sequence adverbials deepen the N5 adverb pool.
  */
 export const HERO_FOCUS_LEVELS: Record<HeroSwapFocus, readonly JlptLevel[]> = {
   noun: ['N5', 'N4', 'N3', 'N2', 'N1'],
   particle: ['N5', 'N4', 'N3', 'N2', 'N1'],
   verb: ['N5'],
   auxiliary: ['N4', 'N2'],
-  adjective: ['N5'],
-  adverb: ['N5'],
+  adjective: ['N5', 'N4'],
+  adverb: ['N5', 'N4'],
 }
 
 export function focusAvailableAt(focus: HeroSwapFocus, level: JlptLevel): boolean {
@@ -254,12 +260,14 @@ export function focusSlotsFor(sentence: GeneratedPreviewSentence, focus: HeroSwa
   if (focus === 'adjective') {
     // Alternate the adjective and its ending: 面白いです → 新しいです →
     // 新しくないです. Both halves of an adjective predicate get practised.
-    if (!slots.includes('adjective')) return []
-    return ['adjective', 'ending']
+    if (slots.includes('adjective')) return ['adjective', 'ending']
+    if (slots.includes('ending') && ADJECTIVE_ENDING_PATTERNS.has(sentence.frameId)) return ['ending']
+    return []
   }
   if (focus === 'adverb') {
-    if (!slots.includes('adverb')) return []
-    return ['adverb']
+    if (slots.includes('adverb')) return ['adverb']
+    if (slots.includes('sequence')) return ['sequence']
+    return []
   }
   // Particles rotate nothing; `focusServes` is what answers for them.
   if (focus === 'particle') return []
@@ -420,7 +428,9 @@ function rotateOneSlot(
   // (the 'verb' segment normally, or 'adjective' for a verbless adjective+
   // copula predicate like n5-17's Xが好きです), since that's the conjugated
   // ending's own surface form.
-  const endingAnchor = current.segments?.some((segment) => segment.key === 'adjective') ? 'adjective' : 'verb'
+  const endingAnchor = current.segments?.some((segment) => segment.key === 'adjective')
+    ? 'adjective'
+    : current.segments?.some((segment) => segment.key === 'verb') ? 'verb' : 'ending'
   const currentText = current.segments?.find((segment) => segment.key === (slot === 'ending' ? endingAnchor : slot))?.text
   // A slot's seeded pick is only reproducible if the candidate pool it was
   // drawn from stays the same shape on every later call — and avoidWords
@@ -493,6 +503,9 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
   let sweepForward = Math.abs(sequenceSeed) % 2 === 0
   /** Particles shown by the previous step, so the next one can differ. */
   let lastParticles = new Set<string>()
+  /** Whole-stream usage keeps the particle drill moving through its complete
+   *  marker pool rather than bouncing between two locally fresh choices. */
+  const particleUsage = new Map<string, number>()
 
   // Each pass appends a base sentence plus however many rotations that sentence
   // supports, so the bound is on emitted steps rather than on passes.
@@ -564,11 +577,24 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
     if (focus === 'particle') {
       const carrying = biasedPool.filter((candidate) => particlesIn(candidate).length)
       const fresh = carrying.filter((candidate) => particlesIn(candidate).some((particle) => !lastParticles.has(particle)))
-      biasedPool = fresh.length ? fresh : carrying
+      const contrastPool = fresh.length ? fresh : carrying
+      const usageScore = (candidate: GeneratedPreviewSentence) => particlesIn(candidate)
+        .reduce((score, particle) => score + (particleUsage.get(particle) ?? 0), 0)
+      const lowestUsage = Math.min(...contrastPool.map(usageScore))
+      biasedPool = contrastPool.filter((candidate) => usageScore(candidate) === lowestUsage)
+    } else if (focus) {
+      // A pattern can generate both focused and unfocused variants (n4-30 may
+      // omit its optional degree adverb). Choose from serving candidates here,
+      // before diversity selection, so the selected sentence cannot silently
+      // fall back to the ordinary all-slot sweep under a Grammar label.
+      biasedPool = biasedPool.filter((candidate) => focusServes(candidate, focus))
     }
     const sentence = selectMostDiverse(biasedPool, tracker)
     if (!sentence) continue
-    if (focus === 'particle') lastParticles = new Set(particlesIn(sentence))
+    if (focus === 'particle') {
+      lastParticles = new Set(particlesIn(sentence))
+      lastParticles.forEach((particle) => particleUsage.set(particle, (particleUsage.get(particle) ?? 0) + 1))
+    }
     tracker.add(sentence)
     {
       if (linkedFormCandidates.length) {
@@ -624,7 +650,9 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
     for (let position = 0; baseSeed !== undefined && position < sweepQueue.length && steps.length < stepCount; position++) {
       const slot = sweepQueue[position]!
       if (slot === 'ending') {
-        const endingAnchor = current.segments?.some((segment) => segment.key === 'adjective') ? 'adjective' : 'verb'
+        const endingAnchor = current.segments?.some((segment) => segment.key === 'adjective')
+          ? 'adjective'
+          : current.segments?.some((segment) => segment.key === 'verb') ? 'verb' : 'ending'
         const anchorText = current.segments?.find((segment) => segment.key === endingAnchor)?.text
         if (anchorText && !endingHistory.includes(anchorText)) endingHistory.push(anchorText)
       }
