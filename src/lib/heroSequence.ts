@@ -228,8 +228,10 @@ export const HERO_FOCUS_SLOTS: Record<HeroSwapFocus, string> = {
  *
  * Plain verb conjugation only exists at N5 because every pattern above it wraps
  * the predicate in a grammar form, and that form is what the auxiliary drill
- * rotates instead. Adjectives run up to N2: the N3 comparison and quotation
- * frames and the N2 concessions all describe with one, and each now rotates it.
+ * rotates instead — and since every level above N5 is built that way, the
+ * auxiliary drill runs on all four of them. Adjectives run up to N2: the N3
+ * comparison and quotation frames and the N2 concessions all describe with
+ * one, and each now rotates it.
  * Degree adverbs also have reviewed N4 frames; sequence adverbials deepen the
  * N5 adverb pool.
  */
@@ -237,7 +239,7 @@ export const HERO_FOCUS_LEVELS: Record<HeroSwapFocus, readonly JlptLevel[]> = {
   noun: ['N5', 'N4', 'N3', 'N2', 'N1'],
   particle: ['N5', 'N4', 'N3', 'N2', 'N1'],
   verb: ['N5'],
-  auxiliary: ['N4', 'N2'],
+  auxiliary: ['N4', 'N3', 'N2', 'N1'],
   adjective: ['N5', 'N4', 'N3', 'N2'],
   adverb: ['N5', 'N4'],
 }
