@@ -15897,6 +15897,14 @@ button.counter-example {
   font-size: 0.66rem;
 }
 
+/* A square, not a pill: stretched across the middle of the row the speaker
+   read as a third nav button rather than one control for one job. The quiz
+   screen's speaker carries a caption beside its icon, so it keeps its pill. */
+.beginner-speak-btn:not(.beginner-speak-btn--quiz) {
+  width: 3rem;
+  border-radius: 14px;
+}
+
 .beginner-speak-btn:hover {
   opacity: 0.9;
 }
@@ -16143,6 +16151,12 @@ button.counter-example {
     padding-inline: 0.4rem;
   }
 
+  /* Square in the middle of its column rather than stretched across it. */
+  .beginner-top-actions .beginner-speak-btn:not(.beginner-speak-btn--quiz) {
+    width: 3rem;
+    justify-self: center;
+  }
+
   /* The quiz row carries a caption as well, and that is what landed on top of
      the buttons either side of it. The speaker reads as tappable without it,
      and the example above it keeps its own replay hint. */
@@ -16162,9 +16176,27 @@ button.counter-example {
   .beginner-write-layout .stroke-order-animation.is-hero,
   .beginner-write-layout .stroke-order-animation.is-hero .stroke-order-char,
   .beginner-write-layout .beginner-static-word-example,
-  .beginner-write-layout .beginner-static-word-example span,
-  .beginner-write-layout .trace-canvas-stack {
+  .beginner-write-layout .beginner-static-word-example span {
     width: min(100%, var(--trace-stack-max, 21rem), 33dvh);
+  }
+
+  /* The box you actually write in gets whatever the screen has left rather
+     than the same flat third, which left a card's worth of dead space under
+     it on a tall phone. 25.5rem is everything else the screen spends: the
+     rows above the box, and the page's own padding under it. The 33dvh floor
+     keeps a short screen no worse off than it was. */
+  .beginner-write-layout .trace-canvas-stack {
+    width: min(
+      100%,
+      var(--trace-stack-max, 21rem),
+      max(33dvh, calc(100dvh - 25.5rem))
+    );
+  }
+
+  /* Most of the gap under the card was this padding, on top of the page's
+     own. One of the two is enough on a phone. */
+  .beginner-learner {
+    padding-bottom: 0.05rem;
   }
 
   /* A word written down the page instead of across it: every cell is as wide
@@ -16230,8 +16262,10 @@ button.counter-example {
 }
 
 @media (max-width: 430px) {
+  /* Bottom padding trimmed to match the wider phone rule above — the page's
+     own padding already carries the gap under the card. */
   .beginner-learner {
-    padding: 0.2rem 0.65rem 1.2rem;
+    padding: 0.2rem 0.65rem 0.05rem;
   }
 
   .beginner-mnemonic {
