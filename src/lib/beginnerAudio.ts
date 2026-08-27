@@ -160,23 +160,15 @@ const HIRAGANA_WORD_RECORDINGS: Record<string, string> = {
   'ぽかぽか': 'pokapoka.mp3',
 }
 
-const HIRAGANA_ROW_RECORDINGS: Record<string, string> = {
-  'あ、い、う、え、お': 'a.mp3',
-  'か、き、く、け、こ': 'ka.mp3',
-  'さ、し、す、せ、そ': 'sa.mp3',
-  'た、ち、つ、て、と': 'ta.mp3',
-  'な、に、ぬ、ね、の': 'na.mp3',
-  'は、ひ、ふ、へ、ほ': 'ha.mp3',
-  'ま、み、む、め、も': 'ma.mp3',
-  'や、ゆ、よ': 'ya.mp3',
-  'ら、り、る、れ、ろ': 'ra.mp3',
-  'わ、を、ん': 'wa.mp3',
-  'が、ぎ、ぐ、げ、ご': 'ga.mp3',
-  'ざ、じ、ず、ぜ、ぞ': 'za.mp3',
-  'だ、ぢ、づ、で、ど': 'da.mp3',
-  'ば、び、ぶ、べ、ぼ': 'ba.mp3',
-  'ぱ、ぴ、ぷ、ぺ、ぽ': 'pa.mp3',
-}
+/*
+ * A row is read as its characters in order, played straight through from the
+ * per-kana takes above. There used to be one pre-concatenated file per row,
+ * but those were cut before う was re-recorded, so あ、い、う、え、お still
+ * carried the old take of it. Each of those files was its own kana clips
+ * joined end to end with nothing between them — every row's duration matched
+ * the sum of its parts exactly — so playing the parts reproduces the row it
+ * replaced, and a kana re-recorded later reaches every row it belongs to.
+ */
 
 export type BeginnerAudioKind = 'kana' | 'word' | 'row'
 
@@ -191,6 +183,19 @@ export function findBeginnerAudio(text: string, kind: BeginnerAudioKind): string
     const file = HIRAGANA_WORD_RECORDINGS[normalized]
     return file ? `${import.meta.env.BASE_URL}audio/beginner/hiragana/words/${file}` : undefined
   }
-  const file = HIRAGANA_ROW_RECORDINGS[normalized]
-  return file ? `${import.meta.env.BASE_URL}audio/beginner/hiragana/rows/${file}` : undefined
+  return undefined
+}
+
+/**
+ * The recordings a row is read from, in order — one per character, played
+ * back to back. Undefined unless every character in the row has a recording,
+ * so a partial row falls through to the speech voice rather than reading
+ * itself out with a gap in the middle.
+ */
+export function findBeginnerRowAudio(text: string): string[] | undefined {
+  const characters = text.trim().split('\u3001').map((part) => part.trim()).filter(Boolean)
+  if (characters.length === 0) return undefined
+  const files = characters.map((character) => HIRAGANA_RECORDINGS[character])
+  if (files.some((file) => !file)) return undefined
+  return files.map((file) => `${import.meta.env.BASE_URL}audio/beginner/hiragana/${file}`)
 }

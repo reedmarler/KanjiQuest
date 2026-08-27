@@ -13,7 +13,7 @@
  * fine for a key — hence the key living only in the service's environment.
  */
 
-import { findBeginnerAudio, type BeginnerAudioKind } from './beginnerAudio'
+import { findBeginnerAudio, findBeginnerRowAudio, type BeginnerAudioKind } from './beginnerAudio'
 import { getCachedSpeech, putCachedSpeech, speechCacheKey } from './speechCache'
 import { findStaticAudio } from './staticAudio'
 import { SPEECH_SPEEDS, type SpeechSpeed } from './speechSpeeds'
@@ -328,6 +328,73 @@ function playBlob(
 }
 
 /**
+ * Plays several clips back to back as one utterance: a kana row is read from
+ * its per-character recordings, and the row is what the listener hears, so
+ * the status stays 'playing' across the joins and only one completion fires
+ * at the end. The clips carry their own lead-in and tail, which is all the
+ * spacing the row needs — nothing is inserted between them.
+ */
+function playBlobSequence(
+  blobs: Blob[],
+  volume: number,
+  generation: number,
+  onEnd?: () => void,
+  onPlaybackError?: () => void,
+) {
+  const play = () => {
+    if (generation !== speechGeneration) return
+
+    const audio = getSharedAudio()
+    audio.pause()
+    audio.volume = volume
+    audio.preservesPitch = true
+    audio.playbackRate = 1
+    currentAudio = audio
+
+    let index = 0
+    let settled = false
+
+    const finish = (failed = false) => {
+      if (settled || generation !== speechGeneration) return
+      settled = true
+      audio.onended = null
+      audio.onerror = null
+      currentAudio = null
+      releaseObjectUrl()
+      setActive(null)
+      if (failed) onPlaybackError?.()
+      else onEnd?.()
+    }
+
+    const playNext = () => {
+      if (settled || generation !== speechGeneration) return
+      const blob = blobs[index++]
+      if (!blob) {
+        finish()
+        return
+      }
+      releaseObjectUrl()
+      const url = URL.createObjectURL(blob)
+      currentObjectUrl = url
+      audio.src = url
+      audio.onended = () => playNext()
+      audio.onerror = () => finish(true)
+      try {
+        const started = audio.play()
+        if (started && typeof started.catch === 'function') void started.catch(() => finish(true))
+      } catch {
+        finish(true)
+      }
+    }
+
+    setActive({ token: generation, status: 'playing' })
+    playNext()
+  }
+
+  void (audioPrime ?? Promise.resolve()).then(play)
+}
+
+/**
  * Speaks one sentence, replacing anything already playing. Returns a token
  * identifying this utterance, for matching against `subscribeToSpeech`.
  *
@@ -360,6 +427,30 @@ export function speakJapanese(text: string, options: SpeakOptions = {}): number 
 
   setActive({ token: generation, status: 'loading' })
   primeAudioPlayback()
+
+  const beginnerRow = beginnerRecordingKind === 'row' ? findBeginnerRowAudio(text) : undefined
+  if (beginnerRow) {
+    Promise.all(beginnerRow.map((url) => fetch(url).then((res) => {
+      const isAudio = res.ok && (res.headers.get('content-type') ?? '').startsWith('audio/')
+      if (!isAudio) throw new Error('no Beginner Mode recording')
+      return res.blob()
+    })))
+      .then((blobs) => {
+        if (generation !== speechGeneration) return
+        playBlobSequence(
+          blobs,
+          volume,
+          generation,
+          onEnd,
+          () => speakWithBrowserVoice(text, rate, volume, generation, onEnd),
+        )
+      })
+      .catch(() => {
+        if (generation !== speechGeneration) return
+        speakWithBrowserVoice(text, rate, volume, generation, onEnd)
+      })
+    return generation
+  }
 
   const beginnerUrl = beginnerRecordingKind ? findBeginnerAudio(text, beginnerRecordingKind) : undefined
   if (beginnerUrl) {
