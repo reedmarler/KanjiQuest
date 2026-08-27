@@ -527,7 +527,7 @@ function App() {
 
   if (view === 'additional-tools') {
     return (
-      <div className="app">
+      <div className="app additional-tools-page">
         <ToolMenuPage
           title="Additional"
           eyebrow="STUDY LIBRARY"
