@@ -4674,9 +4674,17 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     // between them the same way the generic verb dispatcher toggles masu/nai,
     // while n2-16 stays as a pattern id (defaulting to the negative half) so
     // nothing that already refers to it by name breaks.
+    //
+    // The past pair is the same recommendation looking back on something that
+    // did not happen the way it should have — 書くべきでした, 書くべきでは
+    // ありませんでした — which is ordinary べき, not a separate grammar point.
+    // Carrying all four here is what gives the Auxiliary Verbs drill something
+    // to rotate: with only the two non-past halves it ran out after one step.
     const bekiVariants = [
       { suffix:'べきです。', english:`${capitalize(subjectEnglish)} should ${verb.english}.`, tags:['obligation','bekida'] },
       { suffix:'べきではありません。', english:`${capitalize(subjectEnglish)} should not ${verb.english}.`, tags:['obligation','bekidewanai'] },
+      { suffix:'べきでした。', english:`${capitalize(subjectEnglish)} should have ${pastParticiple(verb.english)}.`, tags:['obligation','bekida','past'] },
+      { suffix:'べきではありませんでした。', english:`${capitalize(subjectEnglish)} should not have ${pastParticiple(verb.english)}.`, tags:['obligation','bekidewanai','past'] },
     ]
     let endingIndex = options.slotSeeds?.ending !== undefined
       ? Math.abs(options.slotSeeds.ending) % bekiVariants.length
@@ -6079,9 +6087,15 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
     // n4-07 used to be its own hand-duplicated pattern for just the negative
     // half of this same permission/prohibition construction — merged here so
     // the ending toggles between them, same as the べきです/べきではない merge.
+    //
+    // Both halves have an everyday past: 食べてもよかったです is permission
+    // that held then, 食べてはいけませんでした is prohibition that did. They
+    // are what takes this drill past a single rotation.
     endingVariants = [
       { form: appendForm(n4Forms.te,'もいいです'), english: `may ${base}` },
       { form: appendForm(n4Forms.te,'はいけません'), english: `must not ${base}` },
+      { form: appendForm(n4Forms.te,'もよかったです'), english: `${copulaPast} allowed to ${base}` },
+      { form: appendForm(n4Forms.te,'はいけませんでした'), english: `${copulaPast} not allowed to ${base}` },
     ]
   } else if (patternId === 'n4-08') {
     endingVariants = [
@@ -6113,10 +6127,10 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
   if (!form) return null
   if (!alignN4CrossSlotContext(patternId,verb,vocabulary,result,seed,options)) return null
   // The eating-prohibition idiom (must not eat AT a place, no specific food
-  // named) only applies to the negative half now that n4-06/n4-07 are one
-  // toggleable pattern — "may eat sushi at a restaurant" (the affirmative
-  // half) still wants its object.
-  const objectlessEatingProhibition=(patternId==='n4-06'||patternId==='n4-07') && verb.id==='taberu-location' && endingIndex===1
+  // named) only applies to the prohibition halves now that n4-06/n4-07 are one
+  // toggleable pattern — "may eat sushi at a restaurant" (the permission half,
+  // past or present) still wants its object.
+  const objectlessEatingProhibition=(patternId==='n4-06'||patternId==='n4-07') && verb.id==='taberu-location' && (endingIndex===1||endingIndex===3)
   if (objectlessEatingProhibition) {
     delete result.filled.object
     delete result.slotTagMatches.object

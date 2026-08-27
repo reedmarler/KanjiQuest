@@ -14,7 +14,12 @@ interface GrammarSpec {
   id: string
   frameId: string
   level: DrillJlptLevel
-  target: { type: 'literal'; text: string; occurrence?: number } | { type: 'slot'; slot: string; suffix: string; alternatives: string[] }
+  target:
+    | { type: 'literal'; text: string; occurrence?: number }
+    /* `readingSuffix` is only needed when the suffix carries kanji: the answer
+     * is split off both the text and the reading, and 始めます never ends the
+     * reading — はじめます does. */
+    | { type: 'slot'; slot: string; suffix: string; readingSuffix?: string; alternatives: string[] }
   pattern: string
   meaning: string
   choices?: Choice[]
@@ -81,7 +86,7 @@ const grammarSpecs: GrammarSpec[] = [
   // Alternatives must share the same stem as the answer's own suffix — ことにします/
   // ようにします need the dictionary form, てみます needs the te-form, so only
   // other masu-stem endings are safe distractors here.
-  { id: 'begin-doing', frameId: 'n4-10', level: 'N4', target: { type: 'slot', slot: 'verb', suffix: '始めます', alternatives: ['ます', 'たいです', 'ました'] }, pattern: '始める', meaning: 'begin doing' },
+  { id: 'begin-doing', frameId: 'n4-10', level: 'N4', target: { type: 'slot', slot: 'verb', suffix: '始めます', readingSuffix: 'はじめます', alternatives: ['ます', 'たいです', 'ました'] }, pattern: '始める', meaning: 'begin doing' },
   // The stem here is the て-form with て itself stripped (買っ, not 買って), so
   // only alternatives that themselves start with て reconstruct correctly.
   { id: 'prepare-in-advance', frameId: 'n3-05', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ておきます', alternatives: ['てみます', 'てしまいます', 'てあげます'] }, pattern: 'ておく', meaning: 'do in advance / preparation' },
@@ -92,8 +97,13 @@ const grammarSpecs: GrammarSpec[] = [
 
   // Level 1 top-up — existing base-engine/smallVerbPool patterns not yet tested.
   { id: 'no-need-to', frameId: 'n2-04', level: 'N2', target: { type: 'literal', text: 'ことはありません。' }, pattern: 'ことはない', meaning: 'no need to', choices: [{ text: 'はずです。' }, { text: 'べきではありません。' }, { text: 'かねます。' }] },
-  { id: 'expected-to', frameId: 'n2-06', level: 'N2', target: { type: 'literal', text: 'はずです。' }, pattern: 'はずだ', meaning: 'expected to', choices: [{ text: 'ことはありません。' }, { text: 'べきではありません。' }, { text: 'かねます。' }] },
-  { id: 'should-not', frameId: 'n2-16', level: 'N2', target: { type: 'literal', text: 'べきではありません。' }, pattern: 'べきではない', meaning: 'should not', choices: [{ text: 'ことはありません。' }, { text: 'はずです。' }, { text: 'かねます。' }] },
+  // はず and べき put the verb and its ending in one furigana part (洗うはず
+  // です。), so a literal target finds nothing to blank — these split the
+  // ending off the predicate instead. Every alternative attaches to the same
+  // dictionary form the answer does, which is why かねます (masu-stem only)
+  // is not among them.
+  { id: 'expected-to', frameId: 'n2-06', level: 'N2', target: { type: 'slot', slot: 'verb', suffix: 'はずです。', alternatives: ['はずがありません。', 'べきです。', 'ことはありません。'] }, pattern: 'はずだ', meaning: 'expected to' },
+  { id: 'should-not', frameId: 'n2-16', level: 'N2', target: { type: 'slot', slot: 'verb', suffix: 'べきではありません。', alternatives: ['べきです。', 'はずです。', 'ことはありません。'] }, pattern: 'べきではない', meaning: 'should not' },
   { id: 'cannot-readily', frameId: 'n2-18', level: 'N2', target: { type: 'literal', text: 'かねます。' }, pattern: 'かねる', meaning: 'cannot readily', choices: [{ text: 'ことはありません。' }, { text: 'はずです。' }, { text: 'べきではありません。' }] },
   { id: 'no-longer', frameId: 'n3-33', level: 'N3', target: { type: 'literal', text: 'なくなりました。' }, pattern: 'なくなる', meaning: 'no longer', choices: [{ text: 'ないでください。' }, { text: 'ことはありません。' }, { text: 'べきではありません。' }] },
   { id: 'please-dont', frameId: 'n3-39', level: 'N3', target: { type: 'literal', text: 'ないでください。' }, pattern: 'ないでください', meaning: 'please do not', choices: [{ text: 'なくなりました。' }, { text: 'ことはありません。' }, { text: 'べきではありません。' }] },
@@ -347,9 +357,10 @@ function grammarExercise(sentence: GeneratedSentence, spec: GrammarSpec, order: 
   const index = sentence.furigana.findIndex((part) => part.slot === target.slot)
   if (index < 0) return null
   const part = sentence.furigana[index]!
-  if (!part.text.endsWith(target.suffix) || !part.reading.endsWith(target.suffix)) return null
+  const readingSuffix = target.readingSuffix ?? target.suffix
+  if (!part.text.endsWith(target.suffix) || !part.reading.endsWith(readingSuffix)) return null
   const stem = part.text.slice(0, -target.suffix.length)
-  const readingStem = part.reading.slice(0, -target.suffix.length)
+  const readingStem = part.reading.slice(0, -readingSuffix.length)
   const answer = { text: part.text, reading: part.reading }
   const distractors = target.alternatives.map((ending) => ({ text: `${stem}${ending}`, reading: `${readingStem}${ending}` }))
   return exerciseFromRange(

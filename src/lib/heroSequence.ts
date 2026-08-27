@@ -180,11 +180,24 @@ function particleSegments(sentence: GeneratedPreviewSentence): string[] {
  */
 const CASE_PARTICLES = new Set(['は', 'が', 'を', 'に', 'で', 'へ', 'と', 'から', 'まで', 'より', 'の'])
 
-/** Existing generated frames whose predicate is an adjective even though the
- *  older frame schema exposes the complete predicate through `ending` rather
- *  than an `adjective` slot. They are still safe single-slot rotations: the
- *  subject/topic stays fixed while the description changes. */
-const ADJECTIVE_ENDING_PATTERNS = new Set(['n4-29', 'n4-30', 'n4-33'])
+/**
+ * Whether the predicate this sentence exposes through `ending` — rather than
+ * through an `adjective` slot — is an adjective one.
+ *
+ * Some frames carry the complete predicate in `ending`, so the adjective drill
+ * has to reach them there or it never sees a な-adjective at all: 大切でした,
+ * 大切ではありません, 同じです. The generator already marks which those are,
+ * the same way `hasGrammarAuxiliary` reads the verb case, so this asks it
+ * instead of keeping a list of pattern ids by hand — a list drifts, and did:
+ * it named n4-33, whose ending rotates 大切でした -> 短い時代でした. That is a
+ * whole noun predicate being swapped, which is the noun drill's business, and
+ * it left the two frames that genuinely inflect a な-adjective (n4-27, n4-31)
+ * out of the drill they belong to.
+ */
+function hasAdjectiveEnding(sentence: GeneratedPreviewSentence): boolean {
+  const ending = sentence.slots['ending']
+  return ending?.pos === 'i_adjective' || ending?.pos === 'na_adjective'
+}
 
 /**
  * Which slots a focus rotates, in the order it rotates them. Empty means the
@@ -195,7 +208,7 @@ const ADJECTIVE_ENDING_PATTERNS = new Set(['n4-29', 'n4-30', 'n4-33'])
 export const HERO_FOCUS_SLOTS: Record<HeroSwapFocus, string> = {
   noun: 'every slot that is not the predicate or its ending',
   verb: 'ending, on patterns whose ending is a plain verb conjugation',
-  adjective: 'adjective or complete adjective predicate, including its ending',
+  adjective: 'adjective slot, or a complete い/な-adjective predicate through its ending',
   adverb: 'manner, degree, and sequence adverbials',
   auxiliary: 'ending, on patterns built around a grammar auxiliary',
   particle: 'none — the sentence changes instead',
@@ -261,7 +274,7 @@ export function focusSlotsFor(sentence: GeneratedPreviewSentence, focus: HeroSwa
     // Alternate the adjective and its ending: 面白いです → 新しいです →
     // 新しくないです. Both halves of an adjective predicate get practised.
     if (slots.includes('adjective')) return ['adjective', 'ending']
-    if (slots.includes('ending') && ADJECTIVE_ENDING_PATTERNS.has(sentence.frameId)) return ['ending']
+    if (slots.includes('ending') && hasAdjectiveEnding(sentence)) return ['ending']
     return []
   }
   if (focus === 'adverb') {

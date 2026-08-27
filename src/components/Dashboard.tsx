@@ -93,7 +93,7 @@ const HERO_SWAP_FOCUS_OPTIONS: ReadonlyArray<{ focus: HeroSwapFocus | null; labe
   { focus: 'particle', label: 'Particles' },
   { focus: 'verb', label: 'Verbs' },
   { focus: 'auxiliary', label: 'Auxiliary Verbs' },
-  { focus: 'adjective', label: 'I-Adjectives' },
+  { focus: 'adjective', label: 'Adjectives' },
   { focus: 'adverb', label: 'Adverbs' },
 ]
 
