@@ -143,22 +143,27 @@ body:has(.beginner-word-writing-card) .app,
 
 @media (max-width: 720px) {
   /*
-   * "Beginner Zone" is the one heading long enough to wrap on a phone, which
-   * left it two lines tall next to every other title. Keep it on one line,
-   * shrinking only as far as the width demands, inside the same block height
-   * the dashboard's "Kanji Quest" title occupies (2rem x 1.18 plus its
-   * 0.06em descender pad).
+   * On a phone these titles read as one family with the dashboard's "Kanji
+   * Quest": one line, 2rem, and the same block height (2rem x 1.18 plus its
+   * 0.06em descender pad). --title-fit is how wide the string runs in
+   * multiples of its own font size, so a screen too narrow for 2rem shrinks
+   * the text just enough to keep it on that one line.
    */
-  .beginner-zone-page .tool-menu-heading h1 {
-    font-size: min(2rem, calc((100vw - 4.5rem) / 8.6));
+  .beginner-zone-page .tool-menu-heading h1,
+  .study-tools-page .tool-menu-heading h1 {
+    font-size: min(2rem, calc((100vw - 4.5rem) / var(--title-fit)));
     line-height: 2.36rem;
     padding-bottom: 0.12rem;
     white-space: nowrap;
   }
 
+  .beginner-zone-page .tool-menu-heading h1 { --title-fit: 8.6; }
+  .study-tools-page .tool-menu-heading h1 { --title-fit: 6.7; }
+
   /* A single line now runs the full width, so drop the negative pull that
      used to tuck the wrapped title up behind the Back button. */
-  .beginner-zone-page .tool-menu-heading {
+  .beginner-zone-page .tool-menu-heading,
+  .study-tools-page .tool-menu-heading {
     margin-top: 0;
   }
 }
