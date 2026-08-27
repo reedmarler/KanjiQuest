@@ -4232,7 +4232,7 @@ const advancedPatternMeanings: Record<string,string> = {
   'n3-16':'thanks to','n3-17':'because of (blame)','n3-18':'leaving a state as-is','n3-19':'while (formal)',
   'n2-11':'should do','n1-03':'although','n1-04':'might result in something negative',
   'n2-12':'as / along with a change','n2-13':'even (emphatic)','n2-14':'precisely / it is X that','n2-15':'not only X but also Y',
-  'n1-11':'if / supposing','n1-12':'according to / depending on','n1-13':'not necessarily',
+  'n1-11':'if / supposing','n1-12':'according to / depending on','n1-13':'not necessarily','n1-14':'nothing better than',
   'n2-04':'there is no need to','n1-05':'unless something is done','n1-06':'extending even to','n1-07':'unique or characteristic of',
   'n1-08':'in accordance with','n1-09':'concerning or surrounding a topic','n1-10':'on the occasion of',
   'n2-03':'it has been decided that','n2-05':'must certainly be','n2-06':'expected or supposed to','n2-07':'general truth or recollection',
@@ -4422,6 +4422,7 @@ const advancedPatternIds = new Set([
   'n3-32', 'n3-33', 'n3-34', 'n3-35', 'n3-36', 'n3-37', 'n3-38', 'n3-39', 'n3-40', 'n3-41',
   'n2-22', 'n2-23', 'n2-24', 'n2-25', 'n2-26', 'n2-27', 'n2-28', 'n2-29',
   'n2-30', 'n2-31', 'n2-32', 'n2-33', 'n2-34', 'n2-35', 'n2-36', 'n2-37',
+  'n1-14',
 ])
 
 function advancedPatternLevel(patternId: string): 'N4' | 'N3' | 'N2' | 'N1' {
@@ -4861,6 +4862,63 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     const secondaryVerb = subjectEnglish==='I' || subjectUsesBaseVerb(subjectEnglish) ? secondary.base : secondary.third
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(readingTarget,'object'),literalPart('を'),literalPart('読み','よみ','verb'),literalPart('つつ、'),literalPart(secondary.surface,secondary.reading,'result')]
     return finish(furigana,`${capitalize(subjectEnglish)} ${secondaryVerb} while reading ${englishPhrase(readingTarget,'object')}.`,{subject,object:readingTarget},{},'つつ is a formal equivalent of ながら for two simultaneous actions.')
+  }
+
+  if (patternId === 'n1-14') {
+    // Every other N1 pattern governs a noun or a whole clause, which is why
+    // the level had no adjective drill: there was no frame with a bare
+    // adjective in it to rotate. に越したことはない takes one directly.
+    //
+    // The qualities belong to their topic rather than to one shared pool — a
+    // room is worth making spacious and an explanation is not — so rotating
+    // the adjective stays inside what the topic can sensibly be.
+    const topicPool = [
+      { topic:'部屋', topicReading:'へや', english:'a room', qualities:[
+        { japanese:'広い', reading:'ひろい', english:'spacious' },
+        { japanese:'明るい', reading:'あかるい', english:'bright' },
+        { japanese:'新しい', reading:'あたらしい', english:'new' },
+      ] },
+      { topic:'説明', topicReading:'せつめい', english:'an explanation', qualities:[
+        { japanese:'詳しい', reading:'くわしい', english:'detailed' },
+        { japanese:'短い', reading:'みじかい', english:'brief' },
+        { japanese:'早い', reading:'はやい', english:'prompt' },
+      ] },
+      { topic:'荷物', topicReading:'にもつ', english:'luggage', qualities:[
+        { japanese:'軽い', reading:'かるい', english:'light' },
+        { japanese:'少ない', reading:'すくない', english:'minimal' },
+        { japanese:'小さい', reading:'ちいさい', english:'small' },
+      ] },
+      { topic:'道具', topicReading:'どうぐ', english:'a tool', qualities:[
+        { japanese:'新しい', reading:'あたらしい', english:'new' },
+        { japanese:'軽い', reading:'かるい', english:'light' },
+        { japanese:'丈夫', reading:'じょうぶ', english:'sturdy' },
+      ] },
+    ]
+    let topicPickPool = topicPool
+    if (options.avoidWords?.topic) { const avoided = topicPickPool.filter(c => c.topic !== options.avoidWords!.topic); if (avoided.length) topicPickPool = avoided }
+    const chosenTopic = seededPick(topicPickPool, options.slotSeeds?.topic ?? seed, 1651)
+    if (!chosenTopic) return null
+    // 丈夫 is a な-adjective, so it needs である before に越したことはない where
+    // the い-adjectives attach bare.
+    const qualityForms = chosenTopic.qualities.map(quality => ({
+      ...quality,
+      surface: quality.japanese.endsWith('い') ? quality.japanese : `${quality.japanese}である`,
+      surfaceReading: quality.japanese.endsWith('い') ? quality.reading : `${quality.reading}である`,
+    }))
+    let qualityPickPool = qualityForms
+    if (options.avoidWords?.predicate) { const avoided = qualityPickPool.filter(c => c.surface !== options.avoidWords!.predicate); if (avoided.length) qualityPickPool = avoided }
+    const quality = seededPick(qualityPickPool, options.slotSeeds?.predicate ?? seed, 1652)
+    if (!quality) return null
+    const furigana=[
+      literalPart(chosenTopic.topic,chosenTopic.topicReading,'topic'),
+      literalPart('は','わ'),
+      literalPart(quality.surface,quality.surfaceReading,'predicate'),
+      literalPart('に越したことはありません。','にこしたことはありません。'),
+    ]
+    return finish(furigana,`${capitalize(chosenTopic.english)} is best when it is ${quality.english}.`,{},{
+      topic:grammarSlot(`n1-14-topic-${topicPool.indexOf(chosenTopic)}`,chosenTopic.topic,chosenTopic.topic,chosenTopic.topicReading,chosenTopic.english,['preference'],'noun'),
+      predicate:grammarSlot(`n1-14-quality-${quality.japanese}`,quality.surface,quality.japanese,quality.surfaceReading,quality.english,['preference'],quality.japanese.endsWith('い')?'i_adjective':'na_adjective'),
+    },'に越したことはない says more of a quality is always better, while stopping short of demanding it.')
   }
 
   if (patternId === 'n2-11' || patternId === 'n2-16') {

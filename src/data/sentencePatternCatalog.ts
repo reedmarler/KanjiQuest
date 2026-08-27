@@ -180,6 +180,7 @@ const rows: Array<[JlptLevel, string, string[], string, string, string, boolean?
   ['N1','Conditionとすれば Result',['Conditionとすれば','Result'],'日本へ行くとすれば準備が必要だ','if / supposing','dictionary form + とすれば',true],
   ['N1','Basis に応じて Result',['Basis','に応じて','Result'],'天気に応じて予定が変わる','according to / depending on','noun + に応じて',true],
   ['N1','Generalization とは限らない',['Generalization','とは限らない'],'高いものがいいとは限らない','not necessarily','plain form + とは限らない',true],
+  ['N1','Noun は Adjective に越したことはない',['Noun','は','Adjective','に越したことはない'],'部屋は広いに越したことはない','nothing better than','i-adjective plain form + に越したことはない',true,'The one N1 pattern that governs a bare adjective rather than a noun or a whole clause.'],
 ]
 
 const levelCounts = new Map<JlptLevel,number>()

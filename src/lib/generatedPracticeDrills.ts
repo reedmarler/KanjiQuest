@@ -148,6 +148,9 @@ const grammarSpecs: GrammarSpec[] = [
 
   // Complexity Level 5 — advanced discourse grammar over a whole proposition.
   { id: 'nothing-other-than', frameId: 'n1-02', level: 'N1', target: { type: 'literal', text: 'にほかならない。' }, pattern: 'にほかならない', meaning: 'nothing other than', choices: [{ text: 'というものだ。' }, { text: 'にすぎない。' }, { text: 'どころではない。' }] },
+  // Distractors attach to the same plain adjective the answer does, so the
+  // choice is between four grammar points rather than four shapes.
+  { id: 'nothing-better', frameId: 'n1-14', level: 'N1', target: { type: 'literal', text: 'に越したことはありません。' }, pattern: 'に越したことはない', meaning: 'nothing better than', choices: [{ text: 'に違いありません。' }, { text: 'とは限りません。' }, { text: 'ものです。' }] },
   { id: 'no-choice', frameId: 'n1-01', level: 'N1', target: { type: 'slot', slot: 'verb', suffix: 'ざるを得ません。', readingSuffix: 'ざるをえません。', alternatives: ['なければなりません。', 'ないでください。', 'なくてもいいです。'] }, pattern: 'ざるを得ない', meaning: 'have no choice but to' },
   { id: 'not-necessarily', frameId: 'n1-13', level: 'N1', target: { type: 'literal', text: '限りません。' }, pattern: 'とは限らない', meaning: 'not necessarily', choices: [{ text: 'に決まっています。' }, { text: 'に違いありません。' }, { text: 'わけです。' }] },
   { id: 'general-truth', frameId: 'n2-07', level: 'N2', target: { type: 'literal', text: 'ものだ。' }, pattern: 'ものだ', meaning: 'general truth or recollection', choices: [{ text: 'はずだ。' }, { text: 'に違いない。' }, { text: 'ところだ。' }] },

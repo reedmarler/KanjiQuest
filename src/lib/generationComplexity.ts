@@ -48,7 +48,7 @@ const patternsByComplexity: Record<GenerationComplexity, readonly string[]> = {
     'n2-30', 'n2-31', 'n2-32', 'n2-33', 'n2-34',
   ],
   // Advanced discourse grammar over a whole proposition.
-  5: ['n2-01', 'n2-02', 'n1-01', 'n1-02', 'n1-13', 'n1-06', 'n1-07', 'n2-05', 'n2-07', 'n2-17'],
+  5: ['n2-01', 'n2-02', 'n1-01', 'n1-02', 'n1-13', 'n1-06', 'n1-07', 'n2-05', 'n2-07', 'n2-17', 'n1-14'],
 }
 
 const complexityByPattern = new Map<string, GenerationComplexity>(
