@@ -17635,16 +17635,20 @@ button.counter-example {
  * that screen's title runs in multiples of its own font size, measured once
  * and rounded up for margin — lets the type shrink just far enough to stay on
  * that line instead of wrapping. Retune it when a title's wording changes.
- * --title-gutter is what the viewport spends on everything beside the text.
+ * --title-gutter is what a screen spends on everything beside the text, and
+ * --title-space is the layout width it spends it out of: .app is capped at
+ * 720px and runs at zoom: 1.5 above the phone breakpoint, so a viewport unit
+ * buys only 1/1.5 of a layout pixel there.
  */
 .tool-menu-heading h1,
 .library-panel-header h1,
 .kanji-lab-header h1,
 .achievements-hero h1 {
   --title-fit: 10.5;
-  --title-gutter: 5.5rem;
+  --title-gutter: 11rem;
+  --title-space: min(720px, calc(100vw / 1.5));
   font-weight: 700;
-  font-size: min(2.5rem, calc((100vw - var(--title-gutter)) / var(--title-fit)));
+  font-size: min(2.5rem, calc((var(--title-space) - var(--title-gutter)) / var(--title-fit)));
   line-height: 1.18;
   padding-bottom: 0.06em;
   white-space: nowrap;
@@ -17654,14 +17658,27 @@ button.counter-example {
   background-clip: text;
 }
 
-.tool-menu-heading h1 { --title-gutter: 4.5rem; }
-.beginner-zone-page .tool-menu-heading h1 { --title-fit: 8.6; }
-.study-tools-page .tool-menu-heading h1 { --title-fit: 6.7; }
-.additional-tools-page .tool-menu-heading h1 { --title-fit: 6.1; }
-.library-panel-header h1 { --title-fit: 7.95; }
-.favorite-words-page .kanji-lab-header h1 { --title-fit: 8.9; }
-/* This one is inset in the crest card, so its gutter carries that padding too. */
-.achievements-hero h1 { --title-fit: 8.3; --title-gutter: 6.5rem; }
+/* Beside the Back button the copy block is sized by its subtitle, which a
+   nowrap title can outrun — let it claim the row's free space instead. */
+.library-panel-header > div,
+.kanji-lab-header > div {
+  flex: 1;
+  min-width: 0;
+}
+
+/* How wide each title runs, in multiples of its own font size. */
+.beginner-zone-page .tool-menu-heading h1 { --title-fit: 8.41; }
+.study-tools-page .tool-menu-heading h1 { --title-fit: 6.55; }
+.additional-tools-page .tool-menu-heading h1 { --title-fit: 5.9; }
+.library-panel-header h1 { --title-fit: 7.7; }
+.favorite-words-page .kanji-lab-header h1 { --title-fit: 8.62; }
+.achievements-hero h1 { --title-fit: 8; }
+
+/* Wide layout: the Back button sits beside the title, and the crest card
+   spends a further column on its crest and its percentage. Each gutter also
+   carries ~10px for the scrollbar, which 100vw counts as usable width. */
+.tool-menu-heading h1 { --title-gutter: 6.9rem; }
+.achievements-hero h1 { --title-gutter: 14.5rem; }
 
 @media (max-width: 720px) {
   /* 2rem is the size the dashboard title drops to on a phone, and 2.36rem +
@@ -17671,10 +17688,18 @@ button.counter-example {
   .library-panel-header h1,
   .kanji-lab-header h1,
   .achievements-hero h1 {
-    font-size: min(2rem, calc((100vw - var(--title-gutter)) / var(--title-fit)));
+    --title-space: 100vw;
+    font-size: min(2rem, calc((var(--title-space) - var(--title-gutter)) / var(--title-fit)));
     line-height: 2.36rem;
     padding-bottom: 0.12rem;
   }
+
+  /* Phone layout: 1x zoom, and every one of these headers stacks, so a title
+     only gives up the page's own side padding. */
+  .tool-menu-heading h1 { --title-gutter: 3.8rem; }
+  .library-panel-header h1,
+  .kanji-lab-header h1 { --title-gutter: 5.4rem; }
+  .achievements-hero h1 { --title-gutter: 5.3rem; }
 
   /* A single line now runs the full width, so drop the negative pull that
      used to tuck the wrapped tool-menu title up behind the Back button. */
