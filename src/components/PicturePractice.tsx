@@ -196,13 +196,25 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
 
   return (
     <div className="beginner-learner picture-practice">
-      <div className="beginner-learner-top">
-        <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
-        <span className="beginner-learner-title">Picture Mode</span>
-        {round > 0 && !done ? (
-          <button type="button" className="beginner-speedrun-header-settings" onClick={openSettings}>Settings</button>
-        ) : <span />}
-      </div>
+      {/* The setup screen is a landing page like the tool-menu screens, so it
+          wears their "Kanji Quest" header; once a round is running the compact
+          bar returns, since the flashcard needs the vertical room back. */}
+      {round === 0 ? (
+        <header className="kanji-lab-header beginner-tool-setup-header">
+          <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
+          <div>
+            <h1>Picture Mode</h1>
+          </div>
+        </header>
+      ) : (
+        <div className="beginner-learner-top">
+          <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
+          <span className="beginner-learner-title">Picture Mode</span>
+          {round > 0 && !done ? (
+            <button type="button" className="beginner-speedrun-header-settings" onClick={openSettings}>Settings</button>
+          ) : <span />}
+        </div>
+      )}
 
       {round === 0 ? (
         <main className="beginner-card picture-practice-setup" aria-label="Picture practice settings">

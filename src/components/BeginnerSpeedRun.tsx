@@ -295,21 +295,34 @@ export function BeginnerSpeedRun({ onBack, onDashboard }: BeginnerSpeedRunProps)
   }
 
   return (
-    <div className="beginner-learner">
-      <div className="beginner-learner-top">
-        <div className="app-nav-actions">
+    <div className="beginner-learner beginner-speedrun">
+      {/* The setup screen is a landing page like the tool-menu screens, so it
+          wears their "Kanji Quest" header; once a round is running the compact
+          bar returns, since the flashcard needs the vertical room back. */}
+      {phase === 'idle' ? (
+        <header className="kanji-lab-header beginner-tool-setup-header">
           <AppBackButton onClick={onBack} aria-label="Back to previous page" />
+          <div>
+            <h1>Speed Run</h1>
+          </div>
           <AppDashboardButton onClick={onDashboard} />
+        </header>
+      ) : (
+        <div className="beginner-learner-top">
+          <div className="app-nav-actions">
+            <AppBackButton onClick={onBack} aria-label="Back to previous page" />
+            <AppDashboardButton onClick={onDashboard} />
+          </div>
+          <span className="beginner-learner-title">Speed Run</span>
+          {phase === 'done' ? (
+            <span />
+          ) : (
+            <button type="button" className="beginner-speedrun-header-settings" onClick={openSettings}>
+              Settings
+            </button>
+          )}
         </div>
-        <span className="beginner-learner-title">Speed Run</span>
-        {phase === 'idle' || phase === 'done' ? (
-          <span />
-        ) : (
-          <button type="button" className="beginner-speedrun-header-settings" onClick={openSettings}>
-            Settings
-          </button>
-        )}
-      </div>
+      )}
 
       {phase === 'idle' ? (
         <main className="beginner-card picture-practice-setup beginner-speedrun-setup" aria-label="Speed run settings">

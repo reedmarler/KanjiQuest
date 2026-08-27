@@ -17724,6 +17724,8 @@ button.counter-example {
 .library-panel-header h1 { --title-fit: 7.7; }
 .favorite-words-page .kanji-lab-header h1 { --title-fit: 8.62; }
 .achievements-hero h1 { --title-fit: 8; }
+.beginner-speedrun .kanji-lab-header h1 { --title-fit: 6.1; }
+.picture-practice .kanji-lab-header h1 { --title-fit: 7.55; }
 
 /* Wide layout: the Back button sits beside the title, and the crest card
    spends a further column on its crest and its percentage. Each gutter also
@@ -17770,6 +17772,16 @@ button.counter-example {
   .library-panel-header,
   .kanji-lab-header {
     margin-top: 0.55rem;
+  }
+
+  /* .beginner-learner only carries 0.2rem of top padding, sized for its own
+     compact single-line bar — not the 1rem the library/vocab pages give this
+     header room to stack into. Without the difference made up, the grid-
+     stacked title below renders behind the fixed Back button instead of under
+     it. Scoped to the setup screen's header specifically, since the ordinary
+     compact bar still wants every pixel of the phone screen it can get. */
+  .beginner-learner:has(> .beginner-tool-setup-header) {
+    padding-top: 1rem;
   }
 
   /* These headers sit the Back button beside the title, which leaves a phone
