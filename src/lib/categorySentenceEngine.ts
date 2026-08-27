@@ -3946,6 +3946,41 @@ const n3PatternMeanings: Record<string,string> = {
 }
 
 /**
+ * Manner adverbials the hand-built N3 frames can carry.
+ *
+ * The adverb drill stopped at N4 because nothing above it had an adverbial
+ * slot: the N5/N4 frames get theirs from the verb records' own manner slot,
+ * and the frames above are built by hand. This is that slot, stated once.
+ *
+ * Manner only, since the frames that take it fix a single action rather than a
+ * habit — 常に食べたばかり is not a sentence. Only words that read after the
+ * object in English too, which is where these frames' glosses have room, so
+ * 突然 and やっと are left out rather than glossed into the wrong place. And
+ * only words that fit every verb these frames use (買う, 作る, 書く, 食べる,
+ * 飲む, 読む, 見る): はっきり wants a speech verb and 一生懸命 an effort verb,
+ * and "ate the cake clearly" is the kind of pair the N5 pool's own comment
+ * warns about.
+ */
+const MANNER_ADVERBIALS: ReadonlyArray<{japanese:string;reading:string;english:string}> = [
+  { japanese:'ゆっくり', reading:'ゆっくり', english:'slowly' },
+  { japanese:'静かに', reading:'しずかに', english:'quietly' },
+  { japanese:'丁寧に', reading:'ていねいに', english:'carefully' },
+  // きちんと is ちゃんと's formal twin — one gloss covers both, and the drill
+  // gains nothing from two words a learner cannot tell apart in English.
+  { japanese:'ちゃんと', reading:'ちゃんと', english:'properly' },
+  { japanese:'早く', reading:'はやく', english:'quickly' },
+]
+
+/** Which adverbial this sentence shows; `adverb` is the slot the drill re-seeds. */
+function pickAdverbial<T extends {japanese: string}>(pool: readonly T[], options: CategorySentenceOptions, seed: number, salt: number): T {
+  let index = Math.abs(options.slotSeeds?.adverb ?? seed + salt) % pool.length
+  if (options.avoidWords?.adverb && pool[index]!.japanese === options.avoidWords.adverb) {
+    index = (index + 1) % pool.length
+  }
+  return pool[index]!
+}
+
+/**
  * The polite forms a ます-stem grammar auxiliary takes, and the English each
  * one asks of the clause it governs.
  *
@@ -4682,8 +4717,12 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     // The tail sits inside the verb-slotted part rather than beside it: the
     // drill rotates whole segments, and a tail in its own unslotted literal
     // would change nothing the rotation can see.
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:bakariForm.japanese,reading:bakariForm.reading,slot:'verb'}]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${bakariForm.english} ${englishPhrase(object,'object')}.`,{subject,object},{
+    const mannerAdverb=pickAdverbial(MANNER_ADVERBIALS,options,seed,854)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),
+      literalPart(mannerAdverb.japanese,mannerAdverb.reading,'adverb'),
+      {text:bakariForm.japanese,reading:bakariForm.reading,slot:'verb'}]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${bakariForm.english} ${englishPhrase(object,'object')} ${mannerAdverb.english}.`,{subject,object},{
+      adverb:grammarSlot(`manner-${mannerAdverb.japanese}`,mannerAdverb.japanese,mannerAdverb.japanese,mannerAdverb.reading,mannerAdverb.english,['manner','adverb'],'noun'),
       verb:grammarSlot(`verb-${verb.id}-tabakari`,bakariForm.japanese,verb.japanese,bakariForm.reading,`just ${verb.english}`,['just-completed','ta-bakari']),
       ending:grammarSlot(`tabakari-ending-${bakariForms.indexOf(bakariForm)}`,bakariForm.japanese,verb.japanese,bakariForm.reading,`just ${verb.english}`,['just-completed','ta-bakari','ending']),
     },'たばかり marks an action that finished a moment ago.')
@@ -5563,8 +5602,10 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
       {japanese:`${te.japanese}みました。`,reading:`${te.reading}みました。`,english:`tried ${pair.english}`},
     ]
     const tryForm=pickAuxiliaryForm(tryForms,options)
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:tryForm.japanese,reading:tryForm.reading,slot:'verb'}]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${tryForm.english} ${englishPhrase(object,'object')}.`,{subject,object},{
+    const tryAdverb=pickAdverbial(MANNER_ADVERBIALS,options,seed,1304)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),literalPart(tryAdverb.japanese,tryAdverb.reading,'adverb'),{text:tryForm.japanese,reading:tryForm.reading,slot:'verb'}]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${tryForm.english} ${englishPhrase(object,'object')} ${tryAdverb.english}.`,{subject,object},{
+      adverb:grammarSlot(`manner-${tryAdverb.japanese}`,tryAdverb.japanese,tryAdverb.japanese,tryAdverb.reading,tryAdverb.english,['manner','adverb'],'noun'),
       verb:grammarSlot(`verb-${verb.id}-temiru`,tryForm.japanese,verb.japanese,tryForm.reading,`try ${pair.english}`,['attempt','te-miru']),
       ending:grammarSlot(`temiru-ending-${tryForms.indexOf(tryForm)}`,tryForm.japanese,verb.japanese,tryForm.reading,`try ${pair.english}`,['attempt','te-miru','ending']),
     },'てみる means to try doing something to see how it goes.')
