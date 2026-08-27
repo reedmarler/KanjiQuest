@@ -766,64 +766,64 @@ export function Dashboard({
             )}
           </div>
         )}
-        <div className="control-story-toggle-stack">
-          {/* CSS keeps the mode switch first and places Swap directly beneath
-              it once a specific mode is running. */}
-          {modeToggleOn && settingsMode !== 'picking' && (
-            <div className="control-story-quick-select is-swap" ref={swapModeQuickSelectRef}>
-              <button
-                type="button"
-                className={`control-swap-mode-button${swapModeQuickSelectOpen ? ' is-open' : ''}`}
-                onClick={() => setSwapModeQuickSelectOpen((open) => !open)}
-                aria-label={`Swap mode. Current mode: ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]}`}
-                aria-haspopup="menu"
-                aria-expanded={swapModeQuickSelectOpen}
-                aria-controls="swap-mode-quick-select-menu"
-                title="Swap mode"
+        {/* Swap, Pick a mode and the switch are siblings so each can take
+            either position: the topbar wraps, and whichever control is meant
+            to sit under the switch claims a line of its own. On a phone that
+            is Pick a mode, everywhere else it is Swap. */}
+        {modeToggleOn && settingsMode !== 'picking' && (
+          <div className="control-story-quick-select is-swap" ref={swapModeQuickSelectRef}>
+            <button
+              type="button"
+              className={`control-swap-mode-button${swapModeQuickSelectOpen ? ' is-open' : ''}`}
+              onClick={() => setSwapModeQuickSelectOpen((open) => !open)}
+              aria-label={`Swap mode. Current mode: ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]}`}
+              aria-haspopup="menu"
+              aria-expanded={swapModeQuickSelectOpen}
+              aria-controls="swap-mode-quick-select-menu"
+              title="Swap mode"
+            >
+              <span aria-hidden="true">&#8646;</span>
+              <span>Swap</span>
+            </button>
+            {swapModeQuickSelectOpen && (
+              <div
+                className="control-story-quick-menu"
+                id="swap-mode-quick-select-menu"
+                role="menu"
+                aria-label="Sentence modes"
               >
-                <span aria-hidden="true">&#8646;</span>
-                <span>Swap</span>
-              </button>
-              {swapModeQuickSelectOpen && (
-                <div
-                  className="control-story-quick-menu"
-                  id="swap-mode-quick-select-menu"
-                  role="menu"
-                  aria-label="Sentence modes"
-                >
-                  {PICK_MODE_OPTIONS.map(({ mode, label }) => (
-                    <button
-                      key={mode}
-                      type="button"
-                      role="menuitemradio"
-                      aria-checked={settingsMode === mode}
-                      className={settingsMode === mode ? 'is-active' : ''}
-                      onClick={() => {
-                        if (mode !== settingsMode) selectSettingsMode(mode)
-                        setSwapModeQuickSelectOpen(false)
-                      }}
-                    >
-                      <span>{label}</span>
-                      {settingsMode === mode && <span aria-hidden="true">&#10003;</span>}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-          <button
-            type="button"
-            className={`control-story-toggle control-story-top-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
-            onClick={toggleModeOn}
-            role="switch"
-            aria-checked={modeToggleOn}
-            aria-label={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
-            title={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
-          >
-            <span className="control-toggle-track" aria-hidden="true"><span /></span>
-            <span>{modeToggleOn ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>] : 'Mode'}</span>
-          </button>
-        </div>
+                {PICK_MODE_OPTIONS.map(({ mode, label }) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={settingsMode === mode}
+                    className={settingsMode === mode ? 'is-active' : ''}
+                    onClick={() => {
+                      if (mode !== settingsMode) selectSettingsMode(mode)
+                      setSwapModeQuickSelectOpen(false)
+                    }}
+                  >
+                    <span>{label}</span>
+                    {settingsMode === mode && <span aria-hidden="true">&#10003;</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <button
+          type="button"
+          className={`control-story-toggle control-story-top-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
+          onClick={toggleModeOn}
+          role="switch"
+          aria-checked={modeToggleOn}
+          aria-label={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
+          title={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
+        >
+          <span className="control-toggle-track" aria-hidden="true"><span /></span>
+          <span>{modeToggleOn ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>] : 'Mode'}</span>
+        </button>
       </div>
 
       <header className="hero hero-compact">
