@@ -87,12 +87,23 @@ function categoryFrameFor(sentence: GeneratedPreviewSentence): HeroSentenceFrame
   // たり…たり frame), so disambiguate by occurrence — otherwise both segments
   // share a key and the rotation diff cannot tell which one moved.
   const occurrences = new Map<string, number>()
+  let particleCount = 0
   return {
     generatedEnglish: sentence.english,
     generatedReading: sentence.reading,
     generatedPatternId: `category-${sentence.frameId}`,
     segments: sentence.furigana.map((part, index) => {
-      if (!part.slot) return { key: `lit-${index}`, text: part.text, reading: part.reading, swappable: false }
+      if (!part.slot) {
+        // A case particle is the one literal the drill rotates, so it needs a
+        // key that survives the swap and a `swappable` flag — the segment diff
+        // ignores inert literals, which is why nothing could move a particle
+        // before. Every other literal stays inert.
+        if (CASE_PARTICLES.has(part.text.trim())) {
+          const occurrence = (particleCount += 1)
+          return { key: `particle-${occurrence}`, text: part.text, reading: part.reading, swappable: true }
+        }
+        return { key: `lit-${index}`, text: part.text, reading: part.reading, swappable: false }
+      }
       const occurrence = occurrences.get(part.slot) ?? 0
       occurrences.set(part.slot, occurrence + 1)
       return {
@@ -214,7 +225,7 @@ export const HERO_FOCUS_SLOTS: Record<HeroSwapFocus, string> = {
   adjective: 'every slot the generator marked as an adjective, and the ending of an adjective predicate',
   adverb: 'manner, degree, and sequence adverbials',
   auxiliary: 'ending, on patterns built around a grammar auxiliary',
-  particle: 'none — the sentence changes instead',
+  particle: 'each particle that genuinely alternates on its own noun, then that noun',
 }
 
 /**
@@ -250,9 +261,16 @@ export function focusAvailableAt(focus: HeroSwapFocus, level: JlptLevel): boolea
   return HERO_FOCUS_LEVELS[focus].includes(level)
 }
 
-/** Particles are contrasted across sentences, not swapped inside one. */
-export function focusRotatesInPlace(focus: HeroSwapFocus): boolean {
-  return focus !== 'particle'
+/**
+ * Every focus rotates inside a held sentence now.
+ *
+ * Particles were the exception: most of them are fixed by the predicate, so
+ * the drill contrasted across sentences instead. It still does that, but only
+ * after working the swaps a sentence genuinely allows — see
+ * PARTICLE_ALTERNATIVES.
+ */
+export function focusRotatesInPlace(_focus: HeroSwapFocus): boolean {
+  return true
 }
 
 /**
@@ -312,6 +330,129 @@ export function particlesIn(sentence: GeneratedPreviewSentence): string[] {
 }
 
 /**
+ * The particle swaps that are actually Japanese.
+ *
+ * Which particle a noun takes is mostly decided by the predicate — 山に登る but
+ * 高校で飲む — so most of them cannot be swapped at all, and that is why this
+ * drill used to contrast across sentences instead of rotating one. But some
+ * genuinely alternate on the same noun in the same sentence, and those are the
+ * ones worth practising, because choosing between them is a real decision a
+ * learner makes:
+ *
+ *   は ⟷ が   on a subject: topic versus the thing being singled out
+ *   を ⟷ は   on an object: stated plainly, or raised to the topic
+ *   に ⟷ へ   on a destination: arrival versus direction
+ *
+ * The role gate is what keeps this honest. に marks a destination in 山に登る
+ * and a time in 七時に起きる, and only the first can become へ — so an
+ * alternative applies only after the slots it is licensed for, read off the
+ * segment the particle follows.
+ *
+ * English is deliberately left alone across these. The difference は/が draws
+ * is information structure, which English marks with a cleft or with stress
+ * rather than with words, and を/は and に/へ are the same kind of shift; the
+ * renderer already leaves the gloss untouched when it does not change, the way
+ * it does for a polite ⟷ plain swap.
+ */
+const PARTICLE_ALTERNATIVES: ReadonlyArray<{ from: string; to: string; roles: ReadonlySet<string> }> = [
+  { from: 'は', to: 'が', roles: new Set(['subject', 'topic']) },
+  { from: 'が', to: 'は', roles: new Set(['subject', 'topic']) },
+  { from: 'を', to: 'は', roles: new Set(['object']) },
+  { from: 'に', to: 'へ', roles: new Set(['destination']) },
+  { from: 'へ', to: 'に', roles: new Set(['destination']) },
+]
+
+/** A segment key without its occurrence suffix: `object-2` is still an object. */
+function segmentRole(key: string): string {
+  return key.replace(/-\d+$/, '')
+}
+
+/**
+ * The particle swaps this frame can make, in reading order, each one a single
+ * segment's worth of change.
+ */
+function particleRotationsFor(frame: HeroSentenceFrame): Array<{ key: string; from: string; to: string }> {
+  const segments = frame.segments ?? []
+  const rotations: Array<{ key: string; from: string; to: string }> = []
+  segments.forEach((segment, index) => {
+    if (!segment.key.startsWith('particle-')) return
+    const role = segmentRole(segments[index - 1]?.key ?? '')
+    const current = segment.text.trim()
+    for (const alternative of PARTICLE_ALTERNATIVES) {
+      if (alternative.from !== current || !alternative.roles.has(role)) continue
+      // A clause takes one topic. 夫婦は新聞は読みます is two, so raising an
+      // object to the topic is only available once the subject has moved off
+      // は — which is exactly what the preceding rotation does, so the two
+      // swaps chain rather than collide.
+      const topicElsewhere = segments.some((other) => other !== segment
+        && other.key.startsWith('particle-') && other.text.trim() === 'は')
+      if (alternative.to === 'は' && topicElsewhere) continue
+      rotations.push({ key: segment.key, from: alternative.from, to: alternative.to })
+    }
+  })
+  return rotations
+}
+
+/**
+ * The swaps this sentence walks, in order — each one segment's worth of change,
+ * each particle segment getting one turn. Recomputed after every step because
+ * an earlier swap can license a later one: raising an object to the topic only
+ * becomes available once the subject has moved off は.
+ */
+function particleRotationWalk(frame: HeroSentenceFrame): Array<{ key: string; to: string; frame: HeroSentenceFrame }> {
+  const walk: Array<{ key: string; to: string; frame: HeroSentenceFrame }> = []
+  const rotated = new Set<string>()
+  let current = frame
+  for (;;) {
+    const rotation = particleRotationsFor(current).find((candidate) => !rotated.has(candidate.key))
+    if (!rotation) break
+    rotated.add(rotation.key)
+    current = withParticle(current, rotation.key, rotation.to)
+    walk.push({ key: rotation.key, to: rotation.to, frame: current })
+  }
+  return walk
+}
+
+/**
+ * Every marker this sentence can put on screen: the ones it already shows plus
+ * the ones its swaps reach. Exported for the depth audit, which needs the same
+ * answer the stream gets.
+ */
+export function particlesReachable(sentence: GeneratedPreviewSentence): string[] {
+  const reached = new Set(particlesIn(sentence))
+  for (const step of particleRotationWalk(categoryFrameFor(sentence))) reached.add(step.to)
+  return [...reached]
+}
+
+/**
+ * The word a rotated particle attaches to — the one whose swap the particle
+ * drill follows its rotations with. The particle sits after its noun, so the
+ * segment before the first one rotated is that noun.
+ */
+function anchorSlotForParticles(frame: HeroSentenceFrame, rotated: ReadonlySet<string>): string | null {
+  const segments = frame.segments ?? []
+  for (let index = 0; index < segments.length; index += 1) {
+    const segment = segments[index]!
+    if (!rotated.has(segment.key)) continue
+    const preceding = segments[index - 1]
+    if (preceding?.swappable) return preceding.key
+  }
+  return null
+}
+
+/** The same frame with one particle segment replaced. */
+function withParticle(frame: HeroSentenceFrame, key: string, particle: string): HeroSentenceFrame {
+  const segments = (frame.segments ?? []).map((segment) => segment.key === key
+    ? { ...segment, text: particle, reading: particle }
+    : segment)
+  return {
+    ...frame,
+    segments,
+    generatedReading: segments.map((segment) => segment.reading || segment.text).join(''),
+  }
+}
+
+/**
  * The sweep queue for a focused sentence, or null when this sentence cannot
  * serve the focus at all — a verbless pattern under a verb drill. Returning
  * null lets the caller skip to the next pattern instead of emitting a sentence
@@ -319,12 +460,10 @@ export function particlesIn(sentence: GeneratedPreviewSentence): string[] {
  */
 function focusedSweepQueue(sentence: GeneratedPreviewSentence, focus: HeroSwapFocus): string[] | null {
   /*
-   * Particles are the one part of speech that cannot be swapped in place.
-   * Which particle a noun takes is decided by the predicate — 山に登る but
-   * 高校で飲む — so replacing it inside a fixed sentence produces Japanese
-   * that is simply wrong, which is why the generator will not do it. The drill
-   * is a contrast instead: no rotations, and the stream builder picks each next
-   * pattern for a particle the last one did not use.
+   * Particles do not sweep slots the way the other focuses do: they are
+   * literals the pattern owns, so the stream builder rewrites them directly
+   * (see PARTICLE_ALTERNATIVES) rather than re-seeding a slot. An empty queue
+   * here says "this sentence serves the focus, but not through the sweep".
    */
   if (focus === 'particle') return particleSegments(sentence).length ? [] : null
 
@@ -619,6 +758,10 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
     if (focus === 'particle') {
       lastParticles = new Set(particlesIn(sentence))
       lastParticles.forEach((particle) => particleUsage.set(particle, (particleUsage.get(particle) ?? 0) + 1))
+      // Once every marker has had a turn the list has been walked, so it
+      // starts again rather than letting the first cycle's counts pin the
+      // stream to whichever markers happened to come up least.
+      if (CASE_PARTICLES.size === particleUsage.size) particleUsage.clear()
     }
     tracker.add(sentence)
     {
@@ -638,6 +781,64 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
       slotWidths: HERO_SLOT_WIDTHS,
       templateRefresh: true,
     })
+
+    /*
+     * The particle drill holds the sentence and works the particles it can
+     * genuinely alternate, one at a time, before the stream moves on. Each
+     * swap applies to the sentence as the last one left it, so a sentence with
+     * both a subject and an object marker walks both without ever changing two
+     * things at once.
+     *
+     * These frames are built here rather than through rotateOneSlot: that
+     * re-runs the generator with a new seed, and a particle is a literal the
+     * pattern owns, not a slot the generator fills. Rewriting the segment is
+     * the only way to hold every word still and move the particle alone —
+     * which is the whole drill.
+     */
+    if (focus === 'particle') {
+      const baseFrame = current
+      const rotated = new Set<string>()
+      const swapped = new Map<string, string>()
+      for (const rotation of particleRotationWalk(baseFrame)) {
+        if (steps.length >= stepCount) break
+        rotated.add(rotation.key)
+        swapped.set(rotation.key, rotation.to)
+        steps.push({
+          frame: rotation.frame,
+          changed: changedSegmentKeys(current, rotation.frame),
+          slotWidths: HERO_SLOT_WIDTHS,
+          templateRefresh: false,
+        })
+        current = rotation.frame
+      }
+      /*
+       * With the particles spent, the word they attach to is what is worth
+       * changing next — the same marker on a new noun is a second look at the
+       * same decision, and it keeps the sentence otherwise still rather than
+       * jumping straight to an unrelated one.
+       *
+       * The swap is generated against the frame as it stood before any
+       * particle moved, because the generator only knows the pattern's own
+       * particles; the rotations are then re-applied on top, which is what
+       * leaves the noun as the single thing that changed.
+       */
+      const anchorSlot = anchorSlotForParticles(baseFrame, rotated)
+      const particleSeed = seedBySentence.get(sentence)
+      if (steps.length < stepCount && particleSeed !== undefined && anchorSlot) {
+        const swap = rotateOneSlot(level, sentence.frameId, particleSeed, baseFrame, {}, {}, anchorSlot, 97)
+        if (swap) {
+          const next = swapped.size
+            ? [...swapped].reduce((frame, [key, particle]) => withParticle(frame, key, particle), swap.frame)
+            : swap.frame
+          const changed = changedSegmentKeys(current, next)
+          if (changed.length === 1) {
+            steps.push({ frame: next, changed, slotWidths: HERO_SLOT_WIDTHS, templateRefresh: false })
+            current = next
+          }
+        }
+      }
+      continue
+    }
 
     // Sweep every visible slot in reading order — left to right, then right to
     // left on the next sentence — rather than picking slots at random. This is
@@ -701,7 +902,7 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
      * sentence that can actually be worked. Particles are exempt — that drill
      * is the sentence changing, so it has no rotations by design.
      */
-    if (focus && focus !== 'particle' && rotations === 0) steps.pop()
+    if (focus && rotations === 0) steps.pop()
   }
 
   return steps

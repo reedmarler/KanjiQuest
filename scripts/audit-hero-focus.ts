@@ -18,7 +18,7 @@ import { patternsForLevel } from '../src/lib/generationComplexity'
 import { generatePreviewSentence, type GeneratedPreviewSentence } from '../src/lib/sentenceGeneratorPreview'
 import { generateCategorySentence } from '../src/lib/categorySentenceEngine'
 import { isDashboardSentenceNatural } from '../src/lib/dashboardSentenceQuality'
-import { HERO_FOCUS_LEVELS, HERO_FOCUS_SLOTS, buildHeroSteps, focusSlotsFor, focusServes, particlesIn, type HeroSwapFocus } from '../src/lib/heroSequence'
+import { HERO_FOCUS_LEVELS, HERO_FOCUS_SLOTS, buildHeroSteps, focusSlotsFor, focusServes, particlesIn, particlesReachable, type HeroSwapFocus } from '../src/lib/heroSequence'
 import type { WrongPool } from '../src/lib/wrongPool'
 import type { JlptLevel } from '../src/lib/types'
 
@@ -118,13 +118,13 @@ for (const level of LEVELS) {
       const { sentence: focusedSentence, seed: focusedSeed } = focusedFound
       const row = rows.get(focus)!
       if (focus === 'particle') {
-        // Particles are contrasted between sentences, so a pattern's depth is
-        // how many distinct case markers it puts on screen.
-        const shown = new Set(particlesIn(focusedSentence))
-        shown.forEach((particle) => particleTally.add(particle))
+        // A pattern's particle depth is how many markers it can put on screen:
+        // the ones it starts with, plus the ones its own swaps reach.
+        const reached = new Set(particlesReachable(focusedSentence))
+        reached.forEach((particle) => particleTally.add(particle))
         row.patterns += 1
-        row.reach.push(shown.size)
-        row.shown.push(shown.size)
+        row.reach.push(reached.size)
+        row.shown.push(reached.size)
         continue
       }
       const slots = focusSlotsFor(focusedSentence, focus)
