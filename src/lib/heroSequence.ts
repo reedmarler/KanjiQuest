@@ -181,22 +181,25 @@ function particleSegments(sentence: GeneratedPreviewSentence): string[] {
 const CASE_PARTICLES = new Set(['は', 'が', 'を', 'に', 'で', 'へ', 'と', 'から', 'まで', 'より', 'の'])
 
 /**
- * Whether the predicate this sentence exposes through `ending` — rather than
- * through an `adjective` slot — is an adjective one.
+ * Whether the generator marked this slot as holding an adjective.
  *
- * Some frames carry the complete predicate in `ending`, so the adjective drill
- * has to reach them there or it never sees a な-adjective at all: 大切でした,
- * 大切ではありません, 同じです. The generator already marks which those are,
- * the same way `hasGrammarAuxiliary` reads the verb case, so this asks it
- * instead of keeping a list of pattern ids by hand — a list drifts, and did:
- * it named n4-33, whose ending rotates 大切でした -> 短い時代でした. That is a
- * whole noun predicate being swapped, which is the noun drill's business, and
- * it left the two frames that genuinely inflect a な-adjective (n4-27, n4-31)
- * out of the drill they belong to.
+ * Frames do not agree on a name for the slot their description sits in:
+ * `adjective` at N5, `ending` where the whole predicate is one segment
+ * (大切でした), `predicate` across the N3 comparison and quotation frames
+ * (孫より早いです, 忙しいと思います), `reason` in the N2 concessions
+ * (安いとはいえ). What they do agree on is the part of speech they record, so
+ * the drill asks that, the same way `hasGrammarAuxiliary` reads the verb case,
+ * rather than keeping names or pattern ids by hand. A hand-kept list drifts,
+ * and did: it named n4-33, whose ending rotates 大切でした -> 短い時代でした —
+ * a whole noun predicate swapped, which is the noun drill's business — while
+ * leaving out the frames that genuinely inflect a な-adjective.
+ *
+ * It is also what keeps the noun drill off these slots, since `predicate` and
+ * `reason` are otherwise exactly the shape of slot nouns rotate.
  */
-function hasAdjectiveEnding(sentence: GeneratedPreviewSentence): boolean {
-  const ending = sentence.slots['ending']
-  return ending?.pos === 'i_adjective' || ending?.pos === 'na_adjective'
+function isAdjectivalSlot(sentence: GeneratedPreviewSentence, slot: string): boolean {
+  const record = sentence.slots[slot]
+  return record?.pos === 'i_adjective' || record?.pos === 'na_adjective'
 }
 
 /**
@@ -208,7 +211,7 @@ function hasAdjectiveEnding(sentence: GeneratedPreviewSentence): boolean {
 export const HERO_FOCUS_SLOTS: Record<HeroSwapFocus, string> = {
   noun: 'every slot that is not the predicate or its ending',
   verb: 'ending, on patterns whose ending is a plain verb conjugation',
-  adjective: 'adjective slot, or a complete い/な-adjective predicate through its ending',
+  adjective: 'every slot the generator marked as an adjective, and the ending of an adjective predicate',
   adverb: 'manner, degree, and sequence adverbials',
   auxiliary: 'ending, on patterns built around a grammar auxiliary',
   particle: 'none — the sentence changes instead',
@@ -225,15 +228,17 @@ export const HERO_FOCUS_SLOTS: Record<HeroSwapFocus, string> = {
  *
  * Plain verb conjugation only exists at N5 because every pattern above it wraps
  * the predicate in a grammar form, and that form is what the auxiliary drill
- * rotates instead. Adjective predicates and degree adverbs also have reviewed
- * N4 frames; sequence adverbials deepen the N5 adverb pool.
+ * rotates instead. Adjectives run up to N2: the N3 comparison and quotation
+ * frames and the N2 concessions all describe with one, and each now rotates it.
+ * Degree adverbs also have reviewed N4 frames; sequence adverbials deepen the
+ * N5 adverb pool.
  */
 export const HERO_FOCUS_LEVELS: Record<HeroSwapFocus, readonly JlptLevel[]> = {
   noun: ['N5', 'N4', 'N3', 'N2', 'N1'],
   particle: ['N5', 'N4', 'N3', 'N2', 'N1'],
   verb: ['N5'],
   auxiliary: ['N4', 'N2'],
-  adjective: ['N5', 'N4'],
+  adjective: ['N5', 'N4', 'N3', 'N2'],
   adverb: ['N5', 'N4'],
 }
 
@@ -273,9 +278,11 @@ export function focusSlotsFor(sentence: GeneratedPreviewSentence, focus: HeroSwa
   if (focus === 'adjective') {
     // Alternate the adjective and its ending: 面白いです → 新しいです →
     // 新しくないです. Both halves of an adjective predicate get practised.
+    // `ending` is a synthetic key on these frames — it has no segment of its
+    // own, and rotateOneSlot resolves it against the predicate — so it is
+    // named here rather than found by the scan below.
     if (slots.includes('adjective')) return ['adjective', 'ending']
-    if (slots.includes('ending') && hasAdjectiveEnding(sentence)) return ['ending']
-    return []
+    return slots.filter((slot) => isAdjectivalSlot(sentence, slot))
   }
   if (focus === 'adverb') {
     if (slots.includes('adverb')) return ['adverb']
@@ -285,7 +292,8 @@ export function focusSlotsFor(sentence: GeneratedPreviewSentence, focus: HeroSwa
   // Particles rotate nothing; `focusServes` is what answers for them.
   if (focus === 'particle') return []
   // Nouns: every slot that is not the predicate or its ending.
-  return slots.filter((slot) => slot !== 'verb' && slot !== 'adjective' && slot !== 'ending' && slot !== 'adverb')
+  return slots.filter((slot) => slot !== 'verb' && slot !== 'adjective' && slot !== 'ending' && slot !== 'adverb'
+    && !isAdjectivalSlot(sentence, slot))
 }
 
 /** Whether this sentence can carry the focus at all. */

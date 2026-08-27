@@ -1710,8 +1710,12 @@ function comparativeForm(word: string): string {
   const irregular: Record<string,string> = { good:'better', bad:'worse', far:'farther', little:'less', many:'more', much:'more' }
   if (irregular[word]) return irregular[word]!
   if (/[^aeiou]y$/.test(word)) return `${word.slice(0,-1)}ier`
-  if (word.endsWith('e')) return `${word}r`
+  // The -er suffix, and the -r shortcut for an e-final word, only belong to
+  // short adjectives: English takes "larger" and "wiser" but "more capable",
+  // never "capabler". The e-rule used to run before the length check and so
+  // claimed every long -able and -ible gloss.
   if (word.length <= 6 && !/(?:ous|ful|ive|al|ing|ic)$/.test(word)) {
+    if (word.endsWith('e')) return `${word}r`
     return doublesFinalConsonant(word) ? `${word}${word.slice(-1)}er` : `${word}er`
   }
   return `more ${word}`
@@ -2316,6 +2320,19 @@ export const adjectiveRules = [
   { id:'fuan',japanese:'不安',reading:'ふあん',english:'anxious',categories:['Person'] as SentenceCategory[] },
   { id:'manzoku',japanese:'満足',reading:'まんぞく',english:'satisfied',categories:['Person'] as SentenceCategory[] },
   { id:'fuman',japanese:'不満',reading:'ふまん',english:'dissatisfied',categories:['Person'] as SentenceCategory[] },
+  // Deck adjectives that describe a person and had no rule, so no frame could
+  // reach them. The N3 comparison and quotation frames draw their trait from
+  // this pool, and every one of these reads as a plain description of someone:
+  // 学生は素晴らしいと思います, 父は兄ほど厳しくありません.
+  { id:'subarashii',japanese:'素晴らしい',reading:'すばらしい',english:'wonderful',categories:['Person','Event','Media'] as SentenceCategory[] },
+  { id:'kuwashii',japanese:'詳しい',reading:'くわしい',english:'knowledgeable',categories:['Person'] as SentenceCategory[] },
+  { id:'hazukashii',japanese:'恥ずかしい',reading:'はずかしい',english:'embarrassed',categories:['Person'] as SentenceCategory[] },
+  { id:'kenkou',japanese:'健康',reading:'けんこう',english:'healthy',categories:['Person'] as SentenceCategory[] },
+  { id:'suteki',japanese:'素敵',reading:'すてき',english:'lovely',categories:['Person','Clothing','Place'] as SentenceCategory[] },
+  { id:'kanyou',japanese:'寛容',reading:'かんよう',english:'tolerant',categories:['Person'] as SentenceCategory[] },
+  { id:'hen',japanese:'変',reading:'へん',english:'strange',categories:['Person'] as SentenceCategory[] },
+  { id:'sekkyokuteki',japanese:'積極的',reading:'せっきょくてき',english:'proactive',categories:['Person'] as SentenceCategory[] },
+  { id:'shoukyokuteki',japanese:'消極的',reading:'しょうきょくてき',english:'passive',categories:['Person'] as SentenceCategory[] },
   // Person is deliberately excluded: 残念 describes an outcome or situation
   // ("残念な結果"), not a person's own trait — "a son is regrettable" is not
   // what this word means.
@@ -2469,6 +2486,33 @@ const personAdjectives: ReadonlyArray<{japanese:string;reading:string;english:st
   { japanese:'うまい', reading:'うまい', english:'skillful', na:false },
 ]
 const personAdjectiveWords = new Set(personAdjectives.map(entry => entry.japanese))
+
+/**
+ * Every adjective that can describe a person, for n4-29 — the plain
+ * `Subject は Adjective です` frame.
+ *
+ * The list above exists for adjectives the vocabulary data files as nouns, so
+ * it was never the whole set: `adjectiveRules` already carries the ordinary
+ * person traits (優しい, 真面目, 賢い, 頑固) and the frame could not see any of
+ * them. Both go in, deduplicated by surface, which is what turns the drill from
+ * one word's three inflections into a walk through the pool.
+ *
+ * 痛い needs an experiencer or a body part — "a boy is painful" is not a
+ * description of anyone — and かっこいい negates irregularly (よくありません,
+ * not かっこいくありません), which the shared form-builder below does not model.
+ */
+const personDescriptionAdjectives: ReadonlyArray<{japanese:string;reading:string;english:string;na:boolean}> = (() => {
+  const bySurface = new Map(personAdjectives.map(entry => [entry.japanese, entry] as const))
+  for (const rule of adjectiveRules) {
+    if (!(rule.categories as SentenceCategory[]).includes('Person')) continue
+    if (rule.id === 'itai' || rule.id === 'kakkoii' || bySurface.has(rule.japanese)) continue
+    // きれい and 嫌い end in い but inflect as な-adjectives — the exception the
+    // naive "ends in い" test gets wrong.
+    const na = !(rule.japanese.endsWith('い') && rule.id !== 'kirei' && rule.id !== 'kirai')
+    bySurface.set(rule.japanese, { japanese: rule.japanese, reading: rule.reading, english: rule.english, na })
+  }
+  return [...bySurface.values()]
+})()
 
 /**
  * Adjectives that judge an idea or situation rather than a person, for n4-30.
@@ -3718,24 +3762,31 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     // built from the entry rather than shared.
     const subject=pick(humans,571,'subject')
     if (!subject) return null
-    const adjectiveIndex=Math.abs(seed+572)%personAdjectives.length
-    const adjective=personAdjectives[adjectiveIndex]!
-    const forms=adjective.na
+    const formsFor=(entry: typeof personDescriptionAdjectives[number])=>entry.na
       ? [
-        {japanese:`${adjective.japanese}です`,reading:`${adjective.reading}です`,english:'is'},
-        {japanese:`${adjective.japanese}ではありません`,reading:`${adjective.reading}ではありません`,english:'is not'},
-        {japanese:`${adjective.japanese}でした`,reading:`${adjective.reading}でした`,english:'was'},
+        {japanese:`${entry.japanese}です`,reading:`${entry.reading}です`,english:'is'},
+        {japanese:`${entry.japanese}ではありません`,reading:`${entry.reading}ではありません`,english:'is not'},
+        {japanese:`${entry.japanese}でした`,reading:`${entry.reading}でした`,english:'was'},
       ]
       : [
-        {japanese:`${adjective.japanese}です`,reading:`${adjective.reading}です`,english:'is'},
-        {japanese:`${adjective.japanese.slice(0,-1)}くないです`,reading:`${adjective.reading.slice(0,-1)}くないです`,english:'is not'},
-        {japanese:`${adjective.japanese.slice(0,-1)}かったです`,reading:`${adjective.reading.slice(0,-1)}かったです`,english:'was'},
+        {japanese:`${entry.japanese}です`,reading:`${entry.reading}です`,english:'is'},
+        {japanese:`${entry.japanese.slice(0,-1)}くないです`,reading:`${entry.reading.slice(0,-1)}くないです`,english:'is not'},
+        {japanese:`${entry.japanese.slice(0,-1)}かったです`,reading:`${entry.reading.slice(0,-1)}かったです`,english:'was'},
       ]
-    let endingIndex=Math.abs(options.slotSeeds?.ending ?? seed+573)%forms.length
-    if (options.avoidWords?.ending && forms[endingIndex]!.japanese===options.avoidWords.ending) {
-      endingIndex=(endingIndex+1)%forms.length
+    // The whole predicate is one segment here, so the ending is the only thing
+    // the drill can rotate — and while it walked the three inflections of a
+    // single seed-chosen adjective, that was a three-step drill on one word.
+    // Walking every (adjective, form) pair instead keeps each rotation a
+    // one-segment change while giving it the whole pool to move through.
+    const variants=personDescriptionAdjectives.flatMap((entry,entryIndex)=>formsFor(entry).map((form,formIndex)=>({entry,form,entryIndex,formIndex})))
+    const seededVariant=Math.abs(seed+572)%personDescriptionAdjectives.length*3+Math.abs(seed+573)%3
+    let variantIndex=options.slotSeeds?.ending!==undefined
+      ? Math.abs(options.slotSeeds.ending)%variants.length
+      : seededVariant
+    if (options.avoidWords?.ending && variants[variantIndex]!.form.japanese===options.avoidWords.ending) {
+      variantIndex=(variantIndex+1)%variants.length
     }
-    const form=forms[endingIndex]!
+    const {entry: adjective,form,entryIndex: adjectiveIndex,formIndex: endingIndex}=variants[variantIndex]!
     const subjectEnglish=englishPhrase(subject,'subject')
     // "I am", "you are", "a doctor is" — the copula has to agree with whichever
     // subject the pool produced.
@@ -4283,8 +4334,8 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   const exact = (japanese: string[]) => vocabulary.filter(word => japanese.includes(word.japanese) && hasUsableMeaning(word))
   const wordPart = (word: WordRecord, slot: string) => ({ text: word.japanese, reading: kanaReading(word.reading, word.japanese), slot })
   const literalPart = (text: string, reading = text, slot?: string) => ({ text, reading, slot })
-  const grammarSlot = (id: string, surface: string, dictionaryForm: string, reading: string, english: string, tags: string[]) => ({
-    id, surface, dictionaryForm, reading, english, pos: 'verb' as const, jlpt: level, tags, conjugation: patternId,
+  const grammarSlot = (id: string, surface: string, dictionaryForm: string, reading: string, english: string, tags: string[], pos: 'verb'|'noun'|'i_adjective'|'na_adjective' = 'verb') => ({
+    id, surface, dictionaryForm, reading, english, pos, jlpt: level, tags, conjugation: patternId,
   })
   const finish = (furigana: GeneratedPreviewSentence['furigana'], english: string, filled: Record<string,WordRecord>, extraSlots: GeneratedPreviewSentence['slots'], note: string): GeneratedPreviewSentence => ({
     frameId: patternId, level, japanese: furigana.map(part => part.text).join(''), reading: furigana.map(part => part.reading || part.text).join(''), english,
@@ -5124,11 +5175,11 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   // serves all four instead of ~15 fixed sentences total.
   if (patternId === 'n3-20' || patternId === 'n3-21' || patternId === 'n3-22' || patternId === 'n3-23') {
     const clauseSubject = pick(humans, 1191, 'subject')
-    const clauseAdjective = pick(adjectiveRules.filter(rule => rule.japanese.endsWith('い') && !['kirei','kirai','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1192)
+    const clauseAdjective = pick(adjectiveRules.filter(rule => rule.japanese.endsWith('い') && !['kirei','kirai','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1192, 'predicate')
     if (!clauseSubject || !clauseAdjective) return null
     const subjectEnglish = englishPhrase(clauseSubject,'subject')
     const copula = subjectEnglish === 'I' ? 'am' : subjectUsesBaseVerb(subjectEnglish) ? 'are' : 'is'
-    const clauseSlot = grammarSlot(`clause-adjective-${clauseAdjective.id}`,clauseAdjective.japanese,clauseAdjective.japanese,clauseAdjective.reading,clauseAdjective.english,['embedded-clause'])
+    const clauseSlot = grammarSlot(`clause-adjective-${clauseAdjective.id}`,clauseAdjective.japanese,clauseAdjective.japanese,clauseAdjective.reading,clauseAdjective.english,['embedded-clause'],'i_adjective')
     const furigana=[wordPart(clauseSubject,'subject'),literalPart('は','わ'),{text:clauseAdjective.japanese,reading:clauseAdjective.reading,slot:'predicate'}]
     if (patternId === 'n3-20') {
       return finish([...furigana,literalPart('と思います。','とおもいます。')],`I think ${subjectEnglish} ${copula} ${clauseAdjective.english}.`,{subject:clauseSubject},{predicate:clauseSlot},'と思う reports the speaker\'s own opinion or judgment.')
@@ -5149,12 +5200,12 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     // own rotatable slot.
     const subject = pick(humans, 1231, 'subject')
     const other = pick(humans.filter(word => word.id !== subject?.id), 1232, 'object')
-    const adjective = pick(adjectiveRules.filter(rule => rule.japanese.endsWith('い') && !['kirei','kirai','suki','kirai','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1233)
+    const adjective = pick(adjectiveRules.filter(rule => rule.japanese.endsWith('い') && !['kirei','kirai','suki','kirai','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1233, 'predicate')
     if (!subject || !other || !adjective) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const otherEnglish = englishPhrase(other,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(other,'object'),literalPart('より'),{text:adjective.japanese,reading:adjective.reading,slot:'predicate'},literalPart('です。')]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} ${comparativeForm(adjective.english)} than ${otherEnglish}.`,{subject,object:other},{predicate:grammarSlot(`n3-24-adjective-${adjective.id}`,adjective.japanese,adjective.japanese,adjective.reading,adjective.english,['comparison'])},'より marks the thing being compared against — "more than B."')
+    return finish(furigana,`${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} ${comparativeForm(adjective.english)} than ${otherEnglish}.`,{subject,object:other},{predicate:grammarSlot(`n3-24-adjective-${adjective.id}`,adjective.japanese,adjective.japanese,adjective.reading,adjective.english,['comparison'],'i_adjective')},'より marks the thing being compared against — "more than B."')
   }
 
   if (patternId === 'n3-25') {
@@ -5167,7 +5218,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     // ambiguous dangling comparison rather than "A is not as disliked as B."
     // 痛い needs an experiencer or body-part frame ("my head hurts"), not a bare
     // person-to-person comparison — a person isn't directly describable as "painful."
-    const adjective = pick(adjectiveRules.filter(rule => !['kakkoii','kirai','suki','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1243)
+    const adjective = pick(adjectiveRules.filter(rule => !['kakkoii','kirai','suki','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1243, 'predicate')
     if (!subject || !other || !adjective) return null
     // きれい and 嫌い both end in い but are na-adjectives — the classic
     // exception that trips up the naive "ends in い" i-adjective heuristic.
@@ -5182,7 +5233,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     // full comparison rather than a dangling noun phrase.
     const otherEnglish = englishPhrase(other,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(other,'object'),literalPart('ほど'),literalPart(trait.surface,trait.reading,'predicate')]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} not as ${adjective.english} as ${otherEnglish} ${copulaFor(otherEnglish)}.`,{subject,object:other},{},'ほど with a negative predicate sets an upper bound: not reaching that level.')
+    return finish(furigana,`${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} not as ${adjective.english} as ${otherEnglish} ${copulaFor(otherEnglish)}.`,{subject,object:other},{predicate:grammarSlot(`n3-25-adjective-${adjective.id}`,trait.surface,adjective.japanese,trait.reading,adjective.english,['comparison','negative'],isIAdjective?'i_adjective':'na_adjective')},'ほど with a negative predicate sets an upper bound: not reaching that level.')
   }
 
   if (patternId === 'n3-26') {
@@ -5700,10 +5751,16 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n2-30') {
+    // The conceded quality is the adjective this frame practises, and the
+    // result is picked independently of it, so any generic quality reads
+    // against all three: 古いとはいえ、品質は良いです.
     const clausePool = [
       { clause:'安い', clauseReading:'やすい', english:'it is cheap' },
       { clause:'難しい', clauseReading:'むずかしい', english:'it is difficult' },
       { clause:'小さい', clauseReading:'ちいさい', english:'it is small' },
+      { clause:'古い', clauseReading:'ふるい', english:'it is old' },
+      { clause:'重い', clauseReading:'おもい', english:'it is heavy' },
+      { clause:'地味', clauseReading:'じみ', english:'it is plain' },
     ]
     const resultPool = [
       { result:'品質は良いです', resultReading:'ひんしつはいいです', english:'the quality is good' },
@@ -5719,16 +5776,20 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     if (!clause || !result) return null
     const furigana=[{text:clause.clause,reading:clause.clauseReading,slot:'reason'},literalPart('とはいえ、'),{text:result.result,reading:result.resultReading,slot:'result'}]
     return finish(furigana,`Though ${clause.english}, ${result.english}.`,{},{
-      reason:grammarSlot(`n2-30-clause-${clausePool.indexOf(clause)}`,clause.clause,clause.clause,clause.clauseReading,clause.english,['concession']),
+      reason:grammarSlot(`n2-30-clause-${clausePool.indexOf(clause)}`,clause.clause,clause.clause,clause.clauseReading,clause.english,['concession'],clause.clause.endsWith('い')?'i_adjective':'na_adjective'),
       result:grammarSlot(`n2-30-result-${resultPool.indexOf(result)}`,result.result,result.result,result.resultReading,result.english,['concession']),
     },'とはいえ concedes a point formally before pointing out that it does not change the outcome.')
   }
 
   if (patternId === 'n2-31') {
+    // ながら(も) attaches to a plain い-adjective directly; a な-adjective would
+    // need its own である/な shape, so this pool stays い-only.
     const clausePool = [
       { clause:'狭い', clauseReading:'せまい', english:'it is small' },
       { clause:'安い', clauseReading:'やすい', english:'it is cheap' },
       { clause:'若い', clauseReading:'わかい', english:'young' },
+      { clause:'古い', clauseReading:'ふるい', english:'it is old' },
+      { clause:'忙しい', clauseReading:'いそがしい', english:'they are busy' },
     ]
     const resultPool = [
       { result:'楽しい家です', resultReading:'たのしいいえです', english:'it is a fun house' },
@@ -5744,7 +5805,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     if (!clause || !result) return null
     const furigana=[{text:clause.clause,reading:clause.clauseReading,slot:'reason'},literalPart('ながらも、'),{text:result.result,reading:result.resultReading,slot:'result'}]
     return finish(furigana,`Although ${clause.english}, ${result.english}.`,{},{
-      reason:grammarSlot(`n2-31-clause-${clausePool.indexOf(clause)}`,clause.clause,clause.clause,clause.clauseReading,clause.english,['concession']),
+      reason:grammarSlot(`n2-31-clause-${clausePool.indexOf(clause)}`,clause.clause,clause.clause,clause.clauseReading,clause.english,['concession'],'i_adjective'),
       result:grammarSlot(`n2-31-result-${resultPool.indexOf(result)}`,result.result,result.result,result.resultReading,result.english,['concession']),
     },'ながら(も) after an adjective concedes a quality while asserting something that seems to contradict it.')
   }

@@ -200,7 +200,9 @@ let empty = 0
 const unexpectedChanges: string[] = []
 const allowedChangedKeys: Partial<Record<HeroSwapFocus, ReadonlySet<string>>> = {
   verb: new Set(['verb', 'ending']),
-  adjective: new Set(['adjective', 'ending']),
+  // The description sits in a differently named slot per frame — see
+  // isAdjectivalSlot in heroSequence.
+  adjective: new Set(['adjective', 'ending', 'predicate', 'reason']),
   adverb: new Set(['adverb', 'sequence']),
   auxiliary: new Set(['verb', 'ending']),
 }
