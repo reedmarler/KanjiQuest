@@ -5845,8 +5845,7 @@ body:has(.dashboard) {
 }
 
 @media (max-width: 720px) {
-  .hero h1,
-  .tool-menu-heading h1 { font-size: 2rem; }
+  .hero h1 { font-size: 2rem; }
   .dashboard {
     /* Reserved for the topbar's tallest state (Mode + Swap stacked) so
        picking a mode never shifts the page underneath it. */
@@ -8567,6 +8566,15 @@ body:has(.dashboard) {
   font-size: 2.5rem;
   line-height: 1.18;
   padding-bottom: 0.06em;
+}
+
+/* On phones, match the dashboard "Kanji Quest" title height (2rem). This
+   override has to sit after the 2.5rem base above — an earlier max-width
+   rule was getting clobbered and left Beginner Zone oversized on mobile. */
+@media (max-width: 720px) {
+  .tool-menu-heading h1 {
+    font-size: 2rem;
+  }
 }
 
 .tool-menu-heading p {
