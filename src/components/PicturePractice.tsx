@@ -198,7 +198,7 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
     <div className="beginner-learner picture-practice">
       <div className="beginner-learner-top">
         <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
-        <span className="beginner-learner-title">{round > 0 ? 'Picture Mode' : ''}</span>
+        <span className="beginner-learner-title">Picture Mode</span>
         {round > 0 && !done ? (
           <button type="button" className="beginner-speedrun-header-settings" onClick={openSettings}>Settings</button>
         ) : <span />}

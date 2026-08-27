@@ -301,7 +301,7 @@ export function BeginnerSpeedRun({ onBack, onDashboard }: BeginnerSpeedRunProps)
           <AppBackButton onClick={onBack} aria-label="Back to previous page" />
           <AppDashboardButton onClick={onDashboard} />
         </div>
-        <span className="beginner-learner-title">{phase === 'idle' ? '' : 'Speed Run'}</span>
+        <span className="beginner-learner-title">Speed Run</span>
         {phase === 'idle' || phase === 'done' ? (
           <span />
         ) : (
