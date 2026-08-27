@@ -17718,12 +17718,24 @@ button.counter-example {
   .kanji-lab-header h1 { --title-gutter: 5.4rem; }
   .achievements-hero h1 { --title-gutter: 5.3rem; }
 
-  /* A single line now runs the full width, so drop the negative pull that
-     used to tuck the wrapped tool-menu title up behind the Back button. */
+  /*
+   * Start the title where "Kanji Quest" starts on the dashboard rather than
+   * tight under the Back button, so paging between screens doesn't shift it.
+   * The tool menu heading begins at its title, except on Additional, where the
+   * eyebrow above takes the first ~1.05rem of it.
+   */
   .beginner-zone-page .tool-menu-heading,
-  .study-tools-page .tool-menu-heading,
+  .study-tools-page .tool-menu-heading {
+    margin-top: 0.85rem;
+  }
+
   .additional-tools-page .tool-menu-heading {
-    margin-top: 0;
+    margin-top: -0.2rem;
+  }
+
+  .library-panel-header,
+  .kanji-lab-header {
+    margin-top: 0.55rem;
   }
 
   /* These headers sit the Back button beside the title, which leaves a phone
