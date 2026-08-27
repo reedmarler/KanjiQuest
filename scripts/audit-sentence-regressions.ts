@@ -104,7 +104,13 @@ function checkSentence(sentence: GeneratedPreviewSentence, complexity: Generatio
     }
   }
 
-  if (sentence.japanese.includes('必要')) {
+  // 必要 has to be what the sentence predicates, not merely a word it
+  // contains. n1-01 opens with a fixed reason clause — 説明が必要なので、医者は
+  // 話さざるを得ません — where the thing needed is 説明, inside the frame, and
+  // the subject slot holds the person in the main clause instead. Matching the
+  // substring anywhere therefore accused all 49 of those sentences of needing
+  // a doctor. The rule is about 〜が必要だ as a predicate, so it asks for one.
+  if (/必要(だ|です|でした|ではありません|ではありませんでした)?。?$/.test(sentence.japanese)) {
     const candidate = sentence.slots.subject ?? sentence.slots.object ?? sentence.slots.item
     if (candidate && !usefulNeededWords.has(candidate.dictionaryForm)) {
       addViolation(violations, sentence, complexity, seed, '必要だ used with a noun outside the useful-needed allowlist')

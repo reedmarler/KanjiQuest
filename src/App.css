@@ -2235,7 +2235,10 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.26rem;
-  min-width: 3.65rem;
+  /* Matches the Mode toggle's active footprint exactly (.control-story-top-toggle.is-active),
+     since Swap only ever renders while that toggle is on. */
+  width: 4.45rem;
+  min-width: 4.45rem;
   height: 1.2rem;
   box-sizing: border-box;
   padding: 0 0.38rem;

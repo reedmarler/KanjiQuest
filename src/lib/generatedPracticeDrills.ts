@@ -14,7 +14,12 @@ interface GrammarSpec {
   id: string
   frameId: string
   level: DrillJlptLevel
-  target: { type: 'literal'; text: string; occurrence?: number } | { type: 'slot'; slot: string; suffix: string; alternatives: string[] }
+  target:
+    | { type: 'literal'; text: string; occurrence?: number }
+    /* `readingSuffix` is only needed when the suffix carries kanji: the answer
+     * is split off both the text and the reading, and 始めます never ends the
+     * reading — はじめます does. */
+    | { type: 'slot'; slot: string; suffix: string; readingSuffix?: string; alternatives: string[] }
   pattern: string
   meaning: string
   choices?: Choice[]
@@ -73,15 +78,20 @@ const grammarSpecs: GrammarSpec[] = [
   { id: 'during-span', frameId: 'n3-32', level: 'N3', target: { type: 'literal', text: '間、' }, pattern: '間', meaning: 'during (the whole span)', choices: [{ text: '間に、' }, { text: 'うちに、' }, { text: 'つつ、' }] },
 
   // Complexity Level 3 — chained / aspectual verb forms.
-  { id: 'finish-doing', frameId: 'n3-14', level: 'N3', target: { type: 'literal', text: '終わりました。' }, pattern: '終わる', meaning: 'finish doing', choices: [{ text: '続けています。' }, { text: '始めます。' }, { text: 'てみます。' }] },
-  { id: 'continue-doing', frameId: 'n3-15', level: 'N3', target: { type: 'literal', text: '続けています。' }, pattern: '続ける', meaning: 'continue doing', choices: [{ text: '終わりました。' }, { text: '始めます。' }, { text: 'てみます。' }] },
-  { id: 'try-doing', frameId: 'n3-31', level: 'N3', target: { type: 'literal', text: 'みます。' }, pattern: 'てみる', meaning: 'try doing', choices: [{ text: '終わります。' }, { text: '続けます。' }, { text: '始めます。' }] },
-  { id: 'effort-habit', frameId: 'n3-01', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ようにします', alternatives: ['ようになります', 'ことにします', 'てみます'] }, pattern: 'ようにする', meaning: 'make an effort or habit' },
-  { id: 'decide-to', frameId: 'n3-02', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ことにします', alternatives: ['ようにします', 'ようになります', 'てみます'] }, pattern: 'ことにする', meaning: 'decide to do' },
+  { id: 'finish-doing', frameId: 'n3-14', level: 'N3', target: { type: 'literal', text: '終わりました。' }, pattern: '終わる', meaning: 'finish doing', choices: [{ text: '続けています。' }, { text: '始めます。' }, { text: '続けました。' }] },
+  { id: 'continue-doing', frameId: 'n3-15', level: 'N3', target: { type: 'literal', text: '続けています。' }, pattern: '続ける', meaning: 'continue doing', choices: [{ text: '終わりました。' }, { text: '始めます。' }, { text: '終わります。' }] },
+  // These four frames carry their auxiliary inside the predicate segment, so
+  // there is no standalone literal to blank. Each blanks the ending off the
+  // verb instead, and every alternative attaches to the stem the answer takes
+  // — the て-form here, the dictionary form for ことはない, the masu-stem for
+  // かねる, the ない-stem for ないでください.
+  { id: 'try-doing', frameId: 'n3-31', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'みます。', alternatives: ['しまいます。', 'おきます。', 'あげます。'] }, pattern: 'てみる', meaning: 'try doing' },
+  { id: 'effort-habit', frameId: 'n3-01', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ようにします', alternatives: ['ようになります', 'ことにします', 'つもりです'] }, pattern: 'ようにする', meaning: 'make an effort or habit' },
+  { id: 'decide-to', frameId: 'n3-02', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ことにします', alternatives: ['ようにします', 'ようになります', 'つもりです'] }, pattern: 'ことにする', meaning: 'decide to do' },
   // Alternatives must share the same stem as the answer's own suffix — ことにします/
   // ようにします need the dictionary form, てみます needs the te-form, so only
   // other masu-stem endings are safe distractors here.
-  { id: 'begin-doing', frameId: 'n4-10', level: 'N4', target: { type: 'slot', slot: 'verb', suffix: '始めます', alternatives: ['ます', 'たいです', 'ました'] }, pattern: '始める', meaning: 'begin doing' },
+  { id: 'begin-doing', frameId: 'n4-10', level: 'N4', target: { type: 'slot', slot: 'verb', suffix: '始めます', readingSuffix: 'はじめます', alternatives: ['ます', 'たいです', 'ました'] }, pattern: '始める', meaning: 'begin doing' },
   // The stem here is the て-form with て itself stripped (買っ, not 買って), so
   // only alternatives that themselves start with て reconstruct correctly.
   { id: 'prepare-in-advance', frameId: 'n3-05', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ておきます', alternatives: ['てみます', 'てしまいます', 'てあげます'] }, pattern: 'ておく', meaning: 'do in advance / preparation' },
@@ -91,12 +101,20 @@ const grammarSpecs: GrammarSpec[] = [
   { id: 'on-the-occasion-of', frameId: 'n1-10', level: 'N1', target: { type: 'literal', text: 'に際して、' }, pattern: 'に際して', meaning: 'on the occasion of', choices: [{ text: 'ことには、' }, { text: 'に即して、' }, { text: 'をめぐって、' }] },
 
   // Level 1 top-up — existing base-engine/smallVerbPool patterns not yet tested.
-  { id: 'no-need-to', frameId: 'n2-04', level: 'N2', target: { type: 'literal', text: 'ことはありません。' }, pattern: 'ことはない', meaning: 'no need to', choices: [{ text: 'はずです。' }, { text: 'べきではありません。' }, { text: 'かねます。' }] },
-  { id: 'expected-to', frameId: 'n2-06', level: 'N2', target: { type: 'literal', text: 'はずです。' }, pattern: 'はずだ', meaning: 'expected to', choices: [{ text: 'ことはありません。' }, { text: 'べきではありません。' }, { text: 'かねます。' }] },
-  { id: 'should-not', frameId: 'n2-16', level: 'N2', target: { type: 'literal', text: 'べきではありません。' }, pattern: 'べきではない', meaning: 'should not', choices: [{ text: 'ことはありません。' }, { text: 'はずです。' }, { text: 'かねます。' }] },
-  { id: 'cannot-readily', frameId: 'n2-18', level: 'N2', target: { type: 'literal', text: 'かねます。' }, pattern: 'かねる', meaning: 'cannot readily', choices: [{ text: 'ことはありません。' }, { text: 'はずです。' }, { text: 'べきではありません。' }] },
-  { id: 'no-longer', frameId: 'n3-33', level: 'N3', target: { type: 'literal', text: 'なくなりました。' }, pattern: 'なくなる', meaning: 'no longer', choices: [{ text: 'ないでください。' }, { text: 'ことはありません。' }, { text: 'べきではありません。' }] },
-  { id: 'please-dont', frameId: 'n3-39', level: 'N3', target: { type: 'literal', text: 'ないでください。' }, pattern: 'ないでください', meaning: 'please do not', choices: [{ text: 'なくなりました。' }, { text: 'ことはありません。' }, { text: 'べきではありません。' }] },
+  { id: 'no-need-to', frameId: 'n2-04', level: 'N2', target: { type: 'slot', slot: 'verb', suffix: 'ことはありません。', alternatives: ['はずです。', 'べきです。', 'ことになりました。'] }, pattern: 'ことはない', meaning: 'no need to' },
+  // はず and べき put the verb and its ending in one furigana part (洗うはず
+  // です。), so a literal target finds nothing to blank — these split the
+  // ending off the predicate instead. Every alternative attaches to the same
+  // dictionary form the answer does, which is why かねます (masu-stem only)
+  // is not among them.
+  { id: 'expected-to', frameId: 'n2-06', level: 'N2', target: { type: 'slot', slot: 'verb', suffix: 'はずです。', alternatives: ['はずがありません。', 'べきです。', 'ことはありません。'] }, pattern: 'はずだ', meaning: 'expected to' },
+  { id: 'should-not', frameId: 'n2-16', level: 'N2', target: { type: 'slot', slot: 'verb', suffix: 'べきではありません。', alternatives: ['べきです。', 'はずです。', 'ことはありません。'] }, pattern: 'べきではない', meaning: 'should not' },
+  { id: 'cannot-readily', frameId: 'n2-18', level: 'N2', target: { type: 'slot', slot: 'verb', suffix: 'かねます。', alternatives: ['ます。', 'ました。', '始めます。'] }, pattern: 'かねる', meaning: 'cannot readily' },
+  // なくなる and ざるを得ない sit inside the predicate segment rather than in a
+  // literal of their own, so these blank the ending off the verb. Every
+  // alternative attaches to the same ない-stem the answer does.
+  { id: 'no-longer', frameId: 'n3-33', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'なくなりました。', alternatives: ['ないでください。', 'なければなりません。', 'なくてもいいです。'] }, pattern: 'なくなる', meaning: 'no longer' },
+  { id: 'please-dont', frameId: 'n3-39', level: 'N3', target: { type: 'slot', slot: 'verb', suffix: 'ないでください。', alternatives: ['なければなりません。', 'なくてもいいです。', 'なくなりました。'] }, pattern: 'ないでください', meaning: 'please do not' },
   { id: 'decided-that', frameId: 'n2-03', level: 'N2', target: { type: 'literal', text: 'ことになりました。' }, pattern: 'ことになる', meaning: 'it has been decided that', choices: [{ text: 'なくなりました。' }, { text: 'ないでください。' }, { text: 'ことはありません。' }] },
   { id: 'like-a', frameId: 'n2-08', level: 'N2', target: { type: 'literal', text: 'のような' }, pattern: 'のような', meaning: 'like a / resembling', choices: [{ text: 'に違いない' }, { text: 'に至るまで' }, { text: 'ならではの' }] },
 
@@ -130,7 +148,10 @@ const grammarSpecs: GrammarSpec[] = [
 
   // Complexity Level 5 — advanced discourse grammar over a whole proposition.
   { id: 'nothing-other-than', frameId: 'n1-02', level: 'N1', target: { type: 'literal', text: 'にほかならない。' }, pattern: 'にほかならない', meaning: 'nothing other than', choices: [{ text: 'というものだ。' }, { text: 'にすぎない。' }, { text: 'どころではない。' }] },
-  { id: 'no-choice', frameId: 'n1-01', level: 'N1', target: { type: 'literal', text: 'ざるを' }, pattern: 'ざるを得ない', meaning: 'have no choice but to', choices: [{ text: 'てもいいを' }, { text: 'てはいけないを' }, { text: 'なくてもいいを' }] },
+  // Distractors attach to the same plain adjective the answer does, so the
+  // choice is between four grammar points rather than four shapes.
+  { id: 'nothing-better', frameId: 'n1-14', level: 'N1', target: { type: 'literal', text: 'に越したことはありません。' }, pattern: 'に越したことはない', meaning: 'nothing better than', choices: [{ text: 'に違いありません。' }, { text: 'とは限りません。' }, { text: 'ものです。' }] },
+  { id: 'no-choice', frameId: 'n1-01', level: 'N1', target: { type: 'slot', slot: 'verb', suffix: 'ざるを得ません。', readingSuffix: 'ざるをえません。', alternatives: ['なければなりません。', 'ないでください。', 'なくてもいいです。'] }, pattern: 'ざるを得ない', meaning: 'have no choice but to' },
   { id: 'not-necessarily', frameId: 'n1-13', level: 'N1', target: { type: 'literal', text: '限りません。' }, pattern: 'とは限らない', meaning: 'not necessarily', choices: [{ text: 'に決まっています。' }, { text: 'に違いありません。' }, { text: 'わけです。' }] },
   { id: 'general-truth', frameId: 'n2-07', level: 'N2', target: { type: 'literal', text: 'ものだ。' }, pattern: 'ものだ', meaning: 'general truth or recollection', choices: [{ text: 'はずだ。' }, { text: 'に違いない。' }, { text: 'ところだ。' }] },
   { id: 'softened-denial', frameId: 'n2-17', level: 'N2', target: { type: 'literal', text: 'わけではありません。' }, pattern: 'というわけではない', meaning: 'it is not that (softened)', choices: [{ text: 'わけにはいきません。' }, { text: 'に違いありません。' }, { text: 'ものではありません。' }] },
@@ -347,9 +368,10 @@ function grammarExercise(sentence: GeneratedSentence, spec: GrammarSpec, order: 
   const index = sentence.furigana.findIndex((part) => part.slot === target.slot)
   if (index < 0) return null
   const part = sentence.furigana[index]!
-  if (!part.text.endsWith(target.suffix) || !part.reading.endsWith(target.suffix)) return null
+  const readingSuffix = target.readingSuffix ?? target.suffix
+  if (!part.text.endsWith(target.suffix) || !part.reading.endsWith(readingSuffix)) return null
   const stem = part.text.slice(0, -target.suffix.length)
-  const readingStem = part.reading.slice(0, -target.suffix.length)
+  const readingStem = part.reading.slice(0, -readingSuffix.length)
   const answer = { text: part.text, reading: part.reading }
   const distractors = target.alternatives.map((ending) => ({ text: `${stem}${ending}`, reading: `${readingStem}${ending}` }))
   return exerciseFromRange(

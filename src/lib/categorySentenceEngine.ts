@@ -1710,8 +1710,12 @@ function comparativeForm(word: string): string {
   const irregular: Record<string,string> = { good:'better', bad:'worse', far:'farther', little:'less', many:'more', much:'more' }
   if (irregular[word]) return irregular[word]!
   if (/[^aeiou]y$/.test(word)) return `${word.slice(0,-1)}ier`
-  if (word.endsWith('e')) return `${word}r`
+  // The -er suffix, and the -r shortcut for an e-final word, only belong to
+  // short adjectives: English takes "larger" and "wiser" but "more capable",
+  // never "capabler". The e-rule used to run before the length check and so
+  // claimed every long -able and -ible gloss.
   if (word.length <= 6 && !/(?:ous|ful|ive|al|ing|ic)$/.test(word)) {
+    if (word.endsWith('e')) return `${word}r`
     return doublesFinalConsonant(word) ? `${word}${word.slice(-1)}er` : `${word}er`
   }
   return `more ${word}`
@@ -2316,6 +2320,19 @@ export const adjectiveRules = [
   { id:'fuan',japanese:'不安',reading:'ふあん',english:'anxious',categories:['Person'] as SentenceCategory[] },
   { id:'manzoku',japanese:'満足',reading:'まんぞく',english:'satisfied',categories:['Person'] as SentenceCategory[] },
   { id:'fuman',japanese:'不満',reading:'ふまん',english:'dissatisfied',categories:['Person'] as SentenceCategory[] },
+  // Deck adjectives that describe a person and had no rule, so no frame could
+  // reach them. The N3 comparison and quotation frames draw their trait from
+  // this pool, and every one of these reads as a plain description of someone:
+  // 学生は素晴らしいと思います, 父は兄ほど厳しくありません.
+  { id:'subarashii',japanese:'素晴らしい',reading:'すばらしい',english:'wonderful',categories:['Person','Event','Media'] as SentenceCategory[] },
+  { id:'kuwashii',japanese:'詳しい',reading:'くわしい',english:'knowledgeable',categories:['Person'] as SentenceCategory[] },
+  { id:'hazukashii',japanese:'恥ずかしい',reading:'はずかしい',english:'embarrassed',categories:['Person'] as SentenceCategory[] },
+  { id:'kenkou',japanese:'健康',reading:'けんこう',english:'healthy',categories:['Person'] as SentenceCategory[] },
+  { id:'suteki',japanese:'素敵',reading:'すてき',english:'lovely',categories:['Person','Clothing','Place'] as SentenceCategory[] },
+  { id:'kanyou',japanese:'寛容',reading:'かんよう',english:'tolerant',categories:['Person'] as SentenceCategory[] },
+  { id:'hen',japanese:'変',reading:'へん',english:'strange',categories:['Person'] as SentenceCategory[] },
+  { id:'sekkyokuteki',japanese:'積極的',reading:'せっきょくてき',english:'proactive',categories:['Person'] as SentenceCategory[] },
+  { id:'shoukyokuteki',japanese:'消極的',reading:'しょうきょくてき',english:'passive',categories:['Person'] as SentenceCategory[] },
   // Person is deliberately excluded: 残念 describes an outcome or situation
   // ("残念な結果"), not a person's own trait — "a son is regrettable" is not
   // what this word means.
@@ -2469,6 +2486,33 @@ const personAdjectives: ReadonlyArray<{japanese:string;reading:string;english:st
   { japanese:'うまい', reading:'うまい', english:'skillful', na:false },
 ]
 const personAdjectiveWords = new Set(personAdjectives.map(entry => entry.japanese))
+
+/**
+ * Every adjective that can describe a person, for n4-29 — the plain
+ * `Subject は Adjective です` frame.
+ *
+ * The list above exists for adjectives the vocabulary data files as nouns, so
+ * it was never the whole set: `adjectiveRules` already carries the ordinary
+ * person traits (優しい, 真面目, 賢い, 頑固) and the frame could not see any of
+ * them. Both go in, deduplicated by surface, which is what turns the drill from
+ * one word's three inflections into a walk through the pool.
+ *
+ * 痛い needs an experiencer or a body part — "a boy is painful" is not a
+ * description of anyone — and かっこいい negates irregularly (よくありません,
+ * not かっこいくありません), which the shared form-builder below does not model.
+ */
+const personDescriptionAdjectives: ReadonlyArray<{japanese:string;reading:string;english:string;na:boolean}> = (() => {
+  const bySurface = new Map(personAdjectives.map(entry => [entry.japanese, entry] as const))
+  for (const rule of adjectiveRules) {
+    if (!(rule.categories as SentenceCategory[]).includes('Person')) continue
+    if (rule.id === 'itai' || rule.id === 'kakkoii' || bySurface.has(rule.japanese)) continue
+    // きれい and 嫌い end in い but inflect as な-adjectives — the exception the
+    // naive "ends in い" test gets wrong.
+    const na = !(rule.japanese.endsWith('い') && rule.id !== 'kirei' && rule.id !== 'kirai')
+    bySurface.set(rule.japanese, { japanese: rule.japanese, reading: rule.reading, english: rule.english, na })
+  }
+  return [...bySurface.values()]
+})()
 
 /**
  * Adjectives that judge an idea or situation rather than a person, for n4-30.
@@ -3718,24 +3762,31 @@ function additionalN4Sentence(seed: number,patternId: string,options: CategorySe
     // built from the entry rather than shared.
     const subject=pick(humans,571,'subject')
     if (!subject) return null
-    const adjectiveIndex=Math.abs(seed+572)%personAdjectives.length
-    const adjective=personAdjectives[adjectiveIndex]!
-    const forms=adjective.na
+    const formsFor=(entry: typeof personDescriptionAdjectives[number])=>entry.na
       ? [
-        {japanese:`${adjective.japanese}です`,reading:`${adjective.reading}です`,english:'is'},
-        {japanese:`${adjective.japanese}ではありません`,reading:`${adjective.reading}ではありません`,english:'is not'},
-        {japanese:`${adjective.japanese}でした`,reading:`${adjective.reading}でした`,english:'was'},
+        {japanese:`${entry.japanese}です`,reading:`${entry.reading}です`,english:'is'},
+        {japanese:`${entry.japanese}ではありません`,reading:`${entry.reading}ではありません`,english:'is not'},
+        {japanese:`${entry.japanese}でした`,reading:`${entry.reading}でした`,english:'was'},
       ]
       : [
-        {japanese:`${adjective.japanese}です`,reading:`${adjective.reading}です`,english:'is'},
-        {japanese:`${adjective.japanese.slice(0,-1)}くないです`,reading:`${adjective.reading.slice(0,-1)}くないです`,english:'is not'},
-        {japanese:`${adjective.japanese.slice(0,-1)}かったです`,reading:`${adjective.reading.slice(0,-1)}かったです`,english:'was'},
+        {japanese:`${entry.japanese}です`,reading:`${entry.reading}です`,english:'is'},
+        {japanese:`${entry.japanese.slice(0,-1)}くないです`,reading:`${entry.reading.slice(0,-1)}くないです`,english:'is not'},
+        {japanese:`${entry.japanese.slice(0,-1)}かったです`,reading:`${entry.reading.slice(0,-1)}かったです`,english:'was'},
       ]
-    let endingIndex=Math.abs(options.slotSeeds?.ending ?? seed+573)%forms.length
-    if (options.avoidWords?.ending && forms[endingIndex]!.japanese===options.avoidWords.ending) {
-      endingIndex=(endingIndex+1)%forms.length
+    // The whole predicate is one segment here, so the ending is the only thing
+    // the drill can rotate — and while it walked the three inflections of a
+    // single seed-chosen adjective, that was a three-step drill on one word.
+    // Walking every (adjective, form) pair instead keeps each rotation a
+    // one-segment change while giving it the whole pool to move through.
+    const variants=personDescriptionAdjectives.flatMap((entry,entryIndex)=>formsFor(entry).map((form,formIndex)=>({entry,form,entryIndex,formIndex})))
+    const seededVariant=Math.abs(seed+572)%personDescriptionAdjectives.length*3+Math.abs(seed+573)%3
+    let variantIndex=options.slotSeeds?.ending!==undefined
+      ? Math.abs(options.slotSeeds.ending)%variants.length
+      : seededVariant
+    if (options.avoidWords?.ending && variants[variantIndex]!.form.japanese===options.avoidWords.ending) {
+      variantIndex=(variantIndex+1)%variants.length
     }
-    const form=forms[endingIndex]!
+    const {entry: adjective,form,entryIndex: adjectiveIndex,formIndex: endingIndex}=variants[variantIndex]!
     const subjectEnglish=englishPhrase(subject,'subject')
     // "I am", "you are", "a doctor is" — the copula has to agree with whichever
     // subject the pool produced.
@@ -3894,6 +3945,98 @@ const n3PatternMeanings: Record<string,string> = {
   'n3-06':'conditional if','n3-07':'conditional when or if','n3-08':'although or despite','n3-09':'because or since','n3-10':'in order to',
 }
 
+/**
+ * Manner adverbials the hand-built N3 frames can carry.
+ *
+ * The adverb drill stopped at N4 because nothing above it had an adverbial
+ * slot: the N5/N4 frames get theirs from the verb records' own manner slot,
+ * and the frames above are built by hand. This is that slot, stated once.
+ *
+ * Manner only, since the frames that take it fix a single action rather than a
+ * habit — 常に食べたばかり is not a sentence. Only words that read after the
+ * object in English too, which is where these frames' glosses have room, so
+ * 突然 and やっと are left out rather than glossed into the wrong place. And
+ * only words that fit every verb these frames use (買う, 作る, 書く, 食べる,
+ * 飲む, 読む, 見る): はっきり wants a speech verb and 一生懸命 an effort verb,
+ * and "ate the cake clearly" is the kind of pair the N5 pool's own comment
+ * warns about.
+ */
+const MANNER_ADVERBIALS: ReadonlyArray<{japanese:string;reading:string;english:string}> = [
+  { japanese:'ゆっくり', reading:'ゆっくり', english:'slowly' },
+  { japanese:'静かに', reading:'しずかに', english:'quietly' },
+  { japanese:'丁寧に', reading:'ていねいに', english:'carefully' },
+  // きちんと is ちゃんと's formal twin — one gloss covers both, and the drill
+  // gains nothing from two words a learner cannot tell apart in English.
+  { japanese:'ちゃんと', reading:'ちゃんと', english:'properly' },
+  { japanese:'早く', reading:'はやく', english:'quickly' },
+]
+
+/** Which adverbial this sentence shows; `adverb` is the slot the drill re-seeds. */
+function pickAdverbial<T extends {japanese: string}>(pool: readonly T[], options: CategorySentenceOptions, seed: number, salt: number): T {
+  let index = Math.abs(options.slotSeeds?.adverb ?? seed + salt) % pool.length
+  if (options.avoidWords?.adverb && pool[index]!.japanese === options.avoidWords.adverb) {
+    index = (index + 1) % pool.length
+  }
+  return pool[index]!
+}
+
+/**
+ * The polite forms a ます-stem grammar auxiliary takes, and the English each
+ * one asks of the clause it governs.
+ *
+ * Every N3 frame that ends in an auxiliary — ようにする, ことにする, ておく,
+ * てくる — was frozen in its polite non-past, which left the Auxiliary Verbs
+ * drill nothing to rotate above N4. The tail is the only part that moves, and
+ * the English follows from the clause's own base phrase ("make a point of
+ * studying Japanese"), so a frame states that phrase once rather than writing
+ * out four sentences. `third` is that phrase with its verb in the third person,
+ * which the frames already compute for their subject; when the two are equal
+ * the subject is plural, which is what picks do/does.
+ *
+ * Frames name the forms they want: several of these auxiliaries are natural in
+ * only some of them (〜てしまいません is grammatical and almost never said), so
+ * the caller decides rather than taking all four.
+ */
+type PoliteAuxiliaryTense = 'nonPast' | 'past' | 'negative' | 'pastNegative'
+
+const politeAuxiliaryTails: Record<PoliteAuxiliaryTense, { tail: string; english: (base: string, third: string) => string }> = {
+  nonPast: { tail: 'ます', english: (_base, third) => third },
+  past: { tail: 'ました', english: (base) => simplePast(base) },
+  negative: { tail: 'ません', english: (base, third) => `${third === base ? 'do' : 'does'} not ${base}` },
+  pastNegative: { tail: 'ませんでした', english: (base) => `did not ${base}` },
+}
+
+function politeAuxiliaryForms(
+  stem: { japanese: string; reading: string },
+  tenses: readonly PoliteAuxiliaryTense[],
+) {
+  return tenses.map(tense => ({
+    japanese: `${stem.japanese}${politeAuxiliaryTails[tense].tail}`,
+    reading: `${stem.reading}${politeAuxiliaryTails[tense].tail}`,
+    english: politeAuxiliaryTails[tense].english,
+  }))
+}
+
+/**
+ * Which of those forms this sentence shows. `ending` is the slot the hero's
+ * grammar drill re-seeds, and the surface it avoids is the whole predicate,
+ * since that is the segment the sentence puts on screen.
+ *
+ * Without a re-seed a frame keeps showing what it showed before it had forms
+ * to choose from — its canonical polite non-past, unless the caller names
+ * another. Ordinary generation is therefore unchanged, and the drill is the
+ * only caller that sees the rest of the table.
+ */
+function pickAuxiliaryForm<T extends { japanese: string }>(forms: T[], options: CategorySentenceOptions, defaultIndex = 0): T {
+  let index = options.slotSeeds?.ending !== undefined
+    ? Math.abs(options.slotSeeds.ending) % forms.length
+    : Math.abs(defaultIndex) % forms.length
+  if (options.avoidWords?.ending && forms[index]!.japanese === options.avoidWords.ending) {
+    index = (index + 1) % forms.length
+  }
+  return forms[index]!
+}
+
 function generateN3CategorySentence(seed: number,patternId: string,options: CategorySentenceOptions={}): GeneratedPreviewSentence | null {
   if (!n3PatternIds.has(patternId)) return null
   const vocabulary=generatorWords()
@@ -3918,22 +4061,31 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
   if (patternId==='n3-01') {
     const subject=pick(firstPerson.length?firstPerson:humans,601,'subject')
     if (!subject) return null
-    const subjectEnglish=englishPhrase(subject,'subject'),make=subjectUsesBaseVerb(subjectEnglish)?'make':'makes'
-    const habits: Array<{furigana: GeneratedPreviewSentence['furigana'];filled: Record<string,WordRecord>;extra: GeneratedPreviewSentence['slots'];english: string;rule: string}>=[]
+    const subjectEnglish=englishPhrase(subject,'subject'),plural=subjectUsesBaseVerb(subjectEnglish)
+    type Habit={object: WordRecord;stem:{japanese: string;reading: string};dictionary: string;phrase: string;gloss: string;timeId: string;tags: string[];rule: string}
+    const habits: Habit[]=[]
     const readingObject=pick(readable.filter(word=>word.japanese!=='辞書'),602,'object')
     if (readingObject) habits.push({
-      furigana:[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('毎日','まいにち','time'),wordPart(readingObject,'object'),literalPart('を'),literalPart('読むようにします','よむようにします','verb')],
-      filled:{subject,object:readingObject},extra:{time:grammarSlot('time-mainichi','毎日','毎日','まいにち','every day',['frequency','daily'],'noun'),verb:grammarSlot('verb-yomu-younisuru','読むようにします','読む','よむようにします','make a point of reading',['habit','youni-suru'])},
-      english:`${capitalize(subjectEnglish)} ${make} a point of reading ${englishPhrase(readingObject,'object')} every day.`,rule:'Readable objects are paired with 読む.',
+      object:readingObject,stem:{japanese:'読むようにし',reading:'よむようにし'},dictionary:'読む',
+      phrase:`a point of reading ${englishPhrase(readingObject,'object')} every day`,gloss:'make a point of reading',
+      timeId:'time-mainichi',tags:['habit','youni-suru'],rule:'Readable objects are paired with 読む.',
     })
     const language=pick(languages,603,'object')
     if (language) habits.push({
-      furigana:[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('毎日','まいにち','time'),wordPart(language,'object'),literalPart('を'),literalPart('勉強するようにします','べんきょうするようにします','verb')],
-      filled:{subject,object:language},extra:{time:grammarSlot('time-mainichi-study','毎日','毎日','まいにち','every day',['frequency','daily'],'noun'),verb:grammarSlot('verb-benkyou-younisuru','勉強するようにします','勉強する','べんきょうするようにします','make a point of studying',['habit','learning','youni-suru'])},
-      english:`${capitalize(subjectEnglish)} ${make} a point of studying ${{日本語:'Japanese',英語:'English',中国語:'Chinese',外国語:'a foreign language'}[language.japanese]??primaryEnglishGloss(language.preferredTranslation||language.english)} every day.`,rule:'Language vocabulary is paired with studying.',
+      object:language,stem:{japanese:'勉強するようにし',reading:'べんきょうするようにし'},dictionary:'勉強する',
+      phrase:`a point of studying ${{日本語:'Japanese',英語:'English',中国語:'Chinese',外国語:'a foreign language'}[language.japanese]??primaryEnglishGloss(language.preferredTranslation||language.english)} every day`,
+      gloss:'make a point of studying',timeId:'time-mainichi-study',tags:['habit','learning','youni-suru'],rule:'Language vocabulary is paired with studying.',
     })
     const habit=pick(habits,604)
-    return habit?finish(habit.furigana,habit.english,habit.filled,habit.extra,[habit.rule,'ようにする expresses a deliberate habit or effort.']):null
+    if (!habit) return null
+    const habitForms=politeAuxiliaryForms(habit.stem,['nonPast','past','negative','pastNegative'])
+    const habitForm=pickAuxiliaryForm(habitForms,options)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('毎日','まいにち','time'),wordPart(habit.object,'object'),literalPart('を'),literalPart(habitForm.japanese,habitForm.reading,'verb')]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${habitForm.english(`make ${habit.phrase}`,`${plural?'make':'makes'} ${habit.phrase}`)}.`,{subject,object:habit.object},{
+      time:grammarSlot(habit.timeId,'毎日','毎日','まいにち','every day',['frequency','daily'],'noun'),
+      verb:grammarSlot(`verb-${habit.dictionary}-younisuru`,habitForm.japanese,habit.dictionary,habitForm.reading,habit.gloss,habit.tags),
+      ending:grammarSlot(`younisuru-ending-${habitForms.indexOf(habitForm)}`,habitForm.japanese,habit.dictionary,habitForm.reading,habit.gloss,[...habit.tags,'ending']),
+    },[habit.rule,'ようにする expresses a deliberate habit or effort.'])
   }
 
   if (patternId==='n3-02') {
@@ -3944,8 +4096,20 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
     const subjectEnglish=englishPhrase(subject,'subject'),have=subjectUsesBaseVerb(subjectEnglish)?'have':'has'
     const destinationEnglish={学校:'school',大学:'university'}[destination.japanese]??englishPhrase(destination,'destination')
     const movement=destination.japanese==='家'?'go home':`go to ${destinationEnglish}`
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(destination,'destination'),literalPart('へ','え'),literalPart('行くことにします','いくことにします','verb')]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${have} decided to ${movement}.`,{subject,destination},{verb:grammarSlot('verb-iku-kotonisuru','行くことにします','行く','いくことにします','decide to go',['decision','movement','kotoni-suru'])},['Destination is valid for 行く.','ことにする expresses the subject’s decision.'])
+    // ことにします is the moment of deciding, which English states as a perfect
+    // ("has decided"), so the forms carry their own gloss rather than taking
+    // the shared present/past transform.
+    const decisionForms=[
+      {japanese:'行くことにします',reading:'いくことにします',english:`${have} decided to ${movement}`},
+      {japanese:'行くことにしました',reading:'いくことにしました',english:`decided to ${movement}`},
+      {japanese:'行くことにしませんでした',reading:'いくことにしませんでした',english:`did not decide to ${movement}`},
+    ]
+    const decisionForm=pickAuxiliaryForm(decisionForms,options)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(destination,'destination'),literalPart('へ','え'),literalPart(decisionForm.japanese,decisionForm.reading,'verb')]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${decisionForm.english}.`,{subject,destination},{
+      verb:grammarSlot('verb-iku-kotonisuru',decisionForm.japanese,'行く',decisionForm.reading,'decide to go',['decision','movement','kotoni-suru']),
+      ending:grammarSlot(`kotonisuru-ending-${decisionForms.indexOf(decisionForm)}`,decisionForm.japanese,'行く',decisionForm.reading,'decide to go',['decision','kotoni-suru','ending']),
+    },['Destination is valid for 行く.','ことにする expresses the subject’s decision.'])
   }
 
   if (patternId==='n3-03') {
@@ -3954,8 +4118,15 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
     if (!subject||!object) return null
     const subjectEnglish=englishPhrase(subject,'subject'),becomes=subjectUsesBaseVerb(subjectEnglish)?'become':'becomes'
     const abilityObjectEnglish={漢字:'kanji',本:'books',記事:'articles',新聞:'newspapers',小説:'novels',辞書:'dictionaries'}[object.japanese]??primaryEnglishGloss(object.preferredTranslation||object.english)
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('が'),literalPart('読めるようになります','よめるようになります','verb')]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${becomes} able to read ${abilityObjectEnglish}.`,{subject,object},{verb:grammarSlot('verb-yomeru-youninaru','読めるようになります','読める','よめるようになります','become able to read',['ability-change','potential','youni-naru'])},['Object is readable.','Ability statements use a general class of readable things, not one specific item.','Uses the correct potential form 読める before ようになる.'])
+    // なる is godan: its ます-stem is なり, so the tail attaches to 〜ようになり.
+    const abilityForms=politeAuxiliaryForms({japanese:'読めるようになり',reading:'よめるようになり'},['nonPast','past','negative'])
+    const abilityForm=pickAuxiliaryForm(abilityForms,options)
+    const abilityPhrase=`able to read ${abilityObjectEnglish}`
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('が'),literalPart(abilityForm.japanese,abilityForm.reading,'verb')]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${abilityForm.english(`become ${abilityPhrase}`,`${becomes} ${abilityPhrase}`)}.`,{subject,object},{
+      verb:grammarSlot('verb-yomeru-youninaru',abilityForm.japanese,'読める',abilityForm.reading,'become able to read',['ability-change','potential','youni-naru']),
+      ending:grammarSlot(`youninaru-ending-${abilityForms.indexOf(abilityForm)}`,abilityForm.japanese,'読める',abilityForm.reading,'become able to read',['ability-change','youni-naru','ending']),
+    },['Object is readable.','Ability statements use a general class of readable things, not one specific item.','Uses the correct potential form 読める before ようになる.'])
   }
 
   if (patternId==='n3-04') {
@@ -3973,8 +4144,20 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
     if (!action) return null
     const subjectEnglish=englishPhrase(subject,'subject'),ends=subjectUsesBaseVerb(subjectEnglish)?'end':'ends'
     const regretObjectEnglish={宿題:'my homework',約束:'a promise',財布:'my wallet',鍵:'my key',切符:'my ticket',携帯電話:'my phone',コップ:'a glass',皿:'a plate',時計:'my watch'}[action.object.japanese]??englishPhrase(action.object,'object')
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(action.object,'object'),literalPart('を'),literalPart(action.surface,action.reading,'verb')]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${ends} up ${action.englishVerb} ${regretObjectEnglish}.`,{subject,object:action.object},{verb:grammarSlot(`verb-${action.dictionary}-teshimau`,action.surface,action.dictionary,action.reading,action.english,[...action.tags,'te-shimau'])},['Verb and object form a natural accidental or regrettable event.'])
+    // てしまいます is the slip about to happen, てしまいました the one that did.
+    // The negative is left out: "does not end up forgetting" is grammatical
+    // and not something anyone says.
+    const regretStem={japanese:action.surface.replace(/ます$/,''),reading:action.reading.replace(/ます$/,'')}
+    const regretForms=[
+      {japanese:`${regretStem.japanese}ます`,reading:`${regretStem.reading}ます`,english:`${ends} up ${action.englishVerb}`},
+      {japanese:`${regretStem.japanese}ました`,reading:`${regretStem.reading}ました`,english:`ended up ${action.englishVerb}`},
+    ]
+    const regretForm=pickAuxiliaryForm(regretForms,options)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(action.object,'object'),literalPart('を'),literalPart(regretForm.japanese,regretForm.reading,'verb')]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${regretForm.english} ${regretObjectEnglish}.`,{subject,object:action.object},{
+      verb:grammarSlot(`verb-${action.dictionary}-teshimau`,regretForm.japanese,action.dictionary,regretForm.reading,action.english,[...action.tags,'te-shimau']),
+      ending:grammarSlot(`teshimau-ending-${regretForms.indexOf(regretForm)}`,regretForm.japanese,action.dictionary,regretForm.reading,action.english,[...action.tags,'te-shimau','ending']),
+    },['Verb and object form a natural accidental or regrettable event.'])
   }
 
   if (patternId==='n3-05') {
@@ -3992,8 +4175,21 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
     if (!preparation) return null
     const subjectEnglish=englishPhrase(subject,'subject'),futureSubject=subjectEnglish==='I'?"I'll":`${capitalize(subjectEnglish)} will`
     const objectEnglish=preparation.objectEnglish??({席:'a seat',部屋:'a room',切符:'a ticket',チケット:'a ticket',食べ物:'food'}[preparation.object.japanese]??englishPhrase(preparation.object,'object'))
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(preparation.object,'object'),literalPart('を'),literalPart(preparation.surface,preparation.reading,'verb')]
-    return finish(furigana,`${futureSubject} ${preparation.englishVerb} ${objectEnglish} in advance.`,{subject,object:preparation.object},{verb:grammarSlot(`verb-${preparation.dictionary}-teoku`,preparation.surface,preparation.dictionary,preparation.reading,preparation.english,['preparation','te-oku'])},['Object can reasonably be prepared, reserved, or purchased in advance.'])
+    // ておきます is a plan, so its non-past reads as a future in English; the
+    // past and past-negative are ordinary. 〜ておきません ("won't do it in
+    // advance") is left out as the one form nobody says.
+    const stem={japanese:preparation.surface.replace(/ます$/,''),reading:preparation.reading.replace(/ます$/,'')}
+    const preparationForms=[
+      {japanese:`${stem.japanese}ます`,reading:`${stem.reading}ます`,english:`${futureSubject} ${preparation.englishVerb} ${objectEnglish} in advance`},
+      {japanese:`${stem.japanese}ました`,reading:`${stem.reading}ました`,english:`${capitalize(subjectEnglish)} ${simplePast(preparation.englishVerb)} ${objectEnglish} in advance`},
+      {japanese:`${stem.japanese}ませんでした`,reading:`${stem.reading}ませんでした`,english:`${capitalize(subjectEnglish)} did not ${preparation.englishVerb} ${objectEnglish} in advance`},
+    ]
+    const preparationForm=pickAuxiliaryForm(preparationForms,options)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(preparation.object,'object'),literalPart('を'),literalPart(preparationForm.japanese,preparationForm.reading,'verb')]
+    return finish(furigana,`${preparationForm.english}.`,{subject,object:preparation.object},{
+      verb:grammarSlot(`verb-${preparation.dictionary}-teoku`,preparationForm.japanese,preparation.dictionary,preparationForm.reading,preparation.english,['preparation','te-oku']),
+      ending:grammarSlot(`teoku-ending-${preparationForms.indexOf(preparationForm)}`,preparationForm.japanese,preparation.dictionary,preparationForm.reading,preparation.english,['preparation','te-oku','ending']),
+    },['Object can reasonably be prepared, reserved, or purchased in advance.'])
   }
 
   if (patternId==='n3-06') {
@@ -4071,7 +4267,7 @@ const advancedPatternMeanings: Record<string,string> = {
   'n3-16':'thanks to','n3-17':'because of (blame)','n3-18':'leaving a state as-is','n3-19':'while (formal)',
   'n2-11':'should do','n1-03':'although','n1-04':'might result in something negative',
   'n2-12':'as / along with a change','n2-13':'even (emphatic)','n2-14':'precisely / it is X that','n2-15':'not only X but also Y',
-  'n1-11':'if / supposing','n1-12':'according to / depending on','n1-13':'not necessarily',
+  'n1-11':'if / supposing','n1-12':'according to / depending on','n1-13':'not necessarily','n1-14':'nothing better than',
   'n2-04':'there is no need to','n1-05':'unless something is done','n1-06':'extending even to','n1-07':'unique or characteristic of',
   'n1-08':'in accordance with','n1-09':'concerning or surrounding a topic','n1-10':'on the occasion of',
   'n2-03':'it has been decided that','n2-05':'must certainly be','n2-06':'expected or supposed to','n2-07':'general truth or recollection',
@@ -4261,6 +4457,7 @@ const advancedPatternIds = new Set([
   'n3-32', 'n3-33', 'n3-34', 'n3-35', 'n3-36', 'n3-37', 'n3-38', 'n3-39', 'n3-40', 'n3-41',
   'n2-22', 'n2-23', 'n2-24', 'n2-25', 'n2-26', 'n2-27', 'n2-28', 'n2-29',
   'n2-30', 'n2-31', 'n2-32', 'n2-33', 'n2-34', 'n2-35', 'n2-36', 'n2-37',
+  'n1-14',
 ])
 
 function advancedPatternLevel(patternId: string): 'N4' | 'N3' | 'N2' | 'N1' {
@@ -4283,8 +4480,8 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   const exact = (japanese: string[]) => vocabulary.filter(word => japanese.includes(word.japanese) && hasUsableMeaning(word))
   const wordPart = (word: WordRecord, slot: string) => ({ text: word.japanese, reading: kanaReading(word.reading, word.japanese), slot })
   const literalPart = (text: string, reading = text, slot?: string) => ({ text, reading, slot })
-  const grammarSlot = (id: string, surface: string, dictionaryForm: string, reading: string, english: string, tags: string[]) => ({
-    id, surface, dictionaryForm, reading, english, pos: 'verb' as const, jlpt: level, tags, conjugation: patternId,
+  const grammarSlot = (id: string, surface: string, dictionaryForm: string, reading: string, english: string, tags: string[], pos: 'verb'|'noun'|'i_adjective'|'na_adjective' = 'verb') => ({
+    id, surface, dictionaryForm, reading, english, pos, jlpt: level, tags, conjugation: patternId,
   })
   const finish = (furigana: GeneratedPreviewSentence['furigana'], english: string, filled: Record<string,WordRecord>, extraSlots: GeneratedPreviewSentence['slots'], note: string): GeneratedPreviewSentence => ({
     frameId: patternId, level, japanese: furigana.map(part => part.text).join(''), reading: furigana.map(part => part.reading || part.text).join(''), english,
@@ -4377,9 +4574,24 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     if (!verb || !subject || !reason) return null
     const aStem = n4VerbForms(verb).aStem
     const subjectEnglish = englishPhrase(subject,'subject')
-    const furigana=[literalPart(reason.surface,reason.reading,'reason'),wordPart(subject,'subject'),literalPart('は','わ'),{text:aStem.japanese,reading:aStem.reading,slot:'verb'},literalPart('ざるを'),literalPart('得ません。','えません。','modal')]
-    return finish(furigana,`${reason.english}, ${subjectEnglish} ${subjectUsesBaseVerb(subjectEnglish)?'have':'has'} no choice but to ${verb.english}.`,{subject},{
-      verb:grammarSlot(`verb-${verb.id}-zaruoenai`,`${aStem.japanese}ざるを得ません`,verb.japanese,`${aStem.reading}ざるをえません`,`have no choice but to ${verb.english}`,['obligation','zaru-o-enai']),
+    // 得ません carries the whole grammar point, so it is the sentence's ending
+    // slot rather than an unnamed literal — that is the segment the Auxiliary
+    // Verbs drill rotates. ざるを得る has no affirmative in use, so the two
+    // tenses of the negative are the whole drill.
+    const compulsionForms=[
+      {japanese:'得ません。',reading:'えません。',english:`${subjectUsesBaseVerb(subjectEnglish)?'have':'has'} no choice but to ${verb.english}`},
+      {japanese:'得ませんでした。',reading:'えませんでした。',english:`had no choice but to ${verb.english}`},
+    ]
+    const compulsionForm=pickAuxiliaryForm(compulsionForms,options)
+    // The predicate is one segment, the way every other auxiliary frame builds
+    // it: the drill rotates segments, so a tail split into its own literal
+    // would leave the rotation with nothing it can see changing.
+    const compulsionSurface=`${aStem.japanese}ざるを${compulsionForm.japanese}`
+    const compulsionReading=`${aStem.reading}ざるを${compulsionForm.reading}`
+    const furigana=[literalPart(reason.surface,reason.reading,'reason'),wordPart(subject,'subject'),literalPart('は','わ'),{text:compulsionSurface,reading:compulsionReading,slot:'verb'}]
+    return finish(furigana,`${reason.english}, ${subjectEnglish} ${compulsionForm.english}.`,{subject},{
+      verb:grammarSlot(`verb-${verb.id}-zaruoenai`,compulsionSurface,verb.japanese,compulsionReading,`have no choice but to ${verb.english}`,['obligation','zaru-o-enai']),
+      ending:grammarSlot(`zaruoenai-ending-${compulsionForms.indexOf(compulsionForm)}`,compulsionSurface,verb.japanese,compulsionReading,`no choice but to ${verb.english}`,['obligation','zaru-o-enai','ending']),
       reason:grammarSlot(`reason-${reasonPool.indexOf(reason)}`,reason.surface,reason.surface,reason.reading,reason.english,['reason']),
     },'ざるを得ない follows a reason the subject cannot resist.')
   }
@@ -4437,10 +4649,22 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
       const englishPhraseText = frequency.preposed
         ? `${frequency.preposed} ${habitVerb.english}`
         : `${habitVerb.english} ${frequency.postposed}`
+      // いるわけではありません denies the habit as it stands; いたわけではありません
+      // denies it of the past. English needs the participle for the second,
+      // and the frequency word sits on a different side of the verb in each
+      // case, so both halves are composed rather than transformed.
+      const habitParticiple = frequency.preposed
+        ? `${frequency.preposed} ${presentParticiple(habitVerb.english)}`
+        : `${presentParticiple(habitVerb.english)} ${frequency.postposed}`
+      const denialForms=[
+        {japanese:`${te.japanese}いるわけではありません。`,reading:`${te.reading}いるわけではありません。`,english:`It is not that I ${englishPhraseText}.`},
+        {japanese:`${te.japanese}いたわけではありません。`,reading:`${te.reading}いたわけではありません。`,english:`It is not that I was ${habitParticiple}.`},
+      ]
+      const denialForm=pickAuxiliaryForm(denialForms,options)
       variants.push({
-        furigana:[literalPart(frequency.japanese,frequency.reading,'time'),{text:te.japanese,reading:te.reading,slot:'verb'},literalPart('いるわけではありません。')],
-        filled:{},english:`It is not that I ${englishPhraseText}.`,
-        extra:{verb:grammarSlot(`verb-${habitVerb.id}-wakedewanai`,`${te.japanese}いるわけではありません`,habitVerb.japanese,`${te.reading}いるわけではありません`,englishPhraseText,['habit','wake-dewa-nai']),time:grammarSlot(`n2-01-frequency-${frequency.id}`,frequency.japanese,frequency.japanese,frequency.reading,frequency.preposed??frequency.postposed!,['frequency'])},
+        furigana:[literalPart(frequency.japanese,frequency.reading,'time'),{text:denialForm.japanese,reading:denialForm.reading,slot:'verb'}],
+        filled:{},english:denialForm.english,
+        extra:{verb:grammarSlot(`verb-${habitVerb.id}-wakedewanai`,denialForm.japanese,habitVerb.japanese,denialForm.reading,englishPhraseText,['habit','wake-dewa-nai']),ending:grammarSlot(`wakedewanai-ending-${denialForms.indexOf(denialForm)}`,denialForm.japanese,habitVerb.japanese,denialForm.reading,englishPhraseText,['habit','wake-dewa-nai','ending']),time:grammarSlot(`n2-01-frequency-${frequency.id}`,frequency.japanese,frequency.japanese,frequency.reading,frequency.preposed??frequency.postposed!,['frequency'])},
       })
     }
     const variant = pick(variants, 834)
@@ -4466,8 +4690,16 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     const allowedVerbIds = reason ? declinableReasonToVerbIds[reason.japanese] ?? [] : []
     const declinedVerb = pick(bareActionVerbPool.filter(candidate => allowedVerbIds.includes(candidate.id)), 842)
     if (!reason || !declinedVerb) return null
-    const furigana=[wordPart(reason,'reason'),literalPart('が'),literalPart('あるので、'),{text:declinedVerb.japanese,reading:declinedVerb.reading,slot:'verb'},literalPart('わけにはいきません。')]
-    return finish(furigana,`There is ${englishPhrase(reason,'object')}, so I cannot afford to ${declinedVerb.english}.`,{reason},{},'わけにはいかない marks an option the situation forbids.')
+    const forbiddenForms=[
+      {japanese:`${declinedVerb.japanese}わけにはいきません。`,reading:`${declinedVerb.reading}わけにはいきません。`,english:`There is ${englishPhrase(reason,'object')}, so I cannot afford to ${declinedVerb.english}.`},
+      {japanese:`${declinedVerb.japanese}わけにはいきませんでした。`,reading:`${declinedVerb.reading}わけにはいきませんでした。`,english:`There was ${englishPhrase(reason,'object')}, so I could not afford to ${declinedVerb.english}.`},
+    ]
+    const forbiddenForm=pickAuxiliaryForm(forbiddenForms,options)
+    const furigana=[wordPart(reason,'reason'),literalPart('が'),literalPart('あるので、'),{text:forbiddenForm.japanese,reading:forbiddenForm.reading,slot:'verb'}]
+    return finish(furigana,forbiddenForm.english,{reason},{
+      verb:grammarSlot(`verb-${declinedVerb.id}-wakenihaikanai`,forbiddenForm.japanese,declinedVerb.japanese,forbiddenForm.reading,`cannot afford to ${declinedVerb.english}`,['prohibition','wake-niha-ikanai']),
+      ending:grammarSlot(`wakenihaikanai-ending-${forbiddenForms.indexOf(forbiddenForm)}`,forbiddenForm.japanese,declinedVerb.japanese,forbiddenForm.reading,`cannot afford to ${declinedVerb.english}`,['prohibition','wake-niha-ikanai','ending']),
+    },'わけにはいかない marks an option the situation forbids.')
   }
 
   if (patternId === 'n3-13') {
@@ -4477,67 +4709,76 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     const ta = n4VerbForms(verb).ta
     const subject=result.filled.subject!,object=result.filled.object!
     const subjectEnglish = englishPhrase(subject,'subject')
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:ta.japanese,reading:ta.reading,slot:'verb'},literalPart('ばかりです。')]
-    return finish(furigana,`${capitalize(subjectEnglish)} just ${simplePast(verb.english)} ${englishPhrase(object,'object')}.`,{subject,object},{verb:grammarSlot(`verb-${verb.id}-tabakari`,`${ta.japanese}ばかりです`,verb.japanese,`${ta.reading}ばかりです`,`just ${verb.english}`,['just-completed','ta-bakari'])},'たばかり marks an action that finished a moment ago.')
+    const bakariForms=[
+      {japanese:`${ta.japanese}ばかりです。`,reading:`${ta.reading}ばかりです。`,english:`just ${simplePast(verb.english)}`},
+      {japanese:`${ta.japanese}ばかりでした。`,reading:`${ta.reading}ばかりでした。`,english:`had just ${pastParticiple(verb.english)}`},
+    ]
+    const bakariForm=pickAuxiliaryForm(bakariForms,options)
+    // The tail sits inside the verb-slotted part rather than beside it: the
+    // drill rotates whole segments, and a tail in its own unslotted literal
+    // would change nothing the rotation can see.
+    const mannerAdverb=pickAdverbial(MANNER_ADVERBIALS,options,seed,854)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),
+      literalPart(mannerAdverb.japanese,mannerAdverb.reading,'adverb'),
+      {text:bakariForm.japanese,reading:bakariForm.reading,slot:'verb'}]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${bakariForm.english} ${englishPhrase(object,'object')} ${mannerAdverb.english}.`,{subject,object},{
+      adverb:grammarSlot(`manner-${mannerAdverb.japanese}`,mannerAdverb.japanese,mannerAdverb.japanese,mannerAdverb.reading,mannerAdverb.english,['manner','adverb'],'noun'),
+      verb:grammarSlot(`verb-${verb.id}-tabakari`,bakariForm.japanese,verb.japanese,bakariForm.reading,`just ${verb.english}`,['just-completed','ta-bakari']),
+      ending:grammarSlot(`tabakari-ending-${bakariForms.indexOf(bakariForm)}`,bakariForm.japanese,verb.japanese,bakariForm.reading,`just ${verb.english}`,['just-completed','ta-bakari','ending']),
+    },'たばかり marks an action that finished a moment ago.')
   }
 
   if (patternId === 'n2-10') {
     const verb = pick(smallVerbPool, 861, 'verb')
     const subject = pick(humans, 862, 'subject')
-    const aspect = pick(['about-to','ongoing','just-did'] as const, 863)
-    if (!verb || !subject || !aspect) return null
+    if (!verb || !subject) return null
     const forms = n4VerbForms(verb)
     const subjectEnglish = englishPhrase(subject,'subject')
     const wasSupposedTo = subjectEnglish === 'I' ? 'was' : subjectUsesBaseVerb(subjectEnglish) ? 'were' : 'was'
-    // ところだ's negative (ところではない) reads as a different idiom ("this is
-    // no time for X"), not a clean negation, so only tense toggles here —
-    // ところです ⟷ ところでした, narrating the same about-to/mid-way/just-done
-    // moment from the present or from the past.
-    let endingIndex = options.slotSeeds?.ending !== undefined ? Math.abs(options.slotSeeds.ending) % 2 : 0
-    if (aspect === 'about-to') {
-      const suffixes=['ところです。','ところでした。']
-      const verbPrefix=verb.japanese, verbReading=verb.reading
-      const surfaceFor=(index: number)=>`${verbPrefix}${suffixes[index]}`
-      if (options.avoidWords?.ending && surfaceFor(endingIndex) === options.avoidWords.ending) endingIndex=(endingIndex+1)%2
-      const suffix=suffixes[endingIndex]!
-      const surface=surfaceFor(endingIndex),reading=`${verbReading}${suffix}`
-      const english = endingIndex === 0
-        ? `${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} just about to ${verb.english}.`
-        : `${capitalize(subjectEnglish)} ${wasSupposedTo} just about to ${verb.english}.`
-      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('今から','いまから','time'),{text:surface,reading,slot:'verb'}]
-      return finish(furigana,english,{subject},{
-        verb:grammarSlot(`verb-${verb.id}-tokoro-aboutto-${endingIndex}`,surface,verb.japanese,reading,english,['about-to','tokoro']),
-        ending:grammarSlot(`tokoro-ending-${endingIndex}`,suffix,suffix,suffix,english,['ending']),
-      },'ところだ with a dictionary-form verb means about to do something.')
-    }
-    if (aspect === 'ongoing') {
-      const suffixes=['いるところです。','いるところでした。']
-      const surfaceFor=(index: number)=>`${forms.te.japanese}${suffixes[index]}`
-      if (options.avoidWords?.ending && surfaceFor(endingIndex) === options.avoidWords.ending) endingIndex=(endingIndex+1)%2
-      const suffix=suffixes[endingIndex]!
-      const surface=surfaceFor(endingIndex),reading=`${forms.te.reading}${suffix}`
-      const english = endingIndex === 0
-        ? `${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} in the middle of ${presentParticiple(verb.english)}.`
-        : `${capitalize(subjectEnglish)} ${wasSupposedTo} in the middle of ${presentParticiple(verb.english)}.`
-      const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('今','いま','time'),{text:surface,reading,slot:'verb'}]
-      return finish(furigana,english,{subject},{
-        verb:grammarSlot(`verb-${verb.id}-tokoro-ongoing-${endingIndex}`,surface,verb.japanese,reading,english,['ongoing','tokoro']),
-        ending:grammarSlot(`tokoro-ending-${endingIndex}`,suffix,suffix,suffix,english,['ending']),
-      },'ところだ with ている means currently in the middle of doing something.')
-    }
-    const suffixes=['ところです。','ところでした。']
-    const surfaceFor=(index: number)=>`${forms.ta.japanese}${suffixes[index]}`
-    if (options.avoidWords?.ending && surfaceFor(endingIndex) === options.avoidWords.ending) endingIndex=(endingIndex+1)%2
-    const suffix=suffixes[endingIndex]!
-    const surface=surfaceFor(endingIndex),reading=`${forms.ta.reading}${suffix}`
-    const english = endingIndex === 0
-      ? `${capitalize(subjectEnglish)} just ${simplePast(verb.english)}.`
-      : `${capitalize(subjectEnglish)} had just ${pastParticiple(verb.english)}.`
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('今','いま','time'),{text:surface,reading,slot:'verb'}]
+    // ところ's three aspects are one grammar point taught together — about to
+    // do it, in the middle of it, just finished it — and they differ only in
+    // the form the verb takes before ところ. Rotating across all three, rather
+    // than picking one per sentence and toggling its tense, is what gives the
+    // drill the whole point to walk; 今 works for every one of them, and
+    // holding it fixed keeps each step a one-segment change.
+    //
+    // ところではない is left out: it reads as a different idiom ("this is no
+    // time for X"), not a clean negation.
+    const aspects = [
+      {
+        id:'aboutto', stem:{japanese:verb.japanese,reading:verb.reading}, tail:'ところ',
+        present:`${copulaFor(subjectEnglish)} just about to ${verb.english}`,
+        past:`${wasSupposedTo} just about to ${verb.english}`,
+        tags:['about-to','tokoro'], note:'ところだ with a dictionary-form verb means about to do something.',
+      },
+      {
+        id:'ongoing', stem:forms.te, tail:'いるところ',
+        present:`${copulaFor(subjectEnglish)} in the middle of ${presentParticiple(verb.english)}`,
+        past:`${wasSupposedTo} in the middle of ${presentParticiple(verb.english)}`,
+        tags:['ongoing','tokoro'], note:'ところだ with ている means currently in the middle of doing something.',
+      },
+      {
+        id:'justdid', stem:forms.ta, tail:'ところ',
+        present:`just ${simplePast(verb.english)}`,
+        past:`had just ${pastParticiple(verb.english)}`,
+        tags:['just-did','tokoro'], note:'ところだ with a past-form verb means an action just finished.',
+      },
+    ]
+    const variants = aspects.flatMap(aspect => [
+      { aspect, copula:'です。', english:aspect.present },
+      { aspect, copula:'でした。', english:aspect.past },
+    ]).map(variant => ({
+      ...variant,
+      japanese:`${variant.aspect.stem.japanese}${variant.aspect.tail}${variant.copula}`,
+      reading:`${variant.aspect.stem.reading}${variant.aspect.tail}${variant.copula}`,
+    }))
+    const variant = pickAuxiliaryForm(variants, options, (Math.abs(seed + 863) % aspects.length) * 2)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),literalPart('今','いま','time'),{text:variant.japanese,reading:variant.reading,slot:'verb'}]
+    const english=`${capitalize(subjectEnglish)} ${variant.english}.`
     return finish(furigana,english,{subject},{
-      verb:grammarSlot(`verb-${verb.id}-tokoro-justdid-${endingIndex}`,surface,verb.japanese,reading,english,['just-did','tokoro']),
-      ending:grammarSlot(`tokoro-ending-${endingIndex}`,suffix,suffix,suffix,english,['ending']),
-    },'ところだ with a past-form verb means an action just finished.')
+      verb:grammarSlot(`verb-${verb.id}-tokoro-${variant.aspect.id}`,variant.japanese,verb.japanese,variant.reading,english,variant.aspect.tags),
+      ending:grammarSlot(`tokoro-ending-${variants.indexOf(variant)}`,variant.japanese,verb.japanese,variant.reading,english,['ending']),
+    },variant.aspect.note)
   }
 
   if (patternId === 'n3-11') {
@@ -4662,6 +4903,63 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     return finish(furigana,`${capitalize(subjectEnglish)} ${secondaryVerb} while reading ${englishPhrase(readingTarget,'object')}.`,{subject,object:readingTarget},{},'つつ is a formal equivalent of ながら for two simultaneous actions.')
   }
 
+  if (patternId === 'n1-14') {
+    // Every other N1 pattern governs a noun or a whole clause, which is why
+    // the level had no adjective drill: there was no frame with a bare
+    // adjective in it to rotate. に越したことはない takes one directly.
+    //
+    // The qualities belong to their topic rather than to one shared pool — a
+    // room is worth making spacious and an explanation is not — so rotating
+    // the adjective stays inside what the topic can sensibly be.
+    const topicPool = [
+      { topic:'部屋', topicReading:'へや', english:'a room', qualities:[
+        { japanese:'広い', reading:'ひろい', english:'spacious' },
+        { japanese:'明るい', reading:'あかるい', english:'bright' },
+        { japanese:'新しい', reading:'あたらしい', english:'new' },
+      ] },
+      { topic:'説明', topicReading:'せつめい', english:'an explanation', qualities:[
+        { japanese:'詳しい', reading:'くわしい', english:'detailed' },
+        { japanese:'短い', reading:'みじかい', english:'brief' },
+        { japanese:'早い', reading:'はやい', english:'prompt' },
+      ] },
+      { topic:'荷物', topicReading:'にもつ', english:'luggage', qualities:[
+        { japanese:'軽い', reading:'かるい', english:'light' },
+        { japanese:'少ない', reading:'すくない', english:'minimal' },
+        { japanese:'小さい', reading:'ちいさい', english:'small' },
+      ] },
+      { topic:'道具', topicReading:'どうぐ', english:'a tool', qualities:[
+        { japanese:'新しい', reading:'あたらしい', english:'new' },
+        { japanese:'軽い', reading:'かるい', english:'light' },
+        { japanese:'丈夫', reading:'じょうぶ', english:'sturdy' },
+      ] },
+    ]
+    let topicPickPool = topicPool
+    if (options.avoidWords?.topic) { const avoided = topicPickPool.filter(c => c.topic !== options.avoidWords!.topic); if (avoided.length) topicPickPool = avoided }
+    const chosenTopic = seededPick(topicPickPool, options.slotSeeds?.topic ?? seed, 1651)
+    if (!chosenTopic) return null
+    // 丈夫 is a な-adjective, so it needs である before に越したことはない where
+    // the い-adjectives attach bare.
+    const qualityForms = chosenTopic.qualities.map(quality => ({
+      ...quality,
+      surface: quality.japanese.endsWith('い') ? quality.japanese : `${quality.japanese}である`,
+      surfaceReading: quality.japanese.endsWith('い') ? quality.reading : `${quality.reading}である`,
+    }))
+    let qualityPickPool = qualityForms
+    if (options.avoidWords?.predicate) { const avoided = qualityPickPool.filter(c => c.surface !== options.avoidWords!.predicate); if (avoided.length) qualityPickPool = avoided }
+    const quality = seededPick(qualityPickPool, options.slotSeeds?.predicate ?? seed, 1652)
+    if (!quality) return null
+    const furigana=[
+      literalPart(chosenTopic.topic,chosenTopic.topicReading,'topic'),
+      literalPart('は','わ'),
+      literalPart(quality.surface,quality.surfaceReading,'predicate'),
+      literalPart('に越したことはありません。','にこしたことはありません。'),
+    ]
+    return finish(furigana,`${capitalize(chosenTopic.english)} is best when it is ${quality.english}.`,{},{
+      topic:grammarSlot(`n1-14-topic-${topicPool.indexOf(chosenTopic)}`,chosenTopic.topic,chosenTopic.topic,chosenTopic.topicReading,chosenTopic.english,['preference'],'noun'),
+      predicate:grammarSlot(`n1-14-quality-${quality.japanese}`,quality.surface,quality.japanese,quality.surfaceReading,quality.english,['preference'],quality.japanese.endsWith('い')?'i_adjective':'na_adjective'),
+    },'に越したことはない says more of a quality is always better, while stopping short of demanding it.')
+  }
+
   if (patternId === 'n2-11' || patternId === 'n2-16') {
     const verb = pick(smallVerbPool, 941, 'verb')
     const subject = pick(humans, 942, 'subject')
@@ -4674,9 +4972,17 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     // between them the same way the generic verb dispatcher toggles masu/nai,
     // while n2-16 stays as a pattern id (defaulting to the negative half) so
     // nothing that already refers to it by name breaks.
+    //
+    // The past pair is the same recommendation looking back on something that
+    // did not happen the way it should have — 書くべきでした, 書くべきでは
+    // ありませんでした — which is ordinary べき, not a separate grammar point.
+    // Carrying all four here is what gives the Auxiliary Verbs drill something
+    // to rotate: with only the two non-past halves it ran out after one step.
     const bekiVariants = [
       { suffix:'べきです。', english:`${capitalize(subjectEnglish)} should ${verb.english}.`, tags:['obligation','bekida'] },
       { suffix:'べきではありません。', english:`${capitalize(subjectEnglish)} should not ${verb.english}.`, tags:['obligation','bekidewanai'] },
+      { suffix:'べきでした。', english:`${capitalize(subjectEnglish)} should have ${pastParticiple(verb.english)}.`, tags:['obligation','bekida','past'] },
+      { suffix:'べきではありませんでした。', english:`${capitalize(subjectEnglish)} should not have ${pastParticiple(verb.english)}.`, tags:['obligation','bekidewanai','past'] },
     ]
     let endingIndex = options.slotSeeds?.ending !== undefined
       ? Math.abs(options.slotSeeds.ending) % bekiVariants.length
@@ -4730,10 +5036,16 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     if (options.avoidWords?.result) { const avoided = resultPickPool.filter(c => c.result !== options.avoidWords!.result); if (avoided.length) resultPickPool = avoided }
     const result = seededPick(resultPickPool, options.slotSeeds?.result ?? seed, 962)
     if (!cause || !result) return null
-    const furigana=[{text:cause.cause,reading:cause.causeReading,slot:'reason'},literalPart('と、'),{text:result.result,reading:result.resultReading,slot:'result'},literalPart('かねません。')]
-    return finish(furigana,`${capitalize(cause.english)} might ${result.english}.`,{},{
+    const warningForms=[
+      {japanese:'かねません。',reading:'かねません。',english:`might ${result.english}`},
+      {japanese:'かねませんでした。',reading:'かねませんでした。',english:`might have ${pastParticiple(result.english)}`},
+    ]
+    const warningForm=pickAuxiliaryForm(warningForms,options)
+    const furigana=[{text:cause.cause,reading:cause.causeReading,slot:'reason'},literalPart('と、'),{text:result.result,reading:result.resultReading,slot:'result'},literalPart(warningForm.japanese,warningForm.reading,'ending')]
+    return finish(furigana,`${capitalize(cause.english)} ${warningForm.english}.`,{},{
       reason:grammarSlot(`n1-04-cause-${causePool.indexOf(cause)}`,cause.cause,cause.cause,cause.causeReading,cause.english,['warning']),
       result:grammarSlot(`n1-04-result-${resultPool.indexOf(result)}`,result.result,result.result,result.resultReading,result.english,['warning']),
+      ending:grammarSlot(`kanenai-ending-${warningForms.indexOf(warningForm)}`,warningForm.japanese,'かねない',warningForm.reading,`might ${result.english}`,['warning','kanenai','ending']),
     },'かねない attaches to the masu-stem and warns of a possible negative outcome.')
   }
 
@@ -4856,8 +5168,16 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   if (patternId === 'n2-04') {
     const verb = pick(smallVerbPool, 1041, 'verb')
     if (!verb) return null
-    const furigana=[{text:verb.japanese,reading:verb.reading,slot:'verb'},literalPart('ことはありません。')]
-    return finish(furigana,`There is no need to ${verb.english}.`,{},{verb:grammarSlot(`verb-${verb.id}-kotohanai`,`${verb.japanese}ことはありません`,verb.japanese,`${verb.reading}ことはありません`,`no need to ${verb.english}`,['no-need','koto-ha-nai'])},'ことはない attaches to the dictionary form and reassures that something is unnecessary.')
+    const needForms=[
+      {japanese:`${verb.japanese}ことはありません。`,reading:`${verb.reading}ことはありません。`,english:`There is no need to ${verb.english}.`},
+      {japanese:`${verb.japanese}ことはありませんでした。`,reading:`${verb.reading}ことはありませんでした。`,english:`There was no need to ${verb.english}.`},
+    ]
+    const needForm=pickAuxiliaryForm(needForms,options)
+    const furigana=[{text:needForm.japanese,reading:needForm.reading,slot:'verb'}]
+    return finish(furigana,needForm.english,{},{
+      verb:grammarSlot(`verb-${verb.id}-kotohanai`,needForm.japanese,verb.japanese,needForm.reading,`no need to ${verb.english}`,['no-need','koto-ha-nai']),
+      ending:grammarSlot(`kotohanai-ending-${needForms.indexOf(needForm)}`,needForm.japanese,verb.japanese,needForm.reading,`no need to ${verb.english}`,['no-need','koto-ha-nai','ending']),
+    },'ことはない attaches to the dictionary form and reassures that something is unnecessary.')
   }
 
   if (patternId === 'n1-05') {
@@ -5103,8 +5423,16 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     const verb = pick(smallVerbPool, 1181, 'verb')
     if (!verb) return null
     const masuStem = n4VerbForms(verb).masuStem
-    const furigana=[{text:masuStem.japanese,reading:masuStem.reading,slot:'verb'},literalPart('かねます。')]
-    return finish(furigana,`I cannot readily ${verb.english}.`,{},{verb:grammarSlot(`verb-${verb.id}-kanemasu`,`${masuStem.japanese}かねます`,verb.japanese,`${masuStem.reading}かねます`,`cannot readily ${verb.english}`,['polite-refusal','kaneru'])},'かねる is a formal, polite way to say something is difficult or impossible to do.')
+    const refusalForms=[
+      {japanese:`${masuStem.japanese}かねます。`,reading:`${masuStem.reading}かねます。`,english:`I cannot readily ${verb.english}.`},
+      {japanese:`${masuStem.japanese}かねました。`,reading:`${masuStem.reading}かねました。`,english:`I could not readily ${verb.english}.`},
+    ]
+    const refusalForm=pickAuxiliaryForm(refusalForms,options)
+    const furigana=[{text:refusalForm.japanese,reading:refusalForm.reading,slot:'verb'}]
+    return finish(furigana,refusalForm.english,{},{
+      verb:grammarSlot(`verb-${verb.id}-kanemasu`,refusalForm.japanese,verb.japanese,refusalForm.reading,`cannot readily ${verb.english}`,['polite-refusal','kaneru']),
+      ending:grammarSlot(`kaneru-ending-${refusalForms.indexOf(refusalForm)}`,refusalForm.japanese,verb.japanese,refusalForm.reading,`cannot readily ${verb.english}`,['polite-refusal','kaneru','ending']),
+    },'かねる is a formal, polite way to say something is difficult or impossible to do.')
   }
 
   // と思う/らしい/そうだ/ようだ (n3-20..23) all wrap the exact same shape — an
@@ -5116,11 +5444,11 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   // serves all four instead of ~15 fixed sentences total.
   if (patternId === 'n3-20' || patternId === 'n3-21' || patternId === 'n3-22' || patternId === 'n3-23') {
     const clauseSubject = pick(humans, 1191, 'subject')
-    const clauseAdjective = pick(adjectiveRules.filter(rule => rule.japanese.endsWith('い') && !['kirei','kirai','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1192)
+    const clauseAdjective = pick(adjectiveRules.filter(rule => rule.japanese.endsWith('い') && !['kirei','kirai','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1192, 'predicate')
     if (!clauseSubject || !clauseAdjective) return null
     const subjectEnglish = englishPhrase(clauseSubject,'subject')
     const copula = subjectEnglish === 'I' ? 'am' : subjectUsesBaseVerb(subjectEnglish) ? 'are' : 'is'
-    const clauseSlot = grammarSlot(`clause-adjective-${clauseAdjective.id}`,clauseAdjective.japanese,clauseAdjective.japanese,clauseAdjective.reading,clauseAdjective.english,['embedded-clause'])
+    const clauseSlot = grammarSlot(`clause-adjective-${clauseAdjective.id}`,clauseAdjective.japanese,clauseAdjective.japanese,clauseAdjective.reading,clauseAdjective.english,['embedded-clause'],'i_adjective')
     const furigana=[wordPart(clauseSubject,'subject'),literalPart('は','わ'),{text:clauseAdjective.japanese,reading:clauseAdjective.reading,slot:'predicate'}]
     if (patternId === 'n3-20') {
       return finish([...furigana,literalPart('と思います。','とおもいます。')],`I think ${subjectEnglish} ${copula} ${clauseAdjective.english}.`,{subject:clauseSubject},{predicate:clauseSlot},'と思う reports the speaker\'s own opinion or judgment.')
@@ -5141,12 +5469,12 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     // own rotatable slot.
     const subject = pick(humans, 1231, 'subject')
     const other = pick(humans.filter(word => word.id !== subject?.id), 1232, 'object')
-    const adjective = pick(adjectiveRules.filter(rule => rule.japanese.endsWith('い') && !['kirei','kirai','suki','kirai','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1233)
+    const adjective = pick(adjectiveRules.filter(rule => rule.japanese.endsWith('い') && !['kirei','kirai','suki','kirai','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1233, 'predicate')
     if (!subject || !other || !adjective) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const otherEnglish = englishPhrase(other,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(other,'object'),literalPart('より'),{text:adjective.japanese,reading:adjective.reading,slot:'predicate'},literalPart('です。')]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} ${comparativeForm(adjective.english)} than ${otherEnglish}.`,{subject,object:other},{predicate:grammarSlot(`n3-24-adjective-${adjective.id}`,adjective.japanese,adjective.japanese,adjective.reading,adjective.english,['comparison'])},'より marks the thing being compared against — "more than B."')
+    return finish(furigana,`${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} ${comparativeForm(adjective.english)} than ${otherEnglish}.`,{subject,object:other},{predicate:grammarSlot(`n3-24-adjective-${adjective.id}`,adjective.japanese,adjective.japanese,adjective.reading,adjective.english,['comparison'],'i_adjective')},'より marks the thing being compared against — "more than B."')
   }
 
   if (patternId === 'n3-25') {
@@ -5159,7 +5487,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     // ambiguous dangling comparison rather than "A is not as disliked as B."
     // 痛い needs an experiencer or body-part frame ("my head hurts"), not a bare
     // person-to-person comparison — a person isn't directly describable as "painful."
-    const adjective = pick(adjectiveRules.filter(rule => !['kakkoii','kirai','suki','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1243)
+    const adjective = pick(adjectiveRules.filter(rule => !['kakkoii','kirai','suki','itai'].includes(rule.id) && (rule.categories as SentenceCategory[]).includes('Person')), 1243, 'predicate')
     if (!subject || !other || !adjective) return null
     // きれい and 嫌い both end in い but are na-adjectives — the classic
     // exception that trips up the naive "ends in い" i-adjective heuristic.
@@ -5174,7 +5502,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     // full comparison rather than a dangling noun phrase.
     const otherEnglish = englishPhrase(other,'subject')
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(other,'object'),literalPart('ほど'),literalPart(trait.surface,trait.reading,'predicate')]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} not as ${adjective.english} as ${otherEnglish} ${copulaFor(otherEnglish)}.`,{subject,object:other},{},'ほど with a negative predicate sets an upper bound: not reaching that level.')
+    return finish(furigana,`${capitalize(subjectEnglish)} ${copulaFor(subjectEnglish)} not as ${adjective.english} as ${otherEnglish} ${copulaFor(otherEnglish)}.`,{subject,object:other},{predicate:grammarSlot(`n3-25-adjective-${adjective.id}`,trait.surface,adjective.japanese,trait.reading,adjective.english,['comparison','negative'],isIAdjective?'i_adjective':'na_adjective')},'ほど with a negative predicate sets an upper bound: not reaching that level.')
   }
 
   if (patternId === 'n3-26') {
@@ -5269,8 +5597,18 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     if (!pair || !verb || !object || !subject) return null
     const te = n4VerbForms(verb).te
     const subjectEnglish = englishPhrase(subject,'subject')
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:te.japanese,reading:te.reading,slot:'verb'},literalPart('みます。')]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${subjectUsesBaseVerb(subjectEnglish)?'try':'tries'} ${pair.english} ${englishPhrase(object,'object')}.`,{subject,object},{},'てみる means to try doing something to see how it goes.')
+    const tryForms=[
+      {japanese:`${te.japanese}みます。`,reading:`${te.reading}みます。`,english:`${subjectUsesBaseVerb(subjectEnglish)?'try':'tries'} ${pair.english}`},
+      {japanese:`${te.japanese}みました。`,reading:`${te.reading}みました。`,english:`tried ${pair.english}`},
+    ]
+    const tryForm=pickAuxiliaryForm(tryForms,options)
+    const tryAdverb=pickAdverbial(MANNER_ADVERBIALS,options,seed,1304)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),literalPart(tryAdverb.japanese,tryAdverb.reading,'adverb'),{text:tryForm.japanese,reading:tryForm.reading,slot:'verb'}]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${tryForm.english} ${englishPhrase(object,'object')} ${tryAdverb.english}.`,{subject,object},{
+      adverb:grammarSlot(`manner-${tryAdverb.japanese}`,tryAdverb.japanese,tryAdverb.japanese,tryAdverb.reading,tryAdverb.english,['manner','adverb'],'noun'),
+      verb:grammarSlot(`verb-${verb.id}-temiru`,tryForm.japanese,verb.japanese,tryForm.reading,`try ${pair.english}`,['attempt','te-miru']),
+      ending:grammarSlot(`temiru-ending-${tryForms.indexOf(tryForm)}`,tryForm.japanese,verb.japanese,tryForm.reading,`try ${pair.english}`,['attempt','te-miru','ending']),
+    },'てみる means to try doing something to see how it goes.')
   }
 
   if (patternId === 'n2-19') {
@@ -5371,11 +5709,23 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     const aStem = n4VerbForms(verb).aStem
     const subject=result.filled.subject!,object=result.filled.object!
     const subjectEnglish = englishPhrase(subject,'subject')
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:aStem.japanese,reading:aStem.reading,slot:'verb'},literalPart('なくなりました。')]
     // translatedVerb carries the object-sensitive readings (見る is "look at" for
     // a picture, "watch" for a film); verb.english alone would lose them.
     const verbEnglish = translatedVerb(verb,result.filled,subjectUsesBaseVerb(subjectEnglish))
-    return finish(furigana,`${capitalize(subjectEnglish)} no longer ${verbEnglish} ${englishPhrase(object,'object')}.`,{subject,object},{verb:grammarSlot(`verb-${verb.id}-nakunaru`,`${aStem.japanese}なくなりました`,verb.japanese,`${aStem.reading}なくなりました`,`no longer ${verb.english}`,['cessation','nakunaru'])},'なくなる attaches to the nai-stem and marks that an action or state has stopped happening.')
+    const objectEnglish = englishPhrase(object,'object')
+    // なくなりました is the stop having happened; なくなります is it happening
+    // from here. The negative (なくなりません) is left out — "does not stop
+    // doing" is a double negative nobody reaches for.
+    const cessationForms=[
+      {japanese:`${aStem.japanese}なくなりました。`,reading:`${aStem.reading}なくなりました。`,english:`no longer ${verbEnglish} ${objectEnglish}`},
+      {japanese:`${aStem.japanese}なくなります。`,reading:`${aStem.reading}なくなります。`,english:`will stop ${presentParticiple(translatedVerb(verb,result.filled,true))} ${objectEnglish}`},
+    ]
+    const cessationForm=pickAuxiliaryForm(cessationForms,options)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:cessationForm.japanese,reading:cessationForm.reading,slot:'verb'}]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${cessationForm.english}.`,{subject,object},{
+      verb:grammarSlot(`verb-${verb.id}-nakunaru`,cessationForm.japanese,verb.japanese,cessationForm.reading,`no longer ${verb.english}`,['cessation','nakunaru']),
+      ending:grammarSlot(`nakunaru-ending-${cessationForms.indexOf(cessationForm)}`,cessationForm.japanese,verb.japanese,cessationForm.reading,`no longer ${verb.english}`,['cessation','nakunaru','ending']),
+    },'なくなる attaches to the nai-stem and marks that an action or state has stopped happening.')
   }
 
   if (patternId === 'n3-34') {
@@ -5404,8 +5754,15 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     if (!subject || !pair?.object) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const verbEnglish = subjectEnglish==='I' || subjectUsesBaseVerb(subjectEnglish) ? pair.base : pair.third
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(pair.object,'object'),literalPart('ばかり'),literalPart(pair.verb,pair.verbReading,'verb'),literalPart('います。')]
-    return finish(furigana,`${capitalize(subjectEnglish)} only ${verbEnglish} ${englishPhrase(pair.object,'object')}.`,{subject,object:pair.object},{},'ばかり after an object criticizes a one-sided, repetitive habit.')
+    const habitForms=[
+      {japanese:`${pair.verb}います。`,reading:`${pair.verbReading}います。`,english:`only ${verbEnglish}`},
+      {japanese:`${pair.verb}いました。`,reading:`${pair.verbReading}いました。`,english:`only ${simplePast(pair.base)}`},
+    ]
+    const habitForm=pickAuxiliaryForm(habitForms,options)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(pair.object,'object'),literalPart('ばかり'),literalPart(habitForm.japanese,habitForm.reading,'verb')]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${habitForm.english} ${englishPhrase(pair.object,'object')}.`,{subject,object:pair.object},{
+      ending:grammarSlot(`bakari-ending-${habitForms.indexOf(habitForm)}`,habitForm.japanese,pair.verb,habitForm.reading,`only ${pair.base}`,['one-sided-habit','bakari','ending']),
+    },'ばかり after an object criticizes a one-sided, repetitive habit.')
   }
 
   if (patternId === 'n3-36') {
@@ -5470,8 +5827,20 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     const verb = pick(smallVerbPool, 1411, 'verb')
     if (!verb) return null
     const aStem = n4VerbForms(verb).aStem
-    const furigana=[{text:aStem.japanese,reading:aStem.reading,slot:'verb'},literalPart('ないでください。')]
-    return finish(furigana,`Please do not ${verb.english}.`,{},{verb:grammarSlot(`verb-${verb.id}-naidekudasai`,`${aStem.japanese}ないでください`,verb.japanese,`${aStem.reading}ないでください`,`please do not ${verb.english}`,['polite-request','naide-kudasai'])},'ないでください politely asks someone not to do something.')
+    // てください and ないでください are the two halves of the same request, and
+    // they take different stems — the て-form for one, the ない-stem for the
+    // other — so both are built here rather than sharing a tail.
+    const te = n4VerbForms(verb).te
+    const requestForms=[
+      {japanese:`${aStem.japanese}ないでください。`,reading:`${aStem.reading}ないでください。`,english:`Please do not ${verb.english}.`},
+      {japanese:`${te.japanese}ください。`,reading:`${te.reading}ください。`,english:`Please ${verb.english}.`},
+    ]
+    const requestForm=pickAuxiliaryForm(requestForms,options)
+    const furigana=[{text:requestForm.japanese,reading:requestForm.reading,slot:'verb'}]
+    return finish(furigana,requestForm.english,{},{
+      verb:grammarSlot(`verb-${verb.id}-naidekudasai`,requestForm.japanese,verb.japanese,requestForm.reading,`please do not ${verb.english}`,['polite-request','naide-kudasai']),
+      ending:grammarSlot(`kudasai-ending-${requestForms.indexOf(requestForm)}`,requestForm.japanese,verb.japanese,requestForm.reading,`please do not ${verb.english}`,['polite-request','naide-kudasai','ending']),
+    },'ないでください politely asks someone not to do something.')
   }
 
   if (patternId === 'n3-40') {
@@ -5486,10 +5855,19 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     const subject=result.filled.subject!,object=result.filled.object
     const subjectEnglish = englishPhrase(subject,'subject')
     const objectEnglish = object ? englishPhrase(object,'object') : ''
+    const has = subjectUsesBaseVerb(subjectEnglish) ? 'have' : 'has'
+    const continuationForms=[
+      {japanese:`${te.japanese}きました。`,reading:`${te.reading}きました。`,english:`${has} been ${presentParticiple(verb.english)}${objectEnglish?` ${objectEnglish}`:''} all along`},
+      {japanese:`${te.japanese}きませんでした。`,reading:`${te.reading}きませんでした。`,english:`${has} not been ${presentParticiple(verb.english)}${objectEnglish?` ${objectEnglish}`:''} all along`},
+    ]
+    const continuationForm=pickAuxiliaryForm(continuationForms,options)
     const furigana=object
-      ? [literalPart('ずっと','ずっと','time'),wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:te.japanese,reading:te.reading,slot:'verb'},literalPart('きました。')]
-      : [literalPart('ずっと','ずっと','time'),wordPart(subject,'subject'),literalPart('は','わ'),{text:te.japanese,reading:te.reading,slot:'verb'},literalPart('きました。')]
-    return finish(furigana,`${capitalize(subjectEnglish)} ${subjectUsesBaseVerb(subjectEnglish)?'have':'has'} been ${presentParticiple(verb.english)}${objectEnglish?` ${objectEnglish}`:''} all along.`,object?{subject,object}:{subject},{verb:grammarSlot(`verb-${verb.id}-tekuru`,`${te.japanese}きました`,verb.japanese,`${te.reading}きました`,`have been ${presentParticiple(verb.english)}`,['continuation-to-now','te-kuru'])},'て以来 marks a starting point, but て + くる marks the whole span up to now as an unbroken continuation.')
+      ? [literalPart('ずっと','ずっと','time'),wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('を'),{text:continuationForm.japanese,reading:continuationForm.reading,slot:'verb'}]
+      : [literalPart('ずっと','ずっと','time'),wordPart(subject,'subject'),literalPart('は','わ'),{text:continuationForm.japanese,reading:continuationForm.reading,slot:'verb'}]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${continuationForm.english}.`,object?{subject,object}:{subject},{
+      verb:grammarSlot(`verb-${verb.id}-tekuru`,continuationForm.japanese,verb.japanese,continuationForm.reading,`have been ${presentParticiple(verb.english)}`,['continuation-to-now','te-kuru']),
+      ending:grammarSlot(`tekuru-ending-${continuationForms.indexOf(continuationForm)}`,continuationForm.japanese,verb.japanese,continuationForm.reading,`have been ${presentParticiple(verb.english)}`,['continuation-to-now','te-kuru','ending']),
+    },'て以来 marks a starting point, but て + くる marks the whole span up to now as an unbroken continuation.')
   }
 
   if (patternId === 'n3-41') {
@@ -5692,10 +6070,16 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
   }
 
   if (patternId === 'n2-30') {
+    // The conceded quality is the adjective this frame practises, and the
+    // result is picked independently of it, so any generic quality reads
+    // against all three: 古いとはいえ、品質は良いです.
     const clausePool = [
       { clause:'安い', clauseReading:'やすい', english:'it is cheap' },
       { clause:'難しい', clauseReading:'むずかしい', english:'it is difficult' },
       { clause:'小さい', clauseReading:'ちいさい', english:'it is small' },
+      { clause:'古い', clauseReading:'ふるい', english:'it is old' },
+      { clause:'重い', clauseReading:'おもい', english:'it is heavy' },
+      { clause:'地味', clauseReading:'じみ', english:'it is plain' },
     ]
     const resultPool = [
       { result:'品質は良いです', resultReading:'ひんしつはいいです', english:'the quality is good' },
@@ -5711,16 +6095,20 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     if (!clause || !result) return null
     const furigana=[{text:clause.clause,reading:clause.clauseReading,slot:'reason'},literalPart('とはいえ、'),{text:result.result,reading:result.resultReading,slot:'result'}]
     return finish(furigana,`Though ${clause.english}, ${result.english}.`,{},{
-      reason:grammarSlot(`n2-30-clause-${clausePool.indexOf(clause)}`,clause.clause,clause.clause,clause.clauseReading,clause.english,['concession']),
+      reason:grammarSlot(`n2-30-clause-${clausePool.indexOf(clause)}`,clause.clause,clause.clause,clause.clauseReading,clause.english,['concession'],clause.clause.endsWith('い')?'i_adjective':'na_adjective'),
       result:grammarSlot(`n2-30-result-${resultPool.indexOf(result)}`,result.result,result.result,result.resultReading,result.english,['concession']),
     },'とはいえ concedes a point formally before pointing out that it does not change the outcome.')
   }
 
   if (patternId === 'n2-31') {
+    // ながら(も) attaches to a plain い-adjective directly; a な-adjective would
+    // need its own である/な shape, so this pool stays い-only.
     const clausePool = [
       { clause:'狭い', clauseReading:'せまい', english:'it is small' },
       { clause:'安い', clauseReading:'やすい', english:'it is cheap' },
       { clause:'若い', clauseReading:'わかい', english:'young' },
+      { clause:'古い', clauseReading:'ふるい', english:'it is old' },
+      { clause:'忙しい', clauseReading:'いそがしい', english:'they are busy' },
     ]
     const resultPool = [
       { result:'楽しい家です', resultReading:'たのしいいえです', english:'it is a fun house' },
@@ -5736,7 +6124,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     if (!clause || !result) return null
     const furigana=[{text:clause.clause,reading:clause.clauseReading,slot:'reason'},literalPart('ながらも、'),{text:result.result,reading:result.resultReading,slot:'result'}]
     return finish(furigana,`Although ${clause.english}, ${result.english}.`,{},{
-      reason:grammarSlot(`n2-31-clause-${clausePool.indexOf(clause)}`,clause.clause,clause.clause,clause.clauseReading,clause.english,['concession']),
+      reason:grammarSlot(`n2-31-clause-${clausePool.indexOf(clause)}`,clause.clause,clause.clause,clause.clauseReading,clause.english,['concession'],'i_adjective'),
       result:grammarSlot(`n2-31-result-${resultPool.indexOf(result)}`,result.result,result.result,result.resultReading,result.english,['concession']),
     },'ながら(も) after an adjective concedes a quality while asserting something that seems to contradict it.')
   }
@@ -5812,11 +6200,11 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     // so each is genuinely its own rotatable slot.
     const subject = pick(humans, 1561, 'subject')
     const verbPool = [
-      { verb:'来る', verbReading:'くる', base:'is coming', plural:'are coming' },
-      { verb:'知っている', verbReading:'しっている', base:'knows', plural:'know' },
-      { verb:'間違える', verbReading:'まちがえる', base:'makes a mistake', plural:'make a mistake' },
-      { verb:'忘れる', verbReading:'わすれる', base:'forgets', plural:'forget' },
-      { verb:'嘘をつく', verbReading:'うそをつく', base:'lies', plural:'lie' },
+      { verb:'来る', verbReading:'くる', base:'is coming', plural:'are coming', past:'was coming' },
+      { verb:'知っている', verbReading:'しっている', base:'knows', plural:'know', past:'knew' },
+      { verb:'間違える', verbReading:'まちがえる', base:'makes a mistake', plural:'make a mistake', past:'made a mistake' },
+      { verb:'忘れる', verbReading:'わすれる', base:'forgets', plural:'forget', past:'forgot' },
+      { verb:'嘘をつく', verbReading:'うそをつく', base:'lies', plural:'lie', past:'lied' },
     ]
     let verbPickPool = verbPool
     if (options.avoidWords?.verb) { const avoided = verbPickPool.filter(c => c.verb !== options.avoidWords!.verb); if (avoided.length) verbPickPool = avoided }
@@ -5824,8 +6212,16 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     if (!subject || !verbChoice) return null
     const subjectEnglish = englishPhrase(subject,'subject')
     const gloss = subjectUsesBaseVerb(subjectEnglish) ? verbChoice.plural : verbChoice.base
-    const furigana=[wordPart(subject,'subject'),literalPart('が'),{text:verbChoice.verb,reading:verbChoice.verbReading,slot:'verb'},literalPart('はずがありません。')]
-    return finish(furigana,`There is no way ${subjectEnglish} ${gloss}.`,{subject},{verb:grammarSlot(`n2-36-verb-${verbPool.indexOf(verbChoice)}`,verbChoice.verb,verbChoice.verb,verbChoice.verbReading,gloss,['impossibility'])},'はずがない firmly rules out a possibility as logically impossible.')
+    const impossibilityForms=[
+      {japanese:`${verbChoice.verb}はずがありません。`,reading:`${verbChoice.verbReading}はずがありません。`,english:`There is no way ${subjectEnglish} ${gloss}.`},
+      {japanese:`${verbChoice.verb}はずがありませんでした。`,reading:`${verbChoice.verbReading}はずがありませんでした。`,english:`There was no way ${subjectEnglish} ${verbChoice.past}.`},
+    ]
+    const impossibilityForm=pickAuxiliaryForm(impossibilityForms,options)
+    const furigana=[wordPart(subject,'subject'),literalPart('が'),{text:impossibilityForm.japanese,reading:impossibilityForm.reading,slot:'verb'}]
+    return finish(furigana,impossibilityForm.english,{subject},{
+      verb:grammarSlot(`n2-36-verb-${verbPool.indexOf(verbChoice)}`,impossibilityForm.japanese,verbChoice.verb,impossibilityForm.reading,gloss,['impossibility']),
+      ending:grammarSlot(`hazuganai-ending-${impossibilityForms.indexOf(impossibilityForm)}`,impossibilityForm.japanese,verbChoice.verb,impossibilityForm.reading,gloss,['impossibility','hazu-ga-nai','ending']),
+    },'はずがない firmly rules out a possibility as logically impossible.')
   }
 
   if (patternId === 'n2-37') {
@@ -5844,8 +6240,16 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     const clauseChoice = seededPick(clausePickPool, options.slotSeeds?.verb ?? seed, 1572)
     if (!subject || !clauseChoice) return null
     const subjectEnglish = englishPhrase(subject,'subject')
-    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),{text:clauseChoice.clause,reading:clauseChoice.clauseReading,slot:'verb'},literalPart('としました。')]
-    return finish(furigana,`${capitalize(subjectEnglish)} tried to ${clauseChoice.gloss}.`,{subject},{verb:grammarSlot(`n2-37-verb-${clausePool.indexOf(clauseChoice)}`,clauseChoice.clause,clauseChoice.clause,clauseChoice.clauseReading,clauseChoice.gloss,['attempt'])},'volitional + とする means to attempt or be on the verge of doing something.')
+    const attemptForms=[
+      {japanese:`${clauseChoice.clause}としました。`,reading:`${clauseChoice.clauseReading}としました。`,english:`tried to ${clauseChoice.gloss}`},
+      {japanese:`${clauseChoice.clause}とします。`,reading:`${clauseChoice.clauseReading}とします。`,english:`${subjectUsesBaseVerb(subjectEnglish)?'try':'tries'} to ${clauseChoice.gloss}`},
+    ]
+    const attemptForm=pickAuxiliaryForm(attemptForms,options)
+    const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),{text:attemptForm.japanese,reading:attemptForm.reading,slot:'verb'}]
+    return finish(furigana,`${capitalize(subjectEnglish)} ${attemptForm.english}.`,{subject},{
+      verb:grammarSlot(`n2-37-verb-${clausePool.indexOf(clauseChoice)}`,attemptForm.japanese,clauseChoice.clause,attemptForm.reading,clauseChoice.gloss,['attempt']),
+      ending:grammarSlot(`youtosuru-ending-${attemptForms.indexOf(attemptForm)}`,attemptForm.japanese,clauseChoice.clause,attemptForm.reading,clauseChoice.gloss,['attempt','you-to-suru','ending']),
+    },'volitional + とする means to attempt or be on the verge of doing something.')
   }
 
   return null
@@ -6071,17 +6475,26 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
       english: [`${copula} ${presentParticiple(base)}`,`${copula} not ${presentParticiple(base)}`,`${copulaPast} ${presentParticiple(base)}`,`${copulaPast} not ${presentParticiple(base)}`][i]!,
     }))
   } else if (patternId === 'n4-05') {
-    endingVariants = ['なければなりません','なければなりませんでした'].map((suffix,i) => ({
+    // なければならない and なければいけない are the same obligation in the two
+    // shapes it is taught in, so the drill walks both rather than one of them
+    // in two tenses.
+    endingVariants = ['なければなりません','なければなりませんでした','なければいけません','なければいけませんでした'].map((suffix,i) => ({
       form: appendForm(n4Forms.aStem, suffix),
-      english: [`must ${base}`,`had to ${base}`][i]!,
+      english: [`must ${base}`,`had to ${base}`,`must ${base}`,`had to ${base}`][i]!,
     }))
   } else if (patternId === 'n4-06' || patternId === 'n4-07') {
     // n4-07 used to be its own hand-duplicated pattern for just the negative
     // half of this same permission/prohibition construction — merged here so
     // the ending toggles between them, same as the べきです/べきではない merge.
+    //
+    // Both halves have an everyday past: 食べてもよかったです is permission
+    // that held then, 食べてはいけませんでした is prohibition that did. They
+    // are what takes this drill past a single rotation.
     endingVariants = [
       { form: appendForm(n4Forms.te,'もいいです'), english: `may ${base}` },
       { form: appendForm(n4Forms.te,'はいけません'), english: `must not ${base}` },
+      { form: appendForm(n4Forms.te,'もよかったです'), english: `${copulaPast} allowed to ${base}` },
+      { form: appendForm(n4Forms.te,'はいけませんでした'), english: `${copulaPast} not allowed to ${base}` },
     ]
   } else if (patternId === 'n4-08') {
     endingVariants = [
@@ -6113,10 +6526,10 @@ function generateN4CategorySentence(seed: number,requestedPatternId?: string,opt
   if (!form) return null
   if (!alignN4CrossSlotContext(patternId,verb,vocabulary,result,seed,options)) return null
   // The eating-prohibition idiom (must not eat AT a place, no specific food
-  // named) only applies to the negative half now that n4-06/n4-07 are one
-  // toggleable pattern — "may eat sushi at a restaurant" (the affirmative
-  // half) still wants its object.
-  const objectlessEatingProhibition=(patternId==='n4-06'||patternId==='n4-07') && verb.id==='taberu-location' && endingIndex===1
+  // named) only applies to the prohibition halves now that n4-06/n4-07 are one
+  // toggleable pattern — "may eat sushi at a restaurant" (the permission half,
+  // past or present) still wants its object.
+  const objectlessEatingProhibition=(patternId==='n4-06'||patternId==='n4-07') && verb.id==='taberu-location' && (endingIndex===1||endingIndex===3)
   if (objectlessEatingProhibition) {
     delete result.filled.object
     delete result.slotTagMatches.object

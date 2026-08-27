@@ -50,4 +50,8 @@ export const vocabAdjectiveCards: StudyCard[] = [
 
   { id: 'vocab-adj-yutaka', type: 'vocab', front: '豊か', reading: 'yutaka', back: 'rich; abundant', jlpt: 'N2' },
   { id: 'vocab-adj-mazushii', type: 'vocab', front: '貧しい', reading: 'mazushii', back: 'poor', jlpt: 'N2' },
+
+  // The N2 とはいえ concession frame concedes this one, and it was the only
+  // adjective in that pool the deck did not already carry.
+  { id: 'vocab-adj-jimi', type: 'vocab', front: '地味', reading: 'jimi', back: 'plain; subdued', jlpt: 'N3' },
 ]
