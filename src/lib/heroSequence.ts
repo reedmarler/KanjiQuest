@@ -354,12 +354,28 @@ export function particlesIn(sentence: GeneratedPreviewSentence): string[] {
  * renderer already leaves the gloss untouched when it does not change, the way
  * it does for a polite ⟷ plain swap.
  */
-const PARTICLE_ALTERNATIVES: ReadonlyArray<{ from: string; to: string; roles: ReadonlySet<string> }> = [
+type ParticleAlternative = { from: string; to: string; roles: ReadonlySet<string>; also?: true }
+
+const PARTICLE_ALTERNATIVES: ReadonlyArray<ParticleAlternative> = [
   { from: 'は', to: 'が', roles: new Set(['subject', 'topic']) },
   { from: 'が', to: 'は', roles: new Set(['subject', 'topic']) },
   { from: 'を', to: 'は', roles: new Set(['object']) },
   { from: 'に', to: 'へ', roles: new Set(['destination']) },
   { from: 'へ', to: 'に', roles: new Set(['destination']) },
+  // も is the one alternative English does mark, so these carry a gloss change
+  // with them. It attaches to the noun in front of it, which in every frame
+  // here is the last noun before the verb — so "too" at the end of the English
+  // lands on the same word the Japanese does.
+  //
+  // を drops when も takes over (新聞も読みます, never 新聞をも), while に, で
+  // and から keep their marker and stack it (学校にも行きます). Subject も is
+  // absent on purpose: 夫婦も読みます needs "also" in front of the verb, and
+  // the generator's English is one string with no seam to put it in — a
+  // sentence-final "too" would land the emphasis on the object instead.
+  { from: 'を', to: 'も', roles: new Set(['object']), also: true },
+  { from: 'に', to: 'にも', roles: new Set(['destination']), also: true },
+  { from: 'で', to: 'でも', roles: new Set(['location']), also: true },
+  { from: 'から', to: 'からも', roles: new Set(['origin']), also: true },
 ]
 
 /** A segment key without its occurrence suffix: `object-2` is still an object. */
@@ -371,9 +387,9 @@ function segmentRole(key: string): string {
  * The particle swaps this frame can make, in reading order, each one a single
  * segment's worth of change.
  */
-function particleRotationsFor(frame: HeroSentenceFrame): Array<{ key: string; from: string; to: string }> {
+function particleRotationsFor(frame: HeroSentenceFrame): Array<{ key: string; alternative: ParticleAlternative }> {
   const segments = frame.segments ?? []
-  const rotations: Array<{ key: string; from: string; to: string }> = []
+  const rotations: Array<{ key: string; alternative: ParticleAlternative }> = []
   segments.forEach((segment, index) => {
     if (!segment.key.startsWith('particle-')) return
     const role = segmentRole(segments[index - 1]?.key ?? '')
@@ -387,7 +403,7 @@ function particleRotationsFor(frame: HeroSentenceFrame): Array<{ key: string; fr
       const topicElsewhere = segments.some((other) => other !== segment
         && other.key.startsWith('particle-') && other.text.trim() === 'は')
       if (alternative.to === 'は' && topicElsewhere) continue
-      rotations.push({ key: segment.key, from: alternative.from, to: alternative.to })
+      rotations.push({ key: segment.key, alternative })
     }
   })
   return rotations
@@ -399,16 +415,22 @@ function particleRotationsFor(frame: HeroSentenceFrame): Array<{ key: string; fr
  * an earlier swap can license a later one: raising an object to the topic only
  * becomes available once the subject has moved off は.
  */
-function particleRotationWalk(frame: HeroSentenceFrame): Array<{ key: string; to: string; frame: HeroSentenceFrame }> {
-  const walk: Array<{ key: string; to: string; frame: HeroSentenceFrame }> = []
+function particleRotationWalk(frame: HeroSentenceFrame, bias = 0): Array<{ key: string; alternative: ParticleAlternative; frame: HeroSentenceFrame }> {
+  const walk: Array<{ key: string; alternative: ParticleAlternative; frame: HeroSentenceFrame }> = []
   const rotated = new Set<string>()
   let current = frame
   for (;;) {
-    const rotation = particleRotationsFor(current).find((candidate) => !rotated.has(candidate.key))
-    if (!rotation) break
-    rotated.add(rotation.key)
-    current = withParticle(current, rotation.key, rotation.to)
-    walk.push({ key: rotation.key, to: rotation.to, frame: current })
+    const available = particleRotationsFor(current).filter((candidate) => !rotated.has(candidate.key))
+    if (!available.length) break
+    const key = available[0]!.key
+    // A marker with more than one alternative — を takes both は and も — gets
+    // one turn per sentence, so which one it takes rotates with the sentence
+    // rather than always falling to the first in the table.
+    const forKey = available.filter((candidate) => candidate.key === key)
+    const rotation = forKey[Math.abs(bias + walk.length) % forKey.length]!
+    rotated.add(key)
+    current = withParticle(current, key, rotation.alternative)
+    walk.push({ key, alternative: rotation.alternative, frame: current })
   }
   return walk
 }
@@ -420,7 +442,11 @@ function particleRotationWalk(frame: HeroSentenceFrame): Array<{ key: string; to
  */
 export function particlesReachable(sentence: GeneratedPreviewSentence): string[] {
   const reached = new Set(particlesIn(sentence))
-  for (const step of particleRotationWalk(categoryFrameFor(sentence))) reached.add(step.to)
+  const frame = categoryFrameFor(sentence)
+  // Both biases, since a marker with two alternatives shows one per sentence.
+  for (const bias of [0, 1]) {
+    for (const step of particleRotationWalk(frame, bias)) reached.add(step.alternative.to)
+  }
   return [...reached]
 }
 
@@ -440,14 +466,21 @@ function anchorSlotForParticles(frame: HeroSentenceFrame, rotated: ReadonlySet<s
   return null
 }
 
-/** The same frame with one particle segment replaced. */
-function withParticle(frame: HeroSentenceFrame, key: string, particle: string): HeroSentenceFrame {
+/**
+ * The same frame with one particle segment replaced, and the gloss adjusted
+ * when the swap is one English marks.
+ */
+function withParticle(frame: HeroSentenceFrame, key: string, alternative: ParticleAlternative): HeroSentenceFrame {
   const segments = (frame.segments ?? []).map((segment) => segment.key === key
-    ? { ...segment, text: particle, reading: particle }
+    ? { ...segment, text: alternative.to, reading: alternative.to }
     : segment)
+  const english = alternative.also && frame.generatedEnglish
+    ? frame.generatedEnglish.replace(/\s*([.!?])?$/, (_match, punctuation: string | undefined) => ` too${punctuation ?? ''}`)
+    : frame.generatedEnglish
   return {
     ...frame,
     segments,
+    generatedEnglish: english,
     generatedReading: segments.map((segment) => segment.reading || segment.text).join(''),
   }
 }
@@ -798,11 +831,11 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
     if (focus === 'particle') {
       const baseFrame = current
       const rotated = new Set<string>()
-      const swapped = new Map<string, string>()
-      for (const rotation of particleRotationWalk(baseFrame)) {
+      const swapped = new Map<string, ParticleAlternative>()
+      for (const rotation of particleRotationWalk(baseFrame, index)) {
         if (steps.length >= stepCount) break
         rotated.add(rotation.key)
-        swapped.set(rotation.key, rotation.to)
+        swapped.set(rotation.key, rotation.alternative)
         steps.push({
           frame: rotation.frame,
           changed: changedSegmentKeys(current, rotation.frame),
@@ -828,7 +861,7 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
         const swap = rotateOneSlot(level, sentence.frameId, particleSeed, baseFrame, {}, {}, anchorSlot, 97)
         if (swap) {
           const next = swapped.size
-            ? [...swapped].reduce((frame, [key, particle]) => withParticle(frame, key, particle), swap.frame)
+            ? [...swapped].reduce((frame, [key, alternative]) => withParticle(frame, key, alternative), swap.frame)
             : swap.frame
           const changed = changedSegmentKeys(current, next)
           if (changed.length === 1) {
