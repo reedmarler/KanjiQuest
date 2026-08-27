@@ -112,7 +112,8 @@ function App() {
   const [practiceReturnView, setPracticeReturnView] = useState<View>('dashboard')
   const [beginnerScript, setBeginnerScript] = useState<BeginnerScript>('hiragana')
   const [shrineRegionId, setShrineRegionId] = useState('tsuzuri')
-  const [speedRunReturnView, setSpeedRunReturnView] = useState<'beginner-zone' | 'study-tools'>('beginner-zone')
+  const [speedRunReturnView, setSpeedRunReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools'>('dashboard')
+  const [pictureReturnView, setPictureReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools'>('dashboard')
   /*
    * Whether the sentence session on screen is the lab copy. The lab runs on
    * the same session machinery as the real builder — same exercises, same
@@ -428,6 +429,10 @@ function App() {
               setSpeedRunReturnView('study-tools')
               setView('beginner-speed-run')
             } },
+            { mark: '絵', title: 'Picture Mode', detail: 'Match a picture to the word that names it.', accent: 'sakura', onClick: () => {
+              setPictureReturnView('study-tools')
+              setView('picture-practice')
+            } },
             { mark: '文', title: 'Sentences', detail: 'Build Japanese sentence order.', accent: 'sakura', onClick: () => startSentenceMode('study-tools') },
             { mark: '文法', title: 'Grammar', detail: 'Practice patterns and particles.', accent: 'rayquaza', onClick: () => {
               setActiveQuestId(undefined)
@@ -465,9 +470,9 @@ function App() {
               setBeginnerScript('kanji')
               setView('beginner-learner')
             } },
-            { mark: '⚡', title: 'Speed Run', detail: 'Name each kana before it fades.', accent: 'rayquaza', onClick: () => {
-              setSpeedRunReturnView('beginner-zone')
-              setView('beginner-speed-run')
+            { mark: '絵', title: 'Picture Mode', detail: 'Match a picture to the word that names it.', accent: 'rayquaza', onClick: () => {
+              setPictureReturnView('beginner-zone')
+              setView('picture-practice')
             } },
           ]}
           footerAction={{
@@ -504,7 +509,7 @@ function App() {
     return (
       <div className="app">
         <Suspense fallback={<RouteLoading label="Picture Mode" />}>
-          <PicturePractice onBack={() => setView('dashboard')} />
+          <PicturePractice onBack={() => setView(pictureReturnView)} />
         </Suspense>
       </div>
     )
@@ -708,7 +713,14 @@ function App() {
         onOpenBeginnerZone={() => setView('beginner-zone')}
         onOpenAdditionalTools={() => setView('additional-tools')}
         onOpenStudyTools={() => setView('study-tools')}
-        onOpenPicturePractice={() => setView('picture-practice')}
+        onOpenPicturePractice={() => {
+          setPictureReturnView('dashboard')
+          setView('picture-practice')
+        }}
+        onOpenSpeedRun={() => {
+          setSpeedRunReturnView('dashboard')
+          setView('beginner-speed-run')
+        }}
         onOpenFavoriteWords={() => setView('favorite-words')}
         questProgress={questProgress}
         wrongPool={wrongPool}

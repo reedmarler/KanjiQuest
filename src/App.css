@@ -141,6 +141,33 @@ body:has(.beginner-word-writing-card) .app,
   padding: 0 0.15rem 0.15rem;
 }
 
+@media (max-width: 720px) {
+  /*
+   * On a phone these titles read as one family with the dashboard's "Kanji
+   * Quest": one line, 2rem, and the same block height (2rem x 1.18 plus its
+   * 0.06em descender pad). --title-fit is how wide the string runs in
+   * multiples of its own font size, so a screen too narrow for 2rem shrinks
+   * the text just enough to keep it on that one line.
+   */
+  .beginner-zone-page .tool-menu-heading h1,
+  .study-tools-page .tool-menu-heading h1 {
+    font-size: min(2rem, calc((100vw - 4.5rem) / var(--title-fit)));
+    line-height: 2.36rem;
+    padding-bottom: 0.12rem;
+    white-space: nowrap;
+  }
+
+  .beginner-zone-page .tool-menu-heading h1 { --title-fit: 8.6; }
+  .study-tools-page .tool-menu-heading h1 { --title-fit: 6.7; }
+
+  /* A single line now runs the full width, so drop the negative pull that
+     used to tuck the wrapped title up behind the Back button. */
+  .beginner-zone-page .tool-menu-heading,
+  .study-tools-page .tool-menu-heading {
+    margin-top: 0;
+  }
+}
+
 .study-tools-page .tool-menu-heading > small {
   display: none;
 }
@@ -4107,6 +4134,28 @@ body:has(.dashboard) {
 
 .dashboard-action-secondary > .dashboard-picture-button:hover {
   border-color: var(--sakura-light);
+}
+
+/* Row two of the secondary grid is pinned so Speed Run always sits directly
+   under Picture Mode, whatever order the tiles are written in. */
+.dashboard-action-secondary > .dashboard-additional-tools-button {
+  grid-row: 2;
+}
+
+.dashboard-action-secondary > .dashboard-speedrun-button {
+  grid-column: 2;
+  grid-row: 2;
+  border-color: color-mix(in srgb, var(--rayquaza) 30%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--rayquaza) 7%, transparent), transparent 54%), var(--surface);
+}
+
+.dashboard-action-secondary > .dashboard-speedrun-button:hover {
+  border-color: var(--rayquaza-light);
+}
+
+.dashboard-action-secondary .dashboard-speedrun-button .dashboard-additional-mark-main {
+  background: color-mix(in srgb, var(--rayquaza) 16%, var(--surface-2));
+  color: var(--rayquaza-light);
 }
 
 .dashboard-action-secondary .dashboard-achievement-mark,
