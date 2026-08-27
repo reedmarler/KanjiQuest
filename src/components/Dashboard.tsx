@@ -356,6 +356,7 @@ interface DashboardProps {
   onOpenAdditionalTools: () => void
   onOpenStudyTools: () => void
   onOpenPicturePractice: () => void
+  onOpenSpeedRun: () => void
   onOpenFavoriteWords: () => void
   questProgress: QuestProgress
 }
@@ -368,6 +369,7 @@ export function Dashboard({
   onOpenAdditionalTools,
   onOpenStudyTools,
   onOpenPicturePractice,
+  onOpenSpeedRun,
   onOpenFavoriteWords,
   questProgress,
   wrongPool,
@@ -1189,7 +1191,7 @@ export function Dashboard({
               <i lang="ja">数</i>
             </span>
             <span className="dashboard-feature-footer">
-              <span>5 tools</span>
+              <span>7 tools</span>
               <span aria-hidden="true">→</span>
             </span>
           </button>
@@ -1265,6 +1267,15 @@ export function Dashboard({
             <span className="dashboard-additional-mark-main" aria-hidden="true" lang="ja">他</span>
             <span className="dashboard-additional-heading">
               <b>Additional</b>
+            </span>
+          </button>
+
+          {/* Sits directly under Picture Mode; the study tools menu keeps its
+              own Speed Run square. */}
+          <button type="button" className="dashboard-additional dashboard-speedrun-button" onClick={onOpenSpeedRun}>
+            <span className="dashboard-additional-mark-main" aria-hidden="true">&#9889;</span>
+            <span className="dashboard-additional-heading">
+              <b>Speed Run</b>
             </span>
           </button>
         </div>
