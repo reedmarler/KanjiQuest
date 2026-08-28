@@ -17724,8 +17724,42 @@ button.counter-example {
 .library-panel-header h1 { --title-fit: 7.7; }
 .favorite-words-page .kanji-lab-header h1 { --title-fit: 8.62; }
 .achievements-hero h1 { --title-fit: 8; }
-.beginner-speedrun .kanji-lab-header h1 { --title-fit: 6.1; }
-.picture-practice .kanji-lab-header h1 { --title-fit: 7.55; }
+.beginner-speedrun .kanji-lab-header h1 { --title-fit: 4.55; --title-gutter: 3rem; }
+.picture-practice .kanji-lab-header h1 { --title-fit: 5.6; --title-gutter: 3rem; }
+
+/*
+ * Speed Run and Picture Mode centre their title instead of sitting it beside
+ * the Back button — a deliberate break from every other kanji-lab-header, all
+ * of which stay left-aligned — so its layout is overridden here rather than
+ * shared. Back and the KQ dashboard shortcut are paired in one app-nav-actions
+ * group the way they are everywhere else in the app (never orphaned apart, as
+ * a bare flex/grid child was), and that group is given zero height so it
+ * reserves no visible row: both buttons are pinned to the page corner by the
+ * app-level CSS regardless, so the title can simply take the header's full
+ * width and centre in it, at every breakpoint, without reserving gutter space
+ * for a button pair that no longer shares its row.
+ */
+.beginner-tool-setup-header {
+  display: block;
+  text-align: center;
+}
+
+.beginner-tool-setup-header .app-nav-actions {
+  height: 0;
+}
+
+.beginner-tool-setup-header h1 {
+  /* A block h1 ought to fill this block header's width on its own — verified
+     in the running app that it does not (an existing, unrelated
+     .kanji-lab-header h1 rule elsewhere in the cascade shrinks it to its own
+     text regardless of which single declaration is disabled, so no isolated
+     cause was found), so the fill is stated explicitly rather than assumed.
+     Centering depends on it: text-align only centers content within the
+     element's own box, and a shrunk box is already exactly as wide as its
+     text. */
+  width: 100%;
+  margin: 0;
+}
 
 /* Wide layout: the Back button sits beside the title, and the crest card
    spends a further column on its crest and its percentage. Each gutter also
@@ -17803,6 +17837,14 @@ button.counter-example {
   .library-panel-header h1,
   .kanji-lab-header h1 {
     margin-top: 0;
+  }
+
+  /* .beginner-tool-setup-header shares the .kanji-lab-header class for the
+     h1 treatment, but not this grid-stack: it stays the plain centred block
+     it is at every width, so the phone-only grid above has to be beaten back
+     here at equal specificity by coming later in the file. */
+  .beginner-tool-setup-header {
+    display: block;
   }
 
   /* The crest card puts its title in a middle column too narrow for the

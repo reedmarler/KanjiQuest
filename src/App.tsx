@@ -509,7 +509,7 @@ function App() {
     return (
       <div className="app">
         <Suspense fallback={<RouteLoading label="Picture Mode" />}>
-          <PicturePractice onBack={() => setView(pictureReturnView)} />
+          <PicturePractice onBack={() => setView(pictureReturnView)} onDashboard={() => setView('dashboard')} />
         </Suspense>
       </div>
     )

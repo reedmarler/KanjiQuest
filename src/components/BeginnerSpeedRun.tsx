@@ -301,11 +301,11 @@ export function BeginnerSpeedRun({ onBack, onDashboard }: BeginnerSpeedRunProps)
           bar returns, since the flashcard needs the vertical room back. */}
       {phase === 'idle' ? (
         <header className="kanji-lab-header beginner-tool-setup-header">
-          <AppBackButton onClick={onBack} aria-label="Back to previous page" />
-          <div>
-            <h1>Speed Run</h1>
+          <div className="app-nav-actions">
+            <AppBackButton onClick={onBack} aria-label="Back to previous page" />
+            <AppDashboardButton onClick={onDashboard} />
           </div>
-          <AppDashboardButton onClick={onDashboard} />
+          <h1>Speed Run</h1>
         </header>
       ) : (
         <div className="beginner-learner-top">

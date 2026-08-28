@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { pictureVocabulary, type PictureVocabularyEntry } from '../data/pictureVocabulary'
-import { AppBackButton } from './AppBackButton'
+import { AppBackButton, AppDashboardButton } from './AppBackButton'
 
 type PictureScript = 'hiragana' | 'kanji'
 type PictureLength = 1 | 2 | 3 | 4
@@ -59,9 +59,10 @@ function closestLength(current: PictureLength, choices: readonly PictureLength[]
 
 interface PicturePracticeProps {
   onBack: () => void
+  onDashboard: () => void
 }
 
-export function PicturePractice({ onBack }: PicturePracticeProps) {
+export function PicturePractice({ onBack, onDashboard }: PicturePracticeProps) {
   const [script, setScript] = useState<PictureScript>('hiragana')
   const [length, setLength] = useState<PictureLength>(2)
   const [category, setCategory] = useState<PictureCategoryChoice>('all')
@@ -201,14 +202,18 @@ export function PicturePractice({ onBack }: PicturePracticeProps) {
           bar returns, since the flashcard needs the vertical room back. */}
       {round === 0 ? (
         <header className="kanji-lab-header beginner-tool-setup-header">
-          <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
-          <div>
-            <h1>Picture Mode</h1>
+          <div className="app-nav-actions">
+            <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
+            <AppDashboardButton onClick={onDashboard} />
           </div>
+          <h1>Picture Mode</h1>
         </header>
       ) : (
         <div className="beginner-learner-top">
-          <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
+          <div className="app-nav-actions">
+            <AppBackButton onClick={onBack} aria-label="Back to Dashboard" />
+            <AppDashboardButton onClick={onDashboard} />
+          </div>
           <span className="beginner-learner-title">Picture Mode</span>
           {round > 0 && !done ? (
             <button type="button" className="beginner-speedrun-header-settings" onClick={openSettings}>Settings</button>
