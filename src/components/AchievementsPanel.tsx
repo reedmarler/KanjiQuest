@@ -21,9 +21,18 @@ export function AchievementsPanel({ onBack, ...context }: AchievementsPanelProps
         <span>{unlocked} / {achievements.length} unlocked</span>
       </header>
 
+      {/* The title heads the page, as it does on every other screen, rather
+          than sitting in the crest card's middle column — that column was
+          never wide enough on a phone to carry it at the size the rest of
+          the app's titles run at. */}
+      <section className="achievements-heading">
+        <span>YOUR LEGEND</span>
+        <h1>Achievements</h1>
+      </section>
+
       <section className="achievements-hero">
         <div className="achievements-crest" aria-hidden="true">誉</div>
-        <div><span>YOUR LEGEND</span><h1>Achievements</h1><p>Knowledge leaves a trail. Every quest, story, and hard-won reading adds to it.</p></div>
+        <div><p>Knowledge leaves a trail. Every quest, story, and hard-won reading adds to it.</p></div>
         <strong>{Math.round((unlocked / achievements.length) * 100)}%</strong>
       </section>
 

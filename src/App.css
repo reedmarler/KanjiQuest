@@ -6366,9 +6366,17 @@ body:has(.dashboard) {
 
 .kanji-level-stats {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  /* minmax(0, …) rather than 1fr: a plain 1fr track will not shrink below its
+     content, so on a narrow phone "Vocabulary" pushed the row — and the page
+     with it — wider than the viewport. */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.5rem;
   margin-bottom: 2rem;
+}
+
+/* Long labels wrap inside their own chip instead of setting its width. */
+.kanji-level-chip .level-name {
+  overflow-wrap: anywhere;
 }
 
 .kanji-level-chip {
@@ -6845,7 +6853,7 @@ body:has(.dashboard) {
 }
 
 @media (max-width: 900px) {
-  .kanji-level-stats { grid-template-columns: repeat(3, 1fr); }
+  .kanji-level-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 /* Sentence practice */
@@ -15809,29 +15817,33 @@ button.counter-example {
   }
 }
 
-/* On phones, the animated hiragana is a compact reference while the space
-   the learner actually writes in gets the useful width. Keep Katakana and
-   First Kanji unchanged until their denser character layouts need the same
-   treatment. */
+/* On phones the animated character is a compact reference while the space the
+   learner actually writes in gets the useful width. Katakana and First Kanji
+   run the same way as Hiragana: a denser character reads fine at this size —
+   it is one glyph filling the box either way — and the trade buys back more
+   width than it spends, since the box below grows by more than the reference
+   above it loses. */
 @media (max-width: 719px) {
-  body:has(.beginner-learner--hiragana) .app {
+  body:has(.beginner-learner) .app {
     padding-inline: 0.65rem;
   }
 
-  .beginner-learner--hiragana {
+  .beginner-learner {
     padding-inline: 0;
   }
 
-  .beginner-learner--hiragana > .beginner-card.is-revealed {
+  .beginner-learner > .beginner-card.is-revealed {
     padding-inline: 0.4rem;
   }
 
-  .beginner-learner--hiragana .beginner-write-layout .beginner-char-listen .stroke-order-animation.is-hero,
-  .beginner-learner--hiragana .beginner-write-layout .beginner-char-listen .stroke-order-char {
+  .beginner-learner .beginner-write-layout .beginner-char-listen .stroke-order-animation.is-hero,
+  .beginner-learner .beginner-write-layout .beginner-char-listen .stroke-order-char,
+  .beginner-learner .beginner-write-layout .beginner-char-listen .beginner-static-word-example,
+  .beginner-learner .beginner-write-layout .beginner-char-listen .beginner-static-word-example span {
     width: min(52vw, 11rem);
   }
 
-  .beginner-learner--hiragana .beginner-write-layout .beginner-write-section {
+  .beginner-learner .beginner-write-layout .beginner-write-section {
     padding-top: 0.4rem;
   }
 }
@@ -17694,7 +17706,7 @@ button.counter-example {
 .tool-menu-heading h1,
 .library-panel-header h1,
 .kanji-lab-header h1,
-.achievements-hero h1 {
+.achievements-heading h1 {
   --title-fit: 10.5;
   --title-gutter: 11rem;
   --title-space: min(720px, calc(100vw / 1.5));
@@ -17723,7 +17735,7 @@ button.counter-example {
 .additional-tools-page .tool-menu-heading h1 { --title-fit: 5.9; }
 .library-panel-header h1 { --title-fit: 7.7; }
 .favorite-words-page .kanji-lab-header h1 { --title-fit: 8.62; }
-.achievements-hero h1 { --title-fit: 8; }
+.achievements-heading h1 { --title-fit: 8; }
 .beginner-speedrun .kanji-lab-header h1 { --title-fit: 4.55; --title-gutter: 3rem; }
 .picture-practice .kanji-lab-header h1 { --title-fit: 5.6; --title-gutter: 3rem; }
 
@@ -17765,7 +17777,7 @@ button.counter-example {
    spends a further column on its crest and its percentage. Each gutter also
    carries ~10px for the scrollbar, which 100vw counts as usable width. */
 .tool-menu-heading h1 { --title-gutter: 6.9rem; }
-.achievements-hero h1 { --title-gutter: 14.5rem; }
+.achievements-heading h1 { --title-gutter: 3rem; }
 
 @media (max-width: 720px) {
   /* 2rem is the size the dashboard title drops to on a phone, and 2.36rem +
@@ -17774,7 +17786,7 @@ button.counter-example {
   .tool-menu-heading h1,
   .library-panel-header h1,
   .kanji-lab-header h1,
-  .achievements-hero h1 {
+  .achievements-heading h1 {
     --title-space: 100vw;
     font-size: min(2rem, calc((var(--title-space) - var(--title-gutter)) / var(--title-fit)));
     line-height: 2.36rem;
@@ -17786,7 +17798,7 @@ button.counter-example {
   .tool-menu-heading h1 { --title-gutter: 3.8rem; }
   .library-panel-header h1,
   .kanji-lab-header h1 { --title-gutter: 5.4rem; }
-  .achievements-hero h1 { --title-gutter: 5.3rem; }
+  .achievements-heading h1 { --title-gutter: 3.8rem; }
 
   /*
    * Start the title where "Kanji Quest" starts on the dashboard rather than
@@ -17847,33 +17859,64 @@ button.counter-example {
     display: block;
   }
 
-  /* The crest card puts its title in a middle column too narrow for the
-     dashboard's type size, so on a phone the crest and the percentage share
-     the top row and the title runs the full width beneath them. */
-  .achievements-hero {
-    grid-template-columns: auto 1fr;
-    row-gap: 0.55rem;
+}
+
+/* Achievements heads its page the way the tool menus do: the eyebrow over the
+   title, both above the crest card rather than inside it. */
+.achievements-heading {
+  display: grid;
+  gap: 0.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.achievements-heading > span {
+  color: var(--gold);
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.achievements-heading h1 {
+  margin: 0;
+}
+
+.achievements-hero p {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  /* The eyebrow would land in the corner the Back button is pinned to, and
+     the title has to start where every other page's does — so on a phone the
+     page leads with the title alone, the way Study tools already does. */
+  .achievements-heading > span {
+    display: none;
   }
 
-  .achievements-crest {
-    grid-row: 1;
-    grid-column: 1;
+  .achievements-heading {
+    margin-top: -1.1rem;
+  }
+}
+
+/* Wide layout: the page titles line up with each other. They cannot line up
+   with the dashboard's as well — that screen has no Back button, and its
+   title sits in the band this one is pinned to — so they settle at the tool
+   menus' height, the first that clears it. */
+@media (min-width: 721px) {
+  .additional-tools-page .tool-menu-heading {
+    margin-top: -1.5rem;
   }
 
-  .achievements-hero > strong {
-    grid-row: 1;
-    grid-column: 2;
-    justify-self: end;
-    align-self: center;
+  .library-panel-header,
+  .kanji-lab-header {
+    margin-top: -0.5rem;
   }
 
-  /* The crest is a div too, so the copy block has to be named apart from it. */
-  .achievements-hero > div:not(.achievements-crest) {
-    grid-row: 2;
-    grid-column: 1 / -1;
-  }
-
-  .achievements-hero h1 {
-    margin: 0;
+  /* Left-aligned at the page edge this title would run under the Back
+     button, which is pinned to that corner. It starts past the button
+     instead, the same offset the Study Library title takes from sharing its
+     row with it. */
+  .achievements-heading {
+    margin-top: -3.25rem;
+    padding-left: calc(var(--app-back-width) + 1rem);
   }
 }
