@@ -17920,3 +17920,31 @@ button.counter-example {
     padding-left: calc(var(--app-back-width) + 1rem);
   }
 }
+
+/* ── Picture Mode's answer word ──────────────────────────────────────────
+ * A kanji prompt is read back with its kana over it, so the line the word
+ * sits on reserves the ruby's height whether or not this round's script has
+ * one. Reserving it rather than letting the ruby push the card open keeps the
+ * image, the meaning and the choices at the same height in either script,
+ * and in kanji mode between the blank line and the revealed answer.
+ */
+.picture-practice-answer {
+  min-height: 2.75rem;
+  padding-top: 0.85rem;
+}
+
+.picture-practice-answer .furigana-ruby {
+  ruby-position: over;
+}
+
+.picture-practice-answer .furigana-ruby rt {
+  font: 700 0.46em/1 'Noto Sans JP', sans-serif;
+  color: var(--sakura-light);
+}
+
+/* The mode's name wears the cherry blossom the app titles itself in, rather
+   than reading as one more piece of white chrome in the bar. */
+.picture-practice .beginner-learner-title,
+.beginner-speedrun .beginner-learner-title {
+  color: var(--sakura);
+}

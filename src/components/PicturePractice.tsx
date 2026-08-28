@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { pictureVocabulary, type PictureVocabularyEntry } from '../data/pictureVocabulary'
 import { AppBackButton, AppDashboardButton } from './AppBackButton'
+import { FuriganaSegment } from './FuriganaText'
 
 type PictureScript = 'hiragana' | 'kanji'
 type PictureLength = 1 | 2 | 3 | 4
@@ -9,6 +10,8 @@ type PictureCategoryChoice = 'all' | PictureCategory
 
 interface PicturePrompt {
   text: string
+  /** The kana the word is read as, for furigana over a kanji prompt. */
+  reading?: string
   meaning: string
   image: string
   category: PictureVocabularyEntry['category']
@@ -41,7 +44,9 @@ function buildPool(script: PictureScript, length: PictureLength, category: Pictu
   return pictureVocabulary.flatMap((entry) => {
     const text = script === 'hiragana' ? entry.kana : entry.kanji
     if (!text || [...text].length !== length || (category !== 'all' && entry.category !== category)) return []
-    return [{ text, meaning: entry.meaning, image: entry.image, category: entry.category }]
+    // A kana prompt already reads itself; only the kanji one needs the reading.
+    const reading = script === 'hiragana' ? undefined : entry.kana
+    return [{ text, reading, meaning: entry.meaning, image: entry.image, category: entry.category }]
   })
 }
 
@@ -277,7 +282,9 @@ export function PicturePractice({ onBack, onDashboard }: PicturePracticeProps) {
       ) : (
         <main className="beginner-card beginner-challenge picture-practice-card">
           <div className={`picture-practice-answer${picked ? ' is-visible' : ''}`} lang="ja" aria-live="polite">
-            {picked ? prompt?.text : '\u00a0'}
+            {picked && prompt
+              ? <FuriganaSegment text={prompt.text} reading={prompt.reading} />
+              : '\u00a0'}
           </div>
 
           <div className="picture-practice-image" role="img" aria-label={prompt?.meaning}>
