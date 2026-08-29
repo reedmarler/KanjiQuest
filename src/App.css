@@ -17948,3 +17948,86 @@ button.counter-example {
 .beginner-speedrun .beginner-learner-title {
   color: var(--sakura);
 }
+
+/* ── Kanji Lab notes ─────────────────────────────────────────────────────
+ * The card is a fixed-height frame, so the note sheet floats over its lower
+ * half rather than growing it — nothing the learner is reading moves while
+ * they write about it.
+ */
+/* The sheet anchors to the card it belongs to. */
+.standard-kanji-card {
+  position: relative;
+}
+
+@media (max-width: 720px) {
+  /* Three chips no longer fit a column shared with Show examples — they ran
+     under the button. They take the row above it instead; the card has the
+     vertical room, and the button was already full-width in its own column. */
+  .standard-kanji-utility-row {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0.4rem;
+  }
+}
+
+.kanji-note-toggle.has-note::after {
+  content: '';
+  display: block;
+  width: 0.28rem;
+  height: 0.28rem;
+  margin-left: 0.2rem;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.kanji-note-panel {
+  position: absolute;
+  z-index: 5;
+  right: clamp(0.95rem, 3vw, 1.55rem);
+  bottom: clamp(0.95rem, 3vw, 1.55rem);
+  left: clamp(0.95rem, 3vw, 1.55rem);
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--border));
+  border-radius: 14px;
+  background: var(--surface-2);
+  box-shadow: 0 -0.6rem 1.6rem rgba(0, 0, 0, 0.45);
+  text-align: left;
+}
+
+.kanji-note-panel-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.kanji-note-panel-top strong {
+  font: 700 1.05rem/1 'Noto Sans JP', sans-serif;
+}
+
+.kanji-note-done {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.65rem;
+}
+
+.kanji-note-input {
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: 400 0.78rem/1.45 'Outfit', system-ui, sans-serif;
+  resize: none;
+}
+
+.kanji-note-input:focus-visible {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: 1px;
+}
+
+.kanji-note-hint {
+  color: var(--text-muted);
+  font-size: 0.55rem;
+}

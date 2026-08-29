@@ -7,6 +7,7 @@ import { kanjiLabEntries, type KanjiLabEntry } from '../lib/kanjiLabCatalog'
 import type { JlptLevel } from '../lib/types'
 import { SpeakableCue, SpeakableWord, useSpeakable } from './SpeakableWord'
 import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
+import { loadKanjiNotes, saveKanjiNotes, setKanjiNote, type KanjiNotes } from '../lib/kanjiNotes'
 import { AppBackButton, AppDashboardButton } from './AppBackButton'
 
 interface KanjiLabProps {
@@ -461,6 +462,8 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
   const [revealed, setRevealed] = useState(false)
   const [furiganaVisible, setFuriganaVisible] = useState(true)
   const [englishVisible, setEnglishVisible] = useState(true)
+  const [notes, setNotes] = useState<KanjiNotes>(loadKanjiNotes)
+  const [notesOpen, setNotesOpen] = useState(false)
   const [exampleOffset, setExampleOffset] = useState(0)
   const [completed, setCompleted] = useState(false)
   const entry = entries[index % entries.length]
@@ -471,6 +474,19 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
     ? LEARNER_READING_OVERRIDES[entry.character] ?? kanjiReadings[entry.character]
     : undefined
   const displayedCharacterReadings = uniqueCharacterReadings(characterReadings)
+  const noteSubject = card?.front ?? ''
+  const noteText = notes[noteSubject]?.text ?? ''
+
+  function writeNote(text: string) {
+    if (!entry || !noteSubject) return
+    const next = setKanjiNote(notes, {
+      subject: noteSubject,
+      character: entry.character,
+      reading: wordDeckMode ? entry.example.reading : undefined,
+    }, text)
+    setNotes(next)
+    saveKanjiNotes(next)
+  }
   const mainMeaning = wordDeckMode
     ? entry?.example.meaning.split(';')[0]?.trim() ?? ''
     : entry?.isCurated || (mode === 'paths' && pathStudyTarget === 'kanji')
@@ -825,6 +841,24 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
             })}
           </div>
         </div>
+        {notesOpen && (
+          <div className="kanji-note-panel" role="group" aria-label={`Notes on ${noteSubject}`}>
+            <div className="kanji-note-panel-top">
+              <strong lang="ja">{noteSubject}</strong>
+              <button type="button" className="btn btn-ghost kanji-note-done" onClick={() => setNotesOpen(false)}>Done</button>
+            </div>
+            <textarea
+              className="kanji-note-input"
+              value={noteText}
+              onChange={(event) => writeNote(event.target.value)}
+              placeholder="What do you want to remember about this one?"
+              rows={4}
+              autoFocus
+            />
+            <small className="kanji-note-hint">Saved on this device as you type.</small>
+          </div>
+        )}
+
         <div className="kanji-learning-controls standard-kanji-controls">
           <div className="standard-kanji-utility-row">
             <div className="standard-kanji-dashboard-toggles control-group control-group-primary-options" role="group" aria-label="Display options">
@@ -847,6 +881,18 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
                 onClick={() => setEnglishVisible((isVisible) => !isVisible)}
               >
                 EN
+              </button>
+              {/* Thoughts land against whatever is on the card, written where
+                  they occur rather than kept until somewhere to file them. */}
+              <button
+                type="button"
+                className={`control-chip control-chip-compact app-display-toggle kanji-note-toggle${noteText ? ' has-note' : ''}${notesOpen ? ' is-active' : ''}`}
+                aria-pressed={notesOpen}
+                aria-label={noteText ? `Edit your note on ${noteSubject}` : `Write a note on ${noteSubject}`}
+                title="Notes"
+                onClick={() => setNotesOpen((isOpen) => !isOpen)}
+              >
+                Notes
               </button>
             </div>
             <button
