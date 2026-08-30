@@ -17960,12 +17960,26 @@ button.counter-example {
 }
 
 @media (max-width: 720px) {
-  /* Three chips no longer fit a column shared with Show examples — they ran
-     under the button. They take the row above it instead; the card has the
-     vertical room, and the button was already full-width in its own column. */
+  /* Three chips share the row with Show examples as two did: the group sits
+     against the left edge rather than centred in half the row, takes only the
+     width it needs, and gives the rest to the button. Trimmed padding is what
+     buys the third chip its place. */
   .standard-kanji-utility-row {
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: 0.4rem;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .standard-kanji-dashboard-toggles {
+    justify-self: start;
+  }
+
+  /* The chips are a fixed 3.475rem elsewhere; three of those plus the button
+     is wider than the row, so here they give back the width the button needs
+     to keep "Show examples" on one line. */
+  .standard-kanji-dashboard-toggles .app-display-toggle {
+    width: 2.95rem;
+    min-width: 2.95rem;
+    padding-inline: 0.2rem;
+    font-size: 0.76rem;
   }
 }
 
