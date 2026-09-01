@@ -2236,19 +2236,15 @@ body:has(.dashboard) {
   justify-content: center;
   gap: 0.26rem;
   /* Matches the Mode toggle's rendered footprint, since Swap only ever appears
-     while that toggle is on and the two read as a pair.
-     Rendered, not declared: .control-story-top-toggle asks for 1.2rem and a
-     0.55rem radius, but the plain .control-story-toggle rule below it in the
-     file sets 1.7rem and a pill, and equal specificity means the later rule
-     wins. The toggle is 4.45rem x 1.7rem and fully rounded on screen, so that
-     is what this matches. Only the width lined up before. */
+     while that toggle is on and the two read as a pair: 4.45rem x 1.7rem,
+     with the same 0.55rem-radius shape as the Pick a mode button. */
   width: 4.45rem;
   min-width: 4.45rem;
   height: 1.7rem;
   box-sizing: border-box;
   padding: 0 0.38rem;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 38%, var(--border));
-  border-radius: 999px;
+  border-radius: 0.55rem;
   background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
   color: var(--sakura-light);
   font: 700 0.48rem/1 'Outfit', system-ui, sans-serif;
@@ -2395,7 +2391,10 @@ body:has(.dashboard) {
 
 .control-story-top-toggle {
   /* Sits on the first line of the topbar, pushed to the right edge; whichever
-     control hangs under it wraps to the next line — see the topbar rules. */
+     control hangs under it wraps to the next line — see the topbar rules.
+     Height/min-width/padding/border-radius here are overridden by the plain
+     .control-story-toggle rule below it in the file (equal specificity, later
+     wins) — kept in sync with it rather than removed. */
   order: 1;
   margin-left: auto;
   pointer-events: auto;
@@ -3182,7 +3181,7 @@ body:has(.dashboard) {
   height: 1.7rem;
   padding: 0 0.45rem;
   border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
-  border-radius: 999px;
+  border-radius: 0.55rem;
   background: color-mix(in srgb, var(--surface-2) 82%, transparent);
   color: var(--text-muted);
   font: 700 0.48rem/1 'Outfit', system-ui, sans-serif;
