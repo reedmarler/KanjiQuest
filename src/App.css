@@ -2235,14 +2235,12 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.26rem;
-  /* Matches the Mode toggle's rendered footprint, since Swap only ever appears
-     while that toggle is on and the two read as a pair: 4.45rem x 1.7rem,
-     with the same 0.55rem-radius shape as the Pick a mode button. */
-  width: 4.45rem;
-  min-width: 4.45rem;
+  /* Same fixed footprint as the Pick a mode and Mode-toggle buttons, so the
+     three read as one family of controls in the topbar. */
+  width: 7.25rem;
   height: 1.7rem;
   box-sizing: border-box;
-  padding: 0 0.38rem;
+  padding: 0 0.4rem;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 38%, var(--border));
   border-radius: 0.55rem;
   background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
@@ -2374,12 +2372,10 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.34rem;
-  width: fit-content;
-  min-width: 0;
-  max-width: 7.25rem;
+  width: 7.25rem;
   height: 1.7rem;
   box-sizing: border-box;
-  padding: 0 0.32rem;
+  padding: 0 0.4rem;
   border: 1px solid color-mix(in srgb, var(--rayquaza-light) 34%, var(--border));
   border-radius: 0.55rem;
   background: color-mix(in srgb, var(--rayquaza) 12%, var(--surface-2));
@@ -2392,23 +2388,13 @@ body:has(.dashboard) {
 .control-story-top-toggle {
   /* Sits on the first line of the topbar, pushed to the right edge; whichever
      control hangs under it wraps to the next line — see the topbar rules.
-     Height/min-width/padding/border-radius here are overridden by the plain
-     .control-story-toggle rule below it in the file (equal specificity, later
-     wins) — kept in sync with it rather than removed. */
+     Box model (width/height/padding/border-radius/font) comes entirely from
+     the plain .control-story-toggle rule below, which this button always
+     also carries — that's what keeps it the same fixed size as Swap and
+     Pick a mode, on and off alike. */
   order: 1;
   margin-left: auto;
   pointer-events: auto;
-  min-width: 3.65rem;
-  height: 1.2rem;
-  padding: 0 0.38rem;
-  border-radius: 0.55rem;
-  font-size: 0.5rem;
-}
-
-.control-story-top-toggle.is-active {
-  justify-content: center;
-  width: 4.45rem;
-  min-width: 4.45rem;
 }
 
 .control-story-top-toggle .control-toggle-track {
@@ -3176,10 +3162,11 @@ body:has(.dashboard) {
 .control-story-toggle {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
-  min-width: 4rem;
+  width: 7.25rem;
   height: 1.7rem;
-  padding: 0 0.45rem;
+  padding: 0 0.4rem;
   border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
   border-radius: 0.55rem;
   background: color-mix(in srgb, var(--surface-2) 82%, transparent);
