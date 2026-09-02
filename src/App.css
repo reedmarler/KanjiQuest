@@ -15127,9 +15127,12 @@ button.counter-example {
 }
 
 /* ---------------------------------------------------------------------------
-   Hiragana chart
-   A reference map into the learner: every row at a glance, any character
-   opens the learner already on that row.
+   Kana chart
+   A reference map into the learner, shared by the hiragana and katakana
+   charts: every row at a glance, any character opens the learner right on
+   that character. The left-hand mark is a per-row progress glance — an open
+   circle until every character in the row is mastered, then a checkmark —
+   not a navigation control of its own.
    --------------------------------------------------------------------------- */
 
 .hiragana-chart-page {
@@ -15175,17 +15178,18 @@ button.counter-example {
   gap: 0.5rem;
 }
 
-.hiragana-chart-row-label {
+.hiragana-chart-row-status {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
   width: 2.2rem;
   aspect-ratio: 1;
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--sakura) 16%, var(--surface-2));
-  color: var(--sakura-light);
-  font: 700 0.85rem/1 'Noto Sans JP', sans-serif;
-  text-align: center;
+  color: var(--text-muted);
+  font: 700 1.05rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.hiragana-chart-row-status.is-studied {
+  color: var(--rayquaza-light);
 }
 
 .hiragana-chart-row-chars {
@@ -15265,6 +15269,28 @@ button.counter-example {
   align-items: center;
   justify-content: flex-end;
   gap: 0.35rem;
+}
+
+.beginner-open-chart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.8rem;
+  padding: 0 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 55%, var(--border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--kyogre) 13%, transparent);
+  color: var(--kyogre-light);
+  font: 750 0.58rem/1 'Outfit', system-ui, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.beginner-open-chart:hover,
+.beginner-open-chart:focus-visible {
+  border-color: var(--kyogre-light);
+  background: color-mix(in srgb, var(--kyogre) 22%, transparent);
 }
 
 .beginner-reset-progress {

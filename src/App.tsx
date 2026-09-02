@@ -50,7 +50,7 @@ const QuestCheckpoint = lazy(() => import('./components/QuestCheckpoint').then((
 const FavoriteWordsPage = lazy(() => import('./components/FavoriteWordsPage').then((module) => ({ default: module.FavoriteWordsPage })))
 const AchievementsPanel = lazy(() => import('./components/AchievementsPanel').then((module) => ({ default: module.AchievementsPanel })))
 const BeginnerLearner = lazy(() => import('./components/BeginnerLearner').then((module) => ({ default: module.BeginnerLearner })))
-const HiraganaChart = lazy(() => import('./components/HiraganaChart').then((module) => ({ default: module.HiraganaChart })))
+const KanaChart = lazy(() => import('./components/KanaChart').then((module) => ({ default: module.KanaChart })))
 const BeginnerSpeedRun = lazy(() => import('./components/BeginnerSpeedRun').then((module) => ({ default: module.BeginnerSpeedRun })))
 const PicturePractice = lazy(() => import('./components/PicturePractice').then((module) => ({ default: module.PicturePractice })))
 
@@ -87,6 +87,7 @@ type View =
   | 'favorite-words'
   | 'beginner-zone'
   | 'hiragana-chart'
+  | 'katakana-chart'
   | 'beginner-learner'
   | 'beginner-speed-run'
   | 'picture-practice'
@@ -113,9 +114,11 @@ function App() {
   const [achievementMetrics, setAchievementMetrics] = useState(loadAchievementMetrics)
   const [practiceReturnView, setPracticeReturnView] = useState<View>('dashboard')
   const [beginnerScript, setBeginnerScript] = useState<BeginnerScript>('hiragana')
-  // Which row the learner opens on. Zero for the normal Beginner Zone tiles;
-  // set to a specific row when the hiragana chart links straight into one.
+  // Which row (and which character within it) the learner opens on. Zero for
+  // the normal Beginner Zone tiles; set to a specific character when a kana
+  // chart links straight into one.
   const [beginnerInitialRowIndex, setBeginnerInitialRowIndex] = useState(0)
+  const [beginnerInitialCharIndex, setBeginnerInitialCharIndex] = useState(0)
   const [shrineRegionId, setShrineRegionId] = useState('tsuzuri')
   const [speedRunReturnView, setSpeedRunReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools'>('dashboard')
   const [pictureReturnView, setPictureReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools'>('dashboard')
@@ -466,19 +469,23 @@ function App() {
             { mark: 'あ', title: 'Hiragana', detail: 'Learn the 46 rounded characters.', accent: 'sakura', onClick: () => {
               setBeginnerScript('hiragana')
               setBeginnerInitialRowIndex(0)
+              setBeginnerInitialCharIndex(0)
               setView('beginner-learner')
             } },
             { mark: 'ア', title: 'Katakana', detail: 'Learn the script used for foreign words.', accent: 'kyogre', onClick: () => {
               setBeginnerScript('katakana')
               setBeginnerInitialRowIndex(0)
+              setBeginnerInitialCharIndex(0)
               setView('beginner-learner')
             } },
             { mark: '一', title: 'First Kanji', detail: 'Learn 30 memorable starter kanji.', accent: 'gold', onClick: () => {
               setBeginnerScript('kanji')
               setBeginnerInitialRowIndex(0)
+              setBeginnerInitialCharIndex(0)
               setView('beginner-learner')
             } },
-            { mark: '表', title: 'Hiragana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'amber', onClick: () => setView('hiragana-chart') },
+            { mark: '表', title: 'Hiragana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'sakura', onClick: () => setView('hiragana-chart') },
+            { mark: '表', title: 'Katakana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'kyogre', onClick: () => setView('katakana-chart') },
             { mark: '絵', title: 'Picture Mode', detail: 'Match a picture to the word that names it.', accent: 'rayquaza', onClick: () => {
               setPictureReturnView('beginner-zone')
               setView('picture-practice')
@@ -494,15 +501,18 @@ function App() {
     )
   }
 
-  if (view === 'hiragana-chart') {
+  if (view === 'hiragana-chart' || view === 'katakana-chart') {
+    const chartScript = view === 'hiragana-chart' ? 'hiragana' : 'katakana'
     return (
       <div className="app">
-        <Suspense fallback={<RouteLoading label="Hiragana Chart" />}>
-          <HiraganaChart
+        <Suspense fallback={<RouteLoading label={view === 'hiragana-chart' ? 'Hiragana Chart' : 'Katakana Chart'} />}>
+          <KanaChart
+            script={chartScript}
             onBack={() => setView('beginner-zone')}
-            onSelectRow={(rowIndex) => {
-              setBeginnerScript('hiragana')
+            onSelectCharacter={(rowIndex, charIndex) => {
+              setBeginnerScript(chartScript)
               setBeginnerInitialRowIndex(rowIndex)
+              setBeginnerInitialCharIndex(charIndex)
               setView('beginner-learner')
             }}
           />
@@ -512,10 +522,18 @@ function App() {
   }
 
   if (view === 'beginner-learner') {
+    // Only hiragana and katakana have a chart to return to.
+    const chartView = beginnerScript === 'hiragana' ? 'hiragana-chart' : beginnerScript === 'katakana' ? 'katakana-chart' : null
     return (
       <div className="app">
         <Suspense fallback={<RouteLoading label="Beginner Zone" />}>
-          <BeginnerLearner script={beginnerScript} initialRowIndex={beginnerInitialRowIndex} onBack={() => setView('beginner-zone')} />
+          <BeginnerLearner
+            script={beginnerScript}
+            initialRowIndex={beginnerInitialRowIndex}
+            initialCharIndex={beginnerInitialCharIndex}
+            onBack={() => setView('beginner-zone')}
+            onOpenChart={chartView ? () => setView(chartView) : undefined}
+          />
         </Suspense>
       </div>
     )

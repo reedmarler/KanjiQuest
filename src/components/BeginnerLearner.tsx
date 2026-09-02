@@ -4,6 +4,7 @@ import { recordAnswer } from '../lib/studyRecord'
 import { hiraganaWordBank, katakanaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
 import { speakJapanese, stopSpeaking } from '../lib/speech'
 import { SPEECH_SPEEDS } from '../lib/speechSpeeds'
+import { loadNumberMap, MASTERY_STORAGE_PREFIX, MASTERY_TARGET, storageKey } from '../lib/beginnerMastery'
 import { BeginnerFinalChallenge } from './BeginnerFinalChallenge'
 import { AppBackButton } from './AppBackButton'
 import { getStrokeOrderAnimationDuration, StrokeOrderAnimation } from './StrokeOrderAnimation'
@@ -236,41 +237,18 @@ interface BeginnerLearnerProps {
   script: BeginnerScript
   onBack: () => void
   /** Opens straight into this row instead of the first one — used by the
-   *  hiragana chart, which links each character to its row in the learner. */
+   *  kana charts, which link each character to its row in the learner. */
   initialRowIndex?: number
+  /** Which character within that row to open on. The row still plays through
+   *  in full afterwards, just starting here and wrapping around — tapping つ
+   *  in the た row goes to つ, て, と, た, ち rather than jumping to た. */
+  initialCharIndex?: number
+  /** Opens the script's kana chart, when one exists (hiragana, katakana) —
+   *  a quicker way back than going through the Beginner Zone hub. */
+  onOpenChart?: () => void
 }
 
-/**
- * Mastery is per character and survives reloads, because a beginner working
- * through 46 characters will not do it in one sitting. Keyed by script so the
- * three decks never overwrite each other.
- */
-const MASTERY_STORAGE_PREFIX = 'kq-beginner-mastery-'
-
-/** How many correct recalls in a row retire a character from the row. */
-const MASTERY_TARGET = 2
-
-function storageKey(prefix: string, script: BeginnerScript) {
-  return `${prefix}${script}`
-}
-
-function loadNumberMap(key: string): Record<string, number> {
-  try {
-    const raw = window.localStorage.getItem(key)
-    if (!raw) return {}
-    const parsed: unknown = JSON.parse(raw)
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
-    // Written by us, but a hand-edited or half-written value should degrade to
-    // "not learned yet" rather than crashing the deck on open.
-    const entries = Object.entries(parsed as Record<string, unknown>)
-      .filter((entry): entry is [string, number] => typeof entry[1] === 'number' && Number.isFinite(entry[1]))
-    return Object.fromEntries(entries)
-  } catch {
-    return {}
-  }
-}
-
-export function BeginnerLearner({ script, onBack, initialRowIndex = 0 }: BeginnerLearnerProps) {
+export function BeginnerLearner({ script, onBack, initialRowIndex = 0, initialCharIndex = 0, onOpenChart }: BeginnerLearnerProps) {
   const deck = useMemo(() => getBeginnerDeck(script), [script])
   const startRowIndex = Math.min(Math.max(initialRowIndex, 0), deck.rows.length - 1)
   const [rowIndex, setRowIndex] = useState(startRowIndex)
@@ -290,10 +268,15 @@ export function BeginnerLearner({ script, onBack, initialRowIndex = 0 }: Beginne
   const [completionWritingReplay, setCompletionWritingReplay] = useState(0)
 
   const row = deck.rows[rowIndex]!
-  // The row's characters, shuffled once per row so the learner does not
-  // simply memorise the chart order instead of the characters. cardIndex
-  // walks through it; Next/Previous just move the pointer.
-  const [cards, setCards] = useState<BeginnerCharacter[]>(() => deck.rows[startRowIndex]!.characters)
+  // cardIndex walks through `cards`; Next/Previous just move the pointer.
+  // Opening from a chart tap on a specific character rotates the row to
+  // start there instead of at the row's own first character — the rest of
+  // the row still follows in its usual order, wrapping back to the start.
+  const [cards, setCards] = useState<BeginnerCharacter[]>(() => {
+    const characters = deck.rows[startRowIndex]!.characters
+    const offset = ((initialCharIndex % characters.length) + characters.length) % characters.length
+    return offset === 0 ? characters : [...characters.slice(offset), ...characters.slice(0, offset)]
+  })
   const [cardIndex, setCardIndex] = useState(0)
   const card = cards[cardIndex]
 
@@ -421,6 +404,11 @@ export function BeginnerLearner({ script, onBack, initialRowIndex = 0 }: Beginne
         <AppBackButton onClick={onBack} aria-label="Back to Beginner Zone" />
         <span className="beginner-learner-title">{deck.title}</span>
         <div className="beginner-top-tools">
+          {onOpenChart && (
+            <button type="button" className="beginner-open-chart" onClick={onOpenChart} aria-label={`Return to the ${deck.title} chart`}>
+              {deck.title} Chart
+            </button>
+          )}
           <button type="button" className="beginner-reset-progress" onClick={resetProgress} aria-label={`Reset ${deck.title} progress`}>
             Progress reset
           </button>
