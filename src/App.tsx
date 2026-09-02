@@ -119,6 +119,9 @@ function App() {
   // chart links straight into one.
   const [beginnerInitialRowIndex, setBeginnerInitialRowIndex] = useState(0)
   const [beginnerInitialCharIndex, setBeginnerInitialCharIndex] = useState(0)
+  // Where the learner's Back button goes: the hub normally, but the chart it
+  // was opened from when a kana chart is what sent the learner there.
+  const [beginnerLearnerReturnView, setBeginnerLearnerReturnView] = useState<'beginner-zone' | 'hiragana-chart' | 'katakana-chart'>('beginner-zone')
   const [shrineRegionId, setShrineRegionId] = useState('tsuzuri')
   const [speedRunReturnView, setSpeedRunReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools'>('dashboard')
   const [pictureReturnView, setPictureReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools'>('dashboard')
@@ -472,6 +475,7 @@ function App() {
               setBeginnerScript('kanji')
               setBeginnerInitialRowIndex(0)
               setBeginnerInitialCharIndex(0)
+              setBeginnerLearnerReturnView('beginner-zone')
               setView('beginner-learner')
             } },
             { mark: '絵', title: 'Picture Mode', detail: 'Match a picture to the word that names it.', accent: 'rayquaza', onClick: () => {
@@ -501,6 +505,7 @@ function App() {
               setBeginnerScript(chartScript)
               setBeginnerInitialRowIndex(rowIndex)
               setBeginnerInitialCharIndex(charIndex)
+              setBeginnerLearnerReturnView(view)
               setView('beginner-learner')
             }}
           />
@@ -519,8 +524,9 @@ function App() {
             script={beginnerScript}
             initialRowIndex={beginnerInitialRowIndex}
             initialCharIndex={beginnerInitialCharIndex}
-            onBack={() => setView('beginner-zone')}
+            onBack={() => setView(beginnerLearnerReturnView)}
             onOpenChart={chartView ? () => setView(chartView) : undefined}
+            onDashboard={() => setView('dashboard')}
           />
         </Suspense>
       </div>

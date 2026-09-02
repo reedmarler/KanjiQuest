@@ -6,7 +6,7 @@ import { speakJapanese, stopSpeaking } from '../lib/speech'
 import { SPEECH_SPEEDS } from '../lib/speechSpeeds'
 import { loadNumberMap, MASTERY_STORAGE_PREFIX, MASTERY_TARGET, storageKey } from '../lib/beginnerMastery'
 import { BeginnerFinalChallenge } from './BeginnerFinalChallenge'
-import { AppBackButton } from './AppBackButton'
+import { AppBackButton, AppDashboardButton } from './AppBackButton'
 import { getStrokeOrderAnimationDuration, StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { TraceCanvas } from './TraceCanvas'
 
@@ -236,6 +236,7 @@ function meaningOverlay(word: UnderstandingWord) {
 interface BeginnerLearnerProps {
   script: BeginnerScript
   onBack: () => void
+  onDashboard: () => void
   /** Opens straight into this row instead of the first one — used by the
    *  kana charts, which link each character to its row in the learner. */
   initialRowIndex?: number
@@ -248,7 +249,7 @@ interface BeginnerLearnerProps {
   onOpenChart?: () => void
 }
 
-export function BeginnerLearner({ script, onBack, initialRowIndex = 0, initialCharIndex = 0, onOpenChart }: BeginnerLearnerProps) {
+export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex = 0, initialCharIndex = 0, onOpenChart }: BeginnerLearnerProps) {
   const deck = useMemo(() => getBeginnerDeck(script), [script])
   const startRowIndex = Math.min(Math.max(initialRowIndex, 0), deck.rows.length - 1)
   const [rowIndex, setRowIndex] = useState(startRowIndex)
@@ -401,7 +402,10 @@ export function BeginnerLearner({ script, onBack, initialRowIndex = 0, initialCh
   return (
     <div className={`beginner-learner beginner-learner--${script}`}>
       <div className="beginner-learner-top">
-        <AppBackButton onClick={onBack} aria-label="Back to Beginner Zone" />
+        <div className="app-nav-actions">
+          <AppBackButton onClick={onBack} aria-label="Back" />
+          <AppDashboardButton onClick={onDashboard} />
+        </div>
         <span className="beginner-learner-title">{deck.title}</span>
         <div className="beginner-top-tools">
           {onOpenChart && (
