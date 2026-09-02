@@ -15127,6 +15127,110 @@ button.counter-example {
 }
 
 /* ---------------------------------------------------------------------------
+   Hiragana chart
+   A reference map into the learner: every row at a glance, any character
+   opens the learner already on that row.
+   --------------------------------------------------------------------------- */
+
+.hiragana-chart-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: min(100%, 34rem);
+  margin-inline: auto;
+  padding: 0.2rem 0 1.5rem;
+}
+
+@media (min-width: 720px) {
+  .hiragana-chart-page {
+    width: min(100%, 44rem);
+  }
+}
+
+.hiragana-chart-heading {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.4rem 0.1rem 0.1rem;
+}
+
+.hiragana-chart-heading h1 {
+  color: var(--text);
+  font: 800 1.3rem/1.2 'Outfit', system-ui, sans-serif;
+}
+
+.hiragana-chart-heading p {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.hiragana-chart-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hiragana-chart-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hiragana-chart-row-label {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  aspect-ratio: 1;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--sakura) 16%, var(--surface-2));
+  color: var(--sakura-light);
+  font: 700 0.85rem/1 'Noto Sans JP', sans-serif;
+  text-align: center;
+}
+
+.hiragana-chart-row-chars {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1;
+  gap: 0.35rem;
+}
+
+.hiragana-chart-cell {
+  display: grid;
+  place-items: center;
+  gap: 0.05rem;
+  width: 2.9rem;
+  height: 2.9rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, transform 100ms ease;
+}
+
+.hiragana-chart-cell:hover,
+.hiragana-chart-cell:focus-visible {
+  border-color: var(--sakura-light);
+  background: color-mix(in srgb, var(--sakura) 12%, var(--surface-2));
+}
+
+.hiragana-chart-cell:active {
+  transform: scale(0.95);
+}
+
+.hiragana-chart-cell-char {
+  font: 700 1.15rem/1 'Noto Sans JP', sans-serif;
+}
+
+.hiragana-chart-cell-romaji {
+  color: var(--text-muted);
+  font-size: 0.5rem;
+  text-transform: lowercase;
+}
+
+/* ---------------------------------------------------------------------------
    Beginner zone
    The learner is deliberately sparse: one huge character, one mnemonic, two
    buttons. Absolute beginners are the audience, so nothing competes with the
@@ -15559,6 +15663,12 @@ button.counter-example {
   text-transform: uppercase;
 }
 
+.beginner-listening-check-hint {
+  margin-top: -0.5rem;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+}
+
 .beginner-listening-options {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -15611,6 +15721,16 @@ button.counter-example {
 
 .beginner-listening-options button span[data-kana-count="4"] {
   font-size: 1.2rem;
+}
+
+/* Only shown once an option is picked — the meaning is feedback on the
+   listening check just answered, not a hint offered up front. */
+.beginner-listening-option-meaning {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+  font: 600 0.52rem/1.2 'Outfit', system-ui, sans-serif;
+  text-transform: capitalize;
 }
 
 .beginner-listening-continue {
@@ -15682,20 +15802,20 @@ button.counter-example {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  width: min(70%, 18rem);
+  gap: 0.4rem;
+  width: min(80%, 20rem);
   margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
-  font-size: clamp(0.9rem, 2.3vw, 1.15rem);
+  font-size: clamp(1.15rem, 3vw, 1.55rem);
   line-height: 1.1;
 }
 
 .beginner-quiz-picture {
   flex: 0 0 auto;
-  font: 700 1.05rem/1 'Noto Color Emoji', 'Segoe UI Emoji', 'Outfit', system-ui, sans-serif;
+  font: 700 1.35rem/1 'Noto Color Emoji', 'Segoe UI Emoji', 'Outfit', system-ui, sans-serif;
 }
 
 /* Same wrapper, for the plain flashcard's hiragana display rather than the

@@ -2,16 +2,20 @@ import { useEffect, useMemo, useState } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
 import { recordAnswer } from '../lib/studyRecord'
 import { hiraganaWordBank, katakanaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
-import { speakJapanese } from '../lib/speech'
+import { speakJapanese, stopSpeaking } from '../lib/speech'
 import { SPEECH_SPEEDS } from '../lib/speechSpeeds'
 import { BeginnerFinalChallenge } from './BeginnerFinalChallenge'
 import { AppBackButton } from './AppBackButton'
 import { getStrokeOrderAnimationDuration, StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { TraceCanvas } from './TraceCanvas'
 
-/** How many words the writing part of a row quiz shows between its two
- *  listen-and-select questions. */
+/** How many words the writing part of a row quiz shows. */
 const QUIZ_TRACE_WORDS = 2
+
+/** How many listen-and-select questions a row quiz asks, before the writing
+ *  part. Drawn independently of the trace words below, so the two parts of
+ *  the quiz do not have to share one small pool. */
+const QUIZ_LISTENING_WORDS = 5
 
 /** Every listen button in this view forces the browser's own voice rather
  *  than the app's usual ElevenLabs clips — the hosted voice, tuned for
@@ -177,14 +181,24 @@ function shuffled<T>(items: readonly T[]) {
 
 /** Words usable once `rows[0..rowIndex]` are learned, preferring ones that
  *  actually exercise a character from the row just finished so the quiz
- *  tests new content rather than only what was already known. */
-function pickQuizWords(rows: { characters: BeginnerCharacter[] }[], rowIndex: number, wordBank: readonly UnderstandingWord[]): UnderstandingWord[] {
+ *  tests new content rather than only what was already known. Always
+ *  returns exactly `count` words: an early row can have fewer than `count`
+ *  distinct eligible words, so once the pool is exhausted this tops up by
+ *  cycling back through it rather than shortchanging the quiz. */
+function pickQuizWords(
+  rows: { characters: BeginnerCharacter[] }[],
+  rowIndex: number,
+  wordBank: readonly UnderstandingWord[],
+  count: number,
+): UnderstandingWord[] {
   const available = new Set(rows.slice(0, rowIndex + 1).flatMap((r) => r.characters.map((c) => c.char)))
   const newChars = new Set(rows[rowIndex]!.characters.map((c) => c.char))
   const eligible = wordBank.filter((entry) => [...entry.word].every((ch) => available.has(ch)))
   const preferred = eligible.filter((entry) => [...entry.word].some((ch) => newChars.has(ch)))
-  const pool = preferred.length >= QUIZ_TRACE_WORDS + 1 ? preferred : eligible
-  return shuffled(pool).slice(0, QUIZ_TRACE_WORDS + 1)
+  const pool = shuffled(preferred.length >= count ? preferred : eligible)
+  if (pool.length === 0) return []
+  if (pool.length >= count) return pool.slice(0, count)
+  return Array.from({ length: count }, (_, index) => pool[index % pool.length]!)
 }
 
 function BeginnerWordExample({
@@ -221,6 +235,9 @@ function meaningOverlay(word: UnderstandingWord) {
 interface BeginnerLearnerProps {
   script: BeginnerScript
   onBack: () => void
+  /** Opens straight into this row instead of the first one — used by the
+   *  hiragana chart, which links each character to its row in the learner. */
+  initialRowIndex?: number
 }
 
 /**
@@ -253,17 +270,19 @@ function loadNumberMap(key: string): Record<string, number> {
   }
 }
 
-export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
+export function BeginnerLearner({ script, onBack, initialRowIndex = 0 }: BeginnerLearnerProps) {
   const deck = useMemo(() => getBeginnerDeck(script), [script])
-  const [rowIndex, setRowIndex] = useState(0)
+  const startRowIndex = Math.min(Math.max(initialRowIndex, 0), deck.rows.length - 1)
+  const [rowIndex, setRowIndex] = useState(startRowIndex)
   const [mastery, setMastery] = useState<Record<string, number>>(() => loadNumberMap(storageKey(MASTERY_STORAGE_PREFIX, script)))
   // Rows the learner has already passed a quiz for, this session — not
   // persisted, so returning later re-quizzes a row, which is fine practice.
   const [quizzedRows, setQuizzedRows] = useState<Record<number, boolean>>({})
   const [challengeOpen, setChallengeOpen] = useState(false)
-  const [quizWords, setQuizWords] = useState<UnderstandingWord[] | null>(null)
+  const [quizListeningWords, setQuizListeningWords] = useState<UnderstandingWord[] | null>(null)
+  const [quizTraceWords, setQuizTraceWords] = useState<UnderstandingWord[]>([])
   const [quizPhase, setQuizPhase] = useState<'listening' | 'trace'>('listening')
-  const [listeningQuestionIndex, setListeningQuestionIndex] = useState(0)
+  const [listeningIndex, setListeningIndex] = useState(0)
   const [quizTraceIndex, setQuizTraceIndex] = useState(0)
   const [quizRevealed, setQuizRevealed] = useState(false)
   const [listeningOptions, setListeningOptions] = useState<UnderstandingWord[]>([])
@@ -274,7 +293,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   // The row's characters, shuffled once per row so the learner does not
   // simply memorise the chart order instead of the characters. cardIndex
   // walks through it; Next/Previous just move the pointer.
-  const [cards, setCards] = useState<BeginnerCharacter[]>(() => deck.rows[0]!.characters)
+  const [cards, setCards] = useState<BeginnerCharacter[]>(() => deck.rows[startRowIndex]!.characters)
   const [cardIndex, setCardIndex] = useState(0)
   const card = cards[cardIndex]
 
@@ -286,7 +305,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
     setRowIndex(index)
     setCards(deck.rows[index]!.characters)
     setCardIndex(0)
-    setQuizWords(null)
+    setQuizListeningWords(null)
     setCompletionWritingReplay(0)
   }
 
@@ -299,11 +318,12 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
             meaning: character.meaning ?? character.romaji,
           })))
         : hiraganaWordBank
-    const pickedWords = pickQuizWords(deck.rows, index, wordBank)
-    setQuizWords(pickedWords)
-    setListeningOptions(shuffled(pickedWords))
+    const listeningWords = pickQuizWords(deck.rows, index, wordBank, QUIZ_LISTENING_WORDS)
+    setQuizListeningWords(listeningWords)
+    setQuizTraceWords(pickQuizWords(deck.rows, index, wordBank, QUIZ_TRACE_WORDS))
+    setListeningOptions(shuffled(listeningWords))
     setListeningChoice(null)
-    setListeningQuestionIndex(0)
+    setListeningIndex(0)
     setQuizPhase('listening')
     setQuizTraceIndex(0)
     setQuizRevealed(false)
@@ -313,7 +333,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   function advanceQuizTrace() {
     setQuizRevealed(false)
     const next = quizTraceIndex + 1
-    if (next >= (quizWords?.length ?? 1) - 1) finishQuiz()
+    if (next >= quizTraceWords.length) finishQuiz()
     else setQuizTraceIndex(next)
   }
 
@@ -324,7 +344,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
 
   function finishQuiz() {
     setQuizzedRows((current) => ({ ...current, [rowIndex]: true }))
-    setQuizWords(null)
+    setQuizListeningWords(null)
   }
 
   function resetProgress() {
@@ -356,11 +376,44 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
   const rowComplete = cardIndex >= cards.length
   const nextRowIndex = rowIndex + 1 < deck.rows.length ? rowIndex + 1 : null
   const rowNeedsQuiz = !quizzedRows[rowIndex]
-  const traceWords = quizWords?.slice(0, -1) ?? []
-  const currentTraceWord = traceWords[quizTraceIndex]
-  const listeningWord = listeningQuestionIndex === 1
-    ? quizWords?.[quizWords.length - 1] ?? null
-    : quizWords?.[0] ?? null
+  const currentTraceWord = quizTraceWords[quizTraceIndex]
+  const listeningWord = quizListeningWords?.[listeningIndex] ?? null
+
+  // Every screen that centres on hearing one word or character plays it the
+  // moment it lands, instead of making a beginner hunt for the speaker
+  // button first — the button stays, for replays.
+  useEffect(() => {
+    if (quizListeningWords || rowComplete || !card) return
+    speakJapanese(card.char, {
+      rate: SINGLE_CHARACTER_SPEECH_RATE,
+      forceBrowser: true,
+      beginnerRecordingKind: 'kana',
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [card?.char, quizListeningWords, rowComplete])
+
+  useEffect(() => {
+    if (quizPhase !== 'listening' || !listeningWord) return
+    speakJapanese(listeningWord.word, {
+      rate: SPEECH_SPEEDS.learning,
+      forceBrowser: true,
+      beginnerRecordingKind: 'word',
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quizPhase, listeningWord?.word, listeningIndex])
+
+  useEffect(() => {
+    if (quizPhase !== 'trace' || !currentTraceWord) return
+    speakJapanese(currentTraceWord.word, {
+      rate: SPEECH_SPEEDS.learning,
+      forceBrowser: true,
+      beginnerRecordingKind: 'word',
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quizPhase, currentTraceWord?.word, quizTraceIndex])
+
+  // Leaving the learner mid-word should not keep talking.
+  useEffect(() => stopSpeaking, [])
 
   return (
     <div className={`beginner-learner beginner-learner--${script}`}>
@@ -397,10 +450,13 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
 
       {challengeOpen ? (
         <BeginnerFinalChallenge deck={deck} onExit={() => { setChallengeOpen(false); openRow(0) }} />
-      ) : quizWords ? (
+      ) : quizListeningWords ? (
         quizPhase === 'listening' && listeningWord ? (
           <main className="beginner-card beginner-listening-check">
-            <span className="beginner-listening-check-label">Listening word</span>
+            <span className="beginner-listening-check-label">
+              Listening word {listeningIndex + 1} of {quizListeningWords.length}
+            </span>
+            <p className="beginner-listening-check-hint">Listen, then tap the word you heard.</p>
             <button
               type="button"
               className="beginner-speak-btn beginner-speak-btn--quiz"
@@ -418,6 +474,10 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               {listeningOptions.map((option) => {
                 const selected = listeningChoice === option.word
                 const correct = option.word === listeningWord.word
+                // The meaning stays hidden until an answer is made — this is
+                // a listening check first, a vocabulary one second — then
+                // shows on every option as feedback for what was heard.
+                const revealed = listeningChoice !== null
                 return (
                   <button
                     key={option.word}
@@ -427,6 +487,7 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
                     aria-pressed={selected}
                   >
                     <span lang="ja" data-kana-count={Math.min([...option.word].length, 4)}>{option.word}</span>
+                    {revealed && <small className="beginner-listening-option-meaning">{option.meaning}</small>}
                   </button>
                 )
               })}
@@ -436,17 +497,18 @@ export function BeginnerLearner({ script, onBack }: BeginnerLearnerProps) {
               className="btn btn-primary beginner-listening-continue"
               disabled={listeningChoice !== listeningWord.word}
               onClick={() => {
-                if (listeningQuestionIndex === 0) {
+                const next = listeningIndex + 1
+                if (next < quizListeningWords.length) {
                   setListeningChoice(null)
-                  setListeningOptions(shuffled(quizWords))
-                  setListeningQuestionIndex(1)
+                  setListeningOptions(shuffled(quizListeningWords))
+                  setListeningIndex(next)
                 } else {
                   setListeningChoice(null)
                   setQuizPhase('trace')
                 }
               }}
             >
-              {listeningQuestionIndex === 0 ? 'Next listening word' : 'Continue to writing'} &rarr;
+              {listeningIndex + 1 < quizListeningWords.length ? 'Next listening word' : 'Continue to writing'} &rarr;
             </button>
           </main>
         ) : quizPhase === 'trace' && currentTraceWord ? (
