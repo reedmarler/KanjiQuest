@@ -2236,8 +2236,11 @@ body:has(.dashboard) {
   justify-content: center;
   gap: 0.26rem;
   /* Same fixed footprint as the Pick a mode and Mode-toggle buttons, so the
-     three read as one family of controls in the topbar. */
-  width: 7.25rem;
+     three read as one family of controls in the topbar. Sized to the widest
+     of the three's typical label ("Choose focus"), not the widest possible
+     one — an outlier like "Auxiliary Verbs" or a long story title still
+     truncates with an ellipsis rather than stretching every button further. */
+  width: 6.25rem;
   height: 1.7rem;
   box-sizing: border-box;
   padding: 0 0.4rem;
@@ -2372,7 +2375,7 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.34rem;
-  width: 7.25rem;
+  width: 6.25rem;
   height: 1.7rem;
   box-sizing: border-box;
   padding: 0 0.4rem;
@@ -3164,7 +3167,7 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  width: 7.25rem;
+  width: 6.25rem;
   height: 1.7rem;
   padding: 0 0.4rem;
   border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
