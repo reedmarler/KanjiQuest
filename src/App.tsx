@@ -466,26 +466,14 @@ function App() {
           description="Learn Japanese through memorable character pictures."
           onBack={() => setView('dashboard')}
           tools={[
-            { mark: 'あ', title: 'Hiragana', detail: 'Learn the 46 rounded characters.', accent: 'sakura', onClick: () => {
-              setBeginnerScript('hiragana')
-              setBeginnerInitialRowIndex(0)
-              setBeginnerInitialCharIndex(0)
-              setView('beginner-learner')
-            } },
-            { mark: 'ア', title: 'Katakana', detail: 'Learn the script used for foreign words.', accent: 'kyogre', onClick: () => {
-              setBeginnerScript('katakana')
-              setBeginnerInitialRowIndex(0)
-              setBeginnerInitialCharIndex(0)
-              setView('beginner-learner')
-            } },
+            { mark: 'あ', title: 'Hiragana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'sakura', onClick: () => setView('hiragana-chart') },
+            { mark: 'ア', title: 'Katakana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'kyogre', onClick: () => setView('katakana-chart') },
             { mark: '一', title: 'First Kanji', detail: 'Learn 30 memorable starter kanji.', accent: 'gold', onClick: () => {
               setBeginnerScript('kanji')
               setBeginnerInitialRowIndex(0)
               setBeginnerInitialCharIndex(0)
               setView('beginner-learner')
             } },
-            { mark: '表', title: 'Hiragana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'sakura', onClick: () => setView('hiragana-chart') },
-            { mark: '表', title: 'Katakana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'kyogre', onClick: () => setView('katakana-chart') },
             { mark: '絵', title: 'Picture Mode', detail: 'Match a picture to the word that names it.', accent: 'rayquaza', onClick: () => {
               setPictureReturnView('beginner-zone')
               setView('picture-practice')
