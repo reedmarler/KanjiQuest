@@ -202,6 +202,111 @@ const hiraganaRows: BeginnerRow[] = [
       { char: 'ぽ', romaji: 'po', mnemonic: 'Add the small circle to ほ: "ho" pops into "po".' },
     ],
   },
+  /*
+   * Yōon: an -i row kana with a small や/ゆ/よ tucked beside it, collapsing
+   * the two into one syllable — きい followed by や read separately is not
+   * this, きゃ said as one beat is. The rule, not a new picture, is the
+   * mnemonic here, same as the dakuten and handakuten rows above it.
+   */
+  {
+    id: 'hiragana-kya',
+    label: 'きゃ',
+    characters: [
+      { char: 'きゃ', romaji: 'kya', mnemonic: 'き with a small や tucked beside it: "ki" glides into one beat, "kya".' },
+      { char: 'きゅ', romaji: 'kyu', mnemonic: 'き with a small ゆ tucked beside it: "ki" glides into one beat, "kyu".' },
+      { char: 'きょ', romaji: 'kyo', mnemonic: 'き with a small よ tucked beside it: "ki" glides into one beat, "kyo".' },
+    ],
+  },
+  {
+    id: 'hiragana-sha',
+    label: 'しゃ',
+    characters: [
+      { char: 'しゃ', romaji: 'sha', mnemonic: 'し with a small や tucked beside it: "shi" glides into one beat, "sha".' },
+      { char: 'しゅ', romaji: 'shu', mnemonic: 'し with a small ゆ tucked beside it: "shi" glides into one beat, "shu".' },
+      { char: 'しょ', romaji: 'sho', mnemonic: 'し with a small よ tucked beside it: "shi" glides into one beat, "sho".' },
+    ],
+  },
+  {
+    id: 'hiragana-cha',
+    label: 'ちゃ',
+    characters: [
+      { char: 'ちゃ', romaji: 'cha', mnemonic: 'ち with a small や tucked beside it: "chi" glides into one beat, "cha".' },
+      { char: 'ちゅ', romaji: 'chu', mnemonic: 'ち with a small ゆ tucked beside it: "chi" glides into one beat, "chu".' },
+      { char: 'ちょ', romaji: 'cho', mnemonic: 'ち with a small よ tucked beside it: "chi" glides into one beat, "cho".' },
+    ],
+  },
+  {
+    id: 'hiragana-nya',
+    label: 'にゃ',
+    characters: [
+      { char: 'にゃ', romaji: 'nya', mnemonic: 'に with a small や tucked beside it: "ni" glides into one beat, "nya".' },
+      { char: 'にゅ', romaji: 'nyu', mnemonic: 'に with a small ゆ tucked beside it: "ni" glides into one beat, "nyu".' },
+      { char: 'にょ', romaji: 'nyo', mnemonic: 'に with a small よ tucked beside it: "ni" glides into one beat, "nyo".' },
+    ],
+  },
+  {
+    id: 'hiragana-hya',
+    label: 'ひゃ',
+    characters: [
+      { char: 'ひゃ', romaji: 'hya', mnemonic: 'ひ with a small や tucked beside it: "hi" glides into one beat, "hya".' },
+      { char: 'ひゅ', romaji: 'hyu', mnemonic: 'ひ with a small ゆ tucked beside it: "hi" glides into one beat, "hyu".' },
+      { char: 'ひょ', romaji: 'hyo', mnemonic: 'ひ with a small よ tucked beside it: "hi" glides into one beat, "hyo".' },
+    ],
+  },
+  {
+    id: 'hiragana-mya',
+    label: 'みゃ',
+    characters: [
+      { char: 'みゃ', romaji: 'mya', mnemonic: 'み with a small や tucked beside it: "mi" glides into one beat, "mya".' },
+      { char: 'みゅ', romaji: 'myu', mnemonic: 'み with a small ゆ tucked beside it: "mi" glides into one beat, "myu".' },
+      { char: 'みょ', romaji: 'myo', mnemonic: 'み with a small よ tucked beside it: "mi" glides into one beat, "myo".' },
+    ],
+  },
+  {
+    id: 'hiragana-rya',
+    label: 'りゃ',
+    characters: [
+      { char: 'りゃ', romaji: 'rya', mnemonic: 'り with a small や tucked beside it: "ri" glides into one beat, "rya".' },
+      { char: 'りゅ', romaji: 'ryu', mnemonic: 'り with a small ゆ tucked beside it: "ri" glides into one beat, "ryu".' },
+      { char: 'りょ', romaji: 'ryo', mnemonic: 'り with a small よ tucked beside it: "ri" glides into one beat, "ryo".' },
+    ],
+  },
+  {
+    id: 'hiragana-gya',
+    label: 'ぎゃ',
+    characters: [
+      { char: 'ぎゃ', romaji: 'gya', mnemonic: 'ぎ with a small や tucked beside it: the voiced "gi" glides into one beat, "gya".' },
+      { char: 'ぎゅ', romaji: 'gyu', mnemonic: 'ぎ with a small ゆ tucked beside it: the voiced "gi" glides into one beat, "gyu".' },
+      { char: 'ぎょ', romaji: 'gyo', mnemonic: 'ぎ with a small よ tucked beside it: the voiced "gi" glides into one beat, "gyo".' },
+    ],
+  },
+  {
+    id: 'hiragana-ja',
+    label: 'じゃ',
+    characters: [
+      { char: 'じゃ', romaji: 'ja', mnemonic: 'じ with a small や tucked beside it: the voiced "ji" glides into one beat, "ja".' },
+      { char: 'じゅ', romaji: 'ju', mnemonic: 'じ with a small ゆ tucked beside it: the voiced "ji" glides into one beat, "ju".' },
+      { char: 'じょ', romaji: 'jo', mnemonic: 'じ with a small よ tucked beside it: the voiced "ji" glides into one beat, "jo".' },
+    ],
+  },
+  {
+    id: 'hiragana-bya',
+    label: 'びゃ',
+    characters: [
+      { char: 'びゃ', romaji: 'bya', mnemonic: 'び with a small や tucked beside it: the voiced "bi" glides into one beat, "bya".' },
+      { char: 'びゅ', romaji: 'byu', mnemonic: 'び with a small ゆ tucked beside it: the voiced "bi" glides into one beat, "byu".' },
+      { char: 'びょ', romaji: 'byo', mnemonic: 'び with a small よ tucked beside it: the voiced "bi" glides into one beat, "byo".' },
+    ],
+  },
+  {
+    id: 'hiragana-pya',
+    label: 'ぴゃ',
+    characters: [
+      { char: 'ぴゃ', romaji: 'pya', mnemonic: 'ぴ with a small や tucked beside it: the popped "pi" glides into one beat, "pya".' },
+      { char: 'ぴゅ', romaji: 'pyu', mnemonic: 'ぴ with a small ゆ tucked beside it: the popped "pi" glides into one beat, "pyu".' },
+      { char: 'ぴょ', romaji: 'pyo', mnemonic: 'ぴ with a small よ tucked beside it: the popped "pi" glides into one beat, "pyo".' },
+    ],
+  },
 ]
 
 const katakanaRows: BeginnerRow[] = [
@@ -364,6 +469,107 @@ const katakanaRows: BeginnerRow[] = [
       { char: 'プ', romaji: 'pu', mnemonic: 'Add the small circle to フ: "fu" pops into "pu".' },
       { char: 'ペ', romaji: 'pe', mnemonic: 'Add the small circle to ヘ: "he" pops into "pe".' },
       { char: 'ポ', romaji: 'po', mnemonic: 'Add the small circle to ホ: "ho" pops into "po".' },
+    ],
+  },
+  /* Same yōon rule as the hiragana set — an -i row kana with a small
+     ャ/ュ/ョ tucked beside it, collapsing the two into one beat. */
+  {
+    id: 'katakana-kya',
+    label: 'キャ',
+    characters: [
+      { char: 'キャ', romaji: 'kya', mnemonic: 'キ with a small ャ tucked beside it: "ki" glides into one beat, "kya".' },
+      { char: 'キュ', romaji: 'kyu', mnemonic: 'キ with a small ュ tucked beside it: "ki" glides into one beat, "kyu".' },
+      { char: 'キョ', romaji: 'kyo', mnemonic: 'キ with a small ョ tucked beside it: "ki" glides into one beat, "kyo".' },
+    ],
+  },
+  {
+    id: 'katakana-sha',
+    label: 'シャ',
+    characters: [
+      { char: 'シャ', romaji: 'sha', mnemonic: 'シ with a small ャ tucked beside it: "shi" glides into one beat, "sha".' },
+      { char: 'シュ', romaji: 'shu', mnemonic: 'シ with a small ュ tucked beside it: "shi" glides into one beat, "shu".' },
+      { char: 'ショ', romaji: 'sho', mnemonic: 'シ with a small ョ tucked beside it: "shi" glides into one beat, "sho".' },
+    ],
+  },
+  {
+    id: 'katakana-cha',
+    label: 'チャ',
+    characters: [
+      { char: 'チャ', romaji: 'cha', mnemonic: 'チ with a small ャ tucked beside it: "chi" glides into one beat, "cha".' },
+      { char: 'チュ', romaji: 'chu', mnemonic: 'チ with a small ュ tucked beside it: "chi" glides into one beat, "chu".' },
+      { char: 'チョ', romaji: 'cho', mnemonic: 'チ with a small ョ tucked beside it: "chi" glides into one beat, "cho".' },
+    ],
+  },
+  {
+    id: 'katakana-nya',
+    label: 'ニャ',
+    characters: [
+      { char: 'ニャ', romaji: 'nya', mnemonic: 'ニ with a small ャ tucked beside it: "ni" glides into one beat, "nya".' },
+      { char: 'ニュ', romaji: 'nyu', mnemonic: 'ニ with a small ュ tucked beside it: "ni" glides into one beat, "nyu".' },
+      { char: 'ニョ', romaji: 'nyo', mnemonic: 'ニ with a small ョ tucked beside it: "ni" glides into one beat, "nyo".' },
+    ],
+  },
+  {
+    id: 'katakana-hya',
+    label: 'ヒャ',
+    characters: [
+      { char: 'ヒャ', romaji: 'hya', mnemonic: 'ヒ with a small ャ tucked beside it: "hi" glides into one beat, "hya".' },
+      { char: 'ヒュ', romaji: 'hyu', mnemonic: 'ヒ with a small ュ tucked beside it: "hi" glides into one beat, "hyu".' },
+      { char: 'ヒョ', romaji: 'hyo', mnemonic: 'ヒ with a small ョ tucked beside it: "hi" glides into one beat, "hyo".' },
+    ],
+  },
+  {
+    id: 'katakana-mya',
+    label: 'ミャ',
+    characters: [
+      { char: 'ミャ', romaji: 'mya', mnemonic: 'ミ with a small ャ tucked beside it: "mi" glides into one beat, "mya".' },
+      { char: 'ミュ', romaji: 'myu', mnemonic: 'ミ with a small ュ tucked beside it: "mi" glides into one beat, "myu".' },
+      { char: 'ミョ', romaji: 'myo', mnemonic: 'ミ with a small ョ tucked beside it: "mi" glides into one beat, "myo".' },
+    ],
+  },
+  {
+    id: 'katakana-rya',
+    label: 'リャ',
+    characters: [
+      { char: 'リャ', romaji: 'rya', mnemonic: 'リ with a small ャ tucked beside it: "ri" glides into one beat, "rya".' },
+      { char: 'リュ', romaji: 'ryu', mnemonic: 'リ with a small ュ tucked beside it: "ri" glides into one beat, "ryu".' },
+      { char: 'リョ', romaji: 'ryo', mnemonic: 'リ with a small ョ tucked beside it: "ri" glides into one beat, "ryo".' },
+    ],
+  },
+  {
+    id: 'katakana-gya',
+    label: 'ギャ',
+    characters: [
+      { char: 'ギャ', romaji: 'gya', mnemonic: 'ギ with a small ャ tucked beside it: the voiced "gi" glides into one beat, "gya".' },
+      { char: 'ギュ', romaji: 'gyu', mnemonic: 'ギ with a small ュ tucked beside it: the voiced "gi" glides into one beat, "gyu".' },
+      { char: 'ギョ', romaji: 'gyo', mnemonic: 'ギ with a small ョ tucked beside it: the voiced "gi" glides into one beat, "gyo".' },
+    ],
+  },
+  {
+    id: 'katakana-ja',
+    label: 'ジャ',
+    characters: [
+      { char: 'ジャ', romaji: 'ja', mnemonic: 'ジ with a small ャ tucked beside it: the voiced "ji" glides into one beat, "ja".' },
+      { char: 'ジュ', romaji: 'ju', mnemonic: 'ジ with a small ュ tucked beside it: the voiced "ji" glides into one beat, "ju".' },
+      { char: 'ジョ', romaji: 'jo', mnemonic: 'ジ with a small ョ tucked beside it: the voiced "ji" glides into one beat, "jo".' },
+    ],
+  },
+  {
+    id: 'katakana-bya',
+    label: 'ビャ',
+    characters: [
+      { char: 'ビャ', romaji: 'bya', mnemonic: 'ビ with a small ャ tucked beside it: the voiced "bi" glides into one beat, "bya".' },
+      { char: 'ビュ', romaji: 'byu', mnemonic: 'ビ with a small ュ tucked beside it: the voiced "bi" glides into one beat, "byu".' },
+      { char: 'ビョ', romaji: 'byo', mnemonic: 'ビ with a small ョ tucked beside it: the voiced "bi" glides into one beat, "byo".' },
+    ],
+  },
+  {
+    id: 'katakana-pya',
+    label: 'ピャ',
+    characters: [
+      { char: 'ピャ', romaji: 'pya', mnemonic: 'ピ with a small ャ tucked beside it: the popped "pi" glides into one beat, "pya".' },
+      { char: 'ピュ', romaji: 'pyu', mnemonic: 'ピ with a small ュ tucked beside it: the popped "pi" glides into one beat, "pyu".' },
+      { char: 'ピョ', romaji: 'pyo', mnemonic: 'ピ with a small ョ tucked beside it: the popped "pi" glides into one beat, "pyo".' },
     ],
   },
 ]
