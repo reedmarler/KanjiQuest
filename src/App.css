@@ -15485,14 +15485,6 @@ button.counter-example {
   background: var(--preview-page-bg);
 }
 
-/* The build-number badge lives outside #root so it stays a fixed corner
-   mark regardless of the app's own zoom (see index.html) — it can't be
-   hidden by unmounting it from React, so this reaches it from here instead.
-   Only while あ's preview is on screen; every other screen still shows it. */
-body:has(.beginner-learner--preview-a) #build-badge {
-  display: none;
-}
-
 /* A dark palette for the same layout, toggled by the badge button in place
    of the reference image's streak counter — swaps only the custom
    properties above, so every rule below picks it up automatically. */
