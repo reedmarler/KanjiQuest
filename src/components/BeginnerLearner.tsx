@@ -708,7 +708,11 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             </button>
 
             <div className="preview-a-write">
-              <TraceCanvas key={card.char} char={card.char} />
+              {/* compactSingleCharacter keeps this closer to the read card's
+                  height above it, matching the reference image — without it,
+                  a lone character's trace box defaults to a much larger
+                  square meant for the main (non-preview) writing lesson. */}
+              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter />
             </div>
 
             <div className="preview-a-nav">

@@ -15646,8 +15646,12 @@ body:has(.beginner-learner--preview-a) #build-badge {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.6rem;
-  padding: 2.4rem 1rem 1.6rem;
+  justify-content: center;
+  gap: 0.8rem;
+  /* Matches the write card's height below it (both close to 4:5 against
+     their shared width), same as the reference image — it was noticeably
+     shorter before. */
+  padding: 2.8rem 1rem 2rem;
   border: 0;
   border-radius: 22px;
   background: var(--preview-card-bg);
@@ -15661,7 +15665,7 @@ body:has(.beginner-learner--preview-a) #build-badge {
 }
 
 .preview-a-glyph {
-  font: 400 clamp(7rem, 24vw, 10rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  font: 400 clamp(9rem, 24vw, 10rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
   background: linear-gradient(160deg, var(--preview-glyph-1), var(--preview-glyph-2));
   background-clip: text;
   -webkit-background-clip: text;
