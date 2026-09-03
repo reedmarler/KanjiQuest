@@ -5982,6 +5982,14 @@ body:has(.dashboard) {
     padding: 0 0.34rem;
     gap: 0.28rem;
   }
+  /* Swap and the mode toggle keep the same fixed footprint as Pick a mode at
+     every breakpoint, so the family stays visually consistent when they trade
+     places above. */
+  .control-swap-mode-button,
+  .control-story-toggle {
+    height: 1.45rem;
+    padding: 0 0.34rem;
+  }
   .control-story-name-text {
     font-size: 0.5rem;
   }
