@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Sans+JP:wght@400;700&family=Outfit:wght@400;500;600;700&display=swap');
 
 .test-level-menu{display:flex;gap:8px;margin:-6px 0 20px}.test-level-menu button{min-width:54px;border:1px solid var(--c-line);background:#fff;color:#68756e;border-radius:99px;padding:8px 14px;font:700 .67rem inherit;cursor:pointer}.test-level-menu button.active{background:#285b43;border-color:#285b43;color:#fff}
 .cs-patterns footer button:disabled{color:#a9afa9;cursor:not-allowed}.test-pattern-filter{display:flex;flex-direction:column;gap:4px;color:#718078;font-size:.55rem;font-weight:600}.test-pattern-filter select{max-width:310px;border:1px solid var(--c-line);border-radius:7px;background:#fff;padding:8px 10px;color:#304239;font:600 .62rem inherit}
@@ -15450,6 +15450,162 @@ button.counter-example {
 .beginner-meaning {
   color: var(--text-muted);
   font: 650 0.75rem/1 'Outfit', system-ui, sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Preview: あ restyle spike
+   A lighter, illustrated look tried on just the あ card — see
+   isAlphaPreview in BeginnerLearner.tsx. Everything here is scoped under
+   .beginner-learner--preview-a, which is only present while あ is the card
+   on screen, so no other character or script is touched. The pinned
+   Back/KQ buttons in the header are governed by a shared, absolutely
+   positioned system used on every screen in the app and are deliberately
+   left alone here rather than fought with for one experimental card.
+   --------------------------------------------------------------------------- */
+
+.beginner-learner--preview-a {
+  --preview-card-bg: #fffaf6;
+  --preview-text: #2c2350;
+  --preview-muted: #5b5a82;
+  --preview-accent: #3d7ab8;
+  --preview-glyph-1: #ff6fae;
+  --preview-glyph-2: #d6266f;
+  --preview-shadow: 0 12px 28px rgba(94, 62, 130, 0.16);
+  border-radius: 20px;
+  padding: 0.6rem 0.6rem 0.9rem;
+  background: linear-gradient(135deg, #ffe4d6 0%, #f6d9ff 45%, #dbe8ff 100%);
+}
+
+.beginner-learner--preview-a .beginner-row-tabs {
+  padding: 0.3rem 0.15rem 0.5rem;
+}
+
+.beginner-learner--preview-a .beginner-row-tab {
+  border: 0;
+  border-radius: 14px;
+  background: color-mix(in srgb, #ffffff 65%, transparent);
+  color: var(--preview-text);
+  transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.beginner-learner--preview-a .beginner-row-tab small {
+  color: var(--preview-muted);
+}
+
+.beginner-learner--preview-a .beginner-row-tab.is-active {
+  background: linear-gradient(135deg, var(--preview-glyph-1), var(--preview-glyph-2));
+  color: #fff;
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px rgba(214, 38, 111, 0.35);
+}
+
+.beginner-learner--preview-a .beginner-row-tab.is-active small {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.beginner-learner--preview-a .beginner-row-tab.is-done {
+  border: 0;
+}
+
+.preview-a-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.85rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.preview-a-read {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 2.4rem 1rem 1.6rem;
+  border: 0;
+  border-radius: 22px;
+  background: var(--preview-card-bg);
+  box-shadow: var(--preview-shadow);
+  cursor: pointer;
+  transition: transform 140ms ease;
+}
+
+.preview-a-read:active {
+  transform: scale(0.99);
+}
+
+.preview-a-glyph {
+  font: 400 clamp(7rem, 24vw, 10rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  background: linear-gradient(160deg, var(--preview-glyph-1), var(--preview-glyph-2));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.preview-a-replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--preview-accent);
+  font: 700 0.85rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.preview-a-write {
+  padding: 1.1rem;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle, rgba(150, 130, 190, 0.28) 1px, transparent 1.4px) 0 0 / 16px 16px,
+    var(--preview-card-bg);
+  box-shadow: var(--preview-shadow);
+}
+
+.preview-a-write .trace-canvas-stack {
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+}
+
+.preview-a-write .trace-canvas-clear {
+  border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
+  background: #fff;
+  color: var(--preview-muted);
+}
+
+.preview-a-nav {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.preview-a-nav-btn {
+  flex: 1;
+  padding: 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  font: 800 1rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  box-shadow: var(--preview-shadow);
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+
+.preview-a-nav-btn:active {
+  transform: scale(0.97);
+}
+
+.preview-a-nav-btn--prev {
+  background: linear-gradient(135deg, #d9d6ea, #b8b4cf);
+  color: #3a3560;
+}
+
+.preview-a-nav-btn--prev:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.preview-a-nav-btn--next {
+  background: linear-gradient(135deg, var(--rayquaza), var(--kyogre-light));
+  color: #fff;
 }
 
 .beginner-next-btn {

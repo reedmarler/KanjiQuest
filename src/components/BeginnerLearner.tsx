@@ -280,6 +280,13 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   })
   const [cardIndex, setCardIndex] = useState(0)
   const card = cards[cardIndex]
+  /*
+   * A one-character design spike: a lighter, illustrated restyle tried on
+   * just あ before deciding whether it's worth extending anywhere else.
+   * Every other hiragana character, and both other scripts, keep the
+   * existing look untouched — this flips off the moment the card moves on.
+   */
+  const isAlphaPreview = script === 'hiragana' && card?.char === 'あ'
 
   useEffect(() => {
     window.localStorage.setItem(storageKey(MASTERY_STORAGE_PREFIX, script), JSON.stringify(mastery))
@@ -400,7 +407,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   useEffect(() => stopSpeaking, [])
 
   return (
-    <div className={`beginner-learner beginner-learner--${script}`}>
+    <div className={`beginner-learner beginner-learner--${script}${isAlphaPreview ? ' beginner-learner--preview-a' : ''}`}>
       <div className="beginner-learner-top">
         <div className="app-nav-actions">
           <AppBackButton onClick={onBack} aria-label="Back" />
@@ -646,22 +653,11 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
           </div>
         </main>
       ) : card ? (
-        <main className="beginner-card is-revealed">
-          {/* Previous, a prominent speaker button, and Next sit above the
-              writing area. Hearing the character is the point of this
-              button, so it's bigger and louder than the nav buttons either
-              side of it — Check moved into the tracing panel itself
-              (compactCheck below) so this row stays about pronunciation,
-              not scoring. */}
-          <div className="beginner-top-actions">
-            <button type="button" className="btn btn-ghost beginner-action-btn" onClick={goPrevious} disabled={cardIndex === 0}>Previous</button>
+        isAlphaPreview ? (
+          <main className="beginner-card preview-a-card">
             <button
               type="button"
-              className="beginner-speak-btn"
-              // Slower than the app's usual "learning" pace — a single
-              // character has no surrounding word to give the ear a beat to
-              // catch it in, so the standard slowdown still reads as rushed
-              // here even though it's plenty for whole words elsewhere.
+              className="preview-a-read"
               onClick={() => speakJapanese(card.char, {
                 rate: SINGLE_CHARACTER_SPEECH_RATE,
                 forceBrowser: true,
@@ -669,31 +665,75 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
               })}
               aria-label={`Play the sound for ${card.char}`}
             >
-              &#128266;
+              <span className="preview-a-glyph" lang="ja">{card.char}</span>
+              <span className="preview-a-replay">
+                <span aria-hidden="true">&#128266;</span> Tap to replay
+              </span>
             </button>
-            <button type="button" className="btn btn-primary beginner-action-btn beginner-action-btn-green" onClick={goNext}>Next</button>
-          </div>
 
-          {/* Writing lives right under the character itself — trace it while
-              it's fresh on screen, rather than as a separate mode to switch
-              into. Keyed on the character so a fresh canvas loads per card.
-              On desktop the example and the tracing box sit side by side,
-              with tracing given most of the width since it's what you use. */}
-          <div className="beginner-write-layout">
-            <div className="beginner-char-listen">
-              <BeginnerWordExample word={card.char} script={script} durationScale={2 / 3} />
-            </div>
-            <div className="beginner-write-section">
+            <div className="preview-a-write">
               <TraceCanvas key={card.char} char={card.char} />
             </div>
-          </div>
 
-          {card.meaning && (
-            <div className="beginner-answer">
-              <span className="beginner-meaning">{card.meaning}</span>
+            <div className="preview-a-nav">
+              <button type="button" className="preview-a-nav-btn preview-a-nav-btn--prev" onClick={goPrevious} disabled={cardIndex === 0}>
+                Previous
+              </button>
+              <button type="button" className="preview-a-nav-btn preview-a-nav-btn--next" onClick={goNext}>
+                Next
+              </button>
             </div>
-          )}
-        </main>
+          </main>
+        ) : (
+          <main className="beginner-card is-revealed">
+            {/* Previous, a prominent speaker button, and Next sit above the
+                writing area. Hearing the character is the point of this
+                button, so it's bigger and louder than the nav buttons either
+                side of it — Check moved into the tracing panel itself
+                (compactCheck below) so this row stays about pronunciation,
+                not scoring. */}
+            <div className="beginner-top-actions">
+              <button type="button" className="btn btn-ghost beginner-action-btn" onClick={goPrevious} disabled={cardIndex === 0}>Previous</button>
+              <button
+                type="button"
+                className="beginner-speak-btn"
+                // Slower than the app's usual "learning" pace — a single
+                // character has no surrounding word to give the ear a beat to
+                // catch it in, so the standard slowdown still reads as rushed
+                // here even though it's plenty for whole words elsewhere.
+                onClick={() => speakJapanese(card.char, {
+                  rate: SINGLE_CHARACTER_SPEECH_RATE,
+                  forceBrowser: true,
+                  beginnerRecordingKind: 'kana',
+                })}
+                aria-label={`Play the sound for ${card.char}`}
+              >
+                &#128266;
+              </button>
+              <button type="button" className="btn btn-primary beginner-action-btn beginner-action-btn-green" onClick={goNext}>Next</button>
+            </div>
+
+            {/* Writing lives right under the character itself — trace it while
+                it's fresh on screen, rather than as a separate mode to switch
+                into. Keyed on the character so a fresh canvas loads per card.
+                On desktop the example and the tracing box sit side by side,
+                with tracing given most of the width since it's what you use. */}
+            <div className="beginner-write-layout">
+              <div className="beginner-char-listen">
+                <BeginnerWordExample word={card.char} script={script} durationScale={2 / 3} />
+              </div>
+              <div className="beginner-write-section">
+                <TraceCanvas key={card.char} char={card.char} />
+              </div>
+            </div>
+
+            {card.meaning && (
+              <div className="beginner-answer">
+                <span className="beginner-meaning">{card.meaning}</span>
+              </div>
+            )}
+          </main>
+        )
       ) : null}
     </div>
   )
