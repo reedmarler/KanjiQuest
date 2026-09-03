@@ -15457,10 +15457,7 @@ button.counter-example {
    A lighter, illustrated look tried on just the あ card — see
    isAlphaPreview in BeginnerLearner.tsx. Everything here is scoped under
    .beginner-learner--preview-a, which is only present while あ is the card
-   on screen, so no other character or script is touched. The pinned
-   Back/KQ buttons in the header are governed by a shared, absolutely
-   positioned system used on every screen in the app and are deliberately
-   left alone here rather than fought with for one experimental card.
+   on screen, so no other character or script is touched.
    --------------------------------------------------------------------------- */
 
 .beginner-learner--preview-a {
@@ -15474,6 +15471,50 @@ button.counter-example {
   border-radius: 20px;
   padding: 0.6rem 0.6rem 0.9rem;
   background: linear-gradient(135deg, #ffe4d6 0%, #f6d9ff 45%, #dbe8ff 100%);
+}
+
+.preview-a-top {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.6rem 0.55rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, #ffffff 82%, transparent);
+  box-shadow: var(--preview-shadow);
+}
+
+.preview-a-back {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--preview-text);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.preview-a-title {
+  flex: 1;
+  color: var(--preview-text);
+  font: 800 1.35rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.preview-a-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(94, 62, 130, 0.14);
+  color: var(--preview-text);
+  font: 800 0.9rem/1 'Outfit', system-ui, sans-serif;
 }
 
 .beginner-learner--preview-a .beginner-row-tabs {
@@ -15493,14 +15534,19 @@ button.counter-example {
 }
 
 .beginner-learner--preview-a .beginner-row-tab.is-active {
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
   background: linear-gradient(135deg, var(--preview-glyph-1), var(--preview-glyph-2));
   color: #fff;
-  transform: scale(1.08);
+  font-size: 0.75rem;
+  transform: scale(1.15);
   box-shadow: 0 6px 16px rgba(214, 38, 111, 0.35);
 }
 
+/* The reference drops the count on the active tab — it isn't "0/5 learned",
+   it's the row you're on right now, so the number reads as noise there. */
 .beginner-learner--preview-a .beginner-row-tab.is-active small {
-  color: rgba(255, 255, 255, 0.85);
+  display: none;
 }
 
 .beginner-learner--preview-a .beginner-row-tab.is-done {
@@ -15580,12 +15626,14 @@ button.counter-example {
 
 .preview-a-nav-btn {
   flex: 1;
-  padding: 0.9rem;
+  min-height: 3.6rem;
+  padding: 1rem 1.2rem;
   border: 0;
   border-radius: 999px;
-  font: 800 1rem/1 'Outfit', system-ui, sans-serif;
+  color: #fff;
+  font: 800 1.05rem/1 'Outfit', system-ui, sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
   cursor: pointer;
-  box-shadow: var(--preview-shadow);
   transition: transform 140ms ease, opacity 140ms ease;
 }
 
@@ -15594,18 +15642,19 @@ button.counter-example {
 }
 
 .preview-a-nav-btn--prev {
-  background: linear-gradient(135deg, #d9d6ea, #b8b4cf);
-  color: #3a3560;
+  background: linear-gradient(135deg, #c7c3da, #918cae);
+  box-shadow: 0 10px 22px rgba(94, 84, 130, 0.32);
 }
 
 .preview-a-nav-btn--prev:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
+  box-shadow: none;
   cursor: default;
 }
 
 .preview-a-nav-btn--next {
   background: linear-gradient(135deg, var(--rayquaza), var(--kyogre-light));
-  color: #fff;
+  box-shadow: 0 10px 24px rgba(58, 154, 98, 0.4);
 }
 
 .beginner-next-btn {

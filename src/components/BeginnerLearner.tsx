@@ -408,23 +408,43 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
 
   return (
     <div className={`beginner-learner beginner-learner--${script}${isAlphaPreview ? ' beginner-learner--preview-a' : ''}`}>
-      <div className="beginner-learner-top">
-        <div className="app-nav-actions">
-          <AppBackButton onClick={onBack} aria-label="Back" />
-          <AppDashboardButton onClick={onDashboard} />
-        </div>
-        <span className="beginner-learner-title">{deck.title}</span>
-        <div className="beginner-top-tools">
-          {onOpenChart && (
-            <button type="button" className="beginner-open-chart" onClick={onOpenChart} aria-label={`Return to the ${deck.title} chart`}>
-              {deck.title} Chart
-            </button>
-          )}
-          <button type="button" className="beginner-reset-progress" onClick={resetProgress} aria-label={`Reset ${deck.title} progress`}>
-            Progress reset
+      {isAlphaPreview ? (
+        /* A one-off header for the preview, matching the reference image's
+           single pill bar — back arrow, title, a placeholder badge for a
+           not-yet-built feature (streak, most likely) on the right. This
+           deliberately bypasses the shared AppBackButton/AppDashboardButton
+           (pinned to a fixed spot on every other screen) and drops the
+           Hiragana Chart / Progress reset buttons from view for now: getting
+           the reference image right comes first, reconciling it with the
+           rest of the chrome is the next pass. */
+        <div className="preview-a-top">
+          <button type="button" className="preview-a-back" onClick={onBack} aria-label="Back">
+            <span aria-hidden="true">&#8592;</span>
           </button>
+          <span className="preview-a-title">{deck.title}</span>
+          <span className="preview-a-badge" aria-label="Placeholder for a future feature, such as a streak counter">
+            <span aria-hidden="true">&#128293;</span> &mdash;
+          </span>
         </div>
-      </div>
+      ) : (
+        <div className="beginner-learner-top">
+          <div className="app-nav-actions">
+            <AppBackButton onClick={onBack} aria-label="Back" />
+            <AppDashboardButton onClick={onDashboard} />
+          </div>
+          <span className="beginner-learner-title">{deck.title}</span>
+          <div className="beginner-top-tools">
+            {onOpenChart && (
+              <button type="button" className="beginner-open-chart" onClick={onOpenChart} aria-label={`Return to the ${deck.title} chart`}>
+                {deck.title} Chart
+              </button>
+            )}
+            <button type="button" className="beginner-reset-progress" onClick={resetProgress} aria-label={`Reset ${deck.title} progress`}>
+              Progress reset
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="beginner-row-tabs" role="tablist" aria-label={`${deck.title} rows`}>
         {deck.rows.map((entry, index) => {
