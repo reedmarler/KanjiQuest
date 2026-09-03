@@ -15461,7 +15461,12 @@ button.counter-example {
    --------------------------------------------------------------------------- */
 
 .beginner-learner--preview-a {
+  --preview-page-bg: linear-gradient(135deg, #ffe4d6 0%, #f6d9ff 45%, #dbe8ff 100%);
   --preview-card-bg: #fffaf6;
+  --preview-top-bg: color-mix(in srgb, #ffffff 82%, transparent);
+  --preview-badge-bg: #fff;
+  --preview-tab-bg: color-mix(in srgb, #ffffff 65%, transparent);
+  --preview-dot: rgba(150, 130, 190, 0.28);
   --preview-text: #2c2350;
   --preview-muted: #5b5a82;
   --preview-accent: #3d7ab8;
@@ -15469,17 +15474,41 @@ button.counter-example {
   --preview-glyph-2: #d6266f;
   --preview-shadow: 0 12px 28px rgba(94, 62, 130, 0.16);
   border-radius: 20px;
-  padding: 0.6rem 0.6rem 0.9rem;
-  background: linear-gradient(135deg, #ffe4d6 0%, #f6d9ff 45%, #dbe8ff 100%);
+  /* Lines the header up with the standard back button's fixed 1rem inset
+     elsewhere in the app (--app-nav-top) instead of the usual card padding. */
+  padding: 0 0.6rem 0.9rem;
+  background: var(--preview-page-bg);
+}
+
+/* A dark palette for the same layout, toggled by the badge button in place
+   of the reference image's streak counter — swaps only the custom
+   properties above, so every rule below picks it up automatically. */
+.beginner-learner--preview-a-dark {
+  --preview-page-bg: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
+  --preview-card-bg: #241f38;
+  --preview-top-bg: color-mix(in srgb, #2a2440 85%, transparent);
+  --preview-badge-bg: #332b52;
+  --preview-tab-bg: color-mix(in srgb, #2a2440 70%, transparent);
+  --preview-dot: rgba(255, 255, 255, 0.14);
+  --preview-text: #f2eefc;
+  --preview-muted: #b6b0d6;
+  --preview-accent: #8fd0ff;
+  --preview-glyph-1: #ff86c4;
+  --preview-glyph-2: #ef4f98;
+  --preview-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
 
 .preview-a-top {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.55rem 0.6rem 0.55rem 0.5rem;
+  /* Pulls the pill up so the back arrow lands at the same height as the
+     standard pinned back button (--app-nav-top) elsewhere in the app,
+     without shrinking the pill's own comfortable padding to do it. */
+  margin-top: -0.6rem;
+  padding: 0.4rem 0.6rem 0.4rem 0.5rem;
   border-radius: 999px;
-  background: color-mix(in srgb, #ffffff 82%, transparent);
+  background: var(--preview-top-bg);
   box-shadow: var(--preview-shadow);
 }
 
@@ -15510,11 +15539,22 @@ button.counter-example {
   align-items: center;
   gap: 0.35rem;
   padding: 0.5rem 0.8rem;
+  border: 0;
   border-radius: 999px;
-  background: #fff;
+  background: var(--preview-badge-bg);
   box-shadow: 0 4px 10px rgba(94, 62, 130, 0.14);
   color: var(--preview-text);
   font: 800 0.9rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.preview-a-theme-toggle {
+  cursor: pointer;
+  font-size: 1.05rem;
+  transition: transform 140ms ease;
+}
+
+.preview-a-theme-toggle:active {
+  transform: scale(0.92);
 }
 
 .beginner-learner--preview-a .beginner-row-tabs {
@@ -15524,7 +15564,7 @@ button.counter-example {
 .beginner-learner--preview-a .beginner-row-tab {
   border: 0;
   border-radius: 14px;
-  background: color-mix(in srgb, #ffffff 65%, transparent);
+  background: var(--preview-tab-bg);
   color: var(--preview-text);
   transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
@@ -15602,7 +15642,7 @@ button.counter-example {
   padding: 1.1rem;
   border-radius: 22px;
   background:
-    radial-gradient(circle, rgba(150, 130, 190, 0.28) 1px, transparent 1.4px) 0 0 / 16px 16px,
+    radial-gradient(circle, var(--preview-dot) 1px, transparent 1.4px) 0 0 / 16px 16px,
     var(--preview-card-bg);
   box-shadow: var(--preview-shadow);
 }
@@ -15615,7 +15655,7 @@ button.counter-example {
 
 .preview-a-write .trace-canvas-clear {
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
-  background: #fff;
+  background: var(--preview-badge-bg);
   color: var(--preview-muted);
 }
 

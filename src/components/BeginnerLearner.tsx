@@ -287,6 +287,10 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
    * existing look untouched — this flips off the moment the card moves on.
    */
   const isAlphaPreview = script === 'hiragana' && card?.char === 'あ'
+  // The badge that would hold a future streak counter doubles, for now, as a
+  // dark/light toggle for just this preview card's own palette — it does not
+  // touch the rest of the app's (permanently dark) theme.
+  const [previewDark, setPreviewDark] = useState(false)
 
   useEffect(() => {
     window.localStorage.setItem(storageKey(MASTERY_STORAGE_PREFIX, script), JSON.stringify(mastery))
@@ -407,11 +411,12 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   useEffect(() => stopSpeaking, [])
 
   return (
-    <div className={`beginner-learner beginner-learner--${script}${isAlphaPreview ? ' beginner-learner--preview-a' : ''}`}>
+    <div className={`beginner-learner beginner-learner--${script}${isAlphaPreview ? ' beginner-learner--preview-a' : ''}${isAlphaPreview && previewDark ? ' beginner-learner--preview-a-dark' : ''}`}>
       {isAlphaPreview ? (
         /* A one-off header for the preview, matching the reference image's
-           single pill bar — back arrow, title, a placeholder badge for a
-           not-yet-built feature (streak, most likely) on the right. This
+           single pill bar — back arrow, title, a dark-mode toggle on the
+           right in place of the reference's streak counter (that's real app
+           data we don't have a feature for yet; the toggle is real). This
            deliberately bypasses the shared AppBackButton/AppDashboardButton
            (pinned to a fixed spot on every other screen) and drops the
            Hiragana Chart / Progress reset buttons from view for now: getting
@@ -422,9 +427,15 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             <span aria-hidden="true">&#8592;</span>
           </button>
           <span className="preview-a-title">{deck.title}</span>
-          <span className="preview-a-badge" aria-label="Placeholder for a future feature, such as a streak counter">
-            <span aria-hidden="true">&#128293;</span> &mdash;
-          </span>
+          <button
+            type="button"
+            className="preview-a-badge preview-a-theme-toggle"
+            onClick={() => setPreviewDark((value) => !value)}
+            aria-pressed={previewDark}
+            aria-label={previewDark ? 'Switch this preview to light mode' : 'Switch this preview to dark mode'}
+          >
+            <span aria-hidden="true">{previewDark ? '☀️' : '\u{1F319}'}</span>
+          </button>
         </div>
       ) : (
         <div className="beginner-learner-top">
