@@ -7,12 +7,13 @@ type ChartScript = Extract<BeginnerScript, 'hiragana' | 'katakana'>
 
 // Every row reads left to right as a, i, u, e, o — including the contracted
 // きゃ/きゅ/きょ rows, whose romaji still ends in one of those vowels, so a
-// character's column is just the vowel its own romaji ends with. ん has no
-// vowel, so it gets a lone column of its own past the five.
+// character's column is just the vowel its own romaji ends with. を and ん
+// break that pattern — they sit under う and お rather than their own sound.
 const CHART_VOWEL_COLUMNS: Record<string, number> = { a: 1, i: 2, u: 3, e: 4, o: 5 }
+const CHART_COLUMN_OVERRIDES: Record<string, number> = { wo: 3, n: 5 }
 
 function chartColumn(romaji: string): number {
-  return CHART_VOWEL_COLUMNS[romaji.charAt(romaji.length - 1)] ?? 6
+  return CHART_COLUMN_OVERRIDES[romaji] ?? CHART_VOWEL_COLUMNS[romaji.charAt(romaji.length - 1)] ?? 5
 }
 
 interface KanaChartProps {
