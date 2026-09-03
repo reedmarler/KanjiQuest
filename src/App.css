@@ -15475,11 +15475,11 @@ button.counter-example {
    inherit downward); these repeat the same two gradients directly instead.
    Keep both in sync with the values a few lines down if either changes. */
 body:has(.beginner-learner--preview-a) {
-  background: linear-gradient(180deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
+  background: linear-gradient(135deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
 }
 
 body:has(.beginner-learner--preview-a-dark) {
-  background: linear-gradient(180deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
+  background: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
 }
 
 /* Compound selector (not just .beginner-learner--preview-a) is load-bearing:
@@ -15488,7 +15488,7 @@ body:has(.beginner-learner--preview-a-dark) {
    file they'd otherwise win over this rule's padding on exactly the
    viewports this preview is mostly viewed at. */
 .beginner-learner.beginner-learner--preview-a {
-  --preview-page-bg: linear-gradient(180deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
+  --preview-page-bg: linear-gradient(135deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
   /* Translucent rather than flat white, same technique as the header pill
      below — the page's own pastel gradient shows through faintly instead
      of the cards sitting on top of it as solid, disconnected boxes. */
@@ -15520,7 +15520,7 @@ body:has(.beginner-learner--preview-a-dark) {
    overrides lose to the light rule's own declarations of the same
    properties instead of winning by source order. */
 .beginner-learner.beginner-learner--preview-a-dark {
-  --preview-page-bg: linear-gradient(180deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
+  --preview-page-bg: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
   --preview-card-bg: color-mix(in srgb, #241f38 82%, transparent);
   --preview-top-bg: color-mix(in srgb, #2a2440 85%, transparent);
   --preview-badge-bg: #332b52;
