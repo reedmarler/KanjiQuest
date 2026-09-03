@@ -15462,7 +15462,10 @@ button.counter-example {
 
 .beginner-learner--preview-a {
   --preview-page-bg: linear-gradient(135deg, #ffe4d6 0%, #f6d9ff 45%, #dbe8ff 100%);
-  --preview-card-bg: #fffaf6;
+  /* Translucent rather than flat white, same technique as the header pill
+     below — the page's own pastel gradient shows through faintly instead
+     of the cards sitting on top of it as solid, disconnected boxes. */
+  --preview-card-bg: color-mix(in srgb, #fffaf6 82%, transparent);
   --preview-top-bg: color-mix(in srgb, #ffffff 82%, transparent);
   --preview-badge-bg: #fff;
   --preview-tab-bg: color-mix(in srgb, #ffffff 65%, transparent);
@@ -15495,7 +15498,7 @@ body:has(.beginner-learner--preview-a) #build-badge {
    properties above, so every rule below picks it up automatically. */
 .beginner-learner--preview-a-dark {
   --preview-page-bg: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
-  --preview-card-bg: #241f38;
+  --preview-card-bg: color-mix(in srgb, #241f38 82%, transparent);
   --preview-top-bg: color-mix(in srgb, #2a2440 85%, transparent);
   --preview-badge-bg: #332b52;
   --preview-tab-bg: color-mix(in srgb, #2a2440 70%, transparent);
