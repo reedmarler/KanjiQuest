@@ -15481,7 +15481,7 @@ button.counter-example {
    inherit downward); these repeat the same two gradients directly instead.
    Keep both in sync with the values a few lines down if either changes. */
 body:has(.beginner-learner--preview-a) {
-  background: linear-gradient(135deg, #ffe4d6 0%, #f6d9ff 45%, #dbe8ff 100%);
+  background: linear-gradient(135deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
 }
 
 body:has(.beginner-learner--preview-a-dark) {
@@ -15494,7 +15494,7 @@ body:has(.beginner-learner--preview-a-dark) {
    file they'd otherwise win over this rule's padding on exactly the
    viewports this preview is mostly viewed at. */
 .beginner-learner.beginner-learner--preview-a {
-  --preview-page-bg: linear-gradient(135deg, #ffe4d6 0%, #f6d9ff 45%, #dbe8ff 100%);
+  --preview-page-bg: linear-gradient(135deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
   /* Translucent rather than flat white, same technique as the header pill
      below — the page's own pastel gradient shows through faintly instead
      of the cards sitting on top of it as solid, disconnected boxes. */
@@ -15512,9 +15512,9 @@ body:has(.beginner-learner--preview-a-dark) {
   border-radius: 20px;
   /* Top stays 0 — that's what lines the header up with the standard back
      button's fixed 1rem inset elsewhere in the app (--app-nav-top). Left,
-     right, and bottom carry real breathing room: the white cards were
-     still reading as flush against the screen edges at 1.1rem. */
-  padding: 0 1.8rem 1.6rem;
+     right, and bottom still carry real breathing room, just slightly less
+     than before to let the cards themselves grow a bit. */
+  padding: 0 1.5rem 1.4rem;
   background: var(--preview-page-bg);
 }
 
@@ -15683,7 +15683,7 @@ body:has(.beginner-learner--preview-a-dark) {
   /* Matches the write card's height below it (both close to 4:5 against
      their shared width), same as the reference image — it was noticeably
      shorter before. */
-  padding: 2.8rem 1rem 2rem;
+  padding: 3.1rem 1rem 2.2rem;
   border: 0;
   border-radius: 30px;
   background: var(--preview-card-bg);
@@ -15697,7 +15697,7 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-glyph {
-  font: 400 clamp(9rem, 24vw, 10rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  font: 400 clamp(9.5rem, 24vw, 10.5rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
   background: linear-gradient(160deg, var(--preview-glyph-1), var(--preview-glyph-2));
   background-clip: text;
   -webkit-background-clip: text;
@@ -15714,7 +15714,7 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-write {
-  padding: 1.1rem;
+  padding: 1.3rem;
   border-radius: 30px;
   background:
     radial-gradient(circle, var(--preview-dot) 1px, transparent 1.4px) 0 0 / 16px 16px,
@@ -15729,6 +15729,8 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-write .trace-canvas-clear {
+  top: 0.15rem;
+  right: 0.15rem;
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
   background: var(--preview-badge-bg);
   color: var(--preview-muted);
