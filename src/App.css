@@ -15460,6 +15460,20 @@ button.counter-example {
    on screen, so no other character or script is touched.
    --------------------------------------------------------------------------- */
 
+/* The wrapper's own gradient only paints its own box, which is shorter than
+   the screen on most phones — body's default dark background showed through
+   below the Previous/Next row. body is an ancestor, so it can't read the
+   --preview-page-bg custom property set below (custom properties only
+   inherit downward); these repeat the same two gradients directly instead.
+   Keep both in sync with the values a few lines down if either changes. */
+body:has(.beginner-learner--preview-a) {
+  background: linear-gradient(135deg, #ffe4d6 0%, #f6d9ff 45%, #dbe8ff 100%);
+}
+
+body:has(.beginner-learner--preview-a-dark) {
+  background: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
+}
+
 .beginner-learner--preview-a {
   --preview-page-bg: linear-gradient(135deg, #ffe4d6 0%, #f6d9ff 45%, #dbe8ff 100%);
   /* Translucent rather than flat white, same technique as the header pill
