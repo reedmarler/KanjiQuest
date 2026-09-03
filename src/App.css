@@ -15201,9 +15201,15 @@ button.counter-example {
 }
 
 .hiragana-chart-row-chars {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(5, 2.9rem);
+  grid-auto-columns: 2.9rem;
   flex: 1;
+  /* ん/ン's lone 6th column can run past the five vowel columns on a narrow
+     phone; let this row alone scroll sideways to reach it instead of
+     stretching the whole page wider than the viewport. */
+  min-width: 0;
+  overflow-x: auto;
   gap: 0.35rem;
 }
 

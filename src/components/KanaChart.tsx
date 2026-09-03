@@ -5,6 +5,16 @@ import { AppBackButton } from './AppBackButton'
 
 type ChartScript = Extract<BeginnerScript, 'hiragana' | 'katakana'>
 
+// Every row reads left to right as a, i, u, e, o — including the contracted
+// きゃ/きゅ/きょ rows, whose romaji still ends in one of those vowels, so a
+// character's column is just the vowel its own romaji ends with. ん has no
+// vowel, so it gets a lone column of its own past the five.
+const CHART_VOWEL_COLUMNS: Record<string, number> = { a: 1, i: 2, u: 3, e: 4, o: 5 }
+
+function chartColumn(romaji: string): number {
+  return CHART_VOWEL_COLUMNS[romaji.charAt(romaji.length - 1)] ?? 6
+}
+
 interface KanaChartProps {
   script: ChartScript
   onBack: () => void
@@ -46,6 +56,7 @@ export function KanaChart({ script, onBack, onSelectCharacter }: KanaChartProps)
                     key={character.char}
                     type="button"
                     className="hiragana-chart-cell"
+                    style={{ gridColumn: chartColumn(character.romaji) }}
                     onClick={() => onSelectCharacter(rowIndex, charIndex)}
                     aria-label={`Practice starting at ${character.char}, romaji ${character.romaji}`}
                   >
