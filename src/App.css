@@ -15474,7 +15474,12 @@ body:has(.beginner-learner--preview-a-dark) {
   background: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
 }
 
-.beginner-learner--preview-a {
+/* Compound selector (not just .beginner-learner--preview-a) is load-bearing:
+   several phone-width media queries further down redeclare plain
+   .beginner-learner's padding at equal specificity, and being later in the
+   file they'd otherwise win over this rule's padding on exactly the
+   viewports this preview is mostly viewed at. */
+.beginner-learner.beginner-learner--preview-a {
   --preview-page-bg: linear-gradient(135deg, #ffe4d6 0%, #f6d9ff 45%, #dbe8ff 100%);
   /* Translucent rather than flat white, same technique as the header pill
      below — the page's own pastel gradient shows through faintly instead
@@ -15493,16 +15498,20 @@ body:has(.beginner-learner--preview-a-dark) {
   border-radius: 20px;
   /* Top stays 0 — that's what lines the header up with the standard back
      button's fixed 1rem inset elsewhere in the app (--app-nav-top). Left,
-     right, and bottom got more room: the white cards were sitting almost
-     flush with the screen edges. */
-  padding: 0 1.1rem 1.3rem;
+     right, and bottom carry real breathing room: the white cards were
+     still reading as flush against the screen edges at 1.1rem. */
+  padding: 0 1.8rem 1.6rem;
   background: var(--preview-page-bg);
 }
 
 /* A dark palette for the same layout, toggled by the badge button in place
    of the reference image's streak counter — swaps only the custom
    properties above, so every rule below picks it up automatically. */
-.beginner-learner--preview-a-dark {
+/* Matches the light rule's compound-selector specificity above (both
+   classes are always present together) — otherwise these custom-property
+   overrides lose to the light rule's own declarations of the same
+   properties instead of winning by source order. */
+.beginner-learner.beginner-learner--preview-a-dark {
   --preview-page-bg: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
   --preview-card-bg: color-mix(in srgb, #241f38 82%, transparent);
   --preview-top-bg: color-mix(in srgb, #2a2440 85%, transparent);
@@ -15662,7 +15671,7 @@ body:has(.beginner-learner--preview-a-dark) {
      shorter before. */
   padding: 2.8rem 1rem 2rem;
   border: 0;
-  border-radius: 22px;
+  border-radius: 30px;
   background: var(--preview-card-bg);
   box-shadow: var(--preview-shadow);
   cursor: pointer;
@@ -15692,7 +15701,7 @@ body:has(.beginner-learner--preview-a-dark) {
 
 .preview-a-write {
   padding: 1.1rem;
-  border-radius: 22px;
+  border-radius: 30px;
   background:
     radial-gradient(circle, var(--preview-dot) 1px, transparent 1.4px) 0 0 / 16px 16px,
     var(--preview-card-bg);
