@@ -417,7 +417,6 @@ function App() {
         <ToolMenuPage
           title="Study tools"
           eyebrow="STUDY MODES"
-          description="Choose a focused drill."
           onBack={() => setView('dashboard')}
           tools={[
             { mark: '漢', title: 'Kanji', detail: 'Study kanji readings and forms.', accent: 'kyogre', onClick: () => {
@@ -466,7 +465,6 @@ function App() {
       <div className="app beginner-zone-page">
         <ToolMenuPage
           title="Beginner Zone"
-          description="Learn Japanese through memorable character pictures."
           onBack={() => setView('dashboard')}
           tools={[
             { mark: 'あ', title: 'Hiragana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'sakura', onClick: () => setView('hiragana-chart') },
@@ -788,7 +786,7 @@ function ToolMenuPage({
 }: {
   title: string
   eyebrow?: string
-  description: string
+  description?: string
   tools: ToolMenuItem[]
   onBack: () => void
   footerAction?: {
@@ -803,7 +801,7 @@ function ToolMenuPage({
       <section className="tool-menu-heading">
         {eyebrow && <small>{eyebrow}</small>}
         <h1>{title}</h1>
-        <p>{description}</p>
+        {description && <p>{description}</p>}
       </section>
       <div className="tool-menu-grid">
         {tools.map((tool) => (
