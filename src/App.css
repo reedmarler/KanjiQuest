@@ -15474,10 +15474,20 @@ button.counter-example {
   --preview-glyph-2: #d6266f;
   --preview-shadow: 0 12px 28px rgba(94, 62, 130, 0.16);
   border-radius: 20px;
-  /* Lines the header up with the standard back button's fixed 1rem inset
-     elsewhere in the app (--app-nav-top) instead of the usual card padding. */
-  padding: 0 0.6rem 0.9rem;
+  /* Top stays 0 — that's what lines the header up with the standard back
+     button's fixed 1rem inset elsewhere in the app (--app-nav-top). Left,
+     right, and bottom got more room: the white cards were sitting almost
+     flush with the screen edges. */
+  padding: 0 1.1rem 1.3rem;
   background: var(--preview-page-bg);
+}
+
+/* The build-number badge lives outside #root so it stays a fixed corner
+   mark regardless of the app's own zoom (see index.html) — it can't be
+   hidden by unmounting it from React, so this reaches it from here instead.
+   Only while あ's preview is on screen; every other screen still shows it. */
+body:has(.beginner-learner--preview-a) #build-badge {
+  display: none;
 }
 
 /* A dark palette for the same layout, toggled by the badge button in place
@@ -15533,28 +15543,57 @@ button.counter-example {
   font: 800 1.35rem/1 'Outfit', system-ui, sans-serif;
 }
 
-.preview-a-badge {
+/* An actual on/off switch — sun, a sliding track+knob, moon — rather than a
+   single icon that swaps, so it reads as a toggle at a glance. */
+.preview-a-theme-toggle {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.5rem 0.8rem;
+  padding: 0.45rem 0.7rem;
   border: 0;
   border-radius: 999px;
   background: var(--preview-badge-bg);
   box-shadow: 0 4px 10px rgba(94, 62, 130, 0.14);
   color: var(--preview-text);
-  font: 800 0.9rem/1 'Outfit', system-ui, sans-serif;
-}
-
-.preview-a-theme-toggle {
+  font-size: 0.8rem;
+  line-height: 1;
   cursor: pointer;
-  font-size: 1.05rem;
   transition: transform 140ms ease;
 }
 
 .preview-a-theme-toggle:active {
-  transform: scale(0.92);
+  transform: scale(0.94);
+}
+
+.preview-a-theme-toggle-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 2.1rem;
+  height: 1.15rem;
+  padding: 0.15rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--preview-text) 20%, transparent);
+  transition: background 160ms ease;
+}
+
+.preview-a-theme-toggle-knob {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transform: translateX(0);
+  transition: transform 160ms ease;
+}
+
+.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-track {
+  background: linear-gradient(135deg, var(--preview-glyph-1), var(--preview-glyph-2));
+}
+
+.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-knob {
+  transform: translateX(0.95rem);
 }
 
 .beginner-learner--preview-a .beginner-row-tabs {
