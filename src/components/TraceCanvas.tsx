@@ -8,6 +8,10 @@ interface TraceCanvasProps {
   /** Keeps a one-character vocabulary exercise from using the larger square
    *  intended for the main character-writing lesson. */
   compactSingleCharacter?: boolean
+  /** How much of a cell's height the printed guide glyph fills. Defaults to
+   *  GLYPH_FONT_RATIO below; a caller can raise it for a bigger guide, e.g.
+   *  the あ preview card. */
+  guideFontRatio?: number
 }
 
 /** Logical resolution a single character's cell is computed in — a word of
@@ -58,7 +62,7 @@ function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HT
  * a discouraging number next to a beginner's first ever あ works against the
  * point. Writing it and seeing it beside the real thing is the exercise.
  */
-export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false }: TraceCanvasProps) {
+export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false, guideFontRatio = GLYPH_FONT_RATIO }: TraceCanvasProps) {
   const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const inkCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const drawingRef = useRef(false)
@@ -88,7 +92,7 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
         ctx.fillStyle = 'rgba(148, 148, 168, 0.38)'
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.font = `${Math.round(SIZE * GLYPH_FONT_RATIO)}px 'Noto Sans JP', sans-serif`
+        ctx.font = `${Math.round(SIZE * guideFontRatio)}px 'Noto Sans JP', sans-serif`
         chars.forEach((ch, index) => {
           const cell = SIZE * (index + 0.5)
           if (vertical) ctx.fillText(ch, width / 2, cell + SIZE * 0.04)
@@ -99,7 +103,7 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
 
     const ink = inkCanvasRef.current
     if (ink) ink.getContext('2d')!.clearRect(0, 0, width, height)
-  }, [char, showGuide, vertical])
+  }, [char, showGuide, vertical, guideFontRatio])
 
   function clearInk() {
     const ink = inkCanvasRef.current

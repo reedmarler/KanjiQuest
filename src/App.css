@@ -15676,8 +15676,9 @@ body:has(.beginner-learner--preview-a-dark) {
   gap: 0.8rem;
   /* Matches the write card's height below it (both close to 4:5 against
      their shared width), same as the reference image — it was noticeably
-     shorter before. */
-  padding: 3.1rem 1rem 2.2rem;
+     shorter before. Top/bottom trimmed by exactly what the glyph below
+     grew by, so this card's own height doesn't move. */
+  padding: 2.6rem 1rem 1.7rem;
   border: 0;
   border-radius: 30px;
   background: var(--preview-card-bg);
@@ -15691,7 +15692,7 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-glyph {
-  font: 400 clamp(9.5rem, 24vw, 10.5rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  font: 400 clamp(10.5rem, 26vw, 11.5rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
   background: linear-gradient(160deg, var(--preview-glyph-1), var(--preview-glyph-2));
   background-clip: text;
   -webkit-background-clip: text;
@@ -15723,8 +15724,8 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-write .trace-canvas-clear {
-  top: 0.15rem;
-  right: 0.15rem;
+  top: 0.02rem;
+  right: 0.02rem;
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
   background: var(--preview-badge-bg);
   color: var(--preview-muted);

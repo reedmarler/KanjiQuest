@@ -711,8 +711,12 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
               {/* compactSingleCharacter keeps this closer to the read card's
                   height above it, matching the reference image — without it,
                   a lone character's trace box defaults to a much larger
-                  square meant for the main (non-preview) writing lesson. */}
-              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter />
+                  square meant for the main (non-preview) writing lesson.
+                  guideFontRatio fills more of that box with the guide glyph
+                  than the app-wide default (0.82) — the box's own size is
+                  untouched, since the canvas's fixed internal resolution
+                  doesn't grow with the font, only what's drawn inside it. */}
+              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96} />
             </div>
 
             <div className="preview-a-nav">
