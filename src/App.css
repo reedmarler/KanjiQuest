@@ -15668,26 +15668,36 @@ body:has(.beginner-learner--preview-a-dark) {
 
 .beginner-learner--preview-a .beginner-row-tabs {
   padding: 0.3rem 0.15rem 0.5rem;
+  /* "mandatory" so a swipe always settles on a full tab — never leaves one
+     half-visible at the edge — and scroll-padding matches this container's
+     own inline padding so a snapped tab clears it cleanly instead of
+     landing flush against (or half under) the edge. */
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 0.15rem;
 }
 
 .beginner-learner--preview-a .beginner-row-tab {
   border: 0;
   border-radius: 14px;
+  padding: 0.48rem 0.72rem;
   background: var(--preview-tab-bg);
   color: var(--preview-text);
+  font-size: 0.68rem;
+  scroll-snap-align: start;
   transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
 .beginner-learner--preview-a .beginner-row-tab small {
   color: var(--preview-muted);
+  font-size: 0.58rem;
 }
 
 .beginner-learner--preview-a .beginner-row-tab.is-active {
-  padding-top: 0.65rem;
-  padding-bottom: 0.65rem;
+  padding-top: 0.78rem;
+  padding-bottom: 0.78rem;
   background: linear-gradient(135deg, var(--preview-glyph-1), var(--preview-glyph-2));
   color: #fff;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   transform: scale(1.15);
   box-shadow: 0 6px 16px rgba(214, 38, 111, 0.35);
 }

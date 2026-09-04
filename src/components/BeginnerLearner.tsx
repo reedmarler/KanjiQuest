@@ -505,7 +505,10 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
               title={`${entry.label} — ${masteredCount}/${entry.characters.length} learned`}
             >
               <span>{entry.label}</span>
-              <small>{masteredCount}/{entry.characters.length}</small>
+              {/* Swapped for the row's romaji reading on the あ preview
+                  spike only — every other script/character still shows the
+                  learned count underneath, unchanged. */}
+              <small>{isAlphaPreview ? entry.characters[0]!.romaji : `${masteredCount}/${entry.characters.length}`}</small>
             </button>
           )
         })}
