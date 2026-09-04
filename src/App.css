@@ -15483,13 +15483,23 @@ button.counter-example {
    below the Previous/Next row. body is an ancestor, so it can't read the
    --preview-page-bg custom property set below (custom properties only
    inherit downward); these repeat the same two gradients directly instead.
-   Keep both in sync with the values a few lines down if either changes. */
+   Keep both in sync with the values a few lines down if either changes.
+
+   At 110deg the gradient line runs mostly left to right, so a phone's whole
+   top edge sits inside the first ~56% of it and the lilac would otherwise
+   take the top-right corner. The blossom pink holds to 45% instead, which
+   keeps the top of the screen pink the whole way across and puts the wash
+   down into the bottom-right. BeginnerLearner also points the theme-color meta at
+   this same pink while the preview is on screen, which is what colours the
+   status bar strip above the page in a standalone (home-screen) launch —
+   without it that strip stays the manifest's white and the pink stops short
+   of the actual top of the display. */
 body:has(.beginner-learner--preview-a) {
-  background: linear-gradient(135deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
+  background: linear-gradient(110deg, #ffc2df 0%, #ffc2df 45%, #f3d2ff 72%, #cbb0f2 100%);
 }
 
 body:has(.beginner-learner--preview-a-dark) {
-  background: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
+  background: linear-gradient(110deg, #241b3a 0%, #241b3a 45%, #1c2036 72%, #141b2e 100%);
 }
 
 /* Compound selector (not just .beginner-learner--preview-a) is load-bearing:
@@ -15498,7 +15508,7 @@ body:has(.beginner-learner--preview-a-dark) {
    file they'd otherwise win over this rule's padding on exactly the
    viewports this preview is mostly viewed at. */
 .beginner-learner.beginner-learner--preview-a {
-  --preview-page-bg: linear-gradient(135deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
+  --preview-page-bg: linear-gradient(110deg, #ffc2df 0%, #ffc2df 45%, #f3d2ff 72%, #cbb0f2 100%);
   /* Translucent rather than flat white, same technique as the header pill
      below — the page's own pastel gradient shows through faintly instead
      of the cards sitting on top of it as solid, disconnected boxes. */
@@ -15515,10 +15525,12 @@ body:has(.beginner-learner--preview-a-dark) {
   --preview-shadow: 0 12px 28px rgba(94, 62, 130, 0.16);
   border-radius: 20px;
   /* Top stays 0 — that's what lines the header up with the standard back
-     button's fixed 1rem inset elsewhere in the app (--app-nav-top). Left,
-     right, and bottom still carry real breathing room, just slightly less
-     than before to let the cards themselves grow a bit. */
-  padding: 0 1.5rem 1.4rem;
+     button's fixed 1rem inset elsewhere in the app (--app-nav-top).
+     The gap between the screen edge and a card is this padding plus .app's
+     own 1.25rem: 2.75rem before, 1.65rem now — 40% narrower, which is width
+     the cards and everything in them take back. Bottom keeps its own
+     breathing room. */
+  padding: 0 0.4rem 1.4rem;
   background: var(--preview-page-bg);
 }
 
@@ -15530,7 +15542,7 @@ body:has(.beginner-learner--preview-a-dark) {
    overrides lose to the light rule's own declarations of the same
    properties instead of winning by source order. */
 .beginner-learner.beginner-learner--preview-a-dark {
-  --preview-page-bg: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
+  --preview-page-bg: linear-gradient(110deg, #241b3a 0%, #241b3a 45%, #1c2036 72%, #141b2e 100%);
   --preview-card-bg: color-mix(in srgb, #241f38 82%, transparent);
   --preview-top-bg: color-mix(in srgb, #2a2440 85%, transparent);
   --preview-badge-bg: #332b52;
@@ -15688,7 +15700,7 @@ body:has(.beginner-learner--preview-a-dark) {
      their shared width), same as the reference image — it was noticeably
      shorter before. Top/bottom trimmed by exactly what the glyph below
      grew by, so this card's own height doesn't move. */
-  padding: 2.6rem 1rem 1.7rem;
+  padding: 1.85rem 1rem 0.95rem;
   border: 0;
   border-radius: 30px;
   background: var(--preview-card-bg);
@@ -15702,7 +15714,7 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-glyph {
-  font: 400 clamp(10.5rem, 26vw, 11.5rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  font: 400 clamp(12rem, 31vw, 13rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
   background: linear-gradient(160deg, var(--preview-glyph-1), var(--preview-glyph-2));
   background-clip: text;
   -webkit-background-clip: text;
@@ -15719,7 +15731,7 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-write {
-  padding: 1.3rem;
+  padding: 0.9rem;
   border-radius: 30px;
   background:
     radial-gradient(circle, var(--preview-dot) 1px, transparent 1.4px) 0 0 / 16px 16px,
@@ -15731,14 +15743,46 @@ body:has(.beginner-learner--preview-a-dark) {
   border: 0;
   border-radius: 16px;
   background: transparent;
+  /* Clear sits outside the square, up in the card's own padding — the
+     default hidden overflow (there to clip ink to the bordered box) would
+     cut the button in half here. Nothing to clip anyway: this stack is
+     transparent and borderless, and the ink canvas is inset: 0. */
+  overflow: visible;
+  /* The square was capped at --trace-stack-max (13rem for a single compact
+     character) whatever the screen had spare, which left the guide glyph
+     small in the middle of a much wider card. It grows into that room now,
+     up to the card's own width, bounded by what the page can actually give
+     up below everything else on it — the shape is square, so width spent
+     here is height too. The 13rem floor keeps a short phone where it was. */
+  width: min(100%, max(13rem, calc(100dvh - 35.5rem)));
 }
 
+/* Against .trace-canvas (the full width of the card's inner area), not the
+   square, so this is the card's own corner — see clearInPanelCorner. The
+   small negative inset lifts it into the card's padding without pushing it
+   past the 30px corner radius. */
 .preview-a-write .trace-canvas-clear {
-  top: 0.02rem;
-  right: 0.02rem;
+  top: -0.3rem;
+  right: -0.3rem;
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
   background: var(--preview-badge-bg);
   color: var(--preview-muted);
+  transition: transform 140ms ease, color 140ms ease;
+}
+
+/* Every state keeps a readable label. The shared rule below sets hover to
+   var(--text), which is the app-wide near-white — on this pill's white
+   background the button read as empty for as long as the sticky hover a tap
+   leaves behind on a phone lasted, which is until you touch something else. */
+.preview-a-write .trace-canvas-clear:hover,
+.preview-a-write .trace-canvas-clear:focus-visible,
+.preview-a-write .trace-canvas-clear:active {
+  border-color: color-mix(in srgb, var(--preview-glyph-2) 45%, transparent);
+  color: var(--preview-text);
+}
+
+.preview-a-write .trace-canvas-clear:active {
+  transform: scale(0.94);
 }
 
 .preview-a-nav {
@@ -16529,6 +16573,10 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .trace-canvas {
+  /* Spans the panel it is given, so it is the right thing to hang a
+     clearInPanelCorner button off — the square below is centred inside it
+     and is usually narrower. */
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16569,9 +16617,14 @@ body:has(.beginner-learner--preview-a-dark) {
   cursor: pointer;
 }
 
-.trace-canvas-clear:hover {
-  border-color: var(--sakura);
-  color: var(--text);
+/* Pointer-gated: a tap on a touchscreen leaves :hover stuck on the button
+   until something else is touched, so on a phone this was the button's
+   resting state after every use rather than a hover cue. */
+@media (hover: hover) {
+  .trace-canvas-clear:hover {
+    border-color: var(--sakura);
+    color: var(--text);
+  }
 }
 
 .trace-canvas-overlay {

@@ -28,6 +28,11 @@ const QUIZ_LISTENING_WORDS = 5
 const SINGLE_CHARACTER_SPEECH_RATE = 0.5
 const COMPLETION_WRITING_DURATION_SCALE = 0.1625
 
+/** First colour of each あ-preview page gradient in App.css — keep in step
+ *  with --preview-page-bg there. Used for the status bar strip, which is
+ *  painted by the OS and so cannot read the gradient itself. */
+const PREVIEW_STATUS_BAR = { light: '#ffc2df', dark: '#241b3a' } as const
+
 const WORD_PICTURE: Record<string, string> = {
   あい: '❤️',
   いえ: '🏠',
@@ -291,6 +296,31 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   // dark/light toggle for just this preview card's own palette — it does not
   // touch the rest of the app's (permanently dark) theme.
   const [previewDark, setPreviewDark] = useState(false)
+
+  /*
+   * Launched from the home screen the app runs standalone, and the strip
+   * behind the clock and battery up there is painted by the OS from
+   * theme-color — no CSS on the page can reach it. Left at the manifest's
+   * white it cut a white band across the top of the preview's pink, so for
+   * as long as this card is the one on screen the meta points at the
+   * gradient's own first colour and the page reads pink to the very top.
+   * Restored on the way out, so every other screen keeps the usual bar.
+   */
+  useEffect(() => {
+    if (!isAlphaPreview) return
+    const existing = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+    const meta = existing ?? document.createElement('meta')
+    if (!existing) {
+      meta.name = 'theme-color'
+      document.head.appendChild(meta)
+    }
+    const previous = meta.content
+    meta.content = previewDark ? PREVIEW_STATUS_BAR.dark : PREVIEW_STATUS_BAR.light
+    return () => {
+      if (existing) meta.content = previous
+      else meta.remove()
+    }
+  }, [isAlphaPreview, previewDark])
 
   useEffect(() => {
     window.localStorage.setItem(storageKey(MASTERY_STORAGE_PREFIX, script), JSON.stringify(mastery))
@@ -715,8 +745,12 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                   guideFontRatio fills more of that box with the guide glyph
                   than the app-wide default (0.82) — the box's own size is
                   untouched, since the canvas's fixed internal resolution
-                  doesn't grow with the font, only what's drawn inside it. */}
-              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96} />
+                  doesn't grow with the font, only what's drawn inside it.
+                  1.15 is about as far as that goes: kana ink runs roughly
+                  three quarters of the em box, so the glyph lands just
+                  inside the cell once the +0.04 baseline nudge below is
+                  counted, and anything higher starts clipping its tail. */}
+              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={1.15} clearInPanelCorner />
             </div>
 
             <div className="preview-a-nav">

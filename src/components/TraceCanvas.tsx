@@ -12,6 +12,14 @@ interface TraceCanvasProps {
    *  GLYPH_FONT_RATIO below; a caller can raise it for a bigger guide, e.g.
    *  the あ preview card. */
   guideFontRatio?: number
+  /**
+   * Hangs Clear off the outer panel's corner rather than the drawing
+   * square's. The square is centred and can be narrower than the panel it
+   * sits in — where it also has no visible border, as in the あ preview, a
+   * button pinned to the square's corner reads as floating in the middle of
+   * the panel's edge rather than sitting in a corner at all.
+   */
+  clearInPanelCorner?: boolean
 }
 
 /** Logical resolution a single character's cell is computed in — a word of
@@ -62,7 +70,7 @@ function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HT
  * a discouraging number next to a beginner's first ever あ works against the
  * point. Writing it and seeing it beside the real thing is the exercise.
  */
-export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false, guideFontRatio = GLYPH_FONT_RATIO }: TraceCanvasProps) {
+export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false, guideFontRatio = GLYPH_FONT_RATIO, clearInPanelCorner = false }: TraceCanvasProps) {
   const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const inkCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const drawingRef = useRef(false)
@@ -156,8 +164,15 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
     lastPointRef.current = null
   }
 
+  const clearButton = (
+    <button type="button" className="trace-canvas-clear" onClick={clearInk} aria-label="Clear">
+      &#8635; Clear
+    </button>
+  )
+
   return (
     <div className="trace-canvas">
+      {clearInPanelCorner && clearButton}
       <div
         className={`trace-canvas-stack${vertical ? ' is-vertical' : ''}`}
         style={{
@@ -182,9 +197,7 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
         />
-        <button type="button" className="trace-canvas-clear" onClick={clearInk} aria-label="Clear">
-          &#8635; Clear
-        </button>
+        {!clearInPanelCorner && clearButton}
         {overlay && <div className="trace-canvas-overlay">{overlay}</div>}
       </div>
     </div>
