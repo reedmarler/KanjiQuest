@@ -12,6 +12,13 @@ interface TraceCanvasProps {
    *  GLYPH_FONT_RATIO below; a caller can raise it for a bigger guide, e.g.
    *  the あ preview card. */
   guideFontRatio?: number
+  /** Nudges the printed guide glyph away from its cell's exact geometric
+   *  center, as a fraction of SIZE. textAlign/textBaseline center the glyph's
+   *  advance box, not its visible ink — most characters read fine there, but
+   *  a caller showing one glyph large enough for the mismatch to be obvious
+   *  (the あ preview card) can dial it in per character. Defaults to the
+   *  small downward nudge every other caller already relies on. */
+  guideOffset?: { x?: number; y?: number }
 }
 
 /** Logical resolution a single character's cell is computed in — a word of
@@ -62,7 +69,9 @@ function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HT
  * a discouraging number next to a beginner's first ever あ works against the
  * point. Writing it and seeing it beside the real thing is the exercise.
  */
-export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false, guideFontRatio = GLYPH_FONT_RATIO }: TraceCanvasProps) {
+export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false, guideFontRatio = GLYPH_FONT_RATIO, guideOffset }: TraceCanvasProps) {
+  const offsetX = guideOffset?.x ?? 0
+  const offsetY = guideOffset?.y ?? 0.04
   const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const inkCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const drawingRef = useRef(false)
@@ -95,15 +104,15 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
         ctx.font = `${Math.round(SIZE * guideFontRatio)}px 'Noto Sans JP', sans-serif`
         chars.forEach((ch, index) => {
           const cell = SIZE * (index + 0.5)
-          if (vertical) ctx.fillText(ch, width / 2, cell + SIZE * 0.04)
-          else ctx.fillText(ch, cell, height / 2 + SIZE * 0.04)
+          if (vertical) ctx.fillText(ch, width / 2 + SIZE * offsetX, cell + SIZE * offsetY)
+          else ctx.fillText(ch, cell + SIZE * offsetX, height / 2 + SIZE * offsetY)
         })
       }
     }
 
     const ink = inkCanvasRef.current
     if (ink) ink.getContext('2d')!.clearRect(0, 0, width, height)
-  }, [char, showGuide, vertical, guideFontRatio])
+  }, [char, showGuide, vertical, guideFontRatio, offsetX, offsetY])
 
   function clearInk() {
     const ink = inkCanvasRef.current

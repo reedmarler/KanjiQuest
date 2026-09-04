@@ -15735,13 +15735,13 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-glyph {
-  font: 400 clamp(13.86rem, 35.64vw, 15.345rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  font: 400 clamp(12.474rem, 32.076vw, 13.8105rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
   /* Klee One carries a lot of built-in ascender space above あ's actual
      ink — line-height: 1 above doesn't remove it, it's baked into the
      font's own metrics — so a plain box around the glyph shows a big gap
      above the character even at small padding. Pulled up to compensate;
      scales down with the font size above, since that ascender space does. */
-  margin-top: -2.7rem;
+  margin-top: -2.43rem;
   background: linear-gradient(160deg, var(--preview-glyph-1), var(--preview-glyph-2));
   background-clip: text;
   -webkit-background-clip: text;
