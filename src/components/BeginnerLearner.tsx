@@ -748,7 +748,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                   which is on あ's advance box rather than its visible ink —
                   at this size the mismatch is obvious, unlike the app-wide
                   default guide size elsewhere. */}
-              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96 * 1.1} guideOffset={{ x: -0.001, y: 0.053 }} />
+              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96 * 1.1} guideOffset={{ x: -0.001, y: 0.02 }} />
             </div>
 
             <div className="preview-a-nav">
