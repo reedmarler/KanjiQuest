@@ -15707,10 +15707,10 @@ body:has(.beginner-learner--preview-a-dark) {
   justify-content: center;
   gap: 0.8rem;
   /* Matches the write card's height below it (both close to 4:5 against
-     their shared width), same as the reference image — it was noticeably
-     shorter before. Top/bottom trimmed by exactly what the glyph below
-     grew by, so this card's own height doesn't move. */
-  padding: 2.6rem 1rem 1.7rem;
+     their shared width), same as the reference image. Top/bottom trimmed by
+     exactly what the glyph below grew by, so this card's own height stays
+     put as the glyph itself is resized. */
+  padding: 1.6rem 0.6rem 1.2rem;
   border: 0;
   border-radius: 30px;
   background: var(--preview-card-bg);
@@ -15724,7 +15724,7 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-glyph {
-  font: 400 clamp(10.5rem, 26vw, 11.5rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  font: 400 clamp(13rem, 34vw, 14.5rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
   background: linear-gradient(160deg, var(--preview-glyph-1), var(--preview-glyph-2));
   background-clip: text;
   -webkit-background-clip: text;
@@ -15753,14 +15753,31 @@ body:has(.beginner-learner--preview-a-dark) {
   border: 0;
   border-radius: 16px;
   background: transparent;
+  /* Clear (below) needs to sit past this box's own edge, in the card's
+     corner rather than the canvas's — the canvas layers are transparent
+     right up to their square corners, so letting it escape here doesn't
+     expose any square edges of its own past the rounded clip. */
+  overflow: visible;
 }
 
 .preview-a-write .trace-canvas-clear {
-  top: 0.02rem;
-  right: 0.02rem;
+  /* Negative offsets push it out past the canvas box, into the write
+     card's own 1.3rem padding, landing right at that card's corner instead
+     of the smaller canvas's. */
+  top: -0.75rem;
+  right: -0.75rem;
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
   background: var(--preview-badge-bg);
   color: var(--preview-muted);
+  box-shadow: var(--preview-shadow);
+}
+
+/* The shared component's own :hover rule sets color: var(--text) — the
+   app's permanently-light text color, invisible against this card's own
+   pale (or, in the dark toggle, deep-navy) pill background. */
+.preview-a-write .trace-canvas-clear:hover {
+  border-color: var(--preview-accent);
+  color: var(--preview-text);
 }
 
 .preview-a-nav {
