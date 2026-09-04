@@ -747,7 +747,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                   tuned against one browser — a hand-tuned guess here was
                   clipping the glyph on real phones despite looking fine
                   in every desktop check. */}
-              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96 * 1.1} guideFit />
+              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96 * 1.1 * 1.25} guideFit guideFitMargin={0.98} />
             </div>
 
             <div className="preview-a-nav">

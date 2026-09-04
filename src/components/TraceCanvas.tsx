@@ -31,6 +31,10 @@ interface TraceCanvasProps {
    *  it was eyeballed on. Off by default to leave every other caller's
    *  existing look untouched. */
   guideFit?: boolean
+  /** How much of the cell guideFit's shrink-to-fit is allowed to use, as a
+   *  fraction of SIZE — 1 would let the ink touch the cell edge exactly.
+   *  Defaults to 0.92 (an 8% margin); only meaningful with guideFit on. */
+  guideFitMargin?: number
 }
 
 /** Logical resolution a single character's cell is computed in — a word of
@@ -81,7 +85,7 @@ function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HT
  * a discouraging number next to a beginner's first ever あ works against the
  * point. Writing it and seeing it beside the real thing is the exercise.
  */
-export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false, guideFontRatio = GLYPH_FONT_RATIO, guideOffset, guideFit = false }: TraceCanvasProps) {
+export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false, guideFontRatio = GLYPH_FONT_RATIO, guideOffset, guideFit = false, guideFitMargin = 0.92 }: TraceCanvasProps) {
   const offsetX = guideOffset?.x ?? 0
   const offsetY = guideOffset?.y ?? 0.04
   const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -129,9 +133,10 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
           let metrics = ctx.measureText(ch)
           let inkHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
           let inkWidth = metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight
-          // 8% margin on every side so the ink never touches the cell edge,
-          // whichever dimension (height or width) is the tighter fit.
-          const maxSpan = SIZE * 0.92
+          // Margin (guideFitMargin) on every side so the ink never touches
+          // the cell edge, whichever dimension (height or width) is the
+          // tighter fit.
+          const maxSpan = SIZE * guideFitMargin
           const overflow = Math.max(inkHeight, inkWidth) / maxSpan
           if (overflow > 1) {
             fontSize = Math.round(fontSize / overflow)
@@ -147,7 +152,7 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
 
     const ink = inkCanvasRef.current
     if (ink) ink.getContext('2d')!.clearRect(0, 0, width, height)
-  }, [char, showGuide, vertical, guideFontRatio, offsetX, offsetY, guideFit])
+  }, [char, showGuide, vertical, guideFontRatio, offsetX, offsetY, guideFit, guideFitMargin])
 
   function clearInk() {
     const ink = inkCanvasRef.current
