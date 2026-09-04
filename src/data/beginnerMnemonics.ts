@@ -489,6 +489,7 @@ const katakanaRows: BeginnerRow[] = [
       { char: 'シャ', romaji: 'sha', mnemonic: 'シ with a small ャ tucked beside it: "shi" glides into one beat, "sha".' },
       { char: 'シュ', romaji: 'shu', mnemonic: 'シ with a small ュ tucked beside it: "shi" glides into one beat, "shu".' },
       { char: 'ショ', romaji: 'sho', mnemonic: 'シ with a small ョ tucked beside it: "shi" glides into one beat, "sho".' },
+      { char: 'シェ', romaji: 'she', mnemonic: 'シ with a small ェ tucked beside it: a loanword-only beat, "she" — as in シェフ (chef).' },
     ],
   },
   {
@@ -498,6 +499,7 @@ const katakanaRows: BeginnerRow[] = [
       { char: 'チャ', romaji: 'cha', mnemonic: 'チ with a small ャ tucked beside it: "chi" glides into one beat, "cha".' },
       { char: 'チュ', romaji: 'chu', mnemonic: 'チ with a small ュ tucked beside it: "chi" glides into one beat, "chu".' },
       { char: 'チョ', romaji: 'cho', mnemonic: 'チ with a small ョ tucked beside it: "chi" glides into one beat, "cho".' },
+      { char: 'チェ', romaji: 'che', mnemonic: 'チ with a small ェ tucked beside it: a loanword-only beat, "che" — as in チェス (chess).' },
     ],
   },
   {
@@ -552,6 +554,7 @@ const katakanaRows: BeginnerRow[] = [
       { char: 'ジャ', romaji: 'ja', mnemonic: 'ジ with a small ャ tucked beside it: the voiced "ji" glides into one beat, "ja".' },
       { char: 'ジュ', romaji: 'ju', mnemonic: 'ジ with a small ュ tucked beside it: the voiced "ji" glides into one beat, "ju".' },
       { char: 'ジョ', romaji: 'jo', mnemonic: 'ジ with a small ョ tucked beside it: the voiced "ji" glides into one beat, "jo".' },
+      { char: 'ジェ', romaji: 'je', mnemonic: 'ジ with a small ェ tucked beside it: a loanword-only beat, "je" — as in ジェット (jet). Rare in hiragana, common in katakana.' },
     ],
   },
   {
@@ -570,6 +573,69 @@ const katakanaRows: BeginnerRow[] = [
       { char: 'ピャ', romaji: 'pya', mnemonic: 'ピ with a small ャ tucked beside it: the popped "pi" glides into one beat, "pya".' },
       { char: 'ピュ', romaji: 'pyu', mnemonic: 'ピ with a small ュ tucked beside it: the popped "pi" glides into one beat, "pyu".' },
       { char: 'ピョ', romaji: 'pyo', mnemonic: 'ピ with a small ョ tucked beside it: the popped "pi" glides into one beat, "pyo".' },
+    ],
+  },
+  /*
+   * Extended katakana: combinations built only to spell foreign sounds that
+   * don't occur in native Japanese, so they exist for katakana (loanwords,
+   * foreign names) but essentially never appear in hiragana. Each pairs a
+   * base kana with a small vowel the way yōon does, just with more vowels
+   * available since these aren't limited to the -i row + や/ゆ/よ pattern.
+   */
+  {
+    id: 'katakana-tsa',
+    label: 'ツァ',
+    characters: [
+      { char: 'ツァ', romaji: 'tsa', mnemonic: 'ツ with a small ァ tucked beside it: "tsu" shifts to "tsa" — as in モーツァルト (Mozart).' },
+      { char: 'ツィ', romaji: 'tsi', mnemonic: 'ツ with a small ィ tucked beside it: "tsu" shifts to "tsi" — a rare loanword-only combination.' },
+      { char: 'ツェ', romaji: 'tse', mnemonic: 'ツ with a small ェ tucked beside it: "tsu" shifts to "tse" — as in the "tse" in tsetse fly.' },
+      { char: 'ツォ', romaji: 'tso', mnemonic: 'ツ with a small ォ tucked beside it: "tsu" shifts to "tso" — as in カンツォーネ (canzone).' },
+    ],
+  },
+  {
+    id: 'katakana-fa',
+    label: 'ファ',
+    characters: [
+      { char: 'ファ', romaji: 'fa', mnemonic: 'フ with a small ァ tucked beside it: "fu" shifts to "fa" — as in ファン (fan).' },
+      { char: 'フィ', romaji: 'fi', mnemonic: 'フ with a small ィ tucked beside it: "fu" shifts to "fi" — as in フィルム (film).' },
+      { char: 'フェ', romaji: 'fe', mnemonic: 'フ with a small ェ tucked beside it: "fu" shifts to "fe" — as in カフェ (café).' },
+      { char: 'フォ', romaji: 'fo', mnemonic: 'フ with a small ォ tucked beside it: "fu" shifts to "fo" — as in フォーク (fork).' },
+    ],
+  },
+  {
+    id: 'katakana-ti',
+    label: 'ティ',
+    characters: [
+      { char: 'ティ', romaji: 'ti', mnemonic: 'テ with a small ィ tucked beside it: "te" sharpens into the crisp "ti" — as in パーティー (party).' },
+      { char: 'トゥ', romaji: 'tu', mnemonic: 'ト with a small ゥ tucked beside it: "to" shifts to "tu" — as in ヒンドゥー (Hindu).' },
+    ],
+  },
+  {
+    id: 'katakana-di',
+    label: 'ディ',
+    characters: [
+      { char: 'ディ', romaji: 'di', mnemonic: 'デ with a small ィ tucked beside it: the voiced "de" sharpens into "di" — as in ディズニー (Disney).' },
+      { char: 'ドゥ', romaji: 'du', mnemonic: 'ド with a small ゥ tucked beside it: the voiced "do" shifts to "du" — rare, used only for foreign "du" sounds.' },
+    ],
+  },
+  {
+    id: 'katakana-wi',
+    label: 'ウィ',
+    characters: [
+      { char: 'ウィ', romaji: 'wi', mnemonic: 'ウ with a small ィ tucked beside it: "u" glides into "wi" — as in ウィンドウ (window).' },
+      { char: 'ウェ', romaji: 'we', mnemonic: 'ウ with a small ェ tucked beside it: "u" glides into "we" — as in ウェブ (web).' },
+      { char: 'ウォ', romaji: 'wo', mnemonic: 'ウ with a small ォ tucked beside it: "u" glides into "wo" — as in ウォーター (water). Unlike を, this one keeps its "w".' },
+    ],
+  },
+  {
+    id: 'katakana-va',
+    label: 'ヴァ',
+    characters: [
+      { char: 'ヴァ', romaji: 'va', mnemonic: 'ヴ — a katakana-only base built from ウ with dakuten, for the "v" Japanese has no native sound for — with a small ァ: "va", as in ヴァイオリン (violin).' },
+      { char: 'ヴィ', romaji: 'vi', mnemonic: 'ヴ with a small ィ tucked beside it: "vi", as in ヴィーナス (Venus).' },
+      { char: 'ヴ', romaji: 'vu', mnemonic: 'ヴ on its own: the bare "vu" sound, ウ with dakuten added to voice it.' },
+      { char: 'ヴェ', romaji: 've', mnemonic: 'ヴ with a small ェ tucked beside it: "ve", as in ラヴェンダー (lavender).' },
+      { char: 'ヴォ', romaji: 'vo', mnemonic: 'ヴ with a small ォ tucked beside it: "vo", as in ヴォーカル (vocal).' },
     ],
   },
 ]
