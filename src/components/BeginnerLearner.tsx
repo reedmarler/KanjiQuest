@@ -736,23 +736,19 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             </button>
 
             <div className="preview-a-write">
-              {/* stackWidthRem set past any container this card will ever be,
-                  so the canvas always resolves to 100% of the write card's
-                  actual available width (min(100%, stackWidthRem) in
-                  App.css) instead of one of TraceCanvas's own fixed presets
-                  (13rem compact / 21rem standard) — both were narrower than
-                  this card, leaving matching dead space down both sides of
-                  the box. Still square, so the box grows taller along with
-                  it; the write card's own height is otherwise unconstrained,
-                  so that's fine.
+              {/* compactSingleCharacter keeps the box itself (and every
+                  button/nav element below it) at its original footprint —
+                  filling the box further is guideFontRatio/guideFitMargin's
+                  job, not the box's own size.
                   guideFontRatio requests a guide bigger than the app-wide
                   default (0.82); guideFit measures あ's actual rendered ink
                   on whatever engine loads this page and centers + shrinks
                   to fit from that, rather than trusting a fixed offset
                   tuned against one browser — a hand-tuned guess here was
                   clipping the glyph on real phones despite looking fine
-                  in every desktop check. */}
-              <TraceCanvas key={card.char} char={card.char} stackWidthRem={30} guideFontRatio={0.96 * 1.1 * 1.25} guideFit guideFitMargin={0.98} />
+                  in every desktop check. guideFitMargin pushes how much of
+                  the fixed-size box that fit is allowed to fill. */}
+              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96 * 1.1 * 1.25} guideFit guideFitMargin={0.995} />
             </div>
 
             <div className="preview-a-nav">

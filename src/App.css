@@ -15789,12 +15789,13 @@ body:has(.beginner-learner--preview-a-dark) {
 .preview-a-write .trace-canvas-clear {
   /* Negative offsets push it out past the canvas box, into the write card's
      own 1.3rem padding, landing at that card's corner instead of the
-     smaller canvas's. The canvas now fills the card's full inner width
-     (stackWidthRem on the TraceCanvas call), so unlike when it was a
-     centered, narrower box, top and right are symmetric — both offsets
-     are just crossing that same 1.3rem padding now. */
+     smaller canvas's. The canvas box (square, single character) doesn't
+     fill the card's full inner width — it's centered by .trace-canvas
+     underneath it — so it sits noticeably further from the card's right
+     edge than from its top edge, and right needs a much bigger offset than
+     top to actually land in the same spot relative to the card both ways. */
   top: -0.75rem;
-  right: -0.75rem;
+  right: -2.61rem;
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
   background: var(--preview-badge-bg);
   color: var(--preview-muted);
