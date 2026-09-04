@@ -2222,6 +2222,12 @@ body:has(.dashboard) {
 
 .control-story-quick-select {
   position: relative;
+  /* Without this the wrapper is a block box around an inline-flex button,
+     which leaves room below the button for the wrapper's own inherited
+     line-height (the inline-formatting-context "strut") — so the button
+     sits bottom-aligned a few pixels lower than a plain flex sibling like
+     the mode toggle, even though both buttons are the same height. */
+  display: flex;
   pointer-events: auto;
 }
 
