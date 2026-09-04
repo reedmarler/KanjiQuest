@@ -51,6 +51,11 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scrollbar-gutter: stable;
+  /* Mobile Safari paints the strip revealed by rubber-band overscroll and by
+     its collapsing/expanding address bar using the <html> background, not
+     body's — without this it flashes white regardless of what body is set
+     to. Keep in sync with body's own default background below. */
+  background: var(--bg);
 }
 
 body {
@@ -15483,11 +15488,17 @@ button.counter-example {
    below the Previous/Next row. body is an ancestor, so it can't read the
    --preview-page-bg custom property set below (custom properties only
    inherit downward); these repeat the same two gradients directly instead.
-   Keep both in sync with the values a few lines down if either changes. */
+   Keep both in sync with the values a few lines down if either changes.
+   html gets the same treatment as body: mobile Safari's rubber-band
+   overscroll and its collapsing/expanding address bar reveal a strip painted
+   from <html>'s background, not body's, which otherwise flashes white above
+   and below the page on exactly this card. */
+html:has(.beginner-learner--preview-a),
 body:has(.beginner-learner--preview-a) {
   background: linear-gradient(135deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
 }
 
+html:has(.beginner-learner--preview-a-dark),
 body:has(.beginner-learner--preview-a-dark) {
   background: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
 }
