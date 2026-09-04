@@ -736,10 +736,14 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             </button>
 
             <div className="preview-a-write">
-              {/* compactSingleCharacter keeps the box itself (and every
-                  button/nav element below it) at its original footprint —
-                  filling the box further is guideFontRatio/guideFitMargin's
-                  job, not the box's own size.
+              {/* stackWidthRem set past any container this card will ever be,
+                  so the canvas resolves to 100% of the write card's actual
+                  available width instead of one of TraceCanvas's own fixed
+                  presets (13rem compact / 21rem standard), both narrower
+                  than this card. Still square, so the write card grows
+                  taller to match — the read card's own height (above) is
+                  trimmed by the same amount, so Previous/Next below don't
+                  move.
                   guideFontRatio requests a guide bigger than the app-wide
                   default (0.82); guideFit measures あ's actual rendered ink
                   on whatever engine loads this page and centers + shrinks
@@ -747,8 +751,8 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                   tuned against one browser — a hand-tuned guess here was
                   clipping the glyph on real phones despite looking fine
                   in every desktop check. guideFitMargin pushes how much of
-                  the fixed-size box that fit is allowed to fill. */}
-              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96 * 1.1 * 1.25} guideFit guideFitMargin={0.995} />
+                  the box that fit is allowed to fill. */}
+              <TraceCanvas key={card.char} char={card.char} stackWidthRem={30} guideFontRatio={0.96 * 1.1 * 1.25} guideFit guideFitMargin={0.995} />
             </div>
 
             <div className="preview-a-nav">

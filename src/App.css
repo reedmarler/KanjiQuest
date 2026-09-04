@@ -15717,17 +15717,16 @@ body:has(.beginner-learner--preview-a-dark) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* Tightened from 0.8rem along with the padding below — together they cut
-     1.3rem of this card's height, handed to the write card's own bottom
-     padding so the two still add up the way they did before. Top/bottom
-     since grown back a little from that trim, independent of the write
-     card, to give this card a bit more height of its own. Grown again
-     since: Klee One's あ paints real ink below its nominal line-box (the
-     box this gap is measured from), so a tight gap here read fine in this
-     sandbox's Chromium but let "Tap to listen" sit under the character's
-     tail on a real phone. */
-  gap: 1.6rem;
-  padding: 0.7rem 0.6rem 0.8rem;
+  /* Scaled down (padding, gap, and the glyph's own font-size + margin-top
+     below) so this card gives up exactly the height the write card gained
+     from filling its own box (see stackWidthRem on the TraceCanvas call) —
+     Previous/Next end up back where they were. Gap keeps a real margin
+     (not scaled all the way back to the 0.5rem this once was) since Klee
+     One's あ paints real ink below its nominal line-box, and a tight gap
+     here previously let "Tap to listen" sit under the character's tail on
+     a real phone. */
+  gap: 1rem;
+  padding: 0.51rem 0.6rem 0.59rem;
   border: 0;
   border-radius: 30px;
   background: var(--preview-card-bg);
@@ -15741,13 +15740,13 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-glyph {
-  font: 400 clamp(12.474rem, 32.076vw, 13.8105rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  font: 400 clamp(9.12rem, 23.46vw, 10.1rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
   /* Klee One carries a lot of built-in ascender space above あ's actual
      ink — line-height: 1 above doesn't remove it, it's baked into the
      font's own metrics — so a plain box around the glyph shows a big gap
      above the character even at small padding. Pulled up to compensate;
      scales down with the font size above, since that ascender space does. */
-  margin-top: -2.43rem;
+  margin-top: -1.78rem;
   background: linear-gradient(160deg, var(--preview-glyph-1), var(--preview-glyph-2));
   background-clip: text;
   -webkit-background-clip: text;
@@ -15789,13 +15788,11 @@ body:has(.beginner-learner--preview-a-dark) {
 .preview-a-write .trace-canvas-clear {
   /* Negative offsets push it out past the canvas box, into the write card's
      own 1.3rem padding, landing at that card's corner instead of the
-     smaller canvas's. The canvas box (square, single character) doesn't
-     fill the card's full inner width — it's centered by .trace-canvas
-     underneath it — so it sits noticeably further from the card's right
-     edge than from its top edge, and right needs a much bigger offset than
-     top to actually land in the same spot relative to the card both ways. */
+     smaller canvas's. The canvas fills the card's full inner width
+     (stackWidthRem on the TraceCanvas call), so top and right are
+     symmetric — both offsets are just crossing that same 1.3rem padding. */
   top: -0.75rem;
-  right: -2.61rem;
+  right: -0.75rem;
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
   background: var(--preview-badge-bg);
   color: var(--preview-muted);
