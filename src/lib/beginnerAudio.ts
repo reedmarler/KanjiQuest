@@ -1,4 +1,6 @@
-const HIRAGANA_RECORDINGS: Record<string, string> = {
+type HiraganaRecording = string | string[]
+
+const HIRAGANA_RECORDINGS: Record<string, HiraganaRecording> = {
   'あ': 'a.mp3',
   'い': 'i.mp3',
   'う': 'u-v3.mp3',
@@ -51,7 +53,7 @@ const HIRAGANA_RECORDINGS: Record<string, string> = {
   'げ': 'ge.mp3',
   'ご': 'go.mp3',
   'ざ': 'za.mp3',
-  'じ': 'ji.mp3',
+  'じ': ['ji-01.mp3', 'ji-02.mp3', 'ji-03.mp3'],
   'ず': 'zu.mp3',
   'ぜ': 'ze.mp3',
   'ぞ': 'zo.mp3',
@@ -70,6 +72,13 @@ const HIRAGANA_RECORDINGS: Record<string, string> = {
   'ぷ': 'pu.mp3',
   'ぺ': 'pe.mp3',
   'ぽ': 'po.mp3',
+  'ぎゃ': ['gya.mp3', 'gya-02.mp3', 'gya-03.mp3', 'gya-04.mp3', 'gya-05.mp3', 'gya-06.mp3', 'gya-07.mp3', 'gya-08.mp3'],
+  'ぎゅ': ['gyu.mp3', 'gyu-02.mp3', 'gyu-03.mp3', 'gyu-04.mp3', 'gyu-05.mp3', 'gyu-06.mp3', 'gyu-07.mp3', 'gyu-08.mp3'],
+  'ぎょ': ['gyo.mp3', 'gyo-02.mp3', 'gyo-03.mp3', 'gyo-04.mp3', 'gyo-05.mp3', 'gyo-06.mp3', 'gyo-07.mp3', 'gyo-08.mp3'],
+  'じゃ': ['ja.mp3', 'ja-02.mp3', 'ja-03.mp3'],
+  'じゅ': ['ju.mp3', 'ju-02.mp3', 'ju-03.mp3'],
+  'じょ': ['jo.mp3', 'jo-02.mp3', 'jo-03.mp3'],
+  'じぇ': ['je-01.mp3', 'je-02.mp3', 'je-03.mp3'],
 }
 
 const HIRAGANA_WORD_RECORDINGS: Record<string, string> = {
@@ -172,11 +181,21 @@ const HIRAGANA_WORD_RECORDINGS: Record<string, string> = {
 
 export type BeginnerAudioKind = 'kana' | 'word' | 'row'
 
+function pickRecording(recording: HiraganaRecording | undefined): string | undefined {
+  if (!recording) return undefined
+  if (Array.isArray(recording)) return recording[Math.floor(Math.random() * recording.length)]
+  return recording
+}
+
+function isRecordingFile(file: string | undefined): file is string {
+  return Boolean(file)
+}
+
 /** Returns an approved Beginner Mode recording when one exists. */
 export function findBeginnerAudio(text: string, kind: BeginnerAudioKind): string | undefined {
   const normalized = text.trim()
   if (kind === 'kana') {
-    const file = HIRAGANA_RECORDINGS[normalized]
+    const file = pickRecording(HIRAGANA_RECORDINGS[normalized])
     return file ? `${import.meta.env.BASE_URL}audio/beginner/hiragana/${file}` : undefined
   }
   if (kind === 'word') {
@@ -195,7 +214,7 @@ export function findBeginnerAudio(text: string, kind: BeginnerAudioKind): string
 export function findBeginnerRowAudio(text: string): string[] | undefined {
   const characters = text.trim().split('\u3001').map((part) => part.trim()).filter(Boolean)
   if (characters.length === 0) return undefined
-  const files = characters.map((character) => HIRAGANA_RECORDINGS[character])
-  if (files.some((file) => !file)) return undefined
+  const files = characters.map((character) => pickRecording(HIRAGANA_RECORDINGS[character]))
+  if (!files.every(isRecordingFile)) return undefined
   return files.map((file) => `${import.meta.env.BASE_URL}audio/beginner/hiragana/${file}`)
 }
