@@ -290,6 +290,13 @@ const hiraganaRows: BeginnerRow[] = [
     ],
   },
   {
+    id: 'hiragana-je',
+    label: 'じぇ',
+    characters: [
+      { char: 'じぇ', romaji: 'je', mnemonic: 'じ with a small ぇ tucked beside it: an extended sound for borrowed words like ジェット.' },
+    ],
+  },
+  {
     id: 'hiragana-bya',
     label: 'びゃ',
     characters: [
