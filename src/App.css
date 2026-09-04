@@ -15769,7 +15769,7 @@ body:has(.beginner-learner--preview-a-dark) {
      edge than from its top edge, and right needs a much bigger offset than
      top to actually land in the same spot relative to the card both ways. */
   top: -0.75rem;
-  right: -2.28rem;
+  right: -2.61rem;
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
   background: var(--preview-badge-bg);
   color: var(--preview-muted);
