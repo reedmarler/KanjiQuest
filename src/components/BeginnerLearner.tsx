@@ -740,15 +740,14 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                   height above it, matching the reference image — without it,
                   a lone character's trace box defaults to a much larger
                   square meant for the main (non-preview) writing lesson.
-                  guideFontRatio fills more of that box with the guide glyph
-                  than the app-wide default (0.82) — the box's own size is
-                  untouched, since the canvas's fixed internal resolution
-                  doesn't grow with the font, only what's drawn inside it.
-                  guideOffset corrects textAlign/textBaseline's centering,
-                  which is on あ's advance box rather than its visible ink —
-                  at this size the mismatch is obvious, unlike the app-wide
-                  default guide size elsewhere. */}
-              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96 * 1.1} guideOffset={{ x: -0.001, y: 0.02 }} />
+                  guideFontRatio requests a guide bigger than the app-wide
+                  default (0.82); guideFit measures あ's actual rendered ink
+                  on whatever engine loads this page and centers + shrinks
+                  to fit from that, rather than trusting a fixed offset
+                  tuned against one browser — a hand-tuned guess here was
+                  clipping the glyph on real phones despite looking fine
+                  in every desktop check. */}
+              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96 * 1.1} guideFit />
             </div>
 
             <div className="preview-a-nav">

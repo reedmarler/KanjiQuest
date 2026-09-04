@@ -17,8 +17,20 @@ interface TraceCanvasProps {
    *  advance box, not its visible ink — most characters read fine there, but
    *  a caller showing one glyph large enough for the mismatch to be obvious
    *  (the あ preview card) can dial it in per character. Defaults to the
-   *  small downward nudge every other caller already relies on. */
+   *  small downward nudge every other caller already relies on. Ignored
+   *  when guideFit is on, which centers from measured ink instead of a
+   *  guessed constant. */
   guideOffset?: { x?: number; y?: number }
+  /** Centers the guide glyph on its own measured ink (via
+   *  CanvasRenderingContext2D.measureText's actualBoundingBox* fields)
+   *  instead of guideOffset's fixed guess, and shrinks the font if that ink
+   *  would otherwise overflow the cell. A hand-tuned guideOffset is only
+   *  ever correct for the font metrics of whichever engine it was tuned
+   *  against — this reads real metrics from whatever engine is actually
+   *  rendering it, so it holds up across browsers instead of just the one
+   *  it was eyeballed on. Off by default to leave every other caller's
+   *  existing look untouched. */
+  guideFit?: boolean
 }
 
 /** Logical resolution a single character's cell is computed in — a word of
@@ -69,7 +81,7 @@ function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HT
  * a discouraging number next to a beginner's first ever あ works against the
  * point. Writing it and seeing it beside the real thing is the exercise.
  */
-export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false, guideFontRatio = GLYPH_FONT_RATIO, guideOffset }: TraceCanvasProps) {
+export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false, guideFontRatio = GLYPH_FONT_RATIO, guideOffset, guideFit = false }: TraceCanvasProps) {
   const offsetX = guideOffset?.x ?? 0
   const offsetY = guideOffset?.y ?? 0.04
   const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -101,18 +113,41 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
         ctx.fillStyle = 'rgba(148, 148, 168, 0.38)'
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.font = `${Math.round(SIZE * guideFontRatio)}px 'Noto Sans JP', sans-serif`
+        if (!guideFit) ctx.font = `${Math.round(SIZE * guideFontRatio)}px 'Noto Sans JP', sans-serif`
         chars.forEach((ch, index) => {
-          const cell = SIZE * (index + 0.5)
-          if (vertical) ctx.fillText(ch, width / 2 + SIZE * offsetX, cell + SIZE * offsetY)
-          else ctx.fillText(ch, cell + SIZE * offsetX, height / 2 + SIZE * offsetY)
+          const cellX = vertical ? width / 2 : SIZE * (index + 0.5)
+          const cellY = vertical ? SIZE * (index + 0.5) : height / 2
+          if (!guideFit) {
+            ctx.fillText(ch, cellX + SIZE * offsetX, cellY + SIZE * offsetY)
+            return
+          }
+          // Real, engine-reported ink bounds — not the guessed offset above
+          // — so this lands centered and unclipped on whatever browser
+          // actually renders it, not just the one this was tuned against.
+          let fontSize = Math.round(SIZE * guideFontRatio)
+          ctx.font = `${fontSize}px 'Noto Sans JP', sans-serif`
+          let metrics = ctx.measureText(ch)
+          let inkHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+          let inkWidth = metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight
+          // 8% margin on every side so the ink never touches the cell edge,
+          // whichever dimension (height or width) is the tighter fit.
+          const maxSpan = SIZE * 0.92
+          const overflow = Math.max(inkHeight, inkWidth) / maxSpan
+          if (overflow > 1) {
+            fontSize = Math.round(fontSize / overflow)
+            ctx.font = `${fontSize}px 'Noto Sans JP', sans-serif`
+            metrics = ctx.measureText(ch)
+          }
+          const drawX = cellX + (metrics.actualBoundingBoxLeft - metrics.actualBoundingBoxRight) / 2
+          const drawY = cellY + (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2
+          ctx.fillText(ch, drawX, drawY)
         })
       }
     }
 
     const ink = inkCanvasRef.current
     if (ink) ink.getContext('2d')!.clearRect(0, 0, width, height)
-  }, [char, showGuide, vertical, guideFontRatio, offsetX, offsetY])
+  }, [char, showGuide, vertical, guideFontRatio, offsetX, offsetY, guideFit])
 
   function clearInk() {
     const ink = inkCanvasRef.current
