@@ -15756,7 +15756,7 @@ body:has(.beginner-learner--preview-a-dark) {
      font's own metrics — so a plain box around the glyph shows a big gap
      above the character even at small padding. Pulled up to compensate;
      scales down with the font size above, since that ascender space does. */
-  margin-top: -1.78rem;
+  margin-top: -1.4rem;
   background: linear-gradient(160deg, var(--preview-glyph-1), var(--preview-glyph-2));
   background-clip: text;
   -webkit-background-clip: text;
