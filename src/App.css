@@ -15758,9 +15758,9 @@ body:has(.beginner-learner--preview-a-dark) {
 .preview-a-replay {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   color: var(--preview-accent);
-  font: 700 0.85rem/1 'Outfit', system-ui, sans-serif;
+  font: 700 0.68rem/1 'Outfit', system-ui, sans-serif;
 }
 
 .preview-a-write {
