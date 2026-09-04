@@ -6,8 +6,16 @@ interface TraceCanvasProps {
   showGuide?: boolean
   overlay?: ReactNode
   /** Keeps a one-character vocabulary exercise from using the larger square
-   *  intended for the main character-writing lesson. */
+   *  intended for the main character-writing lesson. Ignored when
+   *  stackWidthRem is set. */
   compactSingleCharacter?: boolean
+  /** Overrides the single/multi-character defaults below outright — the
+   *  box is still square for one character, so this sets its height too.
+   *  For a caller whose surrounding layout is already narrower than either
+   *  default (13rem compact, 21rem standard), like the あ preview card,
+   *  those defaults just leave dead space on either side rather than
+   *  actually constraining anything. */
+  stackWidthRem?: number
   /** How much of a cell's height the printed guide glyph fills. Defaults to
    *  GLYPH_FONT_RATIO below; a caller can raise it for a bigger guide, e.g.
    *  the あ preview card. */
@@ -85,7 +93,7 @@ function pointFromEvent(event: React.PointerEvent<HTMLCanvasElement>, canvas: HT
  * a discouraging number next to a beginner's first ever あ works against the
  * point. Writing it and seeing it beside the real thing is the exercise.
  */
-export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false, guideFontRatio = GLYPH_FONT_RATIO, guideOffset, guideFit = false, guideFitMargin = 0.92 }: TraceCanvasProps) {
+export function TraceCanvas({ char, showGuide = true, overlay, compactSingleCharacter = false, stackWidthRem: stackWidthRemOverride, guideFontRatio = GLYPH_FONT_RATIO, guideOffset, guideFit = false, guideFitMargin = 0.92 }: TraceCanvasProps) {
   const offsetX = guideOffset?.x ?? 0
   const offsetY = guideOffset?.y ?? 0.04
   const guideCanvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -102,9 +110,9 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
   // square cell per character instead of squeezing every glyph into that
   // same square, which was illegible. Stacked, the width is one cell's worth
   // and CSS caps it against the viewport's height instead.
-  const stackWidthRem = charCount <= 1
+  const stackWidthRem = stackWidthRemOverride ?? (charCount <= 1
     ? (compactSingleCharacter ? 13 : 21)
-    : vertical ? 21 : charCount * 15
+    : vertical ? 21 : charCount * 15)
 
   // A new character means a fresh guide and a blank page — stale ink from the
   // previous character must not linger under the next one.

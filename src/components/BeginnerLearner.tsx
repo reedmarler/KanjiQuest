@@ -736,10 +736,15 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             </button>
 
             <div className="preview-a-write">
-              {/* compactSingleCharacter keeps this closer to the read card's
-                  height above it, matching the reference image — without it,
-                  a lone character's trace box defaults to a much larger
-                  square meant for the main (non-preview) writing lesson.
+              {/* stackWidthRem set past any container this card will ever be,
+                  so the canvas always resolves to 100% of the write card's
+                  actual available width (min(100%, stackWidthRem) in
+                  App.css) instead of one of TraceCanvas's own fixed presets
+                  (13rem compact / 21rem standard) — both were narrower than
+                  this card, leaving matching dead space down both sides of
+                  the box. Still square, so the box grows taller along with
+                  it; the write card's own height is otherwise unconstrained,
+                  so that's fine.
                   guideFontRatio requests a guide bigger than the app-wide
                   default (0.82); guideFit measures あ's actual rendered ink
                   on whatever engine loads this page and centers + shrinks
@@ -747,7 +752,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                   tuned against one browser — a hand-tuned guess here was
                   clipping the glyph on real phones despite looking fine
                   in every desktop check. */}
-              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96 * 1.1 * 1.25} guideFit guideFitMargin={0.98} />
+              <TraceCanvas key={card.char} char={card.char} stackWidthRem={30} guideFontRatio={0.96 * 1.1 * 1.25} guideFit guideFitMargin={0.98} />
             </div>
 
             <div className="preview-a-nav">
