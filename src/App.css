@@ -15724,7 +15724,7 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-glyph {
-  font: 400 clamp(14rem, 36vw, 15.5rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  font: 400 clamp(15.4rem, 39.6vw, 17.05rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
   background: linear-gradient(160deg, var(--preview-glyph-1), var(--preview-glyph-2));
   background-clip: text;
   -webkit-background-clip: text;
@@ -15761,11 +15761,15 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-write .trace-canvas-clear {
-  /* Negative offsets push it out past the canvas box, into the write
-     card's own 1.3rem padding, landing right at that card's corner instead
-     of the smaller canvas's. */
+  /* Negative offsets push it out past the canvas box, into the write card's
+     own 1.3rem padding, landing at that card's corner instead of the
+     smaller canvas's. The canvas box (square, single character) doesn't
+     fill the card's full inner width — it's centered by .trace-canvas
+     underneath it — so it sits noticeably further from the card's right
+     edge than from its top edge, and right needs a much bigger offset than
+     top to actually land in the same spot relative to the card both ways. */
   top: -0.75rem;
-  right: -1.15rem;
+  right: -1.88rem;
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
   background: var(--preview-badge-bg);
   color: var(--preview-muted);
