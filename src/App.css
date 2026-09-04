@@ -15712,12 +15712,11 @@ body:has(.beginner-learner--preview-a-dark) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.8rem;
-  /* Matches the write card's height below it (both close to 4:5 against
-     their shared width), same as the reference image. Top/bottom trimmed by
-     exactly what the glyph below grew by, so this card's own height stays
-     put as the glyph itself is resized. */
-  padding: 0.9rem 0.6rem 1.2rem;
+  /* Tightened from 0.8rem along with the padding below — together they cut
+     1.3rem of this card's height, handed to the write card's own bottom
+     padding so the two still add up the way they did before. */
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem 0.6rem;
   border: 0;
   border-radius: 30px;
   background: var(--preview-card-bg);
@@ -15748,7 +15747,10 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-write {
-  padding: 1.3rem;
+  /* Bottom carries the 1.3rem trimmed from the read card above, so the
+     writing area itself grows into the space that used to be excess
+     whitespace up there instead of the page just getting taller overall. */
+  padding: 1.3rem 1.3rem 2.6rem;
   border-radius: 30px;
   background:
     radial-gradient(circle, var(--preview-dot) 1px, transparent 1.4px) 0 0 / 16px 16px,
