@@ -2248,12 +2248,12 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.26rem;
-  /* Same fixed footprint as the Pick a mode and Mode-toggle buttons, so the
-     three read as one family of controls in the topbar. Sized to the widest
-     of the three's typical label ("Choose focus"), not the widest possible
-     one — an outlier like "Auxiliary Verbs" or a long story title still
-     truncates with an ellipsis rather than stretching every button further. */
-  width: 6.25rem;
+  /* Same fixed footprint as the Mode toggle, so the pair reads as one family
+     of controls in the topbar. Both only ever hold a short label ("Swap", or
+     "Mode"/"Story"/"Grammar"/"Star"), unlike the Pick a mode and story/focus
+     name buttons, which need the extra width for "Choose focus" and similar
+     — so this one stays narrower than those instead of matching them. */
+  width: 4.9rem;
   height: 1.7rem;
   box-sizing: border-box;
   padding: 0 0.4rem;
@@ -3180,7 +3180,11 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  width: 6.25rem;
+  /* Narrower than the Pick a mode / story / focus name buttons: this one
+     only ever holds a short label ("Mode", "Story", "Grammar", "Star"), so
+     it doesn't need their width — see the matching note on
+     .control-swap-mode-button, the other member of this narrower pair. */
+  width: 4.9rem;
   height: 1.7rem;
   padding: 0 0.4rem;
   border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
@@ -5969,21 +5973,20 @@ body:has(.dashboard) {
     min-height: 0;
     gap: 0.32rem;
   }
-  /* On a phone the pair trades places: Swap joins the story / grammar chip on
-     the first line, and Pick a mode is the one that hangs under the switch.
-     Swap is the smaller of the two and the only one that shares its line, so
-     it is the one that fits beside a chip; Pick a mode is a full-width name
-     button and reads better on a line of its own. */
-  .control-story-quick-select.is-swap {
-    order: 0;
-    flex-basis: auto;
-    display: block;
-  }
-  .control-story-quick-select.is-picking {
-    order: 2;
-    flex-basis: 100%;
-    display: flex;
-    justify-content: flex-end;
+  /* Pick a mode and Swap keep the same placement as every other breakpoint
+     here too: Pick a mode sits inline to the left of the switch (there is
+     nothing else on that line while a mode is still being picked), and Swap
+     — like every other on-screen mode control — takes the full-width line
+     under the switch. */
+  /* On wide screens the switch's own auto margin is what pins it to the far
+     right of a much wider bar, leaving Pick a mode (or the story/grammar
+     chip) at the opposite end. A phone's bar is only as wide as its own
+     controls, so that same auto margin reads as a stray gap splitting a pair
+     that belongs together — drop it here and let the bar's own right
+     justification hold whichever control shares the line snug against the
+     switch instead. */
+  .control-story-top-toggle {
+    margin-left: 0;
   }
   .control-story-quick-select:not(.is-swap):not(.is-picking) {
     min-width: 0;
@@ -5996,8 +5999,7 @@ body:has(.dashboard) {
     gap: 0.28rem;
   }
   /* Swap and the mode toggle keep the same fixed footprint as Pick a mode at
-     every breakpoint, so the family stays visually consistent when they trade
-     places above. */
+     every breakpoint, so the family stays visually consistent. */
   .control-swap-mode-button,
   .control-story-toggle {
     height: 1.45rem;
@@ -6017,21 +6019,20 @@ body:has(.dashboard) {
     overflow-y: auto;
   }
   /* A menu grows from the edge its button sits against, or it runs off
-     screen. On a phone that is the left for the story / grammar chips and for
-     Swap beside them, and the right for Pick a mode under the switch. */
-  .control-story-quick-select:not(.is-picking) .control-story-quick-menu {
+     screen. On a phone that is the left for the story / grammar chips, which
+     sit at the left edge of the topbar, and the right for Swap, which sits
+     alone on its own full-width line so its own right edge is the topbar's. */
+  .control-story-quick-select:not(.is-swap):not(.is-picking) .control-story-quick-menu {
     left: 0;
     right: auto;
   }
-  .control-story-quick-select.is-swap .control-story-quick-menu {
-    /* Swap only ever lists the 3 short mode names, and it starts partway
-       across the row behind the chip it sits beside, so the wider shared
-       width would clip past the right edge. */
-    width: min(calc(100vw - 5.5rem), 13rem);
-  }
   .control-story-quick-select.is-picking .control-story-quick-menu {
-    left: auto;
-    right: 0;
+    /* Pick a mode sits to the left of the switch rather than flush against
+       the topbar's own right edge, so anchoring the menu's right edge to the
+       button's would run it past the screen's left edge at the default
+       width. It only ever lists the same 3 short mode names Swap does, so
+       it can shrink to fit the room actually left of the switch. */
+    width: min(calc(100vw - 8rem), 13rem);
   }
   .control-story-quick-menu button > span:first-child {
     overflow: hidden;
