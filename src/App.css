@@ -15239,7 +15239,7 @@ button.counter-example {
   width: 2.9rem;
   height: 2.9rem;
   border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--text-muted) 24%, transparent);
+  background: color-mix(in srgb, var(--text-muted) 34%, transparent);
 }
 
 .hiragana-chart-cell-char {
