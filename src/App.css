@@ -5998,6 +5998,17 @@ body:has(.dashboard) {
     min-width: 0;
     max-width: calc(100% - 4.5rem);
   }
+  /* The story/grammar chip and Pick a mode both share line 1 with the
+     switch, so neither is as wide as the topbar itself — its own edges sit
+     somewhere in the middle of a phone's narrow bar, not flush against
+     either screen edge. Anchoring a menu almost as wide as the bar to a
+     point mid-bar runs it off one side or the other regardless of which
+     way it opens, so instead let their menus size and position off the
+     topbar itself (the nearest still-positioned ancestor once this drops
+     position) rather than off their own narrow button. */
+  .control-story-quick-select:not(.is-swap) {
+    position: static;
+  }
   .control-story-name-button {
     max-width: min(10.75rem, calc(100vw - 6rem));
     height: 1.45rem;
@@ -6025,20 +6036,14 @@ body:has(.dashboard) {
     overflow-y: auto;
   }
   /* A menu grows from the edge its button sits against, or it runs off
-     screen. On a phone that is the left for the story / grammar chips, which
-     sit at the left edge of the topbar, and the right for Swap, which sits
-     alone on its own full-width line so its own right edge is the topbar's. */
-  .control-story-quick-select:not(.is-swap):not(.is-picking) .control-story-quick-menu {
+     screen. Swap sits alone on its own full-width line, so its own right
+     edge already is the topbar's — same as always. The story / grammar chip
+     and Pick a mode instead grow from the topbar's own left edge (see the
+     position: static rule above), which is the edge closer to where both of
+     them actually sit on line 1. */
+  .control-story-quick-select:not(.is-swap) .control-story-quick-menu {
     left: 0;
     right: auto;
-  }
-  .control-story-quick-select.is-picking .control-story-quick-menu {
-    /* Pick a mode sits to the left of the switch rather than flush against
-       the topbar's own right edge, so anchoring the menu's right edge to the
-       button's would run it past the screen's left edge at the default
-       width. It only ever lists the same 3 short mode names Swap does, so
-       it can shrink to fit the room actually left of the switch. */
-    width: min(calc(100vw - 8rem), 13rem);
   }
   .control-story-quick-menu button > span:first-child {
     overflow: hidden;
