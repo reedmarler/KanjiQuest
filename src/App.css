@@ -15201,8 +15201,8 @@ button.counter-example {
 }
 
 .hiragana-chart-row-chars {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(5, 2.9rem);
   flex: 1;
   gap: 0.35rem;
 }
@@ -15230,6 +15230,16 @@ button.counter-example {
 
 .hiragana-chart-cell:active {
   transform: scale(0.95);
+}
+
+/* Marks a vowel slot no kana fills — e.g. the empty い/え columns in the
+   contracted きゃ/きゅ/きょ rows — so it reads as "nothing here" rather than
+   a layout gap. */
+.hiragana-chart-cell-empty {
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--text-muted) 24%, transparent);
 }
 
 .hiragana-chart-cell-char {

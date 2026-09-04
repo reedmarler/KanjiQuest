@@ -5,6 +5,19 @@ import { AppBackButton } from './AppBackButton'
 
 type ChartScript = Extract<BeginnerScript, 'hiragana' | 'katakana'>
 
+// Every row reads left to right as a, i, u, e, o — including the contracted
+// きゃ/きゅ/きょ rows, whose romaji still ends in one of those vowels, so a
+// character's column is just the vowel its own romaji ends with. を and ん
+// break that pattern — they sit under う and お rather than their own sound.
+const CHART_VOWEL_COLUMNS: Record<string, number> = { a: 1, i: 2, u: 3, e: 4, o: 5 }
+const CHART_COLUMN_OVERRIDES: Record<string, number> = { wo: 3, n: 5 }
+
+function chartColumn(romaji: string): number {
+  return CHART_COLUMN_OVERRIDES[romaji] ?? CHART_VOWEL_COLUMNS[romaji.charAt(romaji.length - 1)] ?? 5
+}
+
+const CHART_COLUMNS = [1, 2, 3, 4, 5]
+
 interface KanaChartProps {
   script: ChartScript
   onBack: () => void
@@ -32,6 +45,7 @@ export function KanaChart({ script, onBack, onSelectCharacter }: KanaChartProps)
       <div className="hiragana-chart-grid">
         {deck.rows.map((row, rowIndex) => {
           const studied = row.characters.every((character) => (mastery[character.char] ?? 0) >= MASTERY_TARGET)
+          const filledColumns = new Set(row.characters.map((character) => chartColumn(character.romaji)))
           return (
             <div key={row.id} className="hiragana-chart-row">
               <span
@@ -46,12 +60,21 @@ export function KanaChart({ script, onBack, onSelectCharacter }: KanaChartProps)
                     key={character.char}
                     type="button"
                     className="hiragana-chart-cell"
+                    style={{ gridColumn: chartColumn(character.romaji), gridRow: 1 }}
                     onClick={() => onSelectCharacter(rowIndex, charIndex)}
                     aria-label={`Practice starting at ${character.char}, romaji ${character.romaji}`}
                   >
                     <span className="hiragana-chart-cell-char" lang="ja">{character.char}</span>
                     <small className="hiragana-chart-cell-romaji">{character.romaji}</small>
                   </button>
+                ))}
+                {CHART_COLUMNS.filter((column) => !filledColumns.has(column)).map((column) => (
+                  <span
+                    key={column}
+                    className="hiragana-chart-cell-empty"
+                    style={{ gridColumn: column, gridRow: 1 }}
+                    aria-hidden="true"
+                  />
                 ))}
               </div>
             </div>
