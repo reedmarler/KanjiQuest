@@ -10,6 +10,12 @@
     <meta name="apple-mobile-web-app-title" content="Kanji Quest" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- Mobile Safari tints its status bar and bottom toolbar from this tag's
+         color, not from whatever the page actually paints there — without
+         it those bars stay white/gray no matter what background the page
+         sets. Default matches --bg; the あ preview card (BeginnerLearner)
+         swaps this while it's on screen and restores it on the way out. -->
+    <meta name="theme-color" id="theme-color-meta" content="#0f0e17" />
     <title>Kanji Quest — Learn Japanese</title>
   </head>
   <body>

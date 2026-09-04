@@ -28,6 +28,15 @@ const QUIZ_LISTENING_WORDS = 5
 const SINGLE_CHARACTER_SPEECH_RATE = 0.5
 const COMPLETION_WRITING_DURATION_SCALE = 0.1625
 
+/** The app's normal <meta name="theme-color">, matching --bg in App.css —
+ *  restored whenever the あ preview card (below) isn't on screen. */
+const DEFAULT_THEME_COLOR = '#0f0e17'
+/** Middle stop of the あ preview's own light/dark gradients in App.css
+ *  (--preview-page-bg), used as a single representative color since Safari's
+ *  status-bar/toolbar tint only takes a flat color, not a gradient. */
+const ALPHA_PREVIEW_THEME_COLOR_LIGHT = '#f3d2ff'
+const ALPHA_PREVIEW_THEME_COLOR_DARK = '#1c2036'
+
 const WORD_PICTURE: Record<string, string> = {
   あい: '❤️',
   いえ: '🏠',
@@ -291,6 +300,25 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   // dark/light toggle for just this preview card's own palette — it does not
   // touch the rest of the app's (permanently dark) theme.
   const [previewDark, setPreviewDark] = useState(false)
+
+  // Mobile Safari tints its status bar and bottom toolbar from the page's
+  // <meta name="theme-color">, not from what the page actually paints there
+  // — without updating it, those bars stay the app's default dark color (or
+  // white) behind this card's pink/purple gradient instead of blending into
+  // it. Split into two effects so toggling previewDark just updates the
+  // color in place, while leaving the preview (isAlphaPreview turning false)
+  // is the only thing that restores the app default.
+  useEffect(() => {
+    if (!isAlphaPreview) return
+    document.getElementById('theme-color-meta')?.setAttribute('content', previewDark ? ALPHA_PREVIEW_THEME_COLOR_DARK : ALPHA_PREVIEW_THEME_COLOR_LIGHT)
+  }, [isAlphaPreview, previewDark])
+
+  useEffect(() => {
+    if (!isAlphaPreview) return
+    return () => {
+      document.getElementById('theme-color-meta')?.setAttribute('content', DEFAULT_THEME_COLOR)
+    }
+  }, [isAlphaPreview])
 
   useEffect(() => {
     window.localStorage.setItem(storageKey(MASTERY_STORAGE_PREFIX, script), JSON.stringify(mastery))
