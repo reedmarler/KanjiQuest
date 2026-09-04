@@ -78,7 +78,6 @@ const HIRAGANA_RECORDINGS: Record<string, HiraganaRecording> = {
   'じゃ': ['ja.mp3', 'ja-02.mp3', 'ja-03.mp3'],
   'じゅ': ['ju.mp3', 'ju-02.mp3', 'ju-03.mp3'],
   'じょ': ['jo.mp3', 'jo-02.mp3', 'jo-03.mp3'],
-  'じぇ': ['je-01.mp3', 'je-02.mp3', 'je-03.mp3'],
 }
 
 const HIRAGANA_WORD_RECORDINGS: Record<string, string> = {
