@@ -66,6 +66,14 @@ body {
   min-height: 100dvh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  /* Added as a home-screen app, the status bar now floats over the page
+     (apple-mobile-web-app-status-bar-style: black-translucent) instead of
+     reserving its own opaque strip, so body's own background paints all the
+     way to the physical top of the screen — but that also means real
+     content needs pushing back down by the same amount, or it'd render
+     under the status bar. Resolves to 0 in a normal browser tab, where the
+     status bar still reserves its own space, so this changes nothing there. */
+  padding-top: env(safe-area-inset-top);
 }
 
 #root {
@@ -14242,7 +14250,10 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
    must never be the thing a stray tap lands on. */
 #build-badge {
   position: fixed;
-  top: 3px;
+  /* Fixed positioning is relative to the viewport, not to body's own
+     safe-area padding above, so this needs the same inset added directly or
+     a home-screen install's floating status bar sits on top of it. */
+  top: calc(3px + env(safe-area-inset-top));
   left: 5px;
   z-index: 999999;
   padding: 1px 5px;
