@@ -15721,8 +15721,12 @@ body:has(.beginner-learner--preview-a-dark) {
      1.3rem of this card's height, handed to the write card's own bottom
      padding so the two still add up the way they did before. Top/bottom
      since grown back a little from that trim, independent of the write
-     card, to give this card a bit more height of its own. */
-  gap: 0.5rem;
+     card, to give this card a bit more height of its own. Grown again
+     since: Klee One's あ paints real ink below its nominal line-box (the
+     box this gap is measured from), so a tight gap here read fine in this
+     sandbox's Chromium but let "Tap to replay" sit under the character's
+     tail on a real phone. */
+  gap: 1.6rem;
   padding: 0.7rem 0.6rem 0.8rem;
   border: 0;
   border-radius: 30px;
