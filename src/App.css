@@ -15724,7 +15724,7 @@ body:has(.beginner-learner--preview-a-dark) {
      card, to give this card a bit more height of its own. Grown again
      since: Klee One's あ paints real ink below its nominal line-box (the
      box this gap is measured from), so a tight gap here read fine in this
-     sandbox's Chromium but let "Tap to replay" sit under the character's
+     sandbox's Chromium but let "Tap to listen" sit under the character's
      tail on a real phone. */
   gap: 1.6rem;
   padding: 0.7rem 0.6rem 0.8rem;

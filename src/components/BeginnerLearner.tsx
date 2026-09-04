@@ -731,7 +731,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             >
               <span className="preview-a-glyph" lang="ja">{card.char}</span>
               <span className="preview-a-replay">
-                <span aria-hidden="true">&#128266;</span> Tap to replay
+                <span aria-hidden="true">&#128266;</span> Tap to listen
               </span>
             </button>
 
