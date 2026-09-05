@@ -15314,6 +15314,7 @@ body:has(.hiragana-chart-page--katakana) {
 .hiragana-chart-heading h1 {
   color: var(--kana-chart-text);
   font: 800 1.65rem/1.05 'Outfit', system-ui, sans-serif;
+  text-align: center;
 }
 
 .hiragana-chart-heading p {
