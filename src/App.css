@@ -8,6 +8,7 @@
 .batch-controls{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}.batch-controls label{display:flex;flex-direction:column;gap:4px;color:#7b857f;font-size:.55rem;font-weight:600}.batch-controls select{border:1px solid var(--c-line);background:#fff;border-radius:6px;padding:7px 24px 7px 8px;color:#314239;font:600 .62rem inherit}.review-summary{display:flex;gap:8px;margin:-10px 0 15px}.review-summary span{background:#fff;border:1px solid var(--c-line);border-radius:99px;padding:5px 10px;color:#7c867f;font-size:.58rem}.review-summary b{color:#315e48;margin-right:3px}
 
 :root {
+  color-scheme: dark;
   --bg: #0f0e17;
   --surface: #1a1926;
   --surface-2: #242336;
@@ -149,6 +150,11 @@ body:has(.beginner-word-writing-card) .app,
   display: none;
 }
 
+.beginner-zone-page .tool-menu-heading,
+.study-tools-page .tool-menu-heading {
+  margin-bottom: 0.5rem;
+}
+
 body:has(.quest-hub) .app {
   padding-top: 1rem;
   padding-bottom: 2rem;
@@ -169,6 +175,41 @@ body:has(.dashboard) {
   position: relative;
   /* Desktop: title shares a row with the absolute story toggle */
   padding-top: 0.2rem;
+}
+
+.dashboard-theme-toggle {
+  position: absolute;
+  top: 0.45rem;
+  left: 0;
+  z-index: 13;
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 34%, var(--border));
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--surface-2) 76%, transparent);
+  color: var(--text-muted);
+  font: 700 0.8rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--bg) 20%, transparent);
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 100ms ease;
+}
+
+.dashboard-theme-toggle:hover {
+  border-color: color-mix(in srgb, var(--kyogre-light) 62%, var(--border));
+  background: color-mix(in srgb, var(--kyogre) 10%, var(--surface-2));
+  color: var(--text);
+}
+
+.dashboard-theme-toggle:active {
+  transform: scale(0.96);
+}
+
+.dashboard-theme-toggle:focus-visible {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: 2px;
 }
 
 .hero {
@@ -4094,7 +4135,7 @@ body:has(.dashboard) {
 }
 
 .dashboard-action-secondary > .dashboard-additional-tools-button {
-  grid-column: 1;
+  grid-column: 2;
   border-color: color-mix(in srgb, var(--gold) 28%, var(--border));
 }
 
@@ -4107,42 +4148,11 @@ body:has(.dashboard) {
   color: var(--gold);
 }
 
-.dashboard-action-secondary > .dashboard-picture-button:hover {
-  border-color: var(--sakura-light);
-}
-
-/* Row two of the secondary grid is pinned so Speed Run always sits directly
-   under Picture Mode, whatever order the tiles are written in. */
-.dashboard-action-secondary > .dashboard-additional-tools-button {
-  grid-row: 2;
-}
-
-.dashboard-action-secondary > .dashboard-speedrun-button {
-  grid-column: 2;
-  grid-row: 2;
-  border-color: color-mix(in srgb, var(--rayquaza) 30%, var(--border));
-  background: linear-gradient(135deg, color-mix(in srgb, var(--rayquaza) 7%, transparent), transparent 54%), var(--surface);
-}
-
-.dashboard-action-secondary > .dashboard-speedrun-button:hover {
-  border-color: var(--rayquaza-light);
-}
-
-.dashboard-action-secondary .dashboard-speedrun-button .dashboard-additional-mark-main {
-  background: color-mix(in srgb, var(--rayquaza) 16%, var(--surface-2));
-  color: var(--rayquaza-light);
-}
-
 .dashboard-action-secondary .dashboard-achievement-mark,
 .dashboard-action-secondary .dashboard-additional-mark-main {
   width: 1.45rem;
   border-radius: 7px;
   font-size: 0.78rem;
-}
-
-.dashboard-action-secondary .dashboard-picture-button .dashboard-additional-mark-main {
-  background: color-mix(in srgb, var(--sakura) 18%, var(--surface-2));
-  color: var(--sakura-light);
 }
 
 .dashboard-action-secondary .dashboard-achievement-button b,
@@ -8681,6 +8691,11 @@ body:has(.dashboard) {
   text-align: left;
   cursor: pointer;
   transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.beginner-zone-page .tool-menu-card,
+.study-tools-page .tool-menu-card {
+  min-height: 5.4rem;
 }
 
 .tool-menu-card:hover {
@@ -15143,7 +15158,19 @@ button.counter-example {
    not a navigation control of its own.
    --------------------------------------------------------------------------- */
 
+:root[data-app-theme='light'] body:has(.hiragana-chart-page) {
+  background:
+    radial-gradient(circle at 16% 8%, color-mix(in srgb, var(--sakura-light) 18%, transparent), transparent 9rem),
+    radial-gradient(circle at 86% 18%, color-mix(in srgb, var(--sakura) 12%, transparent), transparent 10rem),
+    linear-gradient(180deg, #fff8fb 0%, #fffdfc 48%, #faf7f8 100%);
+}
+
 .hiragana-chart-page {
+  --hiragana-paper: #fffdfc;
+  --hiragana-paper-soft: #fff6f9;
+  --hiragana-ink: #241b22;
+  --hiragana-muted: #675b62;
+  --hiragana-line: rgba(122, 67, 86, 0.16);
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -15219,13 +15246,14 @@ button.counter-example {
   background: var(--surface-2);
   color: var(--text);
   cursor: pointer;
-  transition: border-color 140ms ease, background 140ms ease, transform 100ms ease;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease, transform 100ms ease;
 }
 
 .hiragana-chart-cell:hover,
 .hiragana-chart-cell:focus-visible {
-  border-color: var(--sakura-light);
-  background: color-mix(in srgb, var(--sakura) 12%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--sakura) 56%, var(--border));
+  background: color-mix(in srgb, #fff 72%, var(--sakura-light) 28%);
+  box-shadow: 0 0.2rem 0.8rem color-mix(in srgb, var(--sakura-deep) 13%, transparent);
 }
 
 .hiragana-chart-cell:active {
@@ -15240,6 +15268,44 @@ button.counter-example {
   height: 2.9rem;
   border-radius: 0.5rem;
   background: color-mix(in srgb, var(--text-muted) 34%, transparent);
+}
+
+:root[data-app-theme='light'] .hiragana-chart-heading h1 {
+  color: color-mix(in srgb, var(--sakura-deep) 72%, var(--hiragana-ink));
+}
+
+:root[data-app-theme='light'] .hiragana-chart-heading p {
+  color: var(--hiragana-muted);
+}
+
+:root[data-app-theme='light'] .hiragana-chart-row-status {
+  color: color-mix(in srgb, var(--hiragana-muted) 72%, transparent);
+}
+
+:root[data-app-theme='light'] .hiragana-chart-row-status.is-studied {
+  color: var(--rayquaza-deep);
+}
+
+:root[data-app-theme='light'] .hiragana-chart-cell {
+  border-color: var(--hiragana-line);
+  background: color-mix(in srgb, var(--hiragana-paper) 86%, var(--sakura-light) 14%);
+  color: var(--hiragana-ink);
+  box-shadow: 0 0.18rem 0.65rem color-mix(in srgb, var(--sakura-deep) 9%, transparent);
+}
+
+:root[data-app-theme='light'] .hiragana-chart-cell:hover,
+:root[data-app-theme='light'] .hiragana-chart-cell:focus-visible {
+  border-color: color-mix(in srgb, var(--sakura) 52%, var(--hiragana-line));
+  background: color-mix(in srgb, var(--hiragana-paper) 74%, var(--sakura-light) 26%);
+  box-shadow: 0 0.2rem 0.8rem color-mix(in srgb, var(--sakura-deep) 13%, transparent);
+}
+
+:root[data-app-theme='light'] .hiragana-chart-cell-empty {
+  background: color-mix(in srgb, var(--sakura-light) 18%, transparent);
+}
+
+:root[data-app-theme='light'] .hiragana-chart-cell-romaji {
+  color: var(--hiragana-muted);
 }
 
 .hiragana-chart-cell-char {

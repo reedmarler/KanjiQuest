@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useLayoutEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -53,6 +53,7 @@ const BeginnerLearner = lazy(() => import('./components/BeginnerLearner').then((
 const KanaChart = lazy(() => import('./components/KanaChart').then((module) => ({ default: module.KanaChart })))
 const BeginnerSpeedRun = lazy(() => import('./components/BeginnerSpeedRun').then((module) => ({ default: module.BeginnerSpeedRun })))
 const PicturePractice = lazy(() => import('./components/PicturePractice').then((module) => ({ default: module.PicturePractice })))
+const APP_THEME_STORAGE_KEY = 'kanji-quest-app-theme-v1'
 
 /*
  * Copies of two tools, kept in Additional so they can be modernised before
@@ -96,8 +97,13 @@ type View =
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
 
+type AppTheme = 'dark' | 'light'
+
 function App() {
   const [view, setView] = useState<View>('dashboard')
+  const [appTheme, setAppTheme] = useState<AppTheme>(() => (
+    window.localStorage.getItem(APP_THEME_STORAGE_KEY) === 'light' ? 'light' : 'dark'
+  ))
   const [progress] = useState<Record<string, CardProgress>>(() => loadProgress())
   const [wrongPool, setWrongPool] = useState(() => loadWrongPool())
   const [session, setSession] = useState<SessionItem[]>([])
@@ -132,6 +138,11 @@ function App() {
    * behind it.
    */
   const [sentenceLab, setSentenceLab] = useState(false)
+
+  useEffect(() => {
+    document.documentElement.dataset.appTheme = appTheme
+    window.localStorage.setItem(APP_THEME_STORAGE_KEY, appTheme)
+  }, [appTheme])
 
   // This is a single-page app, so route changes otherwise retain whatever
   // scroll offset the previous screen left behind. Run before paint so each
@@ -480,6 +491,10 @@ function App() {
               setPictureReturnView('beginner-zone')
               setView('picture-practice')
             } },
+            { mark: '⚡', title: 'Speed Run', detail: 'A kana flashes, then vanishes — name it before it fades.', accent: 'rayquaza', onClick: () => {
+              setSpeedRunReturnView('beginner-zone')
+              setView('beginner-speed-run')
+            } },
           ]}
           footerAction={{
             prompt: 'Too easy?',
@@ -749,15 +764,9 @@ function App() {
         onOpenBeginnerZone={() => setView('beginner-zone')}
         onOpenAdditionalTools={() => setView('additional-tools')}
         onOpenStudyTools={() => setView('study-tools')}
-        onOpenPicturePractice={() => {
-          setPictureReturnView('dashboard')
-          setView('picture-practice')
-        }}
-        onOpenSpeedRun={() => {
-          setSpeedRunReturnView('dashboard')
-          setView('beginner-speed-run')
-        }}
         onOpenFavoriteWords={() => setView('favorite-words')}
+        appTheme={appTheme}
+        onToggleAppTheme={() => setAppTheme((theme) => (theme === 'dark' ? 'light' : 'dark'))}
         questProgress={questProgress}
         wrongPool={wrongPool}
         progress={progress}
