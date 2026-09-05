@@ -17439,21 +17439,12 @@ body:has(.beginner-learner--preview-a-dark) {
   }
 }
 
-@media (max-width: 430px) {
-  /* Bottom padding trimmed to match the wider phone rule above — the page's
-     own padding already carries the gap under the card. */
-  .beginner-learner {
-    padding: 0.2rem 0.65rem 0.05rem;
-  }
-
-  .beginner-mnemonic {
-    font-size: 0.76rem;
-  }
-
-  .beginner-romaji {
-    font-size: 1.45rem;
-  }
-
+/* Matches the Hiragana/Katakana Chart page's own wrap breakpoint (560px) —
+   several phones (larger Android devices, Plus/Max iPhones at their 2x CSS
+   width) sit between 430 and 560 and were missing this entirely, keeping the
+   title bar single-row and the row tabs at their crowded 12-per-screen
+   width right up to a much narrower cutoff than the Chart page uses. */
+@media (max-width: 560px) {
   /* Chart/Quiz/switch drop to their own full-width row below the title
      instead of squeezing onto the title's line — same wrap the Hiragana/
      Katakana Chart page's own heading does at this width, so the two
@@ -17475,7 +17466,13 @@ body:has(.beginner-learner--preview-a-dark) {
   .preview-a-header-btn {
     flex: 1 1 0;
   }
+}
 
+/* Wider than the title-bar wrap above: the row tabs feel scrunched at the
+   12-per-screen formula anywhere in the app's "phone" range (below the
+   720px point where the whole app drops out of its 1.5x desktop zoom), not
+   just below 560px. */
+@media (max-width: 720px) {
   /* 12 fit per screen on a wider phone or desktop without feeling cramped,
      but at this width that formula shrinks each tab enough to feel
      scrunched — 6 keeps them legible and easy to tap, at the cost of more
@@ -17483,6 +17480,22 @@ body:has(.beginner-learner--preview-a-dark) {
   .beginner-learner--preview-a .beginner-row-tab {
     flex-basis: calc((100% - 1.5rem) / 6);
     width: calc((100% - 1.5rem) / 6);
+  }
+}
+
+@media (max-width: 430px) {
+  /* Bottom padding trimmed to match the wider phone rule above — the page's
+     own padding already carries the gap under the card. */
+  .beginner-learner {
+    padding: 0.2rem 0.65rem 0.05rem;
+  }
+
+  .beginner-mnemonic {
+    font-size: 0.76rem;
+  }
+
+  .beginner-romaji {
+    font-size: 1.45rem;
   }
 }
 
