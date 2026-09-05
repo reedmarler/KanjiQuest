@@ -15666,75 +15666,36 @@ body:has(.beginner-learner--preview-a-dark) {
   transform: translateX(0.95rem);
 }
 
-/* Marks whichever edge still has more tabs scrolled past it, instead of
-   leaving one visibly sliced in half at rest — the plain overflow-x:auto
-   default. A mask (not an overlay painted to match the page's own
-   gradient background, which this sits directly on and which shifts
-   under it) fades the tabs' own pixels to transparent at that edge, so
-   whatever's actually behind shows through correctly either way. The
-   fade-start/fade-end classes are toggled by BeginnerLearner from real
-   scroll position, so it only ever shows on a side that genuinely has
-   more tabs past it. */
-.beginner-row-tabs-wrap.is-preview-a .beginner-row-tabs {
-  transition: mask-image 140ms ease, -webkit-mask-image 140ms ease;
-}
-
-.beginner-row-tabs-wrap.is-preview-a.fade-start .beginner-row-tabs {
-  -webkit-mask-image: linear-gradient(to right, transparent, black 1.1rem);
-  mask-image: linear-gradient(to right, transparent, black 1.1rem);
-}
-
-.beginner-row-tabs-wrap.is-preview-a.fade-end .beginner-row-tabs {
-  -webkit-mask-image: linear-gradient(to left, transparent, black 1.1rem);
-  mask-image: linear-gradient(to left, transparent, black 1.1rem);
-}
-
-.beginner-row-tabs-wrap.is-preview-a.fade-start.fade-end .beginner-row-tabs {
-  -webkit-mask-image: linear-gradient(to right, transparent, black 1.1rem, black calc(100% - 1.1rem), transparent);
-  mask-image: linear-gradient(to right, transparent, black 1.1rem, black calc(100% - 1.1rem), transparent);
-}
-
+/* Exactly 8 tabs sized to the strip's own visible width, so wherever a
+   scroll lands, either 8 full tabs are showing or (past the last one)
+   empty space — never a 9th tab sliced in half at the edge. Percentage
+   flex-basis resolves against this container's own content width, so
+   this needs no JS measurement and stays correct across screen sizes;
+   VISIBLE_TABS below (8) and the 7 gaps between them are the only two
+   numbers driving it. Snap (mandatory + align: start on every tab, not
+   just every 8th) still lets a swipe move by one tab at a time — the
+   uniform width is what guarantees any tab-aligned stop shows exactly 8,
+   not the snapping itself. */
 .beginner-learner--preview-a .beginner-row-tabs {
   padding: 0.3rem 0.15rem 0.5rem;
-  /* "mandatory" so a swipe always settles on a full tab — never leaves one
-     half-visible at the edge — and scroll-padding matches this container's
-     own inline padding so a snapped tab clears it cleanly instead of
-     landing flush against (or half under) the edge. */
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 0.15rem;
 }
 
 .beginner-learner--preview-a .beginner-row-tab {
+  /* 7 gaps (0.3rem each, matching .beginner-row-tabs's own gap) across 8
+     tabs per screen. */
+  flex: 0 0 calc((100% - 2.1rem) / 8);
+  width: calc((100% - 2.1rem) / 8);
+  min-width: 0;
   border: 0;
   border-radius: 14px;
-  padding: 0.48rem 0.72rem;
+  padding: 0.48rem 0.4rem;
   background: var(--preview-tab-bg);
   color: var(--preview-text);
   font-size: 0.68rem;
   scroll-snap-align: start;
-  /* Without this a fast flick can glide clean past several tabs before
-     momentum runs out — still "snapping" in the sense that it stops on a
-     tab, just not what reads as a snap. This forces every tab in the
-     flick's path to act as a hard stop, so even a fast swipe only ever
-     advances one at a time — a firm, mechanical click each time rather
-     than a free glide. */
-  scroll-snap-stop: always;
   transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
-}
-
-/* A quick, snappy settle-in pop on whichever tab the strip just stopped
-   on — visual stand-in for the haptic click iOS Safari won't let a web
-   page trigger (there's no vibration/haptics API exposed to it at all).
-   Class is added by BeginnerLearner right as a scroll gesture settles and
-   removed after the animation plays, so it re-fires on every stop. */
-@keyframes beginner-row-tab-seat {
-  0% { transform: scale(0.94); }
-  55% { transform: scale(1.06); }
-  100% { transform: scale(1); }
-}
-
-.beginner-learner--preview-a .beginner-row-tab.is-seating {
-  animation: beginner-row-tab-seat 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .beginner-learner--preview-a .beginner-row-tab small {

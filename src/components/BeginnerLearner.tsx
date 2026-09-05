@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
 import { recordAnswer } from '../lib/studyRecord'
 import { hiraganaWordBank, katakanaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
@@ -300,62 +300,6 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   // dark/light toggle for just this preview card's own palette — it does not
   // touch the rest of the app's (permanently dark) theme.
   const [previewDark, setPreviewDark] = useState(false)
-  // The row tabs strip scrolls sideways with more rows than fit on screen —
-  // on the あ preview card a fade marks whichever edge still has more tabs
-  // hidden past it, rather than leaving a tab visibly sliced off mid-square
-  // at rest (the default overflow behaviour). Tracked via scroll position
-  // so the fade only shows on the side that actually has more to reveal.
-  const tabsScrollRef = useRef<HTMLDivElement | null>(null)
-  const [tabsFade, setTabsFade] = useState({ start: false, end: false })
-  // A quick settle-in pop on whichever tab the strip just stopped on — the
-  // visual stand-in for the haptic click iOS Safari won't let a web page
-  // trigger (there's no vibration/haptics API exposed to it at all).
-  const [seatingRowId, setSeatingRowId] = useState<string | null>(null)
-
-  useEffect(() => {
-    const el = tabsScrollRef.current
-    if (!isAlphaPreview || !el) return
-    let settleTimer: number
-    let seatTimer: number
-    // scroll-snap-type on this strip has a real, verified quirk: it never
-    // fully stops, hunting back and forth by a stray 1-2px indefinitely
-    // instead of settling on one value. That alone doesn't change which
-    // tab is leading, but it does keep firing scroll events — without
-    // this guard, each one would re-arm the pop's own clear-timer and the
-    // animation would never get to finish.
-    let lastSeatedId: string | null = null
-    const updateFade = () => {
-      setTabsFade({
-        start: el.scrollLeft > 1,
-        end: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
-      })
-    }
-    const handleScroll = () => {
-      updateFade()
-      // Debounced rather than firing per-frame — this should read as the
-      // strip coming to rest, not as something chasing the scroll itself.
-      window.clearTimeout(settleTimer)
-      settleTimer = window.setTimeout(() => {
-        const tabs = Array.from(el.querySelectorAll<HTMLElement>('.beginner-row-tab'))
-        const leading = tabs.find((tab) => tab.offsetLeft >= el.scrollLeft - 2)
-        const id = leading?.dataset.rowId
-        if (!id || id === lastSeatedId) return
-        lastSeatedId = id
-        setSeatingRowId(id)
-        window.clearTimeout(seatTimer)
-        seatTimer = window.setTimeout(() => setSeatingRowId(null), 240)
-      }, 100)
-    }
-    updateFade()
-    el.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('resize', updateFade)
-    return () => {
-      el.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('resize', updateFade)
-      window.clearTimeout(settleTimer)
-      window.clearTimeout(seatTimer)
-    }
-  }, [isAlphaPreview, rowIndex])
 
   // Mobile Safari tints its status bar and bottom toolbar from the page's
   // <meta name="theme-color">, not from what the page actually paints there
@@ -546,31 +490,28 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
         </div>
       )}
 
-      <div className={`beginner-row-tabs-wrap${isAlphaPreview ? ' is-preview-a' : ''}${tabsFade.start ? ' fade-start' : ''}${tabsFade.end ? ' fade-end' : ''}`}>
-        <div className="beginner-row-tabs" role="tablist" aria-label={`${deck.title} rows`} ref={tabsScrollRef}>
-          {deck.rows.map((entry, index) => {
-            const masteredCount = entry.characters.filter((c) => (mastery[c.char] ?? 0) >= MASTERY_TARGET).length
-            const done = masteredCount === entry.characters.length
-            return (
-              <button
-                key={entry.id}
-                type="button"
-                role="tab"
-                aria-selected={index === rowIndex}
-                data-row-id={entry.id}
-                className={`beginner-row-tab${index === rowIndex ? ' is-active' : ''}${done ? ' is-done' : ''}${seatingRowId === entry.id ? ' is-seating' : ''}`}
-                onClick={() => openRow(index)}
-                title={`${entry.label} — ${masteredCount}/${entry.characters.length} learned`}
-              >
-                <span>{entry.label}</span>
-                {/* Swapped for the row's romaji reading on the あ preview
-                    spike only — every other script/character still shows the
-                    learned count underneath, unchanged. */}
-                <small>{isAlphaPreview ? entry.characters[0]!.romaji : `${masteredCount}/${entry.characters.length}`}</small>
-              </button>
-            )
-          })}
-        </div>
+      <div className="beginner-row-tabs" role="tablist" aria-label={`${deck.title} rows`}>
+        {deck.rows.map((entry, index) => {
+          const masteredCount = entry.characters.filter((c) => (mastery[c.char] ?? 0) >= MASTERY_TARGET).length
+          const done = masteredCount === entry.characters.length
+          return (
+            <button
+              key={entry.id}
+              type="button"
+              role="tab"
+              aria-selected={index === rowIndex}
+              className={`beginner-row-tab${index === rowIndex ? ' is-active' : ''}${done ? ' is-done' : ''}`}
+              onClick={() => openRow(index)}
+              title={`${entry.label} — ${masteredCount}/${entry.characters.length} learned`}
+            >
+              <span>{entry.label}</span>
+              {/* Swapped for the row's romaji reading on the あ preview
+                  spike only — every other script/character still shows the
+                  learned count underneath, unchanged. */}
+              <small>{isAlphaPreview ? entry.characters[0]!.romaji : `${masteredCount}/${entry.characters.length}`}</small>
+            </button>
+          )
+        })}
       </div>
 
       {challengeOpen ? (
