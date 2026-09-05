@@ -316,13 +316,15 @@ interface BeginnerLearnerProps {
   /** Opens the script's kana chart, when one exists (hiragana, katakana) —
    *  a quicker way back than going through the Beginner Zone hub. */
   onOpenChart?: () => void
+  /** Opens the matching row quiz from the kana practice card. */
+  onOpenQuiz?: () => void
   /** Starts on the row quiz instead of character practice. */
   startWithQuiz?: boolean
   /** Initial kana preview palette. The in-card toggle can still change it. */
   defaultPreviewDark?: boolean
 }
 
-export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex = 0, initialCharIndex = 0, onOpenChart, startWithQuiz = false, defaultPreviewDark = true }: BeginnerLearnerProps) {
+export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex = 0, initialCharIndex = 0, onOpenChart, onOpenQuiz, startWithQuiz = false, defaultPreviewDark = true }: BeginnerLearnerProps) {
   const deck = useMemo(() => getBeginnerDeck(script), [script])
   const startRowIndex = Math.min(Math.max(initialRowIndex, 0), deck.rows.length - 1)
   const [rowIndex, setRowIndex] = useState(startRowIndex)
@@ -634,34 +636,45 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   return (
     <div className={`beginner-learner beginner-learner--${script}${isKanaPreview ? ' beginner-learner--preview-a' : ''}${isKanaPreview && previewDark ? ' beginner-learner--preview-a-dark' : ''}`}>
       {isKanaPreview ? (
-        /* A one-off header for this look — back arrow, title, a small icon
-           button for the kana chart this card used to drop entirely (fine
-           while it was a あ-only spike nobody could
-           reach any other way; not fine now that it's the only screen
-           hiragana/katakana learners see), and the dark-mode toggle. */
-        <div className="preview-a-top">
-          <AppBackButton onClick={onBack} aria-label="Back" />
-          <span className="preview-a-title">{deckTitle}</span>
-          {onOpenChart && (
-            <button type="button" className="preview-a-icon-btn" onClick={onOpenChart} aria-label={`Open the ${deck.title} chart`} title={`${deck.title} chart`}>
-              <span aria-hidden="true">&#9638;</span>
-            </button>
+        <>
+          {startWithQuiz ? (
+            <div className="app-nav-actions">
+              <AppBackButton onClick={onBack} aria-label="Back" />
+              <AppDashboardButton onClick={onDashboard} />
+            </div>
+          ) : (
+            <AppBackButton onClick={onBack} aria-label="Back" />
           )}
-          <button
-            type="button"
-            role="switch"
-            className="preview-a-theme-toggle"
-            onClick={() => setPreviewDark((value) => !value)}
-            aria-checked={previewDark}
-            aria-label={previewDark ? 'Turn off dark mode for this preview' : 'Turn on dark mode for this preview'}
-          >
-            {/* --sun/--moon name the animation slot (which one is on top
-                when unchecked/checked), not the glyph in it — swapped so
-                the moon shows in light mode and the sun in dark mode. */}
-            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
-            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
-          </button>
-        </div>
+          <div className="preview-a-top">
+            <span className="preview-a-title">{deckTitle}</span>
+            {onOpenChart && (
+              <button type="button" className="preview-a-header-btn" onClick={onOpenChart} aria-label={`Open the ${deck.title} chart`} title={`${deck.title} chart`}>
+                <span aria-hidden="true">▦</span>
+                <em>Chart</em>
+              </button>
+            )}
+            {onOpenQuiz && (
+              <button type="button" className="preview-a-header-btn" onClick={onOpenQuiz} aria-label={`Open the ${deck.title} quiz`} title={`${deck.title} quiz`}>
+                <span aria-hidden="true">?</span>
+                <em>Quiz</em>
+              </button>
+            )}
+            <button
+              type="button"
+              role="switch"
+              className="preview-a-theme-toggle"
+              onClick={() => setPreviewDark((value) => !value)}
+              aria-checked={previewDark}
+              aria-label={previewDark ? 'Turn off dark mode for this preview' : 'Turn on dark mode for this preview'}
+            >
+              {/* --sun/--moon name the animation slot (which one is on top
+                  when unchecked/checked), not the glyph in it — swapped so
+                  the moon shows in light mode and the sun in dark mode. */}
+              <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
+              <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
+            </button>
+          </div>
+        </>
       ) : (
         <div className="beginner-learner-top">
           <div className="app-nav-actions">

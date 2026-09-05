@@ -35,6 +35,7 @@ export function KanaChart({ script, onBack, onOpenQuiz, onSelectCharacter }: Kan
   const deck = getBeginnerDeck(script)
   const masteryKey = storageKey(MASTERY_STORAGE_PREFIX, script)
   const [mastery, setMastery] = useState<Record<string, number>>(() => loadNumberMap(masteryKey))
+  const [showRomaji, setShowRomaji] = useState(true)
   const leadCharacter = deck.rows[0]?.characters[0]?.char ?? (script === 'hiragana' ? 'あ' : 'ア')
 
   function toggleRow(rowIndex: number) {
@@ -50,16 +51,27 @@ export function KanaChart({ script, onBack, onOpenQuiz, onSelectCharacter }: Kan
   }
 
   return (
-    <main className={`hiragana-chart-page hiragana-chart-page--${script}`}>
+    <main className={`hiragana-chart-page hiragana-chart-page--${script}${showRomaji ? '' : ' is-romaji-hidden'}`}>
       <AppBackButton onClick={onBack} aria-label="Back to Beginner Zone" />
       <section className="hiragana-chart-heading">
         <div className="hiragana-chart-hero-mark" lang="ja" aria-hidden="true">{leadCharacter}</div>
         <div className="hiragana-chart-heading-copy">
           <h1>{deck.title} Chart</h1>
         </div>
-        <button type="button" className="hiragana-chart-quiz-button" onClick={onOpenQuiz}>
-          Quiz
-        </button>
+        <div className="hiragana-chart-actions">
+          <button
+            type="button"
+            className="hiragana-chart-quiz-button hiragana-chart-en-button"
+            onClick={() => setShowRomaji((current) => !current)}
+            aria-pressed={showRomaji}
+            aria-label={`${showRomaji ? 'Hide' : 'Show'} romaji labels`}
+          >
+            EN
+          </button>
+          <button type="button" className="hiragana-chart-quiz-button" onClick={onOpenQuiz}>
+            Quiz
+          </button>
+        </div>
       </section>
       <section className="hiragana-chart-board" aria-label={`${deck.title} rows`}>
         {deck.rows.map((row, rowIndex) => {

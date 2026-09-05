@@ -3580,18 +3580,13 @@ body:has(.dashboard) {
 }
 
 .dashboard-feature-card {
-  /* Sized to match the Beginner Zone tile (.dashboard-action-secondary's
-     min-height below) instead of standing on its own — the footer that used
-     to fill it is gone (see Dashboard.tsx), and the study-tool-reel /
-     quest-scene decorations are absolutely positioned so they can't push
-     this any taller than that shared min-height. */
   position: relative;
-  display: flex;
-  align-items: center;
-  min-height: 2.85rem;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   width: 100%;
+  min-height: 8.4rem;
   overflow: hidden;
-  padding: .38rem .78rem;
+  padding: .72rem .78rem .64rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text);
@@ -3626,23 +3621,13 @@ body:has(.dashboard) {
 }
 
 .dashboard-study-tool-reel {
-  /* Absolutely positioned so the reel can't push .dashboard-feature-card
-     taller than its Beginner-Zone-matching min-height — it's a decorative
-     wash behind the title now, not flow content the card sizes around.
-     Confined (and clipped) to the card's right third so it can't crowd
-     the "Study tools" label. */
-  position: absolute;
-  inset: 0 0 0 62%;
+  position: relative;
   z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: .22rem;
-  overflow: hidden;
-  padding-right: .5rem;
-  opacity: .45;
-  transform: scale(.5);
-  transform-origin: right center;
+  justify-content: center;
+  gap: .35rem;
+  min-width: 0;
   pointer-events: none;
 }
 
@@ -3678,17 +3663,11 @@ body:has(.dashboard) {
 }
 
 .dashboard-quest-scene {
-  /* Same reasoning as .dashboard-study-tool-reel above: absolutely
-     positioned and scaled down so this illustration can't push the card
-     past the Beginner-Zone-matching min-height it now shares. */
-  position: absolute;
-  inset: 0;
+  position: relative;
   z-index: 1;
   display: block;
   min-height: 0;
-  opacity: .55;
-  transform: scale(.4);
-  transform-origin: right center;
+  overflow: hidden;
   pointer-events: none;
 }
 
@@ -10414,10 +10393,11 @@ body:has(.dashboard) {
   .dashboard-action-secondary > .dashboard-additional {
     min-height: 2.55rem;
   }
-  /* Keeps Study tools / Quests matching Beginner Zone's height at this
-     breakpoint too — same number as the achievement/additional tiles above. */
   .dashboard-action-primary > .dashboard-feature-card {
-    min-height: 2.55rem;
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+    padding: .62rem .64rem .54rem;
   }
   .dashboard-action-grid .five-minute-study-heading,
   .dashboard-action-grid .dashboard-additional-heading {
@@ -10441,8 +10421,21 @@ body:has(.dashboard) {
     min-height: 2.35rem;
     padding: 0.32rem 0.45rem;
   }
+  .dashboard-action-primary {
+    grid-auto-rows: 7.4rem;
+  }
   .dashboard-action-primary > .dashboard-feature-card {
-    min-height: 2.35rem;
+    padding-inline: .56rem;
+  }
+  .dashboard-feature-title {
+    font-size: .9rem;
+  }
+  .dashboard-study-tool-reel {
+    gap: .12rem;
+  }
+  .dashboard-study-tool-reel i {
+    width: 1.52rem;
+    font-size: .78rem;
   }
   .tool-menu-grid {
     grid-template-columns: 1fr;
@@ -15187,7 +15180,12 @@ button.counter-example {
 
 :root:has(.hiragana-chart-page--hiragana),
 body:has(.hiragana-chart-page--hiragana) {
-  background: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
+  background: linear-gradient(180deg, #211b36 0%, #191729 64%, #11131f 100%);
+}
+
+:root:has(.hiragana-chart-page--katakana),
+body:has(.hiragana-chart-page--katakana) {
+  background: linear-gradient(180deg, #12243a 0%, #151d31 62%, #101624 100%);
 }
 
 :root[data-app-theme='light']:has(.hiragana-chart-page--hiragana) {
@@ -15202,18 +15200,26 @@ body:has(.hiragana-chart-page--hiragana) {
   --hiragana-ink: #241b22;
   --hiragana-muted: #675b62;
   --hiragana-line: rgba(122, 67, 86, 0.16);
-  --kana-chart-accent: var(--sakura);
-  --kana-chart-accent-strong: #ef4f98;
-  --kana-chart-accent-soft: #ff86c4;
-  --kana-chart-complete: #28d77b;
-  --kana-chart-complete-light: #76f1a4;
-  --kana-chart-complete-deep: #11945a;
-  --kana-chart-board: color-mix(in srgb, #241f38 82%, transparent);
-  --kana-chart-row: color-mix(in srgb, #2a2440 70%, transparent);
-  --kana-chart-cell: color-mix(in srgb, #2a2440 88%, var(--sakura) 12%);
-  --kana-chart-text: #f2eefc;
-  --kana-chart-muted: #b6b0d6;
-  --kana-chart-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  --kana-chart-accent: #cf4f8e;
+  --kana-chart-accent-strong: #c94788;
+  --kana-chart-accent-soft: #ee82b7;
+  --kana-chart-complete: #32e095;
+  --kana-chart-complete-light: #8bffc8;
+  --kana-chart-complete-deep: #13a96e;
+  --kana-chart-board: color-mix(in srgb, #2a2138 88%, transparent);
+  --kana-chart-heading-bg: color-mix(in srgb, #2a2139 94%, transparent);
+  --kana-chart-row: color-mix(in srgb, #30233c 78%, transparent);
+  --kana-chart-cell: color-mix(in srgb, #2f263d 90%, transparent);
+  --kana-chart-grid-line: color-mix(in srgb, #b45a8d 24%, transparent);
+  --kana-chart-panel-border: color-mix(in srgb, #c4659c 34%, transparent);
+  --kana-chart-button-border: color-mix(in srgb, #f2bfd8 40%, transparent);
+  --kana-chart-button-active-start: #b8427e;
+  --kana-chart-button-active-end: #dc6fa7;
+  --kana-chart-hover-bg: color-mix(in srgb, #3a2a42 84%, var(--kana-chart-accent-soft) 8%);
+  --kana-chart-row-status-border: color-mix(in srgb, #bb5b92 76%, var(--border));
+  --kana-chart-text: #f8f1fb;
+  --kana-chart-muted: #cdbfd3;
+  --kana-chart-shadow: 0 14px 30px rgba(8, 8, 18, 0.42);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -15222,15 +15228,37 @@ body:has(.hiragana-chart-page--hiragana) {
   padding: 1.25rem 0 1.5rem;
 }
 
-.hiragana-chart-page > .app-back-slot {
-  height: 0;
+.hiragana-chart-page--katakana .app-back-button {
+  border-color: color-mix(in srgb, var(--kyogre-light) 84%, #fff 8%);
+  color: var(--kyogre-light);
+  background: color-mix(in srgb, var(--kyogre) 18%, var(--surface));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--kyogre-light) 24%, transparent);
+}
+
+.hiragana-chart-page--katakana .app-back-button:hover,
+.hiragana-chart-page--katakana .app-back-button:focus-visible {
+  border-color: var(--kana-chart-button-border);
+  color: #fff;
+  background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
+  box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
 }
 
 .hiragana-chart-page--katakana {
   --kana-chart-accent: var(--kyogre);
-  --kana-chart-accent-strong: var(--kyogre-light);
+  --kana-chart-accent-strong: var(--kyogre);
   --kana-chart-accent-soft: var(--kyogre-light);
-  --kana-chart-cell: color-mix(in srgb, var(--surface-2) 90%, var(--kyogre) 10%);
+  --kana-chart-board: color-mix(in srgb, #17273d 88%, transparent);
+  --kana-chart-heading-bg: color-mix(in srgb, #17243a 94%, transparent);
+  --kana-chart-row: color-mix(in srgb, #1b2b43 78%, transparent);
+  --kana-chart-cell: color-mix(in srgb, #1d2d45 90%, transparent);
+  --kana-chart-grid-line: color-mix(in srgb, var(--kyogre-light) 22%, transparent);
+  --kana-chart-panel-border: color-mix(in srgb, var(--kyogre-light) 30%, transparent);
+  --kana-chart-button-border: color-mix(in srgb, #d3f0ff 38%, transparent);
+  --kana-chart-button-active-start: color-mix(in srgb, var(--kyogre) 88%, #12243a 12%);
+  --kana-chart-button-active-end: color-mix(in srgb, var(--kyogre-light) 72%, #ffffff 6%);
+  --kana-chart-hover-bg: color-mix(in srgb, #20354f 86%, var(--kyogre-light) 9%);
+  --kana-chart-row-status-border: color-mix(in srgb, var(--kyogre-light) 68%, var(--border));
+  --kana-chart-muted: #bed5e8;
 }
 
 @media (min-width: 720px) {
@@ -15248,11 +15276,12 @@ body:has(.hiragana-chart-page--hiragana) {
   gap: 0.85rem;
   min-height: 4.75rem;
   padding: 0.72rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--kana-chart-accent-soft) 18%, transparent);
+  border: 1px solid var(--kana-chart-panel-border);
   border-radius: 18px;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--kana-chart-accent) 14%, transparent), transparent 56%),
-    color-mix(in srgb, #2a2440 85%, transparent);
+    radial-gradient(circle at 14% 20%, color-mix(in srgb, var(--kana-chart-accent-soft) 14%, transparent), transparent 35%),
+    linear-gradient(180deg, color-mix(in srgb, #ffffff 5%, transparent), transparent),
+    var(--kana-chart-heading-bg);
   box-shadow: var(--kana-chart-shadow);
   overflow: hidden;
 }
@@ -15270,7 +15299,7 @@ body:has(.hiragana-chart-page--hiragana) {
   background: linear-gradient(135deg, var(--kana-chart-accent-soft), var(--kana-chart-accent));
   color: #fff;
   font: 800 2.2rem/1 'Noto Sans JP', sans-serif;
-  box-shadow: 0 0.55rem 1.15rem color-mix(in srgb, var(--kana-chart-accent) 28%, transparent);
+  box-shadow: 0 0.55rem 1.1rem color-mix(in srgb, var(--kana-chart-accent) 18%, transparent);
 }
 
 .hiragana-chart-heading-copy {
@@ -15296,19 +15325,26 @@ body:has(.hiragana-chart-page--hiragana) {
   font-size: 0.68rem;
 }
 
+.hiragana-chart-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
 .hiragana-chart-quiz-button {
   display: inline-grid;
   place-items: center;
   min-width: 4.4rem;
   min-height: 2.2rem;
   padding: 0.5rem 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--kana-chart-accent-soft) 34%, transparent);
+  border: 1px solid var(--kana-chart-button-border);
   border-radius: 999px;
   background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
   color: #fff;
   font: 850 0.72rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
-  box-shadow: 0 0.45rem 1.1rem color-mix(in srgb, var(--kana-chart-accent) 24%, transparent);
+  box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
   transition: border-color 140ms ease, box-shadow 140ms ease, transform 100ms ease;
 }
 
@@ -15322,17 +15358,42 @@ body:has(.hiragana-chart-page--hiragana) {
   transform: scale(0.97);
 }
 
+.hiragana-chart-en-button {
+  min-width: 2.8rem;
+  padding-inline: 0.65rem;
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 28%, transparent);
+  background: color-mix(in srgb, var(--kana-chart-heading-bg) 82%, var(--kana-chart-accent) 8%);
+  color: var(--kana-chart-accent-soft);
+  box-shadow: none;
+}
+
+.hiragana-chart-en-button:hover,
+.hiragana-chart-en-button:focus-visible {
+  border-color: color-mix(in srgb, #fff 56%, var(--kana-chart-accent-soft));
+  background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
+  color: #fff;
+  box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
+}
+
+.hiragana-chart-en-button[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 52%, transparent);
+  background: linear-gradient(135deg, var(--kana-chart-button-active-start), var(--kana-chart-button-active-end));
+  color: #fff;
+  box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
+}
+
 .hiragana-chart-board {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.02rem;
   padding: 0.6rem;
-  border: 1px solid color-mix(in srgb, var(--kana-chart-accent-soft) 22%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--kana-chart-accent-soft) 24%, var(--border));
   border-radius: 18px;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--kana-chart-accent) 8%, transparent), transparent 28%),
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--kana-chart-accent-soft) 10%, transparent), transparent 24%),
+    linear-gradient(180deg, color-mix(in srgb, #ffffff 4%, transparent), transparent 34%),
     var(--kana-chart-board);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), var(--kana-chart-shadow);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), var(--kana-chart-shadow);
 }
 
 .hiragana-chart-row {
@@ -15340,7 +15401,7 @@ body:has(.hiragana-chart-page--hiragana) {
   grid-template-columns: 3.7rem minmax(0, 1fr);
   align-items: center;
   gap: 0.35rem;
-  padding: 0.08rem 0.12rem;
+  padding: 0 0.12rem;
 }
 
 .hiragana-chart-row-status {
@@ -15352,8 +15413,8 @@ body:has(.hiragana-chart-page--hiragana) {
   width: 1.05rem;
   height: 1.05rem;
   padding: 0;
-  border: 2px solid color-mix(in srgb, var(--kana-chart-accent-soft) 52%, var(--border));
-  border-radius: 50%;
+  border: 2px solid var(--kana-chart-row-status-border);
+  border-radius: 4px;
   background: transparent;
   color: #fff;
   cursor: pointer;
@@ -15371,8 +15432,8 @@ body:has(.hiragana-chart-page--hiragana) {
 }
 
 .hiragana-chart-row-status span {
-  width: 42%;
-  height: 24%;
+  width: 48%;
+  height: 28%;
   border: solid currentColor;
   border-width: 0 0 2px 2px;
   opacity: 0;
@@ -15394,7 +15455,11 @@ body:has(.hiragana-chart-page--hiragana) {
 .hiragana-chart-row-chars {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.35rem;
+  gap: 0;
+  overflow: hidden;
+  border-top: 1px solid var(--kana-chart-grid-line);
+  border-left: 1px solid var(--kana-chart-grid-line);
+  border-radius: 10px;
 }
 
 .hiragana-chart-cell {
@@ -15404,24 +15469,27 @@ body:has(.hiragana-chart-page--hiragana) {
   width: 100%;
   aspect-ratio: 1;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--kana-chart-accent-soft) 12%, transparent);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--kana-chart-cell) 72%, transparent);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--kana-chart-text);
   cursor: pointer;
+  box-shadow: inset -1px 0 var(--kana-chart-grid-line), inset 0 -1px var(--kana-chart-grid-line);
   transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease, transform 100ms ease;
 }
 
 .hiragana-chart-cell:hover,
 .hiragana-chart-cell:focus-visible {
-  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 62%, var(--border));
-  background: color-mix(in srgb, #332b52 68%, var(--kana-chart-accent) 32%);
-  box-shadow: 0 0.35rem 0.95rem color-mix(in srgb, var(--kana-chart-accent) 22%, transparent);
+  border-radius: 8px;
+  background: var(--kana-chart-hover-bg);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--kana-chart-accent-soft) 20%, transparent),
+    0 0.25rem 0.7rem color-mix(in srgb, #000 18%, transparent);
   transform: translateY(-1px);
 }
 
 .hiragana-chart-cell:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
 /* Marks a vowel slot no kana fills — e.g. the empty い/え columns in the
@@ -15431,6 +15499,7 @@ body:has(.hiragana-chart-page--hiragana) {
   width: 100%;
   aspect-ratio: 1;
   background: transparent;
+  box-shadow: inset -1px 0 var(--kana-chart-grid-line), inset 0 -1px var(--kana-chart-grid-line);
 }
 
 :root[data-app-theme='light'] .hiragana-chart-heading h1 {
@@ -15445,6 +15514,7 @@ body:has(.hiragana-chart-page--hiragana) {
   --kana-chart-board: color-mix(in srgb, #fff8fb 88%, transparent);
   --kana-chart-row: color-mix(in srgb, #ffffff 74%, transparent);
   --kana-chart-cell: color-mix(in srgb, var(--hiragana-paper) 82%, var(--kana-chart-accent-soft) 18%);
+  --kana-chart-grid-line: color-mix(in srgb, var(--sakura-deep) 12%, transparent);
 }
 
 :root[data-app-theme='light'] .hiragana-chart-heading {
@@ -15474,10 +15544,10 @@ body:has(.hiragana-chart-page--hiragana) {
 }
 
 :root[data-app-theme='light'] .hiragana-chart-cell {
-  border-color: var(--hiragana-line);
-  background: color-mix(in srgb, var(--hiragana-paper) 68%, var(--sakura-light) 14%);
+  background: transparent;
   color: var(--hiragana-ink);
-  box-shadow: 0 0.18rem 0.65rem color-mix(in srgb, var(--sakura-deep) 9%, transparent);
+  box-shadow: none;
+  box-shadow: inset -1px 0 var(--kana-chart-grid-line), inset 0 -1px var(--kana-chart-grid-line);
 }
 
 :root[data-app-theme='light'] .hiragana-chart-cell:hover,
@@ -15497,20 +15567,24 @@ body:has(.hiragana-chart-page--hiragana) {
 
 .hiragana-chart-cell-char {
   grid-area: 1 / 1;
-  font: 800 1.52rem/1 'Noto Sans JP', sans-serif;
+  font: 800 1.95rem/1 'Noto Sans JP', sans-serif;
 }
 
 .hiragana-chart-cell-romaji {
   position: absolute;
   right: 0.2rem;
-  bottom: 18%;
+  bottom: 15%;
   left: 0.2rem;
   color: var(--kana-chart-muted);
-  font-size: 0.5rem;
+  font-size: 0.58rem;
   line-height: 1;
   text-align: center;
   text-transform: lowercase;
   pointer-events: none;
+}
+
+.hiragana-chart-page.is-romaji-hidden .hiragana-chart-cell-romaji {
+  display: none;
 }
 
 @media (max-width: 560px) {
@@ -15539,8 +15613,13 @@ body:has(.hiragana-chart-page--hiragana) {
     font-size: 0.62rem;
   }
 
-  .hiragana-chart-quiz-button {
+  .hiragana-chart-actions {
     grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .hiragana-chart-quiz-button {
+    flex: 1 1 0;
     min-width: 0;
     min-height: 2.35rem;
     padding: 0.55rem;
@@ -15557,6 +15636,7 @@ body:has(.hiragana-chart-page--hiragana) {
   .hiragana-chart-row-status {
     width: 0.9rem;
     height: 0.9rem;
+    border-radius: 3px;
   }
 
   .hiragana-chart-row-status span {
@@ -15564,15 +15644,15 @@ body:has(.hiragana-chart-page--hiragana) {
   }
 
   .hiragana-chart-row-chars {
-    gap: 0.22rem;
+    gap: 0;
   }
 
   .hiragana-chart-cell-char {
-    font-size: 1.14rem;
+    font-size: 1.48rem;
   }
 
   .hiragana-chart-cell-romaji {
-    font-size: 0.42rem;
+    font-size: 0.48rem;
   }
 }
 
@@ -15848,7 +15928,7 @@ body:has(.beginner-learner--preview-a-dark) {
      button's fixed 1rem inset elsewhere in the app (--app-nav-top). Left,
      right, and bottom still carry real breathing room, just slightly less
      than before to let the cards themselves grow a bit. */
-  width: min(100%, 56rem);
+  width: min(100%, 44rem);
   padding: 0 1rem 1rem;
   background: var(--preview-page-bg);
 }
@@ -15879,9 +15959,6 @@ body:has(.beginner-learner--preview-a-dark) {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  /* Pulls the pill up so the back arrow lands at the same height as the
-     standard pinned back button (--app-nav-top) elsewhere in the app,
-     without shrinking the pill's own comfortable padding to do it. */
   margin-top: -0.6rem;
   padding: 0.4rem 0.6rem 0.4rem 0.5rem;
   border-radius: 999px;
@@ -15889,16 +15966,11 @@ body:has(.beginner-learner--preview-a-dark) {
   box-shadow: var(--preview-shadow);
 }
 
-.beginner-learner--preview-a .app-back-slot {
-  flex: 0 0 var(--app-back-width);
-}
-
-.beginner-learner--preview-a .app-back-slot > .app-back-button {
-  position: static;
-  width: var(--app-back-width);
+.beginner-learner--preview-a .preview-a-top > .app-dashboard-button {
+  width: 1.85rem;
+  height: 1.85rem;
   border-color: color-mix(in srgb, var(--preview-text) 12%, transparent);
   background: var(--preview-badge-bg);
-  color: var(--preview-text);
   box-shadow: 0 2px 6px rgba(94, 62, 130, 0.14);
 }
 
@@ -15915,27 +15987,35 @@ body:has(.beginner-learner--preview-a-dark) {
   text-overflow: ellipsis;
 }
 
-/* Chart-shortcut and progress-reset — small icon-only buttons rather than
-   the labelled pills the non-preview header uses, since this row also
-   carries the theme toggle and has much less room to spare. */
-.preview-a-icon-btn {
-  display: grid;
+.preview-a-header-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: 0 0 auto;
-  place-items: center;
-  width: 1.85rem;
+  gap: 0.22rem;
+  min-width: 3.25rem;
   height: 1.85rem;
+  padding: 0 0.48rem;
   border: 0;
-  border-radius: 50%;
+  border-radius: 999px;
   background: var(--preview-badge-bg);
   box-shadow: 0 2px 6px rgba(94, 62, 130, 0.14);
   color: var(--preview-text);
-  font-size: 0.85rem;
-  line-height: 1;
+  font: 800 0.55rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
   transition: transform 140ms ease;
 }
 
-.preview-a-icon-btn:active {
+.preview-a-header-btn span {
+  font-size: 0.68rem;
+  line-height: 1;
+}
+
+.preview-a-header-btn em {
+  font-style: normal;
+}
+
+.preview-a-header-btn:active {
   transform: scale(0.92);
 }
 
@@ -16035,10 +16115,9 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .beginner-learner--preview-a .beginner-row-tab {
-  /* 5 gaps (0.3rem each, matching .beginner-row-tabs's own gap) across 6
-     tabs per screen. */
-  flex: 0 0 calc((100% - 1.5rem) / 6);
-  width: calc((100% - 1.5rem) / 6);
+  /* Roughly 12 compact row tabs per strip, about half the previous width. */
+  flex: 0 0 calc((100% - 3.3rem) / 12);
+  width: calc((100% - 3.3rem) / 12);
   min-width: 0;
   border: 0;
   border-radius: 14px;
@@ -16477,6 +16556,7 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .beginner-listening-check {
+  position: relative;
   min-height: min(28rem, calc(100dvh - 9.4rem));
   justify-content: start;
   gap: 0.7rem;
@@ -16487,6 +16567,13 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .beginner-listening-check-label {
+  position: absolute;
+  top: 0.72rem;
+  right: 0.85rem;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 20%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-2) 72%, transparent);
   color: var(--text-muted);
   font: 800 0.65rem/1 'Outfit', system-ui, sans-serif;
   text-transform: uppercase;
@@ -16566,7 +16653,7 @@ body:has(.beginner-learner--preview-a-dark) {
 .beginner-listening-continue {
   width: min(100%, 11.5rem);
   min-height: 2.35rem;
-  margin-top: auto;
+  margin-top: 0.15rem;
   padding: 0.45rem 0.75rem;
   border-radius: 6px;
   font-size: 0.75rem;
@@ -17219,6 +17306,11 @@ body:has(.beginner-learner--preview-a-dark) {
     padding: 0.65rem 0.7rem 0.75rem;
   }
 
+  .beginner-listening-check-label {
+    top: 0.48rem;
+    right: 0.55rem;
+  }
+
   .beginner-listening-options {
     gap: 0.5rem;
     width: 100%;
@@ -17373,6 +17465,15 @@ body:has(.beginner-learner--preview-a-dark) {
 
   .beginner-romaji {
     font-size: 1.45rem;
+  }
+
+  .preview-a-header-btn {
+    min-width: 2.4rem;
+    padding-inline: 0.4rem;
+  }
+
+  .preview-a-header-btn em {
+    display: none;
   }
 }
 

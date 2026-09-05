@@ -130,6 +130,7 @@ function App() {
   // Where the learner's Back button goes: the hub normally, but the chart it
   // was opened from when a kana chart is what sent the learner there.
   const [beginnerLearnerReturnView, setBeginnerLearnerReturnView] = useState<'beginner-zone' | 'hiragana-chart' | 'katakana-chart'>('beginner-zone')
+  const [beginnerQuizReturnView, setBeginnerQuizReturnView] = useState<'beginner-zone' | 'hiragana-chart' | 'katakana-chart'>('beginner-zone')
   const [shrineRegionId, setShrineRegionId] = useState('tsuzuri')
   const [speedRunReturnView, setSpeedRunReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools'>('dashboard')
   const [pictureReturnView, setPictureReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools'>('dashboard')
@@ -158,6 +159,11 @@ function App() {
     [progress],
   )
   const activeQuest = getQuestById(activeQuestId)
+
+  function openBeginnerQuiz(script: Extract<BeginnerScript, 'hiragana' | 'katakana'>, returnView: 'beginner-zone' | 'hiragana-chart' | 'katakana-chart') {
+    setBeginnerQuizReturnView(returnView)
+    setView(script === 'hiragana' ? 'hiragana-quiz' : 'katakana-quiz')
+  }
 
   const finishQuestStep = useCallback((step: QuestStep) => {
     if (!activeQuestId) return
@@ -482,8 +488,8 @@ function App() {
           tools={[
             { mark: 'あ', title: 'Hiragana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'sakura', onClick: () => setView('hiragana-chart') },
             { mark: 'ア', title: 'Katakana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'kyogre', onClick: () => setView('katakana-chart') },
-            { mark: '聞', title: 'Hiragana Quiz', detail: 'Check hiragana with listening and writing.', accent: 'rayquaza', onClick: () => setView('hiragana-quiz') },
-            { mark: '書', title: 'Katakana Quiz', detail: 'Check katakana with listening and writing.', accent: 'amber', onClick: () => setView('katakana-quiz') },
+            { mark: '聞', title: 'Hiragana Quiz', detail: 'Check hiragana with listening and writing.', accent: 'rayquaza', onClick: () => openBeginnerQuiz('hiragana', 'beginner-zone') },
+            { mark: '書', title: 'Katakana Quiz', detail: 'Check katakana with listening and writing.', accent: 'amber', onClick: () => openBeginnerQuiz('katakana', 'beginner-zone') },
             { mark: '一', title: 'First Kanji', detail: 'Learn 30 memorable starter kanji.', accent: 'gold', onClick: () => {
               setBeginnerScript('kanji')
               setBeginnerInitialRowIndex(0)
@@ -521,7 +527,7 @@ function App() {
             initialCharIndex={0}
             startWithQuiz
             defaultPreviewDark={appTheme !== 'light'}
-            onBack={() => setView('beginner-zone')}
+            onBack={() => setView(beginnerQuizReturnView)}
             onOpenChart={() => setView(quizScript === 'hiragana' ? 'hiragana-chart' : 'katakana-chart')}
             onDashboard={() => setView('dashboard')}
           />
@@ -538,7 +544,7 @@ function App() {
           <KanaChart
             script={chartScript}
             onBack={() => setView('beginner-zone')}
-            onOpenQuiz={() => setView(chartScript === 'hiragana' ? 'hiragana-quiz' : 'katakana-quiz')}
+            onOpenQuiz={() => openBeginnerQuiz(chartScript, view)}
             onSelectCharacter={(rowIndex, charIndex) => {
               setBeginnerScript(chartScript)
               setBeginnerInitialRowIndex(rowIndex)
@@ -565,6 +571,7 @@ function App() {
             defaultPreviewDark={appTheme !== 'light'}
             onBack={() => setView(beginnerLearnerReturnView)}
             onOpenChart={chartView ? () => setView(chartView) : undefined}
+            onOpenQuiz={chartView ? () => openBeginnerQuiz(beginnerScript === 'hiragana' ? 'hiragana' : 'katakana', beginnerLearnerReturnView) : undefined}
             onDashboard={() => setView('dashboard')}
           />
         </Suspense>
