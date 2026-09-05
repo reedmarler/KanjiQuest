@@ -15404,11 +15404,11 @@ body:has(.hiragana-chart-page--katakana) {
   place-items: center;
   justify-self: center;
   align-self: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2.1rem;
+  height: 2.1rem;
   padding: 0;
-  border: 2px solid var(--kana-chart-row-status-border);
-  border-radius: 6px;
+  border: 2.5px solid var(--kana-chart-row-status-border);
+  border-radius: 7px;
   background: transparent;
   color: #fff;
   cursor: pointer;
@@ -15619,13 +15619,13 @@ body:has(.hiragana-chart-page--katakana) {
   }
 
   .hiragana-chart-row-status {
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 5px;
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 6px;
   }
 
   .hiragana-chart-row-status span {
-    border-width: 0 0 1.8px 1.8px;
+    border-width: 0 0 2.2px 2.2px;
   }
 
   .hiragana-chart-row-chars {
