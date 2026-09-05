@@ -10395,8 +10395,6 @@ body:has(.dashboard) {
   }
   .dashboard-action-primary > .dashboard-feature-card {
     width: 100%;
-    min-height: 0;
-    height: 100%;
     padding: .62rem .64rem .54rem;
   }
   .dashboard-action-grid .five-minute-study-heading,
@@ -10420,9 +10418,6 @@ body:has(.dashboard) {
   .dashboard-action-secondary > .dashboard-additional {
     min-height: 2.35rem;
     padding: 0.32rem 0.45rem;
-  }
-  .dashboard-action-primary {
-    grid-auto-rows: 7.4rem;
   }
   .dashboard-action-primary > .dashboard-feature-card {
     padding-inline: .56rem;
