@@ -25,18 +25,22 @@ interface KanaChartProps {
   script: ChartScript
   onBack: () => void
   onOpenQuiz: () => void
+  /** Jumps to the other script's chart — hiragana's heading offers カナ,
+   *  katakana's offers かな. */
+  onSwitchScript: () => void
   /** Any character opens the learner right there, cycling the rest of its
    *  row from that point rather than jumping to the row's own first
    *  character. */
   onSelectCharacter: (rowIndex: number, charIndex: number) => void
 }
 
-export function KanaChart({ script, onBack, onOpenQuiz, onSelectCharacter }: KanaChartProps) {
+export function KanaChart({ script, onBack, onOpenQuiz, onSwitchScript, onSelectCharacter }: KanaChartProps) {
   const deck = getBeginnerDeck(script)
   const masteryKey = storageKey(MASTERY_STORAGE_PREFIX, script)
   const [mastery, setMastery] = useState<Record<string, number>>(() => loadNumberMap(masteryKey))
   const [showRomaji, setShowRomaji] = useState(true)
-  const leadCharacter = deck.rows[0]?.characters[0]?.char ?? (script === 'hiragana' ? 'あ' : 'ア')
+  const otherScriptLabel = script === 'hiragana' ? 'カナ' : 'かな'
+  const otherScriptName = script === 'hiragana' ? 'Katakana' : 'Hiragana'
 
   function toggleRow(rowIndex: number) {
     const row = deck.rows[rowIndex]!
@@ -54,7 +58,6 @@ export function KanaChart({ script, onBack, onOpenQuiz, onSelectCharacter }: Kan
     <main className={`hiragana-chart-page hiragana-chart-page--${script}${showRomaji ? '' : ' is-romaji-hidden'}`}>
       <section className="hiragana-chart-heading">
         <AppBackButton onClick={onBack} aria-label="Back to Beginner Zone" />
-        <div className="hiragana-chart-hero-mark" lang="ja" aria-hidden="true">{leadCharacter}</div>
         <div className="hiragana-chart-heading-copy">
           <h1>{deck.title} Chart</h1>
         </div>
@@ -67,6 +70,15 @@ export function KanaChart({ script, onBack, onOpenQuiz, onSelectCharacter }: Kan
             aria-label={`${showRomaji ? 'Hide' : 'Show'} romaji labels`}
           >
             EN
+          </button>
+          <button
+            type="button"
+            className="hiragana-chart-quiz-button hiragana-chart-en-button"
+            onClick={onSwitchScript}
+            lang="ja"
+            aria-label={`Switch to ${otherScriptName} Chart`}
+          >
+            {otherScriptLabel}
           </button>
           <button type="button" className="hiragana-chart-quiz-button" onClick={onOpenQuiz}>
             Quiz

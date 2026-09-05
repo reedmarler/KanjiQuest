@@ -545,6 +545,7 @@ function App() {
             script={chartScript}
             onBack={() => setView('beginner-zone')}
             onOpenQuiz={() => openBeginnerQuiz(chartScript, view)}
+            onSwitchScript={() => setView(view === 'hiragana-chart' ? 'katakana-chart' : 'hiragana-chart')}
             onSelectCharacter={(rowIndex, charIndex) => {
               setBeginnerScript(chartScript)
               setBeginnerInitialRowIndex(rowIndex)
