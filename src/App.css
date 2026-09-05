@@ -15629,8 +15629,10 @@ body:has(.beginner-learner--preview-a-dark) {
   height: 2.35rem;
   border: 0;
   border-radius: 50%;
-  background: linear-gradient(145deg, #ffe29a, #ffb15c);
-  box-shadow: 0 3px 10px rgba(214, 130, 30, 0.4), inset 0 -2px 3px rgba(255, 255, 255, 0.55);
+  /* Sky blue rather than a warm yellow/orange — the sun emoji is itself
+     yellow-orange, and it all but disappeared against a same-toned badge. */
+  background: linear-gradient(145deg, #bfe6ff, #6bb6f0);
+  box-shadow: 0 3px 10px rgba(40, 120, 200, 0.35), inset 0 -2px 3px rgba(255, 255, 255, 0.6);
   cursor: pointer;
   transition: background 320ms ease, box-shadow 320ms ease, transform 140ms ease;
 }
