@@ -17452,9 +17452,13 @@ body:has(.beginner-learner--preview-a-dark) {
     font-size: 1.45rem;
   }
 
+  /* A 4th button (the かな/カナ script switch) joined Chart/Quiz/theme-toggle
+     on this row without the title giving up any space, so it started
+     ellipsis-truncating "Katakana" — trim each icon pill a bit further to
+     give the title room again. */
   .preview-a-header-btn {
-    min-width: 2.4rem;
-    padding-inline: 0.4rem;
+    min-width: 2rem;
+    padding-inline: 0.32rem;
   }
 
   .preview-a-header-btn em {

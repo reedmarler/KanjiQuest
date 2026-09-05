@@ -566,6 +566,13 @@ function App() {
       <div className="app">
         <Suspense fallback={<RouteLoading label="Beginner Zone" />}>
           <BeginnerLearner
+            // Mastery and the starting row/character are only read once, at
+            // mount, from whichever script the learner opened with — keying
+            // on script forces a fresh mount (instead of a prop update) so
+            // switching hiragana/katakana mid-practice re-reads both for the
+            // script just switched to, rather than carrying the old one's
+            // stale values over.
+            key={beginnerScript}
             script={beginnerScript}
             initialRowIndex={beginnerInitialRowIndex}
             initialCharIndex={beginnerInitialCharIndex}
@@ -573,6 +580,14 @@ function App() {
             onBack={() => setView(beginnerLearnerReturnView)}
             onOpenChart={chartView ? () => setView(chartView) : undefined}
             onOpenQuiz={chartView ? () => openBeginnerQuiz(beginnerScript === 'hiragana' ? 'hiragana' : 'katakana', beginnerLearnerReturnView) : undefined}
+            onSwitchScript={chartView ? () => {
+              const nextScript = beginnerScript === 'hiragana' ? 'katakana' : 'hiragana'
+              const nextChartView = nextScript === 'hiragana' ? 'hiragana-chart' : 'katakana-chart'
+              setBeginnerScript(nextScript)
+              setBeginnerInitialRowIndex(0)
+              setBeginnerInitialCharIndex(0)
+              setBeginnerLearnerReturnView((current) => (current === 'beginner-zone' ? current : nextChartView))
+            } : undefined}
             onDashboard={() => setView('dashboard')}
           />
         </Suspense>

@@ -318,13 +318,18 @@ interface BeginnerLearnerProps {
   onOpenChart?: () => void
   /** Opens the matching row quiz from the kana practice card. */
   onOpenQuiz?: () => void
+  /** Jumps to the other kana script's practice, when one exists — hiragana
+   *  offers カナ, katakana offers かな. The caller is expected to remount
+   *  this component (e.g. a `key` tied to script) since mastery and row
+   *  position are loaded once, at mount, for whichever script started it. */
+  onSwitchScript?: () => void
   /** Starts on the row quiz instead of character practice. */
   startWithQuiz?: boolean
   /** Initial kana preview palette. The in-card toggle can still change it. */
   defaultPreviewDark?: boolean
 }
 
-export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex = 0, initialCharIndex = 0, onOpenChart, onOpenQuiz, startWithQuiz = false, defaultPreviewDark = true }: BeginnerLearnerProps) {
+export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex = 0, initialCharIndex = 0, onOpenChart, onOpenQuiz, onSwitchScript, startWithQuiz = false, defaultPreviewDark = true }: BeginnerLearnerProps) {
   const deck = useMemo(() => getBeginnerDeck(script), [script])
   const startRowIndex = Math.min(Math.max(initialRowIndex, 0), deck.rows.length - 1)
   const [rowIndex, setRowIndex] = useState(startRowIndex)
@@ -363,6 +368,8 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
    * not touch.
    */
   const isKanaPreview = script === 'hiragana' || script === 'katakana'
+  const otherScriptLabel = script === 'hiragana' ? 'カナ' : 'かな'
+  const otherScriptName = script === 'hiragana' ? 'Katakana' : 'Hiragana'
   // The badge that would hold a future streak counter doubles, for now, as a
   // dark/light toggle for just this preview card's own palette — it does not
   // touch the rest of the app's (permanently dark) theme.
@@ -657,6 +664,11 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
               <button type="button" className="preview-a-header-btn" onClick={onOpenQuiz} aria-label={`Open the ${deck.title} quiz`} title={`${deck.title} quiz`}>
                 <span aria-hidden="true">?</span>
                 <em>Quiz</em>
+              </button>
+            )}
+            {onSwitchScript && (
+              <button type="button" className="preview-a-header-btn" onClick={onSwitchScript} aria-label={`Switch to ${otherScriptName} practice`} title={`Switch to ${otherScriptName}`}>
+                <span aria-hidden="true" lang="ja">{otherScriptLabel}</span>
               </button>
             )}
             <button
