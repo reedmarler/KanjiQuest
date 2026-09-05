@@ -15712,7 +15712,29 @@ body:has(.beginner-learner--preview-a-dark) {
   color: var(--preview-text);
   font-size: 0.68rem;
   scroll-snap-align: start;
+  /* Without this a fast flick can glide clean past several tabs before
+     momentum runs out — still "snapping" in the sense that it stops on a
+     tab, just not what reads as a snap. This forces every tab in the
+     flick's path to act as a hard stop, so even a fast swipe only ever
+     advances one at a time — a firm, mechanical click each time rather
+     than a free glide. */
+  scroll-snap-stop: always;
   transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+/* A quick, snappy settle-in pop on whichever tab the strip just stopped
+   on — visual stand-in for the haptic click iOS Safari won't let a web
+   page trigger (there's no vibration/haptics API exposed to it at all).
+   Class is added by BeginnerLearner right as a scroll gesture settles and
+   removed after the animation plays, so it re-fires on every stop. */
+@keyframes beginner-row-tab-seat {
+  0% { transform: scale(0.94); }
+  55% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.beginner-learner--preview-a .beginner-row-tab.is-seating {
+  animation: beginner-row-tab-seat 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .beginner-learner--preview-a .beginner-row-tab small {

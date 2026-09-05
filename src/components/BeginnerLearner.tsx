@@ -307,22 +307,53 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   // so the fade only shows on the side that actually has more to reveal.
   const tabsScrollRef = useRef<HTMLDivElement | null>(null)
   const [tabsFade, setTabsFade] = useState({ start: false, end: false })
+  // A quick settle-in pop on whichever tab the strip just stopped on — the
+  // visual stand-in for the haptic click iOS Safari won't let a web page
+  // trigger (there's no vibration/haptics API exposed to it at all).
+  const [seatingRowId, setSeatingRowId] = useState<string | null>(null)
 
   useEffect(() => {
     const el = tabsScrollRef.current
     if (!isAlphaPreview || !el) return
+    let settleTimer: number
+    let seatTimer: number
+    // scroll-snap-type on this strip has a real, verified quirk: it never
+    // fully stops, hunting back and forth by a stray 1-2px indefinitely
+    // instead of settling on one value. That alone doesn't change which
+    // tab is leading, but it does keep firing scroll events — without
+    // this guard, each one would re-arm the pop's own clear-timer and the
+    // animation would never get to finish.
+    let lastSeatedId: string | null = null
     const updateFade = () => {
       setTabsFade({
         start: el.scrollLeft > 1,
         end: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
       })
     }
+    const handleScroll = () => {
+      updateFade()
+      // Debounced rather than firing per-frame — this should read as the
+      // strip coming to rest, not as something chasing the scroll itself.
+      window.clearTimeout(settleTimer)
+      settleTimer = window.setTimeout(() => {
+        const tabs = Array.from(el.querySelectorAll<HTMLElement>('.beginner-row-tab'))
+        const leading = tabs.find((tab) => tab.offsetLeft >= el.scrollLeft - 2)
+        const id = leading?.dataset.rowId
+        if (!id || id === lastSeatedId) return
+        lastSeatedId = id
+        setSeatingRowId(id)
+        window.clearTimeout(seatTimer)
+        seatTimer = window.setTimeout(() => setSeatingRowId(null), 240)
+      }, 100)
+    }
     updateFade()
-    el.addEventListener('scroll', updateFade, { passive: true })
+    el.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', updateFade)
     return () => {
-      el.removeEventListener('scroll', updateFade)
+      el.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', updateFade)
+      window.clearTimeout(settleTimer)
+      window.clearTimeout(seatTimer)
     }
   }, [isAlphaPreview, rowIndex])
 
@@ -526,7 +557,8 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                 type="button"
                 role="tab"
                 aria-selected={index === rowIndex}
-                className={`beginner-row-tab${index === rowIndex ? ' is-active' : ''}${done ? ' is-done' : ''}`}
+                data-row-id={entry.id}
+                className={`beginner-row-tab${index === rowIndex ? ' is-active' : ''}${done ? ' is-done' : ''}${seatingRowId === entry.id ? ' is-seating' : ''}`}
                 onClick={() => openRow(index)}
                 title={`${entry.label} — ${masteredCount}/${entry.characters.length} learned`}
               >
