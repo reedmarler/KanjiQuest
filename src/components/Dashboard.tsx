@@ -1200,10 +1200,6 @@ export function Dashboard({
               <i lang="ja">漢</i>
               <i lang="ja">数</i>
             </span>
-            <span className="dashboard-feature-footer">
-              <span>7 tools</span>
-              <span aria-hidden="true">→</span>
-            </span>
           </button>
 
           <button type="button" className="dashboard-feature-card dashboard-quests-card" onClick={onOpenQuests}>
@@ -1247,10 +1243,6 @@ export function Dashboard({
                 </span>
                 <span className="dashboard-quest-guardian-sprite" />
               </span>
-            </span>
-            <span className="dashboard-feature-footer">
-              <span>{questsCleared} of {QUESTS.length} cleared</span>
-              <span aria-hidden="true">→</span>
             </span>
           </button>
         </div>

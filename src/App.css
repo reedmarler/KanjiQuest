@@ -3576,13 +3576,18 @@ body:has(.dashboard) {
 }
 
 .dashboard-feature-card {
+  /* Sized to match the Beginner Zone tile (.dashboard-action-secondary's
+     min-height below) instead of standing on its own — the footer that used
+     to fill it is gone (see Dashboard.tsx), and the study-tool-reel /
+     quest-scene decorations are absolutely positioned so they can't push
+     this any taller than that shared min-height. */
   position: relative;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  display: flex;
+  align-items: center;
+  min-height: 2.85rem;
   width: 100%;
-  min-height: 8.4rem;
   overflow: hidden;
-  padding: .72rem .78rem .64rem;
+  padding: .38rem .78rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text);
@@ -3597,31 +3602,14 @@ body:has(.dashboard) {
   transform: translateY(-1px);
 }
 
-.dashboard-feature-title,
-.dashboard-feature-footer {
+.dashboard-feature-title {
   position: relative;
   z-index: 2;
   display: flex;
   align-items: center;
   min-width: 0;
-}
-
-.dashboard-feature-title {
   font-size: 1.02rem;
   line-height: 1;
-}
-
-.dashboard-feature-footer {
-  justify-content: space-between;
-  padding-top: .38rem;
-  border-top: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent);
-  color: var(--text-muted);
-  font-size: .53rem;
-}
-
-.dashboard-feature-footer > span:last-child {
-  color: var(--text);
-  font-size: .82rem;
 }
 
 .dashboard-study-tools-card {
@@ -3634,13 +3622,24 @@ body:has(.dashboard) {
 }
 
 .dashboard-study-tool-reel {
-  position: relative;
+  /* Absolutely positioned so the reel can't push .dashboard-feature-card
+     taller than its Beginner-Zone-matching min-height — it's a decorative
+     wash behind the title now, not flow content the card sizes around.
+     Confined (and clipped) to the card's right third so it can't crowd
+     the "Study tools" label. */
+  position: absolute;
+  inset: 0 0 0 62%;
   z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: .35rem;
-  min-width: 0;
+  justify-content: flex-end;
+  gap: .22rem;
+  overflow: hidden;
+  padding-right: .5rem;
+  opacity: .45;
+  transform: scale(.5);
+  transform-origin: right center;
+  pointer-events: none;
 }
 
 .dashboard-study-tool-reel i {
@@ -3675,10 +3674,18 @@ body:has(.dashboard) {
 }
 
 .dashboard-quest-scene {
-  position: relative;
+  /* Same reasoning as .dashboard-study-tool-reel above: absolutely
+     positioned and scaled down so this illustration can't push the card
+     past the Beginner-Zone-matching min-height it now shares. */
+  position: absolute;
+  inset: 0;
   z-index: 1;
   display: block;
   min-height: 0;
+  opacity: .55;
+  transform: scale(.4);
+  transform-origin: right center;
+  pointer-events: none;
 }
 
 .dashboard-quest-scene::before {
@@ -4020,13 +4027,6 @@ body:has(.dashboard) {
 }
 
 @media (max-width: 720px) {
-  .dashboard-action-primary > .dashboard-feature-card {
-    width: 100%;
-    min-height: 0;
-    height: 100%;
-    padding: .62rem .64rem .54rem;
-  }
-
   .dashboard-quest-guardian {
     right: -.2rem;
     width: 4.8rem;
@@ -4045,25 +4045,12 @@ body:has(.dashboard) {
 }
 
 @media (max-width: 430px) {
-  .dashboard-action-primary {
-    grid-auto-rows: 7.4rem;
-  }
-
   .dashboard-action-primary > .dashboard-feature-card {
     padding-inline: .56rem;
   }
 
   .dashboard-feature-title {
     font-size: .9rem;
-  }
-
-  .dashboard-study-tool-reel {
-    gap: .12rem;
-  }
-
-  .dashboard-study-tool-reel i {
-    width: 1.52rem;
-    font-size: .78rem;
   }
 }
 
@@ -10403,9 +10390,6 @@ body:has(.dashboard) {
 @media(max-width:430px){.dashboard-journey-actions{grid-template-columns:1fr 1fr}.dashboard-quest-button,.dashboard-achievement-button{grid-template-columns:1.85rem 1fr;padding:.4rem}.dashboard-quest-mark,.dashboard-achievement-mark{width:1.8rem}.dashboard-quest-button small,.dashboard-achievement-button small{font-size:.4rem}.achievements-hero>strong{display:none}.achievements-hero{grid-template-columns:3.2rem 1fr}.quest-battle-arena{grid-template-columns:1fr 1.5rem 1fr}.quest-fighter-name span{display:none}.quest-checkpoint-clue{font-size:.72rem}.quest-battle-intro h1{font-size:1.3rem}.quest-kanji-card-label small{display:none}.quest-kanji-word-answer{align-items:center;flex-direction:column;gap:.05rem}.quest-kanji-part-examples{flex-wrap:wrap}.quest-book-page{min-height:16.5rem;padding:1.4rem 1rem 1rem}.quest-gate-scene{height:10rem}.quest-gate-figure{width:7.2rem;height:7.2rem}.quest-torii{width:5.4rem;height:6.5rem}.quest-torii:before{width:7rem}.quest-gate-seal{top:3rem;width:2.45rem}.quest-gate-seal span{font-size:1rem}.quest-gate-copy>p:last-child{max-width:19rem}.quest-battle-rules span{font-size:.43rem}}
 
 @media(max-width:720px){
-  .dashboard-action-primary {
-    grid-auto-rows: 7.6rem;
-  }
   .dashboard-action-primary > .dashboard-quest-button,
   .dashboard-action-primary > .dashboard-tool-button {
     min-height: 0;
@@ -10426,6 +10410,11 @@ body:has(.dashboard) {
   .dashboard-action-secondary > .dashboard-additional {
     min-height: 2.55rem;
   }
+  /* Keeps Study tools / Quests matching Beginner Zone's height at this
+     breakpoint too — same number as the achievement/additional tiles above. */
+  .dashboard-action-primary > .dashboard-feature-card {
+    min-height: 2.55rem;
+  }
   .dashboard-action-grid .five-minute-study-heading,
   .dashboard-action-grid .dashboard-additional-heading {
     align-items: center;
@@ -10438,9 +10427,6 @@ body:has(.dashboard) {
 }
 
 @media(max-width:430px){
-  .dashboard-action-primary {
-    grid-auto-rows: 7.4rem;
-  }
   .dashboard-action-primary > .dashboard-quest-button,
   .dashboard-action-primary > .dashboard-tool-button {
     min-height: 0;
@@ -10450,6 +10436,9 @@ body:has(.dashboard) {
   .dashboard-action-secondary > .dashboard-additional {
     min-height: 2.35rem;
     padding: 0.32rem 0.45rem;
+  }
+  .dashboard-action-primary > .dashboard-feature-card {
+    min-height: 2.35rem;
   }
   .tool-menu-grid {
     grid-template-columns: 1fr;
