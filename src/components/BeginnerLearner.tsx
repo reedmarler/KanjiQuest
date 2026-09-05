@@ -644,48 +644,53 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
     <div className={`beginner-learner beginner-learner--${script}${isKanaPreview ? ' beginner-learner--preview-a' : ''}${isKanaPreview && previewDark ? ' beginner-learner--preview-a-dark' : ''}`}>
       {isKanaPreview ? (
         <>
-          <div className="preview-a-header">
-            <div className="preview-a-header-row">
-              {startWithQuiz ? (
-                <div className="app-nav-actions">
-                  <AppBackButton onClick={onBack} aria-label="Back" />
-                  <AppDashboardButton onClick={onDashboard} />
-                </div>
-              ) : (
-                <AppBackButton onClick={onBack} aria-label="Back" />
-              )}
-              <span className="preview-a-title">{deckTitle}</span>
-              <button
-                type="button"
-                role="switch"
-                className="preview-a-theme-toggle"
-                onClick={() => setPreviewDark((value) => !value)}
-                aria-checked={previewDark}
-                aria-label={previewDark ? 'Turn off dark mode for this preview' : 'Turn on dark mode for this preview'}
-              >
-                {/* --sun/--moon name the animation slot (which one is on top
-                    when unchecked/checked), not the glyph in it — swapped so
-                    the moon shows in light mode and the sun in dark mode. */}
-                <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
-                <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
-              </button>
+          {/* Pinned to the page corner, exactly like every other back
+              button in the app (including the Hiragana/Katakana Chart
+              page's) — not enveloped into the title box below. */}
+          {startWithQuiz ? (
+            <div className="app-nav-actions">
+              <AppBackButton onClick={onBack} aria-label="Back" />
+              <AppDashboardButton onClick={onDashboard} />
             </div>
-            <div className="preview-a-top">
+          ) : (
+            <AppBackButton onClick={onBack} aria-label="Back" />
+          )}
+          {/* Pinned to the opposite corner, at the back button's own height. */}
+          <button
+            type="button"
+            role="switch"
+            className="preview-a-theme-toggle"
+            onClick={() => setPreviewDark((value) => !value)}
+            aria-checked={previewDark}
+            aria-label={previewDark ? 'Turn off dark mode for this preview' : 'Turn on dark mode for this preview'}
+          >
+            {/* --sun/--moon name the animation slot (which one is on top
+                when unchecked/checked), not the glyph in it — swapped so
+                the moon shows in light mode and the sun in dark mode. */}
+            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
+            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
+          </button>
+          {/* Same title + action-pills setup as the Hiragana/Katakana Chart
+              page's own heading (EN, カナ/かな, Quiz) — Chart takes EN's
+              spot since there's no romaji toggle here. */}
+          <div className="preview-a-top">
+            <span className="preview-a-title">{deckTitle}</span>
+            <div className="preview-a-actions">
               {onOpenChart && (
                 <button type="button" className="preview-a-header-btn" onClick={onOpenChart} aria-label={`Open the ${deck.title} chart`} title={`${deck.title} chart`}>
                   <span aria-hidden="true">▦</span>
                   <em>Chart</em>
                 </button>
               )}
-              {onOpenQuiz && (
-                <button type="button" className="preview-a-header-btn" onClick={onOpenQuiz} aria-label={`Open the ${deck.title} quiz`} title={`${deck.title} quiz`}>
-                  <span aria-hidden="true">?</span>
-                  <em>Quiz</em>
-                </button>
-              )}
               {onSwitchScript && (
                 <button type="button" className="preview-a-header-btn" onClick={onSwitchScript} aria-label={`Switch to ${otherScriptName} practice`} title={`Switch to ${otherScriptName}`}>
                   <span aria-hidden="true" lang="ja">{otherScriptLabel}</span>
+                </button>
+              )}
+              {onOpenQuiz && (
+                <button type="button" className="preview-a-header-btn preview-a-quiz-btn" onClick={onOpenQuiz} aria-label={`Open the ${deck.title} quiz`} title={`${deck.title} quiz`}>
+                  <span aria-hidden="true">?</span>
+                  <em>Quiz</em>
                 </button>
               )}
             </div>

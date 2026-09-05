@@ -123,10 +123,6 @@ body:has(.beginner-learner) .app {
   padding-bottom: 1.4rem;
 }
 
-body:has(.beginner-learner--preview-a) .app {
-  max-width: 980px;
-}
-
 body:has(.picture-practice) .app {
   padding-top: 1rem;
   padding-bottom: 0;
@@ -15909,12 +15905,12 @@ body:has(.beginner-learner--preview-a-dark) {
   --preview-glyph-2: #d6266f;
   --preview-shadow: 0 12px 28px rgba(94, 62, 130, 0.16);
   border-radius: 20px;
-  /* Top stays 0 — that's what lines the header up with the standard back
-     button's fixed 1rem inset elsewhere in the app (--app-nav-top). Left,
-     right, and bottom still carry real breathing room, just slightly less
-     than before to let the cards themselves grow a bit. */
+  /* Top clears the pinned back button/toggle pair (1rem inset + their own
+     ~2.1rem height) the same way the Hiragana/Katakana Chart page's own
+     heading does, now that the title box sits flush below them instead of
+     overlapping their corner. */
   width: min(100%, 44rem);
-  padding: 0 1rem 1rem;
+  padding: 2.1rem 1rem 1rem;
   background: var(--preview-page-bg);
 }
 
@@ -15940,56 +15936,47 @@ body:has(.beginner-learner--preview-a-dark) {
   --preview-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
 
-/* One envelope around both rows — the back button, the title (centered
-   between it and the toggle), and the toggle on the first row; Chart, Quiz
-   and the script switch on the second — rather than the back button and
-   toggle floating pinned to the page corners above a separate title pill. */
-.preview-a-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 0.55rem 0.6rem 0.55rem 0.55rem;
+/* The pinned back button floats independently of the flow, but the slot it
+   leaves behind still claims a full row's height in this flex column,
+   holding the title box an extra row below it — same fix as the Chart
+   page's own heading, so the box sits flush against the button the same
+   way there too. */
+.beginner-learner--preview-a > .app-back-slot,
+.beginner-learner--preview-a > .app-nav-actions > .app-back-slot {
+  height: 0;
+}
+
+/* Same shape as the Hiragana/Katakana Chart page's own heading: title on
+   the left, action pills on the right, in one box — with the back button
+   and dark-mode toggle pinned to the page corners above it (exactly like
+   the Chart page's back button), rather than enveloped into the box. */
+.preview-a-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.62rem 0.6rem 0.62rem 0.7rem;
   border-radius: 22px;
   background: var(--preview-top-bg);
   box-shadow: var(--preview-shadow);
 }
 
-.preview-a-header-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* The shared back button (and, on the quiz-start path, the dashboard badge
-   beside it) pin themselves to the page corner everywhere else in the app;
-   here they ride inline in the header row instead, the same way the
-   Hiragana/Katakana Chart page's own heading un-pins it. */
-.app .preview-a-header-row .app-back-slot > .app-back-button {
-  position: static;
-}
-
-.app .preview-a-header-row .app-nav-actions > .app-dashboard-button {
-  position: static;
-}
-
-.preview-a-top {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-}
-
 .preview-a-title {
-  flex: 1;
   min-width: 0;
   color: var(--preview-text);
   font: 800 1.16rem/1.22 'Outfit', system-ui, sans-serif;
-  text-align: center;
   /* Katakana is a hair longer than Hiragana and this row is already tight
-     at narrow widths with the back button and toggle also on it. */
+     at narrow widths with the action pills also on it. */
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.preview-a-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
 }
 
 .preview-a-header-btn {
@@ -16024,6 +16011,14 @@ body:has(.beginner-learner--preview-a-dark) {
   transform: scale(0.92);
 }
 
+/* The bolder of the three pills — same idea as the Chart page's own Quiz
+   button standing out from EN/カナ next to it. */
+.preview-a-quiz-btn {
+  background: linear-gradient(135deg, var(--preview-glyph-2), var(--preview-glyph-1));
+  color: #fff;
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--preview-glyph-2) 34%, transparent);
+}
+
 /* An actual on/off switch — sun, a sliding track+knob, moon — rather than a
    single icon that swaps, so it reads as a toggle at a glance. */
 /* A single coin-like badge that morphs between sun and moon, rather than
@@ -16032,8 +16027,10 @@ body:has(.beginner-learner--preview-a-dark) {
    a quarter-turn, so the swap itself reads as the sun/moon rotating out of
    and into view rather than one icon merely fading into another. */
 .preview-a-theme-toggle {
-  position: relative;
-  flex: 0 0 auto;
+  position: absolute;
+  top: var(--app-nav-top);
+  right: var(--app-nav-left);
+  z-index: 20;
   display: grid;
   place-items: center;
   width: 2.1rem;
@@ -17457,10 +17454,20 @@ body:has(.beginner-learner--preview-a-dark) {
   }
 }
 
-/* Chart/Quiz/switch already sit on their own row below the back/title/
-   toggle row at every width — on a phone they additionally stretch to fill
-   it evenly instead of sitting at their compact natural width. */
+/* Same wrap the Hiragana/Katakana Chart page's own heading does at this
+   width: title drops to its own row, Chart/カナ/Quiz wrap to a full-width
+   row below it and stretch to fill it evenly. */
 @media (max-width: 560px) {
+  .preview-a-top {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.4rem;
+  }
+
+  .preview-a-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
   .preview-a-header-btn {
     flex: 1 1 0;
   }
