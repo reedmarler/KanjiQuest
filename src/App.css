@@ -15940,23 +15940,43 @@ body:has(.beginner-learner--preview-a-dark) {
   --preview-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
 
-.preview-a-top {
+/* One envelope around both rows — the back button, the title (centered
+   between it and the toggle), and the toggle on the first row; Chart, Quiz
+   and the script switch on the second — rather than the back button and
+   toggle floating pinned to the page corners above a separate title pill. */
+.preview-a-header {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: -0.6rem;
-  padding: 0.62rem 0.6rem 0.62rem 0.5rem;
-  border-radius: 999px;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.55rem 0.6rem 0.55rem 0.55rem;
+  border-radius: 22px;
   background: var(--preview-top-bg);
   box-shadow: var(--preview-shadow);
 }
 
-.beginner-learner--preview-a .preview-a-top > .app-dashboard-button {
-  width: 1.85rem;
-  height: 1.85rem;
-  border-color: color-mix(in srgb, var(--preview-text) 12%, transparent);
-  background: var(--preview-badge-bg);
-  box-shadow: 0 2px 6px rgba(94, 62, 130, 0.14);
+.preview-a-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* The shared back button (and, on the quiz-start path, the dashboard badge
+   beside it) pin themselves to the page corner everywhere else in the app;
+   here they ride inline in the header row instead, the same way the
+   Hiragana/Katakana Chart page's own heading un-pins it. */
+.app .preview-a-header-row .app-back-slot > .app-back-button {
+  position: static;
+}
+
+.app .preview-a-header-row .app-nav-actions > .app-dashboard-button {
+  position: static;
+}
+
+.preview-a-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
 
 .preview-a-title {
@@ -15964,9 +15984,9 @@ body:has(.beginner-learner--preview-a-dark) {
   min-width: 0;
   color: var(--preview-text);
   font: 800 1.16rem/1.22 'Outfit', system-ui, sans-serif;
-  padding-block: 0.06rem 0.1rem;
+  text-align: center;
   /* Katakana is a hair longer than Hiragana and this row is already tight
-     at narrow widths with the chart/reset icons and toggle also on it. */
+     at narrow widths with the back button and toggle also on it. */
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -16012,14 +16032,12 @@ body:has(.beginner-learner--preview-a-dark) {
    a quarter-turn, so the swap itself reads as the sun/moon rotating out of
    and into view rather than one icon merely fading into another. */
 .preview-a-theme-toggle {
-  position: absolute;
-  top: var(--app-nav-top);
-  right: var(--app-nav-left);
-  z-index: 20;
+  position: relative;
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 2.35rem;
-  height: 2.35rem;
+  width: 2.1rem;
+  height: 2.1rem;
   border: 0;
   border-radius: 50%;
   /* Sky blue rather than a warm yellow/orange — the sun emoji is itself
@@ -17439,30 +17457,10 @@ body:has(.beginner-learner--preview-a-dark) {
   }
 }
 
-/* Matches the Hiragana/Katakana Chart page's own wrap breakpoint (560px) —
-   several phones (larger Android devices, Plus/Max iPhones at their 2x CSS
-   width) sit between 430 and 560 and were missing this entirely, keeping the
-   title bar single-row and the row tabs at their crowded 12-per-screen
-   width right up to a much narrower cutoff than the Chart page uses. */
+/* Chart/Quiz/switch already sit on their own row below the back/title/
+   toggle row at every width — on a phone they additionally stretch to fill
+   it evenly instead of sitting at their compact natural width. */
 @media (max-width: 560px) {
-  /* Chart/Quiz/switch drop to their own full-width row below the title
-     instead of squeezing onto the title's line — same wrap the Hiragana/
-     Katakana Chart page's own heading does at this width, so the two
-     pages' title bars land on the same height instead of this one
-     looking squashed next to that one's two rows. */
-  .preview-a-top {
-    flex-wrap: wrap;
-    row-gap: 0.45rem;
-    padding-block: 0.6rem;
-  }
-
-  .preview-a-title {
-    flex: 1 1 100%;
-    overflow: visible;
-    white-space: normal;
-    text-overflow: clip;
-  }
-
   .preview-a-header-btn {
     flex: 1 1 0;
   }
