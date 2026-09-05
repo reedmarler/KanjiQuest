@@ -190,15 +190,23 @@ function isRecordingFile(file: string | undefined): file is string {
   return Boolean(file)
 }
 
+function katakanaToHiragana(text: string): string {
+  return [...text].map((character) => {
+    const code = character.charCodeAt(0)
+    return code >= 0x30a1 && code <= 0x30f6 ? String.fromCharCode(code - 0x60) : character
+  }).join('')
+}
+
 /** Returns an approved Beginner Mode recording when one exists. */
 export function findBeginnerAudio(text: string, kind: BeginnerAudioKind): string | undefined {
   const normalized = text.trim()
+  const hiragana = katakanaToHiragana(normalized)
   if (kind === 'kana') {
-    const file = pickRecording(HIRAGANA_RECORDINGS[normalized])
+    const file = pickRecording(HIRAGANA_RECORDINGS[normalized] ?? HIRAGANA_RECORDINGS[hiragana])
     return file ? `${import.meta.env.BASE_URL}audio/beginner/hiragana/${file}` : undefined
   }
   if (kind === 'word') {
-    const file = HIRAGANA_WORD_RECORDINGS[normalized]
+    const file = HIRAGANA_WORD_RECORDINGS[normalized] ?? HIRAGANA_WORD_RECORDINGS[hiragana]
     return file ? `${import.meta.env.BASE_URL}audio/beginner/hiragana/words/${file}` : undefined
   }
   return undefined
@@ -213,7 +221,7 @@ export function findBeginnerAudio(text: string, kind: BeginnerAudioKind): string
 export function findBeginnerRowAudio(text: string): string[] | undefined {
   const characters = text.trim().split('\u3001').map((part) => part.trim()).filter(Boolean)
   if (characters.length === 0) return undefined
-  const files = characters.map((character) => pickRecording(HIRAGANA_RECORDINGS[character]))
+  const files = characters.map((character) => pickRecording(HIRAGANA_RECORDINGS[character] ?? HIRAGANA_RECORDINGS[katakanaToHiragana(character)]))
   if (!files.every(isRecordingFile)) return undefined
   return files.map((file) => `${import.meta.env.BASE_URL}audio/beginner/hiragana/${file}`)
 }

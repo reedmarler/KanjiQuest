@@ -123,6 +123,10 @@ body:has(.beginner-learner) .app {
   padding-bottom: 1.4rem;
 }
 
+body:has(.beginner-learner--preview-a) .app {
+  max-width: 980px;
+}
+
 body:has(.picture-practice) .app {
   padding-top: 1rem;
   padding-bottom: 0;
@@ -15188,9 +15192,19 @@ button.counter-example {
 
 :root[data-app-theme='light'] body:has(.hiragana-chart-page) {
   background:
-    radial-gradient(circle at 16% 8%, color-mix(in srgb, var(--sakura-light) 18%, transparent), transparent 9rem),
-    radial-gradient(circle at 86% 18%, color-mix(in srgb, var(--sakura) 12%, transparent), transparent 10rem),
-    linear-gradient(180deg, #fff8fb 0%, #fffdfc 48%, #faf7f8 100%);
+    linear-gradient(135deg, color-mix(in srgb, #ffe3ee 74%, transparent), transparent 42%),
+    linear-gradient(180deg, #fff2f7 0%, #fff8fb 46%, #f6d9e5 100%);
+}
+
+:root:has(.hiragana-chart-page--hiragana),
+body:has(.hiragana-chart-page--hiragana) {
+  background: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
+}
+
+:root[data-app-theme='light']:has(.hiragana-chart-page--hiragana) {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #ffe3ee 74%, transparent), transparent 42%),
+    linear-gradient(180deg, #fff2f7 0%, #fff8fb 46%, #f6d9e5 100%);
 }
 
 .hiragana-chart-page {
@@ -15199,103 +15213,235 @@ button.counter-example {
   --hiragana-ink: #241b22;
   --hiragana-muted: #675b62;
   --hiragana-line: rgba(122, 67, 86, 0.16);
+  --kana-chart-accent: var(--sakura);
+  --kana-chart-accent-strong: #ef4f98;
+  --kana-chart-accent-soft: #ff86c4;
+  --kana-chart-complete: #28d77b;
+  --kana-chart-complete-light: #76f1a4;
+  --kana-chart-complete-deep: #11945a;
+  --kana-chart-board: color-mix(in srgb, #241f38 82%, transparent);
+  --kana-chart-row: color-mix(in srgb, #2a2440 70%, transparent);
+  --kana-chart-cell: color-mix(in srgb, #2a2440 88%, var(--sakura) 12%);
+  --kana-chart-text: #f2eefc;
+  --kana-chart-muted: #b6b0d6;
+  --kana-chart-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.75rem;
   width: min(100%, 34rem);
   margin-inline: auto;
-  padding: 0.2rem 0 1.5rem;
+  padding: 1.25rem 0 1.5rem;
+}
+
+.hiragana-chart-page > .app-back-slot {
+  height: 0;
+}
+
+.hiragana-chart-page--katakana {
+  --kana-chart-accent: var(--kyogre);
+  --kana-chart-accent-strong: var(--kyogre-light);
+  --kana-chart-accent-soft: var(--kyogre-light);
+  --kana-chart-cell: color-mix(in srgb, var(--surface-2) 90%, var(--kyogre) 10%);
 }
 
 @media (min-width: 720px) {
   .hiragana-chart-page {
     width: min(100%, 44rem);
+    padding-top: 1.1rem;
   }
 }
 
 .hiragana-chart-heading {
+  position: relative;
   display: grid;
-  gap: 0.15rem;
-  padding: 0.4rem 0.1rem 0.1rem;
+  grid-template-columns: 4.1rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 4.75rem;
+  padding: 0.72rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--kana-chart-accent-soft) 18%, transparent);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--kana-chart-accent) 14%, transparent), transparent 56%),
+    color-mix(in srgb, #2a2440 85%, transparent);
+  box-shadow: var(--kana-chart-shadow);
+  overflow: hidden;
+}
+
+.hiragana-chart-heading::after {
+  display: none;
+}
+
+.hiragana-chart-hero-mark {
+  display: grid;
+  place-items: center;
+  width: 4.1rem;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--kana-chart-accent-soft), var(--kana-chart-accent));
+  color: #fff;
+  font: 800 2.2rem/1 'Noto Sans JP', sans-serif;
+  box-shadow: 0 0.55rem 1.15rem color-mix(in srgb, var(--kana-chart-accent) 28%, transparent);
+}
+
+.hiragana-chart-heading-copy {
+  min-width: 0;
+}
+
+.hiragana-chart-heading-copy small {
+  display: block;
+  margin-bottom: 0.22rem;
+  color: var(--kana-chart-accent-soft);
+  font: 800 0.54rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.08em;
 }
 
 .hiragana-chart-heading h1 {
-  color: var(--text);
-  font: 800 1.3rem/1.2 'Outfit', system-ui, sans-serif;
+  color: var(--kana-chart-text);
+  font: 800 1.65rem/1.05 'Outfit', system-ui, sans-serif;
 }
 
 .hiragana-chart-heading p {
-  color: var(--text-muted);
+  color: var(--kana-chart-muted);
+  margin-top: 0.25rem;
   font-size: 0.68rem;
 }
 
-.hiragana-chart-grid {
+.hiragana-chart-quiz-button {
+  display: inline-grid;
+  place-items: center;
+  min-width: 4.4rem;
+  min-height: 2.2rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--kana-chart-accent-soft) 34%, transparent);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
+  color: #fff;
+  font: 850 0.72rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 0.45rem 1.1rem color-mix(in srgb, var(--kana-chart-accent) 24%, transparent);
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 100ms ease;
+}
+
+.hiragana-chart-quiz-button:hover,
+.hiragana-chart-quiz-button:focus-visible {
+  border-color: color-mix(in srgb, #fff 56%, var(--kana-chart-accent-soft));
+  box-shadow: 0 0.5rem 1.25rem color-mix(in srgb, var(--kana-chart-accent) 34%, transparent);
+}
+
+.hiragana-chart-quiz-button:active {
+  transform: scale(0.97);
+}
+
+.hiragana-chart-board {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.45rem;
+  padding: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--kana-chart-accent-soft) 22%, var(--border));
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--kana-chart-accent) 8%, transparent), transparent 28%),
+    var(--kana-chart-board);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), var(--kana-chart-shadow);
 }
 
 .hiragana-chart-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 3.7rem minmax(0, 1fr);
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
+  padding: 0.08rem 0.12rem;
 }
 
 .hiragana-chart-row-status {
-  flex: 0 0 auto;
+  position: relative;
   display: grid;
   place-items: center;
-  width: 2.2rem;
-  aspect-ratio: 1;
-  color: var(--text-muted);
-  font: 700 1.05rem/1 'Outfit', system-ui, sans-serif;
+  justify-self: center;
+  align-self: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  padding: 0;
+  border: 2px solid color-mix(in srgb, var(--kana-chart-accent-soft) 52%, var(--border));
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease, transform 100ms ease;
+}
+
+.hiragana-chart-row-status:hover,
+.hiragana-chart-row-status:focus-visible {
+  border-color: var(--kana-chart-accent-soft);
+  box-shadow: 0 0 0 0.22rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
+}
+
+.hiragana-chart-row-status:active {
+  transform: scale(0.97);
+}
+
+.hiragana-chart-row-status span {
+  width: 42%;
+  height: 24%;
+  border: solid currentColor;
+  border-width: 0 0 2px 2px;
+  opacity: 0;
+  transform: translateY(-0.05rem) rotate(-45deg) scale(0.7);
+  transition: opacity 140ms ease, transform 140ms ease;
 }
 
 .hiragana-chart-row-status.is-studied {
-  color: var(--rayquaza-light);
+  border-color: var(--kana-chart-complete-light);
+  background: linear-gradient(135deg, var(--kana-chart-complete-deep), var(--kana-chart-complete), var(--kana-chart-complete-light));
+  box-shadow: 0 0.18rem 0.55rem color-mix(in srgb, var(--kana-chart-complete) 38%, transparent);
+}
+
+.hiragana-chart-row-status.is-studied span {
+  opacity: 1;
+  transform: translateY(-0.05rem) rotate(-45deg) scale(1);
 }
 
 .hiragana-chart-row-chars {
   display: grid;
-  grid-template-columns: repeat(5, 2.9rem);
-  flex: 1;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.35rem;
 }
 
 .hiragana-chart-cell {
+  position: relative;
   display: grid;
   place-items: center;
-  gap: 0.05rem;
-  width: 2.9rem;
-  height: 2.9rem;
+  width: 100%;
+  aspect-ratio: 1;
   padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background: var(--surface-2);
-  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--kana-chart-accent-soft) 12%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--kana-chart-cell) 72%, transparent);
+  color: var(--kana-chart-text);
   cursor: pointer;
   transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease, transform 100ms ease;
 }
 
 .hiragana-chart-cell:hover,
 .hiragana-chart-cell:focus-visible {
-  border-color: color-mix(in srgb, var(--sakura) 56%, var(--border));
-  background: color-mix(in srgb, #fff 72%, var(--sakura-light) 28%);
-  box-shadow: 0 0.2rem 0.8rem color-mix(in srgb, var(--sakura-deep) 13%, transparent);
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 62%, var(--border));
+  background: color-mix(in srgb, #332b52 68%, var(--kana-chart-accent) 32%);
+  box-shadow: 0 0.35rem 0.95rem color-mix(in srgb, var(--kana-chart-accent) 22%, transparent);
+  transform: translateY(-1px);
 }
 
 .hiragana-chart-cell:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 
 /* Marks a vowel slot no kana fills — e.g. the empty い/え columns in the
    contracted きゃ/きゅ/きょ rows — so it reads as "nothing here" rather than
    a layout gap. */
 .hiragana-chart-cell-empty {
-  width: 2.9rem;
-  height: 2.9rem;
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--text-muted) 34%, transparent);
+  width: 100%;
+  aspect-ratio: 1;
+  background: transparent;
 }
 
 :root[data-app-theme='light'] .hiragana-chart-heading h1 {
@@ -15306,17 +15452,41 @@ button.counter-example {
   color: var(--hiragana-muted);
 }
 
+:root[data-app-theme='light'] .hiragana-chart-page {
+  --kana-chart-board: color-mix(in srgb, #fff8fb 88%, transparent);
+  --kana-chart-row: color-mix(in srgb, #ffffff 74%, transparent);
+  --kana-chart-cell: color-mix(in srgb, var(--hiragana-paper) 82%, var(--kana-chart-accent-soft) 18%);
+}
+
+:root[data-app-theme='light'] .hiragana-chart-heading {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--kana-chart-accent) 20%, transparent), transparent 58%),
+    color-mix(in srgb, #fff8fb 88%, transparent);
+  box-shadow: 0 0.8rem 2rem rgba(147, 74, 104, 0.13);
+}
+
+:root[data-app-theme='light'] .hiragana-chart-hero-mark {
+  color: #fff;
+}
+
+:root[data-app-theme='light'] .hiragana-chart-quiz-button {
+  background: color-mix(in srgb, #ffffff 78%, transparent);
+  color: color-mix(in srgb, var(--sakura-deep) 70%, var(--hiragana-ink));
+  box-shadow: 0 0.22rem 0.75rem color-mix(in srgb, var(--sakura-deep) 12%, transparent);
+}
+
 :root[data-app-theme='light'] .hiragana-chart-row-status {
-  color: color-mix(in srgb, var(--hiragana-muted) 72%, transparent);
+  border-color: color-mix(in srgb, var(--hiragana-muted) 46%, transparent);
 }
 
 :root[data-app-theme='light'] .hiragana-chart-row-status.is-studied {
-  color: var(--rayquaza-deep);
+  border-color: var(--kana-chart-complete-deep);
+  background: linear-gradient(135deg, var(--kana-chart-complete-deep), var(--kana-chart-complete), var(--kana-chart-complete-light));
 }
 
 :root[data-app-theme='light'] .hiragana-chart-cell {
   border-color: var(--hiragana-line);
-  background: color-mix(in srgb, var(--hiragana-paper) 86%, var(--sakura-light) 14%);
+  background: color-mix(in srgb, var(--hiragana-paper) 68%, var(--sakura-light) 14%);
   color: var(--hiragana-ink);
   box-shadow: 0 0.18rem 0.65rem color-mix(in srgb, var(--sakura-deep) 9%, transparent);
 }
@@ -15329,7 +15499,7 @@ button.counter-example {
 }
 
 :root[data-app-theme='light'] .hiragana-chart-cell-empty {
-  background: color-mix(in srgb, var(--sakura-light) 18%, transparent);
+  background: transparent;
 }
 
 :root[data-app-theme='light'] .hiragana-chart-cell-romaji {
@@ -15337,13 +15507,84 @@ button.counter-example {
 }
 
 .hiragana-chart-cell-char {
-  font: 700 1.15rem/1 'Noto Sans JP', sans-serif;
+  grid-area: 1 / 1;
+  font: 800 1.52rem/1 'Noto Sans JP', sans-serif;
 }
 
 .hiragana-chart-cell-romaji {
-  color: var(--text-muted);
+  position: absolute;
+  right: 0.2rem;
+  bottom: 18%;
+  left: 0.2rem;
+  color: var(--kana-chart-muted);
   font-size: 0.5rem;
+  line-height: 1;
+  text-align: center;
   text-transform: lowercase;
+  pointer-events: none;
+}
+
+@media (max-width: 560px) {
+  .hiragana-chart-page {
+    width: min(100%, 30rem);
+    gap: 0.55rem;
+    padding-top: 1.2rem;
+  }
+
+  .hiragana-chart-heading {
+    grid-template-columns: 3.35rem minmax(0, 1fr);
+    gap: 0.65rem;
+    padding: 0.75rem;
+  }
+
+  .hiragana-chart-hero-mark {
+    width: 3.35rem;
+    font-size: 1.75rem;
+  }
+
+  .hiragana-chart-heading h1 {
+    font-size: 1.25rem;
+  }
+
+  .hiragana-chart-heading p {
+    font-size: 0.62rem;
+  }
+
+  .hiragana-chart-quiz-button {
+    grid-column: 1 / -1;
+    min-width: 0;
+    min-height: 2.35rem;
+    padding: 0.55rem;
+  }
+
+  .hiragana-chart-board {
+    padding: 0.38rem;
+  }
+
+  .hiragana-chart-row {
+    grid-template-columns: 2.85rem repeat(5, minmax(0, 1fr));
+  }
+
+  .hiragana-chart-row-status {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .hiragana-chart-row-status span {
+    border-width: 0 0 1.8px 1.8px;
+  }
+
+  .hiragana-chart-row-chars {
+    gap: 0.22rem;
+  }
+
+  .hiragana-chart-cell-char {
+    font-size: 1.14rem;
+  }
+
+  .hiragana-chart-cell-romaji {
+    font-size: 0.42rem;
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -15584,7 +15825,7 @@ button.counter-example {
    and below the page on exactly this card. */
 html:has(.beginner-learner--preview-a),
 body:has(.beginner-learner--preview-a) {
-  background: linear-gradient(135deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
+  background: linear-gradient(180deg, #ffe5ee 0%, #fff4f8 48%, #f7dbe7 100%);
 }
 
 html:has(.beginner-learner--preview-a-dark),
@@ -15598,12 +15839,12 @@ body:has(.beginner-learner--preview-a-dark) {
    file they'd otherwise win over this rule's padding on exactly the
    viewports this preview is mostly viewed at. */
 .beginner-learner.beginner-learner--preview-a {
-  --preview-page-bg: linear-gradient(135deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
+  --preview-page-bg: linear-gradient(180deg, #ffe5ee 0%, #fff4f8 48%, #f7dbe7 100%);
   /* Translucent rather than flat white, same technique as the header pill
      below — the page's own pastel gradient shows through faintly instead
      of the cards sitting on top of it as solid, disconnected boxes. */
-  --preview-card-bg: color-mix(in srgb, #fffaf6 82%, transparent);
-  --preview-top-bg: color-mix(in srgb, #ffffff 82%, transparent);
+  --preview-card-bg: color-mix(in srgb, #fff0f5 82%, transparent);
+  --preview-top-bg: color-mix(in srgb, #fff7fb 82%, transparent);
   --preview-badge-bg: #fff;
   --preview-tab-bg: color-mix(in srgb, #ffffff 65%, transparent);
   --preview-dot: rgba(150, 130, 190, 0.28);
@@ -15618,7 +15859,8 @@ body:has(.beginner-learner--preview-a-dark) {
      button's fixed 1rem inset elsewhere in the app (--app-nav-top). Left,
      right, and bottom still carry real breathing room, just slightly less
      than before to let the cards themselves grow a bit. */
-  padding: 0 1.5rem 1.4rem;
+  width: min(100%, 56rem);
+  padding: 0 1rem 1rem;
   background: var(--preview-page-bg);
 }
 
@@ -15658,26 +15900,25 @@ body:has(.beginner-learner--preview-a-dark) {
   box-shadow: var(--preview-shadow);
 }
 
-.preview-a-back {
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  width: 2.1rem;
-  height: 2.1rem;
-  padding: 0;
-  border: 0;
-  background: transparent;
+.beginner-learner--preview-a .app-back-slot {
+  flex: 0 0 var(--app-back-width);
+}
+
+.beginner-learner--preview-a .app-back-slot > .app-back-button {
+  position: static;
+  width: var(--app-back-width);
+  border-color: color-mix(in srgb, var(--preview-text) 12%, transparent);
+  background: var(--preview-badge-bg);
   color: var(--preview-text);
-  font-size: 1.3rem;
-  line-height: 1;
-  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(94, 62, 130, 0.14);
 }
 
 .preview-a-title {
   flex: 1;
   min-width: 0;
   color: var(--preview-text);
-  font: 800 1.2rem/1 'Outfit', system-ui, sans-serif;
+  font: 800 1.16rem/1.22 'Outfit', system-ui, sans-serif;
+  padding-block: 0.06rem 0.1rem;
   /* Katakana is a hair longer than Hiragana and this row is already tight
      at narrow widths with the chart/reset icons and toggle also on it. */
   overflow: hidden;
@@ -15775,14 +16016,33 @@ body:has(.beginner-learner--preview-a-dark) {
    flex-basis resolves against this container's own content width, so
    this needs no JS measurement and stays correct across screen sizes;
    6 and the 5 gaps between them are the only two numbers driving it —
-   change both together to show a different count. Snap (mandatory +
-   align: start on every tab, not just every 6th) still lets a swipe move
-   by one tab at a time — the uniform width is what guarantees any
-   tab-aligned stop shows a whole count, not the snapping itself. */
+   change both together to show a different count. Release snapping is handled
+   in JS so dragging can ease to the nearest tab instead of jumping. */
 .beginner-learner--preview-a .beginner-row-tabs {
-  padding: 0.3rem 0.15rem 0.5rem;
-  scroll-snap-type: x mandatory;
+  padding: 0.45rem 0.15rem 0.55rem;
+  cursor: grab;
   scroll-padding-inline: 0.15rem;
+  scrollbar-width: thin;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.beginner-learner--preview-a .beginner-row-tabs.is-dragging {
+  cursor: grabbing;
+}
+
+.beginner-learner--preview-a .beginner-row-tabs::-webkit-scrollbar {
+  height: 0.45rem;
+}
+
+.beginner-learner--preview-a .beginner-row-tabs::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--preview-tab-bg) 72%, transparent);
+}
+
+.beginner-learner--preview-a .beginner-row-tabs::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--preview-glyph-2) 38%, var(--preview-tab-bg));
 }
 
 .beginner-learner--preview-a .beginner-row-tab {
@@ -15793,12 +16053,17 @@ body:has(.beginner-learner--preview-a-dark) {
   min-width: 0;
   border: 0;
   border-radius: 14px;
-  padding: 0.5rem 0.4rem;
+  padding: 0.48rem 0.4rem;
   background: var(--preview-tab-bg);
   color: var(--preview-text);
   font-size: 0.72rem;
   scroll-snap-align: start;
   transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.beginner-learner--preview-a .beginner-row-tab:first-child {
+  margin-left: 0.25rem;
+  scroll-margin-left: 0.25rem;
 }
 
 .beginner-learner--preview-a .beginner-row-tab small {
@@ -15807,12 +16072,11 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .beginner-learner--preview-a .beginner-row-tab.is-active {
-  padding-top: 0.78rem;
-  padding-bottom: 0.78rem;
+  padding-top: 0.58rem;
+  padding-bottom: 0.58rem;
   background: linear-gradient(135deg, var(--preview-glyph-1), var(--preview-glyph-2));
   color: #fff;
-  font-size: 0.9rem;
-  transform: scale(1.15);
+  font-size: 0.82rem;
   box-shadow: 0 6px 16px rgba(214, 38, 111, 0.35);
 }
 
@@ -15827,16 +16091,20 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-card {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "read write"
+    "nav nav";
   align-items: stretch;
-  gap: 0.85rem;
+  gap: 0.65rem;
   padding: 0;
   border: 0;
   background: transparent;
 }
 
 .preview-a-read {
+  grid-area: read;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -15849,8 +16117,9 @@ body:has(.beginner-learner--preview-a-dark) {
      One's あ paints real ink below its nominal line-box, and a tight gap
      here previously let "Tap to listen" sit under the character's tail on
      a real phone. */
-  gap: 1rem;
-  padding: 0.4rem 0.6rem 0.45rem;
+  gap: 0.45rem;
+  min-height: 0;
+  padding: 0.45rem 0.6rem 0.5rem;
   border: 0;
   border-radius: 30px;
   background: var(--preview-card-bg);
@@ -15864,7 +16133,7 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-glyph {
-  font: 400 clamp(9.12rem, 23.46vw, 10.1rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  font: 400 clamp(9.66rem, 19.6vw, 13.16rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
   /* Vertical centering (a translateY, set inline by BeginnerLearner) is
      handled in JS now, from a real canvas measurement of each character's
      actual ink — this used to be a single hand-tuned margin-top that only
@@ -15888,15 +16157,18 @@ body:has(.beginner-learner--preview-a-dark) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  margin-top: 0.9rem;
   color: var(--preview-accent);
   font: 700 0.68rem/1 'Outfit', system-ui, sans-serif;
 }
 
 .preview-a-write {
+  grid-area: write;
   /* Bottom carries the 1.3rem trimmed from the read card above, so the
      writing area itself grows into the space that used to be excess
      whitespace up there instead of the page just getting taller overall. */
-  padding: 1.3rem 1.3rem 2.3rem;
+  min-width: 0;
+  padding: 0.8rem 0.8rem 1.15rem;
   border-radius: 30px;
   background:
     radial-gradient(circle, var(--preview-dot) 1px, transparent 1.4px) 0 0 / 16px 16px,
@@ -15921,8 +16193,8 @@ body:has(.beginner-learner--preview-a-dark) {
      smaller canvas's. The canvas fills the card's full inner width
      (stackWidthRem on the TraceCanvas call), so top and right are
      symmetric — both offsets are just crossing that same 1.3rem padding. */
-  top: -0.75rem;
-  right: -0.75rem;
+  top: -0.1rem;
+  right: -0.1rem;
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
   background: var(--preview-badge-bg);
   color: var(--preview-muted);
@@ -15938,14 +16210,15 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-nav {
+  grid-area: nav;
   display: flex;
   gap: 0.6rem;
 }
 
 .preview-a-nav-btn {
   flex: 1;
-  min-height: 3.6rem;
-  padding: 1rem 1.2rem;
+  min-height: 2.75rem;
+  padding: 0.75rem 1.05rem;
   border: 0;
   border-radius: 999px;
   color: #fff;
@@ -15953,6 +16226,21 @@ body:has(.beginner-learner--preview-a-dark) {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
   cursor: pointer;
   transition: transform 140ms ease, opacity 140ms ease;
+}
+
+@media (max-width: 719px) {
+  .preview-a-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .preview-a-glyph {
+    font-size: clamp(7.2rem, 28vw, 9.3rem);
+  }
+
+  .preview-a-write {
+    padding: 0.75rem 0.75rem 1rem;
+  }
 }
 
 .preview-a-nav-btn:active {
@@ -16200,10 +16488,13 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .beginner-listening-check {
-  min-height: 22rem;
-  justify-content: flex-start;
-  gap: 1rem;
-  padding: 1rem 1.75rem 1.25rem;
+  min-height: min(28rem, calc(100dvh - 9.4rem));
+  justify-content: start;
+  gap: 0.7rem;
+  padding: clamp(0.75rem, 2vh, 1rem) 1.75rem 1rem;
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--kyogre) 18%, transparent), transparent 12rem),
+    var(--surface);
 }
 
 .beginner-listening-check-label {
@@ -16213,23 +16504,24 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .beginner-listening-check-hint {
-  margin-top: -0.5rem;
+  max-width: 18rem;
+  margin-top: -0.45rem;
   color: var(--text-muted);
-  font-size: 0.66rem;
+  font-size: 0.68rem;
+  line-height: 1.35;
 }
 
 .beginner-listening-options {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.55rem;
-  width: min(100%, 26rem);
-  margin-top: auto;
-  margin-bottom: auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  width: min(100%, 24rem);
+  margin-block: 0.1rem 0;
 }
 
 .beginner-listening-options button {
-  min-height: 4.75rem;
-  padding: 0.55rem;
+  min-height: clamp(4.25rem, 13dvh, 5.35rem);
+  padding: 0.62rem 0.55rem;
   border: 1px solid var(--border);
   border-radius: 7px;
   background: var(--surface-2);
@@ -16260,7 +16552,7 @@ body:has(.beginner-learner--preview-a-dark) {
 
 .beginner-listening-options button span {
   display: block;
-  font: 700 1.9rem/1 'Noto Sans JP', sans-serif;
+  font: 700 2rem/1 'Noto Sans JP', sans-serif;
   white-space: nowrap;
 }
 
@@ -16276,7 +16568,7 @@ body:has(.beginner-learner--preview-a-dark) {
    listening check just answered, not a hint offered up front. */
 .beginner-listening-option-meaning {
   display: block;
-  margin-top: 0.2rem;
+  margin-top: 0.35rem;
   color: var(--text-muted);
   font: 600 0.52rem/1.2 'Outfit', system-ui, sans-serif;
   text-transform: capitalize;
@@ -16285,6 +16577,7 @@ body:has(.beginner-learner--preview-a-dark) {
 .beginner-listening-continue {
   width: min(100%, 11.5rem);
   min-height: 2.35rem;
+  margin-top: auto;
   padding: 0.45rem 0.75rem;
   border-radius: 6px;
   font-size: 0.75rem;
@@ -16311,8 +16604,62 @@ body:has(.beginner-learner--preview-a-dark) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.45rem;
   width: 100%;
+}
+
+.beginner-word-writing-card {
+  min-height: 0;
+  gap: 0.45rem;
+  padding: 0.85rem 1rem 0.9rem;
+}
+
+.beginner-word-writing-card .beginner-top-actions--tight {
+  margin-bottom: 0;
+  padding: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 18%, var(--border));
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--kyogre) 14%, transparent), transparent 60%),
+    color-mix(in srgb, var(--surface-2) 78%, transparent);
+}
+
+.beginner-word-writing-card .beginner-write-section {
+  padding-top: 0;
+  border-top: none;
+}
+
+.beginner-word-writing-card .trace-canvas-stack {
+  width: min(100%, var(--trace-stack-max, 21rem), 30rem);
+}
+
+@media (min-width: 720px) {
+  .beginner-word-writing-card {
+    padding: 0.85rem 1rem 1rem;
+  }
+
+  .beginner-word-writing-card .beginner-write-stack {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-height: 15rem;
+  }
+
+  .beginner-word-writing-card .beginner-quiz-example {
+    align-self: stretch;
+    align-items: center;
+  }
+
+  .beginner-word-writing-card .beginner-write-section {
+    align-self: stretch;
+    justify-content: center;
+  }
+
+  .beginner-word-writing-card .trace-canvas-stack {
+    width: min(100%, var(--trace-stack-max, 21rem), 32rem);
+  }
 }
 
 /* Wraps the example so tapping it both replays the stroke animation (the
@@ -16667,16 +17014,26 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .beginner-quiz-example .stroke-order-animation.is-hero {
-  width: min(100%, 28rem);
-  gap: 0.45rem;
+  width: min(100%, 24rem);
+  gap: 0.28rem;
 }
 
 .beginner-quiz-example .stroke-order-animation.is-hero .stroke-order-char {
-  width: clamp(5.4rem, 24vw, 8.3rem);
+  width: clamp(3.6rem, 14vw, 5.5rem);
+}
+
+@media (min-width: 720px) {
+  .beginner-word-writing-card .beginner-quiz-example .stroke-order-animation.is-hero {
+    width: min(100%, 32rem);
+  }
+
+  .beginner-word-writing-card .beginner-quiz-example .stroke-order-animation.is-hero .stroke-order-char {
+    width: clamp(5.8rem, 9.5vw, 8rem);
+  }
 }
 
 .beginner-quiz-example .stroke-order-animation.is-hero[data-char-count="4"] {
-  width: min(100%, 36rem);
+  width: min(100%, 28rem);
 }
 
 .beginner-quiz-example .stroke-order-animation.is-hero[data-char-count="4"] .stroke-order-chars {
@@ -16685,15 +17042,25 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .beginner-quiz-example .stroke-order-animation.is-hero[data-char-count="4"] .stroke-order-char {
-  width: min(calc((100% - 1.35rem) / 4), 8rem);
+  width: min(calc((100% - 1.35rem) / 4), 5rem);
 }
 
 .beginner-quiz-example .beginner-static-word-example {
-  width: min(100%, 28rem);
+  width: min(100%, 24rem);
 }
 
 .beginner-quiz-example .beginner-static-word-example span {
-  width: clamp(5.4rem, 24vw, 8.3rem);
+  width: clamp(3.6rem, 14vw, 5.5rem);
+}
+
+@media (min-width: 720px) {
+  .beginner-word-writing-card .beginner-quiz-example .beginner-static-word-example {
+    width: min(100%, 32rem);
+  }
+
+  .beginner-word-writing-card .beginner-quiz-example .beginner-static-word-example span {
+    width: clamp(5.8rem, 9.5vw, 8rem);
+  }
 }
 
 .beginner-quiz-example .stroke-order-replay-hint {
@@ -16857,6 +17224,27 @@ body:has(.beginner-learner--preview-a-dark) {
     font-size: 0.64rem;
   }
 
+  .beginner-listening-check {
+    min-height: calc(100dvh - 8.9rem);
+    gap: 0.55rem;
+    padding: 0.65rem 0.7rem 0.75rem;
+  }
+
+  .beginner-listening-options {
+    gap: 0.5rem;
+    width: 100%;
+    margin-block: 0.1rem auto;
+  }
+
+  .beginner-listening-options button {
+    min-height: clamp(3.8rem, 12dvh, 4.8rem);
+    padding: 0.5rem 0.45rem;
+  }
+
+  .beginner-listening-continue {
+    width: 100%;
+  }
+
   /* The flashcard: the example and the box you copy it into, on one screen.
      21rem each is 756px of squares on an 852px phone, so the box was always
      half off the bottom. */
@@ -16890,6 +17278,41 @@ body:has(.beginner-learner--preview-a-dark) {
      as the panel, so what has to be capped is the height of the whole stack. */
   .trace-canvas-stack.is-vertical {
     width: min(100%, var(--trace-stack-max), calc(56dvh / var(--trace-cells)));
+  }
+
+  .beginner-word-writing-card {
+    padding: 0.55rem 0.45rem 0.65rem;
+  }
+
+  .beginner-word-writing-card .beginner-top-actions--tight {
+    gap: 0.3rem;
+    padding: 0.35rem;
+  }
+
+  .beginner-word-writing-card .beginner-speak-btn--quiz {
+    height: 2.55rem;
+  }
+
+  .beginner-word-writing-card .beginner-write-stack {
+    gap: 0.32rem;
+  }
+
+  .beginner-word-writing-card .stroke-order-animation.is-hero,
+  .beginner-word-writing-card .beginner-static-word-example {
+    width: min(100%, 18rem);
+  }
+
+  .beginner-word-writing-card .stroke-order-animation.is-hero .stroke-order-char,
+  .beginner-word-writing-card .beginner-static-word-example span {
+    width: min(21vw, 4.3rem);
+  }
+
+  .beginner-word-writing-card .trace-canvas-stack {
+    width: min(100%, var(--trace-stack-max, 21rem), max(30dvh, calc(100dvh - 20rem)));
+  }
+
+  .beginner-word-writing-card .trace-canvas-stack.is-vertical {
+    width: min(100%, var(--trace-stack-max), calc(42dvh / var(--trace-cells)));
   }
 
   /* The revealed meaning shares the panel's top edge with Clear. Centred in a

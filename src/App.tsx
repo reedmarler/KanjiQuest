@@ -89,6 +89,8 @@ type View =
   | 'beginner-zone'
   | 'hiragana-chart'
   | 'katakana-chart'
+  | 'hiragana-quiz'
+  | 'katakana-quiz'
   | 'beginner-learner'
   | 'beginner-speed-run'
   | 'picture-practice'
@@ -480,6 +482,8 @@ function App() {
           tools={[
             { mark: 'あ', title: 'Hiragana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'sakura', onClick: () => setView('hiragana-chart') },
             { mark: 'ア', title: 'Katakana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'kyogre', onClick: () => setView('katakana-chart') },
+            { mark: '聞', title: 'Hiragana Quiz', detail: 'Check hiragana with listening and writing.', accent: 'rayquaza', onClick: () => setView('hiragana-quiz') },
+            { mark: '書', title: 'Katakana Quiz', detail: 'Check katakana with listening and writing.', accent: 'amber', onClick: () => setView('katakana-quiz') },
             { mark: '一', title: 'First Kanji', detail: 'Learn 30 memorable starter kanji.', accent: 'gold', onClick: () => {
               setBeginnerScript('kanji')
               setBeginnerInitialRowIndex(0)
@@ -506,6 +510,26 @@ function App() {
     )
   }
 
+  if (view === 'hiragana-quiz' || view === 'katakana-quiz') {
+    const quizScript = view === 'hiragana-quiz' ? 'hiragana' : 'katakana'
+    return (
+      <div className="app">
+        <Suspense fallback={<RouteLoading label={view === 'hiragana-quiz' ? 'Hiragana Quiz' : 'Katakana Quiz'} />}>
+          <BeginnerLearner
+            script={quizScript}
+            initialRowIndex={0}
+            initialCharIndex={0}
+            startWithQuiz
+            defaultPreviewDark={appTheme !== 'light'}
+            onBack={() => setView('beginner-zone')}
+            onOpenChart={() => setView(quizScript === 'hiragana' ? 'hiragana-chart' : 'katakana-chart')}
+            onDashboard={() => setView('dashboard')}
+          />
+        </Suspense>
+      </div>
+    )
+  }
+
   if (view === 'hiragana-chart' || view === 'katakana-chart') {
     const chartScript = view === 'hiragana-chart' ? 'hiragana' : 'katakana'
     return (
@@ -514,6 +538,7 @@ function App() {
           <KanaChart
             script={chartScript}
             onBack={() => setView('beginner-zone')}
+            onOpenQuiz={() => setView(chartScript === 'hiragana' ? 'hiragana-quiz' : 'katakana-quiz')}
             onSelectCharacter={(rowIndex, charIndex) => {
               setBeginnerScript(chartScript)
               setBeginnerInitialRowIndex(rowIndex)
@@ -537,6 +562,7 @@ function App() {
             script={beginnerScript}
             initialRowIndex={beginnerInitialRowIndex}
             initialCharIndex={beginnerInitialCharIndex}
+            defaultPreviewDark={appTheme !== 'light'}
             onBack={() => setView(beginnerLearnerReturnView)}
             onOpenChart={chartView ? () => setView(chartView) : undefined}
             onDashboard={() => setView('dashboard')}

@@ -240,7 +240,7 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
           onPointerLeave={handlePointerUp}
         />
         <button type="button" className="trace-canvas-clear" onClick={clearInk} aria-label="Clear">
-          &#8635; Clear
+          Clear
         </button>
         {overlay && <div className="trace-canvas-overlay">{overlay}</div>}
       </div>

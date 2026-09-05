@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
 import { recordAnswer } from '../lib/studyRecord'
 import { hiraganaWordBank, katakanaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
@@ -17,16 +17,15 @@ const QUIZ_TRACE_WORDS = 2
  *  part. Drawn independently of the trace words below, so the two parts of
  *  the quiz do not have to share one small pool. */
 const QUIZ_LISTENING_WORDS = 5
+const QUIZ_LISTENING_OPTIONS = 4
 
-/** Every listen button in this view forces the browser's own voice rather
- *  than the app's usual ElevenLabs clips — the hosted voice, tuned for
- *  fluent sentences, handled bare hiragana and hiragana-only words badly
- *  (clipped, then mispronounced, then just wrong) no matter how the
- *  request was tuned. A single character also gets no surrounding word to
- *  give the ear a beat to catch it in, so it needs to be slower than the
- *  pace a whole word reads fine at. */
+/** Single kana still need a slower pace than whole words: with no surrounding
+ *  word to give the ear a beat, even a normal learning-speed clip can feel
+ *  rushed. Beginner recordings are preferred when available; browser speech
+ *  remains the fallback for anything not recorded yet. */
 const SINGLE_CHARACTER_SPEECH_RATE = 0.5
 const COMPLETION_WRITING_DURATION_SCALE = 0.1625
+const ROW_TAB_DRAG_THRESHOLD_PX = 12
 
 /** The app's normal <meta name="theme-color">, matching --bg in App.css —
  *  restored whenever the kana card (below) isn't on screen. */
@@ -34,7 +33,7 @@ const DEFAULT_THEME_COLOR = '#0f0e17'
 /** Middle stop of the kana card's own light/dark gradients in App.css
  *  (--preview-page-bg), used as a single representative color since Safari's
  *  status-bar/toolbar tint only takes a flat color, not a gradient. */
-const ALPHA_PREVIEW_THEME_COLOR_LIGHT = '#f3d2ff'
+const ALPHA_PREVIEW_THEME_COLOR_LIGHT = '#fff7fa'
 const ALPHA_PREVIEW_THEME_COLOR_DARK = '#1c2036'
 
 const WORD_PICTURE: Record<string, string> = {
@@ -254,6 +253,24 @@ function pickQuizWords(
   return Array.from({ length: count }, (_, index) => pool[index % pool.length]!)
 }
 
+function pickListeningOptions(
+  rows: { characters: BeginnerCharacter[] }[],
+  rowIndex: number,
+  wordBank: readonly UnderstandingWord[],
+  correct: UnderstandingWord,
+  count: number,
+): UnderstandingWord[] {
+  const available = new Set(rows.slice(0, rowIndex + 1).flatMap((r) => r.characters.map((c) => c.char)))
+  const distractors = shuffled(wordBank.filter((entry) => (
+    entry.word !== correct.word && [...entry.word].every((ch) => available.has(ch))
+  )))
+  const fallbackDistractors = shuffled(wordBank.filter((entry) => (
+    entry.word !== correct.word && !distractors.some((option) => option.word === entry.word)
+  )))
+  const options = [correct, ...distractors, ...fallbackDistractors].slice(0, count)
+  return shuffled(options)
+}
+
 function BeginnerWordExample({
   word,
   script,
@@ -299,9 +316,13 @@ interface BeginnerLearnerProps {
   /** Opens the script's kana chart, when one exists (hiragana, katakana) —
    *  a quicker way back than going through the Beginner Zone hub. */
   onOpenChart?: () => void
+  /** Starts on the row quiz instead of character practice. */
+  startWithQuiz?: boolean
+  /** Initial kana preview palette. The in-card toggle can still change it. */
+  defaultPreviewDark?: boolean
 }
 
-export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex = 0, initialCharIndex = 0, onOpenChart }: BeginnerLearnerProps) {
+export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex = 0, initialCharIndex = 0, onOpenChart, startWithQuiz = false, defaultPreviewDark = true }: BeginnerLearnerProps) {
   const deck = useMemo(() => getBeginnerDeck(script), [script])
   const startRowIndex = Math.min(Math.max(initialRowIndex, 0), deck.rows.length - 1)
   const [rowIndex, setRowIndex] = useState(startRowIndex)
@@ -343,7 +364,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   // The badge that would hold a future streak counter doubles, for now, as a
   // dark/light toggle for just this preview card's own palette — it does not
   // touch the rest of the app's (permanently dark) theme.
-  const [previewDark, setPreviewDark] = useState(false)
+  const [previewDark, setPreviewDark] = useState(defaultPreviewDark)
 
   // Mobile Safari tints its status bar and bottom toolbar from the page's
   // <meta name="theme-color">, not from what the page actually paints there
@@ -377,6 +398,15 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   const glyphRef = useRef<HTMLSpanElement | null>(null)
   const [glyphOffset, setGlyphOffset] = useState(0)
   const [glyphScale, setGlyphScale] = useState(1)
+  const rowTabsRef = useRef<HTMLDivElement | null>(null)
+  const rowTabDragRef = useRef({
+    pointerId: -1,
+    startX: 0,
+    scrollLeft: 0,
+    suppressClick: false,
+    dragging: false,
+  })
+  const [rowTabsDragging, setRowTabsDragging] = useState(false)
   useLayoutEffect(() => {
     const el = glyphRef.current
     const parent = el?.parentElement
@@ -405,6 +435,82 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
     setCompletionWritingReplay(0)
   }
 
+  function handleRowTabsPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.pointerType === 'mouse' && event.button !== 0) return
+    const tabs = rowTabsRef.current
+    if (!tabs) return
+    rowTabDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      scrollLeft: tabs.scrollLeft,
+      suppressClick: false,
+      dragging: false,
+    }
+  }
+
+  function handleRowTabsPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    const tabs = rowTabsRef.current
+    const drag = rowTabDragRef.current
+    if (!tabs || drag.pointerId !== event.pointerId) return
+    const deltaX = event.clientX - drag.startX
+    if (Math.abs(deltaX) > ROW_TAB_DRAG_THRESHOLD_PX) {
+      drag.dragging = true
+      drag.suppressClick = true
+      setRowTabsDragging(true)
+      try {
+        tabs.setPointerCapture(event.pointerId)
+      } catch {
+        // Native scrolling still works without pointer capture.
+      }
+    }
+    if (!drag.dragging) return
+    event.preventDefault()
+    tabs.scrollLeft = drag.scrollLeft - deltaX
+  }
+
+  function settleRowTabs(tabs: HTMLDivElement) {
+    const tabStops = Array.from(tabs.querySelectorAll<HTMLButtonElement>('.beginner-row-tab'))
+      .map((button) => button.offsetLeft - tabs.offsetLeft)
+    if (tabStops.length === 0) return
+    const maxScroll = tabs.scrollWidth - tabs.clientWidth
+    const nearest = tabStops.reduce((best, stop) => (
+      Math.abs(stop - tabs.scrollLeft) < Math.abs(best - tabs.scrollLeft) ? stop : best
+    ), tabStops[0]!)
+    tabs.scrollTo({
+      left: Math.max(0, Math.min(maxScroll, nearest)),
+      behavior: 'smooth',
+    })
+  }
+
+  function handleRowTabsPointerEnd(event: ReactPointerEvent<HTMLDivElement>) {
+    const tabs = rowTabsRef.current
+    const drag = rowTabDragRef.current
+    if (drag.pointerId !== event.pointerId) return
+    const wasDragging = drag.dragging
+    drag.pointerId = -1
+    drag.dragging = false
+    setRowTabsDragging(false)
+    try {
+      tabs?.releasePointerCapture(event.pointerId)
+    } catch {
+      // Nothing to release if capture was unavailable.
+    }
+    if (tabs && wasDragging) settleRowTabs(tabs)
+  }
+
+  function handleRowTabClick(event: ReactMouseEvent<HTMLButtonElement>, index: number) {
+    if (rowTabDragRef.current.suppressClick) {
+      event.preventDefault()
+      rowTabDragRef.current.suppressClick = false
+      return
+    }
+    if (startWithQuiz) {
+      startQuizRow(index)
+      return
+    }
+    openRow(index)
+  }
+
   function startQuiz(index: number) {
     const wordBank = script === 'katakana'
       ? katakanaWordBank
@@ -417,13 +523,23 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
     const listeningWords = pickQuizWords(deck.rows, index, wordBank, QUIZ_LISTENING_WORDS)
     setQuizListeningWords(listeningWords)
     setQuizTraceWords(pickQuizWords(deck.rows, index, wordBank, QUIZ_TRACE_WORDS))
-    setListeningOptions(shuffled(listeningWords))
+    setListeningOptions(listeningWords[0]
+      ? pickListeningOptions(deck.rows, index, wordBank, listeningWords[0], QUIZ_LISTENING_OPTIONS)
+      : [])
     setListeningChoice(null)
     setListeningIndex(0)
     setQuizPhase('listening')
     setQuizTraceIndex(0)
     setQuizRevealed(false)
     setCompletionWritingReplay(0)
+  }
+
+  function startQuizRow(index: number) {
+    const characters = deck.rows[index]!.characters
+    setRowIndex(index)
+    setCards(characters)
+    setCardIndex(characters.length)
+    startQuiz(index)
   }
 
   function advanceQuizTrace() {
@@ -440,16 +556,8 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
 
   function finishQuiz() {
     setQuizzedRows((current) => ({ ...current, [rowIndex]: true }))
+    setCardIndex(deck.rows[rowIndex]!.characters.length)
     setQuizListeningWords(null)
-  }
-
-  function resetProgress() {
-    if (!window.confirm(`Reset all ${deck.title} progress?`)) return
-    window.localStorage.removeItem(storageKey(MASTERY_STORAGE_PREFIX, script))
-    setMastery({})
-    setQuizzedRows({})
-    setChallengeOpen(false)
-    openRow(0)
   }
 
   function goNext() {
@@ -462,6 +570,10 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
      * the app (and the map's ink) can finally see it.
      */
     if (script === 'hiragana' || script === 'katakana') recordAnswer(`${script}-${card.char}`, 'good')
+    if (isKanaPreview && !startWithQuiz && cardIndex + 1 >= cards.length && nextRowIndex !== null) {
+      openRow(nextRowIndex)
+      return
+    }
     setCardIndex((current) => current + 1)
   }
 
@@ -471,9 +583,17 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
 
   const rowComplete = cardIndex >= cards.length
   const nextRowIndex = rowIndex + 1 < deck.rows.length ? rowIndex + 1 : null
-  const rowNeedsQuiz = !quizzedRows[rowIndex]
+  const rowNeedsQuiz = (startWithQuiz || !isKanaPreview) && !quizzedRows[rowIndex]
+  const showCompletionQuizPreview = startWithQuiz || !isKanaPreview
   const currentTraceWord = quizTraceWords[quizTraceIndex]
   const listeningWord = quizListeningWords?.[listeningIndex] ?? null
+  const deckTitle = `${deck.title}${startWithQuiz ? ' Quiz' : ''}`
+
+  useEffect(() => {
+    if (!startWithQuiz) return
+    startQuizRow(startRowIndex)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startWithQuiz, startRowIndex, script])
 
   // Every screen that centres on hearing one word or character plays it the
   // moment it lands, instead of making a beginner hunt for the speaker
@@ -514,24 +634,19 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   return (
     <div className={`beginner-learner beginner-learner--${script}${isKanaPreview ? ' beginner-learner--preview-a' : ''}${isKanaPreview && previewDark ? ' beginner-learner--preview-a-dark' : ''}`}>
       {isKanaPreview ? (
-        /* A one-off header for this look — back arrow, title, small icon
-           buttons for the kana chart / progress reset this card used to
-           drop entirely (fine while it was a あ-only spike nobody could
+        /* A one-off header for this look — back arrow, title, a small icon
+           button for the kana chart this card used to drop entirely (fine
+           while it was a あ-only spike nobody could
            reach any other way; not fine now that it's the only screen
            hiragana/katakana learners see), and the dark-mode toggle. */
         <div className="preview-a-top">
-          <button type="button" className="preview-a-back" onClick={onBack} aria-label="Back">
-            <span aria-hidden="true">&#8592;</span>
-          </button>
-          <span className="preview-a-title">{deck.title}</span>
+          <AppBackButton onClick={onBack} aria-label="Back" />
+          <span className="preview-a-title">{deckTitle}</span>
           {onOpenChart && (
             <button type="button" className="preview-a-icon-btn" onClick={onOpenChart} aria-label={`Open the ${deck.title} chart`} title={`${deck.title} chart`}>
               <span aria-hidden="true">&#9638;</span>
             </button>
           )}
-          <button type="button" className="preview-a-icon-btn" onClick={resetProgress} aria-label={`Reset ${deck.title} progress`} title="Reset progress">
-            <span aria-hidden="true">&#8635;</span>
-          </button>
           <button
             type="button"
             role="switch"
@@ -560,14 +675,21 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                 {deck.title} Chart
               </button>
             )}
-            <button type="button" className="beginner-reset-progress" onClick={resetProgress} aria-label={`Reset ${deck.title} progress`}>
-              Progress reset
-            </button>
           </div>
         </div>
       )}
 
-      <div className="beginner-row-tabs" role="tablist" aria-label={`${deck.title} rows`}>
+      <div
+        ref={rowTabsRef}
+        className={`beginner-row-tabs${rowTabsDragging ? ' is-dragging' : ''}`}
+        role="tablist"
+        aria-label={`${deck.title} rows`}
+        onPointerDown={handleRowTabsPointerDown}
+        onPointerMove={handleRowTabsPointerMove}
+        onPointerUp={handleRowTabsPointerEnd}
+        onPointerCancel={handleRowTabsPointerEnd}
+        onPointerLeave={handleRowTabsPointerEnd}
+      >
         {deck.rows.map((entry, index) => {
           const masteredCount = entry.characters.filter((c) => (mastery[c.char] ?? 0) >= MASTERY_TARGET).length
           const done = masteredCount === entry.characters.length
@@ -578,7 +700,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
               role="tab"
               aria-selected={index === rowIndex}
               className={`beginner-row-tab${index === rowIndex ? ' is-active' : ''}${done ? ' is-done' : ''}`}
-              onClick={() => openRow(index)}
+              onClick={(event) => handleRowTabClick(event, index)}
               title={`${entry.label} — ${masteredCount}/${entry.characters.length} learned`}
             >
               <span>{entry.label}</span>
@@ -597,9 +719,9 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
         quizPhase === 'listening' && listeningWord ? (
           <main className="beginner-card beginner-listening-check">
             <span className="beginner-listening-check-label">
-              Listening word {listeningIndex + 1} of {quizListeningWords.length}
+              {listeningIndex + 1} / {quizListeningWords.length}
             </span>
-            <p className="beginner-listening-check-hint">Listen, then tap the word you heard.</p>
+            <p className="beginner-listening-check-hint">Pick the word you hear.</p>
             <button
               type="button"
               className="beginner-speak-btn beginner-speak-btn--quiz"
@@ -643,7 +765,18 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                 const next = listeningIndex + 1
                 if (next < quizListeningWords.length) {
                   setListeningChoice(null)
-                  setListeningOptions(shuffled(quizListeningWords))
+                  setListeningOptions(pickListeningOptions(
+                    deck.rows,
+                    rowIndex,
+                    script === 'katakana' ? katakanaWordBank : script === 'kanji'
+                      ? deck.rows.flatMap((entry) => entry.characters.map((character) => ({
+                          word: character.char,
+                          meaning: character.meaning ?? character.romaji,
+                        })))
+                      : hiraganaWordBank,
+                    quizListeningWords[next]!,
+                    QUIZ_LISTENING_OPTIONS,
+                  ))
                   setListeningIndex(next)
                 } else {
                   setListeningChoice(null)
@@ -651,7 +784,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                 }
               }}
             >
-              {listeningIndex + 1 < quizListeningWords.length ? 'Next listening word' : 'Continue to writing'} &rarr;
+              {listeningIndex + 1 < quizListeningWords.length ? 'Next' : 'Writing'} &rarr;
             </button>
           </main>
         ) : quizPhase === 'trace' && currentTraceWord ? (
@@ -713,6 +846,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                   key={currentTraceWord.word}
                   char={currentTraceWord.word}
                   compactSingleCharacter={[...currentTraceWord.word].length === 1}
+                  stackWidthRem={[...currentTraceWord.word].length === 1 ? 16 : Math.min([...currentTraceWord.word].length * 11, 32)}
                   overlay={quizRevealed ? meaningOverlay(currentTraceWord) : null}
                 />
               </div>
@@ -755,40 +889,46 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
               </button>
             ))}
           </div>
-          <div className="beginner-complete-quiz-preview">
-            <span className="beginner-complete-quiz-kicker">{rowNeedsQuiz ? 'Next quiz' : 'Review row'}</span>
-            <div className="beginner-complete-quiz-cue" aria-label="Listening and writing">
-              <button
-                type="button"
-                className="beginner-complete-quiz-step"
-                onClick={() => speakJapanese(row.characters.map((entry) => entry.char).join('、'), {
-                  rate: SINGLE_CHARACTER_SPEECH_RATE,
-                  forceBrowser: true,
-                  beginnerRecordingKind: 'row',
-                })}
-                aria-label="Hear all characters"
-              >
-                <span className="beginner-complete-quiz-icon" aria-hidden="true">&#128266;</span>
-                <span>Listening</span>
-              </button>
-              <span className="beginner-complete-quiz-plus" aria-hidden="true">+</span>
-              <button
-                type="button"
-                className="beginner-complete-quiz-step"
-                onClick={() => setCompletionWritingReplay((current) => current + 1)}
-                aria-label="Replay writing all characters"
-              >
-                <span className="beginner-complete-quiz-icon beginner-complete-write-icon" aria-hidden="true">&#9998;</span>
-                <span>Writing</span>
-              </button>
+          {showCompletionQuizPreview && (
+            <div className="beginner-complete-quiz-preview">
+              <span className="beginner-complete-quiz-kicker">{rowNeedsQuiz ? 'Next quiz' : 'Review row'}</span>
+              <div className="beginner-complete-quiz-cue" aria-label="Listening and writing">
+                <button
+                  type="button"
+                  className="beginner-complete-quiz-step"
+                  onClick={() => speakJapanese(row.characters.map((entry) => entry.char).join('、'), {
+                    rate: SINGLE_CHARACTER_SPEECH_RATE,
+                    forceBrowser: true,
+                    beginnerRecordingKind: 'row',
+                  })}
+                  aria-label="Hear all characters"
+                >
+                  <span className="beginner-complete-quiz-icon" aria-hidden="true">&#128266;</span>
+                  <span>Listening</span>
+                </button>
+                <span className="beginner-complete-quiz-plus" aria-hidden="true">+</span>
+                <button
+                  type="button"
+                  className="beginner-complete-quiz-step"
+                  onClick={() => setCompletionWritingReplay((current) => current + 1)}
+                  aria-label="Replay writing all characters"
+                >
+                  <span className="beginner-complete-quiz-icon beginner-complete-write-icon" aria-hidden="true">&#9998;</span>
+                  <span>Writing</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
           <div className="beginner-complete-actions">
             <button type="button" className="btn btn-ghost" onClick={() => openRow(rowIndex)}>&larr; Practice again</button>
             {rowNeedsQuiz ? (
               <button type="button" className="btn btn-primary" onClick={() => startQuiz(rowIndex)}>Start listening + writing &rarr;</button>
             ) : nextRowIndex === null ? (
               <button type="button" className="btn btn-primary" onClick={() => setChallengeOpen(true)}>Final challenge &rarr;</button>
+            ) : startWithQuiz ? (
+              <button type="button" className="btn btn-primary" onClick={() => startQuizRow(nextRowIndex)}>
+                Next quiz: {deck.rows[nextRowIndex]!.label} &rarr;
+              </button>
             ) : (
               <button type="button" className="btn btn-primary" onClick={() => openRow(nextRowIndex)}>
                 Next: {deck.rows[nextRowIndex]!.label} &rarr;
@@ -841,8 +981,8 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
               <TraceCanvas
                 key={card.char}
                 char={card.char}
-                stackWidthRem={[...card.char].length === 1 ? 30 : undefined}
-                guideFontRatio={0.96 * 1.1 * 1.25}
+                stackWidthRem={[...card.char].length === 1 ? 18 : undefined}
+                guideFontRatio={0.784}
                 guideFit
                 guideFitMargin={0.995}
               />

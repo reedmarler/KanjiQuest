@@ -31,7 +31,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { allCards } from '../src/data'
-import { hiraganaWordBank } from '../src/data/beginnerUnderstandingWords'
+import { hiraganaWordBank, katakanaWordBank } from '../src/data/beginnerUnderstandingWords'
 import { vocabFocusSets } from '../src/data/vocabFocusSets'
 import { kanjiLabEntries } from '../src/lib/kanjiLabCatalog'
 import { spokenTextForCard, spokenTextForWord } from '../src/lib/spokenText'
@@ -95,6 +95,7 @@ function collectTexts(): string[] {
   }
   if (scope === 'all' || scope === 'beginner') {
     for (const word of hiraganaWordBank) texts.push(spokenTextForWord(word.word))
+    for (const word of katakanaWordBank) texts.push(spokenTextForWord(word.word))
   }
 
   return [...new Set(texts.map((t) => t.trim()).filter(Boolean))]
