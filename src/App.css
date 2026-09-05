@@ -16095,7 +16095,18 @@ body:has(.beginner-learner--preview-a-dark) {
   padding: 0.2rem 0.15rem 0.25rem;
   cursor: grab;
   scroll-padding-inline: 0.15rem;
-  scrollbar-width: thin;
+  /* The active-tab highlight and snap-to-tab settle already show where you
+     are in the strip, so a track/thumb only duplicates that — and on touch
+     it rendered as a persistent bar rather than the momentary overlay a
+     mouse-driven scrollbar would be. Hidden on every engine: scrollbar-width
+     for Firefox, the pseudo-element below for Chromium/WebKit (including
+     Android, where unlike iOS it does not auto-hide on its own). */
+  scrollbar-width: none;
+  /* Lets a vertical swipe that starts on the strip fall straight through to
+     the page's own scroll instead of the browser first spending a frame
+     deciding between that and panning the strip horizontally — which is
+     also handled here, in JS below, once the drag threshold is crossed. */
+  touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -16105,17 +16116,7 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .beginner-learner--preview-a .beginner-row-tabs::-webkit-scrollbar {
-  height: 0.45rem;
-}
-
-.beginner-learner--preview-a .beginner-row-tabs::-webkit-scrollbar-track {
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--preview-tab-bg) 72%, transparent);
-}
-
-.beginner-learner--preview-a .beginner-row-tabs::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--preview-glyph-2) 38%, var(--preview-tab-bg));
+  display: none;
 }
 
 .beginner-learner--preview-a .beginner-row-tab {
@@ -16177,21 +16178,17 @@ body:has(.beginner-learner--preview-a-dark) {
 
 .preview-a-read {
   grid-area: read;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* Scaled down (padding, gap, and the glyph's own font-size + margin-top
-     below) so this card gives up exactly the height the write card gained
-     from filling its own box (see stackWidthRem on the TraceCanvas call) —
-     Previous/Next end up back where they were. Gap keeps a real margin
-     (not scaled all the way back to the 0.5rem this once was) since Klee
-     One's あ paints real ink below its nominal line-box, and a tight gap
-     here previously let "Tap to listen" sit under the character's tail on
-     a real phone. */
-  gap: 0.35rem;
   min-height: 0;
-  padding: 0.45rem 0.6rem 0.5rem;
+  /* "Tap to listen" (below) is pinned to this card's own corner now,
+     out of flow — so unlike the write card opposite it, this padding
+     doesn't need to leave it any room, and the glyph alone gets to set
+     this card's height. */
+  padding: 0.45rem 0.6rem;
   border: 0;
   border-radius: 30px;
   background: var(--preview-card-bg);
@@ -16210,8 +16207,8 @@ body:has(.beginner-learner--preview-a-dark) {
      handled in JS now, from a real canvas measurement of each character's
      actual ink — this used to be a single hand-tuned margin-top that only
      ever looked right for あ, the one character it was tuned against. A
-     transform rather than a margin so it can't drag the "Tap to listen"
-     label below it around too (this card centers both as one flex group).
+     transform rather than a margin so it can't drag "Tap to listen" out of
+     its pinned corner too (that label is positioned independently now).
      white-space/scale: a yōon row's card.char is two characters (きゃ) —
      without nowrap they wrapped onto two lines at this font size, and the
      scale (also set inline by BeginnerLearner, from a real measurement of
@@ -16226,10 +16223,12 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-replay {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.6rem;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  margin-top: 0.4rem;
   color: var(--preview-accent);
   font: 700 0.68rem/1 'Outfit', system-ui, sans-serif;
 }
