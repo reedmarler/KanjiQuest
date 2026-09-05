@@ -5,11 +5,32 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport-fit=cover lets the page draw under the notch/status bar
+         instead of leaving that strip to the OS, which is required for
+         apple-mobile-web-app-status-bar-style below to actually overlay
+         (rather than just recolor) the status bar; it also makes the
+         env(safe-area-inset-*) values below the notch's real height instead
+         of always 0. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Kanji Quest — Learn Japanese with hiragana, katakana, vocabulary, and kanji flashcards." />
     <meta name="apple-mobile-web-app-title" content="Kanji Quest" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- "default" reserves an opaque bar above the page for the status bar,
+         which is why a home-screen install always showed white/gray behind
+         the clock no matter what the page painted below it — that strip
+         belongs to the OS, not the page. "black-translucent" instead lets
+         the page draw all the way to the physical top of the screen, with
+         the status bar floating over it as a transparent overlay (icons
+         render white). Only takes effect standalone (added to the home
+         screen); a normal Safari tab is unaffected. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Mobile Safari (regular tabs) tints its status bar and bottom toolbar
+         from this tag's color, not from whatever the page actually paints
+         there — without it those bars stay white/gray no matter what
+         background the page sets. Default matches --bg; the あ preview card
+         (BeginnerLearner) swaps this while it's on screen and restores it on
+         the way out. -->
+    <meta name="theme-color" id="theme-color-meta" content="#0f0e17" />
     <title>Kanji Quest — Learn Japanese</title>
   </head>
   <body>

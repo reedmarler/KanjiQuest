@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
 import { recordAnswer } from '../lib/studyRecord'
 import { hiraganaWordBank, katakanaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
@@ -27,6 +27,15 @@ const QUIZ_LISTENING_WORDS = 5
  *  pace a whole word reads fine at. */
 const SINGLE_CHARACTER_SPEECH_RATE = 0.5
 const COMPLETION_WRITING_DURATION_SCALE = 0.1625
+
+/** The app's normal <meta name="theme-color">, matching --bg in App.css —
+ *  restored whenever the kana card (below) isn't on screen. */
+const DEFAULT_THEME_COLOR = '#0f0e17'
+/** Middle stop of the kana card's own light/dark gradients in App.css
+ *  (--preview-page-bg), used as a single representative color since Safari's
+ *  status-bar/toolbar tint only takes a flat color, not a gradient. */
+const ALPHA_PREVIEW_THEME_COLOR_LIGHT = '#f3d2ff'
+const ALPHA_PREVIEW_THEME_COLOR_DARK = '#1c2036'
 
 const WORD_PICTURE: Record<string, string> = {
   あい: '❤️',
@@ -171,6 +180,49 @@ const WORD_PICTURE: Record<string, string> = {
   ポスト: '📮',
 }
 
+/** Lazily created and reused — a single offscreen canvas is all
+ *  measureGlyphCenterOffset below ever needs, and creating a fresh one per
+ *  character/resize would be wasteful. */
+let glyphMeasureCanvas: HTMLCanvasElement | null = null
+
+/**
+ * How far to vertically shift a kana glyph (an inline-text span,
+ * line-height: 1) so its actual ink sits centered where the browser laid
+ * out its line box, rather than centered within the box's full font
+ * metrics — the same mismatch TraceCanvas's guideFit corrects for the
+ * printed guide, worked out here via a canvas measurement of the live font
+ * instead of a hand-tuned constant. That constant (this card's old
+ * margin-top: -1.4rem) was tuned by eye for あ alone and visibly wrong on
+ * most other characters, whose ascenders/descenders sit very differently
+ * within the font's own em-box.
+ *
+ * Applied as a transform, not a margin: this card's flex column centers
+ * the glyph and the "Tap to listen" label below it as one group
+ * (justify-content: center on the column), so a margin large enough to
+ * matter here would also drag that label around with it. A transform
+ * repositions only the rendered glyph — it does not participate in layout
+ * at all, so it cannot disturb the label's position.
+ *
+ * fontBoundingBox* describes the font's own box (the same for every
+ * character at a given size — matches the line-height: 1 box the browser
+ * actually lays out); actualBoundingBox* describes this specific glyph's
+ * ink within it. The offset needed is the gap between the two boxes'
+ * centers.
+ */
+function measureGlyphCenterOffset(char: string, fontPx: number): number {
+  glyphMeasureCanvas ??= document.createElement('canvas')
+  const ctx = glyphMeasureCanvas.getContext('2d')
+  if (!ctx) return 0
+  ctx.font = `400 ${fontPx}px 'Klee One', 'Noto Sans JP', sans-serif`
+  const metrics = ctx.measureText(char)
+  const fontAscent = metrics.fontBoundingBoxAscent
+  const fontDescent = metrics.fontBoundingBoxDescent
+  const inkAscent = metrics.actualBoundingBoxAscent
+  const inkDescent = metrics.actualBoundingBoxDescent
+  if (![fontAscent, fontDescent, inkAscent, inkDescent].every(Number.isFinite)) return 0
+  return ((fontDescent - fontAscent) + (inkAscent - inkDescent)) / 2
+}
+
 function shuffled<T>(items: readonly T[]) {
   const copy = [...items]
   for (let index = copy.length - 1; index > 0; index -= 1) {
@@ -281,20 +333,69 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   const [cardIndex, setCardIndex] = useState(0)
   const card = cards[cardIndex]
   /*
-   * A one-character design spike: a lighter, illustrated restyle tried on
-   * just あ before deciding whether it's worth extending anywhere else.
-   * Every other hiragana character, and both other scripts, keep the
-   * existing look untouched — this flips off the moment the card moves on.
+   * The lighter, illustrated restyle first tried on just あ, now the look
+   * for every hiragana and katakana character's main practice card — kanji
+   * keeps the original dark UI (no equivalent design exists for it yet),
+   * and so do the row-complete/quiz screens below, which this flag does
+   * not touch.
    */
-  const isAlphaPreview = script === 'hiragana' && card?.char === 'あ'
+  const isKanaPreview = script === 'hiragana' || script === 'katakana'
   // The badge that would hold a future streak counter doubles, for now, as a
   // dark/light toggle for just this preview card's own palette — it does not
   // touch the rest of the app's (permanently dark) theme.
   const [previewDark, setPreviewDark] = useState(false)
 
+  // Mobile Safari tints its status bar and bottom toolbar from the page's
+  // <meta name="theme-color">, not from what the page actually paints there
+  // — without updating it, those bars stay the app's default dark color (or
+  // white) behind this card's pink/purple gradient instead of blending into
+  // it. Split into two effects so toggling previewDark just updates the
+  // color in place, while leaving the preview (isKanaPreview turning false)
+  // is the only thing that restores the app default.
+  useEffect(() => {
+    if (!isKanaPreview) return
+    document.getElementById('theme-color-meta')?.setAttribute('content', previewDark ? ALPHA_PREVIEW_THEME_COLOR_DARK : ALPHA_PREVIEW_THEME_COLOR_LIGHT)
+  }, [isKanaPreview, previewDark])
+
+  useEffect(() => {
+    if (!isKanaPreview) return
+    return () => {
+      document.getElementById('theme-color-meta')?.setAttribute('content', DEFAULT_THEME_COLOR)
+    }
+  }, [isKanaPreview])
+
   useEffect(() => {
     window.localStorage.setItem(storageKey(MASTERY_STORAGE_PREFIX, script), JSON.stringify(mastery))
   }, [mastery, script])
+
+  // Recenters the read card's glyph on its real ink (measureGlyphCenterOffset
+  // above) and shrinks it to fit when it's a two-character yōon combo (きゃ,
+  // しゃ, …) — at full size those wrapped onto two lines and blew the whole
+  // card's height out. Runs before paint so there's no visible jump, and
+  // again on resize since the glyph's font-size is a vw-based clamp() in
+  // App.css.
+  const glyphRef = useRef<HTMLSpanElement | null>(null)
+  const [glyphOffset, setGlyphOffset] = useState(0)
+  const [glyphScale, setGlyphScale] = useState(1)
+  useLayoutEffect(() => {
+    const el = glyphRef.current
+    const parent = el?.parentElement
+    if (!isKanaPreview || !el || !parent || !card) return
+    const recompute = () => {
+      // Reset first so this measures the glyph's own natural size, not a
+      // scale left over from the previous character.
+      el.style.transform = 'none'
+      const fontPx = parseFloat(getComputedStyle(el).fontSize)
+      setGlyphOffset(Number.isFinite(fontPx) ? measureGlyphCenterOffset(card.char, fontPx) : 0)
+      const parentStyle = getComputedStyle(parent)
+      const available = parent.clientWidth - parseFloat(parentStyle.paddingLeft) - parseFloat(parentStyle.paddingRight)
+      const natural = el.getBoundingClientRect().width
+      setGlyphScale(natural > available ? (available / natural) * 0.94 : 1)
+    }
+    recompute()
+    window.addEventListener('resize', recompute)
+    return () => window.removeEventListener('resize', recompute)
+  }, [isKanaPreview, card])
 
   function openRow(index: number) {
     setRowIndex(index)
@@ -411,35 +512,39 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   useEffect(() => stopSpeaking, [])
 
   return (
-    <div className={`beginner-learner beginner-learner--${script}${isAlphaPreview ? ' beginner-learner--preview-a' : ''}${isAlphaPreview && previewDark ? ' beginner-learner--preview-a-dark' : ''}`}>
-      {isAlphaPreview ? (
-        /* A one-off header for the preview, matching the reference image's
-           single pill bar — back arrow, title, a dark-mode toggle on the
-           right in place of the reference's streak counter (that's real app
-           data we don't have a feature for yet; the toggle is real). This
-           deliberately bypasses the shared AppBackButton/AppDashboardButton
-           (pinned to a fixed spot on every other screen) and drops the
-           Hiragana Chart / Progress reset buttons from view for now: getting
-           the reference image right comes first, reconciling it with the
-           rest of the chrome is the next pass. */
+    <div className={`beginner-learner beginner-learner--${script}${isKanaPreview ? ' beginner-learner--preview-a' : ''}${isKanaPreview && previewDark ? ' beginner-learner--preview-a-dark' : ''}`}>
+      {isKanaPreview ? (
+        /* A one-off header for this look — back arrow, title, small icon
+           buttons for the kana chart / progress reset this card used to
+           drop entirely (fine while it was a あ-only spike nobody could
+           reach any other way; not fine now that it's the only screen
+           hiragana/katakana learners see), and the dark-mode toggle. */
         <div className="preview-a-top">
           <button type="button" className="preview-a-back" onClick={onBack} aria-label="Back">
             <span aria-hidden="true">&#8592;</span>
           </button>
           <span className="preview-a-title">{deck.title}</span>
+          {onOpenChart && (
+            <button type="button" className="preview-a-icon-btn" onClick={onOpenChart} aria-label={`Open the ${deck.title} chart`} title={`${deck.title} chart`}>
+              <span aria-hidden="true">&#9638;</span>
+            </button>
+          )}
+          <button type="button" className="preview-a-icon-btn" onClick={resetProgress} aria-label={`Reset ${deck.title} progress`} title="Reset progress">
+            <span aria-hidden="true">&#8635;</span>
+          </button>
           <button
             type="button"
             role="switch"
             className="preview-a-theme-toggle"
             onClick={() => setPreviewDark((value) => !value)}
             aria-checked={previewDark}
-            aria-label={previewDark ? 'Dark mode on for this preview' : 'Dark mode off for this preview'}
+            aria-label={previewDark ? 'Turn off dark mode for this preview' : 'Turn on dark mode for this preview'}
           >
-            <span aria-hidden="true">&#9728;&#65039;</span>
-            <span className="preview-a-theme-toggle-track" aria-hidden="true">
-              <span className="preview-a-theme-toggle-knob" />
-            </span>
-            <span aria-hidden="true">&#127769;</span>
+            {/* --sun/--moon name the animation slot (which one is on top
+                when unchecked/checked), not the glyph in it — swapped so
+                the moon shows in light mode and the sun in dark mode. */}
+            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
+            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
           </button>
         </div>
       ) : (
@@ -477,7 +582,10 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
               title={`${entry.label} — ${masteredCount}/${entry.characters.length} learned`}
             >
               <span>{entry.label}</span>
-              <small>{masteredCount}/{entry.characters.length}</small>
+              {/* Swapped for the row's romaji reading on hiragana/katakana's
+                  kana card — kanji still shows the learned count
+                  underneath, unchanged. */}
+              <small>{isKanaPreview ? entry.characters[0]!.romaji : `${masteredCount}/${entry.characters.length}`}</small>
             </button>
           )
         })}
@@ -689,7 +797,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
           </div>
         </main>
       ) : card ? (
-        isAlphaPreview ? (
+        isKanaPreview ? (
           <main className="beginner-card preview-a-card">
             <button
               type="button"
@@ -701,22 +809,43 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
               })}
               aria-label={`Play the sound for ${card.char}`}
             >
-              <span className="preview-a-glyph" lang="ja">{card.char}</span>
+              <span ref={glyphRef} className="preview-a-glyph" lang="ja" style={{ transform: `translateY(${glyphOffset * glyphScale}px) scale(${glyphScale})` }}>{card.char}</span>
               <span className="preview-a-replay">
-                <span aria-hidden="true">&#128266;</span> Tap to replay
+                <span aria-hidden="true">&#128266;</span> Tap to listen
               </span>
             </button>
 
             <div className="preview-a-write">
-              {/* compactSingleCharacter keeps this closer to the read card's
-                  height above it, matching the reference image — without it,
-                  a lone character's trace box defaults to a much larger
-                  square meant for the main (non-preview) writing lesson.
-                  guideFontRatio fills more of that box with the guide glyph
-                  than the app-wide default (0.82) — the box's own size is
-                  untouched, since the canvas's fixed internal resolution
-                  doesn't grow with the font, only what's drawn inside it. */}
-              <TraceCanvas key={card.char} char={card.char} compactSingleCharacter guideFontRatio={0.96} />
+              {/* stackWidthRem set past any container this card will ever be,
+                  so the canvas resolves to 100% of the write card's actual
+                  available width instead of one of TraceCanvas's own fixed
+                  presets (13rem compact / 21rem standard), both narrower
+                  than this card. Only for a single character, though: a
+                  yōon row's card.char is two (きゃ), which on a phone stacks
+                  vertically into two cells (TraceCanvas's own layout for any
+                  multi-character word) — forcing that stack to also fill
+                  the card's full width multiplies its height by the same
+                  amount, producing a box several screens tall. Left at
+                  TraceCanvas's own default there, which already handles
+                  multi-character words sensibly (it's the same component
+                  every other flashcard in the app uses for them).
+                  guideFontRatio requests a guide bigger than the app-wide
+                  default (0.82); guideFit measures the actual rendered ink
+                  on whatever engine loads this page and centers + shrinks
+                  to fit from that, rather than trusting a fixed offset
+                  tuned against one browser and one character — a hand-tuned
+                  guess here was clipping あ specifically on real phones
+                  despite looking fine in every desktop check, before this
+                  card applied to any other character. guideFitMargin pushes
+                  how much of the box that fit is allowed to fill. */}
+              <TraceCanvas
+                key={card.char}
+                char={card.char}
+                stackWidthRem={[...card.char].length === 1 ? 30 : undefined}
+                guideFontRatio={0.96 * 1.1 * 1.25}
+                guideFit
+                guideFitMargin={0.995}
+              />
             </div>
 
             <div className="preview-a-nav">

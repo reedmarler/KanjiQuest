@@ -776,10 +776,10 @@ export function Dashboard({
             )}
           </div>
         )}
-        {/* Swap, Pick a mode and the switch are siblings so each can take
-            either position: the topbar wraps, and whichever control is meant
-            to sit under the switch claims a line of its own. On a phone that
-            is Pick a mode, everywhere else it is Swap. */}
+        {/* Swap, Pick a mode and the switch are siblings in one wrapping row:
+            Pick a mode sits inline to the left of the switch while a mode is
+            still being picked, and Swap claims a full-width line under the
+            switch once a mode is active — the same at every breakpoint. */}
         {modeToggleOn && settingsMode !== 'picking' && (
           <div className="control-story-quick-select is-swap" ref={swapModeQuickSelectRef}>
             <button

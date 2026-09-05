@@ -9,11 +9,14 @@ type ChartScript = Extract<BeginnerScript, 'hiragana' | 'katakana'>
 // きゃ/きゅ/きょ rows, whose romaji still ends in one of those vowels, so a
 // character's column is just the vowel its own romaji ends with. を and ん
 // break that pattern — they sit under う and お rather than their own sound.
+// Keyed by character rather than romaji: ウォ genuinely says "wo" and belongs
+// in the お column like any other -o sound, and only を's romaji collides
+// with it, so the override has to name the exact character it applies to.
 const CHART_VOWEL_COLUMNS: Record<string, number> = { a: 1, i: 2, u: 3, e: 4, o: 5 }
-const CHART_COLUMN_OVERRIDES: Record<string, number> = { wo: 3, n: 5 }
+const CHART_COLUMN_OVERRIDES: Record<string, number> = { を: 3, ヲ: 3, ん: 5, ン: 5 }
 
-function chartColumn(romaji: string): number {
-  return CHART_COLUMN_OVERRIDES[romaji] ?? CHART_VOWEL_COLUMNS[romaji.charAt(romaji.length - 1)] ?? 5
+function chartColumn(char: string, romaji: string): number {
+  return CHART_COLUMN_OVERRIDES[char] ?? CHART_VOWEL_COLUMNS[romaji.charAt(romaji.length - 1)] ?? 5
 }
 
 const CHART_COLUMNS = [1, 2, 3, 4, 5]
@@ -45,7 +48,7 @@ export function KanaChart({ script, onBack, onSelectCharacter }: KanaChartProps)
       <div className="hiragana-chart-grid">
         {deck.rows.map((row, rowIndex) => {
           const studied = row.characters.every((character) => (mastery[character.char] ?? 0) >= MASTERY_TARGET)
-          const filledColumns = new Set(row.characters.map((character) => chartColumn(character.romaji)))
+          const filledColumns = new Set(row.characters.map((character) => chartColumn(character.char, character.romaji)))
           return (
             <div key={row.id} className="hiragana-chart-row">
               <span
@@ -60,7 +63,7 @@ export function KanaChart({ script, onBack, onSelectCharacter }: KanaChartProps)
                     key={character.char}
                     type="button"
                     className="hiragana-chart-cell"
-                    style={{ gridColumn: chartColumn(character.romaji), gridRow: 1 }}
+                    style={{ gridColumn: chartColumn(character.char, character.romaji), gridRow: 1 }}
                     onClick={() => onSelectCharacter(rowIndex, charIndex)}
                     aria-label={`Practice starting at ${character.char}, romaji ${character.romaji}`}
                   >

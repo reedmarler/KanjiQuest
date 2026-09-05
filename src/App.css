@@ -52,6 +52,11 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scrollbar-gutter: stable;
+  /* Mobile Safari paints the strip revealed by rubber-band overscroll and by
+     its collapsing/expanding address bar using the <html> background, not
+     body's — without this it flashes white regardless of what body is set
+     to. Keep in sync with body's own default background below. */
+  background: var(--bg);
 }
 
 body {
@@ -62,6 +67,14 @@ body {
   min-height: 100dvh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  /* Added as a home-screen app, the status bar now floats over the page
+     (apple-mobile-web-app-status-bar-style: black-translucent) instead of
+     reserving its own opaque strip, so body's own background paints all the
+     way to the physical top of the screen — but that also means real
+     content needs pushing back down by the same amount, or it'd render
+     under the status bar. Resolves to 0 in a normal browser tab, where the
+     status bar still reserves its own space, so this changes nothing there. */
+  padding-top: env(safe-area-inset-top);
 }
 
 #root {
@@ -2250,6 +2263,12 @@ body:has(.dashboard) {
 
 .control-story-quick-select {
   position: relative;
+  /* Without this the wrapper is a block box around an inline-flex button,
+     which leaves room below the button for the wrapper's own inherited
+     line-height (the inline-formatting-context "strut") — so the button
+     sits bottom-aligned a few pixels lower than a plain flex sibling like
+     the mode toggle, even though both buttons are the same height. */
+  display: flex;
   pointer-events: auto;
 }
 
@@ -2276,12 +2295,12 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.26rem;
-  /* Same fixed footprint as the Pick a mode and Mode-toggle buttons, so the
-     three read as one family of controls in the topbar. Sized to the widest
-     of the three's typical label ("Choose focus"), not the widest possible
-     one — an outlier like "Auxiliary Verbs" or a long story title still
-     truncates with an ellipsis rather than stretching every button further. */
-  width: 6.25rem;
+  /* Same fixed footprint as the Mode toggle, so the pair reads as one family
+     of controls in the topbar. Both only ever hold a short label ("Swap", or
+     "Mode"/"Story"/"Grammar"/"Star"), unlike the Pick a mode and story/focus
+     name buttons, which need the extra width for "Choose focus" and similar
+     — so this one stays narrower than those instead of matching them. */
+  width: 4.9rem;
   height: 1.7rem;
   box-sizing: border-box;
   padding: 0 0.4rem;
@@ -3208,7 +3227,11 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  width: 6.25rem;
+  /* Narrower than the Pick a mode / story / focus name buttons: this one
+     only ever holds a short label ("Mode", "Story", "Grammar", "Star"), so
+     it doesn't need their width — see the matching note on
+     .control-swap-mode-button, the other member of this narrower pair. */
+  width: 4.9rem;
   height: 1.7rem;
   padding: 0 0.4rem;
   border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
@@ -5966,25 +5989,35 @@ body:has(.dashboard) {
     min-height: 0;
     gap: 0.32rem;
   }
-  /* On a phone the pair trades places: Swap joins the story / grammar chip on
-     the first line, and Pick a mode is the one that hangs under the switch.
-     Swap is the smaller of the two and the only one that shares its line, so
-     it is the one that fits beside a chip; Pick a mode is a full-width name
-     button and reads better on a line of its own. */
-  .control-story-quick-select.is-swap {
-    order: 0;
-    flex-basis: auto;
-    display: block;
-  }
-  .control-story-quick-select.is-picking {
-    order: 2;
-    flex-basis: 100%;
-    display: flex;
-    justify-content: flex-end;
+  /* Pick a mode and Swap keep the same placement as every other breakpoint
+     here too: Pick a mode sits inline to the left of the switch (there is
+     nothing else on that line while a mode is still being picked), and Swap
+     — like every other on-screen mode control — takes the full-width line
+     under the switch. */
+  /* On wide screens the switch's own auto margin is what pins it to the far
+     right of a much wider bar, leaving Pick a mode (or the story/grammar
+     chip) at the opposite end. A phone's bar is only as wide as its own
+     controls, so that same auto margin reads as a stray gap splitting a pair
+     that belongs together — drop it here and let the bar's own right
+     justification hold whichever control shares the line snug against the
+     switch instead. */
+  .control-story-top-toggle {
+    margin-left: 0;
   }
   .control-story-quick-select:not(.is-swap):not(.is-picking) {
     min-width: 0;
     max-width: calc(100% - 4.5rem);
+  }
+  /* The story/grammar chip and Pick a mode both share line 1 with the
+     switch, so neither is as wide as the topbar itself — its own edges sit
+     somewhere in the middle of a phone's narrow bar, not flush against
+     either screen edge. Anchoring a menu almost as wide as the bar to a
+     point mid-bar runs it off one side or the other regardless of which
+     way it opens, so instead let their menus size and position off the
+     topbar itself (the nearest still-positioned ancestor once this drops
+     position) rather than off their own narrow button. */
+  .control-story-quick-select:not(.is-swap) {
+    position: static;
   }
   .control-story-name-button {
     max-width: min(10.75rem, calc(100vw - 6rem));
@@ -5993,8 +6026,7 @@ body:has(.dashboard) {
     gap: 0.28rem;
   }
   /* Swap and the mode toggle keep the same fixed footprint as Pick a mode at
-     every breakpoint, so the family stays visually consistent when they trade
-     places above. */
+     every breakpoint, so the family stays visually consistent. */
   .control-swap-mode-button,
   .control-story-toggle {
     height: 1.45rem;
@@ -6014,21 +6046,14 @@ body:has(.dashboard) {
     overflow-y: auto;
   }
   /* A menu grows from the edge its button sits against, or it runs off
-     screen. On a phone that is the left for the story / grammar chips and for
-     Swap beside them, and the right for Pick a mode under the switch. */
-  .control-story-quick-select:not(.is-picking) .control-story-quick-menu {
+     screen. Swap sits alone on its own full-width line, so its own right
+     edge already is the topbar's — same as always. The story / grammar chip
+     and Pick a mode instead grow from the topbar's own left edge (see the
+     position: static rule above), which is the edge closer to where both of
+     them actually sit on line 1. */
+  .control-story-quick-select:not(.is-swap) .control-story-quick-menu {
     left: 0;
     right: auto;
-  }
-  .control-story-quick-select.is-swap .control-story-quick-menu {
-    /* Swap only ever lists the 3 short mode names, and it starts partway
-       across the row behind the chip it sits beside, so the wider shared
-       width would clip past the right edge. */
-    width: min(calc(100vw - 5.5rem), 13rem);
-  }
-  .control-story-quick-select.is-picking .control-story-quick-menu {
-    left: auto;
-    right: 0;
   }
   .control-story-quick-menu button > span:first-child {
     overflow: hidden;
@@ -14252,7 +14277,10 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
    must never be the thing a stray tap lands on. */
 #build-badge {
   position: fixed;
-  top: 3px;
+  /* Fixed positioning is relative to the viewport, not to body's own
+     safe-area padding above, so this needs the same inset added directly or
+     a home-screen install's floating status bar sits on top of it. */
+  top: calc(3px + env(safe-area-inset-top));
   left: 5px;
   z-index: 999999;
   padding: 1px 5px;
@@ -15549,11 +15577,17 @@ button.counter-example {
    below the Previous/Next row. body is an ancestor, so it can't read the
    --preview-page-bg custom property set below (custom properties only
    inherit downward); these repeat the same two gradients directly instead.
-   Keep both in sync with the values a few lines down if either changes. */
+   Keep both in sync with the values a few lines down if either changes.
+   html gets the same treatment as body: mobile Safari's rubber-band
+   overscroll and its collapsing/expanding address bar reveal a strip painted
+   from <html>'s background, not body's, which otherwise flashes white above
+   and below the page on exactly this card. */
+html:has(.beginner-learner--preview-a),
 body:has(.beginner-learner--preview-a) {
   background: linear-gradient(135deg, #ffc2df 0%, #f3d2ff 50%, #cbb0f2 100%);
 }
 
+html:has(.beginner-learner--preview-a-dark),
 body:has(.beginner-learner--preview-a-dark) {
   background: linear-gradient(135deg, #241b3a 0%, #1c2036 55%, #141b2e 100%);
 }
@@ -15613,7 +15647,7 @@ body:has(.beginner-learner--preview-a-dark) {
 .preview-a-top {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.4rem;
   /* Pulls the pill up so the back arrow lands at the same height as the
      standard pinned back button (--app-nav-top) elsewhere in the app,
      without shrinking the pill's own comfortable padding to do it. */
@@ -15641,85 +15675,143 @@ body:has(.beginner-learner--preview-a-dark) {
 
 .preview-a-title {
   flex: 1;
+  min-width: 0;
   color: var(--preview-text);
-  font: 800 1.35rem/1 'Outfit', system-ui, sans-serif;
+  font: 800 1.2rem/1 'Outfit', system-ui, sans-serif;
+  /* Katakana is a hair longer than Hiragana and this row is already tight
+     at narrow widths with the chart/reset icons and toggle also on it. */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-/* An actual on/off switch — sun, a sliding track+knob, moon — rather than a
-   single icon that swaps, so it reads as a toggle at a glance. */
-.preview-a-theme-toggle {
-  display: inline-flex;
+/* Chart-shortcut and progress-reset — small icon-only buttons rather than
+   the labelled pills the non-preview header uses, since this row also
+   carries the theme toggle and has much less room to spare. */
+.preview-a-icon-btn {
+  display: grid;
   flex: 0 0 auto;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.7rem;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 50%;
   background: var(--preview-badge-bg);
-  box-shadow: 0 4px 10px rgba(94, 62, 130, 0.14);
+  box-shadow: 0 2px 6px rgba(94, 62, 130, 0.14);
   color: var(--preview-text);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   line-height: 1;
   cursor: pointer;
   transition: transform 140ms ease;
 }
 
-.preview-a-theme-toggle:active {
-  transform: scale(0.94);
+.preview-a-icon-btn:active {
+  transform: scale(0.92);
 }
 
-.preview-a-theme-toggle-track {
+/* An actual on/off switch — sun, a sliding track+knob, moon — rather than a
+   single icon that swaps, so it reads as a toggle at a glance. */
+/* A single coin-like badge that morphs between sun and moon, rather than
+   the old sun+track+moon row (three small elements competing for the same
+   tiny space). Both icons are stacked in the same spot and cross-fade with
+   a quarter-turn, so the swap itself reads as the sun/moon rotating out of
+   and into view rather than one icon merely fading into another. */
+.preview-a-theme-toggle {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  width: 2.1rem;
-  height: 1.15rem;
-  padding: 0.15rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--preview-text) 20%, transparent);
-  transition: background 160ms ease;
-}
-
-.preview-a-theme-toggle-knob {
-  width: 0.85rem;
-  height: 0.85rem;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 0;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  transform: translateX(0);
-  transition: transform 160ms ease;
+  /* Sky blue rather than a warm yellow/orange — the sun emoji is itself
+     yellow-orange, and it all but disappeared against a same-toned badge. */
+  background: linear-gradient(145deg, #bfe6ff, #6bb6f0);
+  box-shadow: 0 3px 10px rgba(40, 120, 200, 0.35), inset 0 -2px 3px rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: background 320ms ease, box-shadow 320ms ease, transform 140ms ease;
 }
 
-.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-track {
-  background: linear-gradient(135deg, var(--preview-glyph-1), var(--preview-glyph-2));
+.preview-a-theme-toggle:active {
+  transform: scale(0.92);
 }
 
-.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-knob {
-  transform: translateX(0.95rem);
+.preview-a-theme-toggle-icon {
+  position: absolute;
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: opacity 240ms ease, transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.preview-a-theme-toggle-icon--sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.preview-a-theme-toggle-icon--moon {
+  opacity: 0;
+  transform: rotate(85deg) scale(0.4);
+}
+
+.preview-a-theme-toggle[aria-checked="true"] {
+  background: linear-gradient(145deg, #3d3f72, #1c1d3a);
+  box-shadow: 0 3px 12px rgba(40, 30, 90, 0.55), inset 0 -2px 3px rgba(255, 255, 255, 0.1);
+}
+
+.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-icon--sun {
+  opacity: 0;
+  transform: rotate(-85deg) scale(0.4);
+}
+
+.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-icon--moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+/* 6 tabs sized to the strip's own visible width, so wherever a scroll
+   lands, either 6 full tabs are showing or (past the last one) empty
+   space — never a 7th tab sliced in half at the edge. Percentage
+   flex-basis resolves against this container's own content width, so
+   this needs no JS measurement and stays correct across screen sizes;
+   6 and the 5 gaps between them are the only two numbers driving it —
+   change both together to show a different count. Snap (mandatory +
+   align: start on every tab, not just every 6th) still lets a swipe move
+   by one tab at a time — the uniform width is what guarantees any
+   tab-aligned stop shows a whole count, not the snapping itself. */
 .beginner-learner--preview-a .beginner-row-tabs {
   padding: 0.3rem 0.15rem 0.5rem;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 0.15rem;
 }
 
 .beginner-learner--preview-a .beginner-row-tab {
+  /* 5 gaps (0.3rem each, matching .beginner-row-tabs's own gap) across 6
+     tabs per screen. */
+  flex: 0 0 calc((100% - 1.5rem) / 6);
+  width: calc((100% - 1.5rem) / 6);
+  min-width: 0;
   border: 0;
   border-radius: 14px;
+  padding: 0.5rem 0.4rem;
   background: var(--preview-tab-bg);
   color: var(--preview-text);
+  font-size: 0.72rem;
+  scroll-snap-align: start;
   transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
 .beginner-learner--preview-a .beginner-row-tab small {
   color: var(--preview-muted);
+  font-size: 0.62rem;
 }
 
 .beginner-learner--preview-a .beginner-row-tab.is-active {
-  padding-top: 0.65rem;
-  padding-bottom: 0.65rem;
+  padding-top: 0.78rem;
+  padding-bottom: 0.78rem;
   background: linear-gradient(135deg, var(--preview-glyph-1), var(--preview-glyph-2));
   color: #fff;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   transform: scale(1.15);
   box-shadow: 0 6px 16px rgba(214, 38, 111, 0.35);
 }
@@ -15749,12 +15841,16 @@ body:has(.beginner-learner--preview-a-dark) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.8rem;
-  /* Matches the write card's height below it (both close to 4:5 against
-     their shared width), same as the reference image — it was noticeably
-     shorter before. Top/bottom trimmed by exactly what the glyph below
-     grew by, so this card's own height doesn't move. */
-  padding: 2.6rem 1rem 1.7rem;
+  /* Scaled down (padding, gap, and the glyph's own font-size + margin-top
+     below) so this card gives up exactly the height the write card gained
+     from filling its own box (see stackWidthRem on the TraceCanvas call) —
+     Previous/Next end up back where they were. Gap keeps a real margin
+     (not scaled all the way back to the 0.5rem this once was) since Klee
+     One's あ paints real ink below its nominal line-box, and a tight gap
+     here previously let "Tap to listen" sit under the character's tail on
+     a real phone. */
+  gap: 1rem;
+  padding: 0.4rem 0.6rem 0.45rem;
   border: 0;
   border-radius: 30px;
   background: var(--preview-card-bg);
@@ -15768,7 +15864,19 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-glyph {
-  font: 400 clamp(10.5rem, 26vw, 11.5rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  font: 400 clamp(9.12rem, 23.46vw, 10.1rem)/1 'Klee One', 'Noto Sans JP', sans-serif;
+  /* Vertical centering (a translateY, set inline by BeginnerLearner) is
+     handled in JS now, from a real canvas measurement of each character's
+     actual ink — this used to be a single hand-tuned margin-top that only
+     ever looked right for あ, the one character it was tuned against. A
+     transform rather than a margin so it can't drag the "Tap to listen"
+     label below it around too (this card centers both as one flex group).
+     white-space/scale: a yōon row's card.char is two characters (きゃ) —
+     without nowrap they wrapped onto two lines at this font size, and the
+     scale (also set inline by BeginnerLearner, from a real measurement of
+     the rendered width against the card) shrinks that pair to fit on one. */
+  display: inline-block;
+  white-space: nowrap;
   background: linear-gradient(160deg, var(--preview-glyph-1), var(--preview-glyph-2));
   background-clip: text;
   -webkit-background-clip: text;
@@ -15779,13 +15887,16 @@ body:has(.beginner-learner--preview-a-dark) {
 .preview-a-replay {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   color: var(--preview-accent);
-  font: 700 0.85rem/1 'Outfit', system-ui, sans-serif;
+  font: 700 0.68rem/1 'Outfit', system-ui, sans-serif;
 }
 
 .preview-a-write {
-  padding: 1.3rem;
+  /* Bottom carries the 1.3rem trimmed from the read card above, so the
+     writing area itself grows into the space that used to be excess
+     whitespace up there instead of the page just getting taller overall. */
+  padding: 1.3rem 1.3rem 2.3rem;
   border-radius: 30px;
   background:
     radial-gradient(circle, var(--preview-dot) 1px, transparent 1.4px) 0 0 / 16px 16px,
@@ -15797,14 +15908,33 @@ body:has(.beginner-learner--preview-a-dark) {
   border: 0;
   border-radius: 16px;
   background: transparent;
+  /* Clear (below) needs to sit past this box's own edge, in the card's
+     corner rather than the canvas's — the canvas layers are transparent
+     right up to their square corners, so letting it escape here doesn't
+     expose any square edges of its own past the rounded clip. */
+  overflow: visible;
 }
 
 .preview-a-write .trace-canvas-clear {
-  top: 0.02rem;
-  right: 0.02rem;
+  /* Negative offsets push it out past the canvas box, into the write card's
+     own 1.3rem padding, landing at that card's corner instead of the
+     smaller canvas's. The canvas fills the card's full inner width
+     (stackWidthRem on the TraceCanvas call), so top and right are
+     symmetric — both offsets are just crossing that same 1.3rem padding. */
+  top: -0.75rem;
+  right: -0.75rem;
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
   background: var(--preview-badge-bg);
   color: var(--preview-muted);
+  box-shadow: var(--preview-shadow);
+}
+
+/* The shared component's own :hover rule sets color: var(--text) — the
+   app's permanently-light text color, invisible against this card's own
+   pale (or, in the dark toggle, deep-navy) pill background. */
+.preview-a-write .trace-canvas-clear:hover {
+  border-color: var(--preview-accent);
+  color: var(--preview-text);
 }
 
 .preview-a-nav {
