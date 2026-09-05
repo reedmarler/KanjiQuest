@@ -15965,6 +15965,8 @@ body:has(.beginner-learner--preview-a-dark) {
   min-width: 0;
   color: var(--preview-text);
   font: 800 1.16rem/1.22 'Outfit', system-ui, sans-serif;
+  padding-block: 0.06rem 0.1rem;
+  text-align: center;
   /* Katakana is a hair longer than Hiragana and this row is already tight
      at narrow widths with the action pills also on it. */
   overflow: hidden;
@@ -16187,7 +16189,7 @@ body:has(.beginner-learner--preview-a-dark) {
      One's あ paints real ink below its nominal line-box, and a tight gap
      here previously let "Tap to listen" sit under the character's tail on
      a real phone. */
-  gap: 0.45rem;
+  gap: 0.35rem;
   min-height: 0;
   padding: 0.45rem 0.6rem 0.5rem;
   border: 0;
