@@ -377,10 +377,18 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   const isKanaPreview = script === 'hiragana' || script === 'katakana'
   const otherScriptLabel = script === 'hiragana' ? 'カナ' : 'かな'
   const otherScriptName = script === 'hiragana' ? 'Katakana' : 'Hiragana'
+  // Trying the Hiragana Chart page's own sakura palette on this card, one
+  // character at a time — あ only for now, to evaluate before it spreads to
+  // the rest of the row. See the "Sakura preview" block in App.css.
+  const isSakuraPreview = script === 'hiragana' && card?.char === 'あ'
   // The badge that would hold a future streak counter doubles, for now, as a
   // dark/light toggle for just this preview card's own palette — it does not
   // touch the rest of the app's (permanently dark) theme.
   const [previewDark, setPreviewDark] = useState(defaultPreviewDark)
+  // "Tap to listen" spells out the read card's tap target for a first-timer;
+  // once they've actually used it, the hint text is redundant clutter, so it
+  // collapses down to just the speaker icon from then on.
+  const [hasTappedListen, setHasTappedListen] = useState(false)
 
   // Mobile Safari tints its status bar and bottom toolbar from the page's
   // <meta name="theme-color">, not from what the page actually paints there
@@ -648,7 +656,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   useEffect(() => stopSpeaking, [])
 
   return (
-    <div className={`beginner-learner beginner-learner--${script}${isKanaPreview ? ' beginner-learner--preview-a' : ''}${isKanaPreview && previewDark ? ' beginner-learner--preview-a-dark' : ''}`}>
+    <div className={`beginner-learner beginner-learner--${script}${isKanaPreview ? ' beginner-learner--preview-a' : ''}${isKanaPreview && previewDark ? ' beginner-learner--preview-a-dark' : ''}${isSakuraPreview ? ' beginner-learner--sakura-a' : ''}`}>
       {isKanaPreview ? (
         <>
           {/* Pinned to the page corner, exactly like every other back
@@ -988,16 +996,20 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             <button
               type="button"
               className="preview-a-read"
-              onClick={() => speakJapanese(card.char, {
-                rate: SINGLE_CHARACTER_SPEECH_RATE,
-                forceBrowser: true,
-                beginnerRecordingKind: 'kana',
-              })}
+              onClick={() => {
+                setHasTappedListen(true)
+                speakJapanese(card.char, {
+                  rate: SINGLE_CHARACTER_SPEECH_RATE,
+                  forceBrowser: true,
+                  beginnerRecordingKind: 'kana',
+                })
+              }}
               aria-label={`Play the sound for ${card.char}`}
             >
               <span ref={glyphRef} className="preview-a-glyph" lang="ja" style={{ transform: `translateY(${glyphOffset * glyphScale}px) scale(${glyphScale})` }}>{card.char}</span>
-              <span className="preview-a-replay">
-                <span aria-hidden="true">&#128266;</span> Tap to listen
+              <span className={`preview-a-replay${hasTappedListen ? ' preview-a-replay--icon-only' : ''}`}>
+                <span aria-hidden="true">&#128266;</span>
+                {!hasTappedListen && ' Tap to listen'}
               </span>
             </button>
 

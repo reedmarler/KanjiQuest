@@ -15936,6 +15936,59 @@ body:has(.beginner-learner--preview-a-dark) {
   --preview-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
 
+/* ---------------------------------------------------------------------------
+   Sakura preview spike
+   Trying the Hiragana Chart page's own palette here instead — the same
+   sakura accent and page gradient, and an ink/muted text pair instead of
+   the preview's original blue accent and purple-toned text. あ only for
+   now (isSakuraPreview in BeginnerLearner.tsx), to see it against the rest
+   of the card before it spreads to the whole row.
+   --------------------------------------------------------------------------- */
+
+html:has(.beginner-learner--sakura-a.beginner-learner--preview-a),
+body:has(.beginner-learner--sakura-a.beginner-learner--preview-a) {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #ffe3ee 74%, transparent), transparent 42%),
+    linear-gradient(180deg, #fff2f7 0%, #fff8fb 46%, #f6d9e5 100%);
+}
+
+html:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark),
+body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
+  background: linear-gradient(180deg, #211b36 0%, #191729 64%, #11131f 100%);
+}
+
+.beginner-learner.beginner-learner--sakura-a.beginner-learner--preview-a {
+  --preview-page-bg:
+    linear-gradient(135deg, color-mix(in srgb, #ffe3ee 74%, transparent), transparent 42%),
+    linear-gradient(180deg, #fff2f7 0%, #fff8fb 46%, #f6d9e5 100%);
+  --preview-card-bg: color-mix(in srgb, #fff8fb 88%, transparent);
+  --preview-top-bg: color-mix(in srgb, #fff8fb 88%, transparent);
+  --preview-badge-bg: color-mix(in srgb, #ffffff 78%, transparent);
+  --preview-tab-bg: color-mix(in srgb, #ffffff 74%, transparent);
+  --preview-dot: color-mix(in srgb, #e86b8a 14%, transparent);
+  --preview-text: #241b22;
+  --preview-muted: #675b62;
+  --preview-accent: #c94788;
+  --preview-glyph-1: #ee82b7;
+  --preview-glyph-2: #c94788;
+  --preview-shadow: 0 0.8rem 2rem rgba(147, 74, 104, 0.13);
+}
+
+.beginner-learner.beginner-learner--sakura-a.beginner-learner--preview-a-dark {
+  --preview-page-bg: linear-gradient(180deg, #211b36 0%, #191729 64%, #11131f 100%);
+  --preview-card-bg: color-mix(in srgb, #2a2138 88%, transparent);
+  --preview-top-bg: color-mix(in srgb, #2a2139 94%, transparent);
+  --preview-badge-bg: color-mix(in srgb, #2f263d 90%, transparent);
+  --preview-tab-bg: color-mix(in srgb, #30233c 78%, transparent);
+  --preview-dot: color-mix(in srgb, #b45a8d 24%, transparent);
+  --preview-text: #f8f1fb;
+  --preview-muted: #cdbfd3;
+  --preview-accent: #ee82b7;
+  --preview-glyph-1: #ee82b7;
+  --preview-glyph-2: #c94788;
+  --preview-shadow: 0 14px 30px rgba(8, 8, 18, 0.42);
+}
+
 /* The pinned back button floats independently of the flow, but the slot it
    leaves behind still claims a full row's height in this flex column,
    holding the title box an extra row below it — same fix as the Chart
@@ -16217,6 +16270,21 @@ body:has(.beginner-learner--preview-a-dark) {
   gap: 0.35rem;
   color: var(--preview-accent);
   font: 700 0.68rem/1 'Outfit', system-ui, sans-serif;
+}
+
+/* Once tapped, the hint text has done its job — collapses to a plain round
+   speaker badge in the same corner, same idea as the write card's own
+   Clear chip opposite it. */
+.preview-a-replay--icon-only {
+  right: 0.55rem;
+  bottom: 0.55rem;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  background: var(--preview-badge-bg);
+  box-shadow: var(--preview-shadow);
+  font-size: 0.95rem;
 }
 
 .preview-a-write {
