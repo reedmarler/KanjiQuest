@@ -15364,12 +15364,14 @@ body:has(.hiragana-chart-page--katakana) {
   box-shadow: none;
 }
 
+/* A hover/focus cue only — not the same fill as the pressed state below, or
+   hovering the (never-toggled) カナ/かな button, or resting on EN right
+   after clicking it off, would read as "still on". */
 .hiragana-chart-en-button:hover,
 .hiragana-chart-en-button:focus-visible {
-  border-color: color-mix(in srgb, #fff 56%, var(--kana-chart-accent-soft));
-  background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
-  color: #fff;
-  box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 62%, transparent);
+  background: color-mix(in srgb, var(--kana-chart-heading-bg) 70%, var(--kana-chart-accent) 16%);
+  box-shadow: 0 0.3rem 0.75rem color-mix(in srgb, var(--kana-chart-accent) 12%, transparent);
 }
 
 .hiragana-chart-en-button[aria-pressed='true'] {
