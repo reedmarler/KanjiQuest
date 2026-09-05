@@ -16093,7 +16093,18 @@ body:has(.beginner-learner--preview-a-dark) {
   padding: 0.2rem 0.15rem 0.25rem;
   cursor: grab;
   scroll-padding-inline: 0.15rem;
-  scrollbar-width: thin;
+  /* The active-tab highlight and snap-to-tab settle already show where you
+     are in the strip, so a track/thumb only duplicates that — and on touch
+     it rendered as a persistent bar rather than the momentary overlay a
+     mouse-driven scrollbar would be. Hidden on every engine: scrollbar-width
+     for Firefox, the pseudo-element below for Chromium/WebKit (including
+     Android, where unlike iOS it does not auto-hide on its own). */
+  scrollbar-width: none;
+  /* Lets a vertical swipe that starts on the strip fall straight through to
+     the page's own scroll instead of the browser first spending a frame
+     deciding between that and panning the strip horizontally — which is
+     also handled here, in JS below, once the drag threshold is crossed. */
+  touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -16103,17 +16114,7 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .beginner-learner--preview-a .beginner-row-tabs::-webkit-scrollbar {
-  height: 0.45rem;
-}
-
-.beginner-learner--preview-a .beginner-row-tabs::-webkit-scrollbar-track {
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--preview-tab-bg) 72%, transparent);
-}
-
-.beginner-learner--preview-a .beginner-row-tabs::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--preview-glyph-2) 38%, var(--preview-tab-bg));
+  display: none;
 }
 
 .beginner-learner--preview-a .beginner-row-tab {
