@@ -15223,6 +15223,14 @@ body:has(.hiragana-chart-page--katakana) {
   padding: 1.25rem 0 1.5rem;
 }
 
+/* The back button pins to the page corner and floats independently of the
+   flow; without this, the slot it leaves behind still claims a full row of
+   its own height, holding the heading card an extra row's worth of space
+   below the button instead of right up against it. */
+.hiragana-chart-page > .app-back-slot {
+  height: 0;
+}
+
 .hiragana-chart-page--katakana .app-back-button {
   border-color: color-mix(in srgb, var(--kyogre-light) 84%, #fff 8%);
   color: var(--kyogre-light);
