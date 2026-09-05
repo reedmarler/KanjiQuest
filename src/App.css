@@ -15271,7 +15271,7 @@ body:has(.hiragana-chart-page--katakana) {
 .hiragana-chart-heading {
   position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.85rem;
   min-height: 4.75rem;
@@ -15288,15 +15288,6 @@ body:has(.hiragana-chart-page--katakana) {
 
 .hiragana-chart-heading::after {
   display: none;
-}
-
-/* The shared back button pins itself to the page corner; here it rides in
-   the heading's own grid, to the left of the title, so un-pin it the same
-   way the ink road HUD does. */
-.app .hiragana-chart-heading .app-back-slot > .app-back-button {
-  position: relative;
-  top: auto;
-  left: auto;
 }
 
 .hiragana-chart-heading-copy {
@@ -15591,7 +15582,7 @@ body:has(.hiragana-chart-page--katakana) {
   }
 
   .hiragana-chart-heading {
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.5rem;
     padding: 0.65rem;
   }
