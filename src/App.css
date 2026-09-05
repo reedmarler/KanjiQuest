@@ -15754,7 +15754,7 @@ body:has(.beginner-learner--preview-a-dark) {
      here previously let "Tap to listen" sit under the character's tail on
      a real phone. */
   gap: 1rem;
-  padding: 0.51rem 0.6rem 0.59rem;
+  padding: 0.4rem 0.6rem 0.45rem;
   border: 0;
   border-radius: 30px;
   background: var(--preview-card-bg);
@@ -15794,7 +15794,7 @@ body:has(.beginner-learner--preview-a-dark) {
   /* Bottom carries the 1.3rem trimmed from the read card above, so the
      writing area itself grows into the space that used to be excess
      whitespace up there instead of the page just getting taller overall. */
-  padding: 1.3rem 1.3rem 2.6rem;
+  padding: 1.3rem 1.3rem 2.3rem;
   border-radius: 30px;
   background:
     radial-gradient(circle, var(--preview-dot) 1px, transparent 1.4px) 0 0 / 16px 16px,
