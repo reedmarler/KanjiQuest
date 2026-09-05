@@ -16266,10 +16266,15 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   right: 0.7rem;
   bottom: 0.6rem;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.1rem;
   color: var(--preview-accent);
-  font: 700 0.68rem/1 'Outfit', system-ui, sans-serif;
+  font: 700 0.6rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.preview-a-replay-icon {
+  font-size: 0.95rem;
 }
 
 /* Once tapped, the hint text has done its job — collapses to a plain round
@@ -16284,7 +16289,6 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   border-radius: 999px;
   background: var(--preview-badge-bg);
   box-shadow: var(--preview-shadow);
-  font-size: 0.95rem;
 }
 
 .preview-a-write {

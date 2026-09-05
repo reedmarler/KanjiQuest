@@ -1008,8 +1008,8 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             >
               <span ref={glyphRef} className="preview-a-glyph" lang="ja" style={{ transform: `translateY(${glyphOffset * glyphScale}px) scale(${glyphScale})` }}>{card.char}</span>
               <span className={`preview-a-replay${hasTappedListen ? ' preview-a-replay--icon-only' : ''}`}>
-                <span aria-hidden="true">&#128266;</span>
-                {!hasTappedListen && ' Tap to listen'}
+                {!hasTappedListen && <span className="preview-a-replay-label">Tap</span>}
+                <span className="preview-a-replay-icon" aria-hidden="true">&#128266;</span>
               </span>
             </button>
 
