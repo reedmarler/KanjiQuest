@@ -15945,7 +15945,7 @@ body:has(.beginner-learner--preview-a-dark) {
   align-items: center;
   gap: 0.4rem;
   margin-top: -0.6rem;
-  padding: 0.4rem 0.6rem 0.4rem 0.5rem;
+  padding: 0.62rem 0.6rem 0.62rem 0.5rem;
   border-radius: 999px;
   background: var(--preview-top-bg);
   box-shadow: var(--preview-shadow);
@@ -16012,9 +16012,11 @@ body:has(.beginner-learner--preview-a-dark) {
    a quarter-turn, so the swap itself reads as the sun/moon rotating out of
    and into view rather than one icon merely fading into another. */
 .preview-a-theme-toggle {
-  position: relative;
+  position: absolute;
+  top: var(--app-nav-top);
+  right: var(--app-nav-left);
+  z-index: 20;
   display: grid;
-  flex: 0 0 auto;
   place-items: center;
   width: 2.35rem;
   height: 2.35rem;
@@ -16073,7 +16075,7 @@ body:has(.beginner-learner--preview-a-dark) {
    change both together to show a different count. Release snapping is handled
    in JS so dragging can ease to the nearest tab instead of jumping. */
 .beginner-learner--preview-a .beginner-row-tabs {
-  padding: 0.45rem 0.15rem 0.55rem;
+  padding: 0.2rem 0.15rem 0.25rem;
   cursor: grab;
   scroll-padding-inline: 0.15rem;
   scrollbar-width: thin;
@@ -17452,17 +17454,35 @@ body:has(.beginner-learner--preview-a-dark) {
     font-size: 1.45rem;
   }
 
-  /* A 4th button (the かな/カナ script switch) joined Chart/Quiz/theme-toggle
-     on this row without the title giving up any space, so it started
-     ellipsis-truncating "Katakana" — trim each icon pill a bit further to
-     give the title room again. */
-  .preview-a-header-btn {
-    min-width: 2rem;
-    padding-inline: 0.32rem;
+  /* Chart/Quiz/switch drop to their own full-width row below the title
+     instead of squeezing onto the title's line — same wrap the Hiragana/
+     Katakana Chart page's own heading does at this width, so the two
+     pages' title bars land on the same height instead of this one
+     looking squashed next to that one's two rows. */
+  .preview-a-top {
+    flex-wrap: wrap;
+    row-gap: 0.45rem;
+    padding-block: 0.6rem;
   }
 
-  .preview-a-header-btn em {
-    display: none;
+  .preview-a-title {
+    flex: 1 1 100%;
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+  }
+
+  .preview-a-header-btn {
+    flex: 1 1 0;
+  }
+
+  /* 12 fit per screen on a wider phone or desktop without feeling cramped,
+     but at this width that formula shrinks each tab enough to feel
+     scrunched — 6 keeps them legible and easy to tap, at the cost of more
+     scrolling to reach the later rows. */
+  .beginner-learner--preview-a .beginner-row-tab {
+    flex-basis: calc((100% - 1.5rem) / 6);
+    width: calc((100% - 1.5rem) / 6);
   }
 }
 

@@ -652,6 +652,23 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
           ) : (
             <AppBackButton onClick={onBack} aria-label="Back" />
           )}
+          {/* Pinned to the opposite corner, at the back button's own height,
+              rather than riding inside the title bar with Chart/Quiz/switch —
+              a page-level control, not a card-header one. */}
+          <button
+            type="button"
+            role="switch"
+            className="preview-a-theme-toggle"
+            onClick={() => setPreviewDark((value) => !value)}
+            aria-checked={previewDark}
+            aria-label={previewDark ? 'Turn off dark mode for this preview' : 'Turn on dark mode for this preview'}
+          >
+            {/* --sun/--moon name the animation slot (which one is on top
+                when unchecked/checked), not the glyph in it — swapped so
+                the moon shows in light mode and the sun in dark mode. */}
+            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
+            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
+          </button>
           <div className="preview-a-top">
             <span className="preview-a-title">{deckTitle}</span>
             {onOpenChart && (
@@ -671,20 +688,6 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                 <span aria-hidden="true" lang="ja">{otherScriptLabel}</span>
               </button>
             )}
-            <button
-              type="button"
-              role="switch"
-              className="preview-a-theme-toggle"
-              onClick={() => setPreviewDark((value) => !value)}
-              aria-checked={previewDark}
-              aria-label={previewDark ? 'Turn off dark mode for this preview' : 'Turn on dark mode for this preview'}
-            >
-              {/* --sun/--moon name the animation slot (which one is on top
-                  when unchecked/checked), not the glyph in it — swapped so
-                  the moon shows in light mode and the sun in dark mode. */}
-              <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
-              <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
-            </button>
           </div>
         </>
       ) : (
