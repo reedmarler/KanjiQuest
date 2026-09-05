@@ -15666,6 +15666,34 @@ body:has(.beginner-learner--preview-a-dark) {
   transform: translateX(0.95rem);
 }
 
+/* Marks whichever edge still has more tabs scrolled past it, instead of
+   leaving one visibly sliced in half at rest — the plain overflow-x:auto
+   default. A mask (not an overlay painted to match the page's own
+   gradient background, which this sits directly on and which shifts
+   under it) fades the tabs' own pixels to transparent at that edge, so
+   whatever's actually behind shows through correctly either way. The
+   fade-start/fade-end classes are toggled by BeginnerLearner from real
+   scroll position, so it only ever shows on a side that genuinely has
+   more tabs past it. */
+.beginner-row-tabs-wrap.is-preview-a .beginner-row-tabs {
+  transition: mask-image 140ms ease, -webkit-mask-image 140ms ease;
+}
+
+.beginner-row-tabs-wrap.is-preview-a.fade-start .beginner-row-tabs {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 1.1rem);
+  mask-image: linear-gradient(to right, transparent, black 1.1rem);
+}
+
+.beginner-row-tabs-wrap.is-preview-a.fade-end .beginner-row-tabs {
+  -webkit-mask-image: linear-gradient(to left, transparent, black 1.1rem);
+  mask-image: linear-gradient(to left, transparent, black 1.1rem);
+}
+
+.beginner-row-tabs-wrap.is-preview-a.fade-start.fade-end .beginner-row-tabs {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 1.1rem, black calc(100% - 1.1rem), transparent);
+  mask-image: linear-gradient(to right, transparent, black 1.1rem, black calc(100% - 1.1rem), transparent);
+}
+
 .beginner-learner--preview-a .beginner-row-tabs {
   padding: 0.3rem 0.15rem 0.5rem;
   /* "mandatory" so a swipe always settles on a full tab — never leaves one

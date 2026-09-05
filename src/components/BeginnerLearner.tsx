@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { getBeginnerDeck, type BeginnerCharacter, type BeginnerScript } from '../data/beginnerMnemonics'
 import { recordAnswer } from '../lib/studyRecord'
 import { hiraganaWordBank, katakanaWordBank, type UnderstandingWord } from '../data/beginnerUnderstandingWords'
@@ -300,6 +300,31 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   // dark/light toggle for just this preview card's own palette — it does not
   // touch the rest of the app's (permanently dark) theme.
   const [previewDark, setPreviewDark] = useState(false)
+  // The row tabs strip scrolls sideways with more rows than fit on screen —
+  // on the あ preview card a fade marks whichever edge still has more tabs
+  // hidden past it, rather than leaving a tab visibly sliced off mid-square
+  // at rest (the default overflow behaviour). Tracked via scroll position
+  // so the fade only shows on the side that actually has more to reveal.
+  const tabsScrollRef = useRef<HTMLDivElement | null>(null)
+  const [tabsFade, setTabsFade] = useState({ start: false, end: false })
+
+  useEffect(() => {
+    const el = tabsScrollRef.current
+    if (!isAlphaPreview || !el) return
+    const updateFade = () => {
+      setTabsFade({
+        start: el.scrollLeft > 1,
+        end: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+      })
+    }
+    updateFade()
+    el.addEventListener('scroll', updateFade, { passive: true })
+    window.addEventListener('resize', updateFade)
+    return () => {
+      el.removeEventListener('scroll', updateFade)
+      window.removeEventListener('resize', updateFade)
+    }
+  }, [isAlphaPreview, rowIndex])
 
   // Mobile Safari tints its status bar and bottom toolbar from the page's
   // <meta name="theme-color">, not from what the page actually paints there
@@ -490,28 +515,30 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
         </div>
       )}
 
-      <div className="beginner-row-tabs" role="tablist" aria-label={`${deck.title} rows`}>
-        {deck.rows.map((entry, index) => {
-          const masteredCount = entry.characters.filter((c) => (mastery[c.char] ?? 0) >= MASTERY_TARGET).length
-          const done = masteredCount === entry.characters.length
-          return (
-            <button
-              key={entry.id}
-              type="button"
-              role="tab"
-              aria-selected={index === rowIndex}
-              className={`beginner-row-tab${index === rowIndex ? ' is-active' : ''}${done ? ' is-done' : ''}`}
-              onClick={() => openRow(index)}
-              title={`${entry.label} — ${masteredCount}/${entry.characters.length} learned`}
-            >
-              <span>{entry.label}</span>
-              {/* Swapped for the row's romaji reading on the あ preview
-                  spike only — every other script/character still shows the
-                  learned count underneath, unchanged. */}
-              <small>{isAlphaPreview ? entry.characters[0]!.romaji : `${masteredCount}/${entry.characters.length}`}</small>
-            </button>
-          )
-        })}
+      <div className={`beginner-row-tabs-wrap${isAlphaPreview ? ' is-preview-a' : ''}${tabsFade.start ? ' fade-start' : ''}${tabsFade.end ? ' fade-end' : ''}`}>
+        <div className="beginner-row-tabs" role="tablist" aria-label={`${deck.title} rows`} ref={tabsScrollRef}>
+          {deck.rows.map((entry, index) => {
+            const masteredCount = entry.characters.filter((c) => (mastery[c.char] ?? 0) >= MASTERY_TARGET).length
+            const done = masteredCount === entry.characters.length
+            return (
+              <button
+                key={entry.id}
+                type="button"
+                role="tab"
+                aria-selected={index === rowIndex}
+                className={`beginner-row-tab${index === rowIndex ? ' is-active' : ''}${done ? ' is-done' : ''}`}
+                onClick={() => openRow(index)}
+                title={`${entry.label} — ${masteredCount}/${entry.characters.length} learned`}
+              >
+                <span>{entry.label}</span>
+                {/* Swapped for the row's romaji reading on the あ preview
+                    spike only — every other script/character still shows the
+                    learned count underneath, unchanged. */}
+                <small>{isAlphaPreview ? entry.characters[0]!.romaji : `${masteredCount}/${entry.characters.length}`}</small>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {challengeOpen ? (
