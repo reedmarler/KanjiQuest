@@ -16230,7 +16230,7 @@ body:has(.beginner-learner--preview-a-dark) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  margin-top: 0.9rem;
+  margin-top: 0.4rem;
   color: var(--preview-accent);
   font: 700 0.68rem/1 'Outfit', system-ui, sans-serif;
 }
