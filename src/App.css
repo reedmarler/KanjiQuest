@@ -15615,55 +15615,60 @@ body:has(.beginner-learner--preview-a-dark) {
 
 /* An actual on/off switch — sun, a sliding track+knob, moon — rather than a
    single icon that swaps, so it reads as a toggle at a glance. */
+/* A single coin-like badge that morphs between sun and moon, rather than
+   the old sun+track+moon row (three small elements competing for the same
+   tiny space). Both icons are stacked in the same spot and cross-fade with
+   a quarter-turn, so the swap itself reads as the sun/moon rotating out of
+   and into view rather than one icon merely fading into another. */
 .preview-a-theme-toggle {
-  display: inline-flex;
+  position: relative;
+  display: grid;
   flex: 0 0 auto;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.7rem;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
   border: 0;
-  border-radius: 999px;
-  background: var(--preview-badge-bg);
-  box-shadow: 0 4px 10px rgba(94, 62, 130, 0.14);
-  color: var(--preview-text);
-  font-size: 0.8rem;
-  line-height: 1;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffe29a, #ffb15c);
+  box-shadow: 0 3px 10px rgba(214, 130, 30, 0.4), inset 0 -2px 3px rgba(255, 255, 255, 0.55);
   cursor: pointer;
-  transition: transform 140ms ease;
+  transition: background 320ms ease, box-shadow 320ms ease, transform 140ms ease;
 }
 
 .preview-a-theme-toggle:active {
-  transform: scale(0.94);
+  transform: scale(0.92);
 }
 
-.preview-a-theme-toggle-track {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  width: 2.1rem;
-  height: 1.15rem;
-  padding: 0.15rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--preview-text) 20%, transparent);
-  transition: background 160ms ease;
+.preview-a-theme-toggle-icon {
+  position: absolute;
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: opacity 240ms ease, transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.preview-a-theme-toggle-knob {
-  width: 0.85rem;
-  height: 0.85rem;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  transform: translateX(0);
-  transition: transform 160ms ease;
+.preview-a-theme-toggle-icon--sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
-.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-track {
-  background: linear-gradient(135deg, var(--preview-glyph-1), var(--preview-glyph-2));
+.preview-a-theme-toggle-icon--moon {
+  opacity: 0;
+  transform: rotate(85deg) scale(0.4);
 }
 
-.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-knob {
-  transform: translateX(0.95rem);
+.preview-a-theme-toggle[aria-checked="true"] {
+  background: linear-gradient(145deg, #3d3f72, #1c1d3a);
+  box-shadow: 0 3px 12px rgba(40, 30, 90, 0.55), inset 0 -2px 3px rgba(255, 255, 255, 0.1);
+}
+
+.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-icon--sun {
+  opacity: 0;
+  transform: rotate(-85deg) scale(0.4);
+}
+
+.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-icon--moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 /* 6 tabs sized to the strip's own visible width, so wherever a scroll

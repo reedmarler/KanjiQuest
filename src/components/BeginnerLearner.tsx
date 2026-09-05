@@ -461,13 +461,10 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             className="preview-a-theme-toggle"
             onClick={() => setPreviewDark((value) => !value)}
             aria-checked={previewDark}
-            aria-label={previewDark ? 'Dark mode on for this preview' : 'Dark mode off for this preview'}
+            aria-label={previewDark ? 'Turn off dark mode for this preview' : 'Turn on dark mode for this preview'}
           >
-            <span aria-hidden="true">&#9728;&#65039;</span>
-            <span className="preview-a-theme-toggle-track" aria-hidden="true">
-              <span className="preview-a-theme-toggle-knob" />
-            </span>
-            <span aria-hidden="true">&#127769;</span>
+            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#9728;&#65039;</span>
+            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#127769;</span>
           </button>
         </div>
       ) : (
