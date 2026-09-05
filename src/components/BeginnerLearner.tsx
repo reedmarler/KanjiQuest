@@ -463,8 +463,11 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             aria-checked={previewDark}
             aria-label={previewDark ? 'Turn off dark mode for this preview' : 'Turn on dark mode for this preview'}
           >
-            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#9728;&#65039;</span>
-            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#127769;</span>
+            {/* --sun/--moon name the animation slot (which one is on top
+                when unchecked/checked), not the glyph in it — swapped so
+                the moon shows in light mode and the sun in dark mode. */}
+            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
+            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
           </button>
         </div>
       ) : (
