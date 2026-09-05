@@ -319,10 +319,13 @@ interface BeginnerLearnerProps {
   /** Opens the matching row quiz from the kana practice card. */
   onOpenQuiz?: () => void
   /** Jumps to the other kana script's practice, when one exists — hiragana
-   *  offers カナ, katakana offers かな. The caller is expected to remount
-   *  this component (e.g. a `key` tied to script) since mastery and row
-   *  position are loaded once, at mount, for whichever script started it. */
-  onSwitchScript?: () => void
+   *  offers カナ, katakana offers かな. Passed the row and in-row character
+   *  index currently on screen, so the caller can land the switch on the
+   *  same kana (e.g. さ → サ) instead of always reopening at row 0. The
+   *  caller is expected to remount this component (e.g. a `key` tied to
+   *  script) since mastery and row position are loaded once, at mount, for
+   *  whichever script started it. */
+  onSwitchScript?: (rowIndex: number, charIndex: number) => void
   /** Starts on the row quiz instead of character practice. */
   startWithQuiz?: boolean
   /** Initial kana preview palette. The in-card toggle can still change it. */
@@ -360,6 +363,10 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   })
   const [cardIndex, setCardIndex] = useState(0)
   const card = cards[cardIndex]
+  // `cards` may be rotated (see above), so cardIndex alone doesn't say where
+  // the current character actually sits in the row — onSwitchScript needs
+  // that real position to reopen the other script on the same kana.
+  const currentRowCharIndex = card ? Math.max(0, row.characters.findIndex((entry) => entry.char === card.char)) : 0
   /*
    * The lighter, illustrated restyle first tried on just あ, now the look
    * for every hiragana and katakana character's main practice card — kanji
@@ -683,13 +690,18 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                 </button>
               )}
               {onSwitchScript && (
-                <button type="button" className="preview-a-header-btn" onClick={onSwitchScript} aria-label={`Switch to ${otherScriptName} practice`} title={`Switch to ${otherScriptName}`}>
+                <button
+                  type="button"
+                  className="preview-a-header-btn"
+                  onClick={() => onSwitchScript(rowIndex, currentRowCharIndex)}
+                  aria-label={`Switch to ${otherScriptName} practice`}
+                  title={`Switch to ${otherScriptName}`}
+                >
                   <span aria-hidden="true" lang="ja">{otherScriptLabel}</span>
                 </button>
               )}
               {onOpenQuiz && (
-                <button type="button" className="preview-a-header-btn preview-a-quiz-btn" onClick={onOpenQuiz} aria-label={`Open the ${deck.title} quiz`} title={`${deck.title} quiz`}>
-                  <span aria-hidden="true">?</span>
+                <button type="button" className="preview-a-header-btn" onClick={onOpenQuiz} aria-label={`Open the ${deck.title} quiz`} title={`${deck.title} quiz`}>
                   <em>Quiz</em>
                 </button>
               )}

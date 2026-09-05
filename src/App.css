@@ -16013,14 +16013,6 @@ body:has(.beginner-learner--preview-a-dark) {
   transform: scale(0.92);
 }
 
-/* The bolder of the three pills — same idea as the Chart page's own Quiz
-   button standing out from EN/カナ next to it. */
-.preview-a-quiz-btn {
-  background: linear-gradient(135deg, var(--preview-glyph-2), var(--preview-glyph-1));
-  color: #fff;
-  box-shadow: 0 3px 8px color-mix(in srgb, var(--preview-glyph-2) 34%, transparent);
-}
-
 /* An actual on/off switch — sun, a sliding track+knob, moon — rather than a
    single icon that swaps, so it reads as a toggle at a glance. */
 /* A single coin-like badge that morphs between sun and moon, rather than
@@ -16151,12 +16143,6 @@ body:has(.beginner-learner--preview-a-dark) {
   color: #fff;
   font-size: 0.82rem;
   box-shadow: 0 6px 16px rgba(214, 38, 111, 0.35);
-}
-
-/* The reference drops the count on the active tab — it isn't "0/5 learned",
-   it's the row you're on right now, so the number reads as noise there. */
-.beginner-learner--preview-a .beginner-row-tab.is-active small {
-  display: none;
 }
 
 .beginner-learner--preview-a .beginner-row-tab.is-done {

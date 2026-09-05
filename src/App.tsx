@@ -580,12 +580,12 @@ function App() {
             onBack={() => setView(beginnerLearnerReturnView)}
             onOpenChart={chartView ? () => setView(chartView) : undefined}
             onOpenQuiz={chartView ? () => openBeginnerQuiz(beginnerScript === 'hiragana' ? 'hiragana' : 'katakana', beginnerLearnerReturnView) : undefined}
-            onSwitchScript={chartView ? () => {
+            onSwitchScript={chartView ? (rowIndex, charIndex) => {
               const nextScript = beginnerScript === 'hiragana' ? 'katakana' : 'hiragana'
               const nextChartView = nextScript === 'hiragana' ? 'hiragana-chart' : 'katakana-chart'
               setBeginnerScript(nextScript)
-              setBeginnerInitialRowIndex(0)
-              setBeginnerInitialCharIndex(0)
+              setBeginnerInitialRowIndex(rowIndex)
+              setBeginnerInitialCharIndex(charIndex)
               setBeginnerLearnerReturnView((current) => (current === 'beginner-zone' ? current : nextChartView))
             } : undefined}
             onDashboard={() => setView('dashboard')}
