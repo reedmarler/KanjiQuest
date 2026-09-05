@@ -16176,21 +16176,17 @@ body:has(.beginner-learner--preview-a-dark) {
 
 .preview-a-read {
   grid-area: read;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* Scaled down (padding, gap, and the glyph's own font-size + margin-top
-     below) so this card gives up exactly the height the write card gained
-     from filling its own box (see stackWidthRem on the TraceCanvas call) —
-     Previous/Next end up back where they were. Gap keeps a real margin
-     (not scaled all the way back to the 0.5rem this once was) since Klee
-     One's あ paints real ink below its nominal line-box, and a tight gap
-     here previously let "Tap to listen" sit under the character's tail on
-     a real phone. */
-  gap: 0.45rem;
   min-height: 0;
-  padding: 0.45rem 0.6rem 0.5rem;
+  /* "Tap to listen" (below) is pinned to this card's own corner now,
+     out of flow — so unlike the write card opposite it, this padding
+     doesn't need to leave it any room, and the glyph alone gets to set
+     this card's height. */
+  padding: 0.45rem 0.6rem;
   border: 0;
   border-radius: 30px;
   background: var(--preview-card-bg);
@@ -16225,10 +16221,12 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .preview-a-replay {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.6rem;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  margin-top: 0.4rem;
   color: var(--preview-accent);
   font: 700 0.68rem/1 'Outfit', system-ui, sans-serif;
 }
