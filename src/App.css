@@ -15630,7 +15630,7 @@ body:has(.hiragana-chart-page--katakana) {
   }
 
   .hiragana-chart-row {
-    grid-template-columns: 2.85rem repeat(5, minmax(0, 1fr));
+    grid-template-columns: 2.85rem minmax(0, 1fr);
   }
 
   .hiragana-chart-row-status {
