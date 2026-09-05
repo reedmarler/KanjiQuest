@@ -52,8 +52,8 @@ export function KanaChart({ script, onBack, onOpenQuiz, onSelectCharacter }: Kan
 
   return (
     <main className={`hiragana-chart-page hiragana-chart-page--${script}${showRomaji ? '' : ' is-romaji-hidden'}`}>
-      <AppBackButton onClick={onBack} aria-label="Back to Beginner Zone" />
       <section className="hiragana-chart-heading">
+        <AppBackButton onClick={onBack} aria-label="Back to Beginner Zone" />
         <div className="hiragana-chart-hero-mark" lang="ja" aria-hidden="true">{leadCharacter}</div>
         <div className="hiragana-chart-heading-copy">
           <h1>{deck.title} Chart</h1>
