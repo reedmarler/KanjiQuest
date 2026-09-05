@@ -15666,16 +15666,16 @@ body:has(.beginner-learner--preview-a-dark) {
   transform: translateX(0.95rem);
 }
 
-/* Exactly 8 tabs sized to the strip's own visible width, so wherever a
-   scroll lands, either 8 full tabs are showing or (past the last one)
-   empty space — never a 9th tab sliced in half at the edge. Percentage
+/* 6 tabs sized to the strip's own visible width, so wherever a scroll
+   lands, either 6 full tabs are showing or (past the last one) empty
+   space — never a 7th tab sliced in half at the edge. Percentage
    flex-basis resolves against this container's own content width, so
    this needs no JS measurement and stays correct across screen sizes;
-   VISIBLE_TABS below (8) and the 7 gaps between them are the only two
-   numbers driving it. Snap (mandatory + align: start on every tab, not
-   just every 8th) still lets a swipe move by one tab at a time — the
-   uniform width is what guarantees any tab-aligned stop shows exactly 8,
-   not the snapping itself. */
+   6 and the 5 gaps between them are the only two numbers driving it —
+   change both together to show a different count. Snap (mandatory +
+   align: start on every tab, not just every 6th) still lets a swipe move
+   by one tab at a time — the uniform width is what guarantees any
+   tab-aligned stop shows a whole count, not the snapping itself. */
 .beginner-learner--preview-a .beginner-row-tabs {
   padding: 0.3rem 0.15rem 0.5rem;
   scroll-snap-type: x mandatory;
@@ -15683,24 +15683,24 @@ body:has(.beginner-learner--preview-a-dark) {
 }
 
 .beginner-learner--preview-a .beginner-row-tab {
-  /* 7 gaps (0.3rem each, matching .beginner-row-tabs's own gap) across 8
+  /* 5 gaps (0.3rem each, matching .beginner-row-tabs's own gap) across 6
      tabs per screen. */
-  flex: 0 0 calc((100% - 2.1rem) / 8);
-  width: calc((100% - 2.1rem) / 8);
+  flex: 0 0 calc((100% - 1.5rem) / 6);
+  width: calc((100% - 1.5rem) / 6);
   min-width: 0;
   border: 0;
   border-radius: 14px;
-  padding: 0.48rem 0.4rem;
+  padding: 0.5rem 0.4rem;
   background: var(--preview-tab-bg);
   color: var(--preview-text);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   scroll-snap-align: start;
   transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
 .beginner-learner--preview-a .beginner-row-tab small {
   color: var(--preview-muted);
-  font-size: 0.58rem;
+  font-size: 0.62rem;
 }
 
 .beginner-learner--preview-a .beginner-row-tab.is-active {

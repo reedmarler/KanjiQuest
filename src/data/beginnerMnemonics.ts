@@ -140,7 +140,7 @@ const hiraganaRows: BeginnerRow[] = [
   },
   {
     id: 'hiragana-wa',
-    label: 'わ・ん',
+    label: 'わ',
     characters: [
       { char: 'わ', romaji: 'wa', mnemonic: 'A wine glass tipping over — "wa", spilled it.' },
       { char: 'を', romaji: 'wo', mnemonic: 'A person throwing a boomerang — "whoa", it came back.' },
