@@ -449,12 +449,12 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
 
   // The write card's Clear button isn't actually a fixed distance from that
   // card's own edge — it's pinned to the canvas, which is centered and capped
-  // at a width (TraceCanvas's stackWidthRem, itself dependent on character
-  // count and viewport) that only sometimes equals the card's full width; on
-  // any wider screen it drifts inward. Reproducing that math on this side
-  // would mean duplicating all of it, so instead this just measures where
-  // Clear actually landed and matches it, keeping Tap in that same corner
-  // regardless of screen size or how many characters are on screen.
+  // at a fixed width (TraceCanvas's stackWidthRem, 18rem below, the same for
+  // every card) that only sometimes equals the card's full width; on any
+  // wider screen it drifts inward. Reproducing that math on this side would
+  // mean duplicating it, so instead this just measures where Clear actually
+  // landed and matches it, keeping Tap in that same corner regardless of
+  // screen size.
   const writeCardRef = useRef<HTMLDivElement | null>(null)
   const [replayInsetPx, setReplayInsetPx] = useState<number | null>(null)
   useLayoutEffect(() => {
@@ -1053,15 +1053,16 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                   both narrower than this card would otherwise allow. The
                   gap this cap leaves on a wide screen is exactly why Tap
                   (above, on the read card) measures rather than assumes
-                  where Clear ends up. Only for a single character, though: a
-                  yōon row's card.char is two (きゃ), which on a phone stacks
-                  vertically into two cells (TraceCanvas's own layout for any
-                  multi-character word) — forcing that stack to also fill
-                  the card's full width multiplies its height by the same
-                  amount, producing a box several screens tall. Left at
-                  TraceCanvas's own default there, which already handles
-                  multi-character words sensibly (it's the same component
-                  every other flashcard in the app uses for them).
+                  where Clear ends up. Applied to every card alike —
+                  including a yōon row's two-character card.char (きゃ),
+                  which stacks vertically into two cells on a phone — rather
+                  than leaving those to TraceCanvas's own wider default
+                  (21rem there, more on desktop): letting the cap vary with
+                  character count is exactly what made Clear (and Tap with
+                  it) land in a different spot for きゃ/じゃ than for a plain
+                  kana, even with Tap matching Clear correctly on any one
+                  card. The same 18rem for every card is what keeps both
+                  fixed in one place across all of them.
                   guideFontRatio requests a guide bigger than the app-wide
                   default (0.82); guideFit measures the actual rendered ink
                   on whatever engine loads this page and centers + shrinks
@@ -1074,7 +1075,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
               <TraceCanvas
                 key={card.char}
                 char={card.char}
-                stackWidthRem={[...card.char].length === 1 ? 18 : undefined}
+                stackWidthRem={18}
                 guideFontRatio={0.784}
                 guideFit
                 guideFitMargin={0.995}

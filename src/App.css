@@ -15234,8 +15234,13 @@ body:has(.hiragana-chart-page--katakana) {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--kyogre-light) 24%, transparent);
 }
 
-.hiragana-chart-page--katakana .app-back-button:hover,
-.hiragana-chart-page--katakana .app-back-button:focus-visible {
+/* :hover only, not :focus-visible — a tap focuses the button too, and on
+   plenty of touch browsers that focus lingers after the tap (there's no
+   "mouse leave" equivalent to clear it), so pairing this fill with focus
+   left Back looking stuck solid right after the very click that navigates
+   away from it. The plain outline in the app-wide :focus-visible rule
+   still covers real keyboard use. */
+.hiragana-chart-page--katakana .app-back-button:hover {
   border-color: var(--kana-chart-button-border);
   color: #fff;
   background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
@@ -15251,8 +15256,9 @@ body:has(.hiragana-chart-page--katakana) {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--kana-chart-accent-soft) 24%, transparent);
 }
 
-.hiragana-chart-page--hiragana .app-back-button:hover,
-.hiragana-chart-page--hiragana .app-back-button:focus-visible {
+/* :hover only — see the katakana rule above for why :focus-visible doesn't
+   belong here too. */
+.hiragana-chart-page--hiragana .app-back-button:hover {
   border-color: var(--kana-chart-button-border);
   color: #fff;
   background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
@@ -16017,8 +16023,9 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--preview-accent) 24%, transparent);
 }
 
-.beginner-learner--sakura-a .app-back-button:hover,
-.beginner-learner--sakura-a .app-back-button:focus-visible {
+/* :hover only — see the Hiragana Chart page's own back-button rule for
+   why :focus-visible doesn't belong here too. */
+.beginner-learner--sakura-a .app-back-button:hover {
   border-color: color-mix(in srgb, var(--preview-glyph-1) 60%, transparent);
   color: #fff;
   background: linear-gradient(135deg, var(--preview-glyph-2), var(--preview-glyph-1));
@@ -16346,6 +16353,18 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
      right up to their square corners, so letting it escape here doesn't
      expose any square edges of its own past the rounded clip. */
   overflow: visible;
+}
+
+/* The app-wide .is-vertical rule (App.css, mobile only) caps a stacked
+   word's width further by the viewport's own height, guarding against a
+   long word turning into a canvas taller than the screen — but a card
+   here is never more than a yōon row's two characters (きゃ, じゃ), so that
+   extra cap only ever shrank a two-character card below the 18rem every
+   other card here already uses, moving Clear (and Tap, which matches it)
+   to a different spot for きゃ/じゃ than for a plain kana. Dropping back to
+   the same plain 18rem cap keeps every card here the same size. */
+.preview-a-write .trace-canvas-stack.is-vertical {
+  width: min(100%, var(--trace-stack-max));
 }
 
 .preview-a-write .trace-canvas-clear {
