@@ -385,10 +385,6 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   // dark/light toggle for just this preview card's own palette — it does not
   // touch the rest of the app's (permanently dark) theme.
   const [previewDark, setPreviewDark] = useState(defaultPreviewDark)
-  // "Tap to listen" spells out the read card's tap target for a first-timer;
-  // once they've actually used it, the hint text is redundant clutter, so it
-  // collapses down to just the speaker icon from then on.
-  const [hasTappedListen, setHasTappedListen] = useState(false)
 
   // Mobile Safari tints its status bar and bottom toolbar from the page's
   // <meta name="theme-color">, not from what the page actually paints there
@@ -1030,22 +1026,19 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             <button
               type="button"
               className="preview-a-read"
-              onClick={() => {
-                setHasTappedListen(true)
-                speakJapanese(card.char, {
-                  rate: SINGLE_CHARACTER_SPEECH_RATE,
-                  forceBrowser: true,
-                  beginnerRecordingKind: 'kana',
-                })
-              }}
+              onClick={() => speakJapanese(card.char, {
+                rate: SINGLE_CHARACTER_SPEECH_RATE,
+                forceBrowser: true,
+                beginnerRecordingKind: 'kana',
+              })}
               aria-label={`Play the sound for ${card.char}`}
             >
               <span ref={glyphRef} className="preview-a-glyph" lang="ja" style={{ transform: `translateY(${glyphOffset * glyphScale}px) scale(${glyphScale})` }}>{card.char}</span>
               <span
-                className={`preview-a-replay${hasTappedListen ? ' preview-a-replay--icon-only' : ''}`}
+                className="preview-a-replay"
                 style={replayInsetPx != null ? { right: `${replayInsetPx}px` } : undefined}
               >
-                {!hasTappedListen && <span className="preview-a-replay-label">Tap</span>}
+                <span className="preview-a-replay-label">Tap</span>
                 <span className="preview-a-replay-icon" aria-hidden="true">&#128266;</span>
               </span>
             </button>
