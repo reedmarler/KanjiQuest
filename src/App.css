@@ -8366,10 +8366,16 @@ body:has(.dashboard) {
   transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 160ms ease;
 }
 
-.app-back-button:hover {
-  border-color: var(--kyogre-light);
-  color: var(--kyogre-light);
-  background: color-mix(in srgb, var(--kyogre) 10%, var(--surface));
+/* (hover: hover) — a touch tap satisfies plain :hover with no "pointer
+   left" event to ever clear it, so on a touchscreen this stayed visibly
+   tinted right after the very tap that navigates away from the button.
+   Real pointer devices (mouse, trackpad) still get the tint. */
+@media (hover: hover) {
+  .app-back-button:hover {
+    border-color: var(--kyogre-light);
+    color: var(--kyogre-light);
+    background: color-mix(in srgb, var(--kyogre) 10%, var(--surface));
+  }
 }
 
 .app-back-button:active {
@@ -15253,12 +15259,17 @@ body:has(.hiragana-chart-page--katakana) {
    "mouse leave" equivalent to clear it), so pairing this fill with focus
    left Back looking stuck solid right after the very click that navigates
    away from it. The plain outline in the app-wide :focus-visible rule
-   still covers real keyboard use. */
-.hiragana-chart-page--katakana .app-back-button:hover {
-  border-color: var(--kana-chart-button-border);
-  color: #fff;
-  background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
-  box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
+   still covers real keyboard use. Also gated on (hover: hover): plain
+   :hover has the exact same problem on a touchscreen — a tap satisfies it
+   with nothing to ever clear it — so without this a phone would show the
+   same stuck-solid Back button focus-visible was just fixed for. */
+@media (hover: hover) {
+  .hiragana-chart-page--katakana .app-back-button:hover {
+    border-color: var(--kana-chart-button-border);
+    color: #fff;
+    background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
+    box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
+  }
 }
 
 /* Same idea as katakana's kyogre-blue tint above, in the hiragana page's own
@@ -15270,13 +15281,15 @@ body:has(.hiragana-chart-page--katakana) {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--kana-chart-accent-soft) 24%, transparent);
 }
 
-/* :hover only — see the katakana rule above for why :focus-visible doesn't
-   belong here too. */
-.hiragana-chart-page--hiragana .app-back-button:hover {
-  border-color: var(--kana-chart-button-border);
-  color: #fff;
-  background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
-  box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
+/* :hover only, and only on a real hover-capable pointer — see the katakana
+   rule above for why both matter. */
+@media (hover: hover) {
+  .hiragana-chart-page--hiragana .app-back-button:hover {
+    border-color: var(--kana-chart-button-border);
+    color: #fff;
+    background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
+    box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
+  }
 }
 
 .hiragana-chart-page--katakana {
@@ -16037,13 +16050,15 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--preview-accent) 24%, transparent);
 }
 
-/* :hover only — see the Hiragana Chart page's own back-button rule for
-   why :focus-visible doesn't belong here too. */
-.beginner-learner--sakura-a .app-back-button:hover {
-  border-color: color-mix(in srgb, var(--preview-glyph-1) 60%, transparent);
-  color: #fff;
-  background: linear-gradient(135deg, var(--preview-glyph-2), var(--preview-glyph-1));
-  box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--preview-accent) 16%, transparent);
+/* :hover only, and only on a real hover-capable pointer — see the
+   Hiragana Chart page's own back-button rule for why both matter. */
+@media (hover: hover) {
+  .beginner-learner--sakura-a .app-back-button:hover {
+    border-color: color-mix(in srgb, var(--preview-glyph-1) 60%, transparent);
+    color: #fff;
+    background: linear-gradient(135deg, var(--preview-glyph-2), var(--preview-glyph-1));
+    box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--preview-accent) 16%, transparent);
+  }
 }
 
 /* The pinned back button floats independently of the flow, but the slot it
