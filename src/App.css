@@ -15199,7 +15199,18 @@ body:has(.hiragana-chart-page--katakana) {
     linear-gradient(180deg, #fff2f7 0%, #fff8fb 46%, #f6d9e5 100%);
 }
 
-.hiragana-chart-page {
+/* Shared with .beginner-learner--hiragana/--katakana so the practice pages'
+   copy of this heading (see .hiragana-chart-heading in BeginnerLearner)
+   renders with the exact same colors as the Chart page's own — one set of
+   values, not a duplicated palette that could drift out of sync. The Chart
+   page always carries both this class and its --hiragana/--katakana
+   modifier together, so the modifier rule below can override just the
+   handful of tokens that differ; .beginner-learner--katakana needs to be
+   named here too (as well as in that override) since practice pages only
+   ever carry one script modifier class, never this base one alongside it. */
+.hiragana-chart-page,
+.beginner-learner--hiragana,
+.beginner-learner--katakana {
   --hiragana-paper: #fffdfc;
   --hiragana-paper-soft: #fff6f9;
   --hiragana-ink: #241b22;
@@ -15225,6 +15236,9 @@ body:has(.hiragana-chart-page--katakana) {
   --kana-chart-text: #f8f1fb;
   --kana-chart-muted: #cdbfd3;
   --kana-chart-shadow: 0 14px 30px rgba(8, 8, 18, 0.42);
+}
+
+.hiragana-chart-page {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -15279,7 +15293,8 @@ body:has(.hiragana-chart-page--katakana) {
   box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
 }
 
-.hiragana-chart-page--katakana {
+.hiragana-chart-page--katakana,
+.beginner-learner--katakana {
   --kana-chart-accent: var(--kyogre);
   --kana-chart-accent-strong: var(--kyogre);
   --kana-chart-accent-soft: var(--kyogre-light);
@@ -16054,77 +16069,6 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 .beginner-learner--preview-a > .app-back-slot,
 .beginner-learner--preview-a > .app-nav-actions > .app-back-slot {
   height: 0;
-}
-
-/* Same shape as the Hiragana/Katakana Chart page's own heading: title on
-   the left, action pills on the right, in one box — with the back button
-   and dark-mode toggle pinned to the page corners above it (exactly like
-   the Chart page's back button), rather than enveloped into the box. */
-.preview-a-top {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.62rem 0.6rem 0.62rem 0.7rem;
-  border-radius: 22px;
-  background: var(--preview-top-bg);
-  box-shadow: var(--preview-shadow);
-}
-
-.preview-a-title {
-  min-width: 0;
-  color: var(--preview-text);
-  font: 800 1.16rem/1.22 'Outfit', system-ui, sans-serif;
-  padding-block: 0.06rem 0.1rem;
-  /* Still sat a hair low within this centered row even with the padding
-     skew above — a small direct nudge, rather than chasing it further
-     through padding, which only ever moves it indirectly. */
-  transform: translateY(-0.08rem);
-  text-align: center;
-  /* Katakana is a hair longer than Hiragana and this row is already tight
-     at narrow widths with the action pills also on it. */
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.preview-a-actions {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.35rem;
-}
-
-.preview-a-header-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  gap: 0.22rem;
-  min-width: 3.25rem;
-  height: 1.85rem;
-  padding: 0 0.48rem;
-  border: 0;
-  border-radius: 999px;
-  background: var(--preview-badge-bg);
-  box-shadow: 0 2px 6px rgba(94, 62, 130, 0.14);
-  color: var(--preview-text);
-  font: 800 0.55rem/1 'Outfit', system-ui, sans-serif;
-  cursor: pointer;
-  transition: transform 140ms ease;
-}
-
-.preview-a-header-btn span {
-  font-size: 0.68rem;
-  line-height: 1;
-}
-
-.preview-a-header-btn em {
-  font-style: normal;
-}
-
-.preview-a-header-btn:active {
-  transform: scale(0.92);
 }
 
 /* An actual on/off switch — sun, a sliding track+knob, moon — rather than a
@@ -17575,25 +17519,6 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
     grid-column: 1;
     justify-self: stretch;
     width: 100%;
-  }
-}
-
-/* Same wrap the Hiragana/Katakana Chart page's own heading does at this
-   width: title drops to its own row, Chart/カナ/Quiz wrap to a full-width
-   row below it and stretch to fill it evenly. */
-@media (max-width: 560px) {
-  .preview-a-top {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.4rem;
-  }
-
-  .preview-a-actions {
-    grid-column: 1 / -1;
-    width: 100%;
-  }
-
-  .preview-a-header-btn {
-    flex: 1 1 0;
   }
 }
 

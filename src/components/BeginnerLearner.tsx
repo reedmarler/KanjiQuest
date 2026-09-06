@@ -715,36 +715,45 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
             <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
           </button>
-          {/* Same title + action-pills setup as the Hiragana/Katakana Chart
-              page's own heading (EN, カナ/かな, Quiz) — Chart takes EN's
-              spot since there's no romaji toggle here. */}
-          <div className="preview-a-top">
-            <span className="preview-a-title">{deckTitle}</span>
-            <div className="preview-a-actions">
+          {/* The exact same box as the Hiragana/Katakana Chart page's own
+              heading — same classes, same layout — so the two pages read as
+              one standardized header. Chart takes EN's spot since there's
+              no romaji toggle here. */}
+          <section className="hiragana-chart-heading">
+            <div className="hiragana-chart-heading-copy">
+              <h1>{deckTitle}</h1>
+            </div>
+            <div className="hiragana-chart-actions">
               {onOpenChart && (
-                <button type="button" className="preview-a-header-btn" onClick={onOpenChart} aria-label={`Open the ${deck.title} chart`} title={`${deck.title} chart`}>
-                  <span aria-hidden="true">▦</span>
-                  <em>Chart</em>
+                <button
+                  type="button"
+                  className="hiragana-chart-quiz-button hiragana-chart-en-button"
+                  onClick={onOpenChart}
+                  aria-label={`Open the ${deck.title} chart`}
+                  title={`${deck.title} chart`}
+                >
+                  Chart
                 </button>
               )}
               {onSwitchScript && (
                 <button
                   type="button"
-                  className="preview-a-header-btn"
+                  className="hiragana-chart-quiz-button hiragana-chart-en-button"
                   onClick={() => onSwitchScript(rowIndex, currentRowCharIndex)}
                   aria-label={`Switch to ${otherScriptName} practice`}
                   title={`Switch to ${otherScriptName}`}
+                  lang="ja"
                 >
-                  <span aria-hidden="true" lang="ja">{otherScriptLabel}</span>
+                  {otherScriptLabel}
                 </button>
               )}
               {onOpenQuiz && (
-                <button type="button" className="preview-a-header-btn" onClick={onOpenQuiz} aria-label={`Open the ${deck.title} quiz`} title={`${deck.title} quiz`}>
-                  <em>Quiz</em>
+                <button type="button" className="hiragana-chart-quiz-button" onClick={onOpenQuiz} aria-label={`Open the ${deck.title} quiz`} title={`${deck.title} quiz`}>
+                  Quiz
                 </button>
               )}
             </div>
-          </div>
+          </section>
         </>
       ) : (
         <div className="beginner-learner-top">
