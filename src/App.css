@@ -2295,11 +2295,11 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.26rem;
-  /* Same fixed footprint as the Mode toggle, so the pair reads as one family
-     of controls in the topbar. Both only ever hold a short label ("Swap", or
-     "Mode"/"Story"/"Grammar"/"Star"), unlike the Pick a mode and story/focus
-     name buttons, which need the extra width for "Choose focus" and similar
-     — so this one stays narrower than those instead of matching them. */
+  /* "Swap" is the only label this button ever shows, so a fixed width sized
+     to that one word is already the most efficient footprint — unlike the
+     Mode toggle next to it, which swaps its label text and sizes to match,
+     or the Pick a mode / story / focus name buttons, which need the extra
+     width for "Choose focus" and similar. */
   width: 4.9rem;
   height: 1.7rem;
   box-sizing: border-box;
@@ -2451,10 +2451,11 @@ body:has(.dashboard) {
 .control-story-top-toggle {
   /* Sits on the first line of the topbar, pushed to the right edge; whichever
      control hangs under it wraps to the next line — see the topbar rules.
-     Box model (width/height/padding/border-radius/font) comes entirely from
-     the plain .control-story-toggle rule below, which this button always
-     also carries — that's what keeps it the same fixed size as Swap and
-     Pick a mode, on and off alike. */
+     Box model (height/padding/border-radius/font) comes entirely from the
+     plain .control-story-toggle rule below, which this button always also
+     carries; that rule leaves width to the label it's showing, so this
+     button shrinks and grows in place as the mode changes instead of
+     reserving room for the longest possible label. */
   order: 1;
   margin-left: auto;
   pointer-events: auto;
@@ -2469,6 +2470,16 @@ body:has(.dashboard) {
 .control-story-top-toggle .control-toggle-track > span {
   width: 0.44rem;
   height: 0.44rem;
+}
+
+/* "Pick a mode" is the only label this trigger ever shows, so it doesn't
+   need the fixed 6.25rem the same button class reserves for the story and
+   focus pickers next to it (whose titles run much longer and truncate with
+   an ellipsis instead of resizing the box). Sizing to its own content keeps
+   it as narrow as the label actually needs. */
+.control-story-quick-select.is-picking .control-story-name-button {
+  width: auto;
+  max-width: 6.25rem;
 }
 
 .control-story-top-toggle.is-active .control-toggle-track > span {
@@ -3227,11 +3238,13 @@ body:has(.dashboard) {
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  /* Narrower than the Pick a mode / story / focus name buttons: this one
-     only ever holds a short label ("Mode", "Story", "Grammar", "Star"), so
-     it doesn't need their width — see the matching note on
-     .control-swap-mode-button, the other member of this narrower pair. */
-  width: 4.9rem;
+  /* Sized to whichever label is currently showing ("Mode", "Story",
+     "Grammar", "Star") rather than a fixed footprint, so the switch never
+     carries space it doesn't need — a little wider for "Grammar", a little
+     narrower for "Story" or "Star". Also well short of the Pick a mode /
+     story / focus name buttons, which need extra width for "Choose focus"
+     and similar — see the matching note on .control-swap-mode-button. */
+  width: auto;
   height: 1.7rem;
   padding: 0 0.4rem;
   border: 1px solid color-mix(in srgb, var(--text-muted) 28%, transparent);
@@ -5991,8 +6004,9 @@ body:has(.dashboard) {
     padding: 0 0.34rem;
     gap: 0.28rem;
   }
-  /* Swap and the mode toggle keep the same fixed footprint as Pick a mode at
-     every breakpoint, so the family stays visually consistent. */
+  /* Swap keeps the same fixed footprint as Pick a mode at every breakpoint;
+     the mode toggle still sizes to its own label (see the desktop rule) but
+     picks up the same shorter height and tighter padding here. */
   .control-swap-mode-button,
   .control-story-toggle {
     height: 1.45rem;
