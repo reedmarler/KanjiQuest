@@ -15242,6 +15242,23 @@ body:has(.hiragana-chart-page--katakana) {
   box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
 }
 
+/* Same idea as katakana's kyogre-blue tint above, in the hiragana page's own
+   sakura accent instead of the generic (blue) app-wide default. */
+.hiragana-chart-page--hiragana .app-back-button {
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 84%, #fff 8%);
+  color: var(--kana-chart-accent-soft);
+  background: color-mix(in srgb, var(--kana-chart-accent) 18%, var(--surface));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--kana-chart-accent-soft) 24%, transparent);
+}
+
+.hiragana-chart-page--hiragana .app-back-button:hover,
+.hiragana-chart-page--hiragana .app-back-button:focus-visible {
+  border-color: var(--kana-chart-button-border);
+  color: #fff;
+  background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
+  box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
+}
+
 .hiragana-chart-page--katakana {
   --kana-chart-accent: var(--kyogre);
   --kana-chart-accent-strong: var(--kyogre);
