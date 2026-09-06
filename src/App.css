@@ -16134,11 +16134,19 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
    flex-basis resolves against this container's own content width, so
    this needs no JS measurement and stays correct across screen sizes;
    6 and the 5 gaps between them are the only two numbers driving it —
-   change both together to show a different count. Release snapping is handled
-   in JS so dragging can ease to the nearest tab instead of jumping. */
+   change both together to show a different count. scroll-snap-type here
+   (paired with each tab's own scroll-snap-align below) is what actually
+   snaps the strip to a tab boundary — on any scroll, not just the ones
+   the JS below drives — mandatory rather than proximity so it always
+   lands flush instead of sometimes resting mid-tab. Touch scrolls this
+   strip natively (real momentum, and native scroll-chaining hands a
+   vertical swipe straight to the page) — the JS below is mouse-only,
+   easing a mouse drag to the nearest tab the way native touch scrolling
+   already does on its own. */
 .beginner-learner--preview-a .beginner-row-tabs {
   padding: 0.2rem 0.15rem 0.25rem;
   cursor: grab;
+  scroll-snap-type: x mandatory;
   scroll-padding-inline: 0.15rem;
   /* The active-tab highlight and snap-to-tab settle already show where you
      are in the strip, so a track/thumb only duplicates that — and on touch
@@ -16147,11 +16155,6 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
      for Firefox, the pseudo-element below for Chromium/WebKit (including
      Android, where unlike iOS it does not auto-hide on its own). */
   scrollbar-width: none;
-  /* Lets a vertical swipe that starts on the strip fall straight through to
-     the page's own scroll instead of the browser first spending a frame
-     deciding between that and panning the strip horizontally — which is
-     also handled here, in JS below, once the drag threshold is crossed. */
-  touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -16261,10 +16264,13 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   -webkit-text-fill-color: transparent;
 }
 
+/* top/right line this up with the write card's own Clear chip opposite
+   it (.preview-a-write .trace-canvas-clear below) — both sit the same
+   distance from their card's top-right corner. */
 .preview-a-replay {
   position: absolute;
+  top: 0.7rem;
   right: 0.7rem;
-  bottom: 0.6rem;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -16281,8 +16287,8 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
    speaker badge in the same corner, same idea as the write card's own
    Clear chip opposite it. */
 .preview-a-replay--icon-only {
+  top: 0.55rem;
   right: 0.55rem;
-  bottom: 0.55rem;
   justify-content: center;
   width: 1.9rem;
   height: 1.9rem;

@@ -460,7 +460,12 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   }
 
   function handleRowTabsPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-    if (event.pointerType === 'mouse' && event.button !== 0) return
+    // Touch (and pen) scrolls this strip natively — real momentum, correct
+    // axis handling, and the scroll-snap-type on the strip itself (App.css)
+    // settles it on a tab boundary without any help from here. This drag
+    // is only for a mouse, which has no native way to pan a horizontally
+    // scrolling strip that isn't showing its own scrollbar to grab.
+    if (event.pointerType !== 'mouse' || event.button !== 0) return
     const tabs = rowTabsRef.current
     if (!tabs) return
     rowTabDragRef.current = {
