@@ -9,6 +9,7 @@
 
 :root {
   color-scheme: dark;
+  --kana-page-width: 34rem;
   --bg: #0f0e17;
   --surface: #1a1926;
   --surface-2: #242336;
@@ -97,6 +98,12 @@ body {
 @media (max-width: 720px) {
   .app {
     zoom: 1;
+  }
+}
+
+@media (max-width: 719px) {
+  body:has(.hiragana-chart-page) .app {
+    padding-inline: 0.65rem;
   }
 }
 
@@ -15248,7 +15255,7 @@ body:has(.hiragana-chart-page--katakana) {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  width: min(100%, 34rem);
+  width: min(100%, var(--kana-page-width));
   margin-inline: auto;
   padding: 1.25rem 0 1.5rem;
 }
@@ -15327,7 +15334,7 @@ body:has(.hiragana-chart-page--katakana) {
 
 @media (min-width: 720px) {
   .hiragana-chart-page {
-    width: min(100%, 44rem);
+    width: min(100%, var(--kana-page-width));
     padding-top: 1.1rem;
   }
 }
@@ -15974,8 +15981,8 @@ body:has(.beginner-learner--preview-a-dark) {
      ~2.1rem height) the same way the Hiragana/Katakana Chart page's own
      heading does, now that the title box sits flush below them instead of
      overlapping their corner. */
-  width: min(100%, 44rem);
-  padding: 2.1rem 1rem 1rem;
+  width: min(100%, var(--kana-page-width));
+  padding: 1.95rem 0 0.8rem;
   background: var(--preview-page-bg);
 }
 
@@ -16013,8 +16020,8 @@ body:has(.beginner-learner--preview-a-dark) {
 html:has(.beginner-learner--sakura-a.beginner-learner--preview-a),
 body:has(.beginner-learner--sakura-a.beginner-learner--preview-a) {
   background:
-    linear-gradient(135deg, color-mix(in srgb, #ffe3ee 74%, transparent), transparent 42%),
-    linear-gradient(180deg, #fff2f7 0%, #fff8fb 46%, #f6d9e5 100%);
+    linear-gradient(135deg, color-mix(in srgb, #ffe7f1 76%, transparent), transparent 44%),
+    linear-gradient(180deg, #fff5f9 0%, #fffafd 48%, #f8dbe8 100%);
 }
 
 html:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark),
@@ -16024,19 +16031,20 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 
 .beginner-learner.beginner-learner--sakura-a.beginner-learner--preview-a {
   --preview-page-bg:
-    linear-gradient(135deg, color-mix(in srgb, #ffe3ee 74%, transparent), transparent 42%),
-    linear-gradient(180deg, #fff2f7 0%, #fff8fb 46%, #f6d9e5 100%);
-  --preview-card-bg: color-mix(in srgb, #fff8fb 88%, transparent);
-  --preview-top-bg: color-mix(in srgb, #fff8fb 88%, transparent);
-  --preview-badge-bg: color-mix(in srgb, #ffffff 78%, transparent);
-  --preview-tab-bg: color-mix(in srgb, #ffffff 74%, transparent);
-  --preview-dot: color-mix(in srgb, #e86b8a 14%, transparent);
+    linear-gradient(135deg, color-mix(in srgb, #ffe7f1 76%, transparent), transparent 44%),
+    linear-gradient(180deg, #fff5f9 0%, #fffafd 48%, #f8dbe8 100%);
+  --preview-card-bg: color-mix(in srgb, #fff9fc 92%, transparent);
+  --preview-top-bg:
+    linear-gradient(180deg, color-mix(in srgb, #ffffff 94%, transparent), color-mix(in srgb, #ffeaf3 78%, transparent));
+  --preview-badge-bg: color-mix(in srgb, #ffffff 86%, transparent);
+  --preview-tab-bg: color-mix(in srgb, #ffffff 84%, transparent);
+  --preview-dot: color-mix(in srgb, #e86b8a 18%, transparent);
   --preview-text: #241b22;
   --preview-muted: #675b62;
-  --preview-accent: #c94788;
-  --preview-glyph-1: #ee82b7;
-  --preview-glyph-2: #c94788;
-  --preview-shadow: 0 0.8rem 2rem rgba(147, 74, 104, 0.13);
+  --preview-accent: #bf3f80;
+  --preview-glyph-1: #ed78b1;
+  --preview-glyph-2: #c83d83;
+  --preview-shadow: 0 0.8rem 2rem rgba(147, 74, 104, 0.16);
 }
 
 .beginner-learner.beginner-learner--sakura-a.beginner-learner--preview-a-dark {
@@ -16052,6 +16060,17 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   --preview-glyph-1: #ee82b7;
   --preview-glyph-2: #c94788;
   --preview-shadow: 0 14px 30px rgba(8, 8, 18, 0.42);
+}
+
+.beginner-learner--sakura-a.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .preview-a-top,
+.beginner-learner--sakura-a.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .preview-a-read,
+.beginner-learner--sakura-a.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .preview-a-write {
+  border: 1px solid color-mix(in srgb, var(--preview-accent) 12%, transparent);
+}
+
+.beginner-learner--sakura-a.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .preview-a-header-btn,
+.beginner-learner--sakura-a.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .beginner-row-tab {
+  box-shadow: 0 0.3rem 0.9rem rgba(147, 74, 104, 0.12);
 }
 
 /* The back button pinned above this card is otherwise the app-wide default
@@ -16084,6 +16103,77 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 .beginner-learner--preview-a > .app-back-slot,
 .beginner-learner--preview-a > .app-nav-actions > .app-back-slot {
   height: 0;
+}
+
+/* Same shape as the Hiragana/Katakana Chart page's own heading: title on
+   the left, action pills on the right, in one box — with the back button
+   and dark-mode toggle pinned to the page corners above it (exactly like
+   the Chart page's back button), rather than enveloped into the box. */
+.preview-a-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.52rem 0.6rem 0.52rem 0.7rem;
+  border-radius: 22px;
+  background: var(--preview-top-bg);
+  box-shadow: var(--preview-shadow);
+}
+
+.preview-a-title {
+  min-width: 0;
+  color: var(--preview-text);
+  font: 800 1.16rem/1.22 'Outfit', system-ui, sans-serif;
+  padding-block: 0.06rem 0.1rem;
+  /* Still sat a hair low within this centered row even with the padding
+     skew above — a small direct nudge, rather than chasing it further
+     through padding, which only ever moves it indirectly. */
+  transform: translateY(-0.08rem);
+  text-align: center;
+  /* Katakana is a hair longer than Hiragana and this row is already tight
+     at narrow widths with the action pills also on it. */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.preview-a-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.preview-a-header-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 0.22rem;
+  min-width: 3.25rem;
+  height: 1.85rem;
+  padding: 0 0.48rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--preview-badge-bg);
+  box-shadow: 0 2px 6px rgba(94, 62, 130, 0.14);
+  color: var(--preview-text);
+  font: 800 0.55rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  transition: transform 140ms ease;
+}
+
+.preview-a-header-btn span {
+  font-size: 0.68rem;
+  line-height: 1;
+}
+
+.preview-a-header-btn em {
+  font-style: normal;
+}
+
+.preview-a-header-btn:active {
+  transform: scale(0.92);
 }
 
 /* An actual on/off switch — sun, a sliding track+knob, moon — rather than a
@@ -16164,7 +16254,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
    easing a mouse drag to the nearest tab the way native touch scrolling
    already does on its own. */
 .beginner-learner--preview-a .beginner-row-tabs {
-  padding: 0.2rem 0.15rem 0.25rem;
+  padding: 0.12rem 0.15rem 0.14rem;
   cursor: grab;
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 0.15rem;
@@ -16194,7 +16284,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   min-width: 0;
   border: 0;
   border-radius: 14px;
-  padding: 0.48rem 0.4rem;
+  padding: 0.34rem 0.36rem;
   background: var(--preview-tab-bg);
   color: var(--preview-text);
   font-size: 0.72rem;
@@ -16213,8 +16303,8 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 }
 
 .beginner-learner--preview-a .beginner-row-tab.is-active {
-  padding-top: 0.58rem;
-  padding-bottom: 0.58rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
   background: linear-gradient(135deg, var(--preview-glyph-1), var(--preview-glyph-2));
   color: #fff;
   font-size: 0.82rem;
@@ -16232,7 +16322,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
     "read write"
     "nav nav";
   align-items: stretch;
-  gap: 0.65rem;
+  gap: 0.5rem;
   padding: 0;
   border: 0;
   background: transparent;
@@ -16385,6 +16475,10 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   .preview-a-card {
     display: flex;
     flex-direction: column;
+  }
+
+  .beginner-learner.beginner-learner--preview-a {
+    padding-inline: 0;
   }
 
   .preview-a-glyph {

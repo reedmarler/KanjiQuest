@@ -543,7 +543,9 @@ function App() {
         <Suspense fallback={<RouteLoading label={view === 'hiragana-chart' ? 'Hiragana Chart' : 'Katakana Chart'} />}>
           <KanaChart
             script={chartScript}
+            appTheme={appTheme}
             onBack={() => setView('beginner-zone')}
+            onToggleAppTheme={() => setAppTheme((theme) => (theme === 'dark' ? 'light' : 'dark'))}
             onOpenQuiz={() => openBeginnerQuiz(chartScript, view)}
             onSwitchScript={() => setView(view === 'hiragana-chart' ? 'katakana-chart' : 'hiragana-chart')}
             onSelectCharacter={(rowIndex, charIndex) => {

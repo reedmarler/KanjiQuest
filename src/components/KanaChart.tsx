@@ -23,7 +23,9 @@ const CHART_COLUMNS = [1, 2, 3, 4, 5]
 
 interface KanaChartProps {
   script: ChartScript
+  appTheme: 'dark' | 'light'
   onBack: () => void
+  onToggleAppTheme: () => void
   onOpenQuiz: () => void
   /** Jumps to the other script's chart — hiragana's heading offers カナ,
    *  katakana's offers かな. */
@@ -34,13 +36,14 @@ interface KanaChartProps {
   onSelectCharacter: (rowIndex: number, charIndex: number) => void
 }
 
-export function KanaChart({ script, onBack, onOpenQuiz, onSwitchScript, onSelectCharacter }: KanaChartProps) {
+export function KanaChart({ script, appTheme, onBack, onToggleAppTheme, onOpenQuiz, onSwitchScript, onSelectCharacter }: KanaChartProps) {
   const deck = getBeginnerDeck(script)
   const masteryKey = storageKey(MASTERY_STORAGE_PREFIX, script)
   const [mastery, setMastery] = useState<Record<string, number>>(() => loadNumberMap(masteryKey))
   const [showRomaji, setShowRomaji] = useState(true)
   const otherScriptLabel = script === 'hiragana' ? 'カナ' : 'かな'
   const otherScriptName = script === 'hiragana' ? 'Katakana' : 'Hiragana'
+  const headingTitle = script === 'hiragana' ? deck.title : `${deck.title} Chart`
 
   function toggleRow(rowIndex: number) {
     const row = deck.rows[rowIndex]!
@@ -57,9 +60,21 @@ export function KanaChart({ script, onBack, onOpenQuiz, onSwitchScript, onSelect
   return (
     <main className={`hiragana-chart-page hiragana-chart-page--${script}${showRomaji ? '' : ' is-romaji-hidden'}`}>
       <AppBackButton onClick={onBack} aria-label="Back to Beginner Zone" />
+      <button
+        type="button"
+        role="switch"
+        className="preview-a-theme-toggle"
+        onClick={onToggleAppTheme}
+        aria-checked={appTheme === 'dark'}
+        aria-label={`Switch to ${appTheme === 'dark' ? 'light' : 'dark'} mode`}
+        title={`Switch to ${appTheme === 'dark' ? 'light' : 'dark'} mode`}
+      >
+        <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
+        <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
+      </button>
       <section className="hiragana-chart-heading">
         <div className="hiragana-chart-heading-copy">
-          <h1>{deck.title} Chart</h1>
+          <h1>{headingTitle}</h1>
         </div>
         <div className="hiragana-chart-actions">
           <button
