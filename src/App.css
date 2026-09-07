@@ -15622,6 +15622,32 @@ body:has(.hiragana-chart-page--katakana) {
   box-shadow: 0 0.22rem 0.75rem color-mix(in srgb, var(--sakura-deep) 12%, transparent);
 }
 
+/* The practice page's own copy of this heading/button pair needs the same
+   light treatment, but its light/dark state is the page's own local toggle
+   (previewDark, tracked by --preview-a-dark), not this :root[data-app-theme]
+   attribute — see the matching note on the back button above. Without this
+   the heading stayed dark-mode-dark whenever the two were set differently,
+   same bug, same reason. Gating on .beginner-learner--preview-a rather than
+   the --sakura-a-only variant covers the katakana practice page too, since
+   both already read --kana-chart-accent for the color that differs between
+   them. */
+.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .hiragana-chart-heading h1 {
+  color: color-mix(in srgb, var(--sakura-deep) 72%, var(--hiragana-ink));
+}
+
+.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .hiragana-chart-heading {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--kana-chart-accent) 20%, transparent), transparent 58%),
+    color-mix(in srgb, #fff8fb 88%, transparent);
+  box-shadow: 0 0.8rem 2rem rgba(147, 74, 104, 0.13);
+}
+
+.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .hiragana-chart-quiz-button {
+  background: color-mix(in srgb, #ffffff 78%, transparent);
+  color: color-mix(in srgb, var(--sakura-deep) 70%, var(--hiragana-ink));
+  box-shadow: 0 0.22rem 0.75rem color-mix(in srgb, var(--sakura-deep) 12%, transparent);
+}
+
 :root[data-app-theme='light'] .hiragana-chart-row-status {
   border-color: color-mix(in srgb, var(--hiragana-muted) 46%, transparent);
 }
@@ -16392,6 +16418,14 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   color: #fff;
   font-size: 0.82rem;
   box-shadow: 0 6px 16px rgba(214, 38, 111, 0.35);
+}
+
+/* The romaji <small> sets its own color (var(--preview-muted)) regardless
+   of .is-active, which otherwise leaves it stuck at that muted tone —
+   low-contrast dark text on this tab's own bright gradient fill — instead
+   of following the rest of the tab to white. */
+.beginner-learner--preview-a .beginner-row-tab.is-active small {
+  color: #fff;
 }
 
 .beginner-learner--preview-a .beginner-row-tab.is-done {
