@@ -61,7 +61,6 @@ const HERO_SPEECH_VOLUMES = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] 
 type HeroSpeechVolume = typeof HERO_SPEECH_VOLUMES[number]
 type StoryPlaybackMode = 'repeat' | 'shuffle'
 type HeroSettingsMode = 'none' | 'picking' | 'story' | 'grammar' | 'star'
-type AppTheme = 'dark' | 'light'
 
 // What the top-right toggle says once a specific mode is running, and what it
 // switches off. Off, and while a mode is still being picked, it just reads
@@ -357,8 +356,6 @@ interface DashboardProps {
   onOpenAdditionalTools: () => void
   onOpenStudyTools: () => void
   onOpenFavoriteWords: () => void
-  appTheme: AppTheme
-  onToggleAppTheme: () => void
   questProgress: QuestProgress
 }
 
@@ -370,8 +367,6 @@ export function Dashboard({
   onOpenAdditionalTools,
   onOpenStudyTools,
   onOpenFavoriteWords,
-  appTheme,
-  onToggleAppTheme,
   questProgress,
   wrongPool,
   progress,
@@ -644,15 +639,6 @@ export function Dashboard({
 
   return (
     <div className="dashboard">
-      <button
-        type="button"
-        className="dashboard-theme-toggle"
-        onClick={onToggleAppTheme}
-        aria-label={`Switch to ${appTheme === 'dark' ? 'light' : 'dark'} mode`}
-        title={`Switch to ${appTheme === 'dark' ? 'light' : 'dark'} mode`}
-      >
-        <span aria-hidden="true">{appTheme === 'dark' ? '☀️' : '🌙'}</span>
-      </button>
       <div className="control-story-topbar">
         {storyMode && (
           <div className="control-story-quick-select" ref={storyQuickSelectRef}>

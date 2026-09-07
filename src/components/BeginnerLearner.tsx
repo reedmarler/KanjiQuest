@@ -30,10 +30,9 @@ const ROW_TAB_DRAG_THRESHOLD_PX = 12
 /** The app's normal <meta name="theme-color">, matching --bg in App.css —
  *  restored whenever the kana card (below) isn't on screen. */
 const DEFAULT_THEME_COLOR = '#0f0e17'
-/** Middle stop of the kana card's own light/dark gradients in App.css
- *  (--preview-page-bg), used as a single representative color since Safari's
- *  status-bar/toolbar tint only takes a flat color, not a gradient. */
-const ALPHA_PREVIEW_THEME_COLOR_LIGHT = '#fff7fa'
+/** Middle stop of the kana card's own gradient in App.css (--preview-page-bg),
+ *  used as a single representative color since Safari's status-bar/toolbar
+ *  tint only takes a flat color, not a gradient. */
 const ALPHA_PREVIEW_THEME_COLOR_DARK = '#1c2036'
 
 const WORD_PICTURE: Record<string, string> = {
@@ -328,11 +327,9 @@ interface BeginnerLearnerProps {
   onSwitchScript?: (rowIndex: number, charIndex: number) => void
   /** Starts on the row quiz instead of character practice. */
   startWithQuiz?: boolean
-  /** Initial kana preview palette. The in-card toggle can still change it. */
-  defaultPreviewDark?: boolean
 }
 
-export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex = 0, initialCharIndex = 0, onOpenChart, onOpenQuiz, onSwitchScript, startWithQuiz = false, defaultPreviewDark = true }: BeginnerLearnerProps) {
+export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex = 0, initialCharIndex = 0, onOpenChart, onOpenQuiz, onSwitchScript, startWithQuiz = false }: BeginnerLearnerProps) {
   const deck = useMemo(() => getBeginnerDeck(script), [script])
   const startRowIndex = Math.min(Math.max(initialRowIndex, 0), deck.rows.length - 1)
   const [rowIndex, setRowIndex] = useState(startRowIndex)
@@ -381,22 +378,15 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   // character at a time — あ only for now, to evaluate before it spreads to
   // the rest of the row. See the "Sakura preview" block in App.css.
   const isSakuraPreview = script === 'hiragana' && card?.char === 'あ'
-  // The badge that would hold a future streak counter doubles, for now, as a
-  // dark/light toggle for just this preview card's own palette — it does not
-  // touch the rest of the app's (permanently dark) theme.
-  const [previewDark, setPreviewDark] = useState(defaultPreviewDark)
 
   // Mobile Safari tints its status bar and bottom toolbar from the page's
   // <meta name="theme-color">, not from what the page actually paints there
-  // — without updating it, those bars stay the app's default dark color (or
-  // white) behind this card's pink/purple gradient instead of blending into
-  // it. Split into two effects so toggling previewDark just updates the
-  // color in place, while leaving the preview (isKanaPreview turning false)
-  // is the only thing that restores the app default.
+  // — without updating it, those bars stay the app's default dark color
+  // behind this card's pink/purple gradient instead of blending into it.
   useEffect(() => {
     if (!isKanaPreview) return
-    document.getElementById('theme-color-meta')?.setAttribute('content', previewDark ? ALPHA_PREVIEW_THEME_COLOR_DARK : ALPHA_PREVIEW_THEME_COLOR_LIGHT)
-  }, [isKanaPreview, previewDark])
+    document.getElementById('theme-color-meta')?.setAttribute('content', ALPHA_PREVIEW_THEME_COLOR_DARK)
+  }, [isKanaPreview])
 
   useEffect(() => {
     if (!isKanaPreview) return
@@ -686,7 +676,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   useEffect(() => stopSpeaking, [])
 
   return (
-    <div className={`beginner-learner beginner-learner--${script}${isKanaPreview ? ' beginner-learner--preview-a' : ''}${isKanaPreview && previewDark ? ' beginner-learner--preview-a-dark' : ''}${isSakuraPreview ? ' beginner-learner--sakura-a' : ''}`}>
+    <div className={`beginner-learner beginner-learner--${script}${isKanaPreview ? ' beginner-learner--preview-a beginner-learner--preview-a-dark' : ''}${isSakuraPreview ? ' beginner-learner--sakura-a' : ''}`}>
       {isKanaPreview ? (
         <>
           {/* Pinned to the page corner, exactly like every other back/KQ
@@ -696,21 +686,6 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
             <AppBackButton onClick={onBack} aria-label="Back" />
             <AppDashboardButton onClick={onDashboard} />
           </div>
-          {/* Pinned to the opposite corner, at the back button's own height. */}
-          <button
-            type="button"
-            role="switch"
-            className="preview-a-theme-toggle"
-            onClick={() => setPreviewDark((value) => !value)}
-            aria-checked={previewDark}
-            aria-label={previewDark ? 'Turn off dark mode for this preview' : 'Turn on dark mode for this preview'}
-          >
-            {/* --sun/--moon name the animation slot (which one is on top
-                when unchecked/checked), not the glyph in it — swapped so
-                the moon shows in light mode and the sun in dark mode. */}
-            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
-            <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
-          </button>
           {/* The exact same box as the Hiragana/Katakana Chart page's own
               heading — same classes, same layout — so the two pages read as
               one standardized header. Chart takes EN's spot since there's

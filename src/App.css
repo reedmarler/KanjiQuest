@@ -42,57 +42,6 @@
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/*
- * Light mode, app-wide. Until now this attribute only did anything on the
- * Hiragana/Katakana Chart and practice pages (their own bespoke --kana-chart,
- * --preview and --hiragana tokens, untouched here) — everywhere else just
- * read the dark values above regardless of the toggle. These six are the
- * scaffolding every other screen is actually built from, so overriding them
- * once here is what makes the rest of the app follow the toggle at all.
- *
- * Values are the dark set's own hue/saturation with lightness flipped
- * (L' = 100% - L), not a new palette — literally this theme run backwards,
- * the same way --bg < --surface < --surface-2 < --border climbs toward the
- * card foreground in the dark, and now descends from the page canvas toward
- * it in the light. --text/--text-muted invert the same way.
- *
- * The Gen 3 trio + sakura below keep their identity — same hue, same
- * "this is kyogre blue / sakura pink" read in either theme — but most of
- * them (base and *-light alike) are also used as plain text/icon color
- * directly against --surface in dozens of spots (badges, labels, borders),
- * and at dark-mode brightness they measure as low as 1.3:1 against this
- * new light --surface (WCAG wants 4.5:1) — effectively invisible. Rather
- * than a flat lightness flip, which drags a saturated hue like sakura's
- * pink toward crimson, each is folded toward --text instead (base folded
- * further than *-light, so a base→light gradient like the Chart page's
- * Quiz button still reads as a gradient instead of collapsing to one flat
- * tone) — enough to read clearly, while staying recognizably the same
- * color family. --danger gets the same treatment for the same reason.
- * The *-deep tones are already this dark and are left alone.
- */
-:root[data-app-theme='light'] {
-  color-scheme: light;
-  --bg: #eeecf5;
-  --surface: #dad9e6;
-  --surface-2: #cac9dc;
-  --border: #bebdd2;
-  --text: #17151f;
-  --text-muted: #414358;
-  --shadow: 0 8px 32px rgba(60, 40, 90, 0.16);
-
-  --kyogre: #284264;
-  --kyogre-light: #2f6690;
-  --rayquaza: #27513d;
-  --rayquaza-light: #2b7a4c;
-  --groudon: #6e252d;
-  --groudon-light: #b83636;
-  --amber: #675126;
-  --amber-light: #8f6414;
-  --sakura: #7f4a5c;
-  --sakura-light: #c2436f;
-  --danger: #a8425a;
-}
-
 * {
   box-sizing: border-box;
   margin: 0;
@@ -266,41 +215,6 @@ body:has(.dashboard) {
   position: relative;
   /* Desktop: title shares a row with the absolute story toggle */
   padding-top: 0.2rem;
-}
-
-.dashboard-theme-toggle {
-  position: absolute;
-  top: 0.45rem;
-  left: 0;
-  z-index: 13;
-  display: grid;
-  place-items: center;
-  width: 1.7rem;
-  height: 1.7rem;
-  padding: 0;
-  border: 1px solid color-mix(in srgb, var(--kyogre-light) 34%, var(--border));
-  border-radius: 0.55rem;
-  background: color-mix(in srgb, var(--surface-2) 76%, transparent);
-  color: var(--text-muted);
-  font: 700 0.8rem/1 'Outfit', system-ui, sans-serif;
-  cursor: pointer;
-  box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--bg) 20%, transparent);
-  transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 100ms ease;
-}
-
-.dashboard-theme-toggle:hover {
-  border-color: color-mix(in srgb, var(--kyogre-light) 62%, var(--border));
-  background: color-mix(in srgb, var(--kyogre) 10%, var(--surface-2));
-  color: var(--text);
-}
-
-.dashboard-theme-toggle:active {
-  transform: scale(0.96);
-}
-
-.dashboard-theme-toggle:focus-visible {
-  outline: 2px solid var(--kyogre-light);
-  outline-offset: 2px;
 }
 
 .hero {
@@ -15259,12 +15173,6 @@ button.counter-example {
    not a navigation control of its own.
    --------------------------------------------------------------------------- */
 
-:root[data-app-theme='light'] body:has(.hiragana-chart-page) {
-  background:
-    linear-gradient(135deg, color-mix(in srgb, #ffcfe3 80%, transparent), transparent 42%),
-    linear-gradient(180deg, #ffe0ee 0%, #fff2f8 46%, #f0b8d2 100%);
-}
-
 :root:has(.hiragana-chart-page--hiragana),
 body:has(.hiragana-chart-page--hiragana) {
   background: linear-gradient(180deg, #211b36 0%, #191729 64%, #11131f 100%);
@@ -15273,12 +15181,6 @@ body:has(.hiragana-chart-page--hiragana) {
 :root:has(.hiragana-chart-page--katakana),
 body:has(.hiragana-chart-page--katakana) {
   background: linear-gradient(180deg, #12243a 0%, #151d31 62%, #101624 100%);
-}
-
-:root[data-app-theme='light']:has(.hiragana-chart-page--hiragana) {
-  background:
-    linear-gradient(135deg, color-mix(in srgb, #ffcfe3 80%, transparent), transparent 42%),
-    linear-gradient(180deg, #ffe0ee 0%, #fff2f8 46%, #f0b8d2 100%);
 }
 
 /* Shared with .beginner-learner--hiragana/--katakana so the practice pages'
@@ -15643,137 +15545,6 @@ body:has(.hiragana-chart-page--katakana) {
   aspect-ratio: 1;
   background: transparent;
   box-shadow: inset -1px 0 var(--kana-chart-grid-line), inset 0 -1px var(--kana-chart-grid-line);
-}
-
-:root[data-app-theme='light'] .hiragana-chart-heading h1 {
-  color: color-mix(in srgb, var(--sakura-deep) 72%, var(--hiragana-ink));
-}
-
-:root[data-app-theme='light'] .hiragana-chart-heading p {
-  color: var(--hiragana-muted);
-}
-
-/* Mixed from --kana-chart-accent-soft (not a fixed pink hex) so the
-   katakana chart still reads as its own kyogre blue here instead of
-   inheriting hiragana's cherry-blossom tint. */
-:root[data-app-theme='light'] .hiragana-chart-page {
-  --kana-chart-board: color-mix(in srgb, var(--hiragana-paper) 92%, var(--kana-chart-accent-soft) 8%);
-  --kana-chart-row: color-mix(in srgb, var(--hiragana-paper) 96%, var(--kana-chart-accent-soft) 4%);
-  --kana-chart-cell: color-mix(in srgb, var(--hiragana-paper) 88%, var(--kana-chart-accent-soft) 12%);
-  --kana-chart-grid-line: color-mix(in srgb, var(--sakura-deep) 12%, transparent);
-}
-
-:root[data-app-theme='light'] .hiragana-chart-heading {
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--kana-chart-accent) 20%, transparent), transparent 58%),
-    color-mix(in srgb, #fff8fb 88%, transparent);
-  box-shadow: 0 0.8rem 2rem rgba(147, 74, 104, 0.13);
-}
-
-:root[data-app-theme='light'] .hiragana-chart-quiz-button {
-  background: color-mix(in srgb, #ffffff 78%, transparent);
-  color: color-mix(in srgb, var(--sakura-deep) 70%, var(--hiragana-ink));
-  box-shadow: 0 0.22rem 0.75rem color-mix(in srgb, var(--sakura-deep) 12%, transparent);
-}
-
-/* The practice page's own copy of this heading/button pair needs the same
-   light treatment, but its light/dark state is the page's own local toggle
-   (previewDark, tracked by --preview-a-dark), not this :root[data-app-theme]
-   attribute — see the matching note on the back button above. Without this
-   the heading stayed dark-mode-dark whenever the two were set differently,
-   same bug, same reason. Gating on .beginner-learner--preview-a rather than
-   the --sakura-a-only variant covers the katakana practice page too, since
-   both already read --kana-chart-accent for the color that differs between
-   them. */
-.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .hiragana-chart-heading h1 {
-  color: color-mix(in srgb, var(--sakura-deep) 72%, var(--hiragana-ink));
-}
-
-.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .hiragana-chart-heading {
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--kana-chart-accent) 20%, transparent), transparent 58%),
-    color-mix(in srgb, #fff8fb 88%, transparent);
-  box-shadow: 0 0.8rem 2rem rgba(147, 74, 104, 0.13);
-}
-
-.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .hiragana-chart-quiz-button {
-  background: color-mix(in srgb, #ffffff 78%, transparent);
-  color: color-mix(in srgb, var(--sakura-deep) 70%, var(--hiragana-ink));
-  box-shadow: 0 0.22rem 0.75rem color-mix(in srgb, var(--sakura-deep) 12%, transparent);
-}
-
-:root[data-app-theme='light'] .hiragana-chart-row-status {
-  border-color: color-mix(in srgb, var(--hiragana-muted) 46%, transparent);
-}
-
-:root[data-app-theme='light'] .hiragana-chart-row-status.is-studied {
-  border-color: var(--kana-chart-complete-deep);
-  background: linear-gradient(135deg, var(--kana-chart-complete-deep), var(--kana-chart-complete), var(--kana-chart-complete-light));
-}
-
-:root[data-app-theme='light'] .hiragana-chart-cell {
-  background: transparent;
-  color: var(--hiragana-ink);
-  box-shadow: none;
-  box-shadow: inset -1px 0 var(--kana-chart-grid-line), inset 0 -1px var(--kana-chart-grid-line);
-}
-
-:root[data-app-theme='light'] .hiragana-chart-cell:hover,
-:root[data-app-theme='light'] .hiragana-chart-cell:focus-visible {
-  border-color: color-mix(in srgb, var(--sakura) 52%, var(--hiragana-line));
-  background: color-mix(in srgb, var(--hiragana-paper) 74%, var(--sakura-light) 26%);
-  box-shadow: 0 0.2rem 0.8rem color-mix(in srgb, var(--sakura-deep) 13%, transparent);
-}
-
-:root[data-app-theme='light'] .hiragana-chart-cell-empty {
-  background: transparent;
-}
-
-:root[data-app-theme='light'] .hiragana-chart-cell-romaji {
-  color: var(--hiragana-muted);
-}
-
-/* Back and KQ both fall back to the app-wide default pill otherwise — a
-   dark chip that reads fine against this app's normal dark surface, but
-   sits as a jarring dark square on this page's own light pastel
-   background. Matching .hiragana-chart-quiz-button's own light override
-   just above (same paper-white fill, same sakura-deep ink) instead of
-   mixing the accent into the (still-dark) --surface here.
-
-   Shared with the practice page's own あ card (.beginner-learner--sakura-a),
-   which hits the exact same problem for the exact same reason — but that
-   page's light/dark look is its own local toggle (previewDark in
-   BeginnerLearner.tsx, tracked by the presence of --preview-a-dark), not
-   this :root[data-app-theme] attribute the Chart page uses, so it needs
-   its own gate rather than sharing the Chart page's selector. */
-:root[data-app-theme='light'] .hiragana-chart-page--hiragana .app-back-button,
-.beginner-learner--sakura-a:not(.beginner-learner--preview-a-dark) .app-back-button,
-:root[data-app-theme='light'] .hiragana-chart-page--hiragana .app-dashboard-button,
-.beginner-learner--sakura-a:not(.beginner-learner--preview-a-dark) .app-dashboard-button {
-  border-color: color-mix(in srgb, var(--sakura-deep) 45%, transparent);
-  background: color-mix(in srgb, #ffffff 78%, transparent);
-  box-shadow: 0 0.22rem 0.75rem color-mix(in srgb, var(--sakura-deep) 12%, transparent);
-}
-
-:root[data-app-theme='light'] .hiragana-chart-page--hiragana .app-back-button,
-.beginner-learner--sakura-a:not(.beginner-learner--preview-a-dark) .app-back-button {
-  color: color-mix(in srgb, var(--sakura-deep) 70%, var(--hiragana-ink));
-}
-
-@media (hover: hover) {
-  :root[data-app-theme='light'] .hiragana-chart-page--hiragana .app-back-button:hover,
-  .beginner-learner--sakura-a:not(.beginner-learner--preview-a-dark) .app-back-button:hover {
-    border-color: var(--sakura-deep);
-    color: #fff;
-    background: linear-gradient(135deg, var(--sakura-deep), var(--sakura));
-    box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--sakura-deep) 22%, transparent);
-  }
-
-  :root[data-app-theme='light'] .hiragana-chart-page--hiragana .app-dashboard-button:hover,
-  .beginner-learner--sakura-a:not(.beginner-learner--preview-a-dark) .app-dashboard-button:hover {
-    border-color: var(--sakura-deep);
-    background: color-mix(in srgb, var(--sakura) 18%, #ffffff);
-  }
 }
 
 .hiragana-chart-cell-char {
@@ -16337,68 +16108,6 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 
 .preview-a-header-btn:active {
   transform: scale(0.92);
-}
-
-/* An actual on/off switch — sun, a sliding track+knob, moon — rather than a
-   single icon that swaps, so it reads as a toggle at a glance. */
-/* A single coin-like badge that morphs between sun and moon, rather than
-   the old sun+track+moon row (three small elements competing for the same
-   tiny space). Both icons are stacked in the same spot and cross-fade with
-   a quarter-turn, so the swap itself reads as the sun/moon rotating out of
-   and into view rather than one icon merely fading into another. */
-.preview-a-theme-toggle {
-  position: absolute;
-  top: var(--app-nav-top);
-  right: var(--app-nav-left);
-  z-index: 20;
-  display: grid;
-  place-items: center;
-  width: 2.1rem;
-  height: 2.1rem;
-  border: 0;
-  border-radius: 50%;
-  /* Sky blue rather than a warm yellow/orange — the sun emoji is itself
-     yellow-orange, and it all but disappeared against a same-toned badge. */
-  background: linear-gradient(145deg, #bfe6ff, #6bb6f0);
-  box-shadow: 0 3px 10px rgba(40, 120, 200, 0.35), inset 0 -2px 3px rgba(255, 255, 255, 0.6);
-  cursor: pointer;
-  transition: background 320ms ease, box-shadow 320ms ease, transform 140ms ease;
-}
-
-.preview-a-theme-toggle:active {
-  transform: scale(0.92);
-}
-
-.preview-a-theme-toggle-icon {
-  position: absolute;
-  font-size: 1.15rem;
-  line-height: 1;
-  transition: opacity 240ms ease, transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.preview-a-theme-toggle-icon--sun {
-  opacity: 1;
-  transform: rotate(0deg) scale(1);
-}
-
-.preview-a-theme-toggle-icon--moon {
-  opacity: 0;
-  transform: rotate(85deg) scale(0.4);
-}
-
-.preview-a-theme-toggle[aria-checked="true"] {
-  background: linear-gradient(145deg, #3d3f72, #1c1d3a);
-  box-shadow: 0 3px 12px rgba(40, 30, 90, 0.55), inset 0 -2px 3px rgba(255, 255, 255, 0.1);
-}
-
-.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-icon--sun {
-  opacity: 0;
-  transform: rotate(-85deg) scale(0.4);
-}
-
-.preview-a-theme-toggle[aria-checked="true"] .preview-a-theme-toggle-icon--moon {
-  opacity: 1;
-  transform: rotate(0deg) scale(1);
 }
 
 /* 6 tabs sized to the strip's own visible width, so wherever a scroll

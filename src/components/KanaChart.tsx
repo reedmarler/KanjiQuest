@@ -23,10 +23,8 @@ const CHART_COLUMNS = [1, 2, 3, 4, 5]
 
 interface KanaChartProps {
   script: ChartScript
-  appTheme: 'dark' | 'light'
   onBack: () => void
   onDashboard: () => void
-  onToggleAppTheme: () => void
   onOpenQuiz: () => void
   /** Jumps to the other script's chart — hiragana's heading offers カナ,
    *  katakana's offers かな. */
@@ -37,7 +35,7 @@ interface KanaChartProps {
   onSelectCharacter: (rowIndex: number, charIndex: number) => void
 }
 
-export function KanaChart({ script, appTheme, onBack, onDashboard, onToggleAppTheme, onOpenQuiz, onSwitchScript, onSelectCharacter }: KanaChartProps) {
+export function KanaChart({ script, onBack, onDashboard, onOpenQuiz, onSwitchScript, onSelectCharacter }: KanaChartProps) {
   const deck = getBeginnerDeck(script)
   const masteryKey = storageKey(MASTERY_STORAGE_PREFIX, script)
   const [mastery, setMastery] = useState<Record<string, number>>(() => loadNumberMap(masteryKey))
@@ -64,18 +62,6 @@ export function KanaChart({ script, appTheme, onBack, onDashboard, onToggleAppTh
         <AppBackButton onClick={onBack} aria-label="Back to Beginner Zone" />
         <AppDashboardButton onClick={onDashboard} />
       </div>
-      <button
-        type="button"
-        role="switch"
-        className="preview-a-theme-toggle"
-        onClick={onToggleAppTheme}
-        aria-checked={appTheme === 'dark'}
-        aria-label={`Switch to ${appTheme === 'dark' ? 'light' : 'dark'} mode`}
-        title={`Switch to ${appTheme === 'dark' ? 'light' : 'dark'} mode`}
-      >
-        <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--sun" aria-hidden="true">&#127769;</span>
-        <span className="preview-a-theme-toggle-icon preview-a-theme-toggle-icon--moon" aria-hidden="true">&#9728;&#65039;</span>
-      </button>
       <section className="hiragana-chart-heading">
         <div className="hiragana-chart-heading-copy">
           <h1>{headingTitle}</h1>
