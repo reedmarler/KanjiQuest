@@ -42,6 +42,57 @@
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
+/*
+ * Light mode, app-wide. Until now this attribute only did anything on the
+ * Hiragana/Katakana Chart and practice pages (their own bespoke --kana-chart,
+ * --preview and --hiragana tokens, untouched here) — everywhere else just
+ * read the dark values above regardless of the toggle. These six are the
+ * scaffolding every other screen is actually built from, so overriding them
+ * once here is what makes the rest of the app follow the toggle at all.
+ *
+ * Values are the dark set's own hue/saturation with lightness flipped
+ * (L' = 100% - L), not a new palette — literally this theme run backwards,
+ * the same way --bg < --surface < --surface-2 < --border climbs toward the
+ * card foreground in the dark, and now descends from the page canvas toward
+ * it in the light. --text/--text-muted invert the same way.
+ *
+ * The Gen 3 trio + sakura below keep their identity — same hue, same
+ * "this is kyogre blue / sakura pink" read in either theme — but most of
+ * them (base and *-light alike) are also used as plain text/icon color
+ * directly against --surface in dozens of spots (badges, labels, borders),
+ * and at dark-mode brightness they measure as low as 1.3:1 against this
+ * new light --surface (WCAG wants 4.5:1) — effectively invisible. Rather
+ * than a flat lightness flip, which drags a saturated hue like sakura's
+ * pink toward crimson, each is folded toward --text instead (base folded
+ * further than *-light, so a base→light gradient like the Chart page's
+ * Quiz button still reads as a gradient instead of collapsing to one flat
+ * tone) — enough to read clearly, while staying recognizably the same
+ * color family. --danger gets the same treatment for the same reason.
+ * The *-deep tones are already this dark and are left alone.
+ */
+:root[data-app-theme='light'] {
+  color-scheme: light;
+  --bg: #eeecf5;
+  --surface: #dad9e6;
+  --surface-2: #cac9dc;
+  --border: #bebdd2;
+  --text: #17151f;
+  --text-muted: #414358;
+  --shadow: 0 8px 32px rgba(60, 40, 90, 0.16);
+
+  --kyogre: #284264;
+  --kyogre-light: #2f6690;
+  --rayquaza: #27513d;
+  --rayquaza-light: #2b7a4c;
+  --groudon: #6e252d;
+  --groudon-light: #b83636;
+  --amber: #675126;
+  --amber-light: #8f6414;
+  --sakura: #7f4a5c;
+  --sakura-light: #c2436f;
+  --danger: #a8425a;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
