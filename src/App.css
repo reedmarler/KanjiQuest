@@ -11109,6 +11109,17 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gold) 8%, transparent);
 }
 
+/* Kanji Lab's own identity mark. .kanji-armory-mark defaults to gold since
+   Sentence Builder's lab reuses the same class for its own 文 mark; scoping
+   to .kanji-lab gives kanji study screens --sumi instead, without touching
+   that shared default. */
+.kanji-lab:not(.focused-vocab-practice-standard) .kanji-armory-mark {
+  border-color: color-mix(in srgb, var(--sumi) 55%, var(--border));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--sumi) 22%, var(--surface-2)), var(--surface-2));
+  color: var(--sumi-light) !important;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--sumi) 8%, transparent);
+}
+
 /* The generic heading span rule is more specific than the mark class. Keep
    this square as a grid so the glyph is centered on both axes. */
 .kanji-armory-navigation .kanji-path-heading > .kanji-armory-mark {
