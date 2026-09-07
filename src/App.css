@@ -16685,8 +16685,19 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   gap: 0.7rem;
   padding: clamp(0.75rem, 2vh, 1rem) 1.75rem 1rem;
   background:
-    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--kyogre) 18%, transparent), transparent 12rem),
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--kana-chart-accent, var(--kyogre)) 18%, transparent), transparent 12rem),
     var(--surface);
+}
+
+.beginner-learner--hiragana .beginner-listening-check,
+.beginner-learner--katakana .beginner-listening-check,
+.beginner-learner--hiragana .beginner-word-writing-card,
+.beginner-learner--katakana .beginner-word-writing-card {
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 28%, var(--border));
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--kana-chart-accent) 20%, transparent), transparent 13rem),
+    color-mix(in srgb, var(--kana-chart-board) 78%, var(--surface));
+  box-shadow: var(--kana-chart-shadow);
 }
 
 .beginner-listening-check-label {
@@ -16694,7 +16705,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   top: 0.72rem;
   right: 0.85rem;
   padding: 0.25rem 0.45rem;
-  border: 1px solid color-mix(in srgb, var(--kyogre-light) 20%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--kana-chart-accent-soft, var(--kyogre-light)) 20%, var(--border));
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface-2) 72%, transparent);
   color: var(--text-muted);
@@ -16715,11 +16726,11 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.7rem;
   width: min(100%, 24rem);
-  margin-block: 0.1rem 0;
+  margin-block: 0.55rem 0;
 }
 
 .beginner-listening-options button {
-  min-height: clamp(4.25rem, 13dvh, 5.35rem);
+  min-height: clamp(5.8rem, 17dvh, 7.1rem);
   padding: 0.62rem 0.55rem;
   border: 1px solid var(--border);
   border-radius: 7px;
@@ -16732,7 +16743,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 
 .beginner-listening-options button:hover,
 .beginner-listening-options button:focus-visible {
-  border-color: var(--kyogre-light);
+  border-color: var(--kana-chart-accent-soft, var(--kyogre-light));
 }
 
 .beginner-listening-options button:active {
@@ -16742,6 +16753,25 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 .beginner-listening-options button.is-correct {
   border-color: var(--rayquaza-light);
   background: color-mix(in srgb, var(--rayquaza) 14%, var(--surface-2));
+}
+
+.beginner-learner--hiragana .beginner-listening-options button,
+.beginner-learner--katakana .beginner-listening-options button {
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 22%, var(--border));
+  background: color-mix(in srgb, var(--kana-chart-cell) 82%, var(--surface-2));
+}
+
+.beginner-learner--hiragana .beginner-listening-options button.is-selected,
+.beginner-learner--katakana .beginner-listening-options button.is-selected {
+  border-color: var(--kana-chart-accent-soft);
+  background: color-mix(in srgb, var(--kana-chart-hover-bg) 82%, var(--surface-2));
+  box-shadow: 0 0 0 0.18rem color-mix(in srgb, var(--kana-chart-accent) 14%, transparent);
+}
+
+.beginner-learner--hiragana .beginner-listening-options button.is-correct,
+.beginner-learner--katakana .beginner-listening-options button.is-correct {
+  border-color: var(--kana-chart-complete-light);
+  background: color-mix(in srgb, var(--kana-chart-complete-deep) 22%, var(--surface-2));
 }
 
 .beginner-listening-options button.is-wrong {
@@ -16767,7 +16797,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
    listening check just answered, not a hint offered up front. */
 .beginner-listening-option-meaning {
   display: block;
-  margin-top: 0.35rem;
+  margin-top: 0.55rem;
   color: var(--text-muted);
   font: 600 0.52rem/1.2 'Outfit', system-ui, sans-serif;
   text-transform: capitalize;
@@ -16821,6 +16851,14 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--kyogre) 14%, transparent), transparent 60%),
     color-mix(in srgb, var(--surface-2) 78%, transparent);
+}
+
+.beginner-learner--hiragana .beginner-word-writing-card .beginner-top-actions--tight,
+.beginner-learner--katakana .beginner-word-writing-card .beginner-top-actions--tight {
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 24%, var(--border));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--kana-chart-accent) 16%, transparent), transparent 60%),
+    color-mix(in srgb, var(--kana-chart-cell) 82%, transparent);
 }
 
 .beginner-word-writing-card .beginner-write-section {
@@ -17222,7 +17260,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 }
 
 .beginner-quiz-example .stroke-order-animation.is-hero .stroke-order-char {
-  width: clamp(3.6rem, 14vw, 5.5rem);
+  width: clamp(4.15rem, 16vw, 6.25rem);
 }
 
 @media (min-width: 720px) {
@@ -17231,7 +17269,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   }
 
   .beginner-word-writing-card .beginner-quiz-example .stroke-order-animation.is-hero .stroke-order-char {
-    width: clamp(5.8rem, 9.5vw, 8rem);
+    width: clamp(6.6rem, 10.5vw, 8.8rem);
   }
 }
 
@@ -17253,7 +17291,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 }
 
 .beginner-quiz-example .beginner-static-word-example span {
-  width: clamp(3.6rem, 14vw, 5.5rem);
+  width: clamp(4.15rem, 16vw, 6.25rem);
 }
 
 @media (min-width: 720px) {
@@ -17262,7 +17300,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   }
 
   .beginner-word-writing-card .beginner-quiz-example .beginner-static-word-example span {
-    width: clamp(5.8rem, 9.5vw, 8rem);
+    width: clamp(6.6rem, 10.5vw, 8.8rem);
   }
 }
 
@@ -17342,7 +17380,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 
 .trace-canvas-overlay {
   position: absolute;
-  top: 1rem;
+  top: 1.8rem;
   left: 50%;
   z-index: 1;
   display: flex;
@@ -17441,16 +17479,17 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   .beginner-listening-options {
     gap: 0.5rem;
     width: 100%;
-    margin-block: 0.1rem auto;
+    margin-block: 0.55rem 0.35rem;
   }
 
   .beginner-listening-options button {
-    min-height: clamp(3.8rem, 12dvh, 4.8rem);
+    min-height: clamp(5.25rem, 15dvh, 6.2rem);
     padding: 0.5rem 0.45rem;
   }
 
   .beginner-listening-continue {
     width: 100%;
+    margin-top: 0;
   }
 
   /* The flashcard: the example and the box you copy it into, on one screen.
@@ -17495,6 +17534,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   .beginner-word-writing-card .beginner-top-actions--tight {
     gap: 0.3rem;
     padding: 0.35rem;
+    transform: translateY(-0.12rem);
   }
 
   .beginner-word-writing-card .beginner-speak-btn--quiz {
@@ -17512,7 +17552,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 
   .beginner-word-writing-card .stroke-order-animation.is-hero .stroke-order-char,
   .beginner-word-writing-card .beginner-static-word-example span {
-    width: min(21vw, 4.3rem);
+    width: min(23vw, 4.9rem);
   }
 
   .beginner-word-writing-card .trace-canvas-stack {
@@ -17527,6 +17567,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
      panel this narrow it ran underneath the button, so it takes the left of
      the strip and leaves the corner to Clear. */
   .trace-canvas-overlay {
+    top: 1.55rem;
     justify-content: flex-start;
     padding-inline: 0.7rem 5.2rem;
   }
