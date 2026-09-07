@@ -689,17 +689,13 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
     <div className={`beginner-learner beginner-learner--${script}${isKanaPreview ? ' beginner-learner--preview-a' : ''}${isKanaPreview && previewDark ? ' beginner-learner--preview-a-dark' : ''}${isSakuraPreview ? ' beginner-learner--sakura-a' : ''}`}>
       {isKanaPreview ? (
         <>
-          {/* Pinned to the page corner, exactly like every other back
-              button in the app (including the Hiragana/Katakana Chart
+          {/* Pinned to the page corner, exactly like every other back/KQ
+              pair in the app (including the Hiragana/Katakana Chart
               page's) — not enveloped into the title box below. */}
-          {startWithQuiz ? (
-            <div className="app-nav-actions">
-              <AppBackButton onClick={onBack} aria-label="Back" />
-              <AppDashboardButton onClick={onDashboard} />
-            </div>
-          ) : (
+          <div className="app-nav-actions">
             <AppBackButton onClick={onBack} aria-label="Back" />
-          )}
+            <AppDashboardButton onClick={onDashboard} />
+          </div>
           {/* Pinned to the opposite corner, at the back button's own height. */}
           <button
             type="button"

@@ -545,6 +545,7 @@ function App() {
             script={chartScript}
             appTheme={appTheme}
             onBack={() => setView('beginner-zone')}
+            onDashboard={() => setView('dashboard')}
             onToggleAppTheme={() => setAppTheme((theme) => (theme === 'dark' ? 'light' : 'dark'))}
             onOpenQuiz={() => openBeginnerQuiz(chartScript, view)}
             onSwitchScript={() => setView(view === 'hiragana-chart' ? 'katakana-chart' : 'hiragana-chart')}

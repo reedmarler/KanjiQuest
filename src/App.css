@@ -15290,11 +15290,12 @@ body:has(.hiragana-chart-page--katakana) {
   padding: 0.7rem 0 1.5rem;
 }
 
-/* The back button pins to the page corner and floats independently of the
-   flow; without this, the slot it leaves behind still claims a full row of
-   its own height, holding the heading card an extra row's worth of space
-   below the button instead of right up against it. */
-.hiragana-chart-page > .app-back-slot {
+/* The back/KQ pair pins to the page corner and floats independently of the
+   flow; without this, the slot Back leaves behind inside .app-nav-actions
+   still claims a full row of its own height, holding the heading card an
+   extra row's worth of space below the pair instead of right up against
+   it. (KQ itself is already position:absolute, so it never contributes.) */
+.hiragana-chart-page > .app-nav-actions > .app-back-slot {
   height: 0;
 }
 
@@ -16128,12 +16129,11 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   }
 }
 
-/* The pinned back button floats independently of the flow, but the slot it
-   leaves behind still claims a full row's height in this flex column,
-   holding the title box an extra row below it — same fix as the Chart
-   page's own heading, so the box sits flush against the button the same
-   way there too. */
-.beginner-learner--preview-a > .app-back-slot,
+/* The pinned back/KQ pair floats independently of the flow, but the slot
+   Back leaves behind inside .app-nav-actions still claims a full row's
+   height in this flex column, holding the title box an extra row below it
+   — same fix as the Chart page's own heading, so the box sits flush
+   against the pair the same way there too. */
 .beginner-learner--preview-a > .app-nav-actions > .app-back-slot {
   height: 0;
 }

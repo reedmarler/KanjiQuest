@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { getBeginnerDeck, type BeginnerScript } from '../data/beginnerMnemonics'
 import { loadNumberMap, MASTERY_STORAGE_PREFIX, MASTERY_TARGET, storageKey } from '../lib/beginnerMastery'
-import { AppBackButton } from './AppBackButton'
+import { AppBackButton, AppDashboardButton } from './AppBackButton'
 
 type ChartScript = Extract<BeginnerScript, 'hiragana' | 'katakana'>
 
@@ -25,6 +25,7 @@ interface KanaChartProps {
   script: ChartScript
   appTheme: 'dark' | 'light'
   onBack: () => void
+  onDashboard: () => void
   onToggleAppTheme: () => void
   onOpenQuiz: () => void
   /** Jumps to the other script's chart — hiragana's heading offers カナ,
@@ -36,7 +37,7 @@ interface KanaChartProps {
   onSelectCharacter: (rowIndex: number, charIndex: number) => void
 }
 
-export function KanaChart({ script, appTheme, onBack, onToggleAppTheme, onOpenQuiz, onSwitchScript, onSelectCharacter }: KanaChartProps) {
+export function KanaChart({ script, appTheme, onBack, onDashboard, onToggleAppTheme, onOpenQuiz, onSwitchScript, onSelectCharacter }: KanaChartProps) {
   const deck = getBeginnerDeck(script)
   const masteryKey = storageKey(MASTERY_STORAGE_PREFIX, script)
   const [mastery, setMastery] = useState<Record<string, number>>(() => loadNumberMap(masteryKey))
@@ -59,7 +60,10 @@ export function KanaChart({ script, appTheme, onBack, onToggleAppTheme, onOpenQu
 
   return (
     <main className={`hiragana-chart-page hiragana-chart-page--${script}${showRomaji ? '' : ' is-romaji-hidden'}`}>
-      <AppBackButton onClick={onBack} aria-label="Back to Beginner Zone" />
+      <div className="app-nav-actions">
+        <AppBackButton onClick={onBack} aria-label="Back to Beginner Zone" />
+        <AppDashboardButton onClick={onDashboard} />
+      </div>
       <button
         type="button"
         role="switch"
