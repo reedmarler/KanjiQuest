@@ -399,6 +399,8 @@ export function Dashboard({
   const storyQuickSelectRef = useRef<HTMLDivElement | null>(null)
   const pickModeQuickSelectRef = useRef<HTMLDivElement | null>(null)
   const swapModeQuickSelectRef = useRef<HTMLDivElement | null>(null)
+  const modeToggleRef = useRef<HTMLButtonElement | null>(null)
+  const swapModeButtonRef = useRef<HTMLButtonElement | null>(null)
   const storiesAtLevel = useMemo(() => getHeroStoriesForLevel(storyLevel), [storyLevel])
   const selectedStoryTitle = storiesAtLevel.find((story) => story.id === storyId)?.shortTitle ?? 'Guided reading'
   // The top-right toggle is always visible. Off is 'none'; on with no mode
@@ -459,6 +461,32 @@ export function Dashboard({
     setSwapModeQuickSelectOpen(false)
     setSettingsMode((current) => (current === 'none' ? 'picking' : 'none'))
   }
+
+  // Swap always mirrors the toggle's own footprint rather than carrying a
+  // fixed width of its own — the toggle already sizes to whichever label
+  // it's showing ("Story", "Grammar", "Star"), and a mismatch there reads as
+  // the pair not belonging together. Measuring the rendered toggle directly
+  // (instead of keying a width off settingsMode) keeps the two in sync
+  // through label changes and the mobile breakpoint's own size shift alike.
+  useEffect(() => {
+    const toggleEl = modeToggleRef.current
+    if (!toggleEl) return
+    const applyWidth = () => {
+      if (!swapModeButtonRef.current) return
+      // getBoundingClientRect() reports final, already-zoomed screen pixels,
+      // but an inline style="width: Npx" is a pre-zoom length that the .app
+      // ancestor's own zoom (1.5 on desktop, see App.css) then scales again
+      // on render — without dividing that back out, Swap would end up 1.5x
+      // wider than the toggle it's meant to match on desktop.
+      const appEl = toggleEl.closest<HTMLElement>('.app')
+      const zoom = appEl ? parseFloat(getComputedStyle(appEl).zoom) || 1 : 1
+      swapModeButtonRef.current.style.width = `${toggleEl.getBoundingClientRect().width / zoom}px`
+    }
+    const observer = new ResizeObserver(applyWidth)
+    observer.observe(toggleEl)
+    return () => observer.disconnect()
+  }, [])
+
   const [paused, setPaused] = useState(false)
   const [playbackRate, setPlaybackRate] = useState<HeroPlaybackRate>(1)
   const [rewindSignal, setRewindSignal] = useState(0)
@@ -783,6 +811,7 @@ export function Dashboard({
         {modeToggleOn && settingsMode !== 'picking' && (
           <div className="control-story-quick-select is-swap" ref={swapModeQuickSelectRef}>
             <button
+              ref={swapModeButtonRef}
               type="button"
               className={`control-swap-mode-button${swapModeQuickSelectOpen ? ' is-open' : ''}`}
               onClick={() => setSwapModeQuickSelectOpen((open) => !open)}
@@ -823,6 +852,7 @@ export function Dashboard({
           </div>
         )}
         <button
+          ref={modeToggleRef}
           type="button"
           className={`control-story-toggle control-story-top-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
           onClick={toggleModeOn}
