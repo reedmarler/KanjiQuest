@@ -661,6 +661,225 @@ export function Dashboard({
       >
         <span aria-hidden="true">&#9881;</span>
       </button>
+      {settingsExpanded && (
+        <div className="hero-settings-layout" id="hero-content-settings">
+            <div className={`control-group control-group-levels${storyMode ? ' is-disabled' : ''}`} aria-disabled={storyMode}>
+              <span className="control-group-label" id="hero-level-label">Sentence difficulty</span>
+              <div className="control-segmented control-segmented-difficulty" role="group" aria-labelledby="hero-level-label">
+                {GENERATION_COMPLEXITIES.map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    data-difficulty={level}
+                    className={`control-segment${complexity === level ? ' is-active' : ''}`}
+                    onClick={() => setComplexity(level)}
+                    aria-pressed={complexity === level}
+                    aria-label={`${COMPLEXITY_DISPLAY[level].level} ${COMPLEXITY_DISPLAY[level].name}: ${COMPLEXITY_DISPLAY[level].description}`}
+                    title={COMPLEXITY_DISPLAY[level].description}
+                    disabled={storyMode}
+                  >
+                    <span className="control-level-code">{COMPLEXITY_DISPLAY[level].level}</span>
+                    <span className="control-level-name">{COMPLEXITY_DISPLAY[level].name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={`control-story-panel${storyMode ? ' is-active' : ''}`}>
+              <div className="control-story-heading">
+                <span>
+                  <b>Mode</b>
+                  {storyMode && <small>{selectedStoryTitle}</small>}
+                </span>
+                <div className="control-story-actions">
+                  <div className="hero-mode-icons" role="group" aria-label="Sentence modes">
+                    <button
+                      type="button"
+                      className={`hero-mode-icon${storyMode ? ' is-active' : ''}`}
+                      onClick={() => selectSettingsMode('story')}
+                      aria-pressed={storyMode}
+                      aria-label="Story mode"
+                      title="Story mode"
+                    >
+                      <span aria-hidden="true">&#29289;</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`hero-mode-icon${grammarMode ? ' is-active' : ''}`}
+                      onClick={() => selectSettingsMode('grammar')}
+                      aria-pressed={grammarMode}
+                      aria-label="Grammar mode"
+                      title="Grammar mode"
+                    >
+                      <span aria-hidden="true">&#25991;</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`hero-mode-icon${settingsMode === 'star' ? ' is-active' : ''}`}
+                      onClick={() => selectSettingsMode('star')}
+                      aria-pressed={settingsMode === 'star'}
+                      aria-label="Star mode"
+                      title="Star mode"
+                    >
+                      <span aria-hidden="true">&#9733;</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {(storyMode || grammarMode || settingsMode === 'star') && (
+                <div className="hero-mode-panel-slot">
+                {storyMode && (
+                  <div className="control-story-options">
+                    <div className="control-story-setting">
+                      <span>Story difficulty</span>
+                      <div className="control-segmented control-segmented-story" role="group" aria-label="Story difficulty">
+                        {STORY_LEVEL_DISPLAY.map(({ level, name }) => {
+                          const hasStories = getHeroStoriesForLevel(level).length > 0
+                          return (
+                            <button
+                              key={level}
+                              type="button"
+                              data-story-level={level}
+                              className={`control-segment${level === storyLevel ? ' is-active' : ''}${hasStories ? '' : ' is-unavailable'}`}
+                              aria-pressed={level === storyLevel}
+                              aria-label={`${level} ${name}${hasStories ? '' : ': coming soon'}`}
+                              title={hasStories ? `${level} ${name}` : `${level} ${name} coming soon`}
+                              onClick={() => {
+                                setStoryLevel(level)
+                                setStoryQuickSelectOpen(false)
+                              }}
+                              disabled={!hasStories}
+                            >
+                              <span className="control-level-code">{level}</span>
+                              <span className="control-level-name">{name}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="control-story-setting">
+                      <span>Story</span>
+                      <div className="control-story-picker">
+                        <select
+                          className="control-select"
+                          value={storyId}
+                          onChange={(event) => setStoryId(event.target.value)}
+                          aria-label="Choose story"
+                        >
+                          {storiesAtLevel.map((story) => (
+                            <option key={story.id} value={story.id}>{story.shortTitle}</option>
+                          ))}
+                        </select>
+                        <div className="control-story-playback" role="group" aria-label="Story playback">
+                          <button
+                            type="button"
+                            className={`control-story-action${storyPlaybackMode === 'repeat' ? ' is-active' : ''}`}
+                            onClick={() => setStoryPlaybackMode('repeat')}
+                            aria-pressed={storyPlaybackMode === 'repeat'}
+                            aria-label="Repeat selected story"
+                            title="Repeat selected story"
+                          >
+                            <span aria-hidden="true">&#8734;</span>
+                          </button>
+                          <button
+                            type="button"
+                            className={`control-story-action${storyPlaybackMode === 'shuffle' ? ' is-active' : ''}`}
+                            onClick={() => setStoryPlaybackMode('shuffle')}
+                            aria-pressed={storyPlaybackMode === 'shuffle'}
+                            aria-label="Shuffle stories"
+                            title="Shuffle stories"
+                          >
+                            <span aria-hidden="true">&#10536;</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {grammarMode && (
+                  <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
+                    {focusOptions.map(({ focus, label, disabledReason }) => (
+                      <button
+                        key={label}
+                        type="button"
+                        className={`hero-swap-mode-panel${focus && swapFocus === focus ? ' is-active' : ''}`}
+                        aria-pressed={focus ? swapFocus === focus : undefined}
+                        onClick={focus ? () => setSwapFocus((current) => (current === focus ? null : focus)) : undefined}
+                        disabled={!focus}
+                        title={focus ? undefined : disabledReason}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {settingsMode === 'star' && (
+                  <FavoriteWordsPanel onManage={onOpenFavoriteWords} />
+                )}
+
+                </div>
+              )}
+            </div>
+
+          <div className="voice-settings-panel" id="hero-voice-settings" aria-label="Playback settings">
+              <div className="voice-settings-header">
+                <span className="control-group-label">Playback</span>
+                <button
+                  type="button"
+                  className="voice-settings-reset"
+                  onClick={resetSliders}
+                  title="Reset sliders to 1x, 1x, 50%"
+                >
+                  Reset
+                </button>
+              </div>
+              <label className="voice-setting">
+                <span>Sentence speed</span>
+                <input
+                  type="range"
+                  min="0"
+                  max={HERO_PLAYBACK_RATES.length - 1}
+                  step="1"
+                  value={speedIndex}
+                  onChange={(event) => setPlaybackRate(HERO_PLAYBACK_RATES[Number(event.target.value)]!)}
+                />
+                <output>{playbackRate}x</output>
+              </label>
+              {speechSupported && (
+                <>
+                  <label className="voice-setting">
+                    <span>Voice speed</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max={HERO_SPEECH_RATES.length - 1}
+                      step="1"
+                      value={speechRateIndex}
+                      onChange={(event) => changeSpeechRate(HERO_SPEECH_RATES[Number(event.target.value)]!)}
+                    />
+                    <output aria-label={`${effectiveSpeechRate} times speed`}>{effectiveSpeechRate}x</output>
+                  </label>
+                  <label className="voice-setting">
+                    <span>{speechVolumeIcon(speechVolume)} Volume</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max={HERO_SPEECH_VOLUMES.length - 1}
+                      step="1"
+                      value={speechVolumeIndex}
+                      onChange={(event) => changeSpeechVolume(HERO_SPEECH_VOLUMES[Number(event.target.value)]!)}
+                    />
+                    <output>{Math.round(speechVolume * 100)}%</output>
+                  </label>
+                </>
+              )}
+          </div>
+        </div>
+      )}
       <div className="control-story-topbar">
         {storyMode && (
           <div className="control-story-quick-select" ref={storyQuickSelectRef}>
@@ -971,228 +1190,6 @@ export function Dashboard({
             </div>
           </div>
         </div>
-
-        {settingsExpanded && (
-          <div className="hero-settings-layout" id="hero-content-settings">
-              <div className={`control-group control-group-levels${storyMode ? ' is-disabled' : ''}`} aria-disabled={storyMode}>
-                <span className="control-group-label" id="hero-level-label">Sentence difficulty</span>
-                <div className="control-segmented control-segmented-difficulty" role="group" aria-labelledby="hero-level-label">
-                  {GENERATION_COMPLEXITIES.map((level) => (
-                    <button
-                      key={level}
-                      type="button"
-                      data-difficulty={level}
-                      className={`control-segment${complexity === level ? ' is-active' : ''}`}
-                      onClick={() => setComplexity(level)}
-                      aria-pressed={complexity === level}
-                      aria-label={`${COMPLEXITY_DISPLAY[level].level} ${COMPLEXITY_DISPLAY[level].name}: ${COMPLEXITY_DISPLAY[level].description}`}
-                      title={COMPLEXITY_DISPLAY[level].description}
-                      disabled={storyMode}
-                    >
-                      <span className="control-level-code">{COMPLEXITY_DISPLAY[level].level}</span>
-                      <span className="control-level-name">{COMPLEXITY_DISPLAY[level].name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className={`control-story-panel${storyMode ? ' is-active' : ''}`}>
-                <div className="control-story-heading">
-                  <span>
-                    <b>Mode</b>
-                    {storyMode && <small>{selectedStoryTitle}</small>}
-                  </span>
-                  <div className="control-story-actions">
-                    <div className="hero-mode-icons" role="group" aria-label="Sentence modes">
-                      <button
-                        type="button"
-                        className={`hero-mode-icon${storyMode ? ' is-active' : ''}`}
-                        onClick={() => selectSettingsMode('story')}
-                        aria-pressed={storyMode}
-                        aria-label="Story mode"
-                        title="Story mode"
-                      >
-                        <span aria-hidden="true">&#29289;</span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`hero-mode-icon${grammarMode ? ' is-active' : ''}`}
-                        onClick={() => selectSettingsMode('grammar')}
-                        aria-pressed={grammarMode}
-                        aria-label="Grammar mode"
-                        title="Grammar mode"
-                      >
-                        <span aria-hidden="true">&#25991;</span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`hero-mode-icon${settingsMode === 'star' ? ' is-active' : ''}`}
-                        onClick={() => selectSettingsMode('star')}
-                        aria-pressed={settingsMode === 'star'}
-                        aria-label="Star mode"
-                        title="Star mode"
-                      >
-                        <span aria-hidden="true">&#9733;</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {(storyMode || grammarMode || settingsMode === 'star') && (
-                  <div className="hero-mode-panel-slot">
-                  {storyMode && (
-                    <div className="control-story-options">
-                      <div className="control-story-setting">
-                        <span>Story difficulty</span>
-                        <div className="control-segmented control-segmented-story" role="group" aria-label="Story difficulty">
-                          {STORY_LEVEL_DISPLAY.map(({ level, name }) => {
-                            const hasStories = getHeroStoriesForLevel(level).length > 0
-                            return (
-                              <button
-                                key={level}
-                                type="button"
-                                data-story-level={level}
-                                className={`control-segment${level === storyLevel ? ' is-active' : ''}${hasStories ? '' : ' is-unavailable'}`}
-                                aria-pressed={level === storyLevel}
-                                aria-label={`${level} ${name}${hasStories ? '' : ': coming soon'}`}
-                                title={hasStories ? `${level} ${name}` : `${level} ${name} coming soon`}
-                                onClick={() => {
-                                  setStoryLevel(level)
-                                  setStoryQuickSelectOpen(false)
-                                }}
-                                disabled={!hasStories}
-                              >
-                                <span className="control-level-code">{level}</span>
-                                <span className="control-level-name">{name}</span>
-                              </button>
-                            )
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="control-story-setting">
-                        <span>Story</span>
-                        <div className="control-story-picker">
-                          <select
-                            className="control-select"
-                            value={storyId}
-                            onChange={(event) => setStoryId(event.target.value)}
-                            aria-label="Choose story"
-                          >
-                            {storiesAtLevel.map((story) => (
-                              <option key={story.id} value={story.id}>{story.shortTitle}</option>
-                            ))}
-                          </select>
-                          <div className="control-story-playback" role="group" aria-label="Story playback">
-                            <button
-                              type="button"
-                              className={`control-story-action${storyPlaybackMode === 'repeat' ? ' is-active' : ''}`}
-                              onClick={() => setStoryPlaybackMode('repeat')}
-                              aria-pressed={storyPlaybackMode === 'repeat'}
-                              aria-label="Repeat selected story"
-                              title="Repeat selected story"
-                            >
-                              <span aria-hidden="true">&#8734;</span>
-                            </button>
-                            <button
-                              type="button"
-                              className={`control-story-action${storyPlaybackMode === 'shuffle' ? ' is-active' : ''}`}
-                              onClick={() => setStoryPlaybackMode('shuffle')}
-                              aria-pressed={storyPlaybackMode === 'shuffle'}
-                              aria-label="Shuffle stories"
-                              title="Shuffle stories"
-                            >
-                              <span aria-hidden="true">&#10536;</span>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {grammarMode && (
-                    <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
-                      {focusOptions.map(({ focus, label, disabledReason }) => (
-                        <button
-                          key={label}
-                          type="button"
-                          className={`hero-swap-mode-panel${focus && swapFocus === focus ? ' is-active' : ''}`}
-                          aria-pressed={focus ? swapFocus === focus : undefined}
-                          // Selecting the focus already on screen turns the drill
-                          // off, so the same button both enters and leaves it.
-                          onClick={focus ? () => setSwapFocus((current) => (current === focus ? null : focus)) : undefined}
-                          disabled={!focus}
-                          title={focus ? undefined : disabledReason}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {settingsMode === 'star' && (
-                    <FavoriteWordsPanel onManage={onOpenFavoriteWords} />
-                  )}
-
-                  </div>
-                )}
-              </div>
-
-            <div className="voice-settings-panel" id="hero-voice-settings" aria-label="Playback settings">
-                <div className="voice-settings-header">
-                  <span className="control-group-label">Playback</span>
-                  <button
-                    type="button"
-                    className="voice-settings-reset"
-                    onClick={resetSliders}
-                    title="Reset sliders to 1x, 1x, 50%"
-                  >
-                    Reset
-                  </button>
-                </div>
-                <label className="voice-setting">
-                  <span>Sentence speed</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max={HERO_PLAYBACK_RATES.length - 1}
-                    step="1"
-                    value={speedIndex}
-                    onChange={(event) => setPlaybackRate(HERO_PLAYBACK_RATES[Number(event.target.value)]!)}
-                  />
-                  <output>{playbackRate}x</output>
-                </label>
-                {speechSupported && (
-                  <>
-                    <label className="voice-setting">
-                      <span>Voice speed</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max={HERO_SPEECH_RATES.length - 1}
-                        step="1"
-                        value={speechRateIndex}
-                        onChange={(event) => changeSpeechRate(HERO_SPEECH_RATES[Number(event.target.value)]!)}
-                      />
-                      <output aria-label={`${effectiveSpeechRate} times speed`}>{effectiveSpeechRate}x</output>
-                    </label>
-                    <label className="voice-setting">
-                      <span>{speechVolumeIcon(speechVolume)} Volume</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max={HERO_SPEECH_VOLUMES.length - 1}
-                        step="1"
-                        value={speechVolumeIndex}
-                        onChange={(event) => changeSpeechVolume(HERO_SPEECH_VOLUMES[Number(event.target.value)]!)}
-                      />
-                      <output>{Math.round(speechVolume * 100)}%</output>
-                    </label>
-                  </>
-                )}
-            </div>
-          </div>
-        )}
       </section>
 
       <section className="mobile-home-primary" aria-label="Continue study">

@@ -175,6 +175,23 @@ body:has(.beginner-word-writing-card) .app,
    spot on every page. See the shared correction below.
    The heading also needs enough clearance to drop fully below the pinned
    pair instead of sharing its row. */
+
+/* On phones the Hiragana Chart page (and its practice-page counterpart)
+   pull the back button in from --app-nav-left's usual 1.25rem to 0.65rem
+   to match their own narrowed content edge (see body:has(.hiragana-chart-page)
+   .app above) — Beginner Zone never narrowed its own edge to match, so its
+   back button stayed out at the wider inset, reading as a jump left/right
+   between the two screens. Overriding just the variable here (rather than
+   .app's actual padding, which the menu cards below still want at its
+   normal width) pulls the button in to line up with Chart's without
+   touching anything else on this page. */
+@media (max-width: 719px) {
+  .app.beginner-zone-page,
+  .app.study-tools-page,
+  .app.additional-tools-page {
+    --app-nav-left: 0.65rem;
+  }
+}
 .beginner-zone-page .tool-menu-heading,
 .study-tools-page .tool-menu-heading,
 .additional-tools-page .tool-menu-heading {
@@ -2264,16 +2281,23 @@ body:has(.dashboard) {
 }
 
 .hero-settings-layout {
+  position: absolute;
+  top: 2.75rem;
+  right: 0;
+  z-index: 30;
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(14rem, 0.7fr);
   grid-template-rows: 2.75rem auto;
   grid-template-areas: "difficulty voice" "story voice";
   align-items: start;
   gap: 0.55rem;
+  width: min(100%, 31rem);
   min-width: 0;
   padding: 0.75rem;
-  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
-  background: color-mix(in srgb, var(--surface-2) 46%, transparent);
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 24%, var(--border));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 96%, black);
+  box-shadow: 0 0.85rem 2rem color-mix(in srgb, #000 34%, transparent);
 }
 
 .hero-settings-layout .control-group-levels {
@@ -2724,10 +2748,17 @@ body:has(.dashboard) {
 }
 
 .control-audio-buttons .control-story-top-toggle {
+  width: 3.475rem;
   min-width: 3.475rem;
   height: 2rem;
-  padding: 0 0.48rem;
+  padding: 0;
   border-radius: 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.control-audio-buttons .control-story-top-toggle .control-toggle-track {
+  display: none;
 }
 
 .control-group-audio .control-icon-button {
