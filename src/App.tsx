@@ -427,7 +427,7 @@ function App() {
           eyebrow="STUDY MODES"
           onBack={() => setView('dashboard')}
           tools={[
-            { mark: '漢', title: 'Kanji', detail: 'Readings and forms.', accent: 'kyogre', onClick: () => {
+            { mark: '漢', title: 'Kanji', detail: 'Readings and forms.', accent: 'sumi', onClick: () => {
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
               setView('kanji')
@@ -479,7 +479,7 @@ function App() {
             { mark: 'ア', title: 'Katakana Chart', detail: 'Kana rows.', accent: 'kyogre', onClick: () => setView('katakana-chart') },
             { mark: '聞', title: 'Hiragana Quiz', detail: 'Listen and write.', accent: 'rayquaza', onClick: () => openBeginnerQuiz('hiragana', 'beginner-zone') },
             { mark: '書', title: 'Katakana Quiz', detail: 'Listen and write.', accent: 'amber', onClick: () => openBeginnerQuiz('katakana', 'beginner-zone') },
-            { mark: '一', title: 'First Kanji', detail: 'Starter kanji.', accent: 'gold', onClick: () => {
+            { mark: '一', title: 'First Kanji', detail: 'Starter kanji.', accent: 'sumi', onClick: () => {
               setBeginnerScript('kanji')
               setBeginnerInitialRowIndex(0)
               setBeginnerInitialCharIndex(0)
@@ -810,7 +810,7 @@ function App() {
   )
 }
 
-type ToolMenuAccent = 'sakura' | 'rayquaza' | 'gold' | 'kyogre' | 'amber'
+type ToolMenuAccent = 'sakura' | 'rayquaza' | 'gold' | 'kyogre' | 'amber' | 'sumi'
 
 type ToolMenuItem = {
   mark: string

@@ -8823,6 +8823,19 @@ body:has(.dashboard) {
   color: var(--amber-light);
 }
 
+.tool-menu-card--sumi {
+  border-color: color-mix(in srgb, var(--sumi-light) 30%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--sumi) 10%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--sumi:hover {
+  border-color: var(--sumi-light);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--sumi) 16%, transparent), transparent 54%), var(--surface);
+}
+.tool-menu-card--sumi .tool-menu-mark {
+  background: color-mix(in srgb, var(--sumi) 18%, var(--surface-2));
+  color: var(--sumi-light);
+}
+
 .tool-menu-card b {
   display: block;
   font-size: 0.86rem;
