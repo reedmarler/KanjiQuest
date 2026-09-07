@@ -6,6 +6,7 @@ import { SpeakableCue, SpeakableWord, useSpeakable } from './SpeakableWord'
 import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
 import { AppBackButton, AppDashboardButton } from './AppBackButton'
 import { recordAnswer, recordSeen } from '../lib/studyRecord'
+import { loadKanjiNotes, saveKanjiNotes, setKanjiNote, type KanjiNotes } from '../lib/kanjiNotes'
 
 interface FocusedVocabPracticeProps {
   onBack: () => void
@@ -42,12 +43,23 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
   const [furiganaVisible, setFuriganaVisible] = useState(true)
   const [englishVisible, setEnglishVisible] = useState(true)
   const [completed, setCompleted] = useState(false)
+  const [notes, setNotes] = useState<KanjiNotes>(loadKanjiNotes)
+  const [notesOpen, setNotesOpen] = useState(false)
   const card = session.cards[index]
   const example = useMemo(() => (card ? getVocabExampleSentence(card) : undefined), [card])
   const exampleSpeech = useSpeakable(
     example ? spokenTextForWord(example.japanese, example.reading) : '',
     !revealed,
   )
+  const noteSubject = card?.front ?? ''
+  const noteText = notes[noteSubject]?.text ?? ''
+
+  function writeNote(text: string) {
+    if (!card || !noteSubject) return
+    const next = setKanjiNote(notes, { subject: noteSubject, character: noteSubject, reading: card.reading }, text)
+    setNotes(next)
+    saveKanjiNotes(next)
+  }
 
   function nextCard() {
     if (index + 1 >= session.cards.length) {
@@ -176,6 +188,24 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
             )}
           </div>
 
+          {notesOpen && (
+            <div className="kanji-note-panel" role="group" aria-label={`Notes on ${noteSubject}`}>
+              <div className="kanji-note-panel-top">
+                <strong lang="ja">{noteSubject}</strong>
+                <button type="button" className="btn btn-ghost kanji-note-done" onClick={() => setNotesOpen(false)}>Done</button>
+              </div>
+              <textarea
+                className="kanji-note-input"
+                value={noteText}
+                onChange={(event) => writeNote(event.target.value)}
+                placeholder="What do you want to remember about this one?"
+                rows={4}
+                autoFocus
+              />
+              <small className="kanji-note-hint">Saved on this device as you type.</small>
+            </div>
+          )}
+
           <div className="kanji-learning-controls standard-kanji-controls">
             <div className="standard-kanji-utility-row">
               <div className="standard-kanji-dashboard-toggles control-group control-group-primary-options" role="group" aria-label="Display options">
@@ -198,6 +228,18 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
                   onClick={() => setEnglishVisible((isVisible) => !isVisible)}
                 >
                   EN
+                </button>
+                {/* Thoughts land against whatever is on the card, written where
+                    they occur rather than kept until somewhere to file them. */}
+                <button
+                  type="button"
+                  className={`control-chip control-chip-compact app-display-toggle kanji-note-toggle${noteText ? ' has-note' : ''}${notesOpen ? ' is-active' : ''}`}
+                  aria-pressed={notesOpen}
+                  aria-label={noteText ? `Edit your note on ${noteSubject}` : `Write a note on ${noteSubject}`}
+                  title="Notes"
+                  onClick={() => setNotesOpen((isOpen) => !isOpen)}
+                >
+                  Notes
                 </button>
               </div>
               <button
