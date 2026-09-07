@@ -27,7 +27,7 @@ import type { GenerationComplexity } from './lib/generationComplexity'
 import type { SentenceExercise } from './data/sentenceExercises'
 import type { DrillExercise } from './lib/drillExercises'
 import { Dashboard } from './components/Dashboard'
-import { AppBackButton } from './components/AppBackButton'
+import { AppHeaderControls } from './components/AppHeaderControls'
 import { SessionComplete } from './components/SessionComplete'
 import type { LibraryTab } from './components/LibraryPanel'
 import type { BeginnerScript } from './data/beginnerMnemonics'
@@ -467,7 +467,6 @@ function App() {
       <div className="app">
         <Suspense fallback={<RouteLoading label="Quests" />}>
           <QuestHub
-            onBack={() => setView('dashboard')}
             onOpenInkRoad={() => setView('ink-road')}
             progress={questProgress}
             onOpenVocab={(topicId, questId) => {
@@ -522,7 +521,6 @@ function App() {
         <ToolMenuPage
           title="Study tools"
           eyebrow="STUDY MODES"
-          onBack={() => setView('dashboard')}
           tools={[
             { mark: '漢', title: 'Kanji', detail: 'Readings and forms.', accent: 'sumi', onClick: () => {
               setActiveQuestId(undefined)
@@ -570,7 +568,6 @@ function App() {
       <div className="app beginner-zone-page">
         <ToolMenuPage
           title="Beginner Zone"
-          onBack={() => setView('dashboard')}
           tools={[
             { mark: 'あ', title: 'Hiragana Chart', detail: 'Kana rows.', accent: 'sakura', onClick: () => setView('hiragana-chart') },
             { mark: 'ア', title: 'Katakana Chart', detail: 'Kana rows.', accent: 'kyogre', onClick: () => setView('katakana-chart') },
@@ -715,7 +712,6 @@ function App() {
       <div className="app additional-tools-page">
         <ToolMenuPage
           title="More"
-          onBack={() => setView('dashboard')}
           tools={[
             { mark: '語', title: 'Vocab List', detail: 'Words by level.', accent: 'sakura', onClick: () => {
               setLibraryTab('vocab')
@@ -921,14 +917,12 @@ function ToolMenuPage({
   eyebrow,
   description,
   tools,
-  onBack,
   footerAction,
 }: {
   title: string
   eyebrow?: string
   description?: string
   tools: ToolMenuItem[]
-  onBack: () => void
   footerAction?: {
     prompt: string
     label: string
@@ -937,7 +931,7 @@ function ToolMenuPage({
 }) {
   return (
     <main className="tool-menu-page">
-      <AppBackButton onClick={onBack} />
+      <AppHeaderControls />
       <section className="tool-menu-heading">
         {eyebrow && <small>{eyebrow}</small>}
         <h1>{title}</h1>

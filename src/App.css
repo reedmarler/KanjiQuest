@@ -163,33 +163,15 @@ body:has(.beginner-word-writing-card) .app,
   gap: 0.35rem;
 }
 
-.beginner-zone-page .app-back-button,
-.study-tools-page .app-back-button,
-.additional-tools-page .app-back-button {
-  position: relative;
-  top: 0.3rem;
-}
-
-/* On phones the Hiragana Chart page (and its practice-page counterpart)
-   pull the back button in from --app-nav-left's usual 1.25rem to 0.65rem
-   to match their own narrowed content edge (see body:has(.hiragana-chart-page)
-   .app above) — Beginner Zone never narrowed its own edge to match, so its
-   back button stayed out at the wider inset, reading as a jump left/right
-   between the two screens. Overriding just the variable here (rather than
-   .app's actual padding, which the menu cards below still want at its
-   normal width) pulls the button in to line up with Chart's without
-   touching anything else on this page. */
-@media (max-width: 719px) {
-  .app.beginner-zone-page,
-  .app.study-tools-page {
-    --app-nav-left: 0.65rem;
-  }
-}
-
+/* These three tabs are reached from the bottom nav now, not a Back button —
+   their header carries the same corner-pinned profile/settings pair as the
+   Dashboard (.dashboard-profile-placeholder / .dashboard-page-settings,
+   anchored off .app's own position: relative). The heading needs enough
+   clearance to drop fully below that pinned pair instead of sharing its row. */
 .beginner-zone-page .tool-menu-heading,
 .study-tools-page .tool-menu-heading,
 .additional-tools-page .tool-menu-heading {
-  margin-top: -0.45rem;
+  margin-top: 1.95rem;
   padding: 0 0.15rem 0.15rem;
 }
 
@@ -12025,6 +12007,13 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   width: min(100%, 54rem);
 }
 
+/* The corner-pinned profile/settings pair (same as the Dashboard's) sit
+   outside .app's own side padding, so the topbar's count and Ink Road
+   preview need a bit more inset than the rest of the page to clear them. */
+.quest-hub-simple .quest-topbar {
+  padding-inline: 1rem;
+}
+
 .quest-focus {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(15rem, .7fr);
@@ -19550,21 +19539,6 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   .kanji-lab-header h1 { --title-gutter: 5.4rem; }
   .achievements-heading h1 { --title-gutter: 3.8rem; }
 
-  /*
-   * Start the title where "Kanji Quest" starts on the dashboard rather than
-   * tight under the Back button, so paging between screens doesn't shift it.
-   * The tool menu heading begins at its title, except on Additional, where the
-   * eyebrow above takes the first ~1.05rem of it.
-   */
-  .beginner-zone-page .tool-menu-heading,
-  .study-tools-page .tool-menu-heading {
-    margin-top: 0.85rem;
-  }
-
-  .additional-tools-page .tool-menu-heading {
-    margin-top: -0.2rem;
-  }
-
   .library-panel-header,
   .kanji-lab-header {
     margin-top: 0.55rem;
@@ -19652,10 +19626,6 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
    title sits in the band this one is pinned to — so they settle at the tool
    menus' height, the first that clears it. */
 @media (min-width: 721px) {
-  .additional-tools-page .tool-menu-heading {
-    margin-top: -1.5rem;
-  }
-
   .library-panel-header,
   .kanji-lab-header {
     margin-top: -0.5rem;
