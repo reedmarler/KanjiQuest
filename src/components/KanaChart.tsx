@@ -99,7 +99,7 @@ export function KanaChart({ script, appTheme, onBack, onDashboard, onToggleAppTh
           >
             {otherScriptLabel}
           </button>
-          <button type="button" className="hiragana-chart-quiz-button" onClick={onOpenQuiz}>
+          <button type="button" className="hiragana-chart-quiz-button hiragana-chart-en-button" onClick={onOpenQuiz}>
             Quiz
           </button>
         </div>

@@ -744,7 +744,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
                 </button>
               )}
               {onOpenQuiz && (
-                <button type="button" className="hiragana-chart-quiz-button" onClick={onOpenQuiz} aria-label={`Open the ${deck.title} quiz`} title={`${deck.title} quiz`}>
+                <button type="button" className="hiragana-chart-quiz-button hiragana-chart-en-button" onClick={onOpenQuiz} aria-label={`Open the ${deck.title} quiz`} title={`${deck.title} quiz`}>
                   Quiz
                 </button>
               )}
