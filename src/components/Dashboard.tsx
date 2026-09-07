@@ -356,6 +356,9 @@ interface DashboardProps {
   onOpenAdditionalTools: () => void
   onOpenStudyTools: () => void
   onOpenFavoriteWords: () => void
+  onContinueStudy: () => void
+  mobileContinueTitle: string
+  mobileContinueDetail: string
   questProgress: QuestProgress
 }
 
@@ -367,6 +370,9 @@ export function Dashboard({
   onOpenAdditionalTools,
   onOpenStudyTools,
   onOpenFavoriteWords,
+  onContinueStudy,
+  mobileContinueTitle,
+  mobileContinueDetail,
   questProgress,
   wrongPool,
   progress,
@@ -874,6 +880,18 @@ export function Dashboard({
           autoAdvance={!(storyMode && speechOn)}
         />
       </header>
+
+      <section className="mobile-home-primary" aria-label="Continue study">
+        <button type="button" className="mobile-continue-card" onClick={onContinueStudy}>
+          <span className="mobile-continue-mark" aria-hidden="true" lang="ja">続</span>
+          <span className="mobile-continue-copy">
+            <small>Next up</small>
+            <b>{mobileContinueTitle}</b>
+            <em>{mobileContinueDetail}</em>
+          </span>
+          <span className="mobile-continue-arrow" aria-hidden="true">&rarr;</span>
+        </button>
+      </section>
 
       <section className="hero-controls" aria-label="Sentence controls">
         <div className="hero-controls-row hero-controls-primary">

@@ -216,6 +216,11 @@ body:has(.dashboard) {
   overflow-y: scroll;
 }
 
+.mobile-bottom-nav,
+.mobile-home-primary {
+  display: none;
+}
+
 /* Dashboard */
 .dashboard {
   position: relative;
@@ -4014,6 +4019,77 @@ body:has(.dashboard) {
 }
 
 @media (max-width: 720px) {
+  body:has(.mobile-bottom-nav) .app {
+    padding-bottom: calc(5.85rem + env(safe-area-inset-bottom));
+  }
+
+  .mobile-bottom-nav {
+    position: fixed;
+    right: 0.7rem;
+    bottom: calc(0.55rem + env(safe-area-inset-bottom));
+    left: 0.7rem;
+    z-index: 90;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.18rem;
+    padding: 0.38rem;
+    border: 1px solid color-mix(in srgb, var(--kyogre-light) 24%, var(--border));
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    box-shadow: 0 0.65rem 1.8rem color-mix(in srgb, #000 28%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .mobile-bottom-nav button {
+    display: grid;
+    justify-items: center;
+    gap: 0.18rem;
+    min-width: 0;
+    min-height: 3.05rem;
+    padding: 0.34rem 0.16rem 0.28rem;
+    border: 1px solid transparent;
+    border-radius: 13px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+  }
+
+  .mobile-bottom-nav button span {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface-2) 72%, transparent);
+    color: inherit;
+    font: 800 0.88rem/1 'Noto Sans JP', sans-serif;
+  }
+
+  .mobile-bottom-nav button b {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 0.52rem;
+    font-weight: 800;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-bottom-nav button.is-active {
+    border-color: color-mix(in srgb, var(--rayquaza-light) 34%, transparent);
+    background: color-mix(in srgb, var(--rayquaza) 14%, transparent);
+    color: var(--rayquaza-light);
+  }
+
+  .mobile-home-primary {
+    display: block;
+    margin: 0.25rem 0 0.55rem;
+  }
+
+  .dashboard .hero-controls {
+    margin-top: 0;
+  }
+
   .dashboard-quest-guardian {
     right: -.2rem;
     width: 4.8rem;
@@ -16794,8 +16870,80 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 
 .beginner-listening-options button span {
   display: block;
+  color: var(--kana-chart-accent-soft, var(--text));
   font: 700 2rem/1 'Noto Sans JP', sans-serif;
   white-space: nowrap;
+}
+
+.mobile-continue-card {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.72rem;
+  width: 100%;
+  padding: 0.78rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--rayquaza-light) 34%, var(--border));
+  border-radius: 13px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--rayquaza) 16%, transparent), transparent 52%),
+    color-mix(in srgb, var(--surface-2) 84%, var(--surface));
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  box-shadow: 0 0.55rem 1.35rem color-mix(in srgb, var(--bg) 24%, transparent);
+}
+
+.mobile-continue-mark {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface));
+  color: var(--rayquaza-light);
+  font: 800 1.35rem/1 'Noto Sans JP', sans-serif;
+}
+
+.mobile-continue-copy {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.mobile-continue-copy small {
+  color: var(--rayquaza-light);
+  font: 800 0.55rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mobile-continue-copy b {
+  overflow: hidden;
+  font-size: 1rem;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-continue-copy em {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-style: normal;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-continue-arrow {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rayquaza) 24%, var(--surface));
+  color: var(--rayquaza-light);
+  font: 900 1rem/1 'Outfit', system-ui, sans-serif;
 }
 
 .beginner-listening-options button span[data-kana-count="3"] {
@@ -17010,6 +17158,13 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   font: 800 clamp(3.3rem, 12vw, 5.4rem)/1 'Noto Sans JP', sans-serif;
 }
 
+.beginner-learner--hiragana .beginner-static-word-example span,
+.beginner-learner--katakana .beginner-static-word-example span {
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 24%, var(--border));
+  background: color-mix(in srgb, var(--kana-chart-cell) 82%, var(--surface-2));
+  color: var(--kana-chart-accent-soft);
+}
+
 .beginner-write-section {
   display: flex;
   flex-direction: column;
@@ -17118,6 +17273,15 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   background: linear-gradient(135deg, var(--rayquaza), var(--rayquaza-light));
 }
 
+.beginner-learner--hiragana .beginner-action-btn-green,
+.beginner-learner--katakana .beginner-action-btn-green,
+.beginner-learner--hiragana .beginner-listening-continue,
+.beginner-learner--katakana .beginner-listening-continue {
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 42%, transparent);
+  background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
+  box-shadow: 0 0.42rem 1rem color-mix(in srgb, var(--kana-chart-accent) 18%, transparent);
+}
+
 /* Every button in the quiz's top row is the same size, so "Check meaning",
    "Next word →", "Show answer" and "Previous" all read as peers no matter
    which pair happens to be on screen. */
@@ -17185,6 +17349,12 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   font-size: 0.66rem;
 }
 
+.beginner-learner--hiragana .beginner-speak-btn--quiz,
+.beginner-learner--katakana .beginner-speak-btn--quiz {
+  background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--kana-chart-accent) 18%, transparent);
+}
+
 /* A square, not a pill: stretched across the middle of the row the speaker
    read as a third nav button rather than one control for one job. The quiz
    screen's speaker carries a caption beside its icon, so it keeps its pill. */
@@ -17222,6 +17392,11 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   outline: 2px solid var(--kyogre-light);
   outline-offset: 3px;
   border-radius: 10px;
+}
+
+.beginner-learner--hiragana .stroke-order-animation:focus-visible,
+.beginner-learner--katakana .stroke-order-animation:focus-visible {
+  outline-color: var(--kana-chart-accent-soft);
 }
 
 .stroke-order-chars {
@@ -17345,6 +17520,11 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   stroke-dashoffset: 3000;
 }
 
+.beginner-learner--hiragana .stroke-order-path,
+.beginner-learner--katakana .stroke-order-path {
+  stroke: var(--kana-chart-accent-soft);
+}
+
 .trace-canvas {
   display: flex;
   flex-direction: column;
@@ -17368,6 +17548,12 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   -webkit-user-select: none;
 }
 
+.beginner-learner--hiragana .trace-canvas-stack,
+.beginner-learner--katakana .trace-canvas-stack {
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 40%, var(--border));
+  background: color-mix(in srgb, var(--kana-chart-cell) 82%, var(--surface-2));
+}
+
 /* Tucked into the panel's own corner. The revealed meaning used to share a
    strip with it here, but at its current size that text covered the
    learner's writing and collided with this button, so it moved out to its
@@ -17389,6 +17575,11 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 .trace-canvas-clear:hover {
   border-color: var(--sakura);
   color: var(--text);
+}
+
+.beginner-learner--hiragana .trace-canvas-clear:hover,
+.beginner-learner--katakana .trace-canvas-clear:hover {
+  border-color: var(--kana-chart-accent-soft);
 }
 
 .trace-canvas-overlay {

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useLayoutEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -95,6 +95,58 @@ type View =
   | 'picture-practice'
   | 'grammar-lab'
 
+type MobileNavTab = 'quest' | 'study' | 'beginner' | 'library' | 'more'
+
+function mobileNavTabForView(view: View): MobileNavTab {
+  if (view === 'quests' || view === 'ink-road' || view === 'shrine-trial' || view === 'quest-scene' || view === 'quest-checkpoint') return 'quest'
+  if (view === 'study-tools' || view === 'kanji' || view === 'vocab-practice' || view === 'counter-practice' || view === 'grammar' || view === 'study' || view === 'study-loading' || view === 'complete') return 'study'
+  if (view === 'beginner-zone' || view === 'hiragana-chart' || view === 'katakana-chart' || view === 'hiragana-quiz' || view === 'katakana-quiz' || view === 'beginner-learner' || view === 'beginner-speed-run' || view === 'picture-practice') return 'beginner'
+  if (view === 'library' || view === 'favorite-words') return 'library'
+  return 'more'
+}
+
+function MobileBottomNav({
+  currentView,
+  onQuests,
+  onStudy,
+  onBeginner,
+  onLibrary,
+  onMore,
+}: {
+  currentView: View
+  onQuests: () => void
+  onStudy: () => void
+  onBeginner: () => void
+  onLibrary: () => void
+  onMore: () => void
+}) {
+  const activeTab = mobileNavTabForView(currentView)
+  const items: Array<{ tab: MobileNavTab; label: string; mark: string; onClick: () => void }> = [
+    { tab: 'quest', label: 'Quest', mark: '旅', onClick: onQuests },
+    { tab: 'study', label: 'Study', mark: '学', onClick: onStudy },
+    { tab: 'beginner', label: 'Beginner', mark: 'あ', onClick: onBeginner },
+    { tab: 'library', label: 'Library', mark: '本', onClick: onLibrary },
+    { tab: 'more', label: 'More', mark: '他', onClick: onMore },
+  ]
+
+  return (
+    <nav className="mobile-bottom-nav" aria-label="Primary">
+      {items.map((item) => (
+        <button
+          key={item.tab}
+          type="button"
+          className={activeTab === item.tab ? 'is-active' : ''}
+          onClick={item.onClick}
+          aria-current={activeTab === item.tab ? 'page' : undefined}
+        >
+          <span aria-hidden="true" lang="ja">{item.mark}</span>
+          <b>{item.label}</b>
+        </button>
+      ))}
+    </nav>
+  )
+}
+
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
 
@@ -148,6 +200,8 @@ function App() {
     [progress],
   )
   const activeQuest = getQuestById(activeQuestId)
+  const wrongCount = Object.keys(wrongPool).length
+  const hasQuestProgress = Object.keys(questProgress).length > 0
 
   function openBeginnerQuiz(script: Extract<BeginnerScript, 'hiragana' | 'katakana'>, returnView: 'beginner-zone' | 'hiragana-chart' | 'katakana-chart') {
     setBeginnerQuizReturnView(returnView)
@@ -263,8 +317,56 @@ function App() {
     setCurrentIndex((index) => Math.max(0, index - 1))
   }
 
+  const openLibraryHome = () => {
+    setLibraryTab('vocab')
+    setView('library')
+  }
+
+  const openContinueStudy = () => {
+    if (hasQuestProgress) {
+      setView('quests')
+      return
+    }
+    if (wrongCount > 0 || learnedCount > 0) {
+      setView('study-tools')
+      return
+    }
+    setView('beginner-zone')
+  }
+
+  const mobileContinueTitle = hasQuestProgress
+    ? 'Continue Quest'
+    : wrongCount > 0
+      ? 'Review Weak Cards'
+      : learnedCount > 0
+        ? 'Continue Study'
+        : 'Start Beginner Zone'
+  const mobileContinueDetail = hasQuestProgress
+    ? 'Pick up your campaign.'
+    : wrongCount > 0
+      ? `${wrongCount} cards need attention.`
+      : learnedCount > 0
+        ? `${learnedCount} cards learned so far.`
+        : 'Start with kana and first kanji.'
+  const mobileNav = (
+    <MobileBottomNav
+      currentView={view}
+      onQuests={() => setView('quests')}
+      onStudy={() => setView('study-tools')}
+      onBeginner={() => setView('beginner-zone')}
+      onLibrary={openLibraryHome}
+      onMore={() => setView('additional-tools')}
+    />
+  )
+  const withMobileNav = (content: ReactNode) => (
+    <>
+      {content}
+      {mobileNav}
+    </>
+  )
+
   if (view === 'library') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Study Library" />}>
           <LibraryPanel
@@ -272,7 +374,7 @@ function App() {
             onBack={() => setView('dashboard')}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
@@ -366,7 +468,7 @@ function App() {
   }
 
   if (view === 'quests') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Quests" />}>
           <QuestHub
@@ -399,7 +501,7 @@ function App() {
             }}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
@@ -420,7 +522,7 @@ function App() {
   }
 
   if (view === 'study-tools') {
-    return (
+    return withMobileNav(
       <div className="app study-tools-page">
         <ToolMenuPage
           title="Study tools"
@@ -464,12 +566,12 @@ function App() {
             onClick: () => setView('beginner-zone'),
           }}
         />
-      </div>
+      </div>,
     )
   }
 
   if (view === 'beginner-zone') {
-    return (
+    return withMobileNav(
       <div className="app beginner-zone-page">
         <ToolMenuPage
           title="Beginner Zone"
@@ -501,7 +603,7 @@ function App() {
             onClick: () => setView('study-tools'),
           }}
         />
-      </div>
+      </div>,
     )
   }
 
@@ -604,17 +706,17 @@ function App() {
   }
 
   if (view === 'favorite-words') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Favorite Words" />}>
           <FavoriteWordsPage onBack={() => setView('dashboard')} />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'additional-tools') {
-    return (
+    return withMobileNav(
       <div className="app additional-tools-page">
         <ToolMenuPage
           title="Additional"
@@ -639,7 +741,7 @@ function App() {
             { mark: '文法', title: 'Grammar (lab)', detail: 'A copy of grammar practice to rework.', accent: 'amber', onClick: () => setView('grammar-lab') },
           ]}
         />
-      </div>
+      </div>,
     )
   }
 
@@ -792,11 +894,14 @@ function App() {
     return null
   }
 
-  return (
+  return withMobileNav(
     <div className="app">
       <Dashboard
         learnedCount={learnedCount}
         totalCards={CARD_TOTAL}
+        mobileContinueTitle={mobileContinueTitle}
+        mobileContinueDetail={mobileContinueDetail}
+        onContinueStudy={openContinueStudy}
         onOpenQuests={() => setView('quests')}
         onOpenBeginnerZone={() => setView('beginner-zone')}
         onOpenAdditionalTools={() => setView('additional-tools')}
@@ -806,7 +911,7 @@ function App() {
         wrongPool={wrongPool}
         progress={progress}
       />
-    </div>
+    </div>,
   )
 }
 
