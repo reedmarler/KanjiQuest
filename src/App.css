@@ -15606,9 +15606,9 @@ body:has(.hiragana-chart-page--katakana) {
    katakana chart still reads as its own kyogre blue here instead of
    inheriting hiragana's cherry-blossom tint. */
 :root[data-app-theme='light'] .hiragana-chart-page {
-  --kana-chart-board: color-mix(in srgb, var(--hiragana-paper) 80%, var(--kana-chart-accent-soft) 20%);
-  --kana-chart-row: color-mix(in srgb, var(--hiragana-paper) 88%, var(--kana-chart-accent-soft) 12%);
-  --kana-chart-cell: color-mix(in srgb, var(--hiragana-paper) 74%, var(--kana-chart-accent-soft) 26%);
+  --kana-chart-board: color-mix(in srgb, var(--hiragana-paper) 86%, var(--kana-chart-accent-soft) 14%);
+  --kana-chart-row: color-mix(in srgb, var(--hiragana-paper) 92%, var(--kana-chart-accent-soft) 8%);
+  --kana-chart-cell: color-mix(in srgb, var(--hiragana-paper) 80%, var(--kana-chart-accent-soft) 20%);
   --kana-chart-grid-line: color-mix(in srgb, var(--sakura-deep) 12%, transparent);
 }
 
@@ -16139,7 +16139,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   --preview-page-bg:
     linear-gradient(135deg, color-mix(in srgb, #ffcfe3 80%, transparent), transparent 42%),
     linear-gradient(180deg, #ffe0ee 0%, #fff2f8 46%, #f0b8d2 100%);
-  --preview-card-bg: color-mix(in srgb, #ffdcec 84%, transparent);
+  --preview-card-bg: color-mix(in srgb, #ffc2dc 82%, transparent);
   --preview-top-bg:
     linear-gradient(180deg, color-mix(in srgb, #ffffff 94%, transparent), color-mix(in srgb, #ffeaf3 78%, transparent));
   --preview-badge-bg: color-mix(in srgb, #ffffff 86%, transparent);
