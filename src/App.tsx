@@ -95,37 +95,37 @@ type View =
   | 'picture-practice'
   | 'grammar-lab'
 
-type MobileNavTab = 'quest' | 'study' | 'beginner' | 'library' | 'more'
+type MobileNavTab = 'home' | 'quest' | 'study' | 'beginner' | 'more'
 
 function mobileNavTabForView(view: View): MobileNavTab {
+  if (view === 'dashboard') return 'home'
   if (view === 'quests' || view === 'ink-road' || view === 'shrine-trial' || view === 'quest-scene' || view === 'quest-checkpoint') return 'quest'
   if (view === 'study-tools' || view === 'kanji' || view === 'vocab-practice' || view === 'counter-practice' || view === 'grammar' || view === 'study' || view === 'study-loading' || view === 'complete') return 'study'
   if (view === 'beginner-zone' || view === 'hiragana-chart' || view === 'katakana-chart' || view === 'hiragana-quiz' || view === 'katakana-quiz' || view === 'beginner-learner' || view === 'beginner-speed-run' || view === 'picture-practice') return 'beginner'
-  if (view === 'library' || view === 'favorite-words') return 'library'
   return 'more'
 }
 
 function MobileBottomNav({
   currentView,
+  onHome,
   onQuests,
   onStudy,
   onBeginner,
-  onLibrary,
   onMore,
 }: {
   currentView: View
+  onHome: () => void
   onQuests: () => void
   onStudy: () => void
   onBeginner: () => void
-  onLibrary: () => void
   onMore: () => void
 }) {
   const activeTab = mobileNavTabForView(currentView)
   const items: Array<{ tab: MobileNavTab; label: string; mark: string; onClick: () => void }> = [
+    { tab: 'home', label: 'Home', mark: '家', onClick: onHome },
     { tab: 'quest', label: 'Quest', mark: '旅', onClick: onQuests },
     { tab: 'study', label: 'Study', mark: '学', onClick: onStudy },
     { tab: 'beginner', label: 'Beginner', mark: 'あ', onClick: onBeginner },
-    { tab: 'library', label: 'Library', mark: '本', onClick: onLibrary },
     { tab: 'more', label: 'More', mark: '他', onClick: onMore },
   ]
 
@@ -317,11 +317,6 @@ function App() {
     setCurrentIndex((index) => Math.max(0, index - 1))
   }
 
-  const openLibraryHome = () => {
-    setLibraryTab('vocab')
-    setView('library')
-  }
-
   const openContinueStudy = () => {
     if (hasQuestProgress) {
       setView('quests')
@@ -351,10 +346,10 @@ function App() {
   const mobileNav = (
     <MobileBottomNav
       currentView={view}
+      onHome={() => setView('dashboard')}
       onQuests={() => setView('quests')}
       onStudy={() => setView('study-tools')}
       onBeginner={() => setView('beginner-zone')}
-      onLibrary={openLibraryHome}
       onMore={() => setView('additional-tools')}
     />
   )
