@@ -15210,8 +15210,8 @@ button.counter-example {
 
 :root[data-app-theme='light'] body:has(.hiragana-chart-page) {
   background:
-    linear-gradient(135deg, color-mix(in srgb, #ffe3ee 74%, transparent), transparent 42%),
-    linear-gradient(180deg, #fff2f7 0%, #fff8fb 46%, #f6d9e5 100%);
+    linear-gradient(135deg, color-mix(in srgb, #ffcfe3 80%, transparent), transparent 42%),
+    linear-gradient(180deg, #ffe0ee 0%, #fff2f8 46%, #f0b8d2 100%);
 }
 
 :root:has(.hiragana-chart-page--hiragana),
@@ -15226,8 +15226,8 @@ body:has(.hiragana-chart-page--katakana) {
 
 :root[data-app-theme='light']:has(.hiragana-chart-page--hiragana) {
   background:
-    linear-gradient(135deg, color-mix(in srgb, #ffe3ee 74%, transparent), transparent 42%),
-    linear-gradient(180deg, #fff2f7 0%, #fff8fb 46%, #f6d9e5 100%);
+    linear-gradient(135deg, color-mix(in srgb, #ffcfe3 80%, transparent), transparent 42%),
+    linear-gradient(180deg, #ffe0ee 0%, #fff2f8 46%, #f0b8d2 100%);
 }
 
 /* Shared with .beginner-learner--hiragana/--katakana so the practice pages'
@@ -15653,6 +15653,49 @@ body:has(.hiragana-chart-page--katakana) {
   color: var(--hiragana-muted);
 }
 
+/* Back and KQ both fall back to the app-wide default pill otherwise — a
+   dark chip that reads fine against this app's normal dark surface, but
+   sits as a jarring dark square on this page's own light pastel
+   background. Matching .hiragana-chart-quiz-button's own light override
+   just above (same paper-white fill, same sakura-deep ink) instead of
+   mixing the accent into the (still-dark) --surface here.
+
+   Shared with the practice page's own あ card (.beginner-learner--sakura-a),
+   which hits the exact same problem for the exact same reason — but that
+   page's light/dark look is its own local toggle (previewDark in
+   BeginnerLearner.tsx, tracked by the presence of --preview-a-dark), not
+   this :root[data-app-theme] attribute the Chart page uses, so it needs
+   its own gate rather than sharing the Chart page's selector. */
+:root[data-app-theme='light'] .hiragana-chart-page--hiragana .app-back-button,
+.beginner-learner--sakura-a:not(.beginner-learner--preview-a-dark) .app-back-button,
+:root[data-app-theme='light'] .hiragana-chart-page--hiragana .app-dashboard-button,
+.beginner-learner--sakura-a:not(.beginner-learner--preview-a-dark) .app-dashboard-button {
+  border-color: color-mix(in srgb, var(--sakura-deep) 45%, transparent);
+  background: color-mix(in srgb, #ffffff 78%, transparent);
+  box-shadow: 0 0.22rem 0.75rem color-mix(in srgb, var(--sakura-deep) 12%, transparent);
+}
+
+:root[data-app-theme='light'] .hiragana-chart-page--hiragana .app-back-button,
+.beginner-learner--sakura-a:not(.beginner-learner--preview-a-dark) .app-back-button {
+  color: color-mix(in srgb, var(--sakura-deep) 70%, var(--hiragana-ink));
+}
+
+@media (hover: hover) {
+  :root[data-app-theme='light'] .hiragana-chart-page--hiragana .app-back-button:hover,
+  .beginner-learner--sakura-a:not(.beginner-learner--preview-a-dark) .app-back-button:hover {
+    border-color: var(--sakura-deep);
+    color: #fff;
+    background: linear-gradient(135deg, var(--sakura-deep), var(--sakura));
+    box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--sakura-deep) 22%, transparent);
+  }
+
+  :root[data-app-theme='light'] .hiragana-chart-page--hiragana .app-dashboard-button:hover,
+  .beginner-learner--sakura-a:not(.beginner-learner--preview-a-dark) .app-dashboard-button:hover {
+    border-color: var(--sakura-deep);
+    background: color-mix(in srgb, var(--sakura) 18%, #ffffff);
+  }
+}
+
 .hiragana-chart-cell-char {
   grid-area: 1 / 1;
   font: 800 1.95rem/1 'Noto Sans JP', sans-serif;
@@ -16054,8 +16097,8 @@ body:has(.beginner-learner--preview-a-dark) {
 html:has(.beginner-learner--sakura-a.beginner-learner--preview-a),
 body:has(.beginner-learner--sakura-a.beginner-learner--preview-a) {
   background:
-    linear-gradient(135deg, color-mix(in srgb, #ffe7f1 76%, transparent), transparent 44%),
-    linear-gradient(180deg, #fff5f9 0%, #fffafd 48%, #f8dbe8 100%);
+    linear-gradient(135deg, color-mix(in srgb, #ffcfe3 80%, transparent), transparent 42%),
+    linear-gradient(180deg, #ffe0ee 0%, #fff2f8 46%, #f0b8d2 100%);
 }
 
 html:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark),
@@ -16065,9 +16108,9 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 
 .beginner-learner.beginner-learner--sakura-a.beginner-learner--preview-a {
   --preview-page-bg:
-    linear-gradient(135deg, color-mix(in srgb, #ffe7f1 76%, transparent), transparent 44%),
-    linear-gradient(180deg, #fff5f9 0%, #fffafd 48%, #f8dbe8 100%);
-  --preview-card-bg: color-mix(in srgb, #fff9fc 92%, transparent);
+    linear-gradient(135deg, color-mix(in srgb, #ffcfe3 80%, transparent), transparent 42%),
+    linear-gradient(180deg, #ffe0ee 0%, #fff2f8 46%, #f0b8d2 100%);
+  --preview-card-bg: color-mix(in srgb, #fff2f8 88%, transparent);
   --preview-top-bg:
     linear-gradient(180deg, color-mix(in srgb, #ffffff 94%, transparent), color-mix(in srgb, #ffeaf3 78%, transparent));
   --preview-badge-bg: color-mix(in srgb, #ffffff 86%, transparent);
@@ -16099,7 +16142,11 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 .beginner-learner--sakura-a.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .preview-a-top,
 .beginner-learner--sakura-a.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .preview-a-read,
 .beginner-learner--sakura-a.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .preview-a-write {
-  border: 1px solid color-mix(in srgb, var(--preview-accent) 12%, transparent);
+  /* 12% read as barely-there against the deepened page background above —
+     enough to define the card's own edge without it, so bumped up to
+     actually separate the panel from the page instead of just from a flat
+     white behind it. */
+  border: 1px solid color-mix(in srgb, var(--preview-accent) 26%, transparent);
 }
 
 .beginner-learner--sakura-a.beginner-learner--preview-a:not(.beginner-learner--preview-a-dark) .preview-a-header-btn,
