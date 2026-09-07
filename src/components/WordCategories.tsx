@@ -18,6 +18,14 @@ const CATEGORY_MARKS: Record<WordCategory, string> = {
   Other: '他',
 }
 
+const CATEGORY_ACCENT: Record<WordCategory, string> = {
+  Verbs: 'verb',
+  Adjectives: 'adjective',
+  Adverbs: 'adverb',
+  Nouns: 'noun',
+  Other: 'other',
+}
+
 const INITIAL_RENDERED_ITEMS = 150
 const RENDER_BATCH_SIZE = 200
 
@@ -69,7 +77,7 @@ export function WordCategories({ onBack, embedded = false }: WordCategoriesProps
             <button
               key={key}
               type="button"
-              className={`kanji-level-tab ${category === key ? 'active' : ''}`}
+              className={`kanji-level-tab pos-tab pos-tab--${CATEGORY_ACCENT[key]} ${category === key ? 'active' : ''}`}
               onClick={() => setCategory(key)}
             >
               {CATEGORY_MARKS[key]} {key}
@@ -80,7 +88,7 @@ export function WordCategories({ onBack, embedded = false }: WordCategoriesProps
 
       <section className="kanji-level-stats vocab-list-stats">
         {CATEGORY_ORDER.map((key) => (
-          <div key={key} className={`kanji-level-chip ${grouped[key].length > 0 ? '' : 'is-empty'}`}>
+          <div key={key} className={`kanji-level-chip pos-chip pos-chip--${CATEGORY_ACCENT[key]} ${grouped[key].length > 0 ? '' : 'is-empty'}`}>
             <span className="level-name">{key}</span>
             <span className="level-count">{grouped[key].length}</span>
           </div>

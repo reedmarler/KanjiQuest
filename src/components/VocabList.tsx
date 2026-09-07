@@ -147,7 +147,7 @@ export function VocabList({ onBack, embedded = false }: VocabListProps) {
             <button
               key={lvl}
               type="button"
-              className={`kanji-level-tab ${level === lvl ? 'active' : ''}`}
+              className={`kanji-level-tab jlpt-tab jlpt-tab--${lvl.toLowerCase()} ${level === lvl ? 'active' : ''}`}
               onClick={() => setLevel(lvl)}
             >
               {lvl}

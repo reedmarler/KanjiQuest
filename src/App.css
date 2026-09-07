@@ -31,6 +31,12 @@
   --sakura: #ff8ba7;
   --sakura-light: #ffc0d0;
   --sakura-deep: #e86b8a;
+  /* Kanji's identity color — named for sumi-e ink. Kept brighter than the
+     other -light tokens so a kanji's own strokes stay legible wherever this
+     tints text. */
+  --sumi-deep: #7b48a8;
+  --sumi: #ad73ca;
+  --sumi-light: #e6c2f5;
 
   --accent: var(--kyogre);
   --accent-2: var(--kyogre-light);
@@ -6405,6 +6411,36 @@ body:has(.dashboard) {
   color: var(--text-muted);
   margin: 0.15rem 0;
 }
+
+/* Part of speech — categorical accent. Verbs/Adjectives/Adverbs reuse the
+   script-identity hues (katakana blue, hiragana pink, kanji's --sumi) since
+   Word Categories never shows script-page chrome alongside them; Nouns and
+   Other stay neutral as the unmarked default and the grammatical-glue
+   catch-all. These hues are never green/amber/red — that ramp is reserved
+   for "how well/how hard" (SRS grade, JLPT level, difficulty). */
+.pos-chip--verb .level-name,      .pos-tab--verb.active      { color: var(--kyogre-light); }
+.pos-chip--adjective .level-name, .pos-tab--adjective.active { color: var(--sakura-light); }
+.pos-chip--adverb .level-name,    .pos-tab--adverb.active    { color: var(--sumi-light); }
+.pos-chip--noun .level-name,      .pos-tab--noun.active      { color: var(--text); }
+.pos-chip--other .level-name,     .pos-tab--other.active     { color: var(--text-muted); }
+
+.pos-chip--verb      { border-color: color-mix(in srgb, var(--kyogre-light) 46%, var(--border)); }
+.pos-chip--adjective { border-color: color-mix(in srgb, var(--sakura-light) 46%, var(--border)); }
+.pos-chip--adverb    { border-color: color-mix(in srgb, var(--sumi-light) 46%, var(--border)); }
+
+.pos-tab--verb.active      { border-color: var(--kyogre-light); background: color-mix(in srgb, var(--kyogre) 16%, transparent); }
+.pos-tab--adjective.active { border-color: var(--sakura-light); background: color-mix(in srgb, var(--sakura) 16%, transparent); }
+.pos-tab--adverb.active    { border-color: var(--sumi-light); background: color-mix(in srgb, var(--sumi) 18%, transparent); }
+.pos-tab--noun.active      { border-color: var(--text-muted); background: var(--surface-2); }
+.pos-tab--other.active     { border-color: var(--border); background: var(--surface-2); }
+
+/* JLPT level — ordinal accent, the same green-to-red ramp as the difficulty
+   picker: N5 reads easiest, N1 reads hardest. */
+.jlpt-tab--n5.active { border-color: var(--rayquaza-light); color: var(--rayquaza-light); background: color-mix(in srgb, var(--rayquaza) 16%, transparent); }
+.jlpt-tab--n4.active { border-color: var(--rayquaza-light); color: var(--rayquaza-light); background: color-mix(in srgb, var(--rayquaza) 10%, var(--amber) 8%, transparent); }
+.jlpt-tab--n3.active { border-color: var(--amber-light); color: var(--amber-light); background: color-mix(in srgb, var(--amber) 16%, transparent); }
+.jlpt-tab--n2.active { border-color: var(--groudon-light); color: var(--groudon-light); background: color-mix(in srgb, var(--groudon) 10%, var(--amber) 8%, transparent); }
+.jlpt-tab--n1.active { border-color: var(--groudon-light); color: var(--groudon-light); background: color-mix(in srgb, var(--groudon) 16%, transparent); }
 
 .level-bar {
   height: 3px;
