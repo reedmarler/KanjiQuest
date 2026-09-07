@@ -228,6 +228,13 @@ body:has(.dashboard) {
   padding-top: 0.2rem;
 }
 
+.dashboard-page-settings {
+  position: absolute;
+  top: 0.45rem;
+  left: 0;
+  z-index: 13;
+}
+
 .hero {
   text-align: center;
   margin-bottom: 1.5rem;
@@ -4020,24 +4027,26 @@ body:has(.dashboard) {
 
 @media (max-width: 720px) {
   body:has(.mobile-bottom-nav) .app {
-    padding-bottom: calc(5.85rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
   }
 
   .mobile-bottom-nav {
     position: fixed;
-    right: 0.7rem;
-    bottom: calc(0.55rem + env(safe-area-inset-bottom));
-    left: 0.7rem;
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: 90;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 0.18rem;
-    padding: 0.38rem;
+    padding: 0.38rem 0.7rem calc(0.38rem + env(safe-area-inset-bottom));
     border: 1px solid color-mix(in srgb, var(--kyogre-light) 24%, var(--border));
-    border-radius: 18px;
-    background: color-mix(in srgb, var(--surface) 88%, transparent);
-    box-shadow: 0 0.65rem 1.8rem color-mix(in srgb, #000 28%, transparent);
-    backdrop-filter: blur(18px);
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 18px 18px 0 0;
+    background: var(--surface);
+    box-shadow: 0 -0.6rem 1.6rem color-mix(in srgb, #000 26%, transparent);
   }
 
   .mobile-bottom-nav button {
@@ -4088,6 +4097,11 @@ body:has(.dashboard) {
 
   .dashboard .hero-controls {
     margin-top: 0;
+  }
+
+  .dashboard-page-settings {
+    top: 0;
+    left: 0;
   }
 
   .dashboard-quest-guardian {

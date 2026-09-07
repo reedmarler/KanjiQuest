@@ -645,6 +645,17 @@ export function Dashboard({
 
   return (
     <div className="dashboard">
+      <button
+        type="button"
+        className={`dashboard-page-settings control-icon-button control-settings-button${settingsExpanded ? ' is-active' : ''}`}
+        onClick={toggleSettingsExpanded}
+        aria-expanded={settingsExpanded}
+        aria-controls="hero-voice-settings hero-content-settings"
+        aria-label={settingsExpanded ? 'Hide settings' : 'Show settings'}
+        title={settingsExpanded ? 'Hide settings' : 'Show settings'}
+      >
+        <span aria-hidden="true">&#9881;</span>
+      </button>
       <div className="control-story-topbar">
         {storyMode && (
           <div className="control-story-quick-select" ref={storyQuickSelectRef}>
@@ -963,17 +974,6 @@ export function Dashboard({
                   : 'No Japanese voice is installed on this device'}
               >
                 <span className="control-chip-jp" aria-hidden="true">{speechOn ? '\uD83D\uDD0A' : '\uD83D\uDD08'}</span>
-              </button>
-              <button
-                type="button"
-                className={`control-icon-button control-settings-button${settingsExpanded ? ' is-active' : ''}`}
-                onClick={toggleSettingsExpanded}
-                aria-expanded={settingsExpanded}
-                aria-controls="hero-voice-settings hero-content-settings"
-                aria-label={settingsExpanded ? 'Hide settings' : 'Show settings'}
-                title={settingsExpanded ? 'Hide settings' : 'Show settings'}
-              >
-                <span aria-hidden="true">&#9881;</span>
               </button>
             </div>
           </div>
