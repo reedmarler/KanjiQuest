@@ -644,6 +644,14 @@ export function Dashboard({
     <div className="dashboard">
       <button
         type="button"
+        className="dashboard-profile-placeholder"
+        aria-label="User profile"
+        title="User profile"
+      >
+        <span aria-hidden="true">U</span>
+      </button>
+      <button
+        type="button"
         className={`dashboard-page-settings control-icon-button control-settings-button${settingsExpanded ? ' is-active' : ''}`}
         onClick={toggleSettingsExpanded}
         aria-expanded={settingsExpanded}
@@ -851,19 +859,6 @@ export function Dashboard({
             )}
           </div>
         )}
-        <button
-          ref={modeToggleRef}
-          type="button"
-          className={`control-story-toggle control-story-top-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
-          onClick={toggleModeOn}
-          role="switch"
-          aria-checked={modeToggleOn}
-          aria-label={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
-          title={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
-        >
-          <span className="control-toggle-track" aria-hidden="true"><span /></span>
-          <span>{modeToggleOn ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>] : 'Mode'}</span>
-        </button>
       </div>
 
       <header className="hero hero-compact">
@@ -959,6 +954,19 @@ export function Dashboard({
                   : 'No Japanese voice is installed on this device'}
               >
                 <span className="control-chip-jp" aria-hidden="true">{speechOn ? '\uD83D\uDD0A' : '\uD83D\uDD08'}</span>
+              </button>
+              <button
+                ref={modeToggleRef}
+                type="button"
+                className={`control-story-toggle control-story-top-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
+                onClick={toggleModeOn}
+                role="switch"
+                aria-checked={modeToggleOn}
+                aria-label={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
+                title={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
+              >
+                <span className="control-toggle-track" aria-hidden="true"><span /></span>
+                <span>{modeToggleOn ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>] : 'Mode'}</span>
               </button>
             </div>
           </div>

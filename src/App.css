@@ -180,7 +180,8 @@ body:has(.beginner-word-writing-card) .app,
    normal width) pulls the button in to line up with Chart's without
    touching anything else on this page. */
 @media (max-width: 719px) {
-  .app.beginner-zone-page {
+  .app.beginner-zone-page,
+  .app.study-tools-page {
     --app-nav-left: 0.65rem;
   }
 }
@@ -231,8 +232,35 @@ body:has(.dashboard) {
 .dashboard-page-settings {
   position: absolute;
   top: 0.45rem;
+  right: 0;
+  z-index: 13;
+}
+
+.dashboard-profile-placeholder {
+  position: absolute;
+  top: 0.45rem;
   left: 0;
   z-index: 13;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  color: var(--text-muted);
+  font: 800 0.72rem/1 'Outfit', system-ui, sans-serif;
+  cursor: default;
+}
+
+.dashboard-profile-placeholder span {
+  display: grid;
+  place-items: center;
+  width: 1.2rem;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--kyogre) 16%, transparent);
 }
 
 .hero {
@@ -2259,8 +2287,8 @@ body:has(.dashboard) {
 .control-story-topbar {
   position: absolute;
   top: 0.45rem;
-  left: 0;
-  right: 0;
+  left: 2.45rem;
+  right: 2.45rem;
   z-index: 12;
   display: flex;
   align-items: flex-start;
@@ -2282,13 +2310,6 @@ body:has(.dashboard) {
   pointer-events: auto;
 }
 
-/*
- * The switch and the control that hangs under it are siblings in one wrapping
- * row rather than a nested column, which is what lets the two swap places by
- * breakpoint: the one meant to sit underneath takes a full-width line of its
- * own and pushes itself to the right, and the other stays inline on the first
- * line. Everywhere but a phone that under-the-switch control is Swap.
- */
 .control-story-quick-select.is-swap {
   order: 2;
   flex-basis: 100%;
@@ -2466,15 +2487,7 @@ body:has(.dashboard) {
 }
 
 .control-story-top-toggle {
-  /* Sits on the first line of the topbar, pushed to the right edge; whichever
-     control hangs under it wraps to the next line — see the topbar rules.
-     Box model (height/padding/border-radius/font) comes entirely from the
-     plain .control-story-toggle rule below, which this button always also
-     carries; that rule leaves width to the label it's showing, so this
-     button shrinks and grows in place as the mode changes instead of
-     reserving room for the longest possible label. */
-  order: 1;
-  margin-left: auto;
+  margin-left: 0;
   pointer-events: auto;
 }
 
@@ -2684,6 +2697,13 @@ body:has(.dashboard) {
 
 .control-audio-buttons {
   transform: none;
+}
+
+.control-audio-buttons .control-story-top-toggle {
+  min-width: 3.475rem;
+  height: 2rem;
+  padding: 0 0.48rem;
+  border-radius: 0.55rem;
 }
 
 .control-group-audio .control-icon-button {
@@ -4259,6 +4279,12 @@ body:has(.dashboard) {
   }
 
   .dashboard-page-settings {
+    top: 0;
+    right: 0;
+    left: auto;
+  }
+
+  .dashboard-profile-placeholder {
     top: 0;
     left: 0;
   }
