@@ -15936,6 +15936,17 @@ body:has(.beginner-learner--preview-a-dark) {
   --preview-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
 
+/* The glyph gradient and the active row-tab fill (both painted from
+   --preview-glyph-1/2) default to this preview's own pink regardless of
+   script, so katakana characters drew in hiragana's pink instead of its
+   own kyogre blue. Pulled from the same --kana-chart-accent-soft/-strong
+   tokens the back button above already uses for katakana, rather than a
+   second hand-picked blue, so the two can't drift apart. */
+.beginner-learner.beginner-learner--katakana.beginner-learner--preview-a-dark {
+  --preview-glyph-1: var(--kana-chart-accent-soft);
+  --preview-glyph-2: var(--kana-chart-accent-strong);
+}
+
 /* ---------------------------------------------------------------------------
    Sakura preview spike
    Trying the Hiragana Chart page's own palette here instead — the same
@@ -16006,13 +16017,14 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 }
 
 /* The back button pinned above this card is otherwise the app-wide default
-   (plain, turning blue on hover) — same sakura tint as the Hiragana Chart
-   page's own back button, so the あ spike carries that piece of the theme
-   too instead of standing out as the one blue-on-hover control on the page.
-   Pulling from the same --kana-chart-* tokens the Chart page itself uses
-   (rather than this preview's own --preview-* palette, which only happened
-   to be close) keeps the two pixel-identical instead of marginally off. */
-.beginner-learner--sakura-a .app-back-button {
+   (plain, turning blue on hover) — same tint as the Hiragana/Katakana
+   Chart page's own back button, on every character of either script (not
+   just あ, where this started), so it never reverts to the plain look
+   when switching rows. Pulling from the same --kana-chart-* tokens the
+   Chart page itself uses — already script-aware (pink for hiragana, blue
+   for katakana) — means this one rule covers both instead of needing a
+   separate copy per script. */
+.beginner-learner--preview-a .app-back-button {
   border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 84%, #fff 8%);
   color: var(--kana-chart-accent-soft);
   background: color-mix(in srgb, var(--kana-chart-accent) 18%, var(--surface));
@@ -16022,7 +16034,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 /* :hover only, and only on a real hover-capable pointer — see the
    Hiragana Chart page's own back-button rule for why both matter. */
 @media (hover: hover) {
-  .beginner-learner--sakura-a .app-back-button:hover {
+  .beginner-learner--preview-a .app-back-button:hover {
     border-color: var(--kana-chart-button-border);
     color: #fff;
     background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
