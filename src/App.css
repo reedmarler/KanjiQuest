@@ -102,8 +102,13 @@ body {
 }
 
 @media (max-width: 719px) {
+  /* The back button/theme toggle pair are pinned at --app-nav-left/-right
+     from .app's own edge, not its padding edge, so trimming .app's padding
+     above without matching this left them sitting 0.6rem outside the
+     chart's own now-narrower left/right edges instead of flush with them. */
   body:has(.hiragana-chart-page) .app {
     padding-inline: 0.65rem;
+    --app-nav-left: 0.65rem;
   }
 }
 
@@ -17084,8 +17089,12 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
    width than it spends, since the box below grows by more than the reference
    above it loses. */
 @media (max-width: 719px) {
+  /* Same fix as the Chart page's own: matches the trimmed padding above so
+     the pinned back button/theme toggle stay flush with this page's own
+     now-narrower left/right edges instead of sitting 0.6rem outside them. */
   body:has(.beginner-learner) .app {
     padding-inline: 0.65rem;
+    --app-nav-left: 0.65rem;
   }
 
   .beginner-learner {
