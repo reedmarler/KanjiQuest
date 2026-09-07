@@ -164,6 +164,21 @@ body:has(.beginner-word-writing-card) .app,
   top: 0.3rem;
 }
 
+/* On phones the Hiragana Chart page (and its practice-page counterpart)
+   pull the back button in from --app-nav-left's usual 1.25rem to 0.65rem
+   to match their own narrowed content edge (see body:has(.hiragana-chart-page)
+   .app above) — Beginner Zone never narrowed its own edge to match, so its
+   back button stayed out at the wider inset, reading as a jump left/right
+   between the two screens. Overriding just the variable here (rather than
+   .app's actual padding, which the menu cards below still want at its
+   normal width) pulls the button in to line up with Chart's without
+   touching anything else on this page. */
+@media (max-width: 719px) {
+  .app.beginner-zone-page {
+    --app-nav-left: 0.65rem;
+  }
+}
+
 .beginner-zone-page .tool-menu-heading,
 .study-tools-page .tool-menu-heading,
 .additional-tools-page .tool-menu-heading {
@@ -15260,7 +15275,19 @@ body:has(.hiragana-chart-page--katakana) {
   gap: 0.75rem;
   width: min(100%, var(--kana-page-width));
   margin-inline: auto;
-  padding: 1.25rem 0 1.5rem;
+  /* 0.7rem lands the heading at the same height as the Hiragana/Katakana
+     practice page's own copy of it. Working from .app's own edge down to
+     the heading, both pages stack: .app's padding-top, this page's own
+     padding-top, then one flex `gap` before the heading (the collapsed
+     .app-back-slot above it is a zero-height flex item, but still spends a
+     gap) — .app gives this page 2rem versus the practice page's 1rem (see
+     body:has(.beginner-learner) .app), and this page's own 0.75rem gap
+     versus the practice page's 0.5rem, so this page's own padding-top has
+     to come in (1rem + 0.25rem) short of that page's 1.95rem. Independent
+     of breakpoint, since none of those four numbers changes with width —
+     except this page's own gap, which the ≤560px rule below accounts for
+     with its own padding-top. */
+  padding: 0.7rem 0 1.5rem;
 }
 
 /* The back button pins to the page corner and floats independently of the
@@ -15338,7 +15365,6 @@ body:has(.hiragana-chart-page--katakana) {
 @media (min-width: 720px) {
   .hiragana-chart-page {
     width: min(100%, var(--kana-page-width));
-    padding-top: 1.1rem;
   }
 }
 
@@ -15652,7 +15678,11 @@ body:has(.hiragana-chart-page--katakana) {
   .hiragana-chart-page {
     width: min(100%, 30rem);
     gap: 0.55rem;
-    padding-top: 1.2rem;
+    /* The smaller gap above still spends one flex `gap` above the heading
+       (see the base rule's comment), so matching the practice page's
+       height here needs less taken off padding-top than the base rule
+       takes off: 1.45rem - 0.55rem = 0.9rem. */
+    padding-top: 0.9rem;
   }
 
   .hiragana-chart-heading {
