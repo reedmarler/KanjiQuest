@@ -9006,12 +9006,14 @@ body:has(.dashboard) {
 }
 
 .beginner-zone-page .tool-menu-card,
-.study-tools-page .tool-menu-card {
+.study-tools-page .tool-menu-card,
+.additional-tools-page .tool-menu-card {
   height: 5.4rem;
 }
 
 .beginner-zone-page .tool-menu-card > span:last-child,
-.study-tools-page .tool-menu-card > span:last-child {
+.study-tools-page .tool-menu-card > span:last-child,
+.additional-tools-page .tool-menu-card > span:last-child {
   display: grid;
   gap: 0.25rem;
 }
