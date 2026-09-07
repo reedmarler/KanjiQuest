@@ -352,8 +352,6 @@ interface DashboardProps {
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
   onOpenQuests: () => void
-  onOpenBeginnerZone: () => void
-  onOpenAdditionalTools: () => void
   onOpenStudyTools: () => void
   onOpenFavoriteWords: () => void
   onContinueStudy: () => void
@@ -366,8 +364,6 @@ export function Dashboard({
   learnedCount,
   totalCards,
   onOpenQuests,
-  onOpenBeginnerZone,
-  onOpenAdditionalTools,
   onOpenStudyTools,
   onOpenFavoriteWords,
   onContinueStudy,
@@ -520,6 +516,7 @@ export function Dashboard({
   // static tagline — the next guardian is the reason to tap through.
   const questsCleared = QUESTS.filter((quest) => isQuestComplete(questProgress, quest.id)).length
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
+  const wrongCount = Object.keys(wrongPool).length
   const furiganaActive = furiganaOn
 
   useEffect(() => {
@@ -892,18 +889,6 @@ export function Dashboard({
         />
       </header>
 
-      <section className="mobile-home-primary" aria-label="Continue study">
-        <button type="button" className="mobile-continue-card" onClick={onContinueStudy}>
-          <span className="mobile-continue-mark" aria-hidden="true" lang="ja">続</span>
-          <span className="mobile-continue-copy">
-            <small>Next up</small>
-            <b>{mobileContinueTitle}</b>
-            <em>{mobileContinueDetail}</em>
-          </span>
-          <span className="mobile-continue-arrow" aria-hidden="true">&rarr;</span>
-        </button>
-      </section>
-
       <section className="hero-controls" aria-label="Sentence controls">
         <div className="hero-controls-row hero-controls-primary">
           <div className="control-group control-group-primary-options" role="group" aria-label="Display options">
@@ -1202,6 +1187,18 @@ export function Dashboard({
         )}
       </section>
 
+      <section className="mobile-home-primary" aria-label="Continue study">
+        <button type="button" className="mobile-continue-card" onClick={onContinueStudy}>
+          <span className="mobile-continue-mark" aria-hidden="true" lang="ja">続</span>
+          <span className="mobile-continue-copy">
+            <small>Next up</small>
+            <b>{mobileContinueTitle}</b>
+            <em>{mobileContinueDetail}</em>
+          </span>
+          <span className="mobile-continue-arrow" aria-hidden="true">&rarr;</span>
+        </button>
+      </section>
+
       {false && (
         <section className="progress-section progress-compact">
           <div className="progress-header">
@@ -1223,83 +1220,33 @@ export function Dashboard({
         </section>
       )}
 
-      <div className="dashboard-action-grid">
-        <div className="dashboard-action-primary">
-          <button type="button" className="dashboard-feature-card dashboard-study-tools-card" onClick={onOpenStudyTools}>
-            <strong className="dashboard-feature-title">Study tools</strong>
-            <span className="dashboard-study-tool-reel" aria-hidden="true">
-              <i lang="ja">文</i>
-              <i lang="ja">法</i>
-              <i lang="ja">語</i>
-              <i lang="ja">漢</i>
-              <i lang="ja">数</i>
-            </span>
-          </button>
-
-          <button type="button" className="dashboard-feature-card dashboard-quests-card" onClick={onOpenQuests}>
-            <strong className="dashboard-feature-title">Quests</strong>
-            <span className="dashboard-quest-scene" aria-hidden="true">
-              <span
-                className="dashboard-quest-trail"
-                style={{
-                  '--quest-progress': `${QUESTS.length === 0 ? 0 : (questsCleared / QUESTS.length) * 100}%`,
-                } as CSSProperties}
-              >
-                <span className="dashboard-quest-katana-blade"><i /></span>
-                <span className="dashboard-quest-katana-tsuba" />
-                <span className="dashboard-quest-katana-hilt">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-              </span>
-              <span className="dashboard-quest-wind-slash">
-                <i />
-                <b />
-                <b />
-                <b />
-              </span>
-              <span className="dashboard-quest-guardian">
-                <span className="dashboard-quest-speed-lines">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                <span className="dashboard-quest-aura">
-                  <b />
-                  <i lang="ja">桜</i>
-                  <i lang="ja">武</i>
-                  <i lang="ja">気</i>
-                  <i lang="ja">侍</i>
-                  <i lang="ja">刀</i>
-                </span>
-                <span className="dashboard-quest-guardian-sprite" />
-              </span>
-            </span>
-          </button>
+      <section className="dashboard-next-panel" aria-label="Study progress">
+        <div className="dashboard-next-copy">
+          <small>Today</small>
+          <h2>{wrongCount > 0 ? 'Review weak cards first' : 'Keep your path moving'}</h2>
+          <p>{wrongCount > 0 ? `${wrongCount} cards are ready for another pass.` : `${learnedCount} of ${totalCards} cards learned.`}</p>
         </div>
-
-        <div className="dashboard-action-secondary">
-          {/* Reuses the achievement button's classes: they carry the shared
-              secondary-tile layout, and the beginner modifier only restyles
-              the accent colour on top. */}
-          <button type="button" className="dashboard-achievement-button dashboard-beginner-button" onClick={onOpenBeginnerZone}>
-            <span className="dashboard-achievement-mark dashboard-beginner-mark" aria-hidden="true" lang="ja">&#12354;</span>
-            <span>
-              <b>Beginner Zone</b>
-            </span>
-          </button>
-
-          <button type="button" className="dashboard-additional dashboard-additional-tools-button" onClick={onOpenAdditionalTools}>
-            <span className="dashboard-additional-mark-main" aria-hidden="true" lang="ja">他</span>
-            <span className="dashboard-additional-heading">
-              <b>Additional</b>
-            </span>
-          </button>
+        <div className="dashboard-progress-grid">
+          <div className="dashboard-progress-stat">
+            <span>Cards</span>
+            <b>{progressPct}%</b>
+            <i style={{ '--progress-pct': `${progressPct}%` } as CSSProperties} />
+          </div>
+          <div className="dashboard-progress-stat">
+            <span>Quests</span>
+            <b>{questsCleared}/{QUESTS.length}</b>
+            <i style={{ '--progress-pct': `${QUESTS.length === 0 ? 0 : (questsCleared / QUESTS.length) * 100}%` } as CSSProperties} />
+          </div>
         </div>
-      </div>
+        <div className="dashboard-next-actions">
+          <button type="button" className="dashboard-next-primary" onClick={onContinueStudy}>
+            <span>Next up</span>
+            <b>{mobileContinueTitle}</b>
+          </button>
+          <button type="button" onClick={onOpenStudyTools}>Study</button>
+          <button type="button" onClick={onOpenQuests}>Quest</button>
+        </div>
+      </section>
     </div>
   )
 }

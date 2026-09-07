@@ -714,26 +714,24 @@ function App() {
     return withMobileNav(
       <div className="app additional-tools-page">
         <ToolMenuPage
-          title="Additional"
-          eyebrow="STUDY LIBRARY"
-          description="Manage saved content and practice tools."
+          title="More"
           onBack={() => setView('dashboard')}
           tools={[
-            { mark: '語', title: 'Vocab List', detail: 'Browse every word by level.', accent: 'sakura', onClick: () => {
+            { mark: '語', title: 'Vocab List', detail: 'Words by level.', accent: 'sakura', onClick: () => {
               setLibraryTab('vocab')
               setView('library')
             } },
-            { mark: '動', title: 'Word Categories', detail: 'Browse verbs, adjectives, nouns, and more.', accent: 'rayquaza', onClick: () => {
+            { mark: '動', title: 'Word Categories', detail: 'Grammar groups.', accent: 'rayquaza', onClick: () => {
               setLibraryTab('categories')
               setView('library')
             } },
-            { mark: '誉', title: 'Achievements', detail: 'Every quest, story, and hard-won reading.', accent: 'amber', onClick: () => setView('achievements') },
-            { mark: '編', title: 'Content Studio', detail: 'Add and organize your own content.', accent: 'gold', onClick: () => setView('content-studio') },
-            { mark: '験', title: 'Sentence Testing', detail: 'Generate sentences by complexity level.', accent: 'kyogre', onClick: () => setView('sentence-testing') },
-            { mark: '声', title: 'Voice Test', detail: 'Compare provider voices before building audio.', accent: 'sakura', onClick: () => setView('voice-test') },
+            { mark: '誉', title: 'Achievements', detail: 'Milestones.', accent: 'amber', onClick: () => setView('achievements') },
+            { mark: '編', title: 'Content Studio', detail: 'Custom content.', accent: 'gold', onClick: () => setView('content-studio') },
+            { mark: '験', title: 'Sentence Testing', detail: 'Generator checks.', accent: 'kyogre', onClick: () => setView('sentence-testing') },
+            { mark: '声', title: 'Voice Test', detail: 'Audio checks.', accent: 'sakura', onClick: () => setView('voice-test') },
             /* Copies to redesign in. Changes here reach nothing people study with. */
-            { mark: '文', title: 'Sentences (lab)', detail: 'A copy of the sentence builder to rework.', accent: 'rayquaza', onClick: () => startSentenceMode('additional-tools', true) },
-            { mark: '文法', title: 'Grammar (lab)', detail: 'A copy of grammar practice to rework.', accent: 'amber', onClick: () => setView('grammar-lab') },
+            { mark: '文', title: 'Sentences (lab)', detail: 'Draft tool.', accent: 'rayquaza', onClick: () => startSentenceMode('additional-tools', true) },
+            { mark: '文法', title: 'Grammar (lab)', detail: 'Draft tool.', accent: 'amber', onClick: () => setView('grammar-lab') },
           ]}
         />
       </div>,
@@ -898,8 +896,6 @@ function App() {
         mobileContinueDetail={mobileContinueDetail}
         onContinueStudy={openContinueStudy}
         onOpenQuests={() => setView('quests')}
-        onOpenBeginnerZone={() => setView('beginner-zone')}
-        onOpenAdditionalTools={() => setView('additional-tools')}
         onOpenStudyTools={() => setView('study-tools')}
         onOpenFavoriteWords={() => setView('favorite-words')}
         questProgress={questProgress}
