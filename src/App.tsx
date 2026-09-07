@@ -427,32 +427,32 @@ function App() {
           eyebrow="STUDY MODES"
           onBack={() => setView('dashboard')}
           tools={[
-            { mark: '漢', title: 'Kanji', detail: 'Study kanji readings and forms.', accent: 'kyogre', onClick: () => {
+            { mark: '漢', title: 'Kanji', detail: 'Readings and forms.', accent: 'kyogre', onClick: () => {
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
               setView('kanji')
             } },
-            { mark: '語彙', title: 'Vocab', detail: 'Drill focused word groups.', accent: 'gold', onClick: () => {
+            { mark: '語彙', title: 'Vocab', detail: 'Focused words.', accent: 'gold', onClick: () => {
               setQuestVocabTopicId(undefined)
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
               setView('vocab-practice')
             } },
-            { mark: '数', title: 'Numbers', detail: 'Drill counting words and counters.', accent: 'amber', onClick: () => {
+            { mark: '数', title: 'Counters', detail: 'Counting patterns.', accent: 'amber', onClick: () => {
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
               setView('counter-practice')
             } },
-            { mark: '⚡', title: 'Speed Run', detail: 'A kana flashes, then vanishes — name it before it fades.', accent: 'rayquaza', onClick: () => {
+            { mark: '⚡', title: 'Speed Run', detail: 'Fast kana recall.', accent: 'rayquaza', onClick: () => {
               setSpeedRunReturnView('study-tools')
               setView('beginner-speed-run')
             } },
-            { mark: '絵', title: 'Picture Mode', detail: 'Match a picture to the word that names it.', accent: 'sakura', onClick: () => {
+            { mark: '絵', title: 'Pictures', detail: 'Image word matching.', accent: 'sakura', onClick: () => {
               setPictureReturnView('study-tools')
               setView('picture-practice')
             } },
-            { mark: '文', title: 'Sentences', detail: 'Build Japanese sentence order.', accent: 'sakura', onClick: () => startSentenceMode('study-tools') },
-            { mark: '文法', title: 'Grammar', detail: 'Practice patterns and particles.', accent: 'rayquaza', onClick: () => {
+            { mark: '文', title: 'Sentences', detail: 'Word order.', accent: 'sakura', onClick: () => startSentenceMode('study-tools') },
+            { mark: '文法', title: 'Grammar', detail: 'Patterns and particles.', accent: 'rayquaza', onClick: () => {
               setActiveQuestId(undefined)
               setPracticeReturnView('study-tools')
               setView('grammar')
@@ -475,22 +475,22 @@ function App() {
           title="Beginner Zone"
           onBack={() => setView('dashboard')}
           tools={[
-            { mark: 'あ', title: 'Hiragana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'sakura', onClick: () => setView('hiragana-chart') },
-            { mark: 'ア', title: 'Katakana Chart', detail: 'See every row at a glance, jump straight to one.', accent: 'kyogre', onClick: () => setView('katakana-chart') },
-            { mark: '聞', title: 'Hiragana Quiz', detail: 'Check hiragana with listening and writing.', accent: 'rayquaza', onClick: () => openBeginnerQuiz('hiragana', 'beginner-zone') },
-            { mark: '書', title: 'Katakana Quiz', detail: 'Check katakana with listening and writing.', accent: 'amber', onClick: () => openBeginnerQuiz('katakana', 'beginner-zone') },
-            { mark: '一', title: 'First Kanji', detail: 'Learn 30 memorable starter kanji.', accent: 'gold', onClick: () => {
+            { mark: 'あ', title: 'Hiragana Chart', detail: 'Kana rows.', accent: 'sakura', onClick: () => setView('hiragana-chart') },
+            { mark: 'ア', title: 'Katakana Chart', detail: 'Kana rows.', accent: 'kyogre', onClick: () => setView('katakana-chart') },
+            { mark: '聞', title: 'Hiragana Quiz', detail: 'Listen and write.', accent: 'rayquaza', onClick: () => openBeginnerQuiz('hiragana', 'beginner-zone') },
+            { mark: '書', title: 'Katakana Quiz', detail: 'Listen and write.', accent: 'amber', onClick: () => openBeginnerQuiz('katakana', 'beginner-zone') },
+            { mark: '一', title: 'First Kanji', detail: 'Starter kanji.', accent: 'gold', onClick: () => {
               setBeginnerScript('kanji')
               setBeginnerInitialRowIndex(0)
               setBeginnerInitialCharIndex(0)
               setBeginnerLearnerReturnView('beginner-zone')
               setView('beginner-learner')
             } },
-            { mark: '絵', title: 'Picture Mode', detail: 'Match a picture to the word that names it.', accent: 'rayquaza', onClick: () => {
+            { mark: '絵', title: 'Pictures', detail: 'Image word matching.', accent: 'rayquaza', onClick: () => {
               setPictureReturnView('beginner-zone')
               setView('picture-practice')
             } },
-            { mark: '⚡', title: 'Speed Run', detail: 'A kana flashes, then vanishes — name it before it fades.', accent: 'rayquaza', onClick: () => {
+            { mark: '⚡', title: 'Speed Run', detail: 'Fast kana recall.', accent: 'rayquaza', onClick: () => {
               setSpeedRunReturnView('beginner-zone')
               setView('beginner-speed-run')
             } },
