@@ -16272,7 +16272,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 .preview-a-replay {
   position: absolute;
   top: 0.7rem;
-  right: 0.7rem;
+  right: 0.35rem;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -16329,7 +16329,7 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
      (stackWidthRem on the TraceCanvas call), so top and right are
      symmetric — both offsets are just crossing that same 1.3rem padding. */
   top: -0.1rem;
-  right: -0.1rem;
+  right: -0.45rem;
   border-color: color-mix(in srgb, var(--preview-text) 18%, transparent);
   background: var(--preview-badge-bg);
   color: var(--preview-muted);
