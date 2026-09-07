@@ -178,26 +178,26 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
 
           <div className="kanji-learning-controls standard-kanji-controls">
             <div className="standard-kanji-utility-row">
-              <div className="standard-kanji-display-toggles control-group control-group-primary-options" role="group" aria-label="Display options">
+              <div className="standard-kanji-dashboard-toggles control-group control-group-primary-options" role="group" aria-label="Display options">
                 <button
                   type="button"
-                  className={`control-chip${furiganaVisible ? ' is-active' : ''}`}
+                  className={`control-chip control-chip-compact app-display-toggle${furiganaVisible ? ' is-active' : ''}`}
                   aria-pressed={furiganaVisible}
                   aria-label="Toggle furigana"
                   title="Furigana"
                   onClick={() => setFuriganaVisible((isVisible) => !isVisible)}
                 >
-                  Furigana
+                  ふり
                 </button>
                 <button
                   type="button"
-                  className={`control-chip${englishVisible ? ' is-active' : ''}`}
+                  className={`control-chip control-chip-compact app-display-toggle${englishVisible ? ' is-active' : ''}`}
                   aria-pressed={englishVisible}
                   aria-label="Toggle English translation"
                   title="English"
                   onClick={() => setEnglishVisible((isVisible) => !isVisible)}
                 >
-                  English
+                  EN
                 </button>
               </div>
               <button
