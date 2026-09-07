@@ -16110,22 +16110,25 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
 /* The back button pinned above this card is otherwise the app-wide default
    (plain, turning blue on hover) — same sakura tint as the Hiragana Chart
    page's own back button, so the あ spike carries that piece of the theme
-   too instead of standing out as the one blue-on-hover control on the page. */
+   too instead of standing out as the one blue-on-hover control on the page.
+   Pulling from the same --kana-chart-* tokens the Chart page itself uses
+   (rather than this preview's own --preview-* palette, which only happened
+   to be close) keeps the two pixel-identical instead of marginally off. */
 .beginner-learner--sakura-a .app-back-button {
-  border-color: color-mix(in srgb, var(--preview-accent) 84%, #fff 8%);
-  color: var(--preview-accent);
-  background: color-mix(in srgb, var(--preview-accent) 18%, var(--surface));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--preview-accent) 24%, transparent);
+  border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 84%, #fff 8%);
+  color: var(--kana-chart-accent-soft);
+  background: color-mix(in srgb, var(--kana-chart-accent) 18%, var(--surface));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--kana-chart-accent-soft) 24%, transparent);
 }
 
 /* :hover only, and only on a real hover-capable pointer — see the
    Hiragana Chart page's own back-button rule for why both matter. */
 @media (hover: hover) {
   .beginner-learner--sakura-a .app-back-button:hover {
-    border-color: color-mix(in srgb, var(--preview-glyph-1) 60%, transparent);
+    border-color: var(--kana-chart-button-border);
     color: #fff;
-    background: linear-gradient(135deg, var(--preview-glyph-2), var(--preview-glyph-1));
-    box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--preview-accent) 16%, transparent);
+    background: linear-gradient(135deg, var(--kana-chart-accent-strong), var(--kana-chart-accent-soft));
+    box-shadow: 0 0.36rem 0.9rem color-mix(in srgb, var(--kana-chart-accent) 16%, transparent);
   }
 }
 
