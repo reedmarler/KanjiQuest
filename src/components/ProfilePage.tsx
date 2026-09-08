@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react'
-import { profileInitial, readProfilePhoto, useUserProfile } from '../lib/userProfile'
+import { displayProfilePhoto, readProfilePhoto, useUserProfile } from '../lib/userProfile'
 import { AppBackButton } from './AppBackButton'
 
 export function ProfilePage({ onBack }: { onBack: () => void }) {
@@ -28,7 +28,6 @@ export function ProfilePage({ onBack }: { onBack: () => void }) {
     <main className="account-page">
       <header className="account-page-heading">
         <AppBackButton onClick={onBack} aria-label="Back" />
-        <small>Account</small>
         <h1>Profile</h1>
       </header>
 
@@ -37,18 +36,14 @@ export function ProfilePage({ onBack }: { onBack: () => void }) {
           type="button"
           className="account-profile-photo"
           onClick={() => photoRef.current?.click()}
-          aria-label={profile.photo ? 'Change profile picture' : 'Add a profile picture'}
+          aria-label="Change profile picture"
         >
-          {profile.photo
-            ? <img src={profile.photo} alt="" />
-            : <span aria-hidden="true">{profileInitial(profile.name)}</span>}
-          <small>{profile.photo ? 'Change' : 'Add photo'}</small>
+          <img src={displayProfilePhoto(profile.photo)} alt="" />
         </button>
 
-        {editingName ? (
-          <form className="account-profile-name-form" onSubmit={saveName}>
-            <label>
-              <span>Name</span>
+        <div className="account-profile-identity">
+          {editingName ? (
+            <form className="account-profile-name-form" onSubmit={saveName}>
               <input
                 value={draftName}
                 onChange={(event) => setDraftName(event.target.value)}
@@ -57,14 +52,13 @@ export function ProfilePage({ onBack }: { onBack: () => void }) {
                 maxLength={32}
                 aria-label="In-app name"
               />
-            </label>
-          </form>
-        ) : (
-          <button type="button" className="account-profile-name" onClick={startRename}>
-            <small>Name</small>
-            <b>{profile.name}</b>
-          </button>
-        )}
+            </form>
+          ) : (
+            <button type="button" className="account-profile-name" onClick={startRename}>
+              <b>{profile.name}</b>
+            </button>
+          )}
+        </div>
       </section>
 
       <section className="account-profile-fields" aria-label="Profile details">

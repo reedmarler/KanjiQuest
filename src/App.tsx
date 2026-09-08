@@ -30,7 +30,7 @@ import { COMPLEXITY_DISPLAY, Dashboard, HERO_SPEECH_STORAGE_KEY } from './compon
 import { AppHeaderControls } from './components/AppHeaderControls'
 import { UserProfileMenu } from './components/UserProfileMenu'
 import type { DailyGoalId } from './lib/dailyGoals'
-import { profileInitial, useUserProfile } from './lib/userProfile'
+import { displayProfilePhoto, useUserProfile } from './lib/userProfile'
 import { canSpeakJapanese, stopSpeaking, watchSpeechSupport } from './lib/speech'
 import { SessionComplete } from './components/SessionComplete'
 import type { LibraryTab } from './components/LibraryPanel'
@@ -162,7 +162,7 @@ function DesktopPrimaryNav({
   hideUser,
   profileOpen,
   settingsOpen,
-  profileName,
+  profileName: _profileName,
   profilePhoto,
   onProfile,
   onSettings,
@@ -207,9 +207,7 @@ function DesktopPrimaryNav({
         title="User menu"
         tabIndex={hideUser ? -1 : undefined}
       >
-        {profilePhoto
-          ? <img src={profilePhoto} alt="" />
-          : <span aria-hidden="true">{profileInitial(profileName)}</span>}
+        <img src={displayProfilePhoto(profilePhoto)} alt="" />
       </button>
       <div className="desktop-primary-nav-links">
         {items.map((item) => (

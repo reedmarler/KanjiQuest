@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 
 import { QUESTS } from '../data/questCampaign'
 import { useDailyGoals } from '../lib/dailyGoals'
 import { isQuestComplete, type QuestProgress } from '../lib/questProgress'
-import { profileInitial, readProfilePhoto, useUserProfile } from '../lib/userProfile'
+import { displayProfilePhoto, readProfilePhoto, useUserProfile } from '../lib/userProfile'
 
 type UserProfileMenuProps = {
   open: boolean
@@ -164,11 +164,9 @@ export function UserProfileMenu({
             type="button"
             className="dashboard-profile-avatar"
             onClick={() => photoRef.current?.click()}
-            aria-label={profile.photo ? 'Change profile picture' : 'Add a profile picture'}
+            aria-label="Change profile picture"
           >
-            {profile.photo
-              ? <img src={profile.photo} alt="" />
-              : <span aria-hidden="true">{profileInitial(profile.name)}</span>}
+            <img src={displayProfilePhoto(profile.photo)} alt="" />
           </button>
           <div>
             {editingName ? (

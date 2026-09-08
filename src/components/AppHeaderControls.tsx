@@ -1,3 +1,5 @@
+import { displayProfilePhoto } from '../lib/userProfile'
+
 /**
  * Profile + settings pair used on the main hub tabs on phones. Desktop puts
  * the same actions inside the primary nav, so these stay hidden there.
@@ -6,7 +8,7 @@ export function AppHeaderControls({
   hideUser = false,
   profileOpen = false,
   settingsOpen = false,
-  profileName,
+  profileName: _profileName,
   profilePhoto,
   onProfile,
   onSettings,
@@ -31,9 +33,7 @@ export function AppHeaderControls({
         title="User menu"
         tabIndex={hideUser ? -1 : undefined}
       >
-        {profilePhoto
-          ? <img src={profilePhoto} alt="" />
-          : <span aria-hidden="true">{profileName.trim()[0]?.toUpperCase() || '?'}</span>}
+        <img src={displayProfilePhoto(profilePhoto)} alt="" />
       </button>
       <button
         type="button"

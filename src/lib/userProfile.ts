@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 const PROFILE_STORAGE_KEY = 'kanji-quest-user-profile-v1'
 const PROFILE_EVENT = 'kanji-quest-user-profile-change'
 const DEFAULT_NAME = 'Reed'
+export const DEFAULT_PROFILE_PHOTO = '/apple-touch-icon.png'
 const PHOTO_SIZE = 256
 
 export type UserProfile = {
@@ -43,6 +44,10 @@ function saveUserProfile(profile: UserProfile) {
 
 export function profileInitial(name: string) {
   return (name.trim()[0] || '?').toUpperCase()
+}
+
+export function displayProfilePhoto(photo: string | null) {
+  return photo || DEFAULT_PROFILE_PHOTO
 }
 
 export async function readProfilePhoto(file: File) {

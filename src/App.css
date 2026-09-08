@@ -277,6 +277,10 @@ body:has(.dashboard) {
 }
 
 @media (min-width: 721px) {
+  .app:has(> .desktop-primary-nav) {
+    padding-top: 0.5rem;
+  }
+
   .desktop-primary-nav {
     position: sticky;
     top: 0;
@@ -887,9 +891,10 @@ body:has(.dashboard) {
 
 .account-profile-card {
   display: grid;
-  justify-items: center;
-  gap: 0.85rem;
-  padding: 1.15rem 0.85rem 1.05rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
   border: 1px solid color-mix(in srgb, var(--kyogre-light) 22%, var(--border));
   border-radius: 14px;
   background: color-mix(in srgb, var(--surface-2) 62%, transparent);
@@ -897,73 +902,61 @@ body:has(.dashboard) {
 
 .account-profile-photo {
   display: grid;
-  justify-items: center;
-  gap: 0.4rem;
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--kyogre-light);
   cursor: pointer;
 }
 
-.account-profile-photo span,
 .account-profile-photo img {
-  display: grid;
-  place-items: center;
+  display: block;
   overflow: hidden;
-  width: 6.4rem;
+  width: 4.6rem;
   aspect-ratio: 1;
   border: 1px solid color-mix(in srgb, var(--kyogre-light) 38%, transparent);
-  border-radius: 18px;
+  border-radius: 14px;
   background: color-mix(in srgb, var(--kyogre) 18%, var(--surface-2));
-  color: var(--kyogre-light);
-  font: 900 2.1rem/1 'Outfit', system-ui, sans-serif;
-}
-
-.account-profile-photo img {
   object-fit: cover;
 }
 
-.account-profile-photo small,
-.account-profile-name small {
-  color: var(--kyogre-light);
-  font: 800 0.62rem/1 'Outfit', system-ui, sans-serif;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+.account-profile-identity,
+.account-profile-name,
+.account-profile-name-form,
+.account-profile-name-form input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  max-height: 2.5rem;
 }
 
 .account-profile-name,
 .account-profile-name-form {
-  display: grid;
-  gap: 0.28rem;
-  width: min(18rem, 100%);
+  display: flex;
+  align-items: center;
   padding: 0;
   border: 0;
   background: transparent;
   color: inherit;
-  text-align: center;
+  text-align: left;
   cursor: pointer;
 }
 
-.account-profile-name b {
-  font-size: 1.45rem;
-  line-height: 1.15;
-}
-
-.account-profile-name-form label {
-  display: grid;
-  gap: 0.28rem;
+.account-profile-name b,
+.account-profile-name-form input {
+  overflow: hidden;
+  font: 800 1.45rem/2.5rem 'Outfit', system-ui, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .account-profile-name-form input {
-  width: 100%;
-  padding: 0.35rem 0.2rem;
+  padding: 0;
   border: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--kyogre-light) 48%, transparent);
   background: transparent;
   color: var(--text);
-  font: 800 1.45rem/1.15 'Outfit', system-ui, sans-serif;
-  text-align: center;
+  text-align: left;
 }
 
 .account-profile-name-form input:focus {
