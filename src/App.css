@@ -221,7 +221,8 @@ body:has(.quest-hub) .dashboard-page-settings {
 }
 
 .beginner-zone-page .tool-menu-heading,
-.study-tools-page .tool-menu-heading {
+.study-tools-page .tool-menu-heading,
+.additional-tools-page .tool-menu-heading {
   margin-bottom: 0.5rem;
 }
 
