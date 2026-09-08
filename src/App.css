@@ -3208,133 +3208,74 @@ body:has(.dashboard) {
   overflow-y: auto;
 }
 
-/* One compact row: label on the left, the mode dropdown and Swap on the right. */
+/* Label on the left, the three mode choices laid out as options on the right. */
 .hero-mode-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.65rem;
   margin-bottom: 0.5rem;
   min-width: 0;
 }
 
 .hero-mode-bar-label {
+  flex-shrink: 0;
   color: var(--text-muted);
   font: 800 0.55rem/1 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.hero-mode-bar-actions {
+.hero-mode-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.hero-mode-option {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
-.hero-mode-picker {
-  position: relative;
-}
-
-.hero-mode-menu-button {
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
-  gap: 0.3rem;
+  gap: 0.4rem;
   min-width: 0;
-  min-height: 1.7rem;
-  padding: 0 0.55rem;
-  border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
-  border-radius: 0.5rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 26%, transparent);
+  border-radius: 0.55rem;
   background: color-mix(in srgb, var(--surface-2) 82%, transparent);
   color: var(--text-muted);
-  font: 750 0.6rem/1 'Outfit', system-ui, sans-serif;
+  font: 750 0.62rem/1 'Outfit', system-ui, sans-serif;
   cursor: pointer;
   white-space: nowrap;
   transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 100ms ease;
 }
 
-.hero-mode-menu-button:hover {
+.hero-mode-option:hover {
   color: var(--text);
   border-color: color-mix(in srgb, var(--kyogre-light) 40%, var(--border));
 }
 
-.hero-mode-menu-button:active {
-  transform: scale(0.94);
+.hero-mode-option:active {
+  transform: scale(0.96);
 }
 
-.hero-mode-menu-button:disabled {
-  opacity: 0.42;
-  cursor: not-allowed;
-}
-
-.hero-mode-menu-button:disabled:hover {
-  color: var(--text-muted);
-  border-color: color-mix(in srgb, var(--text-muted) 24%, transparent);
-}
-
-.hero-mode-menu-button.is-active {
-  color: var(--kyogre-light);
-  border-color: color-mix(in srgb, var(--kyogre-light) 68%, transparent);
-  background: color-mix(in srgb, var(--kyogre) 22%, var(--surface-2));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kyogre-light) 26%, transparent);
-}
-
-.hero-mode-menu-caret {
-  font-size: 0.5rem;
-  opacity: 0.75;
-}
-
-/* Floating menu — opens over the panel so its height never shifts. */
-.hero-mode-menu {
-  position: absolute;
-  top: calc(100% + 0.3rem);
-  right: 0;
-  z-index: 20;
-  display: grid;
-  gap: 0.15rem;
-  min-width: 8.5rem;
-  padding: 0.25rem;
-  border: 1px solid color-mix(in srgb, var(--kyogre-light) 24%, var(--border));
-  border-radius: 0.6rem;
-  background: color-mix(in srgb, var(--surface) 96%, black);
-  box-shadow: 0 0.6rem 1.6rem color-mix(in srgb, #000 34%, transparent);
-}
-
-.hero-mode-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  width: 100%;
-  padding: 0.34rem 0.45rem;
-  border: 0;
-  border-radius: 0.4rem;
-  background: transparent;
-  color: var(--text-muted);
-  font: 700 0.62rem/1 'Outfit', system-ui, sans-serif;
-  text-align: left;
-  cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
-}
-
-.hero-mode-menu-item:hover {
-  color: var(--text);
-  background: color-mix(in srgb, var(--kyogre) 12%, transparent);
-}
-
-.hero-mode-menu-item.is-active {
+.hero-mode-option.is-active {
   color: var(--rayquaza-light);
-  background: color-mix(in srgb, var(--rayquaza) 16%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--rayquaza-light) 60%, transparent);
+  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface-2));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rayquaza-light) 26%, transparent);
 }
 
-.hero-mode-menu-glyph {
+.hero-mode-option-glyph {
   display: grid;
   place-items: center;
-  width: 1.35rem;
-  height: 1.35rem;
-  border-radius: 0.35rem;
-  background: color-mix(in srgb, var(--text-muted) 10%, var(--surface-2));
-  font: 700 0.78rem/1 'Noto Sans JP', 'Outfit', system-ui, sans-serif;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 0.3rem;
+  background: color-mix(in srgb, var(--text-muted) 12%, var(--surface-2));
+  color: inherit;
+  font: 700 0.72rem/1 'Noto Sans JP', 'Outfit', system-ui, sans-serif;
 }
 
 .hero-mode-hint {

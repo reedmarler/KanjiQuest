@@ -62,18 +62,7 @@ type HeroSpeechVolume = typeof HERO_SPEECH_VOLUMES[number]
 type StoryPlaybackMode = 'repeat' | 'shuffle'
 type HeroSettingsMode = 'none' | 'picking' | 'story' | 'grammar' | 'star'
 
-// What the top-right toggle says once a specific mode is running, and what it
-// switches off. Off, and while a mode is still being picked, it just reads
-// 'Mode' — the toggle is always on screen now, so it no longer defaults to
-// Story the moment it is switched on.
-const HERO_MODE_LABELS: Record<Exclude<HeroSettingsMode, 'none'>, string> = {
-  picking: 'Mode',
-  story: 'Story',
-  grammar: 'Grammar',
-  star: 'Star',
-}
-
-// The choices offered by the "Pick a mode" dropdown, in menu order.
+// The mode options shown in the panel once the toggle is on, in display order.
 const HERO_MODE_CHOICES = [
   { mode: 'story', glyph: '物', label: 'Story' },
   { mode: 'grammar', glyph: '文', label: 'Grammar' },
@@ -397,8 +386,6 @@ export function Dashboard({
   onComplexityChange,
 }: DashboardProps) {
   const [settingsMode, setSettingsMode] = useState<HeroSettingsMode>('none')
-  const [modePickerOpen, setModePickerOpen] = useState(false)
-  const [swapPickerOpen, setSwapPickerOpen] = useState(false)
   // Which part of speech the grammar drill rotates. Null keeps the ordinary
   // sweep, where every slot gets one turn.
   const [swapFocus, setSwapFocus] = useState<HeroSwapFocus | null>(null)
@@ -444,31 +431,17 @@ export function Dashboard({
     return alternatives[Math.floor(Math.random() * alternatives.length)]?.id ?? storyId
   }, [storyId, storyMode, storyPlaybackMode, storiesAtLevel])
 
+  // Clicking the active mode drops back to 'picking' — the mode options stay on
+  // screen, just with none chosen. The top-right toggle is what closes the panel.
   function selectSettingsMode(mode: Exclude<HeroSettingsMode, 'none'>) {
-    const next = settingsMode === mode ? 'none' : mode
-    setSettingsMode(next)
-    setModePickerOpen(next === 'picking')
-    setSwapPickerOpen(next === 'grammar')
+    setSettingsMode((current) => (current === mode ? 'picking' : mode))
   }
 
   // The compact mode toggle only switches the drill on or off; it never picks
   // a specific mode itself, so turning it on waits for a choice from the mode
-  // buttons it reveals below the sentence controls.
+  // options it reveals below the sentence controls.
   function toggleModeOn() {
-    const next = settingsMode === 'none' ? 'picking' : 'none'
-    setSettingsMode(next)
-    setModePickerOpen(next === 'picking')
-    setSwapPickerOpen(false)
-  }
-
-  function toggleModePicker() {
-    setModePickerOpen((current) => !current)
-  }
-
-  function toggleSwapPicker() {
-    setSettingsMode('grammar')
-    setModePickerOpen(false)
-    setSwapPickerOpen((current) => !current || !grammarMode)
+    setSettingsMode((current) => (current === 'none' ? 'picking' : 'none'))
   }
 
   const [paused, setPaused] = useState(false)
@@ -760,54 +733,25 @@ export function Dashboard({
           <div className="control-story-panel hero-mode-controls-panel is-active">
             <div className="hero-mode-bar">
               <b className="hero-mode-bar-label">Mode</b>
-              <div className="hero-mode-bar-actions">
-                <div className="hero-mode-picker">
+              <div className="hero-mode-options" role="group" aria-label="Sentence modes">
+                {HERO_MODE_CHOICES.map(({ mode, glyph, label }) => (
                   <button
+                    key={mode}
                     type="button"
-                    className={`hero-mode-menu-button hero-mode-picker-button${modePickerOpen ? ' is-active' : ''}`}
-                    onClick={toggleModePicker}
-                    aria-haspopup="menu"
-                    aria-expanded={modePickerOpen}
+                    aria-pressed={settingsMode === mode}
+                    className={`hero-mode-option${settingsMode === mode ? ' is-active' : ''}`}
+                    onClick={() => selectSettingsMode(mode)}
                   >
-                    {settingsMode === 'picking'
-                      ? 'Pick a mode'
-                      : HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]}
-                    <span className="hero-mode-menu-caret" aria-hidden="true">&#9662;</span>
+                    <span className="hero-mode-option-glyph" aria-hidden="true" lang="ja">{glyph}</span>
+                    {label}
                   </button>
-                  {modePickerOpen && (
-                    <div className="hero-mode-menu" role="menu" aria-label="Sentence modes">
-                      {HERO_MODE_CHOICES.map(({ mode, glyph, label }) => (
-                        <button
-                          key={mode}
-                          type="button"
-                          role="menuitemradio"
-                          aria-checked={settingsMode === mode}
-                          className={`hero-mode-menu-item${settingsMode === mode ? ' is-active' : ''}`}
-                          onClick={() => selectSettingsMode(mode)}
-                        >
-                          <span className="hero-mode-menu-glyph" aria-hidden="true" lang="ja">{glyph}</span>
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  className={`hero-mode-menu-button${grammarMode && swapPickerOpen ? ' is-active' : ''}`}
-                  onClick={toggleSwapPicker}
-                  disabled={!grammarMode}
-                  aria-expanded={grammarMode && swapPickerOpen}
-                  title={grammarMode ? 'Choose which part of speech to swap' : 'Swap is available in Grammar mode'}
-                >
-                  Swap
-                </button>
+                ))}
               </div>
             </div>
 
             <div className="hero-mode-panel-slot">
               {settingsMode === 'picking' && (
-                <p className="hero-mode-hint">Pick a mode to shape the sentence stream.</p>
+                <p className="hero-mode-hint">Pick a mode above to shape the sentence stream.</p>
               )}
 
               {storyMode && (
@@ -877,7 +821,7 @@ export function Dashboard({
                 </div>
               )}
 
-              {grammarMode && (swapPickerOpen ? (
+              {grammarMode && (
                 <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
                   {focusOptions.map(({ focus, label, disabledReason }) => (
                     <button
@@ -893,9 +837,7 @@ export function Dashboard({
                     </button>
                   ))}
                 </div>
-              ) : (
-                <p className="hero-mode-hint">Tap <b>Swap</b> to focus one part of speech.</p>
-              ))}
+              )}
 
               {settingsMode === 'star' && (
                 <FavoriteWordsPanel onManage={onOpenFavoriteWords} />
