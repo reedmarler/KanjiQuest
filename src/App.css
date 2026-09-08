@@ -1207,6 +1207,13 @@ body:has(.dashboard) {
   font-size: 0.76rem;
 }
 
+.profile-fields-note {
+  margin: 0.1rem 0.2rem 0;
+  color: color-mix(in srgb, var(--text-muted) 80%, transparent);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
 .daily-quests-ring {
   position: relative;
   display: grid;

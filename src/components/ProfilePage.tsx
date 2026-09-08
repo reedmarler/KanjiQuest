@@ -10,6 +10,7 @@ import { loadProgress, loadStats } from '../lib/storage'
 import { isLearned } from '../lib/srs'
 import { isQuestComplete, loadQuestProgress } from '../lib/questProgress'
 import { QUESTS } from '../data/questCampaign'
+import { accountSyncStatusText, isAccountSyncConfigured, loadAccountSyncState } from '../lib/accountSync'
 import { AppBackButton } from './AppBackButton'
 
 type ProfileStat = { label: string; value: string }
@@ -38,6 +39,10 @@ export function ProfilePage({ onBack }: { onBack: () => void }) {
   const photoRef = useRef<HTMLInputElement | null>(null)
   const stats = useProfileStats()
   const memberSince = formatMemberSince(profile.createdAt)
+  const syncState = useMemo(() => loadAccountSyncState(), [])
+  const syncLabel = syncState.status === 'signed-in'
+    ? 'Signed in'
+    : isAccountSyncConfigured() ? 'Ready to connect' : 'Local only'
 
   function startRename() {
     setDraftName(profile.name)
@@ -147,8 +152,9 @@ export function ProfilePage({ onBack }: { onBack: () => void }) {
         </article>
         <article>
           <span>Sync</span>
-          <small>Local only</small>
+          <small>{syncLabel}</small>
         </article>
+        <p className="profile-fields-note">{accountSyncStatusText(syncState)}</p>
       </section>
 
       <input
