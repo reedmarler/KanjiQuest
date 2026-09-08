@@ -12867,390 +12867,9 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   margin-top: 2.2rem;
 }
 
-.quest-focus {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(15rem, .7fr);
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--sakura) 26%, var(--border));
-  border-radius: 12px;
-  background: var(--surface);
-}
-
-.quest-focus-copy {
-  min-width: 0;
-  padding: 1.35rem 1.45rem 1.2rem;
-}
-
-.quest-focus-copy > header,
-.quest-picker > header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.quest-focus-copy > header > span,
-.quest-picker > header span,
-.quest-next-action small,
-.quest-focus-guardian small {
-  color: var(--sakura-light);
-  font-size: .48rem;
-  font-weight: 800;
-  letter-spacing: .12em;
-}
-
-.quest-focus-copy > header > small,
-.quest-picker > header > small {
-  color: var(--text-muted);
-  font-size: .52rem;
-}
-
-.quest-focus-copy h1 {
-  margin: .45rem 0 .18rem;
-  font-size: 1.55rem;
-}
-
-.quest-focus-copy > p {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: .68rem;
-}
-
-.quest-focus-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .35rem .8rem;
-  margin-top: .75rem;
-  color: var(--text-muted);
-  font-size: .52rem;
-}
-
-.quest-focus-meta span + span::before {
-  content: '·';
-  margin-right: .8rem;
-  color: var(--border-strong);
-}
-
-.quest-next-action {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding: .7rem 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-.quest-next-action > div {
-  display: grid;
-  gap: .08rem;
-}
-
-.quest-next-action b {
-  font-size: .75rem;
-}
-
-.quest-next-action .btn {
-  min-width: 7.2rem;
-}
-
-.quest-step-list {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  margin-top: .8rem;
-}
-
-.quest-step-row {
-  display: grid;
-  min-width: 0;
-  gap: .12rem;
-  padding: .35rem .55rem;
-  border: 0;
-  border-left: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-}
-
-.quest-step-row:first-child {
-  border-left: 0;
-}
-
-.quest-step-row:not(:disabled) {
-  cursor: pointer;
-}
-
-.quest-step-row > span {
-  color: var(--text-muted);
-  font-size: .45rem;
-  font-weight: 800;
-}
-
-.quest-step-row b {
-  overflow: hidden;
-  font-size: .58rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.quest-step-row small {
-  overflow: hidden;
-  color: var(--text-muted);
-  font-size: .43rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.quest-step-row.is-next > span,
-.quest-step-row.is-next b,
-.quest-step-row.is-done > span {
-  color: var(--sakura-light);
-}
-
-.quest-step-row:disabled {
-  opacity: .42;
-}
-
-.quest-focus-guardian {
-  position: relative;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 20rem;
-  overflow: hidden;
-  padding: 1.15rem;
-  border-left: 1px solid var(--border);
-  background: radial-gradient(circle at 50% 62%, color-mix(in srgb, var(--sakura) 18%, transparent), transparent 42%), var(--surface-2);
-}
-
-.quest-focus-guardian-copy,
-.quest-focus-guardian footer {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  gap: .08rem;
-}
-
-.quest-focus-guardian-copy b {
-  font-size: .82rem;
-}
-
-.quest-focus-guardian-copy span {
-  color: var(--text-muted);
-  font-size: .54rem;
-}
-
-.quest-focus-guardian > img {
-  position: absolute;
-  z-index: 1;
-  right: -10%;
-  bottom: -5%;
-  width: 120%;
-  height: 84%;
-  object-fit: contain;
-  object-position: center bottom;
-  filter: drop-shadow(0 .45rem .55rem rgba(0, 0, 0, .58));
-}
-
-.quest-focus-guardian > strong {
-  place-self: center;
-  color: var(--sakura-light);
-  font: 700 3rem 'Noto Sans JP', sans-serif;
-}
-
-.quest-focus-guardian footer {
-  align-self: end;
-  margin: 0 -.25rem -.25rem;
-  padding: .55rem .65rem;
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  backdrop-filter: blur(5px);
-}
-
-.quest-focus-guardian footer b {
-  font-size: .62rem;
-}
-
-.quest-picker {
-  margin-top: .75rem;
-  padding: .9rem 1rem 1rem;
-  border-top: 1px solid var(--border);
-}
-
-.quest-picker h2 {
-  margin: .12rem 0 0;
-  font-size: .85rem;
-}
-
-.quest-picker-grid {
-  display: grid;
-  grid-auto-columns: 9.5rem;
-  grid-auto-flow: column;
-  gap: .4rem;
-  margin-top: .7rem;
-  padding-bottom: .3rem;
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
-  scrollbar-width: thin;
-  scroll-snap-type: inline proximity;
-}
-
-.quest-picker-item {
-  display: grid;
-  grid-template-columns: 1.55rem 1fr;
-  align-items: center;
-  gap: .48rem;
-  min-width: 0;
-  min-height: 3rem;
-  padding: .48rem .55rem;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--surface-2);
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  scroll-snap-align: start;
-}
-
-.quest-picker-item:not(:disabled) {
-  cursor: pointer;
-}
-
-.quest-picker-item > span {
-  display: grid;
-  place-items: center;
-  width: 1.55rem;
-  aspect-ratio: 1;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  color: var(--text-muted);
-  font-size: .52rem;
-}
-
-.quest-picker-item > div {
-  display: grid;
-  min-width: 0;
-  gap: .08rem;
-}
-
-.quest-picker-item b {
-  overflow: hidden;
-  font-size: .55rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.quest-picker-item small {
-  color: var(--text-muted);
-  font-size: .43rem;
-}
-
-.quest-picker-item.is-current {
-  border-color: color-mix(in srgb, var(--sakura-light) 55%, var(--border));
-  background: color-mix(in srgb, var(--sakura) 10%, var(--surface-2));
-}
-
-.quest-picker-item.is-current > span,
-.quest-picker-item.is-done > span {
-  border-color: color-mix(in srgb, var(--sakura-light) 50%, var(--border));
-  color: var(--sakura-light);
-}
-
-.quest-picker-item:disabled {
-  opacity: .42;
-}
-
-@media (max-width: 720px) {
-  .quest-hub-simple .quest-topbar {
-    margin-bottom: .55rem;
-  }
-
-  .quest-focus {
-    grid-template-columns: 1fr;
-  }
-
-  .quest-focus-copy {
-    padding: 1rem;
-  }
-
-  .quest-focus-copy h1 {
-    font-size: 1.28rem;
-  }
-
-  .quest-focus-meta {
-    gap: .28rem .55rem;
-  }
-
-  .quest-focus-meta span + span::before {
-    margin-right: .55rem;
-  }
-
-  .quest-step-list {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .quest-step-row {
-    grid-template-columns: 1.55rem 1fr auto;
-    align-items: center;
-    min-height: 2.2rem;
-    padding: .3rem .15rem;
-    border-top: 1px solid var(--border);
-    border-left: 0;
-  }
-
-  .quest-step-row:first-child {
-    border-top: 0;
-  }
-
-  .quest-step-row small {
-    max-width: 9rem;
-  }
-
-  .quest-focus-guardian {
-    grid-template-columns: 1fr 7.5rem;
-    grid-template-rows: 1fr auto;
-    min-height: 9.2rem;
-    padding: .9rem 1rem;
-    border-top: 1px solid var(--border);
-    border-left: 0;
-  }
-
-  .quest-focus-guardian > img {
-    right: -.3rem;
-    bottom: -8%;
-    width: 9rem;
-    height: 10rem;
-  }
-
-  .quest-focus-guardian footer {
-    grid-column: 1;
-    align-self: end;
-    width: fit-content;
-    margin: .5rem 0 0;
-  }
-
-  .quest-picker {
-    padding-right: 0;
-    padding-left: 0;
-  }
-
-  .quest-picker-grid {
-    grid-auto-columns: 8.8rem;
-  }
-}
-
 @media (max-width: 430px) {
   .quest-hub-simple .quest-topbar > span {
     font-size: .48rem;
-  }
-
-  .quest-next-action .btn {
-    min-width: 6rem;
-  }
-
-  .quest-step-row small {
-    max-width: 6.5rem;
   }
 }
 
@@ -15216,91 +14835,37 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
 .journey-goal-tally b { color: var(--sakura-light); font-size: .8rem; }
 
-/* --- Quest hub: the road ---------------------------------------------- */
+/* --- Quest hub: the road -----------------------------------------------
+   One continuous path for the whole campaign, arcs marked as gates along
+   it rather than as separate boxed sections — the map is the menu, so it
+   reads as one road rather than a stack of chore lists. */
 
-.journey-road { margin-top: .9rem; }
-
-.journey-road-title {
-  margin: 0 0 .55rem;
+.quest-path-gate {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin: 1rem 0 .55rem -1.15rem;
+  padding-left: 1.15rem;
   color: var(--text-muted);
-  font-size: .58rem;
-  font-weight: 800;
-  letter-spacing: .14em;
-  text-transform: uppercase;
 }
 
-.journey-chapter {
-  margin-bottom: .7rem;
-  padding: .95rem 1rem 1.05rem;
-  border: 1px solid var(--border);
-  border-radius: 15px;
-  background: var(--surface);
-}
-
-/* An arc whose quests are all still locked is context, not a menu. */
-.journey-chapter.is-sealed { opacity: .62; }
-
-.journey-chapter.is-cleared {
-  border-color: color-mix(in srgb, var(--rayquaza) 34%, var(--border));
-}
-
-.journey-chapter-header {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: .7rem;
-  align-items: start;
-  margin-bottom: .8rem;
-}
-
-.journey-chapter-mark {
+.quest-path-gate-mark {
+  flex: none;
   display: grid;
   place-items: center;
-  width: 2.1rem;
-  height: 2.1rem;
+  width: 1.7rem;
+  height: 1.7rem;
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: 8px;
   background: var(--surface-2);
-  color: var(--text-muted);
-  font-size: 1rem;
+  color: var(--sakura-light);
+  font-size: .85rem;
   line-height: 1;
 }
 
-.journey-chapter-eyebrow {
-  color: var(--text-muted);
-  font-size: .48rem;
-  font-weight: 800;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-
-.journey-chapter-header h3 {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: .42rem;
-  margin: .12rem 0 .26rem;
-  font-size: .84rem;
-}
-
-.journey-chapter-header h3 small {
-  color: var(--text-muted);
-  font-size: .6rem;
-  font-weight: 600;
-}
-
-.journey-chapter-header p {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: .58rem;
-  line-height: 1.5;
-}
-
-.journey-chapter-count {
-  color: var(--text-muted);
-  font-size: .62rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
+.quest-path-gate-copy { display: grid; gap: .02rem; min-width: 0; }
+.quest-path-gate-copy b { font-size: .68rem; color: var(--text); }
+.quest-path-gate-copy small { color: var(--text-muted); font-size: .48rem; }
 
 /* The path itself. The connecting line is what makes a list of buttons read
    as consecutive stops rather than a menu of options. */
@@ -15398,15 +14963,275 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   white-space: nowrap;
 }
 
+/* A quiet ring around wherever the traveller actually stands, so the road
+   reads at a glance instead of needing the "in progress" label read out. */
+@keyframes journey-stop-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 55%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--sakura) 0%, transparent); }
+}
+
+.journey-stop.is-current .journey-stop-dot {
+  animation: journey-stop-pulse 2.2s ease-in-out infinite;
+}
+
+/* The two beats of "you just did that, and this is what opened up" —
+   the whole of what "movement" along the path looks like here. */
+@keyframes journey-stop-cleared-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.4); }
+  65% { transform: scale(.9); }
+  100% { transform: scale(1); }
+}
+
+.journey-stop.is-just-cleared .journey-stop-dot {
+  animation: journey-stop-cleared-pop 620ms cubic-bezier(.34, 1.56, .64, 1);
+}
+
+@keyframes journey-stop-unlock-ping {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 65%, transparent); }
+  100% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--sakura) 0%, transparent); }
+}
+
+.journey-stop.is-just-unlocked .journey-stop-dot {
+  animation: journey-stop-unlock-ping 900ms ease-out 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-stop.is-current .journey-stop-dot,
+  .journey-stop.is-just-cleared .journey-stop-dot,
+  .journey-stop.is-just-unlocked .journey-stop-dot {
+    animation: none;
+  }
+}
+
 @media (max-width: 720px) {
   .journey-goal { padding: .85rem .9rem; gap: .7rem; }
   .journey-goal-mark { width: 2.5rem; height: 2.5rem; font-size: 1.25rem; }
   .journey-goal-copy h1 { font-size: .98rem; }
-  .journey-chapter-header { grid-template-columns: auto 1fr; }
-  /* The tally would otherwise sit alone on a third column and squeeze the
-     blurb; on the mark's row it costs no width at all. */
-  .journey-chapter-count { grid-row: 1; grid-column: 2; justify-self: end; }
+  .quest-path-gate { margin-left: -1.15rem; }
 }
+
+/* --- Quest sheet: tap a stop, see the whole story ----------------------
+   Everything that used to sit permanently on the hub — the patron's ask,
+   the guardian, the reward, the step-by-step breakdown — now lives here,
+   one tap away instead of loaded in front of every visit. */
+
+.quest-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  /* Above the mobile bottom nav (z-index 90) — the sheet is meant to cover
+     the whole screen, nav included, not sit behind it. */
+  z-index: 95;
+  display: grid;
+  align-items: flex-end;
+  padding: 0;
+  background: color-mix(in srgb, #000 55%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+.quest-sheet {
+  width: 100%;
+  max-width: 34rem;
+  max-height: min(86vh, 42rem);
+  margin: 0 auto;
+  overflow-y: auto;
+  padding: 1.2rem 1.3rem calc(1.3rem + env(safe-area-inset-bottom, 0px));
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-radius: 20px 20px 0 0;
+  background: var(--surface);
+  box-shadow: 0 -1rem 2.5rem rgba(0, 0, 0, .45);
+  animation: quest-sheet-rise 220ms ease-out;
+}
+
+@keyframes quest-sheet-rise {
+  from { transform: translateY(12%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quest-sheet { animation: none; }
+}
+
+@media (min-width: 640px) {
+  .quest-sheet-backdrop { align-items: center; padding: 1rem; }
+  .quest-sheet { border-radius: 18px; border-bottom: 1px solid var(--border); }
+}
+
+.quest-sheet-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .8rem;
+}
+
+.quest-sheet-head > span {
+  color: var(--sakura-light);
+  font-size: .5rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.quest-sheet-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  margin-top: -.3rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.quest-sheet h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .5rem;
+  margin: .3rem 0 .1rem;
+  font-size: 1.2rem;
+}
+
+.quest-sheet h2 small {
+  color: var(--text-muted);
+  font-size: .58rem;
+  font-weight: 600;
+}
+
+.quest-sheet-subtitle {
+  margin: 0 0 .8rem;
+  color: var(--text-muted);
+  font-size: .64rem;
+}
+
+.quest-sheet-patron {
+  display: grid;
+  gap: .3rem;
+  padding: .8rem .9rem;
+  border: 1px solid color-mix(in srgb, var(--sakura) 26%, var(--border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sakura) 7%, var(--surface-2));
+}
+
+.quest-sheet-patron-role {
+  color: var(--sakura-light);
+  font-size: .46rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.quest-sheet-patron p {
+  margin: 0;
+  color: var(--text);
+  font-size: .72rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.quest-sheet-patron-name {
+  color: var(--text-muted);
+  font-size: .56rem;
+}
+
+.quest-sheet-threat {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-top: .7rem;
+}
+
+.quest-sheet-threat-portrait {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.quest-sheet-threat-portrait img { width: 100%; height: 100%; object-fit: cover; }
+.quest-sheet-threat-portrait strong { color: var(--sakura-light); font: 700 1.15rem 'Noto Sans JP', sans-serif; }
+
+.quest-sheet-threat-copy { display: grid; gap: .04rem; min-width: 0; }
+.quest-sheet-threat-copy small { color: var(--text-muted); font-size: .48rem; font-weight: 800; letter-spacing: .1em; }
+.quest-sheet-threat-copy b { font-size: .72rem; }
+.quest-sheet-threat-copy span { color: var(--text-muted); font-size: .56rem; }
+
+.quest-sheet-steps {
+  display: flex;
+  gap: .4rem;
+  margin-top: .9rem;
+}
+
+.quest-sheet-pip {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  height: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: .58rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.quest-sheet-pip.is-done {
+  border-color: color-mix(in srgb, var(--rayquaza) 50%, var(--border));
+  background: color-mix(in srgb, var(--rayquaza) 18%, var(--surface-2));
+  color: var(--rayquaza-light);
+}
+
+.quest-sheet-pip.is-next {
+  border-color: var(--sakura);
+  background: color-mix(in srgb, var(--sakura) 22%, var(--surface-2));
+  color: var(--sakura-light);
+}
+
+.quest-sheet-pip:disabled { cursor: not-allowed; opacity: .4; }
+
+.quest-sheet-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  margin-top: 1rem;
+  padding-top: .9rem;
+  border-top: 1px solid var(--border);
+}
+
+.quest-sheet-reward {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  min-width: 0;
+}
+
+.quest-sheet-reward > span {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 50%, var(--border));
+  border-radius: 50%;
+  color: var(--gold);
+  font: 700 .85rem 'Noto Sans JP', sans-serif;
+}
+
+.quest-sheet-reward > div { display: grid; gap: 0; min-width: 0; }
+.quest-sheet-reward small { color: var(--text-muted); font-size: .45rem; font-weight: 800; letter-spacing: .1em; }
+.quest-sheet-reward b { overflow: hidden; font-size: .62rem; text-overflow: ellipsis; white-space: nowrap; }
+
+.quest-sheet-footer .btn { flex: none; min-width: 7.5rem; }
 
 /* --- Listen cue in packed example cells -------------------------------- */
 

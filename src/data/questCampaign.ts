@@ -80,6 +80,14 @@ export type QuestDefinition = {
     attacks?: readonly GuardianAttack[]
     phases?: readonly GuardianPhase[]
   }
+  /** Who actually asks for this quest — the quest sheet leads with their
+   *  voice, so twelve otherwise-similar errands each open on a different
+   *  person with a different stake in the outcome. */
+  patron: {
+    name: string
+    role: string
+    request: string
+  }
   reward: {
     name: string
     mark: string
@@ -599,6 +607,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Damp Tile Slip', japanese: '濡れ床', flavor: 'The floor turns slick and your footing — and your grammar — slides.' },
       ],
     },
+    patron: { name: 'Your mother', role: 'Villager', request: "The house doesn't feel like ours without the morning words. Please bring them home." },
     reward: { name: 'Morning Lantern', mark: '灯', perk: 'dawn-guard', perkTitle: 'Dawn Guard', perkDescription: 'Blocks the first wrong answer in every guardian battle.' },
   },
   {
@@ -622,6 +631,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Bitter Course', japanese: '苦膳', flavor: 'Every flavour turns wrong on your tongue, and so does the particle.' },
       ],
     },
+    patron: { name: 'Obasan, the shop owner', role: 'Shopkeeper', request: "My customers can't taste the words anymore. Win back the language of my kitchen." },
     reward: { name: 'Shared Bento', mark: '弁', perk: 'second-wind', perkTitle: 'Second Wind', perkDescription: 'Restores one heart after two correct answers in a row.' },
   },
   {
@@ -646,6 +656,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Frozen Rail', japanese: '凍結線路', flavor: 'Blue frost locks every route except the wrong one.' },
       ],
     },
+    patron: { name: 'The stationmaster', role: 'Villager', request: "Every platform sign has gone silent under his frost. I can't run a single train until someone speaks for this station again." },
     reward: { name: 'Traveler’s Bell', mark: '鈴', perk: 'clear-path', perkTitle: 'Clear Path', perkDescription: 'Removes one wrong choice from the first question of each battle.' },
   },
   {
@@ -669,6 +680,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Pocket Sleight', japanese: '掏摸', flavor: 'The word you were holding is simply gone.' },
       ],
     },
+    patron: { name: 'The kōban officer', role: 'Village watch', request: "Half of what gets reported to me these days has no face and no story. Help me put both back together." },
     reward: { name: 'Truth Coin', mark: '真', perk: 'true-sight', perkTitle: 'True Sight', perkDescription: 'Shows the grammar meaning hint on every battle question.' },
   },
   {
@@ -693,6 +705,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Mountain Rebuke', japanese: '山喝', flavor: 'A single shouted correction and the whole room straightens.' },
       ],
     },
+    patron: { name: 'Sensei Tanaka', role: 'Teacher', request: 'Tengu-sensei has failed three classes running. Prove to him this one is different.' },
     reward: { name: 'Tengu Feather', mark: '羽', perk: 'perfect-edge', perkTitle: 'Perfect Edge', perkDescription: 'Three correct answers in a row deal one extra strike.' },
   },
   {
@@ -717,6 +730,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Endless Drizzle', japanese: '長雨', flavor: 'It does not stop. It simply keeps being true.' },
       ],
     },
+    patron: { name: 'A farmer at the edge of town', role: 'Villager', request: "Ame-onna's storms follow no season anymore. Speak the weather back into sense before my fields drown." },
     reward: { name: 'Storm Charm', mark: '護', perk: 'change-fate', perkTitle: 'Change Fate', perkDescription: 'Once per battle, swap a question you do not want.' },
   },
   {
@@ -741,6 +755,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Shadow Deadline', japanese: '影の締切', flavor: 'The darkness closes around the final word before you can finish it.' },
       ],
     },
+    patron: { name: 'The section chief', role: 'Rich merchant', request: "The night shift never ends while that shadow guards the ledgers. Finish the work it's holding hostage." },
     reward: { name: 'Overtime Seal', mark: '残', perk: 'iron-will', perkTitle: 'Iron Will', perkDescription: 'Start every guardian battle with one extra heart.' },
   },
   {
@@ -769,6 +784,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Gashadokuro · Splintered', mark: '砕', taunt: 'Cracks run through the skull. It does not slow down.' },
       ],
     },
+    patron: { name: 'The ward physician', role: 'Villager', request: "Nobody who walks in can say where it hurts anymore. I need someone who still can." },
     reward: { name: 'Bone Charm', mark: '薬', perk: 'twin-strike', perkTitle: 'Twin Strike', perkDescription: 'Every third correct answer lands a double strike.' },
   },
   {
@@ -797,6 +813,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Kitsune · Unmasked', mark: '妖', taunt: 'The mask falls. There was never a face under it.' },
       ],
     },
+    patron: { name: 'The mask-stall vendor', role: 'Merchant', request: "I sold that fox her own face by mistake. Win it back fairly, and the festival is yours." },
     reward: { name: 'Fox Mask', mark: '面', perk: 'kitsune-luck', perkTitle: 'Fox Luck', perkDescription: 'A wrong answer sometimes costs nothing at all.' },
   },
   {
@@ -825,6 +842,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Yūrei · Remembering', mark: '憶', taunt: 'It turns toward you. It is starting to recall the rest.' },
       ],
     },
+    patron: { name: "The building's landlord", role: 'Rich landowner', request: "Room 402 hasn't rented in eleven years. Find out what it keeps saying, and I'll finally let someone new move in." },
     reward: { name: 'Echo Ward', mark: '響', perk: 'ward-echo', perkTitle: 'Echo Ward', perkDescription: 'The first missed question comes back for a second attempt.' },
   },
   {
@@ -853,6 +871,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Yamauba · True Form', mark: '鬼', taunt: 'The kindness drops away like a shawl.' },
       ],
     },
+    patron: { name: 'A guide at the trailhead', role: 'Villager', request: "Yamauba has kept everyone who took her kindness. Climb further than they did, and don't stay for tea." },
     reward: { name: 'Stone Stance', mark: '岩', perk: 'mountain-stance', perkTitle: 'Mountain Stance', perkDescription: 'Guardian counters below full strength cannot take your last heart.' },
   },
   {
@@ -883,6 +902,7 @@ export const QUESTS: readonly QuestDefinition[] = [
         { name: 'Koganemaru · Regent', mark: '王', taunt: 'He raises one fist. Every stolen word falls silent.' },
       ],
     },
+    patron: { name: 'The village elder', role: 'Samurai lord', request: 'Koganemaru was sworn to guard this road, not swallow it. Take back what he stole from every one of us.' },
     reward: { name: 'Rekindled Lantern', mark: '燈', perk: 'lantern-flame', perkTitle: 'Rekindled Flame', perkDescription: 'Every relic you carry grows stronger. The road is yours.' },
   },
 ]

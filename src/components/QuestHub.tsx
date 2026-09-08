@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { CAMPAIGN_ARCS, CAMPAIGN_GOAL, QUESTS, isQuestUnlocked } from '../data/questCampaign'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { CAMPAIGN_ARCS, CAMPAIGN_GOAL, QUESTS, isQuestUnlocked, type QuestDefinition } from '../data/questCampaign'
 import { completedQuestSteps, isQuestComplete, QUEST_STEPS, type QuestProgress, type QuestStep } from '../lib/questProgress'
 import { earnedRelics } from '../lib/relics'
 
@@ -13,34 +13,56 @@ interface QuestHubProps {
   progress: QuestProgress
 }
 
-const STEP_DETAILS: ReadonlyArray<{ id: QuestStep; number: string; title: string; description: string }> = [
-  { id: 'vocab', number: '01', title: 'Prepare', description: '15 words for this scene.' },
-  { id: 'kanji', number: '02', title: 'Read kanji', description: 'Kanji from those same words.' },
-  { id: 'grammar', number: '03', title: 'Use grammar', description: 'Forms inside this scene.' },
-  { id: 'scene', number: '04', title: 'Read scene', description: 'Read the story you prepared for.' },
-  { id: 'checkpoint', number: '05', title: 'Guardian battle', description: 'Prove mastery and break the seal.' },
+const STEP_DETAILS: ReadonlyArray<{ id: QuestStep; number: string; title: string }> = [
+  { id: 'vocab', number: '01', title: 'Prepare' },
+  { id: 'kanji', number: '02', title: 'Read kanji' },
+  { id: 'grammar', number: '03', title: 'Use grammar' },
+  { id: 'scene', number: '04', title: 'Read scene' },
+  { id: 'checkpoint', number: '05', title: 'Guardian battle' },
 ]
 
 export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGrammar, onOpenScene, onOpenCheckpoint, progress }: QuestHubProps) {
   const questComplete = useMemo(() => (questId: string) => isQuestComplete(progress, questId), [progress])
   const unlocked = useMemo(() => QUESTS.filter((quest) => isQuestUnlocked(quest, questComplete)), [questComplete])
-  const furthest = unlocked.find((quest) => !questComplete(quest.id)) ?? unlocked[unlocked.length - 1] ?? QUESTS[0]!
-  const [selectedId, setSelectedId] = useState(furthest.id)
-  const selected = QUESTS.find((quest) => quest.id === selectedId) ?? furthest
+  const frontier = unlocked.find((quest) => !questComplete(quest.id)) ?? null
+
+  const [openQuestId, setOpenQuestId] = useState<string | null>(null)
+  const openQuest = QUESTS.find((quest) => quest.id === openQuestId) ?? null
 
   const clearedCount = QUESTS.filter((quest) => questComplete(quest.id)).length
   const relicCount = earnedRelics(progress).length
-  const completed = completedQuestSteps(progress, selected.id)
-  const finished = isQuestComplete(progress, selected.id)
-  const nextStep = QUEST_STEPS.find((step) => !progress[selected.id]?.[step]) ?? 'checkpoint'
-  const currentStep = STEP_DETAILS.find((step) => step.id === nextStep) ?? STEP_DETAILS[0]
 
-  const openStep = (step: QuestStep) => {
-    if (step === 'vocab') onOpenVocab(selected.vocabularySetId, selected.id)
-    else if (step === 'kanji') onOpenKanji(selected.id)
-    else if (step === 'grammar') onOpenGrammar(selected.id)
-    else if (step === 'scene') onOpenScene(selected.id)
-    else onOpenCheckpoint(selected.id)
+  /*
+   * The only "movement" this menu shows: when a quest flips to complete, its
+   * stop settles with a small pop and the one after it pings awake a moment
+   * later. Walking the road itself is what the study screens are for — this
+   * is just the map noticing that you did.
+   */
+  const [justCleared, setJustCleared] = useState<string | null>(null)
+  const [justUnlocked, setJustUnlocked] = useState<string | null>(null)
+  const prevProgress = useRef(progress)
+
+  useEffect(() => {
+    const prev = prevProgress.current
+    prevProgress.current = progress
+    if (prev === progress) return
+
+    const cleared = QUESTS.find((quest) => !isQuestComplete(prev, quest.id) && isQuestComplete(progress, quest.id))
+    if (!cleared) return
+    setJustCleared(cleared.id)
+
+    const next = QUESTS.find((quest) => quest.number === cleared.number + 1)
+    if (!next) return
+    const timer = window.setTimeout(() => setJustUnlocked(next.id), 550)
+    return () => window.clearTimeout(timer)
+  }, [progress])
+
+  const openStep = (quest: QuestDefinition, step: QuestStep) => {
+    if (step === 'vocab') onOpenVocab(quest.vocabularySetId, quest.id)
+    else if (step === 'kanji') onOpenKanji(quest.id)
+    else if (step === 'grammar') onOpenGrammar(quest.id)
+    else if (step === 'scene') onOpenScene(quest.id)
+    else onOpenCheckpoint(quest.id)
   }
 
   return (
@@ -54,15 +76,12 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
         </button>
       </header>
 
-      {/* Why any of this matters. The relics were already the goal mechanically
-          — nothing on screen ever said so, which left twelve quests looking
-          like a to-do list rather than a road to somewhere. */}
       <section className="journey-goal" aria-labelledby="journey-goal-title">
         <span className="journey-goal-mark" aria-hidden="true">{CAMPAIGN_GOAL.mark}</span>
         <div className="journey-goal-copy">
           <span className="journey-goal-eyebrow">THE JOURNEY</span>
           <h1 id="journey-goal-title">{CAMPAIGN_GOAL.title}<small lang="ja">{CAMPAIGN_GOAL.japanese}</small></h1>
-          <p>{CAMPAIGN_GOAL.premise} <b>{CAMPAIGN_GOAL.promise}</b></p>
+          <p>{CAMPAIGN_GOAL.premise} Villagers, shopkeepers, and lords along the road are offering rewards to whoever helps.</p>
           <div className="journey-goal-track" role="img" aria-label={`${relicCount} of ${QUESTS.length} seals recovered`}>
             <div className="journey-goal-fill" style={{ width: `${(relicCount / QUESTS.length) * 100}%` }} />
           </div>
@@ -72,106 +91,161 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
         </div>
       </section>
 
-      <section className="quest-focus" aria-labelledby="current-quest-title">
-        <div className="quest-focus-copy">
-          <header>
-            <span>QUEST {String(selected.number).padStart(2, '0')}</span>
-            <small>{selected.level} · {completed} of {QUEST_STEPS.length} steps</small>
-          </header>
-          <h2 id="current-quest-title">{selected.title}</h2>
-          <p>{selected.subtitle}</p>
+      {/* One continuous road for the whole campaign — tapping any open stop
+          is the only way in, so nothing about a quest loads until you ask
+          for it. Arc gates sit inline on the road rather than as their own
+          boxed sections, so it still reads as one path, not twelve errands. */}
+      <ol className="journey-path" aria-label="Quest path">
+        {QUESTS.map((quest, index) => {
+          const isOpen = isQuestUnlocked(quest, questComplete)
+          const done = questComplete(quest.id)
+          const isCurrent = frontier?.id === quest.id
+          const isFinale = quest.number === QUESTS.length
+          const previousArcId = index > 0 ? QUESTS[index - 1]!.arcId : null
+          const gate = quest.arcId !== previousArcId ? CAMPAIGN_ARCS.find((arc) => arc.id === quest.arcId) : undefined
 
-          <div className="quest-focus-meta">
-            <span>{selected.vocabularyTheme}</span>
-            <span>{selected.grammar.length} grammar forms</span>
-            <span>{relicCount} relics carried</span>
-          </div>
+          return (
+            <li key={quest.id}>
+              {gate && (
+                <div className="quest-path-gate">
+                  <span className="quest-path-gate-mark" aria-hidden="true">{gate.mark}</span>
+                  <div className="quest-path-gate-copy">
+                    <b>{gate.title}</b>
+                    <small>{gate.subtitle}</small>
+                  </div>
+                </div>
+              )}
+              <button
+                type="button"
+                disabled={!isOpen}
+                onClick={() => setOpenQuestId(quest.id)}
+                aria-pressed={openQuestId === quest.id}
+                onAnimationEnd={() => {
+                  if (justCleared === quest.id) setJustCleared(null)
+                  if (justUnlocked === quest.id) setJustUnlocked(null)
+                }}
+                className={`journey-stop${done ? ' is-done' : ''}${isCurrent ? ' is-current' : ''}${isFinale ? ' is-finale' : ''}${justCleared === quest.id ? ' is-just-cleared' : ''}${justUnlocked === quest.id ? ' is-just-unlocked' : ''}`}
+              >
+                <span className="journey-stop-dot" aria-hidden="true">{done ? '✓' : quest.number}</span>
+                <span className="journey-stop-copy">
+                  <b>{isOpen ? quest.title : 'Sealed'}</b>
+                  <small>{isOpen ? `${quest.level} · ${quest.guardian.name}` : quest.level}</small>
+                </span>
+                {isFinale && <span className="journey-stop-flag">FINALE</span>}
+              </button>
+            </li>
+          )
+        })}
+      </ol>
 
-          <div className="quest-next-action">
-            <div><small>{finished ? 'QUEST COMPLETE' : 'UP NEXT'}</small><b>{finished ? 'Review this quest' : currentStep.title}</b></div>
-            <button type="button" className="btn btn-primary" onClick={() => openStep(nextStep)}>{finished ? 'Review' : 'Continue'}</button>
-          </div>
+      {openQuest && (
+        <QuestSheet
+          quest={openQuest}
+          progress={progress}
+          onClose={() => setOpenQuestId(null)}
+          onOpenStep={(step) => openStep(openQuest, step)}
+        />
+      )}
+    </main>
+  )
+}
 
-          <div className="quest-step-list" aria-label="Quest steps">
-            {STEP_DETAILS.map((step) => {
-              const isDone = Boolean(progress[selected.id]?.[step.id])
-              const isNext = !finished && step.id === nextStep
-              const isAvailable = isDone || isNext
-              return (
-                <button key={step.id} type="button" disabled={!isAvailable} className={`quest-step-row${isDone ? ' is-done' : ''}${isNext ? ' is-next' : ''}`} onClick={() => openStep(step.id)}>
-                  <span>{isDone ? '✓' : step.number}</span>
-                  <b>{step.title}</b>
-                  <small>{isDone ? 'Complete' : isNext ? step.description : 'Locked'}</small>
-                </button>
-              )
-            })}
+function QuestSheet({
+  quest,
+  progress,
+  onClose,
+  onOpenStep,
+}: {
+  quest: QuestDefinition
+  progress: QuestProgress
+  onClose: () => void
+  onOpenStep: (step: QuestStep) => void
+}) {
+  const completed = completedQuestSteps(progress, quest.id)
+  const finished = isQuestComplete(progress, quest.id)
+  const nextStep = QUEST_STEPS.find((step) => !progress[quest.id]?.[step]) ?? 'checkpoint'
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [onClose])
+
+  return (
+    <div className="quest-sheet-backdrop" onClick={onClose}>
+      <div
+        className="quest-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quest-sheet-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="quest-sheet-head">
+          <span>QUEST {String(quest.number).padStart(2, '0')} · {quest.level} · {completed}/{STEP_DETAILS.length} steps</span>
+          <button type="button" className="quest-sheet-close" onClick={onClose} aria-label="Close">×</button>
+        </div>
+        <h2 id="quest-sheet-title">{quest.title}<small lang="ja">{quest.symbol}</small></h2>
+        <p className="quest-sheet-subtitle">{quest.subtitle}</p>
+
+        <div className="quest-sheet-patron">
+          <span className="quest-sheet-patron-role">{quest.patron.role} asks</span>
+          <p>“{quest.patron.request}”</p>
+          <span className="quest-sheet-patron-name">— {quest.patron.name}</span>
+        </div>
+
+        <div className="quest-sheet-threat">
+          <span className="quest-sheet-threat-portrait">
+            {quest.guardian.portrait
+              ? <img src={quest.guardian.portrait} alt="" />
+              : <strong aria-hidden="true">{quest.guardian.mark}</strong>}
+          </span>
+          <div className="quest-sheet-threat-copy">
+            <small>{finished ? 'DEFEATED' : 'GUARDIAN'}</small>
+            <b>{quest.guardian.name}</b>
+            <span>{quest.guardian.title}</span>
           </div>
         </div>
 
-        <aside className="quest-focus-guardian">
-          <div className="quest-focus-guardian-copy"><small>{finished ? 'DEFEATED' : 'GUARDIAN'}</small><b>{selected.guardian.name}</b><span>{selected.guardian.title}</span></div>
-          {selected.guardian.portrait
-            ? <img src={selected.guardian.portrait} alt={`${selected.guardian.name}, ${selected.guardian.title}`} />
-            : <strong aria-hidden="true">{selected.guardian.mark}</strong>}
-          <footer><small>{finished ? 'RELIC RECOVERED' : 'REWARD'}</small><b>{selected.reward.name}</b></footer>
-        </aside>
-      </section>
+        <div className="quest-sheet-steps" role="group" aria-label={`${completed} of ${STEP_DETAILS.length} steps complete`}>
+          {STEP_DETAILS.map((step) => {
+            const isDone = Boolean(progress[quest.id]?.[step.id])
+            const isNext = !finished && step.id === nextStep
+            return (
+              <button
+                key={step.id}
+                type="button"
+                disabled={!(isDone || isNext)}
+                className={`quest-sheet-pip${isDone ? ' is-done' : ''}${isNext ? ' is-next' : ''}`}
+                title={step.title}
+                aria-label={`${step.title}${isDone ? ', complete' : isNext ? ', up next' : ', locked'}`}
+                onClick={() => onOpenStep(step.id)}
+              >
+                {isDone ? '✓' : step.number}
+              </button>
+            )
+          })}
+        </div>
 
-      {/* The road, told as chapters. A flat grid of twelve made every quest
-          look like a separate errand; grouping them under each arc's own lore
-          gives the list a shape and a direction. */}
-      <section className="journey-road" aria-labelledby="journey-road-title">
-        <h2 id="journey-road-title" className="journey-road-title">The road ahead</h2>
-        {CAMPAIGN_ARCS.map((arc) => {
-          const arcQuests = QUESTS.filter((quest) => quest.arcId === arc.id)
-          const arcCleared = arcQuests.filter((quest) => questComplete(quest.id)).length
-          const arcOpen = arcQuests.some((quest) => isQuestUnlocked(quest, questComplete))
-
-          return (
-            <article key={arc.id} className={`journey-chapter${arcOpen ? '' : ' is-sealed'}${arcCleared === arcQuests.length ? ' is-cleared' : ''}`}>
-              <header className="journey-chapter-header">
-                <span className="journey-chapter-mark" aria-hidden="true">{arc.mark}</span>
-                <div>
-                  <span className="journey-chapter-eyebrow">{arc.subtitle}</span>
-                  <h3>{arc.title}<small lang="ja">{arc.japanese}</small></h3>
-                  <p>{arc.blurb}</p>
-                </div>
-                <small className="journey-chapter-count">{arcCleared}/{arcQuests.length}</small>
-              </header>
-
-              <ol className="journey-path">
-                {arcQuests.map((quest) => {
-                  const isOpen = isQuestUnlocked(quest, questComplete)
-                  const done = questComplete(quest.id)
-                  const isSelected = quest.id === selected.id
-                  const isFinale = quest.number === QUESTS.length
-
-                  return (
-                    <li key={quest.id}>
-                      <button
-                        type="button"
-                        disabled={!isOpen}
-                        onClick={() => setSelectedId(quest.id)}
-                        aria-pressed={isSelected}
-                        className={`journey-stop${done ? ' is-done' : ''}${isSelected ? ' is-current' : ''}${isFinale ? ' is-finale' : ''}`}
-                      >
-                        <span className="journey-stop-dot" aria-hidden="true">{done ? '✓' : quest.number}</span>
-                        <span className="journey-stop-copy">
-                          <b>{isOpen ? quest.title : 'Sealed'}</b>
-                          {/* Naming the guardian is what turns a row into a
-                              stop on a road with something waiting on it. */}
-                          <small>{isOpen ? `${quest.level} · ${quest.guardian.name}` : quest.level}</small>
-                        </span>
-                        {isFinale && <span className="journey-stop-flag">FINALE</span>}
-                      </button>
-                    </li>
-                  )
-                })}
-              </ol>
-            </article>
-          )
-        })}
-      </section>
-    </main>
+        <div className="quest-sheet-footer">
+          <div className="quest-sheet-reward">
+            <span aria-hidden="true">{quest.reward.mark}</span>
+            <div>
+              <small>{finished ? 'RELIC RECOVERED' : 'REWARD'}</small>
+              <b>{quest.reward.name}</b>
+            </div>
+          </div>
+          <button type="button" className="btn btn-primary" onClick={() => onOpenStep(nextStep)}>
+            {finished ? 'Review' : 'Continue'}
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
