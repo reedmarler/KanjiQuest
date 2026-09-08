@@ -4213,7 +4213,7 @@ body:has(.dashboard) {
 }
 
 /* Home quest card: a small scene, a five-node path, and one Continue. */
-.dashboard-quest-card {
+.home-quest-card {
   position: relative;
   display: grid;
   gap: 0.55rem;
@@ -4227,23 +4227,25 @@ body:has(.dashboard) {
     color-mix(in srgb, var(--surface) 92%, var(--surface-2));
 }
 
-.dashboard-quest-scene {
+.home-quest-scene {
   position: absolute;
   inset: 0;
   z-index: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.6;
+  opacity: 0.4;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 34%, #000);
+  mask-image: linear-gradient(90deg, transparent, #000 34%, #000);
 }
 
-.dashboard-quest-card > *:not(.dashboard-quest-scene):not(.dashboard-quest-cord) {
+.home-quest-card > *:not(.home-quest-scene):not(.home-quest-cord) {
   position: relative;
   z-index: 1;
 }
 
 /* Identity row */
-.dashboard-quest-head {
+.home-quest-head {
   display: grid;
   grid-template-columns: 2.85rem minmax(0, 1fr) 1.1rem;
   align-items: center;
@@ -4258,11 +4260,11 @@ body:has(.dashboard) {
   cursor: pointer;
 }
 
-.dashboard-quest-head:hover .dashboard-quest-title {
+.home-quest-head:hover .home-quest-title {
   color: var(--sakura-light);
 }
 
-.dashboard-quest-mark {
+.home-quest-mark {
   display: grid;
   place-items: center;
   align-self: start;
@@ -4275,20 +4277,20 @@ body:has(.dashboard) {
   font: 800 1.5rem/1 'Noto Sans JP', sans-serif;
 }
 
-.dashboard-quest-id {
+.home-quest-id {
   display: grid;
   gap: 0.14rem;
   min-width: 0;
 }
 
-.dashboard-quest-eyebrow {
+.home-quest-eyebrow {
   color: color-mix(in srgb, var(--text-muted) 90%, var(--sakura));
   font: 800 0.52rem/1 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.dashboard-quest-title {
+.home-quest-title {
   overflow: hidden;
   font-size: 1.02rem;
   line-height: 1.1;
@@ -4297,14 +4299,14 @@ body:has(.dashboard) {
   transition: color 140ms ease;
 }
 
-.dashboard-quest-sub {
+.home-quest-sub {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   min-width: 0;
 }
 
-.dashboard-quest-stamp {
+.home-quest-stamp {
   flex: 0 0 auto;
   padding: 0.08rem 0.32rem;
   border-radius: 3px;
@@ -4315,7 +4317,7 @@ body:has(.dashboard) {
   letter-spacing: 0.04em;
 }
 
-.dashboard-quest-guardian {
+.home-quest-guardian {
   overflow: hidden;
   color: color-mix(in srgb, var(--text-muted) 82%, transparent);
   font-size: 0.6rem;
@@ -4324,14 +4326,14 @@ body:has(.dashboard) {
   white-space: nowrap;
 }
 
-.dashboard-quest-head .dashboard-quest-go {
+.home-quest-head .home-quest-go {
   align-self: center;
   color: color-mix(in srgb, var(--sakura-light) 70%, var(--text-muted));
   font: 900 1.3rem/1 'Outfit', system-ui, sans-serif;
 }
 
 /* Corner bead cord — wealth, count on tap */
-.dashboard-quest-cord {
+.home-quest-cord {
   position: absolute;
   top: 0.5rem;
   right: 0.55rem;
@@ -4346,7 +4348,7 @@ body:has(.dashboard) {
   cursor: pointer;
 }
 
-.dashboard-quest-cord-beads {
+.home-quest-cord-beads {
   display: flex;
   align-items: center;
   gap: 0.16rem;
@@ -4355,57 +4357,58 @@ body:has(.dashboard) {
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--amber) 34%, transparent), transparent);
 }
 
-.dashboard-quest-cord-beads i {
+.home-quest-cord-beads i {
   width: 0.34rem;
   height: 0.34rem;
   border-radius: 50%;
   background: var(--amber-light);
 }
 
-.dashboard-quest-cord-beads i.is-empty {
+.home-quest-cord-beads i.is-empty {
   background: color-mix(in srgb, var(--text-muted) 38%, transparent);
 }
 
-.dashboard-quest-cord-count {
+.home-quest-cord-count {
   color: var(--amber-light);
   font: 800 0.6rem/1 'Outfit', system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
 }
 
 /* The path */
-.dashboard-quest-path {
+.home-quest-path {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 1.5rem;
-  margin: 0.1rem 0.1rem 0;
+  margin: 0.1rem 0 0;
+  padding: 0 1.25rem 0 0.35rem;
 }
 
-.dashboard-quest-path::before,
-.dashboard-quest-path::after {
+.home-quest-path::before,
+.home-quest-path::after {
   content: '';
   position: absolute;
   top: 50%;
-  left: 0.4rem;
-  right: 0.4rem;
+  left: 0.75rem;
+  right: 1.6rem;
   height: 2px;
   border-radius: 999px;
   transform: translateY(-50%);
 }
 
-.dashboard-quest-path::before {
+.home-quest-path::before {
   background: color-mix(in srgb, var(--text-muted) 22%, transparent);
 }
 
-.dashboard-quest-path::after {
+.home-quest-path::after {
   background: var(--rayquaza-light);
   transform: translateY(-50%) scaleX(var(--path-pct, 0));
   transform-origin: left center;
   transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.dashboard-quest-node {
+.home-quest-node {
   position: relative;
   width: 0.62rem;
   height: 0.62rem;
@@ -4414,21 +4417,21 @@ body:has(.dashboard) {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--surface) 92%, var(--surface-2));
 }
 
-.dashboard-quest-node.is-done {
+.home-quest-node.is-done {
   background: var(--rayquaza-light);
 }
 
-.dashboard-quest-node.is-next {
+.home-quest-node.is-next {
   background: var(--sakura);
-  animation: dashboard-quest-pulse 1.8s ease-in-out infinite;
+  animation: home-quest-pulse 1.8s ease-in-out infinite;
 }
 
-.dashboard-quest-node.is-prize {
+.home-quest-node.is-prize {
   width: 0.8rem;
   height: 0.8rem;
 }
 
-@keyframes dashboard-quest-pulse {
+@keyframes home-quest-pulse {
   0%, 100% {
     box-shadow:
       0 0 0 3px color-mix(in srgb, var(--surface) 92%, var(--surface-2)),
@@ -4442,48 +4445,49 @@ body:has(.dashboard) {
 }
 
 /* Traveler bead on a cord */
-.dashboard-quest-bead {
+.home-quest-bead {
   display: inline-grid;
   place-items: center;
   line-height: 0;
 }
 
-.dashboard-quest-bead svg {
+.home-quest-bead svg {
   width: 100%;
   height: 100%;
   overflow: visible;
 }
 
-.dashboard-quest-bead line {
+.home-quest-bead line {
   stroke: color-mix(in srgb, var(--amber) 60%, var(--text-muted));
   stroke-width: 1.4;
 }
 
-.dashboard-quest-bead ellipse {
+.home-quest-bead ellipse {
   fill: var(--amber);
   stroke: color-mix(in srgb, var(--amber-light) 80%, #fff);
   stroke-width: 1;
 }
 
-.dashboard-quest-bead .dashboard-quest-bead-glint {
+.home-quest-bead .home-quest-bead-glint {
   fill: color-mix(in srgb, var(--amber-light) 55%, #fff);
   stroke: none;
 }
 
-.dashboard-quest-node-bead {
+.home-quest-node-bead {
   position: absolute;
-  bottom: calc(100% - 0.12rem);
+  bottom: calc(100% - 0.4rem);
   left: 50%;
-  width: 1.35rem;
-  height: 1.15rem;
+  width: 1.2rem;
+  height: 1rem;
   transform: translateX(-50%);
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, #000 45%, transparent));
 }
 
-.dashboard-quest-card.is-fresh .dashboard-quest-node-bead {
+.home-quest-card.is-fresh .home-quest-node-bead {
   animation: dashboard-bead-land 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.dashboard-quest-card.is-fresh .dashboard-quest-path::after {
+.home-quest-card.is-fresh .home-quest-path::after {
   transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -4494,7 +4498,7 @@ body:has(.dashboard) {
 }
 
 /* Up-next caption */
-.dashboard-quest-upnext {
+.home-quest-upnext {
   margin: 0;
   overflow: hidden;
   color: var(--text-muted);
@@ -4504,7 +4508,7 @@ body:has(.dashboard) {
   white-space: nowrap;
 }
 
-.dashboard-quest-upnext em {
+.home-quest-upnext em {
   margin-right: 0.4rem;
   padding: 0.05rem 0.3rem;
   border-radius: 999px;
@@ -4517,7 +4521,7 @@ body:has(.dashboard) {
 }
 
 /* One primary Continue */
-.dashboard-quest-continue {
+.home-quest-continue {
   display: grid;
   grid-template-columns: 2rem minmax(0, 1fr) auto 1.2rem;
   align-items: center;
@@ -4535,24 +4539,24 @@ body:has(.dashboard) {
   transition: border-color 140ms ease, background 140ms ease, transform 120ms ease;
 }
 
-.dashboard-quest-continue:hover {
+.home-quest-continue:hover {
   border-color: color-mix(in srgb, var(--sakura) 66%, transparent);
   background: color-mix(in srgb, var(--sakura) 24%, var(--surface-2));
   transform: translateY(-1px);
 }
 
-.dashboard-quest-continue.is-quiet {
+.home-quest-continue.is-quiet {
   border-color: color-mix(in srgb, var(--text-muted) 22%, transparent);
   background: color-mix(in srgb, var(--surface-2) 58%, transparent);
 }
 
-.dashboard-quest-continue.is-quiet:hover {
+.home-quest-continue.is-quiet:hover {
   border-color: color-mix(in srgb, var(--text-muted) 40%, transparent);
   background: color-mix(in srgb, var(--surface-2) 74%, transparent);
   transform: none;
 }
 
-.dashboard-quest-continue-mark {
+.home-quest-continue-mark {
   display: grid;
   place-items: center;
   width: 2rem;
@@ -4563,23 +4567,23 @@ body:has(.dashboard) {
   font: 800 1rem/1 'Noto Sans JP', sans-serif;
 }
 
-.dashboard-quest-continue.is-quiet .dashboard-quest-continue-mark {
+.home-quest-continue.is-quiet .home-quest-continue-mark {
   background: color-mix(in srgb, var(--text-muted) 20%, var(--surface));
   color: var(--text-muted);
 }
 
-.dashboard-quest-continue-copy {
+.home-quest-continue-copy {
   display: grid;
   gap: 0.1rem;
   min-width: 0;
 }
 
-.dashboard-quest-continue-copy b {
+.home-quest-continue-copy b {
   font-size: 0.86rem;
   line-height: 1.1;
 }
 
-.dashboard-quest-continue-copy small {
+.home-quest-continue-copy small {
   overflow: hidden;
   color: var(--text-muted);
   font-size: 0.6rem;
@@ -4588,33 +4592,33 @@ body:has(.dashboard) {
   white-space: nowrap;
 }
 
-.dashboard-quest-continue-bead {
+.home-quest-continue-bead {
   width: 1.4rem;
   height: 1.15rem;
 }
 
-.dashboard-quest-continue.is-quiet .dashboard-quest-continue-bead {
+.home-quest-continue.is-quiet .home-quest-continue-bead {
   opacity: 0.5;
 }
 
-.dashboard-quest-continue .dashboard-quest-go {
+.home-quest-continue .home-quest-go {
   color: color-mix(in srgb, var(--sakura-light) 80%, var(--text));
   font: 900 1.3rem/1 'Outfit', system-ui, sans-serif;
 }
 
-.dashboard-quest-continue.is-quiet .dashboard-quest-go {
+.home-quest-continue.is-quiet .home-quest-go {
   color: var(--text-muted);
 }
 
 /* Demoted stat strip — must not rival Continue */
-.dashboard-quest-stats {
+.home-quest-stats {
   display: flex;
   align-items: center;
   gap: 0.15rem;
   padding: 0 0.1rem;
 }
 
-.dashboard-quest-stats button {
+.home-quest-stats button {
   flex: 1;
   min-width: 0;
   padding: 0.2rem 0.25rem;
@@ -4628,31 +4632,31 @@ body:has(.dashboard) {
   transition: color 120ms ease, background 120ms ease;
 }
 
-.dashboard-quest-stats button + button {
+.home-quest-stats button + button {
   border-left: 1px solid color-mix(in srgb, var(--text-muted) 16%, transparent);
 }
 
-.dashboard-quest-stats button:hover {
+.home-quest-stats button:hover {
   color: var(--text);
   background: color-mix(in srgb, var(--surface-2) 60%, transparent);
 }
 
-.dashboard-quest-stats b {
+.home-quest-stats b {
   color: var(--text);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
 
 /* Campaign-complete variant */
-.dashboard-quest-card.is-complete .dashboard-quest-mark {
+.home-quest-card.is-complete .home-quest-mark {
   background: color-mix(in srgb, var(--amber) 22%, var(--surface));
   color: var(--amber-light);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dashboard-quest-node.is-next { animation: none; }
-  .dashboard-quest-card.is-fresh .dashboard-quest-node-bead { animation: none; }
-  .dashboard-quest-path::after { transition: none; }
+  .home-quest-node.is-next { animation: none; }
+  .home-quest-card.is-fresh .home-quest-node-bead { animation: none; }
+  .home-quest-path::after { transition: none; }
 }
 
 .dashboard-action-grid {
@@ -5172,7 +5176,7 @@ body:has(.dashboard) {
     margin-top: 0;
   }
 
-  .dashboard-quest-card {
+  .home-quest-card {
     margin-top: 0.5rem;
     padding: 0.55rem 0.55rem 0.5rem;
   }

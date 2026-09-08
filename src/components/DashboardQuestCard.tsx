@@ -28,13 +28,13 @@ const QUEST_STEP_PREVIEW: Record<QuestStep, { title: string; hint: string }> = {
   checkpoint: { title: 'Guardian battle', hint: 'Prove it and break the seal.' },
 }
 
-const SESSION_KEY = 'kq-dashboard-quest-steps'
+const SESSION_KEY = 'kq-home-quest-steps'
 
 /** A muted torii-and-road still that sits behind the card content. */
 function QuestScene() {
   return (
     <svg
-      className="dashboard-quest-scene"
+      className="home-quest-scene"
       viewBox="0 0 400 128"
       preserveAspectRatio="xMidYMid slice"
       aria-hidden="true"
@@ -67,11 +67,11 @@ function QuestScene() {
 /** A single traveler bead threaded on a short cord. */
 function TravelerBead({ className = '' }: { className?: string }) {
   return (
-    <span className={`dashboard-quest-bead${className ? ` ${className}` : ''}`} aria-hidden="true">
+    <span className={`home-quest-bead${className ? ` ${className}` : ''}`} aria-hidden="true">
       <svg viewBox="0 0 24 20">
         <line x1="1" y1="7" x2="23" y2="13" />
         <ellipse cx="12" cy="10" rx="5.4" ry="6.4" />
-        <ellipse className="dashboard-quest-bead-glint" cx="10.2" cy="8" rx="1.3" ry="1.8" />
+        <ellipse className="home-quest-bead-glint" cx="10.2" cy="8" rx="1.3" ry="1.8" />
       </svg>
     </span>
   )
@@ -133,23 +133,23 @@ export function DashboardQuestCard({
 
   if (!nextQuest) {
     return (
-      <section className="dashboard-quest-card is-complete" aria-label="Campaign complete">
+      <section className="home-quest-card is-complete" aria-label="Campaign complete">
         <QuestScene />
-        <div className="dashboard-quest-head">
-          <span className="dashboard-quest-mark" aria-hidden="true" lang="ja">祝</span>
-          <div className="dashboard-quest-id">
-            <span className="dashboard-quest-eyebrow">Campaign</span>
-            <b className="dashboard-quest-title">Every seal is broken</b>
-            <span className="dashboard-quest-guardian">All {QUESTS.length} quests cleared</span>
+        <div className="home-quest-head">
+          <span className="home-quest-mark" aria-hidden="true" lang="ja">祝</span>
+          <div className="home-quest-id">
+            <span className="home-quest-eyebrow">Campaign</span>
+            <b className="home-quest-title">Every seal is broken</b>
+            <span className="home-quest-guardian">All {QUESTS.length} quests cleared</span>
           </div>
         </div>
-        <button type="button" className="dashboard-quest-continue is-quiet" onClick={onOpenQuests}>
-          <span className="dashboard-quest-continue-mark" aria-hidden="true" lang="ja">続</span>
-          <span className="dashboard-quest-continue-copy">
+        <button type="button" className="home-quest-continue is-quiet" onClick={onOpenQuests}>
+          <span className="home-quest-continue-mark" aria-hidden="true" lang="ja">続</span>
+          <span className="home-quest-continue-copy">
             <b>Replay a quest</b>
             <small>Open the campaign map</small>
           </span>
-          <span className="dashboard-quest-go" aria-hidden="true">&#8250;</span>
+          <span className="home-quest-go" aria-hidden="true">&#8250;</span>
         </button>
       </section>
     )
@@ -159,47 +159,47 @@ export function DashboardQuestCard({
 
   return (
     <section
-      className={`dashboard-quest-card${dailyDone ? ' is-daily-done' : ''}${beadLanded ? ' is-fresh' : ''}`}
+      className={`home-quest-card${dailyDone ? ' is-daily-done' : ''}${beadLanded ? ' is-fresh' : ''}`}
       aria-label="Next quest"
     >
       <QuestScene />
 
       <button
         type="button"
-        className="dashboard-quest-head"
+        className="home-quest-head"
         onClick={onOpenQuests}
         aria-label={`Open quest: ${nextQuest.title}`}
       >
-        <span className="dashboard-quest-mark" aria-hidden="true" lang="ja">{nextQuest.symbol}</span>
-        <div className="dashboard-quest-id">
-          <span className="dashboard-quest-eyebrow">Quest #{nextQuest.number} · {nextQuest.level}</span>
-          <b className="dashboard-quest-title">{nextQuest.title}</b>
-          <span className="dashboard-quest-sub">
-            <span className="dashboard-quest-stamp" aria-hidden="true">{arcCleared}/{arcQuests.length}</span>
-            <span className="dashboard-quest-guardian">
+        <span className="home-quest-mark" aria-hidden="true" lang="ja">{nextQuest.symbol}</span>
+        <div className="home-quest-id">
+          <span className="home-quest-eyebrow">Quest #{nextQuest.number} · {nextQuest.level}</span>
+          <b className="home-quest-title">{nextQuest.title}</b>
+          <span className="home-quest-sub">
+            <span className="home-quest-stamp" aria-hidden="true">{arcCleared}/{arcQuests.length}</span>
+            <span className="home-quest-guardian">
               Guardian · {nextQuest.guardian.name} · {nextQuest.guardian.title}
             </span>
           </span>
         </div>
-        <span className="dashboard-quest-go" aria-hidden="true">&#8250;</span>
+        <span className="home-quest-go" aria-hidden="true">&#8250;</span>
       </button>
 
       <button
         type="button"
-        className="dashboard-quest-cord"
+        className="home-quest-cord"
         onClick={() => setCordOpen((open) => !open)}
         aria-label={`${questsCleared} traveler beads earned`}
       >
-        <span className="dashboard-quest-cord-beads" aria-hidden="true">
+        <span className="home-quest-cord-beads" aria-hidden="true">
           {Array.from({ length: cordBeadCount }).map((_, index) => (
             <i key={index} className={questsCleared === 0 ? 'is-empty' : undefined} />
           ))}
         </span>
-        {cordOpen && <span className="dashboard-quest-cord-count">{questsCleared}</span>}
+        {cordOpen && <span className="home-quest-cord-count">{questsCleared}</span>}
       </button>
 
       <div
-        className="dashboard-quest-path"
+        className="home-quest-path"
         role="img"
         aria-label={`${stepsDone} of ${QUEST_STEPS.length} steps done`}
         style={{ '--path-pct': String(pathFraction) } as CSSProperties}
@@ -211,15 +211,15 @@ export function DashboardQuestCard({
           return (
             <span
               key={step}
-              className={`dashboard-quest-node${done ? ' is-done' : ''}${isNext ? ' is-next' : ''}${isPrize ? ' is-prize' : ''}`}
+              className={`home-quest-node${done ? ' is-done' : ''}${isNext ? ' is-next' : ''}${isPrize ? ' is-prize' : ''}`}
             >
-              {isPrize && <TravelerBead className="dashboard-quest-node-bead" />}
+              {isPrize && <TravelerBead className="home-quest-node-bead" />}
             </span>
           )
         })}
       </div>
 
-      <p className="dashboard-quest-upnext">
+      <p className="home-quest-upnext">
         <em>Up next</em>
         {nextStep
           ? <>{QUEST_STEP_PREVIEW[nextStep].title} — {QUEST_STEP_PREVIEW[nextStep].hint}</>
@@ -228,19 +228,19 @@ export function DashboardQuestCard({
 
       <button
         type="button"
-        className={`dashboard-quest-continue${dailyDone ? ' is-quiet' : ''}`}
+        className={`home-quest-continue${dailyDone ? ' is-quiet' : ''}`}
         onClick={onContinueStudy}
       >
-        <span className="dashboard-quest-continue-mark" aria-hidden="true" lang="ja">続</span>
-        <span className="dashboard-quest-continue-copy">
+        <span className="home-quest-continue-mark" aria-hidden="true" lang="ja">続</span>
+        <span className="home-quest-continue-copy">
           <b>Continue Quest</b>
           <small>{stepsLeft === 1 ? '1 step left' : `${stepsLeft} steps left`} · ~{questMinutes} min</small>
         </span>
-        <TravelerBead className="dashboard-quest-continue-bead" />
-        <span className="dashboard-quest-go" aria-hidden="true">&#8250;</span>
+        <TravelerBead className="home-quest-continue-bead" />
+        <span className="home-quest-go" aria-hidden="true">&#8250;</span>
       </button>
 
-      <div className="dashboard-quest-stats">
+      <div className="home-quest-stats">
         <button type="button" onClick={onOpenStudyTools}><b>{progressPct}%</b> cards</button>
         <button type="button" onClick={onOpenQuests}><b>{questsCleared}/{QUESTS.length}</b> quests</button>
         <button type="button" onClick={onOpenStudyTools}><b>{wrongCount}</b> review</button>
