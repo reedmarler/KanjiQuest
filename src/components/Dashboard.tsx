@@ -73,14 +73,6 @@ const HERO_MODE_LABELS: Record<Exclude<HeroSettingsMode, 'none'>, string> = {
   star: 'Star',
 }
 
-// The choices behind the 'Pick a mode' quick-select, in the same order as
-// the icon row inside the expanded settings panel.
-const PICK_MODE_OPTIONS: ReadonlyArray<{ mode: Exclude<HeroSettingsMode, 'none' | 'picking'>; label: string }> = [
-  { mode: 'story', label: 'Story' },
-  { mode: 'grammar', label: 'Grammar' },
-  { mode: 'star', label: 'Star' },
-]
-
 /*
  * Each of these holds the sentence still and works one part of speech, except
  * Particles: which particle a noun takes is decided by the predicate — 山に登る
@@ -385,24 +377,10 @@ export function Dashboard({
   const [storyId, setStoryId] = useState(HERO_STORY_DEFINITIONS[0]?.id ?? '')
   const [storyLevel, setStoryLevel] = useState<JlptLevel>(HERO_STORY_LEVELS[0] ?? 'N5')
   const [storyPlaybackMode, setStoryPlaybackMode] = useState<StoryPlaybackMode>('repeat')
-  const [storyQuickSelectOpen, setStoryQuickSelectOpen] = useState(false)
-  const [focusQuickSelectOpen, setFocusQuickSelectOpen] = useState(false)
-  const [pickModeQuickSelectOpen, setPickModeQuickSelectOpen] = useState(false)
-  // Lets an already-active mode (story/grammar/star) be swapped for another
-  // without switching the drill off first — separate from pickModeQuickSelect,
-  // which only exists while no mode has been chosen yet.
-  const [swapModeQuickSelectOpen, setSwapModeQuickSelectOpen] = useState(false)
-  const focusQuickSelectRef = useRef<HTMLDivElement | null>(null)
-  const storyQuickSelectRef = useRef<HTMLDivElement | null>(null)
-  const pickModeQuickSelectRef = useRef<HTMLDivElement | null>(null)
-  const swapModeQuickSelectRef = useRef<HTMLDivElement | null>(null)
-  const modeToggleRef = useRef<HTMLButtonElement | null>(null)
-  const swapModeButtonRef = useRef<HTMLButtonElement | null>(null)
   const storiesAtLevel = useMemo(() => getHeroStoriesForLevel(storyLevel), [storyLevel])
-  const selectedStoryTitle = storiesAtLevel.find((story) => story.id === storyId)?.shortTitle ?? 'Guided reading'
-  // The top-right toggle is always visible. Off is 'none'; on with no mode
-  // chosen yet is 'picking', which surfaces the mode name-button below rather
-  // than guessing which mode the learner wants.
+  // The compact mode toggle is always visible. Off is 'none'; on with no
+  // mode chosen yet is 'picking', which surfaces the mode choices inside the
+  // gear settings panel rather than guessing which mode the learner wants.
   const modeToggleOn = settingsMode !== 'none'
   // Entering Grammar mode should start a drill, not leave the ordinary sweep
   // running under a Grammar label. Likewise, raising the complexity can take
@@ -417,7 +395,6 @@ export function Dashboard({
     })
   }, [complexity, grammarMode])
 
-  const activeFocusLabel = HERO_SWAP_FOCUS_OPTIONS.find((option) => option.focus === swapFocus)?.label ?? 'Choose focus'
   /*
    * A focus with no pattern to run on at this level would build an empty
    * stream, and an empty stream is a blank hero — so it is closed off here
@@ -440,49 +417,17 @@ export function Dashboard({
   function selectSettingsMode(mode: Exclude<HeroSettingsMode, 'none'>) {
     setSettingsMode((current) => {
       const next = current === mode ? 'none' : mode
-      if (next !== 'story') setStoryQuickSelectOpen(false)
-      if (next !== 'grammar') setFocusQuickSelectOpen(false)
       return next
     })
   }
 
-  // The permanent top-right toggle only ever fully switches the drill on or
-  // off; it never picks a specific mode itself, so turning it on lands on
-  // 'picking' and waits for a choice from the name-button it reveals.
+  // The compact mode toggle only switches the drill on or off; it never picks
+  // a specific mode itself, so turning it on opens settings and waits for a
+  // choice from the mode buttons it reveals.
   function toggleModeOn() {
-    // Neither popup can stay meaningfully open once the drill is off or back
-    // to unpicked — closing both here rather than conditionally is simpler
-    // and correct, since this function's 'next' is never 'story' or 'grammar'.
-    setStoryQuickSelectOpen(false)
-    setFocusQuickSelectOpen(false)
-    setSwapModeQuickSelectOpen(false)
     setSettingsMode((current) => (current === 'none' ? 'picking' : 'none'))
+    setSettingsExpanded(true)
   }
-
-  // Swap always mirrors the toggle's own footprint rather than carrying a
-  // fixed width of its own — the toggle already sizes to whichever label
-  // it's showing ("Story", "Grammar", "Star"), and a mismatch there reads as
-  // the pair not belonging together. Measuring the rendered toggle directly
-  // (instead of keying a width off settingsMode) keeps the two in sync
-  // through label changes and the mobile breakpoint's own size shift alike.
-  useEffect(() => {
-    const toggleEl = modeToggleRef.current
-    if (!toggleEl) return
-    const applyWidth = () => {
-      if (!swapModeButtonRef.current) return
-      // getBoundingClientRect() reports final, already-zoomed screen pixels,
-      // but an inline style="width: Npx" is a pre-zoom length that the .app
-      // ancestor's own zoom (1.5 on desktop, see App.css) then scales again
-      // on render — without dividing that back out, Swap would end up 1.5x
-      // wider than the toggle it's meant to match on desktop.
-      const appEl = toggleEl.closest<HTMLElement>('.app')
-      const zoom = appEl ? parseFloat(getComputedStyle(appEl).zoom) || 1 : 1
-      swapModeButtonRef.current.style.width = `${toggleEl.getBoundingClientRect().width / zoom}px`
-    }
-    const observer = new ResizeObserver(applyWidth)
-    observer.observe(toggleEl)
-    return () => observer.disconnect()
-  }, [])
 
   const [paused, setPaused] = useState(false)
   const [playbackRate, setPlaybackRate] = useState<HeroPlaybackRate>(1)
@@ -523,43 +468,6 @@ export function Dashboard({
     if (storiesAtLevel.some((story) => story.id === storyId)) return
     setStoryId(storiesAtLevel[0]?.id ?? '')
   }, [storiesAtLevel, storyId])
-
-  useEffect(() => {
-    if (!storyQuickSelectOpen && !focusQuickSelectOpen && !pickModeQuickSelectOpen && !swapModeQuickSelectOpen) return
-
-    // One handler for all four menus: whichever is open closes on an
-    // outside pointer or Escape. The mode-settings menus (story/focus) and
-    // the mode-picker menus (pick/swap) are each mutually exclusive with
-    // their own pair, since they render for opposite settingsMode states.
-    const closeOnOutsidePointer = (event: PointerEvent) => {
-      if (!storyQuickSelectRef.current?.contains(event.target as Node)) {
-        setStoryQuickSelectOpen(false)
-      }
-      if (!focusQuickSelectRef.current?.contains(event.target as Node)) {
-        setFocusQuickSelectOpen(false)
-      }
-      if (!pickModeQuickSelectRef.current?.contains(event.target as Node)) {
-        setPickModeQuickSelectOpen(false)
-      }
-      if (!swapModeQuickSelectRef.current?.contains(event.target as Node)) {
-        setSwapModeQuickSelectOpen(false)
-      }
-    }
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return
-      setStoryQuickSelectOpen(false)
-      setFocusQuickSelectOpen(false)
-      setPickModeQuickSelectOpen(false)
-      setSwapModeQuickSelectOpen(false)
-    }
-
-    document.addEventListener('pointerdown', closeOnOutsidePointer)
-    document.addEventListener('keydown', closeOnEscape)
-    return () => {
-      document.removeEventListener('pointerdown', closeOnOutsidePointer)
-      document.removeEventListener('keydown', closeOnEscape)
-    }
-  }, [storyQuickSelectOpen, focusQuickSelectOpen, pickModeQuickSelectOpen, swapModeQuickSelectOpen])
 
   function toggleFurigana() {
     setFuriganaOn((on) => !on)
@@ -685,13 +593,33 @@ export function Dashboard({
               </div>
             </div>
 
-            <div className={`control-story-panel${storyMode ? ' is-active' : ''}`}>
+            <div className={`control-story-panel${modeToggleOn ? ' is-active' : ''}`}>
               <div className="control-story-heading">
                 <span>
                   <b>Mode</b>
-                  {storyMode && <small>{selectedStoryTitle}</small>}
+                  {modeToggleOn && settingsMode !== 'picking' && (
+                    <small>{HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]}</small>
+                  )}
                 </span>
                 <div className="control-story-actions">
+                  <button
+                    type="button"
+                    className={`control-chip control-chip-compact app-display-toggle hero-mode-settings-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
+                    onClick={toggleModeOn}
+                    role="switch"
+                    aria-checked={modeToggleOn}
+                    aria-label={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
+                    title={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
+                  >
+                    {modeToggleOn && settingsMode !== 'picking'
+                      ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]
+                      : 'Mode'}
+                  </button>
+                </div>
+              </div>
+
+              {modeToggleOn && (
+                <div className="hero-mode-panel-slot">
                   <div className="hero-mode-icons" role="group" aria-label="Sentence modes">
                     <button
                       type="button"
@@ -724,103 +652,95 @@ export function Dashboard({
                       <span aria-hidden="true">&#9733;</span>
                     </button>
                   </div>
-                </div>
-              </div>
 
-              {(storyMode || grammarMode || settingsMode === 'star') && (
-                <div className="hero-mode-panel-slot">
-                {storyMode && (
-                  <div className="control-story-options">
-                    <div className="control-story-setting">
-                      <span>Story difficulty</span>
-                      <div className="control-segmented control-segmented-story" role="group" aria-label="Story difficulty">
-                        {STORY_LEVEL_DISPLAY.map(({ level, name }) => {
-                          const hasStories = getHeroStoriesForLevel(level).length > 0
-                          return (
-                            <button
-                              key={level}
-                              type="button"
-                              data-story-level={level}
-                              className={`control-segment${level === storyLevel ? ' is-active' : ''}${hasStories ? '' : ' is-unavailable'}`}
-                              aria-pressed={level === storyLevel}
-                              aria-label={`${level} ${name}${hasStories ? '' : ': coming soon'}`}
-                              title={hasStories ? `${level} ${name}` : `${level} ${name} coming soon`}
-                              onClick={() => {
-                                setStoryLevel(level)
-                                setStoryQuickSelectOpen(false)
-                              }}
-                              disabled={!hasStories}
-                            >
-                              <span className="control-level-code">{level}</span>
-                              <span className="control-level-name">{name}</span>
-                            </button>
-                          )
-                        })}
+                  {storyMode && (
+                    <div className="control-story-options">
+                      <div className="control-story-setting">
+                        <span>Story difficulty</span>
+                        <div className="control-segmented control-segmented-story" role="group" aria-label="Story difficulty">
+                          {STORY_LEVEL_DISPLAY.map(({ level, name }) => {
+                            const hasStories = getHeroStoriesForLevel(level).length > 0
+                            return (
+                              <button
+                                key={level}
+                                type="button"
+                                data-story-level={level}
+                                className={`control-segment${level === storyLevel ? ' is-active' : ''}${hasStories ? '' : ' is-unavailable'}`}
+                                aria-pressed={level === storyLevel}
+                                aria-label={`${level} ${name}${hasStories ? '' : ': coming soon'}`}
+                                title={hasStories ? `${level} ${name}` : `${level} ${name} coming soon`}
+                                onClick={() => setStoryLevel(level)}
+                                disabled={!hasStories}
+                              >
+                                <span className="control-level-code">{level}</span>
+                                <span className="control-level-name">{name}</span>
+                              </button>
+                            )
+                          })}
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="control-story-setting">
-                      <span>Story</span>
-                      <div className="control-story-picker">
-                        <select
-                          className="control-select"
-                          value={storyId}
-                          onChange={(event) => setStoryId(event.target.value)}
-                          aria-label="Choose story"
-                        >
-                          {storiesAtLevel.map((story) => (
-                            <option key={story.id} value={story.id}>{story.shortTitle}</option>
-                          ))}
-                        </select>
-                        <div className="control-story-playback" role="group" aria-label="Story playback">
-                          <button
-                            type="button"
-                            className={`control-story-action${storyPlaybackMode === 'repeat' ? ' is-active' : ''}`}
-                            onClick={() => setStoryPlaybackMode('repeat')}
-                            aria-pressed={storyPlaybackMode === 'repeat'}
-                            aria-label="Repeat selected story"
-                            title="Repeat selected story"
+                      <div className="control-story-setting">
+                        <span>Story</span>
+                        <div className="control-story-picker">
+                          <select
+                            className="control-select"
+                            value={storyId}
+                            onChange={(event) => setStoryId(event.target.value)}
+                            aria-label="Choose story"
                           >
-                            <span aria-hidden="true">&#8734;</span>
-                          </button>
-                          <button
-                            type="button"
-                            className={`control-story-action${storyPlaybackMode === 'shuffle' ? ' is-active' : ''}`}
-                            onClick={() => setStoryPlaybackMode('shuffle')}
-                            aria-pressed={storyPlaybackMode === 'shuffle'}
-                            aria-label="Shuffle stories"
-                            title="Shuffle stories"
-                          >
-                            <span aria-hidden="true">&#10536;</span>
-                          </button>
+                            {storiesAtLevel.map((story) => (
+                              <option key={story.id} value={story.id}>{story.shortTitle}</option>
+                            ))}
+                          </select>
+                          <div className="control-story-playback" role="group" aria-label="Story playback">
+                            <button
+                              type="button"
+                              className={`control-story-action${storyPlaybackMode === 'repeat' ? ' is-active' : ''}`}
+                              onClick={() => setStoryPlaybackMode('repeat')}
+                              aria-pressed={storyPlaybackMode === 'repeat'}
+                              aria-label="Repeat selected story"
+                              title="Repeat selected story"
+                            >
+                              <span aria-hidden="true">&#8734;</span>
+                            </button>
+                            <button
+                              type="button"
+                              className={`control-story-action${storyPlaybackMode === 'shuffle' ? ' is-active' : ''}`}
+                              onClick={() => setStoryPlaybackMode('shuffle')}
+                              aria-pressed={storyPlaybackMode === 'shuffle'}
+                              aria-label="Shuffle stories"
+                              title="Shuffle stories"
+                            >
+                              <span aria-hidden="true">&#10536;</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {grammarMode && (
-                  <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
-                    {focusOptions.map(({ focus, label, disabledReason }) => (
-                      <button
-                        key={label}
-                        type="button"
-                        className={`hero-swap-mode-panel${focus && swapFocus === focus ? ' is-active' : ''}`}
-                        aria-pressed={focus ? swapFocus === focus : undefined}
-                        onClick={focus ? () => setSwapFocus((current) => (current === focus ? null : focus)) : undefined}
-                        disabled={!focus}
-                        title={focus ? undefined : disabledReason}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  {grammarMode && (
+                    <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
+                      {focusOptions.map(({ focus, label, disabledReason }) => (
+                        <button
+                          key={label}
+                          type="button"
+                          className={`hero-swap-mode-panel${focus && swapFocus === focus ? ' is-active' : ''}`}
+                          aria-pressed={focus ? swapFocus === focus : undefined}
+                          onClick={focus ? () => setSwapFocus((current) => (current === focus ? null : focus)) : undefined}
+                          disabled={!focus}
+                          title={focus ? undefined : disabledReason}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
-                {settingsMode === 'star' && (
-                  <FavoriteWordsPanel onManage={onOpenFavoriteWords} />
-                )}
-
+                  {settingsMode === 'star' && (
+                    <FavoriteWordsPanel onManage={onOpenFavoriteWords} />
+                  )}
                 </div>
               )}
             </div>
@@ -880,206 +800,6 @@ export function Dashboard({
           </div>
         </div>
       )}
-      <div className="control-story-topbar">
-        {storyMode && (
-          <div className="control-story-quick-select" ref={storyQuickSelectRef}>
-            <button
-              type="button"
-              className={`control-story-name-button${storyQuickSelectOpen ? ' is-open' : ''}`}
-              onClick={() => setStoryQuickSelectOpen((open) => !open)}
-              aria-label={`Choose story. Current story: ${selectedStoryTitle}`}
-              aria-haspopup="menu"
-              aria-expanded={storyQuickSelectOpen}
-              aria-controls="story-quick-select-menu"
-              title="Quick-select story"
-            >
-              <span className="control-story-name-mark" aria-hidden="true">&#29289;</span>
-              <span className="control-story-name-text">{selectedStoryTitle}</span>
-              <span className="control-story-name-chevron" aria-hidden="true">&#9662;</span>
-            </button>
-            {storyQuickSelectOpen && (
-              <div
-                className="control-story-quick-menu"
-                id="story-quick-select-menu"
-                role="menu"
-                aria-label={`${storyLevel} stories`}
-              >
-                <div className="control-story-quick-menu-levels" role="group" aria-label="Story difficulty">
-                  {STORY_LEVEL_DISPLAY.map(({ level, name }) => {
-                    const hasStories = getHeroStoriesForLevel(level).length > 0
-                    return (
-                      <button
-                        key={level}
-                        type="button"
-                        className={`control-story-quick-menu-level${level === storyLevel ? ' is-active' : ''}`}
-                        aria-pressed={level === storyLevel}
-                        aria-label={`${level} ${name}${hasStories ? '' : ': coming soon'}`}
-                        title={hasStories ? `${level} ${name}` : `${level} ${name} coming soon`}
-                        // Switching level re-populates the story grid below
-                        // without closing the menu, so picking a level and a
-                        // story happens in one open/close cycle.
-                        onClick={() => setStoryLevel(level)}
-                        disabled={!hasStories}
-                      >
-                        {level}
-                      </button>
-                    )
-                  })}
-                </div>
-                {storiesAtLevel.map((story) => (
-                  <button
-                    key={story.id}
-                    type="button"
-                    className={story.id === storyId ? 'is-active' : ''}
-                    role="menuitemradio"
-                    aria-checked={story.id === storyId}
-                    onClick={() => {
-                      setStoryId(story.id)
-                      setStoryQuickSelectOpen(false)
-                    }}
-                  >
-                    <span>{story.title}</span>
-                    {story.id === storyId && <span aria-hidden="true">&#10003;</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        {grammarMode && (
-          <div className="control-story-quick-select is-grammar" ref={focusQuickSelectRef}>
-            <button
-              type="button"
-              className={`control-story-name-button${focusQuickSelectOpen ? ' is-open' : ''}`}
-              onClick={() => setFocusQuickSelectOpen((open) => !open)}
-              aria-label={`Choose grammar focus. Current focus: ${activeFocusLabel}`}
-              aria-haspopup="menu"
-              aria-expanded={focusQuickSelectOpen}
-              aria-controls="focus-quick-select-menu"
-              title="Quick-select grammar focus"
-            >
-              <span className="control-story-name-mark" aria-hidden="true">&#25991;</span>
-              <span className="control-story-name-text">{activeFocusLabel}</span>
-              <span className="control-story-name-chevron" aria-hidden="true">&#9662;</span>
-            </button>
-            {focusQuickSelectOpen && (
-              <div
-                className="control-story-quick-menu"
-                id="focus-quick-select-menu"
-                role="menu"
-                aria-label="Grammar focus"
-              >
-                {focusOptions.map(({ focus, label, disabledReason }) => (
-                  <button
-                    key={label}
-                    type="button"
-                    className={focus && swapFocus === focus ? 'is-active' : ''}
-                    role="menuitemradio"
-                    aria-checked={focus ? swapFocus === focus : false}
-                    disabled={!focus}
-                    title={focus ? undefined : disabledReason}
-                    onClick={focus ? () => {
-                      setSwapFocus((current) => (current === focus ? null : focus))
-                      setFocusQuickSelectOpen(false)
-                    } : undefined}
-                  >
-                    <span>{label}</span>
-                    {focus && swapFocus === focus && <span aria-hidden="true">&#10003;</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        {settingsMode === 'picking' && (
-          <div className="control-story-quick-select is-picking" ref={pickModeQuickSelectRef}>
-            <button
-              type="button"
-              className={`control-story-name-button${pickModeQuickSelectOpen ? ' is-open' : ''}`}
-              onClick={() => setPickModeQuickSelectOpen((open) => !open)}
-              aria-label="Pick a mode"
-              aria-haspopup="menu"
-              aria-expanded={pickModeQuickSelectOpen}
-              aria-controls="pick-mode-quick-select-menu"
-              title="Pick a mode"
-            >
-              <span className="control-story-name-mark" aria-hidden="true">&#36984;</span>
-              <span className="control-story-name-text">Pick a mode</span>
-              <span className="control-story-name-chevron" aria-hidden="true">&#9662;</span>
-            </button>
-            {pickModeQuickSelectOpen && (
-              <div
-                className="control-story-quick-menu"
-                id="pick-mode-quick-select-menu"
-                role="menu"
-                aria-label="Sentence modes"
-              >
-                {PICK_MODE_OPTIONS.map(({ mode, label }) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      selectSettingsMode(mode)
-                      setPickModeQuickSelectOpen(false)
-                    }}
-                  >
-                    <span>{label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        {/* Swap, Pick a mode and the switch are siblings in one wrapping row:
-            Pick a mode sits inline to the left of the switch while a mode is
-            still being picked, and Swap claims a full-width line under the
-            switch once a mode is active — the same at every breakpoint. */}
-        {modeToggleOn && settingsMode !== 'picking' && (
-          <div className="control-story-quick-select is-swap" ref={swapModeQuickSelectRef}>
-            <button
-              ref={swapModeButtonRef}
-              type="button"
-              className={`control-swap-mode-button${swapModeQuickSelectOpen ? ' is-open' : ''}`}
-              onClick={() => setSwapModeQuickSelectOpen((open) => !open)}
-              aria-label={`Swap mode. Current mode: ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]}`}
-              aria-haspopup="menu"
-              aria-expanded={swapModeQuickSelectOpen}
-              aria-controls="swap-mode-quick-select-menu"
-              title="Swap mode"
-            >
-              <span aria-hidden="true">&#8646;</span>
-              <span>Swap</span>
-            </button>
-            {swapModeQuickSelectOpen && (
-              <div
-                className="control-story-quick-menu"
-                id="swap-mode-quick-select-menu"
-                role="menu"
-                aria-label="Sentence modes"
-              >
-                {PICK_MODE_OPTIONS.map(({ mode, label }) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={settingsMode === mode}
-                    className={settingsMode === mode ? 'is-active' : ''}
-                    onClick={() => {
-                      if (mode !== settingsMode) selectSettingsMode(mode)
-                      setSwapModeQuickSelectOpen(false)
-                    }}
-                  >
-                    <span>{label}</span>
-                    {settingsMode === mode && <span aria-hidden="true">&#10003;</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
       <header className="hero hero-compact">
         <h1>Kanji Quest</h1>
         <DashboardHeroSentence
@@ -1175,17 +895,15 @@ export function Dashboard({
                 <span className="control-chip-jp" aria-hidden="true">{speechOn ? '\uD83D\uDD0A' : '\uD83D\uDD08'}</span>
               </button>
               <button
-                ref={modeToggleRef}
                 type="button"
-                className={`control-story-toggle control-story-top-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
+                className={`control-chip control-chip-compact app-display-toggle hero-mode-control-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
                 onClick={toggleModeOn}
                 role="switch"
                 aria-checked={modeToggleOn}
                 aria-label={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
                 title={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
               >
-                <span className="control-toggle-track" aria-hidden="true"><span /></span>
-                <span>{modeToggleOn ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>] : 'Mode'}</span>
+                {modeToggleOn ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>] : 'Mode'}
               </button>
             </div>
           </div>
