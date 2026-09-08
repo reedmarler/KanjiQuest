@@ -9,27 +9,50 @@ const PHOTO_SIZE = 256
 export type UserProfile = {
   name: string
   photo: string | null
+  /** Free-text status line the learner can set on the profile page. */
+  tagline: string
+  /** Epoch ms of the first time this profile was written; drives "Member since". */
+  createdAt: number
 }
+
+export const TAGLINE_MAX = 60
 
 const DEFAULT_PROFILE: UserProfile = {
   name: DEFAULT_NAME,
   photo: null,
+  tagline: '',
+  createdAt: 0,
 }
 
-function isUserProfile(value: unknown): value is UserProfile {
+function isStoredProfile(value: unknown): value is Partial<UserProfile> {
   if (!value || typeof value !== 'object') return false
   const profile = value as Partial<UserProfile>
-  return typeof profile.name === 'string' && (profile.photo === null || typeof profile.photo === 'string')
+  return typeof profile.name === 'string' && (profile.photo == null || typeof profile.photo === 'string')
 }
 
 export function loadUserProfile(): UserProfile {
   try {
     const parsed: unknown = JSON.parse(window.localStorage.getItem(PROFILE_STORAGE_KEY) ?? 'null')
-    if (!isUserProfile(parsed)) return DEFAULT_PROFILE
-    const name = parsed.name.trim() || DEFAULT_NAME
-    return { name, photo: parsed.photo }
+    if (!isStoredProfile(parsed)) return { ...DEFAULT_PROFILE, createdAt: Date.now() }
+    return {
+      name: (parsed.name ?? '').trim() || DEFAULT_NAME,
+      photo: parsed.photo ?? null,
+      tagline: typeof parsed.tagline === 'string' ? parsed.tagline.slice(0, TAGLINE_MAX) : '',
+      // Back-fill for profiles saved before this field existed, so the date is
+      // stable from here on rather than jumping every render.
+      createdAt: typeof parsed.createdAt === 'number' && parsed.createdAt > 0 ? parsed.createdAt : Date.now(),
+    }
   } catch {
-    return DEFAULT_PROFILE
+    return { ...DEFAULT_PROFILE, createdAt: Date.now() }
+  }
+}
+
+export function formatMemberSince(createdAt: number): string {
+  if (!createdAt) return ''
+  try {
+    return new Date(createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+  } catch {
+    return ''
   }
 }
 
@@ -87,9 +110,11 @@ export function useUserProfile() {
 
   const updateProfile = useCallback((partial: Partial<UserProfile>) => {
     setProfile((current) => {
-      const next = {
+      const next: UserProfile = {
         name: (partial.name ?? current.name).trim() || DEFAULT_NAME,
         photo: partial.photo === undefined ? current.photo : partial.photo,
+        tagline: (partial.tagline === undefined ? current.tagline : partial.tagline).trim().slice(0, TAGLINE_MAX),
+        createdAt: current.createdAt || Date.now(),
       }
       saveUserProfile(next)
       return next

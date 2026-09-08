@@ -1,12 +1,43 @@
-import { useRef, useState, type FormEvent } from 'react'
-import { displayProfilePhoto, readProfilePhoto, useUserProfile } from '../lib/userProfile'
+import { useMemo, useRef, useState, type FormEvent } from 'react'
+import {
+  displayProfilePhoto,
+  formatMemberSince,
+  readProfilePhoto,
+  TAGLINE_MAX,
+  useUserProfile,
+} from '../lib/userProfile'
+import { loadProgress, loadStats } from '../lib/storage'
+import { isLearned } from '../lib/srs'
+import { isQuestComplete, loadQuestProgress } from '../lib/questProgress'
+import { QUESTS } from '../data/questCampaign'
 import { AppBackButton } from './AppBackButton'
+
+type ProfileStat = { label: string; value: string }
+
+function useProfileStats(): ProfileStat[] {
+  return useMemo(() => {
+    const stats = loadStats()
+    const cardsLearned = Object.values(loadProgress()).filter(isLearned).length
+    const questProgress = loadQuestProgress()
+    const questsCleared = QUESTS.filter((quest) => isQuestComplete(questProgress, quest.id)).length
+    return [
+      { label: 'Day streak', value: String(stats.streak) },
+      { label: 'Cards learned', value: cardsLearned.toLocaleString() },
+      { label: 'Reviews', value: stats.totalReviews.toLocaleString() },
+      { label: 'Quests cleared', value: `${questsCleared}/${QUESTS.length}` },
+    ]
+  }, [])
+}
 
 export function ProfilePage({ onBack }: { onBack: () => void }) {
   const [profile, updateProfile] = useUserProfile()
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState(profile.name)
+  const [editingTagline, setEditingTagline] = useState(false)
+  const [draftTagline, setDraftTagline] = useState(profile.tagline)
   const photoRef = useRef<HTMLInputElement | null>(null)
+  const stats = useProfileStats()
+  const memberSince = formatMemberSince(profile.createdAt)
 
   function startRename() {
     setDraftName(profile.name)
@@ -19,31 +50,45 @@ export function ProfilePage({ onBack }: { onBack: () => void }) {
     setEditingName(false)
   }
 
+  function startTagline() {
+    setDraftTagline(profile.tagline)
+    setEditingTagline(true)
+  }
+
+  function saveTagline(event?: FormEvent) {
+    event?.preventDefault()
+    updateProfile({ tagline: draftTagline })
+    setEditingTagline(false)
+  }
+
   async function changePhoto(file: File | undefined) {
     if (!file) return
     updateProfile({ photo: await readProfilePhoto(file) })
   }
 
   return (
-    <main className="account-page">
+    <main className="account-page profile-page">
       <header className="account-page-heading">
         <AppBackButton onClick={onBack} aria-label="Back" />
+        <small>You</small>
         <h1>Profile</h1>
       </header>
 
-      <section className="account-profile-card">
+      <section className="profile-hero">
         <button
           type="button"
-          className="account-profile-photo"
+          className="profile-hero-photo"
           onClick={() => photoRef.current?.click()}
           aria-label="Change profile picture"
         >
           <img src={displayProfilePhoto(profile.photo)} alt="" />
+          <span aria-hidden="true">Change</span>
         </button>
 
-        <div className="account-profile-identity">
+        <div className="profile-hero-identity">
+          <span className="profile-hero-label">Name</span>
           {editingName ? (
-            <form className="account-profile-name-form" onSubmit={saveName}>
+            <form className="profile-hero-name-form" onSubmit={saveName}>
               <input
                 value={draftName}
                 onChange={(event) => setDraftName(event.target.value)}
@@ -54,14 +99,48 @@ export function ProfilePage({ onBack }: { onBack: () => void }) {
               />
             </form>
           ) : (
-            <button type="button" className="account-profile-name" onClick={startRename}>
+            <button type="button" className="profile-hero-name" onClick={startRename}>
               <b>{profile.name}</b>
+              <em>Edit</em>
             </button>
           )}
+
+          {editingTagline ? (
+            <form className="profile-hero-tagline-form" onSubmit={saveTagline}>
+              <input
+                value={draftTagline}
+                onChange={(event) => setDraftTagline(event.target.value)}
+                onBlur={() => saveTagline()}
+                autoFocus
+                maxLength={TAGLINE_MAX}
+                placeholder="Add a tagline"
+                aria-label="Profile tagline"
+              />
+            </form>
+          ) : (
+            <button
+              type="button"
+              className={`profile-hero-tagline${profile.tagline ? '' : ' is-empty'}`}
+              onClick={startTagline}
+            >
+              {profile.tagline || 'Add a tagline'}
+            </button>
+          )}
+
+          {memberSince && <p className="profile-hero-since">Member since {memberSince}</p>}
         </div>
       </section>
 
-      <section className="account-profile-fields" aria-label="Profile details">
+      <section className="profile-stats" aria-label="Your progress">
+        {stats.map((stat) => (
+          <article key={stat.label}>
+            <b>{stat.value}</b>
+            <span>{stat.label}</span>
+          </article>
+        ))}
+      </section>
+
+      <section className="profile-fields" aria-label="Account">
         <article>
           <span>Device</span>
           <small>This browser</small>
