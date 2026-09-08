@@ -29,6 +29,8 @@ import type { DrillExercise } from './lib/drillExercises'
 import { COMPLEXITY_DISPLAY, Dashboard, HERO_SPEECH_STORAGE_KEY } from './components/Dashboard'
 import { AppHeaderControls } from './components/AppHeaderControls'
 import { UserProfileMenu } from './components/UserProfileMenu'
+import type { DailyGoalId } from './lib/dailyGoals'
+import { profileInitial, useUserProfile } from './lib/userProfile'
 import { canSpeakJapanese, stopSpeaking, watchSpeechSupport } from './lib/speech'
 import { SessionComplete } from './components/SessionComplete'
 import type { LibraryTab } from './components/LibraryPanel'
@@ -55,6 +57,8 @@ const BeginnerLearner = lazy(() => import('./components/BeginnerLearner').then((
 const KanaChart = lazy(() => import('./components/KanaChart').then((module) => ({ default: module.KanaChart })))
 const BeginnerSpeedRun = lazy(() => import('./components/BeginnerSpeedRun').then((module) => ({ default: module.BeginnerSpeedRun })))
 const PicturePractice = lazy(() => import('./components/PicturePractice').then((module) => ({ default: module.PicturePractice })))
+const ProfilePage = lazy(() => import('./components/ProfilePage').then((module) => ({ default: module.ProfilePage })))
+const DailyGoalsPage = lazy(() => import('./components/DailyGoalsPage').then((module) => ({ default: module.DailyGoalsPage })))
 
 /*
  * Copies of two tools, kept in Additional so they can be modernised before
@@ -96,11 +100,13 @@ type View =
   | 'beginner-speed-run'
   | 'picture-practice'
   | 'grammar-lab'
+  | 'profile'
+  | 'daily-goals'
 
 type PrimaryNavTab = 'home' | 'quest' | 'study' | 'beginner' | 'more'
 
 function primaryNavTabForView(view: View): PrimaryNavTab {
-  if (view === 'dashboard') return 'home'
+  if (view === 'dashboard' || view === 'profile' || view === 'daily-goals') return 'home'
   if (view === 'quests' || view === 'ink-road' || view === 'shrine-trial' || view === 'quest-scene' || view === 'quest-checkpoint') return 'quest'
   if (view === 'study-tools' || view === 'kanji' || view === 'vocab-practice' || view === 'counter-practice' || view === 'grammar' || view === 'study' || view === 'study-loading' || view === 'complete') return 'study'
   if (view === 'beginner-zone' || view === 'hiragana-chart' || view === 'katakana-chart' || view === 'hiragana-quiz' || view === 'katakana-quiz' || view === 'beginner-learner' || view === 'beginner-speed-run' || view === 'picture-practice') return 'beginner'
@@ -154,6 +160,8 @@ function DesktopPrimaryNav({
   hideUser,
   profileOpen,
   settingsOpen,
+  profileName,
+  profilePhoto,
   onProfile,
   onSettings,
   onHome,
@@ -166,6 +174,8 @@ function DesktopPrimaryNav({
   hideUser: boolean
   profileOpen: boolean
   settingsOpen: boolean
+  profileName: string
+  profilePhoto: string | null
   onProfile: () => void
   onSettings: () => void
   onHome: () => void
@@ -195,7 +205,9 @@ function DesktopPrimaryNav({
         title="User menu"
         tabIndex={hideUser ? -1 : undefined}
       >
-        <span aria-hidden="true">U</span>
+        {profilePhoto
+          ? <img src={profilePhoto} alt="" />
+          : <span aria-hidden="true">{profileInitial(profileName)}</span>}
       </button>
       <div className="desktop-primary-nav-links">
         {items.map((item) => (
@@ -272,6 +284,7 @@ function App() {
   const [speechOn, setSpeechOn] = useState(() => window.localStorage.getItem(HERO_SPEECH_STORAGE_KEY) === 'true')
   const [speechSupported, setSpeechSupported] = useState(canSpeakJapanese)
   const [complexity, setComplexity] = useState<GenerationComplexity>(1)
+  const [userProfile] = useUserProfile()
 
   useEffect(() => watchSpeechSupport(setSpeechSupported), [])
 
@@ -284,6 +297,32 @@ function App() {
     setView(next)
     setProfileMenuOpen(false)
     if (next !== 'dashboard') setSettingsExpanded(false)
+  }, [])
+
+  const openDailyGoal = useCallback((id: DailyGoalId) => {
+    setProfileMenuOpen(false)
+    if (id === 'sentence') {
+      setView('dashboard')
+      return
+    }
+    if (id === 'kanji') {
+      setActiveQuestId(undefined)
+      setPracticeReturnView('daily-goals')
+      setView('kanji')
+      return
+    }
+    if (id === 'vocab') {
+      setQuestVocabTopicId(undefined)
+      setActiveQuestId(undefined)
+      setPracticeReturnView('daily-goals')
+      setView('vocab-practice')
+      return
+    }
+    if (id === 'kana') {
+      setView('hiragana-chart')
+      return
+    }
+    setView('quests')
   }, [])
 
   const toggleProfileMenu = useCallback(() => {
@@ -467,6 +506,8 @@ function App() {
         hideUser={profileMenuOpen}
         profileOpen={profileMenuOpen}
         settingsOpen={settingsExpanded}
+        profileName={userProfile.name}
+        profilePhoto={userProfile.photo}
         onProfile={toggleProfileMenu}
         onSettings={toggleSettingsPanel}
       />
@@ -488,6 +529,8 @@ function App() {
       hideUser={profileMenuOpen}
       profileOpen={profileMenuOpen}
       settingsOpen={settingsExpanded}
+      profileName={userProfile.name}
+      profilePhoto={userProfile.photo}
       onProfile={toggleProfileMenu}
       onSettings={toggleSettingsPanel}
       onHome={() => goToView('dashboard')}
@@ -512,12 +555,13 @@ function App() {
       onToggleFurigana={() => setFuriganaOn((value) => !value)}
       onToggleEnglish={() => setEnglishOn((value) => !value)}
       onToggleSpeech={() => setSpeechOn((value) => !value)}
+      onOpenProfile={() => goToView('profile')}
+      onOpenDailyGoals={() => goToView('daily-goals')}
       onOpenLearningSettings={() => {
         setProfileMenuOpen(false)
         setView('dashboard')
         setSettingsExpanded(true)
       }}
-      onOpenStudyTools={() => goToView('study-tools')}
       onOpenQuests={() => goToView('quests')}
       onOpenAchievements={() => goToView('achievements')}
     />
@@ -685,6 +729,26 @@ function App() {
               setView('quest-checkpoint')
             }}
           />
+        </Suspense>
+      </div>,
+    )
+  }
+
+  if (view === 'profile') {
+    return withMobileNav(
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Profile" />}>
+          <ProfilePage onBack={() => setView('dashboard')} />
+        </Suspense>
+      </div>,
+    )
+  }
+
+  if (view === 'daily-goals') {
+    return withMobileNav(
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Daily Goals" />}>
+          <DailyGoalsPage onBack={() => setView('dashboard')} onOpenGoal={openDailyGoal} />
         </Suspense>
       </div>,
     )

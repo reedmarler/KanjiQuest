@@ -6,12 +6,16 @@ export function AppHeaderControls({
   hideUser = false,
   profileOpen = false,
   settingsOpen = false,
+  profileName,
+  profilePhoto,
   onProfile,
   onSettings,
 }: {
   hideUser?: boolean
   profileOpen?: boolean
   settingsOpen?: boolean
+  profileName: string
+  profilePhoto: string | null
   onProfile: () => void
   onSettings: () => void
 }) {
@@ -27,7 +31,9 @@ export function AppHeaderControls({
         title="User menu"
         tabIndex={hideUser ? -1 : undefined}
       >
-        <span aria-hidden="true">U</span>
+        {profilePhoto
+          ? <img src={profilePhoto} alt="" />
+          : <span aria-hidden="true">{profileName.trim()[0]?.toUpperCase() || '?'}</span>}
       </button>
       <button
         type="button"

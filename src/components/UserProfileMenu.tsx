@@ -1,6 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react'
 import { QUESTS } from '../data/questCampaign'
+import { useDailyGoals } from '../lib/dailyGoals'
 import { isQuestComplete, type QuestProgress } from '../lib/questProgress'
+import { profileInitial, readProfilePhoto, useUserProfile } from '../lib/userProfile'
 
 type UserProfileMenuProps = {
   open: boolean
@@ -16,8 +18,9 @@ type UserProfileMenuProps = {
   onToggleFurigana: () => void
   onToggleEnglish: () => void
   onToggleSpeech: () => void
+  onOpenProfile: () => void
+  onOpenDailyGoals: () => void
   onOpenLearningSettings: () => void
-  onOpenStudyTools: () => void
   onOpenQuests: () => void
   onOpenAchievements: () => void
 }
@@ -48,19 +51,27 @@ export function UserProfileMenu({
   onToggleFurigana,
   onToggleEnglish,
   onToggleSpeech,
+  onOpenProfile,
+  onOpenDailyGoals,
   onOpenLearningSettings,
-  onOpenStudyTools,
   onOpenQuests,
   onOpenAchievements,
 }: UserProfileMenuProps) {
   const importFileRef = useRef<HTMLInputElement | null>(null)
+  const photoRef = useRef<HTMLInputElement | null>(null)
+  const [profile, updateProfile] = useUserProfile()
+  const { doneCount, percent: dailyGoalPct, goals } = useDailyGoals()
+  const [editingName, setEditingName] = useState(false)
+  const [draftName, setDraftName] = useState(profile.name)
   const questsCleared = QUESTS.filter((quest) => isQuestComplete(questProgress, quest.id)).length
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
   const questPct = QUESTS.length > 0 ? Math.round((questsCleared / QUESTS.length) * 100) : 0
-  const dailyGoalPct = Math.min(100, Math.round((Math.min(learnedCount, 10) / 10) * 100))
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      setEditingName(false)
+      return
+    }
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') onClose()
     }
@@ -69,6 +80,22 @@ export function UserProfileMenu({
   }, [open, onClose])
 
   if (!open) return null
+
+  function startRename() {
+    setDraftName(profile.name)
+    setEditingName(true)
+  }
+
+  function saveName(event?: FormEvent) {
+    event?.preventDefault()
+    updateProfile({ name: draftName })
+    setEditingName(false)
+  }
+
+  async function changePhoto(file: File | undefined) {
+    if (!file) return
+    updateProfile({ photo: await readProfilePhoto(file) })
+  }
 
   function exportProgress() {
     const payload = {
@@ -133,35 +160,57 @@ export function UserProfileMenu({
       />
       <aside className="dashboard-profile-menu" id="dashboard-profile-menu" aria-label="User menu">
         <header className="dashboard-profile-header">
-          <span className="dashboard-profile-avatar" aria-hidden="true">R</span>
+          <button
+            type="button"
+            className="dashboard-profile-avatar"
+            onClick={() => photoRef.current?.click()}
+            aria-label={profile.photo ? 'Change profile picture' : 'Add a profile picture'}
+          >
+            {profile.photo
+              ? <img src={profile.photo} alt="" />
+              : <span aria-hidden="true">{profileInitial(profile.name)}</span>}
+          </button>
           <div>
-            <small>Local profile</small>
-            <h2>Reed</h2>
-            <p>{learnedCount} learned · {questsCleared}/{QUESTS.length} quests</p>
+            {editingName ? (
+              <form className="dashboard-profile-name-form" onSubmit={saveName}>
+                <input
+                  value={draftName}
+                  onChange={(event) => setDraftName(event.target.value)}
+                  onBlur={() => saveName()}
+                  autoFocus
+                  maxLength={32}
+                  aria-label="In-app name"
+                />
+              </form>
+            ) : (
+              <button type="button" className="dashboard-profile-name" onClick={startRename}>
+                <h2>{profile.name}</h2>
+              </button>
+            )}
           </div>
           <button type="button" className="dashboard-profile-close" onClick={onClose} aria-label="Close user menu">
             <span aria-hidden="true">&times;</span>
           </button>
         </header>
 
-        <div className="dashboard-profile-today">
+        <button type="button" className="dashboard-profile-today" onClick={onOpenDailyGoals}>
           <span>
             <small>Daily goal</small>
-            <b>{Math.min(learnedCount, 10)}/10</b>
+            <b>{doneCount}/{goals.length}</b>
           </span>
-          <i style={{ '--progress-pct': `${dailyGoalPct}%` } as React.CSSProperties} />
-        </div>
+          <i style={{ '--progress-pct': `${dailyGoalPct}%` } as CSSProperties} />
+        </button>
 
         <section className="dashboard-profile-section" aria-label="Profile shortcuts">
-          <button type="button" onClick={onOpenLearningSettings}>
+          <button type="button" onClick={onOpenProfile}>
             <span>Profile</span>
-            <small>Local account</small>
+            <small>Account</small>
           </button>
           <button type="button" onClick={onOpenLearningSettings}>
             <span>Learning settings</span>
             <small>{currentLevelLabel} · {furiganaOn ? 'Furigana' : 'No furi'} · {englishOn ? 'EN' : 'JP'}</small>
           </button>
-          <button type="button" onClick={onOpenStudyTools}>
+          <button type="button" onClick={onOpenDailyGoals}>
             <span>Daily goal</span>
             <small>{dailyGoalPct}%</small>
           </button>
@@ -254,6 +303,16 @@ export function UserProfileMenu({
           accept="application/json,.json"
           onChange={(event) => {
             void importProgress(event.currentTarget.files?.[0])
+            event.currentTarget.value = ''
+          }}
+        />
+        <input
+          ref={photoRef}
+          className="dashboard-profile-file"
+          type="file"
+          accept="image/*"
+          onChange={(event) => {
+            void changePhoto(event.currentTarget.files?.[0])
             event.currentTarget.value = ''
           }}
         />
