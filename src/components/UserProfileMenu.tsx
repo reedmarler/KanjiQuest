@@ -47,10 +47,12 @@ export function UserProfileMenu({
   const { doneCount, percent: dailyGoalPct, goals } = useDailyGoals()
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState(profile.name)
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false)
 
   useEffect(() => {
     if (!open) {
       setEditingName(false)
+      setResetConfirmOpen(false)
       return
     }
     function handleKeyDown(event: KeyboardEvent) {
@@ -124,9 +126,7 @@ export function UserProfileMenu({
     window.location.reload()
   }
 
-  function resetLocalProgress() {
-    const confirmed = window.confirm('Reset all local Kanji Quest progress on this device? This cannot be undone unless you exported a backup.')
-    if (!confirmed) return
+  function resetAppProgress() {
     Object.keys(kanjiQuestStorageSnapshot()).forEach((key) => window.localStorage.removeItem(key))
     window.location.reload()
   }
@@ -174,7 +174,7 @@ export function UserProfileMenu({
 
         <button type="button" className="dashboard-profile-today" onClick={onOpenDailyGoals}>
           <span>
-            <small>Daily goal</small>
+            <small>Daily quests</small>
             <b>{doneCount}/{goals.length}</b>
           </span>
           <i style={{ '--progress-pct': `${dailyGoalPct}%` } as CSSProperties} />
@@ -185,43 +185,43 @@ export function UserProfileMenu({
             <span>Profile</span>
           </button>
           <button type="button" onClick={onOpenLearningSettings}>
-            <span>Learning settings</span>
+            <span>Settings</span>
           </button>
           <button type="button" onClick={onOpenDailyGoals}>
-            <span>Daily goal</span>
+            <span>Daily quests</span>
           </button>
           <button type="button" onClick={onOpenQuests}>
-            <span>Progress history</span>
+            <span>Quest Progress</span>
           </button>
           <button type="button" onClick={onOpenAchievements}>
             <span>Achievements</span>
           </button>
         </section>
 
-        <section className="dashboard-profile-section dashboard-profile-preferences" aria-label="Study preferences">
-          <span className="dashboard-profile-section-label">Study preferences</span>
+        <section className="dashboard-profile-section dashboard-profile-preferences" aria-label="Default Preferences">
+          <span className="dashboard-profile-section-label">Default Preferences</span>
           <div className="dashboard-profile-toggle-row">
-            <span>Furigana default</span>
+            <span>Furigana</span>
             <button
               type="button"
-              className={`dashboard-profile-switch${furiganaOn ? ' is-on' : ''}`}
+              className={`control-chip control-chip-compact app-display-toggle dashboard-profile-display-toggle${furiganaOn ? ' is-active' : ''}`}
               onClick={onToggleFurigana}
               aria-pressed={furiganaOn}
-              aria-label={`Furigana default ${furiganaOn ? 'on' : 'off'}`}
+              aria-label={`Furigana ${furiganaOn ? 'on' : 'off'}`}
             >
-              <i />
+              &#12405;&#12426;
             </button>
           </div>
           <div className="dashboard-profile-toggle-row">
-            <span>English default</span>
+            <span>English</span>
             <button
               type="button"
-              className={`dashboard-profile-switch${englishOn ? ' is-on' : ''}`}
+              className={`control-chip control-chip-compact app-display-toggle dashboard-profile-display-toggle${englishOn ? ' is-active' : ''}`}
               onClick={onToggleEnglish}
               aria-pressed={englishOn}
-              aria-label={`English default ${englishOn ? 'on' : 'off'}`}
+              aria-label={`English ${englishOn ? 'on' : 'off'}`}
             >
-              <i />
+              EN
             </button>
           </div>
         </section>
@@ -230,20 +230,25 @@ export function UserProfileMenu({
           <span className="dashboard-profile-section-label">Data and account</span>
           <button type="button" onClick={exportProgress}>
             <span>Export progress</span>
-            <small>Backup</small>
           </button>
           <button type="button" onClick={requestImportProgress}>
             <span>Import progress</span>
-            <small>Restore</small>
           </button>
           <button type="button" disabled>
             <span>Sign in / sync</span>
-            <small>Local-only</small>
           </button>
-          <button type="button" className="is-danger" onClick={resetLocalProgress}>
-            <span>Reset local progress</span>
-            <small>Clear</small>
+          <button type="button" className="is-danger" onClick={() => setResetConfirmOpen(true)}>
+            <span>Reset app progress</span>
           </button>
+          {resetConfirmOpen && (
+            <div className="dashboard-profile-reset-confirm" role="alertdialog" aria-label="Reset progress warning">
+              <p>Warning: this can't be undone. Are you sure you want to reset progress?</p>
+              <div>
+                <button type="button" className="is-danger" onClick={resetAppProgress}>Yes</button>
+                <button type="button" onClick={() => setResetConfirmOpen(false)}>No</button>
+              </div>
+            </div>
+          )}
         </section>
 
         <footer className="dashboard-profile-footer">

@@ -273,7 +273,7 @@ export function RotatingHeroSentence({
   const englishIsSwapping = phase === 'swap' && english !== nextEnglish
   const englishCharCount = Math.max(english.length, nextEnglish.length)
   const storyEnglishLineCount = storyId
-    ? Math.min(5, Math.max(3, Math.ceil(englishCharCount / 48)))
+    ? Math.min(8, Math.max(4, Math.ceil(englishCharCount / 40)))
     : 2
 
   // Longer sentences risk wrapping to a cramped 3rd line on narrow phones —

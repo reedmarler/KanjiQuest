@@ -734,6 +734,18 @@ body:has(.dashboard) {
   background: color-mix(in srgb, var(--kyogre) 10%, var(--surface-2));
 }
 
+.dashboard-profile-section .dashboard-profile-display-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  width: 3.475rem;
+  min-width: 3.475rem;
+  min-height: 2rem;
+  padding: 0;
+  text-align: center;
+}
+
 /* The switch only changes appearance on click; hovering must not touch its
    on/off fill. A faint lift is the whole hover affordance. */
 .dashboard-profile-section .dashboard-profile-switch:hover:not(:disabled) {
@@ -846,6 +858,36 @@ body:has(.dashboard) {
 .dashboard-profile-section button.is-danger:hover {
   border-color: color-mix(in srgb, var(--danger) 36%, transparent);
   background: color-mix(in srgb, var(--danger) 10%, var(--surface-2));
+}
+
+.dashboard-profile-reset-confirm {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--danger) 36%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface-2));
+}
+
+.dashboard-profile-reset-confirm p {
+  margin: 0;
+  color: color-mix(in srgb, var(--danger) 72%, var(--text));
+  font-size: 0.76rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.dashboard-profile-reset-confirm > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.dashboard-profile-section .dashboard-profile-reset-confirm button {
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.42rem 0.55rem;
+  text-align: center;
 }
 
 .dashboard-profile-section button.is-danger::after {
@@ -1548,24 +1590,31 @@ body:has(.dashboard) {
   --hero-database-english-row-height: 1.28rem;
   --hero-database-english-slot-height: calc(var(--hero-database-english-row-height) * var(--hero-database-english-lines, 3));
   --hero-rotater-height: calc(var(--hero-japanese-row-height) + var(--hero-database-english-slot-height) + 0.85rem);
-  height: var(--hero-rotater-height);
+  height: auto;
   min-height: var(--hero-rotater-height);
-  max-height: var(--hero-rotater-height);
-  flex-basis: var(--hero-rotater-height);
+  max-height: none;
+  flex-basis: auto;
 }
 
 .hero-story-block .hero-database-english,
 .hero-story-block .hero-database-english-stack {
-  height: var(--hero-database-english-slot-height);
+  height: auto;
   min-height: var(--hero-database-english-slot-height);
-  max-height: var(--hero-database-english-slot-height);
+  max-height: none;
+  overflow: visible;
 }
 
 .hero-story-block .hero-database-english-text {
+  display: block;
   white-space: normal;
   line-height: var(--hero-database-english-row-height);
-  -webkit-line-clamp: var(--hero-database-english-lines, 3);
-  line-clamp: var(--hero-database-english-lines, 3);
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+.dashboard.is-story-mode .hero-compact {
+  margin-bottom: 0.65rem;
 }
 
 @keyframes hero-database-highlight {

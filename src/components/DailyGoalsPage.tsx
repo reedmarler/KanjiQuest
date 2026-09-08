@@ -16,7 +16,7 @@ export function DailyGoalsPage({
       <header className="account-page-heading">
         <AppBackButton onClick={onBack} aria-label="Back" />
         <small>Today</small>
-        <h1>Daily goals</h1>
+        <h1>Daily quests</h1>
         <p>{doneCount}/{DAILY_GOALS.length} done</p>
       </header>
 
@@ -24,7 +24,7 @@ export function DailyGoalsPage({
         <i style={{ '--progress-pct': `${percent}%` } as CSSProperties} />
       </div>
 
-      <section className="account-goal-list" aria-label="Daily goals">
+      <section className="account-goal-list" aria-label="Daily quests">
         {DAILY_GOALS.map((goal) => {
           const done = isDone(goal.id)
           return (

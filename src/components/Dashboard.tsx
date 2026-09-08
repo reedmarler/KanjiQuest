@@ -567,7 +567,7 @@ export function Dashboard({
   const speechVolumeIndex = HERO_SPEECH_VOLUMES.indexOf(speechVolume)
 
   return (
-    <div className="dashboard">
+    <div className={`dashboard${storyMode ? ' is-story-mode' : ''}`}>
       {settingsExpanded && (
         <div className="hero-settings-layout" id="hero-content-settings">
             <div className={`control-group control-group-levels${storyMode ? ' is-disabled' : ''}`} aria-disabled={storyMode}>

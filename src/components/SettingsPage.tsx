@@ -9,9 +9,7 @@ type SettingsPageProps = {
 }
 
 /**
- * Full-page home for the study settings that used to live only in the gear
- * popover. The popover stays for quick tweaks; this is where the profile menu's
- * "Learning settings" now goes.
+ * Full-page home for the default reading preferences shared across tools.
  */
 export function SettingsPage({
   onBack,
@@ -25,33 +23,33 @@ export function SettingsPage({
       <header className="account-page-heading">
         <AppBackButton onClick={onBack} aria-label="Back" />
         <small>Preferences</small>
-        <h1>Learning settings</h1>
+        <h1>Settings</h1>
       </header>
 
-      <section className="dashboard-profile-section settings-toggle-list" aria-label="Reading defaults">
-        <span className="dashboard-profile-section-label">Reading defaults</span>
+      <section className="dashboard-profile-section settings-toggle-list" aria-label="Default Preferences">
+        <span className="dashboard-profile-section-label">Default Preferences</span>
         <div className="dashboard-profile-toggle-row">
-          <span>Furigana default</span>
+          <span>Furigana</span>
           <button
             type="button"
-            className={`dashboard-profile-switch${furiganaOn ? ' is-on' : ''}`}
+            className={`control-chip control-chip-compact app-display-toggle dashboard-profile-display-toggle${furiganaOn ? ' is-active' : ''}`}
             onClick={onToggleFurigana}
             aria-pressed={furiganaOn}
-            aria-label={`Furigana default ${furiganaOn ? 'on' : 'off'}`}
+            aria-label={`Furigana ${furiganaOn ? 'on' : 'off'}`}
           >
-            <i />
+            &#12405;&#12426;
           </button>
         </div>
         <div className="dashboard-profile-toggle-row">
-          <span>English default</span>
+          <span>English</span>
           <button
             type="button"
-            className={`dashboard-profile-switch${englishOn ? ' is-on' : ''}`}
+            className={`control-chip control-chip-compact app-display-toggle dashboard-profile-display-toggle${englishOn ? ' is-active' : ''}`}
             onClick={onToggleEnglish}
             aria-pressed={englishOn}
-            aria-label={`English default ${englishOn ? 'on' : 'off'}`}
+            aria-label={`English ${englishOn ? 'on' : 'off'}`}
           >
-            <i />
+            EN
           </button>
         </div>
       </section>
