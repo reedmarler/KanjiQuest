@@ -1,7 +1,7 @@
 ﻿import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
-import { isQuestComplete, type QuestProgress } from '../lib/questProgress'
+import { completedQuestSteps, isQuestComplete, QUEST_STEPS, type QuestProgress, type QuestStep } from '../lib/questProgress'
 import { QUESTS } from '../data/questCampaign'
 import { GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
 import { HERO_STORY_DEFINITIONS, HERO_STORY_LEVELS, getHeroStoriesForLevel } from '../data/heroStories'
@@ -104,6 +104,16 @@ const STORY_LEVEL_DISPLAY: Array<{ level: JlptLevel; name: string }> = [
   { level: 'N2', name: 'Upper' },
   { level: 'N1', name: 'Advanced' },
 ]
+
+// One-line preview of what each quest step asks for, shown on the dashboard's
+// next-quest card so "up next" points at something concrete.
+const QUEST_STEP_PREVIEW: Record<QuestStep, { title: string; hint: string }> = {
+  vocab: { title: 'Prepare', hint: 'Learn the words for this scene.' },
+  kanji: { title: 'Read kanji', hint: 'The kanji from those same words.' },
+  grammar: { title: 'Use grammar', hint: 'The forms this scene runs on.' },
+  scene: { title: 'Read the scene', hint: 'Read the story you prepared for.' },
+  checkpoint: { title: 'Guardian battle', hint: 'Prove it and break the seal.' },
+}
 
 function speechVolumeIcon(volume: number): string {
   if (volume === 0) return '\uD83D\uDD07'
@@ -477,6 +487,15 @@ export function Dashboard({
   const questPct = QUESTS.length > 0 ? Math.round((questsCleared / QUESTS.length) * 100) : 0
   const wrongCount = Object.keys(wrongPool).length
   const furiganaActive = furiganaOn
+
+  // The first unfinished quest is what the panel points at; within it, the first
+  // unfinished step is the concrete "up next".
+  const nextQuest = QUESTS.find((quest) => !isQuestComplete(questProgress, quest.id))
+  const nextQuestStepsDone = nextQuest ? completedQuestSteps(questProgress, nextQuest.id) : 0
+  const nextQuestStep = nextQuest
+    ? QUEST_STEPS.find((step) => !questProgress[nextQuest.id]?.[step]) ?? QUEST_STEPS[QUEST_STEPS.length - 1]!
+    : undefined
+  const nextQuestStarted = nextQuest ? nextQuestStepsDone > 0 : false
 
   useEffect(() => {
     if (storiesAtLevel.some((story) => story.id === storyId)) return
@@ -868,45 +887,90 @@ export function Dashboard({
         </section>
       )}
 
-      <section className="dashboard-next-panel" aria-label="Study progress">
-        <button type="button" className="dashboard-next-card" onClick={onContinueStudy}>
+      <section className="dashboard-next-panel" aria-label="Progress and next quest">
+        {nextQuest ? (
+          <button type="button" className="dashboard-next-quest" onClick={onOpenQuests}>
+            <span className="dashboard-next-quest-mark" aria-hidden="true" lang="ja">{nextQuest.symbol}</span>
+            <span className="dashboard-next-quest-body">
+              <small className="dashboard-next-quest-kicker">
+                {nextQuestStarted ? 'Continue quest' : 'Next quest'} · {nextQuest.level} · #{nextQuest.number}
+              </small>
+              <b>{nextQuest.title}</b>
+              <span className="dashboard-next-quest-preview">
+                {nextQuestStep
+                  ? <><em>Up next</em>{QUEST_STEP_PREVIEW[nextQuestStep].title} — {QUEST_STEP_PREVIEW[nextQuestStep].hint}</>
+                  : nextQuest.subtitle}
+              </span>
+              <span
+                className="dashboard-next-quest-steps"
+                role="img"
+                aria-label={`${nextQuestStepsDone} of ${QUEST_STEPS.length} steps done`}
+              >
+                {QUEST_STEPS.map((step, index) => (
+                  <i
+                    key={step}
+                    className={index < nextQuestStepsDone ? 'is-done' : index === nextQuestStepsDone ? 'is-next' : ''}
+                  />
+                ))}
+                <small>{nextQuestStepsDone}/{QUEST_STEPS.length}</small>
+              </span>
+              <small className="dashboard-next-quest-guardian">
+                Guardian · {nextQuest.guardian.name} · {nextQuest.guardian.title}
+              </small>
+            </span>
+            <span className="dashboard-next-quest-go" aria-hidden="true">&#8250;</span>
+          </button>
+        ) : (
+          <div className="dashboard-next-quest is-complete">
+            <span className="dashboard-next-quest-mark" aria-hidden="true" lang="ja">祝</span>
+            <span className="dashboard-next-quest-body">
+              <small className="dashboard-next-quest-kicker">Campaign complete</small>
+              <b>Every seal is broken</b>
+              <span className="dashboard-next-quest-preview">
+                All {QUESTS.length} quests cleared — replay any from the map.
+              </span>
+            </span>
+          </div>
+        )}
+
+        <div className="dashboard-progress-track" aria-label="Overall progress">
+          <button
+            type="button"
+            className="dashboard-progress-stat"
+            onClick={onOpenStudyTools}
+            style={{ '--progress-pct': `${progressPct}%` } as CSSProperties}
+          >
+            <span><b>{progressPct}%</b><small>Cards</small></span>
+            <i />
+          </button>
+          <button
+            type="button"
+            className="dashboard-progress-stat"
+            onClick={onOpenQuests}
+            style={{ '--progress-pct': `${questPct}%` } as CSSProperties}
+          >
+            <span><b>{questsCleared}/{QUESTS.length}</b><small>Quests</small></span>
+            <i />
+          </button>
+          <button
+            type="button"
+            className="dashboard-progress-stat"
+            onClick={onOpenStudyTools}
+            style={{ '--progress-pct': `${wrongCount > 0 ? 100 : 0}%` } as CSSProperties}
+          >
+            <span><b>{wrongCount}</b><small>Review</small></span>
+            <i />
+          </button>
+        </div>
+
+        <button type="button" className="dashboard-next-cta" onClick={onContinueStudy}>
           <span className="dashboard-next-mark" aria-hidden="true" lang="ja">続</span>
-          <span className="dashboard-next-copy">
-            <small>Next up</small>
+          <span className="dashboard-next-cta-copy">
             <b>{mobileContinueTitle}</b>
             <em>{mobileContinueDetail}</em>
           </span>
-          <span className="dashboard-next-arrow" aria-hidden="true">&#8250;</span>
+          <span className="dashboard-next-quest-go" aria-hidden="true">&#8250;</span>
         </button>
-
-        <div className="dashboard-progress-track" aria-label="Current progress">
-          <div className="dashboard-progress-stat" style={{ '--progress-pct': `${progressPct}%` } as CSSProperties}>
-            <span>
-              <b>{progressPct}%</b>
-              <small>Cards</small>
-            </span>
-            <i />
-          </div>
-          <div className="dashboard-progress-stat" style={{ '--progress-pct': `${questPct}%` } as CSSProperties}>
-            <span>
-              <b>{questsCleared}/{QUESTS.length}</b>
-              <small>Quests</small>
-            </span>
-            <i />
-          </div>
-          <div className="dashboard-progress-stat" style={{ '--progress-pct': `${wrongCount > 0 ? 100 : 0}%` } as CSSProperties}>
-            <span>
-              <b>{wrongCount}</b>
-              <small>Review</small>
-            </span>
-            <i />
-          </div>
-        </div>
-
-        <div className="dashboard-next-actions">
-          <button type="button" onClick={onOpenStudyTools}>Study</button>
-          <button type="button" onClick={onOpenQuests}>Quest</button>
-        </div>
       </section>
     </div>
   )

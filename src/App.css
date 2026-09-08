@@ -4195,10 +4195,10 @@ body:has(.dashboard) {
 
 .dashboard-next-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
-    "next actions"
-    "track track";
+    "quest"
+    "track"
+    "cta";
   gap: 0.5rem;
   margin: 0.15rem 0 0.6rem;
   padding: 0.58rem;
@@ -4210,15 +4210,16 @@ body:has(.dashboard) {
     color-mix(in srgb, var(--surface) 94%, var(--surface-2));
 }
 
-.dashboard-next-card {
+/* Next-quest card: a real peek at where the campaign stands. */
+.dashboard-next-quest {
   display: grid;
-  grid-area: next;
-  grid-template-columns: 2.25rem minmax(0, 1fr) 1.7rem;
+  grid-area: quest;
+  grid-template-columns: 2.75rem minmax(0, 1fr) 1.5rem;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.65rem;
+  width: 100%;
   min-width: 0;
-  min-height: 3.3rem;
-  padding: 0.45rem 0.52rem;
+  padding: 0.6rem 0.62rem;
   border: 1px solid color-mix(in srgb, var(--rayquaza-light) 32%, transparent);
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface-2) 78%, transparent);
@@ -4229,64 +4230,117 @@ body:has(.dashboard) {
   transition: border-color 140ms ease, background 140ms ease, transform 120ms ease;
 }
 
-.dashboard-next-card:hover {
-  border-color: color-mix(in srgb, var(--rayquaza-light) 54%, var(--border));
+.dashboard-next-quest:not(.is-complete):hover {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 56%, var(--border));
   background: color-mix(in srgb, var(--rayquaza) 12%, var(--surface-2));
   transform: translateY(-1px);
 }
 
-.dashboard-next-mark {
-  display: grid;
-  place-items: center;
-  width: 2.25rem;
-  aspect-ratio: 1;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface));
-  color: var(--rayquaza-light);
-  font: 800 1.12rem/1 'Noto Sans JP', sans-serif;
+.dashboard-next-quest.is-complete {
+  cursor: default;
 }
 
-.dashboard-next-copy {
+.dashboard-next-quest-mark {
   display: grid;
-  gap: 0.12rem;
+  place-items: center;
+  align-self: start;
+  width: 2.75rem;
+  aspect-ratio: 1;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--rayquaza) 22%, var(--surface));
+  color: var(--rayquaza-light);
+  font: 800 1.4rem/1 'Noto Sans JP', sans-serif;
+}
+
+.dashboard-next-quest-body {
+  display: grid;
+  gap: 0.16rem;
   min-width: 0;
 }
 
-.dashboard-next-copy small {
+.dashboard-next-quest-kicker {
   color: var(--rayquaza-light);
-  font: 800 0.5rem/1 'Outfit', system-ui, sans-serif;
-  letter-spacing: 0.12em;
+  font: 800 0.52rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
-.dashboard-next-copy b {
+.dashboard-next-quest-body b {
   overflow: hidden;
-  max-width: 100%;
-  font-size: 0.86rem;
-  line-height: 1.06;
+  font-size: 0.98rem;
+  line-height: 1.1;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.dashboard-next-copy em {
+.dashboard-next-quest-preview {
   overflow: hidden;
   color: var(--text-muted);
-  font-size: 0.58rem;
+  font-size: 0.66rem;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.dashboard-next-quest-preview em {
+  margin-right: 0.35rem;
+  padding: 0.05rem 0.28rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sakura) 22%, transparent);
+  color: var(--sakura-light);
+  font: 800 0.5rem/1.4 'Outfit', system-ui, sans-serif;
   font-style: normal;
-  line-height: 1.15;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dashboard-next-quest-steps {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  margin-top: 0.14rem;
+}
+
+.dashboard-next-quest-steps i {
+  flex: 1;
+  height: 0.32rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 20%, transparent);
+}
+
+.dashboard-next-quest-steps i.is-done {
+  background: var(--rayquaza-light);
+}
+
+.dashboard-next-quest-steps i.is-next {
+  background: color-mix(in srgb, var(--sakura-light) 82%, transparent);
+}
+
+.dashboard-next-quest-steps small {
+  flex: 0 0 auto;
+  margin-left: 0.15rem;
+  color: var(--text-muted);
+  font: 800 0.56rem/1 'Outfit', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-next-quest-guardian {
+  overflow: hidden;
+  color: color-mix(in srgb, var(--text-muted) 82%, transparent);
+  font-size: 0.58rem;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.dashboard-next-arrow {
+.dashboard-next-quest-go {
   display: grid;
   place-items: center;
-  width: 1.7rem;
-  height: 1.7rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--rayquaza) 18%, transparent);
+  align-self: center;
   color: var(--rayquaza-light);
-  font: 900 1.25rem/1 'Outfit', system-ui, sans-serif;
+  font: 900 1.4rem/1 'Outfit', system-ui, sans-serif;
 }
 
 .dashboard-progress-track {
@@ -4299,12 +4353,23 @@ body:has(.dashboard) {
 
 .dashboard-progress-stat {
   display: grid;
-  gap: 0.32rem;
+  gap: 0.34rem;
   min-width: 0;
-  padding: 0.42rem 0.48rem;
+  padding: 0.46rem 0.5rem;
   border: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent);
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface-2) 62%, transparent);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, transform 120ms ease;
+}
+
+.dashboard-progress-stat:hover {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 40%, var(--border));
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  transform: translateY(-1px);
 }
 
 .dashboard-progress-stat span {
@@ -4325,14 +4390,14 @@ body:has(.dashboard) {
 }
 
 .dashboard-progress-stat b {
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   line-height: 1;
   white-space: nowrap;
 }
 
 .dashboard-progress-stat i {
   display: block;
-  height: 0.28rem;
+  height: 0.3rem;
   overflow: hidden;
   border-radius: 999px;
   background:
@@ -4341,31 +4406,64 @@ body:has(.dashboard) {
   font-style: normal;
 }
 
-.dashboard-next-actions {
+.dashboard-next-cta {
   display: grid;
-  grid-area: actions;
-  grid-template-columns: repeat(2, 4.6rem);
-  gap: 0.4rem;
-  align-self: stretch;
-}
-
-.dashboard-next-actions button {
-  min-width: 0;
-  min-height: 3.3rem;
-  padding: 0.44rem 0.55rem;
-  border: 1px solid color-mix(in srgb, var(--text-muted) 22%, transparent);
+  grid-area: cta;
+  grid-template-columns: 2.1rem minmax(0, 1fr) 1.4rem;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 2.9rem;
+  padding: 0.42rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--rayquaza-light) 30%, transparent);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--surface-2) 58%, transparent);
+  background: color-mix(in srgb, var(--rayquaza) 12%, var(--surface-2));
   color: var(--text);
-  font: 800 0.62rem/1 'Outfit', system-ui, sans-serif;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   transition: border-color 140ms ease, background 140ms ease, transform 120ms ease;
 }
 
-.dashboard-next-actions button:hover {
-  border-color: color-mix(in srgb, var(--rayquaza-light) 42%, var(--border));
-  background: color-mix(in srgb, var(--rayquaza) 12%, var(--surface-2));
+.dashboard-next-cta:hover {
+  border-color: color-mix(in srgb, var(--rayquaza-light) 55%, var(--border));
+  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface-2));
   transform: translateY(-1px);
+}
+
+.dashboard-next-mark {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  aspect-ratio: 1;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--rayquaza) 24%, var(--surface));
+  color: var(--rayquaza-light);
+  font: 800 1.05rem/1 'Noto Sans JP', sans-serif;
+}
+
+.dashboard-next-cta-copy {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.dashboard-next-cta-copy b {
+  overflow: hidden;
+  font-size: 0.82rem;
+  line-height: 1.08;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-next-cta-copy em {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.58rem;
+  font-style: normal;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dashboard-action-grid {
@@ -4886,27 +4984,9 @@ body:has(.dashboard) {
   }
 
   .dashboard-next-panel {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "next"
-      "track"
-      "actions";
     gap: 0.45rem;
     margin-top: 0.5rem;
     padding: 0.5rem;
-  }
-
-  .dashboard-next-actions {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .dashboard-next-card {
-    min-height: 3.55rem;
-  }
-
-  .dashboard-next-actions button {
-    min-width: 0;
-    min-height: 2.45rem;
   }
 
   .dashboard-progress-track {
