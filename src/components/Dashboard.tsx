@@ -40,14 +40,7 @@ function engineSpeechRate(labeledRate: HeroSpeechRate): number {
 }
 
 function minimumSpeechRateForSentence(text: string, playbackRate: HeroPlaybackRate): HeroSpeechRate {
-  const spokenCharacters = Array.from(text).filter((character) => /[\p{L}\p{N}ー]/u.test(character))
-  const moraCount = spokenCharacters.reduce(
-    (total, character) => total + (COMBINING_SMALL_KANA.has(character) ? 0 : 1),
-    0,
-  )
-  const pauseCount = (text.match(/[、。！？,.!?]/g) ?? []).length
-  // Roughly 5.25 mora per second at engine 1x, with room for voice startup and pauses.
-  const estimatedReadingMs = 300 + (moraCount * 190) + (pauseCount * 220)
+  const estimatedReadingMs = estimateBaseSpeechDurationMs(text)
   const availableMs = HERO_SENTENCE_CYCLE_MS / playbackRate
   // Labeled rates are scaled down before they hit the engine, so the slider
   // step that clears the cycle is correspondingly higher.
@@ -55,6 +48,21 @@ function minimumSpeechRateForSentence(text: string, playbackRate: HeroPlaybackRa
 
   return HERO_SPEECH_RATES.find((rate) => rate >= requiredRate)
     ?? HERO_SPEECH_RATES[HERO_SPEECH_RATES.length - 1]
+}
+
+function estimateBaseSpeechDurationMs(text: string): number {
+  const spokenCharacters = Array.from(text).filter((character) => /[\p{L}\p{N}ー]/u.test(character))
+  const moraCount = spokenCharacters.reduce(
+    (total, character) => total + (COMBINING_SMALL_KANA.has(character) ? 0 : 1),
+    0,
+  )
+  const pauseCount = (text.match(/[、。！？,.!?]/g) ?? []).length
+  // Roughly 5.25 mora per second at engine 1x, with room for voice startup and pauses.
+  return 300 + (moraCount * 190) + (pauseCount * 220)
+}
+
+function estimateSpeechDurationMs(text: string, labeledRate: HeroSpeechRate): number {
+  return Math.max(1200, Math.ceil(estimateBaseSpeechDurationMs(text) / engineSpeechRate(labeledRate)))
 }
 
 /** Voice volume steps, muted to full, in 10% increments. */
@@ -357,6 +365,7 @@ interface DashboardProps {
   onToggleEnglish: () => void
   onToggleSpeech: () => void
   settingsExpanded: boolean
+  onCloseSettings: () => void
   complexity: GenerationComplexity
   onComplexityChange: (level: GenerationComplexity) => void
 }
@@ -379,6 +388,7 @@ export function Dashboard({
   onToggleEnglish,
   onToggleSpeech,
   settingsExpanded,
+  onCloseSettings,
   complexity,
   onComplexityChange,
 }: DashboardProps) {
@@ -497,6 +507,20 @@ export function Dashboard({
   // paint; this keeps the button from staying disabled when one exists.
   useEffect(() => watchSpeechSupport(setSpeechSupported), [])
 
+  useEffect(() => {
+    if (!settingsExpanded) return
+
+    function closeSettingsFromOutsideClick(event: PointerEvent) {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      if (target.closest('#hero-content-settings, .dashboard-page-settings, .desktop-primary-nav-settings')) return
+      onCloseSettings()
+    }
+
+    document.addEventListener('pointerdown', closeSettingsFromOutsideClick)
+    return () => document.removeEventListener('pointerdown', closeSettingsFromOutsideClick)
+  }, [onCloseSettings, settingsExpanded])
+
   // Keep the physical voice slider in sync when sentence timing requires a
   // faster reading. Automatic safety bumps do not replace the saved preference.
   useEffect(() => {
@@ -507,14 +531,11 @@ export function Dashboard({
   // Rate and volume are read through refs so adjusting either setting does not
   // restart the sentence currently being spoken.
   useEffect(() => {
-    if (!speechOn || !spokenSentence) return
-    // Story mode drives its own advance off this completion instead of the
-    // rest/highlight/swap timer (autoAdvance={false} above), so the sentence
-    // stays up exactly as long as the voice takes to read it. A beat that
-    // finishes while paused should not force the story forward.
-    const onEnd = storyMode
+    if (!speechOn || !speechSupported || !spokenSentence) return
+    const advanceAfterReading = storyMode
       ? () => { if (!pausedRef.current) setAdvanceSignal((value) => value + 1) }
       : undefined
+
     speakJapanese(spokenSentence, {
       rate: engineSpeechRate(effectiveSpeechRateRef.current),
       // Always render at natural speed and let the audio element handle the
@@ -523,10 +544,20 @@ export function Dashboard({
       // sentence would be bought again every time the slider moved.
       synthesisRate: SPEECH_SPEEDS.natural,
       volume: speechVolumeRef.current,
-      onEnd,
+      onEnd: advanceAfterReading,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [speechOn, spokenSentence, storyMode])
+  }, [speechOn, speechSupported, spokenSentence, storyMode])
+
+  useEffect(() => {
+    if (!storyMode || (speechOn && speechSupported) || !spokenSentence || paused) return
+    const timer = window.setTimeout(
+      () => { if (!pausedRef.current) setAdvanceSignal((value) => value + 1) },
+      estimateSpeechDurationMs(spokenSentence, speechRate),
+    )
+
+    return () => window.clearTimeout(timer)
+  }, [paused, speechOn, speechRate, speechSupported, spokenSentence, storyMode])
 
   // Leaving the dashboard mid-sentence should not keep talking.
   useEffect(() => stopSpeaking, [])
@@ -635,7 +666,7 @@ export function Dashboard({
           advanceSignal={advanceSignal}
           onCanRewindChange={setCanRewindSentence}
           onSentenceChange={setSpokenSentence}
-          autoAdvance={!(storyMode && speechOn)}
+          autoAdvance={!storyMode}
         />
       </header>
 
@@ -726,7 +757,7 @@ export function Dashboard({
         </div>
 
         {modeToggleOn && (
-          <div className="control-story-panel hero-mode-controls-panel is-active">
+          <div className={`control-story-panel hero-mode-controls-panel is-active${storyMode ? ' is-story-mode' : ''}`}>
             <div className="hero-mode-bar">
               <b className="hero-mode-bar-label">Mode</b>
               <div className="hero-mode-options" role="group" aria-label="Sentence modes">

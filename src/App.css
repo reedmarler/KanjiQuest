@@ -1544,9 +1544,10 @@ body:has(.dashboard) {
   text-wrap: balance;
 }
 
-/* Story English stays inside the same fixed two-line slot as normal mode so
-   long translations clamp instead of pushing the panel up and down. */
 .hero-story-block {
+  --hero-database-english-row-height: 1.28rem;
+  --hero-database-english-slot-height: calc(var(--hero-database-english-row-height) * var(--hero-database-english-lines, 3));
+  --hero-rotater-height: calc(var(--hero-japanese-row-height) + var(--hero-database-english-slot-height) + 0.85rem);
   height: var(--hero-rotater-height);
   min-height: var(--hero-rotater-height);
   max-height: var(--hero-rotater-height);
@@ -1563,6 +1564,8 @@ body:has(.dashboard) {
 .hero-story-block .hero-database-english-text {
   white-space: normal;
   line-height: var(--hero-database-english-row-height);
+  -webkit-line-clamp: var(--hero-database-english-lines, 3);
+  line-clamp: var(--hero-database-english-lines, 3);
 }
 
 @keyframes hero-database-highlight {
@@ -3884,6 +3887,16 @@ body:has(.dashboard) {
 
 .hero-mode-controls-panel {
   width: 100%;
+}
+
+.hero-mode-controls-panel.is-story-mode .hero-mode-panel-slot {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+.hero-mode-controls-panel.is-story-mode .control-story-options {
+  min-height: 0;
 }
 
 .control-story-picker {

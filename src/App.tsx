@@ -1178,6 +1178,7 @@ function App() {
         onToggleEnglish={() => setEnglishOn((value) => !value)}
         onToggleSpeech={() => setSpeechOn((value) => !value)}
         settingsExpanded={settingsExpanded}
+        onCloseSettings={() => setSettingsExpanded(false)}
         complexity={complexity}
         onComplexityChange={setComplexity}
       />

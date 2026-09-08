@@ -55,11 +55,10 @@ export interface RotatingHeroSentenceProps {
   /** Fires with the verified spoken reading of the sentence on screen. */
   onSentenceChange?: (speechText: string) => void
   /**
-   * When false, the rest/highlight/swap timer still animates for visual
-   * polish but stops short of calling advanceSentence — the caller is
+   * When false, the visual rest/highlight/swap timer pauses and the caller is
    * expected to drive advancement itself (via `advanceSignal`). Story mode
-   * uses this so the voice can finish reading a beat at its own pace
-   * instead of the sentence rotating on a fixed clock underneath it.
+   * uses this so the sentence cannot begin swapping before its read-aloud
+   * duration has finished.
    * Defaults to true, matching the old always-auto-advance behavior.
    */
   autoAdvance?: boolean
@@ -245,7 +244,7 @@ export function RotatingHeroSentence({
   }, [visibleSpeechText, onSentenceChange])
 
   useEffect(() => {
-    if (displayMode !== 'sentence' || steps.length < 2 || paused) return
+    if (displayMode !== 'sentence' || steps.length < 2 || paused || !autoAdvance) return
 
     const duration = (
       phase === 'rest' ? HERO_REST_MS
@@ -256,10 +255,7 @@ export function RotatingHeroSentence({
     const timer = window.setTimeout(() => {
       if (phase === 'rest') setPhase('highlight')
       else if (phase === 'highlight') setPhase('swap')
-      // Once settled in 'swap', a caller with autoAdvance off (Story mode
-      // reading aloud) is expected to advance via `advanceSignal` itself —
-      // staying put here is what lets the voice finish at its own pace.
-      else if (autoAdvance) advanceSentence()
+      else advanceSentence()
     }, duration)
 
     return () => window.clearTimeout(timer)
@@ -275,6 +271,10 @@ export function RotatingHeroSentence({
   const english = getHeroEnglish(frame)
   const nextEnglish = getHeroEnglish(nextFrame)
   const englishIsSwapping = phase === 'swap' && english !== nextEnglish
+  const englishCharCount = Math.max(english.length, nextEnglish.length)
+  const storyEnglishLineCount = storyId
+    ? Math.min(5, Math.max(3, Math.ceil(englishCharCount / 48)))
+    : 2
 
   // Longer sentences risk wrapping to a cramped 3rd line on narrow phones —
   // taking the longer of the outgoing/incoming frame keeps this stable
@@ -388,6 +388,7 @@ export function RotatingHeroSentence({
         '--hero-database-space-duration': `${(HERO_HIGHLIGHT_MS + HERO_SWAP_MS) / playbackRate}ms`,
         '--hero-database-swap-duration': `${HERO_SWAP_MS / playbackRate}ms`,
         '--hero-database-char-count': heroCharCount,
+        '--hero-database-english-lines': storyEnglishLineCount,
       } as CSSProperties}
     >
       <p className={`hero-sentence-line hero-database-line${phase === 'swap' && isFrameChange ? ' is-frame-swapping' : ''}`} aria-live="polite">
