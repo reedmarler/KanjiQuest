@@ -73,6 +73,17 @@ const HERO_MODE_LABELS: Record<Exclude<HeroSettingsMode, 'none'>, string> = {
   star: 'Star',
 }
 
+// The choices offered by the "Pick a mode" dropdown, in menu order.
+const HERO_MODE_CHOICES = [
+  { mode: 'story', glyph: '物', label: 'Story' },
+  { mode: 'grammar', glyph: '文', label: 'Grammar' },
+  { mode: 'star', glyph: '★', label: 'Star' },
+] as const satisfies ReadonlyArray<{
+  mode: Exclude<HeroSettingsMode, 'none' | 'picking'>
+  glyph: string
+  label: string
+}>
+
 /*
  * Each of these holds the sentence still and works one part of speech, except
  * Particles: which particle a noun takes is decided by the predicate — 山に登る
@@ -991,69 +1002,57 @@ export function Dashboard({
         </div>
 
         {modeToggleOn && (
-          <div className={`control-story-panel hero-mode-controls-panel${modeToggleOn ? ' is-active' : ''}`}>
-            <div className="control-story-heading">
-              <span>
-                <b>Mode</b>
-                {settingsMode !== 'picking' && (
-                  <small>{HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]}</small>
-                )}
-              </span>
-            </div>
-
-            <div className="hero-mode-panel-slot">
-              <div className="hero-mode-menu-actions">
-                <button
-                  type="button"
-                  className={`hero-mode-menu-button${modePickerOpen ? ' is-active' : ''}`}
-                  onClick={toggleModePicker}
-                  aria-expanded={modePickerOpen}
-                >
-                  Pick a mode
-                </button>
+          <div className="control-story-panel hero-mode-controls-panel is-active">
+            <div className="hero-mode-bar">
+              <b className="hero-mode-bar-label">Mode</b>
+              <div className="hero-mode-bar-actions">
+                <div className="hero-mode-picker">
+                  <button
+                    type="button"
+                    className={`hero-mode-menu-button hero-mode-picker-button${modePickerOpen ? ' is-active' : ''}`}
+                    onClick={toggleModePicker}
+                    aria-haspopup="menu"
+                    aria-expanded={modePickerOpen}
+                  >
+                    {settingsMode === 'picking'
+                      ? 'Pick a mode'
+                      : HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]}
+                    <span className="hero-mode-menu-caret" aria-hidden="true">&#9662;</span>
+                  </button>
+                  {modePickerOpen && (
+                    <div className="hero-mode-menu" role="menu" aria-label="Sentence modes">
+                      {HERO_MODE_CHOICES.map(({ mode, glyph, label }) => (
+                        <button
+                          key={mode}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={settingsMode === mode}
+                          className={`hero-mode-menu-item${settingsMode === mode ? ' is-active' : ''}`}
+                          onClick={() => selectSettingsMode(mode)}
+                        >
+                          <span className="hero-mode-menu-glyph" aria-hidden="true" lang="ja">{glyph}</span>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <button
                   type="button"
                   className={`hero-mode-menu-button${grammarMode && swapPickerOpen ? ' is-active' : ''}`}
                   onClick={toggleSwapPicker}
+                  disabled={!grammarMode}
                   aria-expanded={grammarMode && swapPickerOpen}
+                  title={grammarMode ? 'Choose which part of speech to swap' : 'Swap is available in Grammar mode'}
                 >
                   Swap
                 </button>
               </div>
+            </div>
 
-              {modePickerOpen && (
-                <div className="hero-mode-icons" role="group" aria-label="Sentence modes">
-                  <button
-                    type="button"
-                    className={`hero-mode-icon${storyMode ? ' is-active' : ''}`}
-                    onClick={() => selectSettingsMode('story')}
-                    aria-pressed={storyMode}
-                    aria-label="Story mode"
-                    title="Story mode"
-                  >
-                    <span aria-hidden="true">&#29289;</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`hero-mode-icon${grammarMode ? ' is-active' : ''}`}
-                    onClick={() => selectSettingsMode('grammar')}
-                    aria-pressed={grammarMode}
-                    aria-label="Grammar mode"
-                    title="Grammar mode"
-                  >
-                    <span aria-hidden="true">&#25991;</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`hero-mode-icon${settingsMode === 'star' ? ' is-active' : ''}`}
-                    onClick={() => selectSettingsMode('star')}
-                    aria-pressed={settingsMode === 'star'}
-                    aria-label="Star mode"
-                    title="Star mode"
-                  >
-                    <span aria-hidden="true">&#9733;</span>
-                  </button>
-                </div>
+            <div className="hero-mode-panel-slot">
+              {settingsMode === 'picking' && (
+                <p className="hero-mode-hint">Pick a mode to shape the sentence stream.</p>
               )}
 
               {storyMode && (
@@ -1123,7 +1122,7 @@ export function Dashboard({
                 </div>
               )}
 
-              {grammarMode && swapPickerOpen && (
+              {grammarMode && (swapPickerOpen ? (
                 <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
                   {focusOptions.map(({ focus, label, disabledReason }) => (
                     <button
@@ -1139,7 +1138,9 @@ export function Dashboard({
                     </button>
                   ))}
                 </div>
-              )}
+              ) : (
+                <p className="hero-mode-hint">Tap <b>Swap</b> to focus one part of speech.</p>
+              ))}
 
               {settingsMode === 'star' && (
                 <FavoriteWordsPanel onManage={onOpenFavoriteWords} />
