@@ -2953,6 +2953,46 @@ body:has(.dashboard) {
   min-height: 5.2rem;
 }
 
+.hero-mode-menu-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.hero-mode-menu-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 2rem;
+  padding: 0 0.62rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  color: var(--text-muted);
+  font: 750 0.62rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 100ms ease;
+}
+
+.hero-mode-menu-button:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--kyogre-light) 40%, var(--border));
+}
+
+.hero-mode-menu-button:active {
+  transform: scale(0.94);
+}
+
+.hero-mode-menu-button.is-active {
+  color: var(--kyogre-light);
+  border-color: color-mix(in srgb, var(--kyogre-light) 68%, transparent);
+  background: color-mix(in srgb, var(--kyogre) 22%, var(--surface-2));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kyogre-light) 26%, transparent);
+}
+
 .hero-mode-panel-slot > .hero-mode-icons {
   justify-self: start;
 }

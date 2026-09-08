@@ -371,6 +371,8 @@ export function Dashboard({
   const [englishOn, setEnglishOn] = useState(true)
   const [complexity, setComplexity] = useState<GenerationComplexity>(1)
   const [settingsMode, setSettingsMode] = useState<HeroSettingsMode>('none')
+  const [modePickerOpen, setModePickerOpen] = useState(false)
+  const [swapPickerOpen, setSwapPickerOpen] = useState(false)
   // Which part of speech the grammar drill rotates. Null keeps the ordinary
   // sweep, where every slot gets one turn.
   const [swapFocus, setSwapFocus] = useState<HeroSwapFocus | null>(null)
@@ -417,17 +419,30 @@ export function Dashboard({
   }, [storyId, storyMode, storyPlaybackMode, storiesAtLevel])
 
   function selectSettingsMode(mode: Exclude<HeroSettingsMode, 'none'>) {
-    setSettingsMode((current) => {
-      const next = current === mode ? 'none' : mode
-      return next
-    })
+    const next = settingsMode === mode ? 'none' : mode
+    setSettingsMode(next)
+    setModePickerOpen(next === 'picking')
+    setSwapPickerOpen(next === 'grammar')
   }
 
   // The compact mode toggle only switches the drill on or off; it never picks
   // a specific mode itself, so turning it on waits for a choice from the mode
   // buttons it reveals below the sentence controls.
   function toggleModeOn() {
-    setSettingsMode((current) => (current === 'none' ? 'picking' : 'none'))
+    const next = settingsMode === 'none' ? 'picking' : 'none'
+    setSettingsMode(next)
+    setModePickerOpen(next === 'picking')
+    setSwapPickerOpen(false)
+  }
+
+  function toggleModePicker() {
+    setModePickerOpen((current) => !current)
+  }
+
+  function toggleSwapPicker() {
+    setSettingsMode('grammar')
+    setModePickerOpen(false)
+    setSwapPickerOpen((current) => !current || !grammarMode)
   }
 
   const [paused, setPaused] = useState(false)
@@ -987,38 +1002,59 @@ export function Dashboard({
             </div>
 
             <div className="hero-mode-panel-slot">
-              <div className="hero-mode-icons" role="group" aria-label="Sentence modes">
+              <div className="hero-mode-menu-actions">
                 <button
                   type="button"
-                  className={`hero-mode-icon${storyMode ? ' is-active' : ''}`}
-                  onClick={() => selectSettingsMode('story')}
-                  aria-pressed={storyMode}
-                  aria-label="Story mode"
-                  title="Story mode"
+                  className={`hero-mode-menu-button${modePickerOpen ? ' is-active' : ''}`}
+                  onClick={toggleModePicker}
+                  aria-expanded={modePickerOpen}
                 >
-                  <span aria-hidden="true">&#29289;</span>
+                  Pick a mode
                 </button>
                 <button
                   type="button"
-                  className={`hero-mode-icon${grammarMode ? ' is-active' : ''}`}
-                  onClick={() => selectSettingsMode('grammar')}
-                  aria-pressed={grammarMode}
-                  aria-label="Grammar mode"
-                  title="Grammar mode"
+                  className={`hero-mode-menu-button${grammarMode && swapPickerOpen ? ' is-active' : ''}`}
+                  onClick={toggleSwapPicker}
+                  aria-expanded={grammarMode && swapPickerOpen}
                 >
-                  <span aria-hidden="true">&#25991;</span>
-                </button>
-                <button
-                  type="button"
-                  className={`hero-mode-icon${settingsMode === 'star' ? ' is-active' : ''}`}
-                  onClick={() => selectSettingsMode('star')}
-                  aria-pressed={settingsMode === 'star'}
-                  aria-label="Star mode"
-                  title="Star mode"
-                >
-                  <span aria-hidden="true">&#9733;</span>
+                  Swap
                 </button>
               </div>
+
+              {modePickerOpen && (
+                <div className="hero-mode-icons" role="group" aria-label="Sentence modes">
+                  <button
+                    type="button"
+                    className={`hero-mode-icon${storyMode ? ' is-active' : ''}`}
+                    onClick={() => selectSettingsMode('story')}
+                    aria-pressed={storyMode}
+                    aria-label="Story mode"
+                    title="Story mode"
+                  >
+                    <span aria-hidden="true">&#29289;</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`hero-mode-icon${grammarMode ? ' is-active' : ''}`}
+                    onClick={() => selectSettingsMode('grammar')}
+                    aria-pressed={grammarMode}
+                    aria-label="Grammar mode"
+                    title="Grammar mode"
+                  >
+                    <span aria-hidden="true">&#25991;</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`hero-mode-icon${settingsMode === 'star' ? ' is-active' : ''}`}
+                    onClick={() => selectSettingsMode('star')}
+                    aria-pressed={settingsMode === 'star'}
+                    aria-label="Star mode"
+                    title="Star mode"
+                  >
+                    <span aria-hidden="true">&#9733;</span>
+                  </button>
+                </div>
+              )}
 
               {storyMode && (
                 <div className="control-story-options">
@@ -1087,7 +1123,7 @@ export function Dashboard({
                 </div>
               )}
 
-              {grammarMode && (
+              {grammarMode && swapPickerOpen && (
                 <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
                   {focusOptions.map(({ focus, label, disabledReason }) => (
                     <button
