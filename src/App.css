@@ -3579,6 +3579,15 @@ body:has(.dashboard) {
   font-weight: 750;
 }
 
+/* The dashboard's furi/EN toggles get their square corners from the
+   control-group wrapper around them. The same button outside a group
+   (ChoiceDrill, SentenceBuilder) would otherwise fall back to .control-chip's
+   pill radius, which is defined later in this file and wins at equal
+   specificity — so pin the square shape to the toggle itself. */
+.control-chip.app-display-toggle {
+  border-radius: 0.55rem;
+}
+
 .hero-mode-control-toggle {
   overflow: hidden;
   font-size: 0.68rem;
