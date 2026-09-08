@@ -58,6 +58,7 @@ const KanaChart = lazy(() => import('./components/KanaChart').then((module) => (
 const BeginnerSpeedRun = lazy(() => import('./components/BeginnerSpeedRun').then((module) => ({ default: module.BeginnerSpeedRun })))
 const PicturePractice = lazy(() => import('./components/PicturePractice').then((module) => ({ default: module.PicturePractice })))
 const ProfilePage = lazy(() => import('./components/ProfilePage').then((module) => ({ default: module.ProfilePage })))
+const SettingsPage = lazy(() => import('./components/SettingsPage').then((module) => ({ default: module.SettingsPage })))
 const DailyGoalsPage = lazy(() => import('./components/DailyGoalsPage').then((module) => ({ default: module.DailyGoalsPage })))
 
 /*
@@ -101,12 +102,13 @@ type View =
   | 'picture-practice'
   | 'grammar-lab'
   | 'profile'
+  | 'settings'
   | 'daily-goals'
 
 type PrimaryNavTab = 'home' | 'quest' | 'study' | 'beginner' | 'more'
 
 function primaryNavTabForView(view: View): PrimaryNavTab {
-  if (view === 'dashboard' || view === 'profile' || view === 'daily-goals') return 'home'
+  if (view === 'dashboard' || view === 'profile' || view === 'settings' || view === 'daily-goals') return 'home'
   if (view === 'quests' || view === 'ink-road' || view === 'shrine-trial' || view === 'quest-scene' || view === 'quest-checkpoint') return 'quest'
   if (view === 'study-tools' || view === 'kanji' || view === 'vocab-practice' || view === 'counter-practice' || view === 'grammar' || view === 'study' || view === 'study-loading' || view === 'complete') return 'study'
   if (view === 'beginner-zone' || view === 'hiragana-chart' || view === 'katakana-chart' || view === 'hiragana-quiz' || view === 'katakana-quiz' || view === 'beginner-learner' || view === 'beginner-speed-run' || view === 'picture-practice') return 'beginner'
@@ -557,11 +559,7 @@ function App() {
       onToggleSpeech={() => setSpeechOn((value) => !value)}
       onOpenProfile={() => goToView('profile')}
       onOpenDailyGoals={() => goToView('daily-goals')}
-      onOpenLearningSettings={() => {
-        setProfileMenuOpen(false)
-        setView('dashboard')
-        setSettingsExpanded(true)
-      }}
+      onOpenLearningSettings={() => goToView('settings')}
       onOpenQuests={() => goToView('quests')}
       onOpenAchievements={() => goToView('achievements')}
     />
@@ -739,6 +737,27 @@ function App() {
       <div className="app">
         <Suspense fallback={<RouteLoading label="Profile" />}>
           <ProfilePage onBack={() => setView('dashboard')} />
+        </Suspense>
+      </div>,
+    )
+  }
+
+  if (view === 'settings') {
+    return withMobileNav(
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Settings" />}>
+          <SettingsPage
+            onBack={() => setView('dashboard')}
+            complexity={complexity}
+            onComplexityChange={setComplexity}
+            furiganaOn={furiganaOn}
+            englishOn={englishOn}
+            speechOn={speechOn}
+            speechSupported={speechSupported}
+            onToggleFurigana={() => setFuriganaOn((value) => !value)}
+            onToggleEnglish={() => setEnglishOn((value) => !value)}
+            onToggleSpeech={() => setSpeechOn((value) => !value)}
+          />
         </Suspense>
       </div>,
     )
