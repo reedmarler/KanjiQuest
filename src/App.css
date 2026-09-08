@@ -258,9 +258,108 @@ body:has(.dashboard) {
   overflow-y: scroll;
 }
 
+.desktop-primary-nav,
 .mobile-bottom-nav,
 .mobile-home-primary {
   display: none;
+}
+
+@media (min-width: 721px) {
+  .desktop-primary-nav {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.22rem;
+    width: auto;
+    margin: 0 2.55rem 0.7rem;
+    padding: 0.28rem;
+    border: 1px solid color-mix(in srgb, var(--kyogre-light) 24%, var(--border));
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    box-shadow: 0 0.45rem 1.4rem color-mix(in srgb, #000 26%, transparent);
+    backdrop-filter: blur(14px);
+  }
+
+  .desktop-primary-nav button {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 0.18rem;
+    min-width: 0;
+    min-height: 3.05rem;
+    padding: 0.32rem 0.2rem 0.28rem;
+    border: 1px solid transparent;
+    border-radius: 13px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+  }
+
+  .desktop-primary-nav button:hover {
+    border-color: color-mix(in srgb, var(--kyogre-light) 30%, transparent);
+    background: color-mix(in srgb, var(--kyogre) 10%, transparent);
+    color: var(--text);
+  }
+
+  .desktop-primary-nav button span {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface-2) 76%, transparent);
+    color: inherit;
+    font: 800 0.88rem/1 'Noto Sans JP', sans-serif;
+  }
+
+  .desktop-primary-nav button b {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 0.52rem;
+    font-weight: 800;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .desktop-primary-nav button.is-active {
+    border-color: color-mix(in srgb, var(--rayquaza-light) 36%, transparent);
+    background: color-mix(in srgb, var(--rayquaza) 14%, transparent);
+    color: var(--rayquaza-light);
+  }
+
+  .beginner-zone-page .dashboard-profile-placeholder,
+  .study-tools-page .dashboard-profile-placeholder,
+  .additional-tools-page .dashboard-profile-placeholder,
+  body:has(.quest-hub) .dashboard-profile-placeholder {
+    top: 0.45rem;
+  }
+
+  .beginner-zone-page .dashboard-page-settings,
+  .study-tools-page .dashboard-page-settings,
+  .additional-tools-page .dashboard-page-settings,
+  body:has(.quest-hub) .dashboard-page-settings {
+    top: 0.45rem;
+  }
+
+  .beginner-zone-page .tool-menu-heading,
+  .study-tools-page .tool-menu-heading,
+  .additional-tools-page .tool-menu-heading {
+    margin-top: 0.35rem;
+  }
+
+  body:has(.quest-hub) .app {
+    padding-top: 0.5rem;
+  }
+
+  .app:has(> .desktop-primary-nav):not(.ink-road-page) .app-back-slot > .app-back-button,
+  .app:has(> .desktop-primary-nav):not(.ink-road-page) .app-nav-actions > .app-dashboard-button {
+    top: calc(var(--app-nav-top) + 4.35rem);
+  }
 }
 
 /* Dashboard */
@@ -2534,11 +2633,11 @@ body:has(.dashboard) {
   right: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(14rem, 0.7fr);
+  grid-template-columns: minmax(0, 1fr) minmax(10.5rem, 11.5rem);
   grid-template-areas: "difficulty voice";
   align-items: start;
   gap: 0.55rem;
-  width: min(100%, 31rem);
+  width: min(100%, 34rem);
   min-width: 0;
   padding: 0.75rem;
   border: 1px solid color-mix(in srgb, var(--kyogre-light) 24%, var(--border));
@@ -2584,8 +2683,8 @@ body:has(.dashboard) {
 
 .control-group-levels {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.55rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.35rem;
   width: 100%;
 }
 
@@ -3152,18 +3251,19 @@ body:has(.dashboard) {
 .control-segmented-difficulty .control-segment,
 .control-segmented-story .control-segment {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto;
   align-content: center;
-  justify-content: center;
+  justify-items: center;
   gap: 0.12rem;
   min-width: 0;
-  padding: 0.25rem 0.18rem;
+  padding: 0.25rem 0.12rem;
   overflow: hidden;
 }
 
 .control-level-code {
   color: var(--text);
-  font-size: 0.61rem;
+  font-size: 0.68rem;
   font-weight: 800;
   line-height: 1;
   white-space: nowrap;
@@ -3171,13 +3271,15 @@ body:has(.dashboard) {
 
 .control-level-name {
   display: block;
+  width: 100%;
   overflow: hidden;
   color: var(--text-muted);
-  font-size: 0.42rem;
+  font-size: 0.5rem;
   font-weight: 600;
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.05;
+  text-align: center;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .control-segmented-difficulty .control-segment.is-active .control-level-code,

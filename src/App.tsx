@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
+import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useLayoutEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -95,9 +95,9 @@ type View =
   | 'picture-practice'
   | 'grammar-lab'
 
-type MobileNavTab = 'home' | 'quest' | 'study' | 'beginner' | 'more'
+type PrimaryNavTab = 'home' | 'quest' | 'study' | 'beginner' | 'more'
 
-function mobileNavTabForView(view: View): MobileNavTab {
+function primaryNavTabForView(view: View): PrimaryNavTab {
   if (view === 'dashboard') return 'home'
   if (view === 'quests' || view === 'ink-road' || view === 'shrine-trial' || view === 'quest-scene' || view === 'quest-checkpoint') return 'quest'
   if (view === 'study-tools' || view === 'kanji' || view === 'vocab-practice' || view === 'counter-practice' || view === 'grammar' || view === 'study' || view === 'study-loading' || view === 'complete') return 'study'
@@ -120,8 +120,8 @@ function MobileBottomNav({
   onBeginner: () => void
   onMore: () => void
 }) {
-  const activeTab = mobileNavTabForView(currentView)
-  const items: Array<{ tab: MobileNavTab; label: string; mark: string; onClick: () => void }> = [
+  const activeTab = primaryNavTabForView(currentView)
+  const items: Array<{ tab: PrimaryNavTab; label: string; mark: string; onClick: () => void }> = [
     { tab: 'home', label: 'Home', mark: '家', onClick: onHome },
     { tab: 'quest', label: 'Quest', mark: '旅', onClick: onQuests },
     { tab: 'study', label: 'Study', mark: '学', onClick: onStudy },
@@ -131,6 +131,48 @@ function MobileBottomNav({
 
   return (
     <nav className="mobile-bottom-nav" aria-label="Primary">
+      {items.map((item) => (
+        <button
+          key={item.tab}
+          type="button"
+          className={activeTab === item.tab ? 'is-active' : ''}
+          onClick={item.onClick}
+          aria-current={activeTab === item.tab ? 'page' : undefined}
+        >
+          <span aria-hidden="true" lang="ja">{item.mark}</span>
+          <b>{item.label}</b>
+        </button>
+      ))}
+    </nav>
+  )
+}
+
+function DesktopPrimaryNav({
+  currentView,
+  onHome,
+  onQuests,
+  onStudy,
+  onBeginner,
+  onMore,
+}: {
+  currentView: View
+  onHome: () => void
+  onQuests: () => void
+  onStudy: () => void
+  onBeginner: () => void
+  onMore: () => void
+}) {
+  const activeTab = primaryNavTabForView(currentView)
+  const items: Array<{ tab: PrimaryNavTab; label: string; mark: string; onClick: () => void }> = [
+    { tab: 'home', label: 'Home', mark: '家', onClick: onHome },
+    { tab: 'quest', label: 'Quest', mark: '旅', onClick: onQuests },
+    { tab: 'study', label: 'Study', mark: '学', onClick: onStudy },
+    { tab: 'beginner', label: 'Beginner', mark: 'あ', onClick: onBeginner },
+    { tab: 'more', label: 'More', mark: '他', onClick: onMore },
+  ]
+
+  return (
+    <nav className="desktop-primary-nav" aria-label="Primary">
       {items.map((item) => (
         <button
           key={item.tab}
@@ -353,12 +395,41 @@ function App() {
       onMore={() => setView('additional-tools')}
     />
   )
-  const withMobileNav = (content: ReactNode) => (
-    <>
-      {content}
-      {mobileNav}
-    </>
+  const desktopNav = (
+    <DesktopPrimaryNav
+      currentView={view}
+      onHome={() => setView('dashboard')}
+      onQuests={() => setView('quests')}
+      onStudy={() => setView('study-tools')}
+      onBeginner={() => setView('beginner-zone')}
+      onMore={() => setView('additional-tools')}
+    />
   )
+  const withMobileNav = (content: ReactNode) => {
+    const appShell = isValidElement(content)
+      && typeof (content.props as { className?: unknown }).className === 'string'
+      && (content.props as { className: string }).className.split(/\s+/).includes('app')
+    const framed = appShell
+      ? cloneElement(
+          content as ReactElement<{ children?: ReactNode }>,
+          undefined,
+          desktopNav,
+          ...Children.toArray((content as ReactElement<{ children?: ReactNode }>).props.children),
+        )
+      : (
+        <>
+          {desktopNav}
+          {content}
+        </>
+      )
+
+    return (
+      <>
+        {framed}
+        {mobileNav}
+      </>
+    )
+  }
 
   if (view === 'library') {
     return withMobileNav(
