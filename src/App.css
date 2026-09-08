@@ -163,16 +163,57 @@ body:has(.beginner-word-writing-card) .app,
   gap: 0.35rem;
 }
 
-/* These three tabs are reached from the bottom nav now, not a Back button —
-   their header carries the same corner-pinned profile/settings pair as the
-   Dashboard (.dashboard-profile-placeholder / .dashboard-page-settings,
-   anchored off .app's own position: relative). The heading needs enough
-   clearance to drop fully below that pinned pair instead of sharing its row. */
+/* These tabs are reached from the bottom nav now, not a Back button — their
+   header carries the same corner-pinned profile/settings pair as the
+   Dashboard (.dashboard-profile-placeholder / .dashboard-page-settings).
+   That pair is positioned straight off .app everywhere it's used, but on the
+   Dashboard itself it actually sits inside .dashboard (position: relative),
+   a normal-flow child that's already inset by .app's own padding — so
+   anchoring the same top/left/right values straight off .app here would land
+   the pair .app's padding short of where the Dashboard's copy sits. Restated
+   here with that padding folded back in, so the pair lands at the exact same
+   spot on every page. See the shared correction below.
+   The heading also needs enough clearance to drop fully below the pinned
+   pair instead of sharing its row. */
 .beginner-zone-page .tool-menu-heading,
 .study-tools-page .tool-menu-heading,
 .additional-tools-page .tool-menu-heading {
-  margin-top: 1.95rem;
+  margin-top: 2.5rem;
   padding: 0 0.15rem 0.15rem;
+}
+
+.beginner-zone-page .dashboard-profile-placeholder,
+.study-tools-page .dashboard-profile-placeholder,
+.additional-tools-page .dashboard-profile-placeholder,
+body:has(.quest-hub) .dashboard-profile-placeholder {
+  top: 0.95rem;
+  left: 1.25rem;
+}
+
+.beginner-zone-page .dashboard-page-settings,
+.study-tools-page .dashboard-page-settings,
+.additional-tools-page .dashboard-page-settings,
+body:has(.quest-hub) .dashboard-page-settings {
+  top: 0.95rem;
+  right: 1.25rem;
+}
+
+@media (max-width: 720px) {
+  .beginner-zone-page .dashboard-profile-placeholder,
+  .study-tools-page .dashboard-profile-placeholder,
+  .additional-tools-page .dashboard-profile-placeholder,
+  body:has(.quest-hub) .dashboard-profile-placeholder {
+    top: 0.5rem;
+    left: 1.25rem;
+  }
+
+  .beginner-zone-page .dashboard-page-settings,
+  .study-tools-page .dashboard-page-settings,
+  .additional-tools-page .dashboard-page-settings,
+  body:has(.quest-hub) .dashboard-page-settings {
+    top: 0.5rem;
+    right: 1.25rem;
+  }
 }
 
 .study-tools-page .tool-menu-heading > small {
@@ -12007,11 +12048,13 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   width: min(100%, 54rem);
 }
 
-/* The corner-pinned profile/settings pair (same as the Dashboard's) sit
-   outside .app's own side padding, so the topbar's count and Ink Road
-   preview need a bit more inset than the rest of the page to clear them. */
+/* The corner-pinned profile/settings pair (same as the Dashboard's) would
+   otherwise share this row and force the count and Ink Road preview to
+   squeeze into whatever width is left between them, wrapping onto two
+   lines — drop the whole row below the pinned pair instead, the same way
+   the tool menus' headings do. */
 .quest-hub-simple .quest-topbar {
-  padding-inline: 1rem;
+  margin-top: 2.2rem;
 }
 
 .quest-focus {
