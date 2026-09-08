@@ -4172,7 +4172,7 @@ function generateN3CategorySentence(seed: number,patternId: string,options: Cate
     const subjectEnglish=englishPhrase(subject,'subject'),becomes=subjectUsesBaseVerb(subjectEnglish)?'become':'becomes'
     const abilityObjectEnglish={漢字:'kanji',本:'books',記事:'articles',新聞:'newspapers',小説:'novels',辞書:'dictionaries'}[object.japanese]??primaryEnglishGloss(object.preferredTranslation||object.english)
     // なる is godan: its ます-stem is なり, so the tail attaches to 〜ようになり.
-    const abilityForms=politeAuxiliaryForms({japanese:'読めるようになり',reading:'よめるようになり'},['nonPast','past','negative'])
+    const abilityForms=politeAuxiliaryForms({japanese:'読めるようになり',reading:'よめるようになり'},['nonPast','past','negative','pastNegative'])
     const abilityForm=pickAuxiliaryForm(abilityForms,options)
     const abilityPhrase=`able to read ${abilityObjectEnglish}`
     const furigana=[wordPart(subject,'subject'),literalPart('は','わ'),wordPart(object,'object'),literalPart('が'),literalPart(abilityForm.japanese,abilityForm.reading,'verb')]
@@ -5653,6 +5653,7 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     const tryForms=[
       {japanese:`${te.japanese}みます。`,reading:`${te.reading}みます。`,english:`${subjectUsesBaseVerb(subjectEnglish)?'try':'tries'} ${pair.english}`},
       {japanese:`${te.japanese}みました。`,reading:`${te.reading}みました。`,english:`tried ${pair.english}`},
+      {japanese:`${te.japanese}みませんでした。`,reading:`${te.reading}みませんでした。`,english:`did not try ${pair.english}`},
     ]
     const tryForm=pickAuxiliaryForm(tryForms,options)
     const tryAdverb=pickAdverbial(MANNER_ADVERBIALS,options,seed,1304)
