@@ -2372,6 +2372,22 @@ export const adjectiveRules = [
   { id:'katte',japanese:'勝手',reading:'かって',english:'selfish',categories:['Person'] as SentenceCategory[] },
 ]
 
+/**
+ * Adjectives the grammar-mode drill will not swap *in* (n5-17). Each one
+ * either rides on a hand-curated noun allow-list that does not generalise
+ * (必要 / 少ない / 完全) or on an abstract judgement that only reads well on
+ * an abstract noun — and the 'Document' category holds both 切手 (a physical
+ * stamp) and 情報 (information), so a bare category match is not enough to
+ * tell "切手が効果的です" apart from "情報が効果的です". They remain available
+ * as the base pick, where the noun is chosen to suit them.
+ */
+const nonSwapAdjectiveIds = new Set([
+  'hitsuyou', 'sukunai', 'kanzen',
+  'tekisetsu', 'futekisetsu', 'koukateki', 'seikaku-accurate', 'gutaiteki',
+  'genjitsuteki', 'ippanteki', 'kanou', 'fukanou', 'tadashii',
+  'marui', 'shikakui', 'zannen', 'shinkoku',
+])
+
 function hasCompositeSurface(word: WordRecord) {
   return word.japanese.includes('/') || /[／~〜]/.test(word.japanese)
 }
@@ -3003,41 +3019,70 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const describingAdjectives = requiredRecord
       ? adjectiveRules.filter(rule=>categoryMatch(requiredRecord,rule.categories as SentenceCategory[]))
       : adjectiveRules
-    const adjective=pick(describingAdjectives.length?describingAdjectives:adjectiveRules,171)
-    if (!adjective) return null
+    const baseAdjective=pick(describingAdjectives.length?describingAdjectives:adjectiveRules,171)
+    if (!baseAdjective) return null
     // 普通 needs a comparison or a concrete context (e.g. この服は普通です);
     // it is not useful as an unqualified generated predicate.
-    if (adjective.id === 'futsuu') return null
-    // 必要だ is exempted from the normal category+tag pool: its curated
-    // allow-list crosses several classifier categories (time, money, tools,
-    // documents), and a couple of its words (経験, 知識, 協力) fall through
-    // the classifier's fallback bucket entirely, which validInanimatePool
-    // excludes outright. Matching by exact word text sidesteps both issues.
-    const object=adjective.id==='hitsuyou'
-      ? pick(vocabulary.filter(word=>hitsuyouCompatibleWords.has(word.japanese) && hasUsableMeaning(word)),172)
-      : adjective.id==='sukunai'
-        ? pick(vocabulary.filter(word=>sukunaiCompatibleWords.has(word.japanese) && hasUsableMeaning(word)),172)
-        : adjective.id==='kanzen'
-          ? pick(vocabulary.filter(word=>kanzenCompatibleWords.has(word.japanese) && hasUsableMeaning(word)),172)
-        : adjective.id==='nigiyaka'
-          ? pick(validPlacePool(vocabulary).filter(word=>matchingTags(word,crowdedPlaceTags).length>0 && !['ヨーロッパ','アジア','アフリカ','外国'].includes(word.japanese)),172)
-          : adjective.id==='kurai' || adjective.id==='akarui'
-            // A whole city or country is not intrinsically dark/bright — that
-            // only makes sense for a bounded local space (room, street, forest).
-            ? pick(validInanimatePool(vocabulary,adjective.categories).filter(word=>![...tagSet(word)].some(tag=>geographicOriginTags.has(tag))),172)
-          : adjective.id==='nagai' || adjective.id==='mijikai'
-            // 長い/短い describe a clear linear dimension. The broad Object/Document/
-            // Book/Vehicle categories let anything physical through (shoes, a bag),
-            // most of which are not naturally described that way.
-            ? pick(vocabulary.filter(word=>linearDimensionWords.has(word.japanese) && hasUsableMeaning(word)),172)
-          : adjective.id==='daijoubu'
-            ? pick([...validHumanPool(vocabulary),...validInanimatePool(vocabulary,['Object']).filter(isPhysicalObject)],172)
-            : adjective.id==='osoi' || adjective.id==='hayai-early'
-              ? pick([...validHumanPool(vocabulary),...validInanimatePool(vocabulary,['Vehicle','Event'])],172)
-              : adjective.categories.length===1 && adjective.categories[0]==='Person'
-                ? pick(validHumanPool(vocabulary),172)
-            : pick(validInanimatePool(vocabulary,adjective.categories).filter(word=>!adjective.physicalOnly || isPhysicalObject(word)),172)
+    if (baseAdjective.id === 'futsuu') return null
+    // The nouns each adjective may describe. 必要だ is exempted from the normal
+    // category+tag pool: its curated allow-list crosses several classifier
+    // categories (time, money, tools, documents), and a couple of its words
+    // (経験, 知識, 協力) fall through the classifier's fallback bucket
+    // entirely, which validInanimatePool excludes outright. Matching by exact
+    // word text sidesteps both issues. Extracted so the grammar-mode adjective
+    // drill (below) can ask the reverse question — which adjectives a fixed
+    // noun accepts — against the very same reviewed pools.
+    const objectPoolFor=(adj: (typeof adjectiveRules)[number]): WordRecord[] =>
+      adj.id==='hitsuyou'
+        ? vocabulary.filter(word=>hitsuyouCompatibleWords.has(word.japanese) && hasUsableMeaning(word))
+      : adj.id==='sukunai'
+        ? vocabulary.filter(word=>sukunaiCompatibleWords.has(word.japanese) && hasUsableMeaning(word))
+      : adj.id==='kanzen'
+        ? vocabulary.filter(word=>kanzenCompatibleWords.has(word.japanese) && hasUsableMeaning(word))
+      : adj.id==='nigiyaka'
+        ? validPlacePool(vocabulary).filter(word=>matchingTags(word,crowdedPlaceTags).length>0 && !['ヨーロッパ','アジア','アフリカ','外国'].includes(word.japanese))
+      : adj.id==='kurai' || adj.id==='akarui'
+        // A whole city or country is not intrinsically dark/bright — that
+        // only makes sense for a bounded local space (room, street, forest).
+        ? validInanimatePool(vocabulary,adj.categories).filter(word=>![...tagSet(word)].some(tag=>geographicOriginTags.has(tag)))
+      : adj.id==='nagai' || adj.id==='mijikai'
+        // 長い/短い describe a clear linear dimension. The broad Object/Document/
+        // Book/Vehicle categories let anything physical through (shoes, a bag),
+        // most of which are not naturally described that way.
+        ? vocabulary.filter(word=>linearDimensionWords.has(word.japanese) && hasUsableMeaning(word))
+      : adj.id==='daijoubu'
+        ? [...validHumanPool(vocabulary),...validInanimatePool(vocabulary,['Object']).filter(isPhysicalObject)]
+      : adj.id==='osoi' || adj.id==='hayai-early'
+        ? [...validHumanPool(vocabulary),...validInanimatePool(vocabulary,['Vehicle','Event'])]
+      : adj.categories.length===1 && adj.categories[0]==='Person'
+        ? validHumanPool(vocabulary)
+      : validInanimatePool(vocabulary,adj.categories).filter(word=>!adj.physicalOnly || isPhysicalObject(word))
+    const object=pick(objectPoolFor(baseAdjective),172)
     if (!object) return null
+    // Grammar mode holds one sentence still and rotates a single part of
+    // speech. The base sentence above picks the adjective first and fits a
+    // noun to it; a drill rotation comes back with slotSeeds.adjective set and
+    // the last adjective in avoidWords, and here swaps in another adjective
+    // the *same* noun legitimately takes. Every candidate is one whose own
+    // reviewed object pool already contains this noun, so the swap cannot
+    // reach a pairing the ordinary generator would not have produced.
+    let adjective=baseAdjective
+    if (!options.requiredWord && (options.slotSeeds?.adjective!==undefined || options.avoidWords?.adjective)) {
+      const baseCategories=new Set(baseAdjective.categories as SentenceCategory[])
+      const swappable=adjectiveRules.filter(rule=>rule.id!=='futsuu'
+        && rule.japanese!==options.avoidWords?.adjective
+        // Stay inside one descriptive family: a noun the generator fitted a
+        // physical-property adjective to should rotate among physical-property
+        // adjectives, not jump to an abstract judgement.
+        && (rule.categories as SentenceCategory[]).some(category=>baseCategories.has(category))
+        // The narrow-pool and abstract-evaluation adjectives ride on a loose
+        // category match (切手 and 情報 are both 'Document'); their curated
+        // pairings do not generalise to an arbitrary same-category noun, so
+        // they are only ever the base pick, never a swap target.
+        && !nonSwapAdjectiveIds.has(rule.id)
+        && objectPoolFor(rule).some(word=>word.japanese===object.japanese))
+      if (swappable.length) adjective=pick(swappable,171,'adjective') ?? baseAdjective
+    }
     const topicPredicate=(adjective.categories as SentenceCategory[]).includes('Person')
     // A person filling this slot needs subject-case English. objectEnglish()
     // stamps an indefinite article on whatever it is given, which turns the
