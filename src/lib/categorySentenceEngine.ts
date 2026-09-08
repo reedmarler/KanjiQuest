@@ -4014,6 +4014,14 @@ const MANNER_ADVERBIALS: ReadonlyArray<{japanese:string;reading:string;english:s
   // gains nothing from two words a learner cannot tell apart in English.
   { japanese:'ちゃんと', reading:'ちゃんと', english:'properly' },
   { japanese:'早く', reading:'はやく', english:'quickly' },
+  // More manner adverbs that read naturally on any everyday action verb
+  // (read, eat, write, watch, buy…) and still work when the frame places
+  // them sentence-finally in English, so the drill has more than a five-word
+  // loop wherever it runs. Deliberately conservative: 上手に / きれいに /
+  // 一生懸命 fit some verbs and read stiffly after others, so they are out.
+  { japanese:'熱心に', reading:'ねっしんに', english:'eagerly' },
+  { japanese:'集中して', reading:'しゅうちゅうして', english:'intently' },
+  { japanese:'楽しそうに', reading:'たのしそうに', english:'happily' },
 ]
 
 /** Which adverbial this sentence shows; `adverb` is the slot the drill re-seeds. */
