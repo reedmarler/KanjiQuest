@@ -232,7 +232,7 @@ body:has(.quest-hub) .dashboard-page-settings {
   .additional-tools-page .dashboard-profile-placeholder,
   body:has(.quest-hub) .dashboard-profile-placeholder {
     top: 0.5rem;
-    left: 0;
+    left: 1.25rem;
   }
 
   .app > .dashboard-page-settings,
@@ -241,7 +241,7 @@ body:has(.quest-hub) .dashboard-page-settings {
   .additional-tools-page .dashboard-page-settings,
   body:has(.quest-hub) .dashboard-page-settings {
     top: 0.5rem;
-    right: 0;
+    right: 1.25rem;
   }
 }
 
