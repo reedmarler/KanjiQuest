@@ -277,8 +277,10 @@ body:has(.dashboard) {
 }
 
 @media (min-width: 721px) {
-  .app:has(> .desktop-primary-nav) {
-    padding-top: 0.5rem;
+  .app:has(> .desktop-primary-nav),
+  body:has(.dashboard) .app:has(> .desktop-primary-nav),
+  body:has(.quest-hub) .app:has(> .desktop-primary-nav) {
+    padding-top: 0;
   }
 
   .desktop-primary-nav {
@@ -288,16 +290,17 @@ body:has(.dashboard) {
     display: grid;
     grid-template-columns: 1.7rem minmax(0, 1fr) 1.7rem;
     align-items: center;
+    justify-items: center;
     column-gap: 0.45rem;
     box-sizing: border-box;
     width: 100%;
     max-width: none;
-    height: 1.85rem;
-    min-height: 1.85rem;
-    max-height: 1.85rem;
-    margin: 0 0 0.35rem;
+    height: 2.5rem;
+    min-height: 2.5rem;
+    max-height: 2.5rem;
+    margin: 0;
     padding: 0;
-    overflow: visible;
+    overflow: hidden;
     border: 0;
     border-bottom: 1px solid color-mix(in srgb, var(--sakura) 16%, var(--border));
     border-radius: 0;
@@ -377,7 +380,7 @@ body:has(.dashboard) {
     content: '';
     position: absolute;
     right: 0.58rem;
-    bottom: -1px;
+    bottom: 0;
     left: 0.58rem;
     height: 2px;
     border-radius: 99px;
@@ -388,31 +391,42 @@ body:has(.dashboard) {
   .desktop-primary-nav-settings {
     display: grid;
     place-items: center;
-    overflow: hidden;
     width: 1.7rem;
     height: 1.7rem;
     padding: 0;
-    border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+    border: 0;
+    background: transparent;
     color: var(--text-muted);
-    font: 800 0.62rem/1 'Outfit', system-ui, sans-serif;
+    font: inherit;
     cursor: pointer;
   }
 
-  .desktop-primary-nav-user span,
-  .desktop-primary-nav-settings span {
-    display: grid;
-    place-items: center;
-    width: 1.05rem;
-    aspect-ratio: 1;
+  .desktop-primary-nav-user {
+    overflow: hidden;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--kyogre) 16%, transparent);
+  }
+
+  .desktop-primary-nav-user img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .desktop-primary-nav-settings {
+    overflow: visible;
+    color: var(--text-muted);
+  }
+
+  .desktop-primary-nav-settings svg {
+    display: block;
+    width: 1.35rem;
+    height: 1.35rem;
   }
 
   .desktop-primary-nav-user.is-active,
   .desktop-primary-nav-settings.is-active {
-    border-color: color-mix(in srgb, var(--kyogre-light) 58%, transparent);
+    border-color: transparent;
     color: var(--kyogre-light);
   }
 
