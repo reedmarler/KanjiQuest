@@ -6146,8 +6146,14 @@ function generateAdvancedCategorySentence(seed: number, patternId: string, optio
     if (options.avoidWords?.result) { const avoided = resultPickPool.filter(c => c.result !== options.avoidWords!.result); if (avoided.length) resultPickPool = avoided }
     const result = seededPick(resultPickPool, options.slotSeeds?.result ?? seed, 1502)
     if (!clause || !result) return null
-    const furigana=[{text:clause.clause,reading:clause.clauseReading,slot:'reason'},literalPart('とはいえ、'),{text:result.result,reading:result.resultReading,slot:'result'}]
-    return finish(furigana,`Though ${clause.english}, ${result.english}.`,{},{
+    // The conceded quality carries a degree adverb, giving the Adverbs drill a
+    // pattern to run on above N3. 最も is dropped — "it is most cheap" does not
+    // read, unlike the longer adjectives n4-30's degree frame uses it with.
+    const degree = pickAdverbial(degreeAdverbs.filter(entry => entry.japanese !== '最も'), options, seed, 1503)
+    const bareQuality = clause.english.replace(/^it is /, '')
+    const furigana=[{text:degree.japanese,reading:degree.reading,slot:'adverb'},{text:clause.clause,reading:clause.clauseReading,slot:'reason'},literalPart('とはいえ、'),{text:result.result,reading:result.resultReading,slot:'result'}]
+    return finish(furigana,`Though it is ${degree.english} ${bareQuality}, ${result.english}.`,{},{
+      adverb:grammarSlot(`n2-30-degree-${degree.japanese}`,degree.japanese,degree.japanese,degree.reading,degree.english,['degree','adverb'],'noun'),
       reason:grammarSlot(`n2-30-clause-${clausePool.indexOf(clause)}`,clause.clause,clause.clause,clause.clauseReading,clause.english,['concession'],clause.clause.endsWith('い')?'i_adjective':'na_adjective'),
       result:grammarSlot(`n2-30-result-${resultPool.indexOf(result)}`,result.result,result.result,result.resultReading,result.english,['concession']),
     },'とはいえ concedes a point formally before pointing out that it does not change the outcome.')

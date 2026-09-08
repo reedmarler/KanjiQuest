@@ -244,9 +244,10 @@ export const HERO_FOCUS_SLOTS: Record<HeroSwapFocus, string> = {
  * comparison and quotation frames and the N2 concessions all describe with
  * one, and n1-14 (〜に越したことはない) was written for the top of the range,
  * where every other pattern governs a noun or a whole clause.
- * Degree adverbs also have reviewed N4 frames, sequence adverbials deepen the
- * N5 adverb pool, and the two N3 frames that fix a single action carry a
- * manner one.
+ * Degree adverbs have reviewed N4 and N2 frames (n4-30's abstract judgement and
+ * n2-30's とはいえ concession), sequence adverbials deepen the N5 adverb pool,
+ * and the two N3 frames that fix a single action carry a manner one. N1 has no
+ * home for one — every pattern there governs a noun or a whole clause.
  */
 export const HERO_FOCUS_LEVELS: Record<HeroSwapFocus, readonly JlptLevel[]> = {
   noun: ['N5', 'N4', 'N3', 'N2', 'N1'],
@@ -254,7 +255,7 @@ export const HERO_FOCUS_LEVELS: Record<HeroSwapFocus, readonly JlptLevel[]> = {
   verb: ['N5'],
   auxiliary: ['N4', 'N3', 'N2', 'N1'],
   adjective: ['N5', 'N4', 'N3', 'N2', 'N1'],
-  adverb: ['N5', 'N4', 'N3'],
+  adverb: ['N5', 'N4', 'N3', 'N2'],
 }
 
 export function focusAvailableAt(focus: HeroSwapFocus, level: JlptLevel): boolean {
