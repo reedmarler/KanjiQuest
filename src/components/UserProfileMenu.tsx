@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react'
 import { useDailyGoals } from '../lib/dailyGoals'
+import { accountSyncStatusText, isAccountSyncConfigured, loadAccountSyncState } from '../lib/accountSync'
 import { displayProfilePhoto, readProfilePhoto, useUserProfile } from '../lib/userProfile'
 
 type UserProfileMenuProps = {
@@ -48,11 +49,15 @@ export function UserProfileMenu({
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState(profile.name)
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false)
+  const [syncDetailsOpen, setSyncDetailsOpen] = useState(false)
+  const accountSyncState = loadAccountSyncState()
+  const syncConfigured = isAccountSyncConfigured()
 
   useEffect(() => {
     if (!open) {
       setEditingName(false)
       setResetConfirmOpen(false)
+      setSyncDetailsOpen(false)
       return
     }
     function handleKeyDown(event: KeyboardEvent) {
@@ -234,9 +239,15 @@ export function UserProfileMenu({
           <button type="button" onClick={requestImportProgress}>
             <span>Import progress</span>
           </button>
-          <button type="button" disabled>
-            <span>Sign in / sync</span>
+          <button type="button" onClick={() => setSyncDetailsOpen((value) => !value)}>
+            <span>{syncConfigured ? 'Sign in / sync' : 'Sync later'}</span>
           </button>
+          {syncDetailsOpen && (
+            <div className="dashboard-profile-reset-confirm" role="status">
+              <p>{accountSyncStatusText(accountSyncState)}</p>
+              <p>Sign-in will stay optional. You can keep using this device locally, then connect cloud backup when the backend is ready.</p>
+            </div>
+          )}
           <button type="button" className="is-danger" onClick={() => setResetConfirmOpen(true)}>
             <span>Reset app progress</span>
           </button>
