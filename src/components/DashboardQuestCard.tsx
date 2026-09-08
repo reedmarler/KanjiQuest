@@ -155,7 +155,7 @@ export function DashboardQuestCard({
     )
   }
 
-  const pathPct = (stepsDone / (QUEST_STEPS.length - 1)) * 100
+  const pathFraction = stepsDone / (QUEST_STEPS.length - 1)
 
   return (
     <section
@@ -202,7 +202,7 @@ export function DashboardQuestCard({
         className="dashboard-quest-path"
         role="img"
         aria-label={`${stepsDone} of ${QUEST_STEPS.length} steps done`}
-        style={{ '--path-pct': `${pathPct}%` } as CSSProperties}
+        style={{ '--path-pct': String(pathFraction) } as CSSProperties}
       >
         {QUEST_STEPS.map((step, index) => {
           const done = index < stepsDone

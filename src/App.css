@@ -4212,99 +4212,301 @@ body:has(.dashboard) {
   margin-bottom: 0.6rem;
 }
 
-.dashboard-next-panel {
+/* Home quest card: a small scene, a five-node path, and one Continue. */
+.dashboard-quest-card {
+  position: relative;
   display: grid;
-  grid-template-areas:
-    "quest"
-    "track"
-    "cta";
-  gap: 0.5rem;
+  gap: 0.55rem;
+  overflow: hidden;
   margin: 0.15rem 0 0.6rem;
-  padding: 0.58rem;
-  border: 1px solid color-mix(in srgb, var(--rayquaza-light) 22%, var(--border));
-  border-radius: 8px;
+  padding: 0.7rem 0.72rem 0.62rem;
+  border: 1px solid color-mix(in srgb, var(--sakura) 20%, var(--border));
+  border-radius: 12px;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--rayquaza) 10%, transparent), transparent 52%),
-    linear-gradient(315deg, color-mix(in srgb, var(--sakura) 7%, transparent), transparent 46%),
-    color-mix(in srgb, var(--surface) 94%, var(--surface-2));
+    radial-gradient(120% 90% at 88% 0%, color-mix(in srgb, var(--sakura) 12%, transparent), transparent 60%),
+    color-mix(in srgb, var(--surface) 92%, var(--surface-2));
 }
 
-/* Next-quest card: a real peek at where the campaign stands. */
-.dashboard-next-quest {
-  display: grid;
-  grid-area: quest;
-  grid-template-columns: 2.75rem minmax(0, 1fr) 1.5rem;
-  align-items: center;
-  gap: 0.65rem;
+.dashboard-quest-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   width: 100%;
-  min-width: 0;
-  padding: 0.6rem 0.62rem;
-  border: 1px solid color-mix(in srgb, var(--rayquaza-light) 32%, transparent);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface-2) 78%, transparent);
+  height: 100%;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.dashboard-quest-card > *:not(.dashboard-quest-scene):not(.dashboard-quest-cord) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Identity row */
+.dashboard-quest-head {
+  display: grid;
+  grid-template-columns: 2.85rem minmax(0, 1fr) 1.1rem;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--text);
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: border-color 140ms ease, background 140ms ease, transform 120ms ease;
 }
 
-.dashboard-next-quest:not(.is-complete):hover {
-  border-color: color-mix(in srgb, var(--rayquaza-light) 56%, var(--border));
-  background: color-mix(in srgb, var(--rayquaza) 12%, var(--surface-2));
-  transform: translateY(-1px);
+.dashboard-quest-head:hover .dashboard-quest-title {
+  color: var(--sakura-light);
 }
 
-.dashboard-next-quest.is-complete {
-  cursor: default;
-}
-
-.dashboard-next-quest-mark {
+.dashboard-quest-mark {
   display: grid;
   place-items: center;
   align-self: start;
-  width: 2.75rem;
+  width: 2.85rem;
   aspect-ratio: 1;
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--rayquaza) 22%, var(--surface));
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--sakura) 32%, transparent);
+  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface));
   color: var(--rayquaza-light);
-  font: 800 1.4rem/1 'Noto Sans JP', sans-serif;
+  font: 800 1.5rem/1 'Noto Sans JP', sans-serif;
 }
 
-.dashboard-next-quest-body {
+.dashboard-quest-id {
   display: grid;
-  gap: 0.16rem;
+  gap: 0.14rem;
   min-width: 0;
 }
 
-.dashboard-next-quest-kicker {
-  color: var(--rayquaza-light);
+.dashboard-quest-eyebrow {
+  color: color-mix(in srgb, var(--text-muted) 90%, var(--sakura));
   font: 800 0.52rem/1 'Outfit', system-ui, sans-serif;
-  letter-spacing: 0.11em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.dashboard-next-quest-body b {
+.dashboard-quest-title {
   overflow: hidden;
-  font-size: 0.98rem;
+  font-size: 1.02rem;
   line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 140ms ease;
+}
+
+.dashboard-quest-sub {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.dashboard-quest-stamp {
+  flex: 0 0 auto;
+  padding: 0.08rem 0.32rem;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--groudon) 76%, var(--amber));
+  color: #fff;
+  font: 800 0.52rem/1.35 'Outfit', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.dashboard-quest-guardian {
+  overflow: hidden;
+  color: color-mix(in srgb, var(--text-muted) 82%, transparent);
+  font-size: 0.6rem;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.dashboard-next-quest-preview {
+.dashboard-quest-head .dashboard-quest-go {
+  align-self: center;
+  color: color-mix(in srgb, var(--sakura-light) 70%, var(--text-muted));
+  font: 900 1.3rem/1 'Outfit', system-ui, sans-serif;
+}
+
+/* Corner bead cord — wealth, count on tap */
+.dashboard-quest-cord {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.55rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.16rem 0.32rem;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 68%, transparent);
+  cursor: pointer;
+}
+
+.dashboard-quest-cord-beads {
+  display: flex;
+  align-items: center;
+  gap: 0.16rem;
+  padding: 0.05rem 0.16rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--amber) 34%, transparent), transparent);
+}
+
+.dashboard-quest-cord-beads i {
+  width: 0.34rem;
+  height: 0.34rem;
+  border-radius: 50%;
+  background: var(--amber-light);
+}
+
+.dashboard-quest-cord-beads i.is-empty {
+  background: color-mix(in srgb, var(--text-muted) 38%, transparent);
+}
+
+.dashboard-quest-cord-count {
+  color: var(--amber-light);
+  font: 800 0.6rem/1 'Outfit', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The path */
+.dashboard-quest-path {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 1.5rem;
+  margin: 0.1rem 0.1rem 0;
+}
+
+.dashboard-quest-path::before,
+.dashboard-quest-path::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0.4rem;
+  right: 0.4rem;
+  height: 2px;
+  border-radius: 999px;
+  transform: translateY(-50%);
+}
+
+.dashboard-quest-path::before {
+  background: color-mix(in srgb, var(--text-muted) 22%, transparent);
+}
+
+.dashboard-quest-path::after {
+  background: var(--rayquaza-light);
+  transform: translateY(-50%) scaleX(var(--path-pct, 0));
+  transform-origin: left center;
+  transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dashboard-quest-node {
+  position: relative;
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text-muted) 30%, var(--surface));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--surface) 92%, var(--surface-2));
+}
+
+.dashboard-quest-node.is-done {
+  background: var(--rayquaza-light);
+}
+
+.dashboard-quest-node.is-next {
+  background: var(--sakura);
+  animation: dashboard-quest-pulse 1.8s ease-in-out infinite;
+}
+
+.dashboard-quest-node.is-prize {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+@keyframes dashboard-quest-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--surface) 92%, var(--surface-2)),
+      0 0 0 4px color-mix(in srgb, var(--sakura) 42%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--surface) 92%, var(--surface-2)),
+      0 0 0 9px color-mix(in srgb, var(--sakura) 0%, transparent);
+  }
+}
+
+/* Traveler bead on a cord */
+.dashboard-quest-bead {
+  display: inline-grid;
+  place-items: center;
+  line-height: 0;
+}
+
+.dashboard-quest-bead svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.dashboard-quest-bead line {
+  stroke: color-mix(in srgb, var(--amber) 60%, var(--text-muted));
+  stroke-width: 1.4;
+}
+
+.dashboard-quest-bead ellipse {
+  fill: var(--amber);
+  stroke: color-mix(in srgb, var(--amber-light) 80%, #fff);
+  stroke-width: 1;
+}
+
+.dashboard-quest-bead .dashboard-quest-bead-glint {
+  fill: color-mix(in srgb, var(--amber-light) 55%, #fff);
+  stroke: none;
+}
+
+.dashboard-quest-node-bead {
+  position: absolute;
+  bottom: calc(100% - 0.12rem);
+  left: 50%;
+  width: 1.35rem;
+  height: 1.15rem;
+  transform: translateX(-50%);
+}
+
+.dashboard-quest-card.is-fresh .dashboard-quest-node-bead {
+  animation: dashboard-bead-land 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dashboard-quest-card.is-fresh .dashboard-quest-path::after {
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes dashboard-bead-land {
+  0% { transform: translateX(-320%); opacity: 0; }
+  70% { opacity: 1; }
+  100% { transform: translateX(-50%); opacity: 1; }
+}
+
+/* Up-next caption */
+.dashboard-quest-upnext {
+  margin: 0;
   overflow: hidden;
   color: var(--text-muted);
   font-size: 0.66rem;
   line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.dashboard-next-quest-preview em {
-  margin-right: 0.35rem;
-  padding: 0.05rem 0.28rem;
+.dashboard-quest-upnext em {
+  margin-right: 0.4rem;
+  padding: 0.05rem 0.3rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--sakura) 22%, transparent);
   color: var(--sakura-light);
@@ -4312,131 +4514,20 @@ body:has(.dashboard) {
   font-style: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  white-space: nowrap;
 }
 
-.dashboard-next-quest-steps {
-  display: flex;
+/* One primary Continue */
+.dashboard-quest-continue {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto 1.2rem;
   align-items: center;
-  gap: 0.28rem;
-  margin-top: 0.14rem;
-}
-
-.dashboard-next-quest-steps i {
-  flex: 1;
-  height: 0.32rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--text-muted) 20%, transparent);
-}
-
-.dashboard-next-quest-steps i.is-done {
-  background: var(--rayquaza-light);
-}
-
-.dashboard-next-quest-steps i.is-next {
-  background: color-mix(in srgb, var(--sakura-light) 82%, transparent);
-}
-
-.dashboard-next-quest-steps small {
-  flex: 0 0 auto;
-  margin-left: 0.15rem;
-  color: var(--text-muted);
-  font: 800 0.56rem/1 'Outfit', system-ui, sans-serif;
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-next-quest-guardian {
-  overflow: hidden;
-  color: color-mix(in srgb, var(--text-muted) 82%, transparent);
-  font-size: 0.58rem;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dashboard-next-quest-go {
-  display: grid;
-  place-items: center;
-  align-self: center;
-  color: var(--rayquaza-light);
-  font: 900 1.4rem/1 'Outfit', system-ui, sans-serif;
-}
-
-.dashboard-progress-track {
-  display: grid;
-  grid-area: track;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.4rem;
-  min-width: 0;
-}
-
-.dashboard-progress-stat {
-  display: grid;
-  gap: 0.34rem;
-  min-width: 0;
-  padding: 0.46rem 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface-2) 62%, transparent);
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 140ms ease, background 140ms ease, transform 120ms ease;
-}
-
-.dashboard-progress-stat:hover {
-  border-color: color-mix(in srgb, var(--rayquaza-light) 40%, var(--border));
-  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
-  transform: translateY(-1px);
-}
-
-.dashboard-progress-stat span {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.4rem;
-  min-width: 0;
-}
-
-.dashboard-progress-stat small {
-  color: var(--text-muted);
-  font-size: 0.5rem;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.dashboard-progress-stat b {
-  font-size: 0.88rem;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.dashboard-progress-stat i {
-  display: block;
-  height: 0.3rem;
-  overflow: hidden;
-  border-radius: 999px;
-  background:
-    linear-gradient(90deg, var(--rayquaza-light) var(--progress-pct, 0%), transparent 0),
-    color-mix(in srgb, var(--text-muted) 18%, transparent);
-  font-style: normal;
-}
-
-.dashboard-next-cta {
-  display: grid;
-  grid-area: cta;
-  grid-template-columns: 2.1rem minmax(0, 1fr) 1.4rem;
-  align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
   width: 100%;
-  min-height: 2.9rem;
-  padding: 0.42rem 0.6rem;
-  border: 1px solid color-mix(in srgb, var(--rayquaza-light) 30%, transparent);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--rayquaza) 12%, var(--surface-2));
+  min-height: 3rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--sakura) 40%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--sakura) 16%, var(--surface-2));
   color: var(--text);
   font: inherit;
   text-align: left;
@@ -4444,45 +4535,124 @@ body:has(.dashboard) {
   transition: border-color 140ms ease, background 140ms ease, transform 120ms ease;
 }
 
-.dashboard-next-cta:hover {
-  border-color: color-mix(in srgb, var(--rayquaza-light) 55%, var(--border));
-  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface-2));
+.dashboard-quest-continue:hover {
+  border-color: color-mix(in srgb, var(--sakura) 66%, transparent);
+  background: color-mix(in srgb, var(--sakura) 24%, var(--surface-2));
   transform: translateY(-1px);
 }
 
-.dashboard-next-mark {
+.dashboard-quest-continue.is-quiet {
+  border-color: color-mix(in srgb, var(--text-muted) 22%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 58%, transparent);
+}
+
+.dashboard-quest-continue.is-quiet:hover {
+  border-color: color-mix(in srgb, var(--text-muted) 40%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 74%, transparent);
+  transform: none;
+}
+
+.dashboard-quest-continue-mark {
   display: grid;
   place-items: center;
-  width: 2.1rem;
+  width: 2rem;
   aspect-ratio: 1;
   border-radius: 7px;
-  background: color-mix(in srgb, var(--rayquaza) 24%, var(--surface));
-  color: var(--rayquaza-light);
-  font: 800 1.05rem/1 'Noto Sans JP', sans-serif;
+  background: color-mix(in srgb, var(--sakura) 26%, var(--surface));
+  color: var(--sakura-light);
+  font: 800 1rem/1 'Noto Sans JP', sans-serif;
 }
 
-.dashboard-next-cta-copy {
+.dashboard-quest-continue.is-quiet .dashboard-quest-continue-mark {
+  background: color-mix(in srgb, var(--text-muted) 20%, var(--surface));
+  color: var(--text-muted);
+}
+
+.dashboard-quest-continue-copy {
   display: grid;
   gap: 0.1rem;
   min-width: 0;
 }
 
-.dashboard-next-cta-copy b {
+.dashboard-quest-continue-copy b {
+  font-size: 0.86rem;
+  line-height: 1.1;
+}
+
+.dashboard-quest-continue-copy small {
   overflow: hidden;
-  font-size: 0.82rem;
-  line-height: 1.08;
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.dashboard-next-cta-copy em {
-  overflow: hidden;
+.dashboard-quest-continue-bead {
+  width: 1.4rem;
+  height: 1.15rem;
+}
+
+.dashboard-quest-continue.is-quiet .dashboard-quest-continue-bead {
+  opacity: 0.5;
+}
+
+.dashboard-quest-continue .dashboard-quest-go {
+  color: color-mix(in srgb, var(--sakura-light) 80%, var(--text));
+  font: 900 1.3rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.dashboard-quest-continue.is-quiet .dashboard-quest-go {
   color: var(--text-muted);
-  font-size: 0.58rem;
-  font-style: normal;
-  line-height: 1.15;
-  text-overflow: ellipsis;
+}
+
+/* Demoted stat strip — must not rival Continue */
+.dashboard-quest-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0 0.1rem;
+}
+
+.dashboard-quest-stats button {
+  flex: 1;
+  min-width: 0;
+  padding: 0.2rem 0.25rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font: 600 0.6rem/1 'Outfit', system-ui, sans-serif;
   white-space: nowrap;
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.dashboard-quest-stats button + button {
+  border-left: 1px solid color-mix(in srgb, var(--text-muted) 16%, transparent);
+}
+
+.dashboard-quest-stats button:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+}
+
+.dashboard-quest-stats b {
+  color: var(--text);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Campaign-complete variant */
+.dashboard-quest-card.is-complete .dashboard-quest-mark {
+  background: color-mix(in srgb, var(--amber) 22%, var(--surface));
+  color: var(--amber-light);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-quest-node.is-next { animation: none; }
+  .dashboard-quest-card.is-fresh .dashboard-quest-node-bead { animation: none; }
+  .dashboard-quest-path::after { transition: none; }
 }
 
 .dashboard-action-grid {
@@ -5002,18 +5172,9 @@ body:has(.dashboard) {
     margin-top: 0;
   }
 
-  .dashboard-next-panel {
-    gap: 0.45rem;
+  .dashboard-quest-card {
     margin-top: 0.5rem;
-    padding: 0.5rem;
-  }
-
-  .dashboard-progress-track {
-    gap: 0.32rem;
-  }
-
-  .dashboard-progress-stat {
-    padding-inline: 0.38rem;
+    padding: 0.55rem 0.55rem 0.5rem;
   }
 
   .dashboard-page-settings {

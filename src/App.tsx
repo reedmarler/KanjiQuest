@@ -488,20 +488,6 @@ function App() {
     setView('beginner-zone')
   }
 
-  const mobileContinueTitle = hasQuestProgress
-    ? 'Continue Quest'
-    : wrongCount > 0
-      ? 'Review Weak Cards'
-      : learnedCount > 0
-        ? 'Continue Study'
-        : 'Start Beginner Zone'
-  const mobileContinueDetail = hasQuestProgress
-    ? 'Pick up your campaign.'
-    : wrongCount > 0
-      ? `${wrongCount} cards need attention.`
-      : learnedCount > 0
-        ? `${learnedCount} cards learned so far.`
-        : 'Start with kana and first kanji.'
   const showHubChrome = view === 'dashboard'
     || view === 'quests'
     || view === 'study-tools'
@@ -1166,8 +1152,6 @@ function App() {
       <Dashboard
         learnedCount={learnedCount}
         totalCards={CARD_TOTAL}
-        mobileContinueTitle={mobileContinueTitle}
-        mobileContinueDetail={mobileContinueDetail}
         onContinueStudy={openContinueStudy}
         onOpenQuests={() => setView('quests')}
         onOpenStudyTools={() => setView('study-tools')}
