@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { CAMPAIGN_ARCS, CAMPAIGN_GOAL, QUESTS, isQuestUnlocked } from '../data/questCampaign'
 import { completedQuestSteps, isQuestComplete, QUEST_STEPS, type QuestProgress, type QuestStep } from '../lib/questProgress'
 import { earnedRelics } from '../lib/relics'
-import { AppHeaderControls } from './AppHeaderControls'
 
 interface QuestHubProps {
   onOpenInkRoad: () => void
@@ -46,7 +45,6 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
 
   return (
     <main className="quest-hub quest-hub-simple">
-      <AppHeaderControls />
       <header className="quest-topbar">
         <span>{clearedCount} / {QUESTS.length} quests complete</span>
         {/* The map is a preview sitting beside this list, not a replacement:

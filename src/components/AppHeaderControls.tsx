@@ -1,25 +1,41 @@
 /**
- * The same profile-placeholder + settings pair the Dashboard shows in its
- * top corners, reused on the other main tabs (Quests, Study Tools, Beginner
- * Zone, More) in place of a back button — those tabs are reached from the
- * bottom nav now, so a way back up the stack isn't needed there.
+ * Profile + settings pair used on the main hub tabs on phones. Desktop puts
+ * the same actions inside the primary nav, so these stay hidden there.
  */
-export function AppHeaderControls() {
+export function AppHeaderControls({
+  hideUser = false,
+  profileOpen = false,
+  settingsOpen = false,
+  onProfile,
+  onSettings,
+}: {
+  hideUser?: boolean
+  profileOpen?: boolean
+  settingsOpen?: boolean
+  onProfile: () => void
+  onSettings: () => void
+}) {
   return (
     <>
       <button
         type="button"
-        className="dashboard-profile-placeholder"
-        aria-label="User profile"
-        title="User profile"
+        className={`dashboard-profile-placeholder${profileOpen ? ' is-active' : ''}${hideUser ? ' is-hidden' : ''}`}
+        onClick={onProfile}
+        aria-label="Open user menu"
+        aria-expanded={profileOpen}
+        aria-controls="dashboard-profile-menu"
+        title="User menu"
+        tabIndex={hideUser ? -1 : undefined}
       >
         <span aria-hidden="true">U</span>
       </button>
       <button
         type="button"
-        className="dashboard-page-settings control-icon-button control-settings-button"
-        aria-label="Settings"
-        title="Settings"
+        className={`dashboard-page-settings control-icon-button control-settings-button${settingsOpen ? ' is-active' : ''}`}
+        onClick={onSettings}
+        aria-label={settingsOpen ? 'Hide settings' : 'Show settings'}
+        aria-expanded={settingsOpen}
+        title={settingsOpen ? 'Hide settings' : 'Show settings'}
       >
         <span aria-hidden="true">&#9881;</span>
       </button>

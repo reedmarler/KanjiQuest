@@ -1,4 +1,4 @@
-import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useLayoutEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react'
+import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -26,8 +26,10 @@ import type { CardProgress } from './lib/types'
 import type { GenerationComplexity } from './lib/generationComplexity'
 import type { SentenceExercise } from './data/sentenceExercises'
 import type { DrillExercise } from './lib/drillExercises'
-import { Dashboard } from './components/Dashboard'
+import { COMPLEXITY_DISPLAY, Dashboard, HERO_SPEECH_STORAGE_KEY } from './components/Dashboard'
 import { AppHeaderControls } from './components/AppHeaderControls'
+import { UserProfileMenu } from './components/UserProfileMenu'
+import { canSpeakJapanese, stopSpeaking, watchSpeechSupport } from './lib/speech'
 import { SessionComplete } from './components/SessionComplete'
 import type { LibraryTab } from './components/LibraryPanel'
 import type { BeginnerScript } from './data/beginnerMnemonics'
@@ -149,6 +151,11 @@ function MobileBottomNav({
 
 function DesktopPrimaryNav({
   currentView,
+  hideUser,
+  profileOpen,
+  settingsOpen,
+  onProfile,
+  onSettings,
   onHome,
   onQuests,
   onStudy,
@@ -156,6 +163,11 @@ function DesktopPrimaryNav({
   onMore,
 }: {
   currentView: View
+  hideUser: boolean
+  profileOpen: boolean
+  settingsOpen: boolean
+  onProfile: () => void
+  onSettings: () => void
   onHome: () => void
   onQuests: () => void
   onStudy: () => void
@@ -173,18 +185,42 @@ function DesktopPrimaryNav({
 
   return (
     <nav className="desktop-primary-nav" aria-label="Primary">
-      {items.map((item) => (
-        <button
-          key={item.tab}
-          type="button"
-          className={activeTab === item.tab ? 'is-active' : ''}
-          onClick={item.onClick}
-          aria-current={activeTab === item.tab ? 'page' : undefined}
-        >
-          <span aria-hidden="true" lang="ja">{item.mark}</span>
-          <b>{item.label}</b>
-        </button>
-      ))}
+      <button
+        type="button"
+        className={`desktop-primary-nav-user${profileOpen ? ' is-active' : ''}${hideUser ? ' is-hidden' : ''}`}
+        onClick={onProfile}
+        aria-label="Open user menu"
+        aria-expanded={profileOpen}
+        aria-controls="dashboard-profile-menu"
+        title="User menu"
+        tabIndex={hideUser ? -1 : undefined}
+      >
+        <span aria-hidden="true">U</span>
+      </button>
+      <div className="desktop-primary-nav-links">
+        {items.map((item) => (
+          <button
+            key={item.tab}
+            type="button"
+            className={activeTab === item.tab ? 'is-active' : ''}
+            onClick={item.onClick}
+            aria-current={activeTab === item.tab ? 'page' : undefined}
+          >
+            <span aria-hidden="true" lang="ja">{item.mark}</span>
+            <b>{item.label}</b>
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        className={`desktop-primary-nav-settings${settingsOpen ? ' is-active' : ''}`}
+        onClick={onSettings}
+        aria-label={settingsOpen ? 'Hide settings' : 'Show settings'}
+        aria-expanded={settingsOpen}
+        title={settingsOpen ? 'Hide settings' : 'Show settings'}
+      >
+        <span aria-hidden="true">&#9881;</span>
+      </button>
     </nav>
   )
 }
@@ -229,6 +265,41 @@ function App() {
    * behind it.
    */
   const [sentenceLab, setSentenceLab] = useState(false)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const [settingsExpanded, setSettingsExpanded] = useState(false)
+  const [furiganaOn, setFuriganaOn] = useState(true)
+  const [englishOn, setEnglishOn] = useState(true)
+  const [speechOn, setSpeechOn] = useState(() => window.localStorage.getItem(HERO_SPEECH_STORAGE_KEY) === 'true')
+  const [speechSupported, setSpeechSupported] = useState(canSpeakJapanese)
+  const [complexity, setComplexity] = useState<GenerationComplexity>(1)
+
+  useEffect(() => watchSpeechSupport(setSpeechSupported), [])
+
+  useEffect(() => {
+    window.localStorage.setItem(HERO_SPEECH_STORAGE_KEY, String(speechOn))
+    if (!speechOn) stopSpeaking()
+  }, [speechOn])
+
+  const goToView = useCallback((next: View) => {
+    setView(next)
+    setProfileMenuOpen(false)
+    if (next !== 'dashboard') setSettingsExpanded(false)
+  }, [])
+
+  const toggleProfileMenu = useCallback(() => {
+    setSettingsExpanded(false)
+    setProfileMenuOpen((open) => !open)
+  }, [])
+
+  const toggleSettingsPanel = useCallback(() => {
+    setProfileMenuOpen(false)
+    if (view !== 'dashboard') {
+      setView('dashboard')
+      setSettingsExpanded(true)
+      return
+    }
+    setSettingsExpanded((open) => !open)
+  }, [view])
 
   // This is a single-page app, so route changes otherwise retain whatever
   // scroll offset the previous screen left behind. Run before paint so each
@@ -385,24 +456,71 @@ function App() {
       : learnedCount > 0
         ? `${learnedCount} cards learned so far.`
         : 'Start with kana and first kanji.'
+  const showHubChrome = view === 'dashboard'
+    || view === 'quests'
+    || view === 'study-tools'
+    || view === 'beginner-zone'
+    || view === 'additional-tools'
+  const hubChrome = showHubChrome
+    ? (
+      <AppHeaderControls
+        hideUser={settingsExpanded || profileMenuOpen}
+        profileOpen={profileMenuOpen}
+        settingsOpen={settingsExpanded}
+        onProfile={toggleProfileMenu}
+        onSettings={toggleSettingsPanel}
+      />
+    )
+    : null
   const mobileNav = (
     <MobileBottomNav
       currentView={view}
-      onHome={() => setView('dashboard')}
-      onQuests={() => setView('quests')}
-      onStudy={() => setView('study-tools')}
-      onBeginner={() => setView('beginner-zone')}
-      onMore={() => setView('additional-tools')}
+      onHome={() => goToView('dashboard')}
+      onQuests={() => goToView('quests')}
+      onStudy={() => goToView('study-tools')}
+      onBeginner={() => goToView('beginner-zone')}
+      onMore={() => goToView('additional-tools')}
     />
   )
   const desktopNav = (
     <DesktopPrimaryNav
       currentView={view}
-      onHome={() => setView('dashboard')}
-      onQuests={() => setView('quests')}
-      onStudy={() => setView('study-tools')}
-      onBeginner={() => setView('beginner-zone')}
-      onMore={() => setView('additional-tools')}
+      hideUser={settingsExpanded || profileMenuOpen}
+      profileOpen={profileMenuOpen}
+      settingsOpen={settingsExpanded}
+      onProfile={toggleProfileMenu}
+      onSettings={toggleSettingsPanel}
+      onHome={() => goToView('dashboard')}
+      onQuests={() => goToView('quests')}
+      onStudy={() => goToView('study-tools')}
+      onBeginner={() => goToView('beginner-zone')}
+      onMore={() => goToView('additional-tools')}
+    />
+  )
+  const profileMenu = (
+    <UserProfileMenu
+      open={profileMenuOpen}
+      onClose={() => setProfileMenuOpen(false)}
+      learnedCount={learnedCount}
+      totalCards={CARD_TOTAL}
+      questProgress={questProgress}
+      currentLevelLabel={COMPLEXITY_DISPLAY[complexity].level}
+      furiganaOn={furiganaOn}
+      englishOn={englishOn}
+      speechOn={speechOn}
+      speechSupported={speechSupported}
+      speechDetail={speechOn ? 'On' : 'Off'}
+      onToggleFurigana={() => setFuriganaOn((value) => !value)}
+      onToggleEnglish={() => setEnglishOn((value) => !value)}
+      onToggleSpeech={() => setSpeechOn((value) => !value)}
+      onOpenLearningSettings={() => {
+        setProfileMenuOpen(false)
+        setView('dashboard')
+        setSettingsExpanded(true)
+      }}
+      onOpenStudyTools={() => goToView('study-tools')}
+      onOpenQuests={() => goToView('quests')}
+      onOpenAchievements={() => goToView('achievements')}
     />
   )
   const withMobileNav = (content: ReactNode) => {
@@ -414,11 +532,13 @@ function App() {
           content as ReactElement<{ children?: ReactNode }>,
           undefined,
           desktopNav,
+          hubChrome,
           ...Children.toArray((content as ReactElement<{ children?: ReactNode }>).props.children),
         )
       : (
         <>
           {desktopNav}
+          {hubChrome}
           {content}
         </>
       )
@@ -427,6 +547,7 @@ function App() {
       <>
         {framed}
         {mobileNav}
+        {profileMenu}
       </>
     )
   }
@@ -969,6 +1090,15 @@ function App() {
         questProgress={questProgress}
         wrongPool={wrongPool}
         progress={progress}
+        furiganaOn={furiganaOn}
+        englishOn={englishOn}
+        speechOn={speechOn}
+        onToggleFurigana={() => setFuriganaOn((value) => !value)}
+        onToggleEnglish={() => setEnglishOn((value) => !value)}
+        onToggleSpeech={() => setSpeechOn((value) => !value)}
+        settingsExpanded={settingsExpanded}
+        complexity={complexity}
+        onComplexityChange={setComplexity}
       />
     </div>,
   )
@@ -1003,7 +1133,6 @@ function ToolMenuPage({
 }) {
   return (
     <main className="tool-menu-page">
-      <AppHeaderControls />
       <section className="tool-menu-heading">
         {eyebrow && <small>{eyebrow}</small>}
         <h1>{title}</h1>

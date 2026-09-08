@@ -18,7 +18,7 @@ import {
 } from '../lib/speech'
 import { FavoriteWordsPanel } from './FavoriteWordsPanel'
 
-const HERO_SPEECH_STORAGE_KEY = 'kanji-quest-hero-speech-v1'
+export const HERO_SPEECH_STORAGE_KEY = 'kanji-quest-hero-speech-v1'
 /** Voice speeds, slowest to fastest. Labeled 1x is 30% slower than the engine's natural pace. */
 const HERO_SPEECH_RATES = [
   0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1, 1.25, 1.5, 1.75, 2, 2.5, 3,
@@ -100,7 +100,7 @@ const HERO_SWAP_FOCUS_OPTIONS: ReadonlyArray<{ focus: HeroSwapFocus | null; labe
   { focus: 'adverb', label: 'Adverbs' },
 ]
 
-const COMPLEXITY_DISPLAY: Record<GenerationComplexity, { level: string; name: string; description: string }> = {
+export const COMPLEXITY_DISPLAY: Record<GenerationComplexity, { level: string; name: string; description: string }> = {
   1: { level: 'L1', name: 'Intro', description: 'Foundation grammar: basic particles, ～ます, adjective predicates.' },
   2: { level: 'L2', name: 'Elementary', description: 'Everyday grammar: ～たい, ～ている, ～てから, plain past.' },
   3: { level: 'L3', name: 'Intermediate', description: 'Connected grammar: conditionals, ～ようになる, quotation, comparison.' },
@@ -362,6 +362,15 @@ interface DashboardProps {
   mobileContinueTitle: string
   mobileContinueDetail: string
   questProgress: QuestProgress
+  furiganaOn: boolean
+  englishOn: boolean
+  speechOn: boolean
+  onToggleFurigana: () => void
+  onToggleEnglish: () => void
+  onToggleSpeech: () => void
+  settingsExpanded: boolean
+  complexity: GenerationComplexity
+  onComplexityChange: (level: GenerationComplexity) => void
 }
 
 export function Dashboard({
@@ -370,17 +379,23 @@ export function Dashboard({
   onOpenQuests,
   onOpenStudyTools,
   onOpenFavoriteWords,
-  onOpenAchievements,
+  onOpenAchievements: _onOpenAchievements,
   onContinueStudy,
   mobileContinueTitle,
   mobileContinueDetail,
   questProgress,
   wrongPool,
   progress,
+  furiganaOn,
+  englishOn,
+  speechOn,
+  onToggleFurigana,
+  onToggleEnglish,
+  onToggleSpeech,
+  settingsExpanded,
+  complexity,
+  onComplexityChange,
 }: DashboardProps) {
-  const [furiganaOn, setFuriganaOn] = useState(true)
-  const [englishOn, setEnglishOn] = useState(true)
-  const [complexity, setComplexity] = useState<GenerationComplexity>(1)
   const [settingsMode, setSettingsMode] = useState<HeroSettingsMode>('none')
   const [modePickerOpen, setModePickerOpen] = useState(false)
   const [swapPickerOpen, setSwapPickerOpen] = useState(false)
@@ -461,14 +476,10 @@ export function Dashboard({
   const [rewindSignal, setRewindSignal] = useState(0)
   const [advanceSignal, setAdvanceSignal] = useState(0)
   const [canRewindSentence, setCanRewindSentence] = useState(false)
-  const [speechOn, setSpeechOn] = useState(() => window.localStorage.getItem(HERO_SPEECH_STORAGE_KEY) === 'true')
   const [speechSupported, setSpeechSupported] = useState(canSpeakJapanese)
   const [spokenSentence, setSpokenSentence] = useState('')
   const [speechRate, setSpeechRate] = useState<HeroSpeechRate>(1)
   const [speechVolume, setSpeechVolume] = useState<HeroSpeechVolume>(0.5)
-  const [settingsExpanded, setSettingsExpanded] = useState(false)
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
-  const importFileRef = useRef<HTMLInputElement | null>(null)
   // Lets the speak-on-new-sentence effect read current settings without taking
   // them as dependencies, so slider changes do not restart active speech.
   const speechVolumeRef = useRef(speechVolume)
@@ -493,32 +504,11 @@ export function Dashboard({
   const questPct = QUESTS.length > 0 ? Math.round((questsCleared / QUESTS.length) * 100) : 0
   const wrongCount = Object.keys(wrongPool).length
   const furiganaActive = furiganaOn
-  const currentLevelLabel = COMPLEXITY_DISPLAY[complexity].level
-  const dailyGoalPct = Math.min(100, Math.round((Math.min(learnedCount, 10) / 10) * 100))
 
   useEffect(() => {
     if (storiesAtLevel.some((story) => story.id === storyId)) return
     setStoryId(storiesAtLevel[0]?.id ?? '')
   }, [storiesAtLevel, storyId])
-
-  function toggleFurigana() {
-    setFuriganaOn((on) => !on)
-  }
-
-  function toggleEnglish() {
-    setEnglishOn((on) => !on)
-  }
-
-  function toggleSpeech() {
-    setSpeechOn((on) => {
-      const next = !on
-      window.localStorage.setItem(HERO_SPEECH_STORAGE_KEY, String(next))
-      // Turning it off should silence the sentence already being read, not just
-      // stop the next one.
-      if (!next) stopSpeaking()
-      return next
-    })
-  }
 
   function changeSpeechRate(rate: HeroSpeechRate) {
     setSpeechRate(rate)
@@ -533,108 +523,6 @@ export function Dashboard({
     changeSpeechRate(1)
     changeSpeechVolume(0.5)
   }
-
-  function toggleSettingsExpanded() {
-    setSettingsExpanded((expanded) => !expanded)
-  }
-
-  function closeProfileMenu() {
-    setProfileMenuOpen(false)
-  }
-
-  function openLearningSettings() {
-    setSettingsExpanded(true)
-    closeProfileMenu()
-  }
-
-  function openAchievements() {
-    closeProfileMenu()
-    onOpenAchievements()
-  }
-
-  function openStudyToolsFromMenu() {
-    closeProfileMenu()
-    onOpenStudyTools()
-  }
-
-  function openQuestsFromMenu() {
-    closeProfileMenu()
-    onOpenQuests()
-  }
-
-  function kanjiQuestStorageSnapshot() {
-    const snapshot: Record<string, string> = {}
-    for (let index = 0; index < window.localStorage.length; index += 1) {
-      const key = window.localStorage.key(index)
-      if (!key) continue
-      if (!key.startsWith('kanji-quest') && !key.startsWith('kq-beginner')) continue
-      const value = window.localStorage.getItem(key)
-      if (value !== null) snapshot[key] = value
-    }
-    return snapshot
-  }
-
-  function exportProgress() {
-    const payload = {
-      app: 'Kanji Quest',
-      version: '0.0.0',
-      exportedAt: new Date().toISOString(),
-      localStorage: kanjiQuestStorageSnapshot(),
-    }
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const anchor = document.createElement('a')
-    anchor.href = url
-    anchor.download = `kanji-quest-progress-${new Date().toISOString().slice(0, 10)}.json`
-    anchor.click()
-    URL.revokeObjectURL(url)
-  }
-
-  function requestImportProgress() {
-    importFileRef.current?.click()
-  }
-
-  async function importProgress(file: File | undefined) {
-    if (!file) return
-    const text = await file.text()
-    const parsed: unknown = JSON.parse(text)
-    if (
-      !parsed
-      || typeof parsed !== 'object'
-      || !('localStorage' in parsed)
-      || !parsed.localStorage
-      || typeof parsed.localStorage !== 'object'
-    ) {
-      window.alert('That file does not look like a Kanji Quest progress export.')
-      return
-    }
-    const entries = Object.entries(parsed.localStorage as Record<string, unknown>)
-      .filter(([key, value]) => (key.startsWith('kanji-quest') || key.startsWith('kq-beginner')) && typeof value === 'string')
-    if (entries.length === 0) {
-      window.alert('No Kanji Quest progress data was found in that file.')
-      return
-    }
-    const confirmed = window.confirm(`Import ${entries.length} saved Kanji Quest entries and reload the app?`)
-    if (!confirmed) return
-    entries.forEach(([key, value]) => window.localStorage.setItem(key, value as string))
-    window.location.reload()
-  }
-
-  function resetLocalProgress() {
-    const confirmed = window.confirm('Reset all local Kanji Quest progress on this device? This cannot be undone unless you exported a backup.')
-    if (!confirmed) return
-    Object.keys(kanjiQuestStorageSnapshot()).forEach((key) => window.localStorage.removeItem(key))
-    window.location.reload()
-  }
-
-  useEffect(() => {
-    if (!profileMenuOpen) return
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') closeProfileMenu()
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [profileMenuOpen])
 
   // Voices arrive asynchronously, so a Japanese voice can appear after first
   // paint; this keeps the button from staying disabled when one exists.
@@ -680,139 +568,6 @@ export function Dashboard({
 
   return (
     <div className="dashboard">
-      <button
-        type="button"
-        className={`dashboard-profile-placeholder${profileMenuOpen ? ' is-active' : ''}`}
-        onClick={() => setProfileMenuOpen(true)}
-        aria-label="Open user menu"
-        aria-expanded={profileMenuOpen}
-        aria-controls="dashboard-profile-menu"
-        title="User menu"
-      >
-        <span aria-hidden="true">U</span>
-      </button>
-      {profileMenuOpen && (
-        <div className="dashboard-profile-layer">
-          <button
-            type="button"
-            className="dashboard-profile-scrim"
-            aria-label="Close user menu"
-            onClick={closeProfileMenu}
-          />
-          <aside className="dashboard-profile-menu" id="dashboard-profile-menu" aria-label="User menu">
-            <header className="dashboard-profile-header">
-              <span className="dashboard-profile-avatar" aria-hidden="true">R</span>
-              <div>
-                <small>Local profile</small>
-                <h2>Reed</h2>
-                <p>{learnedCount} learned · {questsCleared}/{QUESTS.length} quests</p>
-              </div>
-              <button type="button" className="dashboard-profile-close" onClick={closeProfileMenu} aria-label="Close user menu">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </header>
-
-            <div className="dashboard-profile-today">
-              <span>
-                <small>Daily goal</small>
-                <b>{Math.min(learnedCount, 10)}/10</b>
-              </span>
-              <i style={{ '--progress-pct': `${dailyGoalPct}%` } as CSSProperties} />
-            </div>
-
-            <section className="dashboard-profile-section" aria-label="Profile shortcuts">
-              <button type="button" onClick={openLearningSettings}>
-                <span>Profile</span>
-                <small>Local account and display settings</small>
-              </button>
-              <button type="button" onClick={openLearningSettings}>
-                <span>Learning settings</span>
-                <small>{currentLevelLabel} · Furigana {furiganaOn ? 'on' : 'off'} · English {englishOn ? 'on' : 'off'}</small>
-              </button>
-              <button type="button" onClick={openStudyToolsFromMenu}>
-                <span>Daily goal</span>
-                <small>10 cards · {dailyGoalPct}% today</small>
-              </button>
-              <button type="button" onClick={openQuestsFromMenu}>
-                <span>Progress history</span>
-                <small>{progressPct}% cards · {questPct}% quest path</small>
-              </button>
-              <button type="button" onClick={openAchievements}>
-                <span>Achievements</span>
-                <small>Milestones and records</small>
-              </button>
-            </section>
-
-            <section className="dashboard-profile-section dashboard-profile-preferences" aria-label="Study preferences">
-              <span className="dashboard-profile-section-label">Study preferences</span>
-              <button type="button" onClick={openLearningSettings}>
-                <span>Sentence difficulty</span>
-                <small>{currentLevelLabel} {COMPLEXITY_DISPLAY[complexity].name}</small>
-              </button>
-              <button type="button" onClick={toggleFurigana}>
-                <span>Furigana default</span>
-                <small>{furiganaOn ? 'On' : 'Off'}</small>
-              </button>
-              <button type="button" onClick={toggleEnglish}>
-                <span>English default</span>
-                <small>{englishOn ? 'On' : 'Off'}</small>
-              </button>
-              <button type="button" onClick={toggleSpeech} disabled={!speechSupported}>
-                <span>Voice settings</span>
-                <small>{speechSupported ? `${speechOn ? 'On' : 'Off'} · ${effectiveSpeechRate}x · ${Math.round(speechVolume * 100)}%` : 'No Japanese voice installed'}</small>
-              </button>
-            </section>
-
-            <section className="dashboard-profile-section dashboard-profile-data" aria-label="Data and account">
-              <span className="dashboard-profile-section-label">Data and account</span>
-              <button type="button" onClick={exportProgress}>
-                <span>Export progress</span>
-                <small>Download a local backup</small>
-              </button>
-              <button type="button" onClick={requestImportProgress}>
-                <span>Import progress</span>
-                <small>Restore from a backup file</small>
-              </button>
-              <button type="button" disabled>
-                <span>Sign in / sync</span>
-                <small>Local-only for now</small>
-              </button>
-              <button type="button" className="is-danger" onClick={resetLocalProgress}>
-                <span>Reset local progress</span>
-                <small>Clear this device</small>
-              </button>
-            </section>
-
-            <footer className="dashboard-profile-footer">
-              <span>Kanji Quest v0.0.0</span>
-              <a href="mailto:feedback@kanji.quest">Feedback</a>
-              <span>About Kanji Quest</span>
-            </footer>
-
-            <input
-              ref={importFileRef}
-              className="dashboard-profile-file"
-              type="file"
-              accept="application/json,.json"
-              onChange={(event) => {
-                void importProgress(event.currentTarget.files?.[0])
-                event.currentTarget.value = ''
-              }}
-            />
-          </aside>
-        </div>
-      )}
-      <button
-        type="button"
-        className={`dashboard-page-settings control-icon-button control-settings-button${settingsExpanded ? ' is-active' : ''}`}
-        onClick={toggleSettingsExpanded}
-        aria-expanded={settingsExpanded}
-        aria-controls="hero-voice-settings hero-content-settings"
-        aria-label={settingsExpanded ? 'Hide settings' : 'Show settings'}
-        title={settingsExpanded ? 'Hide settings' : 'Show settings'}
-      >
-        <span aria-hidden="true">&#9881;</span>
-      </button>
       {settingsExpanded && (
         <div className="hero-settings-layout" id="hero-content-settings">
             <div className={`control-group control-group-levels${storyMode ? ' is-disabled' : ''}`} aria-disabled={storyMode}>
@@ -824,7 +579,7 @@ export function Dashboard({
                     type="button"
                     data-difficulty={level}
                     className={`control-segment${complexity === level ? ' is-active' : ''}`}
-                    onClick={() => setComplexity(level)}
+                    onClick={() => onComplexityChange(level)}
                     aria-pressed={complexity === level}
                     aria-label={`${COMPLEXITY_DISPLAY[level].level} ${COMPLEXITY_DISPLAY[level].name}: ${COMPLEXITY_DISPLAY[level].description}`}
                     title={COMPLEXITY_DISPLAY[level].description}
@@ -921,7 +676,7 @@ export function Dashboard({
             <button
               type="button"
               className={`control-chip control-chip-compact app-display-toggle${furiganaActive ? ' is-active' : ''}`}
-              onClick={toggleFurigana}
+              onClick={onToggleFurigana}
               aria-pressed={furiganaActive}
               aria-label="Toggle furigana"
               title="Furigana"
@@ -931,7 +686,7 @@ export function Dashboard({
             <button
               type="button"
               className={`control-chip control-chip-compact app-display-toggle${englishOn ? ' is-active' : ''}`}
-              onClick={toggleEnglish}
+              onClick={onToggleEnglish}
               aria-pressed={englishOn}
               aria-label="Toggle English translation"
               title="English"
@@ -976,7 +731,7 @@ export function Dashboard({
               <button
                 type="button"
                 className={`control-icon-button control-speaker-button${speechOn ? ' is-active' : ''}`}
-                onClick={toggleSpeech}
+                onClick={onToggleSpeech}
                 aria-pressed={speechOn}
                 disabled={!speechSupported}
                 aria-label={speechOn ? 'Stop reading sentences aloud' : 'Read each new sentence aloud'}
@@ -992,10 +747,10 @@ export function Dashboard({
                 onClick={toggleModeOn}
                 role="switch"
                 aria-checked={modeToggleOn}
-                aria-label={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
-                title={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
+                aria-label={modeToggleOn ? 'Turn off sentence mode' : 'Turn on a sentence mode'}
+                title={modeToggleOn ? 'Turn off sentence mode' : 'Turn on a sentence mode'}
               >
-                {modeToggleOn ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>] : 'Mode'}
+                Mode
               </button>
             </div>
           </div>
