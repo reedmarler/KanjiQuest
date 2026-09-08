@@ -4,7 +4,6 @@ import { getVocabExampleSentence } from '../lib/vocabExampleSentence'
 import { FuriganaSegment } from './FuriganaText'
 import { SpeakableCue, SpeakableWord, useSpeakable } from './SpeakableWord'
 import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
-import { AppBackButton, AppDashboardButton } from './AppBackButton'
 import { recordAnswer, recordSeen } from '../lib/studyRecord'
 import { loadKanjiNotes, saveKanjiNotes, setKanjiNote, type KanjiNotes } from '../lib/kanjiNotes'
 
@@ -36,7 +35,7 @@ function newSession(previousTopicId?: string, initialTopicId?: string) {
   return { topic, cards: shuffled(topic.cards) }
 }
 
-export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQuestComplete, questTitle }: FocusedVocabPracticeProps) {
+export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, questTitle }: FocusedVocabPracticeProps) {
   const [session, setSession] = useState(() => newSession(undefined, initialTopicId))
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
@@ -118,17 +117,6 @@ export function FocusedVocabPractice({ onBack, onDashboard, initialTopicId, onQu
   // and Kanji behave like two decks in the same study system.
   return (
     <div className="grammar-practice-view kanji-lab kanji-lab-paths standard-kanji-study focused-vocab-practice-standard">
-      <div className="study-top grammar-study-top">
-        <div className="app-nav-actions">
-          <AppBackButton onClick={onBack} aria-label={questTitle ? 'Back to Quest' : 'Back to Study Tools'} />
-          <AppDashboardButton onClick={onDashboard} />
-        </div>
-        <span className="study-progress">{Math.min(index + 1, session.cards.length)} / {session.cards.length}</span>
-        <span className="study-type-badge">
-          <span>Vocab</span>
-          <span className="jlpt-badge">Path</span>
-        </span>
-      </div>
       <div className="study-progress-bar">
         <div className="study-progress-fill" style={{ width: `${((index + 1) / session.cards.length) * 100}%` }} />
       </div>

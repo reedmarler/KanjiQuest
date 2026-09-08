@@ -374,7 +374,7 @@ function App() {
   }
 
   if (view === 'kanji') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Kanji Lab" />}>
           <KanjiLab
@@ -390,12 +390,12 @@ function App() {
               : undefined}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'vocab-practice') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Vocab" />}>
           <FocusedVocabPractice
@@ -412,30 +412,30 @@ function App() {
               : undefined}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'counter-practice') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Counters" />}>
           <CounterPractice onBack={() => setView('study-tools')} onDashboard={() => setView('dashboard')} />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'content-studio') {
-    return (
+    return withMobileNav(
       <Suspense fallback={<RouteLoading label="Content Studio" />}>
         <ContentStudio onBack={() => setView('dashboard')} />
-      </Suspense>
+      </Suspense>,
     )
   }
 
   if (view === 'ink-road') {
-    return (
+    return withMobileNav(
       <div className="app ink-road-page">
         <Suspense fallback={<RouteLoading label="The Ink Road" />}>
           <MapView
@@ -444,12 +444,12 @@ function App() {
             onShrine={(regionId) => { setShrineRegionId(regionId); setView('shrine-trial') }}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'shrine-trial') {
-    return (
+    return withMobileNav(
       <div className="app ink-road-page">
         <Suspense fallback={<RouteLoading label="The Shrine" />}>
           <ShrineTrial
@@ -458,7 +458,7 @@ function App() {
             onDone={() => setView('ink-road')}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
@@ -500,7 +500,7 @@ function App() {
   }
 
   if (view === 'achievements') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Achievements" />}>
           <AchievementsPanel
@@ -511,7 +511,7 @@ function App() {
             metrics={achievementMetrics}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
@@ -601,7 +601,7 @@ function App() {
 
   if (view === 'hiragana-quiz' || view === 'katakana-quiz') {
     const quizScript = view === 'hiragana-quiz' ? 'hiragana' : 'katakana'
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label={view === 'hiragana-quiz' ? 'Hiragana Quiz' : 'Katakana Quiz'} />}>
           <BeginnerLearner
@@ -614,13 +614,13 @@ function App() {
             onDashboard={() => setView('dashboard')}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'hiragana-chart' || view === 'katakana-chart') {
     const chartScript = view === 'hiragana-chart' ? 'hiragana' : 'katakana'
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label={view === 'hiragana-chart' ? 'Hiragana Chart' : 'Katakana Chart'} />}>
           <KanaChart
@@ -638,14 +638,14 @@ function App() {
             }}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'beginner-learner') {
     // Only hiragana and katakana have a chart to return to.
     const chartView = beginnerScript === 'hiragana' ? 'hiragana-chart' : beginnerScript === 'katakana' ? 'katakana-chart' : null
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Beginner Zone" />}>
           <BeginnerLearner
@@ -673,27 +673,27 @@ function App() {
             onDashboard={() => setView('dashboard')}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'beginner-speed-run') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Speed Run" />}>
           <BeginnerSpeedRun onBack={() => setView(speedRunReturnView)} onDashboard={() => setView('dashboard')} />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'picture-practice') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Picture Mode" />}>
           <PicturePractice onBack={() => setView(pictureReturnView)} onDashboard={() => setView('dashboard')} />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
@@ -735,7 +735,7 @@ function App() {
   }
 
   if (view === 'grammar-lab') {
-    return (
+    return withMobileNav(
       <div className="app tool-lab">
         <Suspense fallback={<RouteLoading label="Grammar (lab)" />}>
           <GrammarPracticeLab
@@ -745,12 +745,12 @@ function App() {
             onToggleFavorite={toggleDrillFavorite}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'quest-scene') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Quest Scene" />}>
           <QuestScene
@@ -764,12 +764,12 @@ function App() {
             }}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'quest-checkpoint') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Quest Checkpoint" />}>
           <QuestCheckpoint
@@ -786,32 +786,32 @@ function App() {
             }}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'sentence-testing') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Sentence Testing" />}>
           <SentenceTesting onBack={() => setView('dashboard')} />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'voice-test') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Voice Test" />}>
           <VoiceTest onBack={() => setView('additional-tools')} />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'grammar') {
-    return (
+    return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Grammar" />}>
           <GrammarPractice
@@ -826,27 +826,27 @@ function App() {
             } : undefined}
           />
         </Suspense>
-      </div>
+      </div>,
     )
   }
 
   if (view === 'study-loading') {
-    return (
+    return withMobileNav(
       <div className="app">
         <RouteLoading label="Sentence Practice" />
-      </div>
+      </div>,
     )
   }
 
   if (view === 'complete') {
-    return (
+    return withMobileNav(
       <div className="app">
         <SessionComplete
           reviewed={session.length}
           correct={sessionCorrect}
           onHome={() => setView(exitView === 'study' ? 'dashboard' : exitView)}
         />
-      </div>
+      </div>,
     )
   }
 
@@ -854,7 +854,7 @@ function App() {
   if (view === 'study' && item) {
     if (item.kind === 'sentence-builder') {
       const Builder = sentenceLab ? SentenceBuilderLab : SentenceBuilderView
-      return (
+      return withMobileNav(
         <div className={sentenceLab ? 'app tool-lab' : 'app'}>
           <Suspense fallback={<RouteLoading label={sentenceLab ? 'Sentence Builder (lab)' : 'Sentence Builder'} />}>
             <Builder
@@ -876,7 +876,7 @@ function App() {
               onToggleFavorite={() => toggleFavoriteSentence(item.exercise)}
             />
           </Suspense>
-        </div>
+        </div>,
       )
     }
 
@@ -894,6 +894,7 @@ function App() {
         onOpenQuests={() => setView('quests')}
         onOpenStudyTools={() => setView('study-tools')}
         onOpenFavoriteWords={() => setView('favorite-words')}
+        onOpenAchievements={() => setView('achievements')}
         questProgress={questProgress}
         wrongPool={wrongPool}
         progress={progress}

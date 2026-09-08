@@ -346,6 +346,7 @@ interface DashboardProps {
   onOpenQuests: () => void
   onOpenStudyTools: () => void
   onOpenFavoriteWords: () => void
+  onOpenAchievements: () => void
   onContinueStudy: () => void
   mobileContinueTitle: string
   mobileContinueDetail: string
@@ -358,6 +359,7 @@ export function Dashboard({
   onOpenQuests,
   onOpenStudyTools,
   onOpenFavoriteWords,
+  onOpenAchievements,
   onContinueStudy,
   mobileContinueTitle,
   mobileContinueDetail,
@@ -439,6 +441,8 @@ export function Dashboard({
   const [speechRate, setSpeechRate] = useState<HeroSpeechRate>(1)
   const [speechVolume, setSpeechVolume] = useState<HeroSpeechVolume>(0.5)
   const [settingsExpanded, setSettingsExpanded] = useState(false)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const importFileRef = useRef<HTMLInputElement | null>(null)
   // Lets the speak-on-new-sentence effect read current settings without taking
   // them as dependencies, so slider changes do not restart active speech.
   const speechVolumeRef = useRef(speechVolume)
@@ -460,8 +464,11 @@ export function Dashboard({
   // static tagline — the next guardian is the reason to tap through.
   const questsCleared = QUESTS.filter((quest) => isQuestComplete(questProgress, quest.id)).length
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
+  const questPct = QUESTS.length > 0 ? Math.round((questsCleared / QUESTS.length) * 100) : 0
   const wrongCount = Object.keys(wrongPool).length
   const furiganaActive = furiganaOn
+  const currentLevelLabel = COMPLEXITY_DISPLAY[complexity].level
+  const dailyGoalPct = Math.min(100, Math.round((Math.min(learnedCount, 10) / 10) * 100))
 
   useEffect(() => {
     if (storiesAtLevel.some((story) => story.id === storyId)) return
@@ -504,6 +511,104 @@ export function Dashboard({
   function toggleSettingsExpanded() {
     setSettingsExpanded((expanded) => !expanded)
   }
+
+  function closeProfileMenu() {
+    setProfileMenuOpen(false)
+  }
+
+  function openLearningSettings() {
+    setSettingsExpanded(true)
+    closeProfileMenu()
+  }
+
+  function openAchievements() {
+    closeProfileMenu()
+    onOpenAchievements()
+  }
+
+  function openStudyToolsFromMenu() {
+    closeProfileMenu()
+    onOpenStudyTools()
+  }
+
+  function openQuestsFromMenu() {
+    closeProfileMenu()
+    onOpenQuests()
+  }
+
+  function kanjiQuestStorageSnapshot() {
+    const snapshot: Record<string, string> = {}
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+      const key = window.localStorage.key(index)
+      if (!key) continue
+      if (!key.startsWith('kanji-quest') && !key.startsWith('kq-beginner')) continue
+      const value = window.localStorage.getItem(key)
+      if (value !== null) snapshot[key] = value
+    }
+    return snapshot
+  }
+
+  function exportProgress() {
+    const payload = {
+      app: 'Kanji Quest',
+      version: '0.0.0',
+      exportedAt: new Date().toISOString(),
+      localStorage: kanjiQuestStorageSnapshot(),
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `kanji-quest-progress-${new Date().toISOString().slice(0, 10)}.json`
+    anchor.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function requestImportProgress() {
+    importFileRef.current?.click()
+  }
+
+  async function importProgress(file: File | undefined) {
+    if (!file) return
+    const text = await file.text()
+    const parsed: unknown = JSON.parse(text)
+    if (
+      !parsed
+      || typeof parsed !== 'object'
+      || !('localStorage' in parsed)
+      || !parsed.localStorage
+      || typeof parsed.localStorage !== 'object'
+    ) {
+      window.alert('That file does not look like a Kanji Quest progress export.')
+      return
+    }
+    const entries = Object.entries(parsed.localStorage as Record<string, unknown>)
+      .filter(([key, value]) => (key.startsWith('kanji-quest') || key.startsWith('kq-beginner')) && typeof value === 'string')
+    if (entries.length === 0) {
+      window.alert('No Kanji Quest progress data was found in that file.')
+      return
+    }
+    const confirmed = window.confirm(`Import ${entries.length} saved Kanji Quest entries and reload the app?`)
+    if (!confirmed) return
+    entries.forEach(([key, value]) => window.localStorage.setItem(key, value as string))
+    window.location.reload()
+  }
+
+  function resetLocalProgress() {
+    const confirmed = window.confirm('Reset all local Kanji Quest progress on this device? This cannot be undone unless you exported a backup.')
+    if (!confirmed) return
+    Object.keys(kanjiQuestStorageSnapshot()).forEach((key) => window.localStorage.removeItem(key))
+    window.location.reload()
+  }
+
+  useEffect(() => {
+    if (!profileMenuOpen) return
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') closeProfileMenu()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [profileMenuOpen])
 
   // Voices arrive asynchronously, so a Japanese voice can appear after first
   // paint; this keeps the button from staying disabled when one exists.
@@ -551,12 +656,126 @@ export function Dashboard({
     <div className="dashboard">
       <button
         type="button"
-        className="dashboard-profile-placeholder"
-        aria-label="User profile"
-        title="User profile"
+        className={`dashboard-profile-placeholder${profileMenuOpen ? ' is-active' : ''}`}
+        onClick={() => setProfileMenuOpen(true)}
+        aria-label="Open user menu"
+        aria-expanded={profileMenuOpen}
+        aria-controls="dashboard-profile-menu"
+        title="User menu"
       >
         <span aria-hidden="true">U</span>
       </button>
+      {profileMenuOpen && (
+        <div className="dashboard-profile-layer">
+          <button
+            type="button"
+            className="dashboard-profile-scrim"
+            aria-label="Close user menu"
+            onClick={closeProfileMenu}
+          />
+          <aside className="dashboard-profile-menu" id="dashboard-profile-menu" aria-label="User menu">
+            <header className="dashboard-profile-header">
+              <span className="dashboard-profile-avatar" aria-hidden="true">R</span>
+              <div>
+                <small>Local profile</small>
+                <h2>Reed</h2>
+                <p>{learnedCount} learned · {questsCleared}/{QUESTS.length} quests</p>
+              </div>
+              <button type="button" className="dashboard-profile-close" onClick={closeProfileMenu} aria-label="Close user menu">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </header>
+
+            <div className="dashboard-profile-today">
+              <span>
+                <small>Daily goal</small>
+                <b>{Math.min(learnedCount, 10)}/10</b>
+              </span>
+              <i style={{ '--progress-pct': `${dailyGoalPct}%` } as CSSProperties} />
+            </div>
+
+            <section className="dashboard-profile-section" aria-label="Profile shortcuts">
+              <button type="button" onClick={openLearningSettings}>
+                <span>Profile</span>
+                <small>Local account and display settings</small>
+              </button>
+              <button type="button" onClick={openLearningSettings}>
+                <span>Learning settings</span>
+                <small>{currentLevelLabel} · Furigana {furiganaOn ? 'on' : 'off'} · English {englishOn ? 'on' : 'off'}</small>
+              </button>
+              <button type="button" onClick={openStudyToolsFromMenu}>
+                <span>Daily goal</span>
+                <small>10 cards · {dailyGoalPct}% today</small>
+              </button>
+              <button type="button" onClick={openQuestsFromMenu}>
+                <span>Progress history</span>
+                <small>{progressPct}% cards · {questPct}% quest path</small>
+              </button>
+              <button type="button" onClick={openAchievements}>
+                <span>Achievements</span>
+                <small>Milestones and records</small>
+              </button>
+            </section>
+
+            <section className="dashboard-profile-section dashboard-profile-preferences" aria-label="Study preferences">
+              <span className="dashboard-profile-section-label">Study preferences</span>
+              <button type="button" onClick={openLearningSettings}>
+                <span>Sentence difficulty</span>
+                <small>{currentLevelLabel} {COMPLEXITY_DISPLAY[complexity].name}</small>
+              </button>
+              <button type="button" onClick={toggleFurigana}>
+                <span>Furigana default</span>
+                <small>{furiganaOn ? 'On' : 'Off'}</small>
+              </button>
+              <button type="button" onClick={toggleEnglish}>
+                <span>English default</span>
+                <small>{englishOn ? 'On' : 'Off'}</small>
+              </button>
+              <button type="button" onClick={toggleSpeech} disabled={!speechSupported}>
+                <span>Voice settings</span>
+                <small>{speechSupported ? `${speechOn ? 'On' : 'Off'} · ${effectiveSpeechRate}x · ${Math.round(speechVolume * 100)}%` : 'No Japanese voice installed'}</small>
+              </button>
+            </section>
+
+            <section className="dashboard-profile-section dashboard-profile-data" aria-label="Data and account">
+              <span className="dashboard-profile-section-label">Data and account</span>
+              <button type="button" onClick={exportProgress}>
+                <span>Export progress</span>
+                <small>Download a local backup</small>
+              </button>
+              <button type="button" onClick={requestImportProgress}>
+                <span>Import progress</span>
+                <small>Restore from a backup file</small>
+              </button>
+              <button type="button" disabled>
+                <span>Sign in / sync</span>
+                <small>Local-only for now</small>
+              </button>
+              <button type="button" className="is-danger" onClick={resetLocalProgress}>
+                <span>Reset local progress</span>
+                <small>Clear this device</small>
+              </button>
+            </section>
+
+            <footer className="dashboard-profile-footer">
+              <span>Kanji Quest v0.0.0</span>
+              <a href="mailto:feedback@kanji.quest">Feedback</a>
+              <span>About Kanji Quest</span>
+            </footer>
+
+            <input
+              ref={importFileRef}
+              className="dashboard-profile-file"
+              type="file"
+              accept="application/json,.json"
+              onChange={(event) => {
+                void importProgress(event.currentTarget.files?.[0])
+                event.currentTarget.value = ''
+              }}
+            />
+          </aside>
+        </div>
+      )}
       <button
         type="button"
         className={`dashboard-page-settings control-icon-button control-settings-button${settingsExpanded ? ' is-active' : ''}`}
@@ -894,18 +1113,6 @@ export function Dashboard({
         )}
       </section>
 
-      <section className="mobile-home-primary" aria-label="Continue study">
-        <button type="button" className="mobile-continue-card" onClick={onContinueStudy}>
-          <span className="mobile-continue-mark" aria-hidden="true" lang="ja">続</span>
-          <span className="mobile-continue-copy">
-            <small>Next up</small>
-            <b>{mobileContinueTitle}</b>
-            <em>{mobileContinueDetail}</em>
-          </span>
-          <span className="mobile-continue-arrow" aria-hidden="true">&rarr;</span>
-        </button>
-      </section>
-
       {false && (
         <section className="progress-section progress-compact">
           <div className="progress-header">
@@ -928,28 +1135,41 @@ export function Dashboard({
       )}
 
       <section className="dashboard-next-panel" aria-label="Study progress">
-        <div className="dashboard-next-copy">
-          <small>Today</small>
-          <h2>{wrongCount > 0 ? 'Review weak cards first' : 'Keep your path moving'}</h2>
-          <p>{wrongCount > 0 ? `${wrongCount} cards are ready for another pass.` : `${learnedCount} of ${totalCards} cards learned.`}</p>
-        </div>
-        <div className="dashboard-progress-grid">
-          <div className="dashboard-progress-stat">
-            <span>Cards</span>
-            <b>{progressPct}%</b>
-            <i style={{ '--progress-pct': `${progressPct}%` } as CSSProperties} />
-          </div>
-          <div className="dashboard-progress-stat">
-            <span>Quests</span>
-            <b>{questsCleared}/{QUESTS.length}</b>
-            <i style={{ '--progress-pct': `${QUESTS.length === 0 ? 0 : (questsCleared / QUESTS.length) * 100}%` } as CSSProperties} />
-          </div>
-        </div>
-        <div className="dashboard-next-actions">
-          <button type="button" className="dashboard-next-primary" onClick={onContinueStudy}>
-            <span>Next up</span>
+        <button type="button" className="dashboard-next-card" onClick={onContinueStudy}>
+          <span className="dashboard-next-mark" aria-hidden="true" lang="ja">続</span>
+          <span className="dashboard-next-copy">
+            <small>Next up</small>
             <b>{mobileContinueTitle}</b>
-          </button>
+            <em>{mobileContinueDetail}</em>
+          </span>
+          <span className="dashboard-next-arrow" aria-hidden="true">&#8250;</span>
+        </button>
+
+        <div className="dashboard-progress-track" aria-label="Current progress">
+          <div className="dashboard-progress-stat" style={{ '--progress-pct': `${progressPct}%` } as CSSProperties}>
+            <span>
+              <b>{progressPct}%</b>
+              <small>Cards</small>
+            </span>
+            <i />
+          </div>
+          <div className="dashboard-progress-stat" style={{ '--progress-pct': `${questPct}%` } as CSSProperties}>
+            <span>
+              <b>{questsCleared}/{QUESTS.length}</b>
+              <small>Quests</small>
+            </span>
+            <i />
+          </div>
+          <div className="dashboard-progress-stat" style={{ '--progress-pct': `${wrongCount > 0 ? 100 : 0}%` } as CSSProperties}>
+            <span>
+              <b>{wrongCount}</b>
+              <small>Review</small>
+            </span>
+            <i />
+          </div>
+        </div>
+
+        <div className="dashboard-next-actions">
           <button type="button" onClick={onOpenStudyTools}>Study</button>
           <button type="button" onClick={onOpenQuests}>Quest</button>
         </div>

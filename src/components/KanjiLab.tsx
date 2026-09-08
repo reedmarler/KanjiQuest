@@ -8,7 +8,6 @@ import type { JlptLevel } from '../lib/types'
 import { SpeakableCue, SpeakableWord, useSpeakable } from './SpeakableWord'
 import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
 import { loadKanjiNotes, saveKanjiNotes, setKanjiNote, type KanjiNotes } from '../lib/kanjiNotes'
-import { AppBackButton, AppDashboardButton } from './AppBackButton'
 
 interface KanjiLabProps {
   onBack: () => void
@@ -17,7 +16,6 @@ interface KanjiLabProps {
   onQuestComplete?: () => void
 }
 
-const levels: JlptLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1']
 const retryDistance = 5
 type KanjiStudyMode = 'paths' | 'levels'
 type KanjiCompoundLength = 1 | 2 | 3 | 4
@@ -447,10 +445,11 @@ function entriesForQuest(questId?: string): KanjiLabEntry[] {
   })
 }
 
-export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: KanjiLabProps) {
+export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
   const quest = getQuestById(questId)
   const questEntries = useMemo(() => entriesForQuest(questId), [questId])
   const questMode = Boolean(quest && questEntries.length)
+  const levels: JlptLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1']
   const [mode, setMode] = useState<KanjiStudyMode>('paths')
   const [compoundLength, setCompoundLength] = useState<KanjiCompoundLength>(1)
   const [path, setPath] = useState(() => shuffled(kanjiFocusSets)[0]!)
@@ -555,6 +554,20 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
     setExampleOffset(0)
   }
 
+  function chooseCompoundLength(nextLength: KanjiCompoundLength) {
+    const isAvailable = levelHasCompoundLength(level, nextLength)
+    if (!isAvailable) return
+    setCompoundLength(nextLength)
+    const levelEntries = kanjiLabEntries.filter((candidate) => candidate.card.jlpt === level)
+    const nextEntries = nextLength === 1
+      ? uniqueKanjiOrder(levelEntries)
+      : compoundEntries(levelEntries, nextLength)
+    setEntries(nextEntries)
+    setIndex(0)
+    setRevealed(false)
+    setExampleOffset(0)
+  }
+
   function nextCard(knewIt = false) {
     if (questMode) {
       if (index + 1 >= entries.length) {
@@ -588,20 +601,6 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
     } else {
       setIndex((current) => (current + 1) % entries.length)
     }
-    setRevealed(false)
-    setExampleOffset(0)
-  }
-
-  function chooseCompoundLength(nextLength: KanjiCompoundLength) {
-    const isAvailable = levelHasCompoundLength(level, nextLength)
-    if (!isAvailable) return
-    setCompoundLength(nextLength)
-    const levelEntries = kanjiLabEntries.filter((candidate) => candidate.card.jlpt === level)
-    const nextEntries = nextLength === 1
-      ? uniqueKanjiOrder(levelEntries)
-      : compoundEntries(levelEntries, nextLength)
-    setEntries(nextEntries)
-    setIndex(0)
     setRevealed(false)
     setExampleOffset(0)
   }
@@ -650,7 +649,6 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
   if (questMode && completed) {
     return (
       <div className="grammar-practice-view kanji-lab kanji-lab-paths">
-        <div className="study-top grammar-study-top"><button type="button" className="vocab-back-arrow" onClick={previousCard} aria-label="Previous kanji" title="Previous kanji"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>{onDashboard && <button type="button" className="btn btn-ghost" onClick={onDashboard}>Dashboard</button>}</div>
         <main className="focused-vocab-complete">
           <span className="focused-vocab-complete-mark">漢</span>
           <h2>Kanji step complete</h2>
@@ -664,23 +662,19 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
 
   return (
     <div className="grammar-practice-view kanji-lab kanji-lab-paths standard-kanji-study">
-      <div className="study-top grammar-study-top">
-        <div className="app-nav-actions">
-          <AppBackButton
-            onClick={onBack}
-            aria-label={questMode ? 'Back to Quest' : 'Back to Study Tools'}
-          />
-          {onDashboard && <AppDashboardButton onClick={onDashboard} />}
-        </div>
-        <span className="study-progress">{index + 1} / {entries.length}</span>
-        {/* A quest fixes its own deck, so the path and level pickers would be
-            levers that quietly abandon the quest. It gets an identity badge
-            in their place. */}
+      <div className="study-progress-bar">
+        <div className="study-progress-fill" style={{ width: ((index + 1) / entries.length) * 100 + '%' }} />
+      </div>
+
+      <section className="kanji-study-navigation kanji-armory-navigation standard-kanji-navigation">
         {questMode ? (
-          <span className="study-type-badge"><span>Quest Kanji</span><span className="jlpt-badge">{quest?.level}</span></span>
-        ) : (
+          <div className="kanji-path-heading">
+            <span className="kanji-armory-mark" aria-hidden="true">漢</span>
+            <div><span>QUEST KANJI</span><h2>{quest?.title}</h2><p>{quest?.vocabularyTheme} — only the kanji from this quest’s vocabulary.</p></div>
+          </div>
+        ) : (<>
         <div
-          className="standard-kanji-top-modes standard-kanji-top-selectors"
+          className="standard-kanji-top-modes standard-kanji-top-selectors standard-kanji-inline-selectors"
           aria-label="Kanji study selection"
           onBlur={(event) => {
             if (!event.currentTarget.contains(event.relatedTarget)) setOpenTopPicker(null)
@@ -747,19 +741,6 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
             )}
           </div>
         </div>
-        )}
-      </div>
-      <div className="study-progress-bar">
-        <div className="study-progress-fill" style={{ width: ((index + 1) / entries.length) * 100 + '%' }} />
-      </div>
-
-      <section className="kanji-study-navigation kanji-armory-navigation standard-kanji-navigation">
-        {questMode ? (
-          <div className="kanji-path-heading">
-            <span className="kanji-armory-mark" aria-hidden="true">漢</span>
-            <div><span>QUEST KANJI</span><h2>{quest?.title}</h2><p>{quest?.vocabularyTheme} — only the kanji from this quest’s vocabulary.</p></div>
-          </div>
-        ) : (<>
         {mode === 'paths' ? (
           <div className="kanji-path-heading">
             <span className="kanji-armory-mark" aria-hidden="true">{path.symbol}</span>
@@ -773,16 +754,17 @@ export function KanjiLab({ onBack, onDashboard, questId, onQuestComplete }: Kanj
               <button type="button" className={pathStudyTarget === 'kanji' ? 'active' : ''} aria-pressed={pathStudyTarget === 'kanji'} onClick={() => choosePathStudyTarget('kanji')}>Kanji</button>
             </div>
           </div>
-        ) : (<>
+        ) : (
           <div className="kanji-path-heading kanji-level-heading">
-            <span className="kanji-armory-mark" aria-hidden="true">{String.fromCodePoint(0x6f22)}</span>
+            <span className="kanji-armory-mark" aria-hidden="true">漢</span>
             <div>
               <h2>{level} Kanji</h2>
               <p>Study kanji grouped by Japanese Language Proficiency Test level.</p>
             </div>
             {compoundLengthPicker()}
           </div>
-        </>)}</>)}
+        )}
+        </>)}
       </section>
 
       <main className={'grammar-choice-card kanji-learning-card standard-kanji-card main-word-length-' + Math.min([...card.front].length, 4) + (revealed ? ' is-revealed' : '') + (hasMoreExamples ? ' has-more-examples' : '')}>
