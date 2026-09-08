@@ -196,49 +196,51 @@ function DesktopPrimaryNav({
   ]
 
   return (
-    <nav className="desktop-primary-nav" aria-label="Primary">
-      <button
-        type="button"
-        className={`desktop-primary-nav-user${profileOpen ? ' is-active' : ''}${hideUser ? ' is-hidden' : ''}`}
-        onClick={onProfile}
-        aria-label="Open user menu"
-        aria-expanded={profileOpen}
-        aria-controls="dashboard-profile-menu"
-        title="User menu"
-        tabIndex={hideUser ? -1 : undefined}
-      >
-        <img src={displayProfilePhoto(profilePhoto)} alt="" />
-      </button>
-      <div className="desktop-primary-nav-links">
-        {items.map((item) => (
-          <button
-            key={item.tab}
-            type="button"
-            className={activeTab === item.tab ? 'is-active' : ''}
-            onClick={item.onClick}
-            aria-current={activeTab === item.tab ? 'page' : undefined}
-          >
-            <span aria-hidden="true" lang="ja">{item.mark}</span>
-            <b>{item.label}</b>
-          </button>
-        ))}
-      </div>
-      <button
-        type="button"
-        className={`desktop-primary-nav-settings${settingsOpen ? ' is-active' : ''}`}
-        onClick={onSettings}
-        aria-label={settingsOpen ? 'Hide settings' : 'Show settings'}
-        aria-expanded={settingsOpen}
-        title={settingsOpen ? 'Hide settings' : 'Show settings'}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M19.4 13a7.7 7.7 0 0 0 .1-1 7.7 7.7 0 0 0-.1-1l2-1.6a.5.5 0 0 0 .1-.6l-1.9-3.3a.5.5 0 0 0-.6-.2l-2.4 1a7 7 0 0 0-1.7-1l-.4-2.5a.5.5 0 0 0-.5-.4h-3.8a.5.5 0 0 0-.5.4l-.4 2.5a7 7 0 0 0-1.7 1l-2.4-1a.5.5 0 0 0-.6.2L2.4 7.8a.5.5 0 0 0 .1.6l2 1.6a7.7 7.7 0 0 0-.1 1 7.7 7.7 0 0 0 .1 1l-2 1.6a.5.5 0 0 0-.1.6l1.9 3.3a.5.5 0 0 0 .6.2l2.4-1a7 7 0 0 0 1.7 1l.4 2.5a.5.5 0 0 0 .5.4h3.8a.5.5 0 0 0 .5-.4l.4-2.5a7 7 0 0 0 1.7-1l2.4 1a.5.5 0 0 0 .6-.2l1.9-3.3a.5.5 0 0 0-.1-.6Zm-7.4 2.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5Z"
-          />
-        </svg>
-      </button>
-    </nav>
+    <div className="desktop-primary-nav-bar">
+      <nav className="desktop-primary-nav" aria-label="Primary">
+        <button
+          type="button"
+          className={`desktop-primary-nav-user${profileOpen ? ' is-active' : ''}${hideUser ? ' is-hidden' : ''}`}
+          onClick={onProfile}
+          aria-label="Open user menu"
+          aria-expanded={profileOpen}
+          aria-controls="dashboard-profile-menu"
+          title="User menu"
+          tabIndex={hideUser ? -1 : undefined}
+        >
+          <img src={displayProfilePhoto(profilePhoto)} alt="" />
+        </button>
+        <div className="desktop-primary-nav-links">
+          {items.map((item) => (
+            <button
+              key={item.tab}
+              type="button"
+              className={activeTab === item.tab ? 'is-active' : ''}
+              onClick={item.onClick}
+              aria-current={activeTab === item.tab ? 'page' : undefined}
+            >
+              <span aria-hidden="true" lang="ja">{item.mark}</span>
+              <b>{item.label}</b>
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          className={`desktop-primary-nav-settings${settingsOpen ? ' is-active' : ''}`}
+          onClick={onSettings}
+          aria-label={settingsOpen ? 'Hide settings' : 'Show settings'}
+          aria-expanded={settingsOpen}
+          title={settingsOpen ? 'Hide settings' : 'Show settings'}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M19.4 13a7.7 7.7 0 0 0 .1-1 7.7 7.7 0 0 0-.1-1l2-1.6a.5.5 0 0 0 .1-.6l-1.9-3.3a.5.5 0 0 0-.6-.2l-2.4 1a7 7 0 0 0-1.7-1l-.4-2.5a.5.5 0 0 0-.5-.4h-3.8a.5.5 0 0 0-.5.4l-.4 2.5a7 7 0 0 0-1.7 1l-2.4-1a.5.5 0 0 0-.6.2L2.4 7.8a.5.5 0 0 0 .1.6l2 1.6a7.7 7.7 0 0 0-.1 1 7.7 7.7 0 0 0 .1 1l-2 1.6a.5.5 0 0 0 .1.6l1.9 3.3a.5.5 0 0 0 .6.2l2.4-1a7 7 0 0 0 1.7 1l.4 2.5a.5.5 0 0 0 .5.4h3.8a.5.5 0 0 0-.5-.4l.4-2.5a7 7 0 0 0 1.7-1l2.4 1a.5.5 0 0 0 .6-.2l1.9-3.3a.5.5 0 0 0-.1-.6Zm-7.4 2.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5Z"
+            />
+          </svg>
+        </button>
+      </nav>
+    </div>
   )
 }
 
@@ -575,13 +577,11 @@ function App() {
       ? cloneElement(
           content as ReactElement<{ children?: ReactNode }>,
           undefined,
-          desktopNav,
           hubChrome,
           ...Children.toArray((content as ReactElement<{ children?: ReactNode }>).props.children),
         )
       : (
         <>
-          {desktopNav}
           {hubChrome}
           {content}
         </>
@@ -589,6 +589,7 @@ function App() {
 
     return (
       <>
+        {desktopNav}
         {framed}
         {mobileNav}
         {profileMenu}
