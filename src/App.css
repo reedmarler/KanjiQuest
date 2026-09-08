@@ -547,11 +547,12 @@ body:has(.dashboard) {
   inset: 0 auto 0 0;
   display: flex;
   flex-direction: column;
-  width: min(20rem, calc(100vw - 1.25rem));
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: calc(0.8rem + env(safe-area-inset-top)) 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+  width: min(18.5rem, calc(100vw - 4.25rem));
+  height: 100vh;
+  height: 100dvh;
+  padding: calc(0.8rem + env(safe-area-inset-top)) 0.75rem calc(6.3rem + env(safe-area-inset-bottom));
   overflow-y: auto;
+  overscroll-behavior: contain;
   border-right: 1px solid color-mix(in srgb, var(--kyogre-light) 22%, var(--border));
   background:
     linear-gradient(155deg, color-mix(in srgb, var(--kyogre) 14%, transparent), transparent 45%),
@@ -744,6 +745,13 @@ body:has(.dashboard) {
   min-height: 2rem;
   padding: 0;
   text-align: center;
+}
+
+.dashboard-profile-section .dashboard-profile-display-toggle:not(.is-active) {
+  border-color: color-mix(in srgb, var(--text-muted) 18%, transparent);
+  background: color-mix(in srgb, #000 18%, var(--surface-2));
+  color: color-mix(in srgb, var(--text-muted) 62%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 18%, transparent);
 }
 
 /* The switch only changes appearance on click; hovering must not touch its
