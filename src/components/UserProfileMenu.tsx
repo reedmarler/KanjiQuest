@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react'
 import { useDailyGoals } from '../lib/dailyGoals'
-import { accountSyncStatusText, isAccountSyncConfigured, loadAccountSyncState } from '../lib/accountSync'
+import { exportProgressBackup, kanjiQuestStorageSnapshot, readProgressBackup, restoreProgressBackup } from '../lib/progressBackup'
 import { displayProfilePhoto, readProfilePhoto, useUserProfile } from '../lib/userProfile'
 
 type UserProfileMenuProps = {
@@ -15,18 +15,7 @@ type UserProfileMenuProps = {
   onOpenLearningSettings: () => void
   onOpenQuests: () => void
   onOpenAchievements: () => void
-}
-
-function kanjiQuestStorageSnapshot() {
-  const snapshot: Record<string, string> = {}
-  for (let index = 0; index < window.localStorage.length; index += 1) {
-    const key = window.localStorage.key(index)
-    if (!key) continue
-    if (!key.startsWith('kanji-quest') && !key.startsWith('kq-beginner')) continue
-    const value = window.localStorage.getItem(key)
-    if (value !== null) snapshot[key] = value
-  }
-  return snapshot
+  onOpenBackupSync: () => void
 }
 
 export function UserProfileMenu({
@@ -41,6 +30,7 @@ export function UserProfileMenu({
   onOpenLearningSettings,
   onOpenQuests,
   onOpenAchievements,
+  onOpenBackupSync,
 }: UserProfileMenuProps) {
   const importFileRef = useRef<HTMLInputElement | null>(null)
   const photoRef = useRef<HTMLInputElement | null>(null)
@@ -49,15 +39,11 @@ export function UserProfileMenu({
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState(profile.name)
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false)
-  const [syncDetailsOpen, setSyncDetailsOpen] = useState(false)
-  const accountSyncState = loadAccountSyncState()
-  const syncConfigured = isAccountSyncConfigured()
 
   useEffect(() => {
     if (!open) {
       setEditingName(false)
       setResetConfirmOpen(false)
-      setSyncDetailsOpen(false)
       return
     }
     function handleKeyDown(event: KeyboardEvent) {
@@ -85,50 +71,22 @@ export function UserProfileMenu({
     updateProfile({ photo: await readProfilePhoto(file) })
   }
 
-  function exportProgress() {
-    const payload = {
-      app: 'Kanji Quest',
-      version: '0.0.0',
-      exportedAt: new Date().toISOString(),
-      localStorage: kanjiQuestStorageSnapshot(),
-    }
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const anchor = document.createElement('a')
-    anchor.href = url
-    anchor.download = `kanji-quest-progress-${new Date().toISOString().slice(0, 10)}.json`
-    anchor.click()
-    URL.revokeObjectURL(url)
-  }
-
   function requestImportProgress() {
     importFileRef.current?.click()
   }
 
   async function importProgress(file: File | undefined) {
     if (!file) return
-    const text = await file.text()
-    const parsed: unknown = JSON.parse(text)
-    if (
-      !parsed
-      || typeof parsed !== 'object'
-      || !('localStorage' in parsed)
-      || !parsed.localStorage
-      || typeof parsed.localStorage !== 'object'
-    ) {
-      window.alert('That file does not look like a Kanji Quest progress export.')
-      return
-    }
-    const entries = Object.entries(parsed.localStorage as Record<string, unknown>)
-      .filter(([key, value]) => (key.startsWith('kanji-quest') || key.startsWith('kq-beginner')) && typeof value === 'string')
-    if (entries.length === 0) {
-      window.alert('No Kanji Quest progress data was found in that file.')
+    let entries: Array<[string, string]>
+    try {
+      entries = await readProgressBackup(file)
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'That file could not be imported.')
       return
     }
     const confirmed = window.confirm(`Import ${entries.length} saved Kanji Quest entries and reload the app?`)
     if (!confirmed) return
-    entries.forEach(([key, value]) => window.localStorage.setItem(key, value as string))
-    window.location.reload()
+    restoreProgressBackup(entries)
   }
 
   function resetAppProgress() {
@@ -231,23 +189,21 @@ export function UserProfileMenu({
           </button>
         </section>
 
-        <section className="dashboard-profile-section dashboard-profile-data" aria-label="Data and account">
-          <span className="dashboard-profile-section-label">Data and account</span>
-          <button type="button" onClick={exportProgress}>
+        <section className="dashboard-profile-section dashboard-profile-data" aria-label="Backup and Sync">
+          <span className="dashboard-profile-section-label">Backup & Sync</span>
+          <button type="button" onClick={exportProgressBackup}>
             <span>Export progress</span>
           </button>
           <button type="button" onClick={requestImportProgress}>
             <span>Import progress</span>
           </button>
-          <button type="button" onClick={() => setSyncDetailsOpen((value) => !value)}>
-            <span>{syncConfigured ? 'Sign in / sync' : 'Sync later'}</span>
+          <button type="button" onClick={onOpenBackupSync}>
+            <span>Cloud backup</span>
           </button>
-          {syncDetailsOpen && (
-            <div className="dashboard-profile-reset-confirm" role="status">
-              <p>{accountSyncStatusText(accountSyncState)}</p>
-              <p>Sign-in will stay optional. You can keep using this device locally, then connect cloud backup when the backend is ready.</p>
-            </div>
-          )}
+        </section>
+
+        <section className="dashboard-profile-section dashboard-profile-data" aria-label="Data and account">
+          <span className="dashboard-profile-section-label">Data and account</span>
           <button type="button" className="is-danger" onClick={() => setResetConfirmOpen(true)}>
             <span>Reset app progress</span>
           </button>

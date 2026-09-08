@@ -66,6 +66,7 @@ const PicturePractice = lazy(() => import('./components/PicturePractice').then((
 const ProfilePage = lazy(() => import('./components/ProfilePage').then((module) => ({ default: module.ProfilePage })))
 const SettingsPage = lazy(() => import('./components/SettingsPage').then((module) => ({ default: module.SettingsPage })))
 const DailyGoalsPage = lazy(() => import('./components/DailyGoalsPage').then((module) => ({ default: module.DailyGoalsPage })))
+const BackupSyncPage = lazy(() => import('./components/BackupSyncPage').then((module) => ({ default: module.BackupSyncPage })))
 
 /*
  * Copies of two tools, kept in Additional so they can be modernised before
@@ -110,11 +111,12 @@ type View =
   | 'profile'
   | 'settings'
   | 'daily-goals'
+  | 'backup-sync'
 
 type PrimaryNavTab = 'home' | 'quest' | 'study' | 'beginner' | 'more'
 
 function primaryNavTabForView(view: View): PrimaryNavTab {
-  if (view === 'dashboard' || view === 'profile' || view === 'settings' || view === 'daily-goals') return 'home'
+  if (view === 'dashboard' || view === 'profile' || view === 'settings' || view === 'daily-goals' || view === 'backup-sync') return 'home'
   if (view === 'quests' || view === 'ink-road' || view === 'shrine-trial' || view === 'quest-scene' || view === 'quest-checkpoint') return 'quest'
   if (view === 'study-tools' || view === 'kanji' || view === 'vocab-practice' || view === 'counter-practice' || view === 'grammar' || view === 'study' || view === 'study-loading' || view === 'complete') return 'study'
   if (view === 'beginner-zone' || view === 'hiragana-chart' || view === 'katakana-chart' || view === 'hiragana-quiz' || view === 'katakana-quiz' || view === 'beginner-learner' || view === 'beginner-speed-run' || view === 'picture-practice') return 'beginner'
@@ -557,6 +559,7 @@ function App() {
       onOpenLearningSettings={() => goToView('settings')}
       onOpenQuests={() => goToView('quests')}
       onOpenAchievements={() => goToView('achievements')}
+      onOpenBackupSync={() => goToView('backup-sync')}
     />
   )
   const withMobileNav = (content: ReactNode) => {
@@ -766,6 +769,16 @@ function App() {
       <div className="app">
         <Suspense fallback={<RouteLoading label="Daily Goals" />}>
           <DailyGoalsPage onBack={() => setView('dashboard')} onOpenGoal={openDailyGoal} />
+        </Suspense>
+      </div>,
+    )
+  }
+
+  if (view === 'backup-sync') {
+    return withMobileNav(
+      <div className="app">
+        <Suspense fallback={<RouteLoading label="Backup & Sync" />}>
+          <BackupSyncPage onBack={() => setView('dashboard')} />
         </Suspense>
       </div>,
     )
