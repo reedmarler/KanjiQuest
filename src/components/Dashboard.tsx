@@ -379,8 +379,8 @@ export function Dashboard({
   const [storyPlaybackMode, setStoryPlaybackMode] = useState<StoryPlaybackMode>('repeat')
   const storiesAtLevel = useMemo(() => getHeroStoriesForLevel(storyLevel), [storyLevel])
   // The compact mode toggle is always visible. Off is 'none'; on with no
-  // mode chosen yet is 'picking', which surfaces the mode choices inside the
-  // gear settings panel rather than guessing which mode the learner wants.
+  // mode chosen yet is 'picking', which surfaces the mode choices below the
+  // sentence controls rather than guessing which mode the learner wants.
   const modeToggleOn = settingsMode !== 'none'
   // Entering Grammar mode should start a drill, not leave the ordinary sweep
   // running under a Grammar label. Likewise, raising the complexity can take
@@ -422,11 +422,10 @@ export function Dashboard({
   }
 
   // The compact mode toggle only switches the drill on or off; it never picks
-  // a specific mode itself, so turning it on opens settings and waits for a
-  // choice from the mode buttons it reveals.
+  // a specific mode itself, so turning it on waits for a choice from the mode
+  // buttons it reveals below the sentence controls.
   function toggleModeOn() {
     setSettingsMode((current) => (current === 'none' ? 'picking' : 'none'))
-    setSettingsExpanded(true)
   }
 
   const [paused, setPaused] = useState(false)
@@ -593,158 +592,6 @@ export function Dashboard({
               </div>
             </div>
 
-            <div className={`control-story-panel${modeToggleOn ? ' is-active' : ''}`}>
-              <div className="control-story-heading">
-                <span>
-                  <b>Mode</b>
-                  {modeToggleOn && settingsMode !== 'picking' && (
-                    <small>{HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]}</small>
-                  )}
-                </span>
-                <div className="control-story-actions">
-                  <button
-                    type="button"
-                    className={`control-chip control-chip-compact app-display-toggle hero-mode-settings-toggle${modeToggleOn ? ' is-active' : ''}${grammarMode ? ' is-grammar' : ''}`}
-                    onClick={toggleModeOn}
-                    role="switch"
-                    aria-checked={modeToggleOn}
-                    aria-label={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
-                    title={modeToggleOn ? `Turn off ${HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]} mode` : 'Turn on a sentence mode'}
-                  >
-                    {modeToggleOn && settingsMode !== 'picking'
-                      ? HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]
-                      : 'Mode'}
-                  </button>
-                </div>
-              </div>
-
-              {modeToggleOn && (
-                <div className="hero-mode-panel-slot">
-                  <div className="hero-mode-icons" role="group" aria-label="Sentence modes">
-                    <button
-                      type="button"
-                      className={`hero-mode-icon${storyMode ? ' is-active' : ''}`}
-                      onClick={() => selectSettingsMode('story')}
-                      aria-pressed={storyMode}
-                      aria-label="Story mode"
-                      title="Story mode"
-                    >
-                      <span aria-hidden="true">&#29289;</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`hero-mode-icon${grammarMode ? ' is-active' : ''}`}
-                      onClick={() => selectSettingsMode('grammar')}
-                      aria-pressed={grammarMode}
-                      aria-label="Grammar mode"
-                      title="Grammar mode"
-                    >
-                      <span aria-hidden="true">&#25991;</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`hero-mode-icon${settingsMode === 'star' ? ' is-active' : ''}`}
-                      onClick={() => selectSettingsMode('star')}
-                      aria-pressed={settingsMode === 'star'}
-                      aria-label="Star mode"
-                      title="Star mode"
-                    >
-                      <span aria-hidden="true">&#9733;</span>
-                    </button>
-                  </div>
-
-                  {storyMode && (
-                    <div className="control-story-options">
-                      <div className="control-story-setting">
-                        <span>Story difficulty</span>
-                        <div className="control-segmented control-segmented-story" role="group" aria-label="Story difficulty">
-                          {STORY_LEVEL_DISPLAY.map(({ level, name }) => {
-                            const hasStories = getHeroStoriesForLevel(level).length > 0
-                            return (
-                              <button
-                                key={level}
-                                type="button"
-                                data-story-level={level}
-                                className={`control-segment${level === storyLevel ? ' is-active' : ''}${hasStories ? '' : ' is-unavailable'}`}
-                                aria-pressed={level === storyLevel}
-                                aria-label={`${level} ${name}${hasStories ? '' : ': coming soon'}`}
-                                title={hasStories ? `${level} ${name}` : `${level} ${name} coming soon`}
-                                onClick={() => setStoryLevel(level)}
-                                disabled={!hasStories}
-                              >
-                                <span className="control-level-code">{level}</span>
-                                <span className="control-level-name">{name}</span>
-                              </button>
-                            )
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="control-story-setting">
-                        <span>Story</span>
-                        <div className="control-story-picker">
-                          <select
-                            className="control-select"
-                            value={storyId}
-                            onChange={(event) => setStoryId(event.target.value)}
-                            aria-label="Choose story"
-                          >
-                            {storiesAtLevel.map((story) => (
-                              <option key={story.id} value={story.id}>{story.shortTitle}</option>
-                            ))}
-                          </select>
-                          <div className="control-story-playback" role="group" aria-label="Story playback">
-                            <button
-                              type="button"
-                              className={`control-story-action${storyPlaybackMode === 'repeat' ? ' is-active' : ''}`}
-                              onClick={() => setStoryPlaybackMode('repeat')}
-                              aria-pressed={storyPlaybackMode === 'repeat'}
-                              aria-label="Repeat selected story"
-                              title="Repeat selected story"
-                            >
-                              <span aria-hidden="true">&#8734;</span>
-                            </button>
-                            <button
-                              type="button"
-                              className={`control-story-action${storyPlaybackMode === 'shuffle' ? ' is-active' : ''}`}
-                              onClick={() => setStoryPlaybackMode('shuffle')}
-                              aria-pressed={storyPlaybackMode === 'shuffle'}
-                              aria-label="Shuffle stories"
-                              title="Shuffle stories"
-                            >
-                              <span aria-hidden="true">&#10536;</span>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {grammarMode && (
-                    <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
-                      {focusOptions.map(({ focus, label, disabledReason }) => (
-                        <button
-                          key={label}
-                          type="button"
-                          className={`hero-swap-mode-panel${focus && swapFocus === focus ? ' is-active' : ''}`}
-                          aria-pressed={focus ? swapFocus === focus : undefined}
-                          onClick={focus ? () => setSwapFocus((current) => (current === focus ? null : focus)) : undefined}
-                          disabled={!focus}
-                          title={focus ? undefined : disabledReason}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {settingsMode === 'star' && (
-                    <FavoriteWordsPanel onManage={onOpenFavoriteWords} />
-                  )}
-                </div>
-              )}
-            </div>
-
           <div className="voice-settings-panel" id="hero-voice-settings" aria-label="Playback settings">
               <div className="voice-settings-header">
                 <span className="control-group-label">Playback</span>
@@ -908,6 +755,143 @@ export function Dashboard({
             </div>
           </div>
         </div>
+
+        {modeToggleOn && (
+          <div className={`control-story-panel hero-mode-controls-panel${modeToggleOn ? ' is-active' : ''}`}>
+            <div className="control-story-heading">
+              <span>
+                <b>Mode</b>
+                {settingsMode !== 'picking' && (
+                  <small>{HERO_MODE_LABELS[settingsMode as Exclude<HeroSettingsMode, 'none'>]}</small>
+                )}
+              </span>
+            </div>
+
+            <div className="hero-mode-panel-slot">
+              <div className="hero-mode-icons" role="group" aria-label="Sentence modes">
+                <button
+                  type="button"
+                  className={`hero-mode-icon${storyMode ? ' is-active' : ''}`}
+                  onClick={() => selectSettingsMode('story')}
+                  aria-pressed={storyMode}
+                  aria-label="Story mode"
+                  title="Story mode"
+                >
+                  <span aria-hidden="true">&#29289;</span>
+                </button>
+                <button
+                  type="button"
+                  className={`hero-mode-icon${grammarMode ? ' is-active' : ''}`}
+                  onClick={() => selectSettingsMode('grammar')}
+                  aria-pressed={grammarMode}
+                  aria-label="Grammar mode"
+                  title="Grammar mode"
+                >
+                  <span aria-hidden="true">&#25991;</span>
+                </button>
+                <button
+                  type="button"
+                  className={`hero-mode-icon${settingsMode === 'star' ? ' is-active' : ''}`}
+                  onClick={() => selectSettingsMode('star')}
+                  aria-pressed={settingsMode === 'star'}
+                  aria-label="Star mode"
+                  title="Star mode"
+                >
+                  <span aria-hidden="true">&#9733;</span>
+                </button>
+              </div>
+
+              {storyMode && (
+                <div className="control-story-options">
+                  <div className="control-story-setting">
+                    <span>Story difficulty</span>
+                    <div className="control-segmented control-segmented-story" role="group" aria-label="Story difficulty">
+                      {STORY_LEVEL_DISPLAY.map(({ level, name }) => {
+                        const hasStories = getHeroStoriesForLevel(level).length > 0
+                        return (
+                          <button
+                            key={level}
+                            type="button"
+                            data-story-level={level}
+                            className={`control-segment${level === storyLevel ? ' is-active' : ''}${hasStories ? '' : ' is-unavailable'}`}
+                            aria-pressed={level === storyLevel}
+                            aria-label={`${level} ${name}${hasStories ? '' : ': coming soon'}`}
+                            title={hasStories ? `${level} ${name}` : `${level} ${name} coming soon`}
+                            onClick={() => setStoryLevel(level)}
+                            disabled={!hasStories}
+                          >
+                            <span className="control-level-code">{level}</span>
+                            <span className="control-level-name">{name}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="control-story-setting">
+                    <span>Story</span>
+                    <div className="control-story-picker">
+                      <select
+                        className="control-select"
+                        value={storyId}
+                        onChange={(event) => setStoryId(event.target.value)}
+                        aria-label="Choose story"
+                      >
+                        {storiesAtLevel.map((story) => (
+                          <option key={story.id} value={story.id}>{story.shortTitle}</option>
+                        ))}
+                      </select>
+                      <div className="control-story-playback" role="group" aria-label="Story playback">
+                        <button
+                          type="button"
+                          className={`control-story-action${storyPlaybackMode === 'repeat' ? ' is-active' : ''}`}
+                          onClick={() => setStoryPlaybackMode('repeat')}
+                          aria-pressed={storyPlaybackMode === 'repeat'}
+                          aria-label="Repeat selected story"
+                          title="Repeat selected story"
+                        >
+                          <span aria-hidden="true">&#8734;</span>
+                        </button>
+                        <button
+                          type="button"
+                          className={`control-story-action${storyPlaybackMode === 'shuffle' ? ' is-active' : ''}`}
+                          onClick={() => setStoryPlaybackMode('shuffle')}
+                          aria-pressed={storyPlaybackMode === 'shuffle'}
+                          aria-label="Shuffle stories"
+                          title="Shuffle stories"
+                        >
+                          <span aria-hidden="true">&#10536;</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {grammarMode && (
+                <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
+                  {focusOptions.map(({ focus, label, disabledReason }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      className={`hero-swap-mode-panel${focus && swapFocus === focus ? ' is-active' : ''}`}
+                      aria-pressed={focus ? swapFocus === focus : undefined}
+                      onClick={focus ? () => setSwapFocus((current) => (current === focus ? null : focus)) : undefined}
+                      disabled={!focus}
+                      title={focus ? undefined : disabledReason}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {settingsMode === 'star' && (
+                <FavoriteWordsPanel onManage={onOpenFavoriteWords} />
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="mobile-home-primary" aria-label="Continue study">

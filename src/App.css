@@ -2287,8 +2287,7 @@ body:has(.dashboard) {
   z-index: 30;
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(14rem, 0.7fr);
-  grid-template-rows: 2.75rem auto;
-  grid-template-areas: "difficulty voice" "story voice";
+  grid-template-areas: "difficulty voice";
   align-items: start;
   gap: 0.55rem;
   width: min(100%, 31rem);
@@ -2302,10 +2301,6 @@ body:has(.dashboard) {
 
 .hero-settings-layout .control-group-levels {
   grid-area: difficulty;
-}
-
-.hero-settings-layout .control-story-panel {
-  grid-area: story;
 }
 
 .hero-settings-layout .voice-settings-panel {
@@ -2473,15 +2468,10 @@ body:has(.dashboard) {
   font-weight: 750;
 }
 
-.hero-mode-control-toggle,
-.hero-mode-settings-toggle {
+.hero-mode-control-toggle {
   overflow: hidden;
   font-size: 0.68rem;
   text-overflow: ellipsis;
-}
-
-.hero-mode-settings-toggle {
-  height: 1.8rem;
 }
 
 .control-audio-buttons {
@@ -2992,6 +2982,10 @@ body:has(.dashboard) {
   align-items: center;
   gap: 0.28rem;
   flex-shrink: 0;
+}
+
+.hero-mode-controls-panel {
+  width: 100%;
 }
 
 .hero-mode-icons {
@@ -6074,8 +6068,7 @@ body:has(.dashboard) {
   }
   .hero-settings-layout {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: repeat(3, auto);
-    grid-template-areas: "difficulty" "voice" "story";
+    grid-template-areas: "difficulty" "voice";
   }
   .control-group {
     max-width: 100%;
