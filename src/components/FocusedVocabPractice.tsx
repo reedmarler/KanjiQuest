@@ -6,6 +6,7 @@ import { SpeakableCue, SpeakableWord, useSpeakable } from './SpeakableWord'
 import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
 import { recordAnswer, recordSeen } from '../lib/studyRecord'
 import { loadKanjiNotes, saveKanjiNotes, setKanjiNote, type KanjiNotes } from '../lib/kanjiNotes'
+import { loadDisplayPreference, saveBooleanPreference } from '../lib/displayPreferences'
 
 interface FocusedVocabPracticeProps {
   onBack: () => void
@@ -13,7 +14,12 @@ interface FocusedVocabPracticeProps {
   initialTopicId?: string
   onQuestComplete?: () => void
   questTitle?: string
+  furiganaDefault: boolean
+  englishDefault: boolean
 }
+
+const VOCAB_FURIGANA_STORAGE_KEY = 'kanji-quest-focused-vocab-show-furigana-v1'
+const VOCAB_ENGLISH_STORAGE_KEY = 'kanji-quest-focused-vocab-show-english-v1'
 
 function shuffled<T>(items: readonly T[]) {
   const copy = [...items]
@@ -35,12 +41,12 @@ function newSession(previousTopicId?: string, initialTopicId?: string) {
   return { topic, cards: shuffled(topic.cards) }
 }
 
-export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, questTitle }: FocusedVocabPracticeProps) {
+export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, questTitle, furiganaDefault, englishDefault }: FocusedVocabPracticeProps) {
   const [session, setSession] = useState(() => newSession(undefined, initialTopicId))
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
-  const [furiganaVisible, setFuriganaVisible] = useState(true)
-  const [englishVisible, setEnglishVisible] = useState(true)
+  const [furiganaVisible, setFuriganaVisible] = useState(() => loadDisplayPreference(VOCAB_FURIGANA_STORAGE_KEY, furiganaDefault))
+  const [englishVisible, setEnglishVisible] = useState(() => loadDisplayPreference(VOCAB_ENGLISH_STORAGE_KEY, englishDefault))
   const [completed, setCompleted] = useState(false)
   const [notes, setNotes] = useState<KanjiNotes>(loadKanjiNotes)
   const [notesOpen, setNotesOpen] = useState(false)
@@ -104,6 +110,22 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
     setIndex(0)
     setRevealed(false)
     setCompleted(false)
+  }
+
+  function toggleFurigana() {
+    setFuriganaVisible((isVisible) => {
+      const next = !isVisible
+      saveBooleanPreference(VOCAB_FURIGANA_STORAGE_KEY, next)
+      return next
+    })
+  }
+
+  function toggleEnglish() {
+    setEnglishVisible((isVisible) => {
+      const next = !isVisible
+      saveBooleanPreference(VOCAB_ENGLISH_STORAGE_KEY, next)
+      return next
+    })
   }
 
   function replayTopic() {
@@ -203,7 +225,7 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
                   aria-pressed={furiganaVisible}
                   aria-label="Toggle furigana"
                   title="Furigana"
-                  onClick={() => setFuriganaVisible((isVisible) => !isVisible)}
+                  onClick={toggleFurigana}
                 >
                   ふり
                 </button>
@@ -213,7 +235,7 @@ export function FocusedVocabPractice({ onBack, initialTopicId, onQuestComplete, 
                   aria-pressed={englishVisible}
                   aria-label="Toggle English translation"
                   title="English"
-                  onClick={() => setEnglishVisible((isVisible) => !isVisible)}
+                  onClick={toggleEnglish}
                 >
                   EN
                 </button>

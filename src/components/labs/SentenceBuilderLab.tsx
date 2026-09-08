@@ -186,6 +186,7 @@ interface SentenceBuilderLabProps {
   onToggleInfiniteMode: () => void
   isFavorite: boolean
   onToggleFavorite: () => void
+  furiganaDefault: boolean
 }
 
 function normalizeSentenceAnswer(value: string): string {
@@ -418,6 +419,7 @@ export function SentenceBuilderLab({
   onToggleInfiniteMode,
   isFavorite,
   onToggleFavorite,
+  furiganaDefault,
 }: SentenceBuilderLabProps) {
   const segments = exercise.segments ?? []
   const readings = exercise.segmentReadings
@@ -427,7 +429,7 @@ export function SentenceBuilderLab({
     loadBooleanPreference(HIDE_WORDS_STORAGE_KEY, false),
   )
   const [showFurigana, setShowFurigana] = useState(() =>
-    loadBooleanPreference(SHOW_FURIGANA_STORAGE_KEY, true),
+    loadBooleanPreference(SHOW_FURIGANA_STORAGE_KEY, furiganaDefault),
   )
   const [splitParticles, setSplitParticles] = useState(() =>
     loadBooleanPreference(SPLIT_PARTICLES_STORAGE_KEY, false),
@@ -579,6 +581,14 @@ export function SentenceBuilderLab({
     })
   }
 
+  const handleToggleFurigana = () => {
+    setShowFurigana((shown) => {
+      const next = !shown
+      saveBooleanPreference(SHOW_FURIGANA_STORAGE_KEY, next)
+      return next
+    })
+  }
+
   // Fast mode: once every tile has been placed, check immediately instead of
   // waiting for the learner to also press the Check button.
   useEffect(() => {
@@ -701,10 +711,6 @@ export function SentenceBuilderLab({
   useEffect(() => {
     saveBooleanPreference(HIDE_WORDS_STORAGE_KEY, hideJapanese)
   }, [hideJapanese])
-
-  useEffect(() => {
-    saveBooleanPreference(SHOW_FURIGANA_STORAGE_KEY, showFurigana)
-  }, [showFurigana])
 
   useEffect(() => {
     saveBooleanPreference(SPLIT_PARTICLES_STORAGE_KEY, splitParticles)
@@ -959,7 +965,7 @@ export function SentenceBuilderLab({
               <button
                 type="button"
                 className={`control-chip control-chip-compact app-display-toggle${showFurigana ? ' is-active' : ''}`}
-                onClick={() => setShowFurigana((shown) => !shown)}
+                onClick={handleToggleFurigana}
                 aria-pressed={showFurigana}
                 aria-label="Toggle furigana"
                 title="Furigana"
@@ -1071,7 +1077,7 @@ export function SentenceBuilderLab({
             <button
               type="button"
               className={`control-chip control-chip-compact app-display-toggle${showFurigana ? ' is-active' : ''}`}
-              onClick={() => setShowFurigana((shown) => !shown)}
+              onClick={handleToggleFurigana}
               aria-pressed={showFurigana}
               aria-label="Toggle furigana"
               title="Furigana"

@@ -13,12 +13,13 @@ interface GrammarPracticeProps {
   onToggleFavorite: (exercise: DrillExercise) => void
   questId?: string
   onQuestComplete?: () => void
+  furiganaDefault: boolean
 }
 
 const GRAMMAR_BATCH_COUNT = 5
 const GRAMMAR_LEVELS_KEY = 'kanji-quest-generated-grammar-practice-levels-v1'
 
-export function GrammarPractice({ onBack, onDashboard, isFavorite, onToggleFavorite, questId, onQuestComplete }: GrammarPracticeProps) {
+export function GrammarPractice({ onBack, onDashboard, isFavorite, onToggleFavorite, questId, onQuestComplete, furiganaDefault }: GrammarPracticeProps) {
   const quest = getQuestById(questId)
   const questMode = Boolean(quest?.grammarDrills.length)
   const [pool, setPool] = useState<DrillExercise[] | null>(null)
@@ -75,6 +76,7 @@ export function GrammarPractice({ onBack, onDashboard, isFavorite, onToggleFavor
         onDashboard={onDashboard}
         onFinishAction={onQuestComplete}
         finishActionLabel="Read the scene →"
+        furiganaDefault={furiganaDefault}
       />
     )
   }
@@ -114,6 +116,7 @@ export function GrammarPractice({ onBack, onDashboard, isFavorite, onToggleFavor
       onToggleFavorite={onToggleFavorite}
       onBack={onBack}
       onDashboard={onDashboard}
+      furiganaDefault={furiganaDefault}
     />
   )
 }

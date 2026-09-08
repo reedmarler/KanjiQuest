@@ -47,6 +47,7 @@ export interface ChoiceDrillProps {
   onDashboard?: () => void
   onFinishAction?: () => void
   finishActionLabel?: string
+  furiganaDefault: boolean
 }
 
 function loadBooleanPreference(key: string, fallback: boolean) {
@@ -160,6 +161,7 @@ export function ChoiceDrill({
   onDashboard,
   onFinishAction,
   finishActionLabel,
+  furiganaDefault,
 }: ChoiceDrillProps) {
   const furiganaKey = `${storagePrefix}-show-furigana-v1`
   const levelsKey = `${storagePrefix}-levels-v1`
@@ -189,7 +191,7 @@ export function ChoiceDrill({
   const [finished, setFinished] = useState(false)
   const [loadingNextPool, setLoadingNextPool] = useState(false)
   const [infiniteCompletedCount, setInfiniteCompletedCount] = useState(0)
-  const [showFurigana, setShowFurigana] = useState(() => loadBooleanPreference(furiganaKey, true))
+  const [showFurigana, setShowFurigana] = useState(() => loadBooleanPreference(furiganaKey, furiganaDefault))
   const [infiniteMode, setInfiniteMode] = useState(() => loadBooleanPreference(infiniteKey, false))
   const [fastMode, setFastMode] = useState(() => loadBooleanPreference(fastModeKey, false))
   const [eliminatedOptions, setEliminatedOptions] = useState<Set<string>>(new Set())

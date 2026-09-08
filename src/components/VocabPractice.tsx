@@ -9,6 +9,7 @@ interface VocabPracticeProps {
   onBack: () => void
   isFavorite: (exercise: DrillExercise) => boolean
   onToggleFavorite: (exercise: DrillExercise) => void
+  furiganaDefault: boolean
 }
 
 // 5, not 3: with level-filtered batches now cheap (only the selected level's
@@ -18,7 +19,7 @@ interface VocabPracticeProps {
 const VOCAB_BATCH_COUNT = 5
 const VOCAB_LEVELS_KEY = 'kanji-quest-generated-vocab-practice-levels-v1'
 
-export function VocabPractice({ onBack, isFavorite, onToggleFavorite }: VocabPracticeProps) {
+export function VocabPractice({ onBack, isFavorite, onToggleFavorite, furiganaDefault }: VocabPracticeProps) {
   const [pool, setPool] = useState<DrillExercise[] | null>(null)
   const [completedBatches, setCompletedBatches] = useState(0)
   const nextBatchSeed = useRef(Math.floor(Date.now() / 1000))
@@ -89,6 +90,7 @@ export function VocabPractice({ onBack, isFavorite, onToggleFavorite }: VocabPra
       isFavorite={isFavorite}
       onToggleFavorite={onToggleFavorite}
       onBack={onBack}
+      furiganaDefault={furiganaDefault}
     />
   )
 }

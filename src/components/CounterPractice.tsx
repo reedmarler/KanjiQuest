@@ -11,13 +11,18 @@ import {
 import { FuriganaSegment, getFuriganaRuns } from './FuriganaText'
 import { SpeakableWord, useSpeakable } from './SpeakableWord'
 import { AppBackButton, AppDashboardButton } from './AppBackButton'
+import { loadDisplayPreference, saveBooleanPreference } from '../lib/displayPreferences'
 
 interface CounterPracticeProps {
   onBack: () => void
   onDashboard: () => void
+  furiganaDefault: boolean
+  englishDefault: boolean
 }
 
 type CategoryFilter = 'All' | CounterCategory
+const COUNTER_FURIGANA_STORAGE_KEY = 'kanji-quest-counter-practice-show-furigana-v1'
+const COUNTER_ENGLISH_STORAGE_KEY = 'kanji-quest-counter-practice-show-english-v1'
 
 function shuffled<T>(items: readonly T[]) {
   const copy = [...items]
@@ -249,7 +254,7 @@ function CounterStudyCard({
   )
 }
 
-export function CounterPractice({ onBack, onDashboard }: CounterPracticeProps) {
+export function CounterPractice({ onBack, onDashboard, furiganaDefault, englishDefault }: CounterPracticeProps) {
   const [category, setCategory] = useState<CategoryFilter>('All')
   const [deck, setDeck] = useState<JapaneseCounter[]>(() => [...JAPANESE_COUNTERS])
   const [index, setIndex] = useState(0)
@@ -257,8 +262,8 @@ export function CounterPractice({ onBack, onDashboard }: CounterPracticeProps) {
   const [correctIds, setCorrectIds] = useState<Set<string>>(() => new Set())
   const [completed, setCompleted] = useState(false)
   const [quizRun, setQuizRun] = useState(() => Math.floor(Math.random() * 1000))
-  const [showEnglish, setShowEnglish] = useState(true)
-  const [showFurigana, setShowFurigana] = useState(true)
+  const [showEnglish, setShowEnglish] = useState(() => loadDisplayPreference(COUNTER_ENGLISH_STORAGE_KEY, englishDefault))
+  const [showFurigana, setShowFurigana] = useState(() => loadDisplayPreference(COUNTER_FURIGANA_STORAGE_KEY, furiganaDefault))
   const [shuffleMode, setShuffleMode] = useState(false)
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false)
   const categoryPickerRef = useRef<HTMLDivElement>(null)
@@ -361,6 +366,22 @@ export function CounterPractice({ onBack, onDashboard }: CounterPracticeProps) {
     if (option === answer) {
       setCorrectIds((current) => new Set(current).add(counter.id))
     }
+  }
+
+  function toggleEnglish() {
+    setShowEnglish((visible) => {
+      const next = !visible
+      saveBooleanPreference(COUNTER_ENGLISH_STORAGE_KEY, next)
+      return next
+    })
+  }
+
+  function toggleFurigana() {
+    setShowFurigana((visible) => {
+      const next = !visible
+      saveBooleanPreference(COUNTER_FURIGANA_STORAGE_KEY, next)
+      return next
+    })
   }
 
   return (
@@ -469,8 +490,8 @@ export function CounterPractice({ onBack, onDashboard }: CounterPracticeProps) {
             quizRun={quizRun}
             showEnglish={showEnglish}
             showFurigana={showFurigana}
-            onToggleEnglish={() => setShowEnglish((visible) => !visible)}
-            onToggleFurigana={() => setShowFurigana((visible) => !visible)}
+            onToggleEnglish={toggleEnglish}
+            onToggleFurigana={toggleFurigana}
             selected={selected}
             onSelect={selectCounter}
           />

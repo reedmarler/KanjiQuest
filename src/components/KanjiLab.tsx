@@ -8,12 +8,15 @@ import type { JlptLevel } from '../lib/types'
 import { SpeakableCue, SpeakableWord, useSpeakable } from './SpeakableWord'
 import { spokenTextForCard, spokenTextForWord } from '../lib/spokenText'
 import { loadKanjiNotes, saveKanjiNotes, setKanjiNote, type KanjiNotes } from '../lib/kanjiNotes'
+import { loadDisplayPreference, saveBooleanPreference } from '../lib/displayPreferences'
 
 interface KanjiLabProps {
   onBack: () => void
   onDashboard?: () => void
   questId?: string
   onQuestComplete?: () => void
+  furiganaDefault: boolean
+  englishDefault: boolean
 }
 
 const retryDistance = 5
@@ -445,7 +448,10 @@ function entriesForQuest(questId?: string): KanjiLabEntry[] {
   })
 }
 
-export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
+const KANJI_FURIGANA_STORAGE_KEY = 'kanji-quest-kanji-lab-show-furigana-v1'
+const KANJI_ENGLISH_STORAGE_KEY = 'kanji-quest-kanji-lab-show-english-v1'
+
+export function KanjiLab({ onBack, questId, onQuestComplete, furiganaDefault, englishDefault }: KanjiLabProps) {
   const quest = getQuestById(questId)
   const questEntries = useMemo(() => entriesForQuest(questId), [questId])
   const questMode = Boolean(quest && questEntries.length)
@@ -459,8 +465,8 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
   const [entries, setEntries] = useState(() => questEntries.length ? questEntries : entriesForPath(path, 'words'))
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
-  const [furiganaVisible, setFuriganaVisible] = useState(true)
-  const [englishVisible, setEnglishVisible] = useState(true)
+  const [furiganaVisible, setFuriganaVisible] = useState(() => loadDisplayPreference(KANJI_FURIGANA_STORAGE_KEY, furiganaDefault))
+  const [englishVisible, setEnglishVisible] = useState(() => loadDisplayPreference(KANJI_ENGLISH_STORAGE_KEY, englishDefault))
   const [notes, setNotes] = useState<KanjiNotes>(loadKanjiNotes)
   const [notesOpen, setNotesOpen] = useState(false)
   const [exampleOffset, setExampleOffset] = useState(0)
@@ -618,6 +624,22 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
       return
     }
     onBack()
+  }
+
+  function toggleFurigana() {
+    setFuriganaVisible((isVisible) => {
+      const next = !isVisible
+      saveBooleanPreference(KANJI_FURIGANA_STORAGE_KEY, next)
+      return next
+    })
+  }
+
+  function toggleEnglish() {
+    setEnglishVisible((isVisible) => {
+      const next = !isVisible
+      saveBooleanPreference(KANJI_ENGLISH_STORAGE_KEY, next)
+      return next
+    })
   }
 
   function compoundLengthPicker() {
@@ -850,7 +872,7 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
                 aria-pressed={furiganaVisible}
                 aria-label="Toggle furigana"
                 title="Furigana"
-                onClick={() => setFuriganaVisible((isVisible) => !isVisible)}
+                onClick={toggleFurigana}
               >
                 ふり
               </button>
@@ -860,7 +882,7 @@ export function KanjiLab({ onBack, questId, onQuestComplete }: KanjiLabProps) {
                 aria-pressed={englishVisible}
                 aria-label="Toggle English translation"
                 title="English"
-                onClick={() => setEnglishVisible((isVisible) => !isVisible)}
+                onClick={toggleEnglish}
               >
                 EN
               </button>

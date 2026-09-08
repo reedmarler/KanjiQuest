@@ -1,23 +1,14 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react'
-import { QUESTS } from '../data/questCampaign'
 import { useDailyGoals } from '../lib/dailyGoals'
-import { isQuestComplete, type QuestProgress } from '../lib/questProgress'
 import { displayProfilePhoto, readProfilePhoto, useUserProfile } from '../lib/userProfile'
 
 type UserProfileMenuProps = {
   open: boolean
   onClose: () => void
-  learnedCount: number
-  totalCards: number
-  questProgress: QuestProgress
-  currentLevelLabel: string
   furiganaOn: boolean
   englishOn: boolean
-  speechOn: boolean
-  speechSupported: boolean
   onToggleFurigana: () => void
   onToggleEnglish: () => void
-  onToggleSpeech: () => void
   onOpenProfile: () => void
   onOpenDailyGoals: () => void
   onOpenLearningSettings: () => void
@@ -40,17 +31,10 @@ function kanjiQuestStorageSnapshot() {
 export function UserProfileMenu({
   open,
   onClose,
-  learnedCount,
-  totalCards,
-  questProgress,
-  currentLevelLabel,
   furiganaOn,
   englishOn,
-  speechOn,
-  speechSupported,
   onToggleFurigana,
   onToggleEnglish,
-  onToggleSpeech,
   onOpenProfile,
   onOpenDailyGoals,
   onOpenLearningSettings,
@@ -63,9 +47,6 @@ export function UserProfileMenu({
   const { doneCount, percent: dailyGoalPct, goals } = useDailyGoals()
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState(profile.name)
-  const questsCleared = QUESTS.filter((quest) => isQuestComplete(questProgress, quest.id)).length
-  const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
-  const questPct = QUESTS.length > 0 ? Math.round((questsCleared / QUESTS.length) * 100) : 0
 
   useEffect(() => {
     if (!open) {
@@ -202,32 +183,23 @@ export function UserProfileMenu({
         <section className="dashboard-profile-section" aria-label="Profile shortcuts">
           <button type="button" onClick={onOpenProfile}>
             <span>Profile</span>
-            <small>Account</small>
           </button>
           <button type="button" onClick={onOpenLearningSettings}>
             <span>Learning settings</span>
-            <small>{currentLevelLabel} · {furiganaOn ? 'Furigana' : 'No furi'} · {englishOn ? 'EN' : 'JP'}</small>
           </button>
           <button type="button" onClick={onOpenDailyGoals}>
             <span>Daily goal</span>
-            <small>{dailyGoalPct}%</small>
           </button>
           <button type="button" onClick={onOpenQuests}>
             <span>Progress history</span>
-            <small>{progressPct}% · {questPct}%</small>
           </button>
           <button type="button" onClick={onOpenAchievements}>
             <span>Achievements</span>
-            <small>Milestones</small>
           </button>
         </section>
 
         <section className="dashboard-profile-section dashboard-profile-preferences" aria-label="Study preferences">
           <span className="dashboard-profile-section-label">Study preferences</span>
-          <button type="button" onClick={onOpenLearningSettings}>
-            <span>Sentence difficulty</span>
-            <small>{currentLevelLabel}</small>
-          </button>
           <div className="dashboard-profile-toggle-row">
             <span>Furigana default</span>
             <button
@@ -248,20 +220,6 @@ export function UserProfileMenu({
               onClick={onToggleEnglish}
               aria-pressed={englishOn}
               aria-label={`English default ${englishOn ? 'on' : 'off'}`}
-            >
-              <i />
-            </button>
-          </div>
-          <div className="dashboard-profile-toggle-row">
-            <span>Voice</span>
-            {!speechSupported && <small>Unavailable</small>}
-            <button
-              type="button"
-              className={`dashboard-profile-switch${speechOn ? ' is-on' : ''}`}
-              onClick={onToggleSpeech}
-              disabled={!speechSupported}
-              aria-pressed={speechOn}
-              aria-label={`Voice ${speechOn ? 'on' : 'off'}`}
             >
               <i />
             </button>

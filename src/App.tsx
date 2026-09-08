@@ -26,12 +26,18 @@ import type { CardProgress } from './lib/types'
 import type { GenerationComplexity } from './lib/generationComplexity'
 import type { SentenceExercise } from './data/sentenceExercises'
 import type { DrillExercise } from './lib/drillExercises'
-import { COMPLEXITY_DISPLAY, Dashboard, HERO_SPEECH_STORAGE_KEY } from './components/Dashboard'
+import { Dashboard, HERO_SPEECH_STORAGE_KEY } from './components/Dashboard'
 import { AppHeaderControls } from './components/AppHeaderControls'
 import { UserProfileMenu } from './components/UserProfileMenu'
 import type { DailyGoalId } from './lib/dailyGoals'
 import { displayProfilePhoto, useUserProfile } from './lib/userProfile'
-import { canSpeakJapanese, stopSpeaking, watchSpeechSupport } from './lib/speech'
+import { stopSpeaking } from './lib/speech'
+import {
+  APP_ENGLISH_DEFAULT_KEY,
+  APP_FURIGANA_DEFAULT_KEY,
+  loadBooleanPreference,
+  saveBooleanPreference,
+} from './lib/displayPreferences'
 import { SessionComplete } from './components/SessionComplete'
 import type { LibraryTab } from './components/LibraryPanel'
 import type { BeginnerScript } from './data/beginnerMnemonics'
@@ -286,14 +292,19 @@ function App() {
   const [sentenceLab, setSentenceLab] = useState(false)
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [settingsExpanded, setSettingsExpanded] = useState(false)
-  const [furiganaOn, setFuriganaOn] = useState(true)
-  const [englishOn, setEnglishOn] = useState(true)
+  const [furiganaOn, setFuriganaOn] = useState(() => loadBooleanPreference(APP_FURIGANA_DEFAULT_KEY, true))
+  const [englishOn, setEnglishOn] = useState(() => loadBooleanPreference(APP_ENGLISH_DEFAULT_KEY, true))
   const [speechOn, setSpeechOn] = useState(() => window.localStorage.getItem(HERO_SPEECH_STORAGE_KEY) === 'true')
-  const [speechSupported, setSpeechSupported] = useState(canSpeakJapanese)
   const [complexity, setComplexity] = useState<GenerationComplexity>(1)
   const [userProfile] = useUserProfile()
 
-  useEffect(() => watchSpeechSupport(setSpeechSupported), [])
+  useEffect(() => {
+    saveBooleanPreference(APP_FURIGANA_DEFAULT_KEY, furiganaOn)
+  }, [furiganaOn])
+
+  useEffect(() => {
+    saveBooleanPreference(APP_ENGLISH_DEFAULT_KEY, englishOn)
+  }, [englishOn])
 
   useEffect(() => {
     window.localStorage.setItem(HERO_SPEECH_STORAGE_KEY, String(speechOn))
@@ -537,17 +548,10 @@ function App() {
     <UserProfileMenu
       open={profileMenuOpen}
       onClose={() => setProfileMenuOpen(false)}
-      learnedCount={learnedCount}
-      totalCards={CARD_TOTAL}
-      questProgress={questProgress}
-      currentLevelLabel={COMPLEXITY_DISPLAY[complexity].level}
       furiganaOn={furiganaOn}
       englishOn={englishOn}
-      speechOn={speechOn}
-      speechSupported={speechSupported}
       onToggleFurigana={() => setFuriganaOn((value) => !value)}
       onToggleEnglish={() => setEnglishOn((value) => !value)}
-      onToggleSpeech={() => setSpeechOn((value) => !value)}
       onOpenProfile={() => goToView('profile')}
       onOpenDailyGoals={() => goToView('daily-goals')}
       onOpenLearningSettings={() => goToView('settings')}
@@ -604,6 +608,8 @@ function App() {
             questId={activeQuestId}
             onBack={() => setView(practiceReturnView)}
             onDashboard={() => setView('dashboard')}
+            furiganaDefault={furiganaOn}
+            englishDefault={englishOn}
             onQuestComplete={activeQuestId
               ? () => {
                   finishQuestStep('kanji')
@@ -626,6 +632,8 @@ function App() {
             questTitle={activeQuest?.title}
             onBack={() => setView(practiceReturnView)}
             onDashboard={() => setView('dashboard')}
+            furiganaDefault={furiganaOn}
+            englishDefault={englishOn}
             onQuestComplete={activeQuestId && questVocabTopicId
               ? () => {
                   finishQuestStep('vocab')
@@ -643,7 +651,12 @@ function App() {
     return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Counters" />}>
-          <CounterPractice onBack={() => setView('study-tools')} onDashboard={() => setView('dashboard')} />
+          <CounterPractice
+            onBack={() => setView('study-tools')}
+            onDashboard={() => setView('dashboard')}
+            furiganaDefault={furiganaOn}
+            englishDefault={englishOn}
+          />
         </Suspense>
       </div>,
     )
@@ -738,15 +751,10 @@ function App() {
         <Suspense fallback={<RouteLoading label="Settings" />}>
           <SettingsPage
             onBack={() => setView('dashboard')}
-            complexity={complexity}
-            onComplexityChange={setComplexity}
             furiganaOn={furiganaOn}
             englishOn={englishOn}
-            speechOn={speechOn}
-            speechSupported={speechSupported}
             onToggleFurigana={() => setFuriganaOn((value) => !value)}
             onToggleEnglish={() => setEnglishOn((value) => !value)}
-            onToggleSpeech={() => setSpeechOn((value) => !value)}
           />
         </Suspense>
       </div>,
@@ -1005,6 +1013,7 @@ function App() {
           <GrammarPracticeLab
             onBack={() => setView('additional-tools')}
             onDashboard={() => setView('dashboard')}
+            furiganaDefault={furiganaOn}
             isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
             onToggleFavorite={toggleDrillFavorite}
           />
@@ -1081,6 +1090,7 @@ function App() {
           <GrammarPractice
             onBack={() => setView(practiceReturnView)}
             onDashboard={() => setView('dashboard')}
+            furiganaDefault={furiganaOn}
             isFavorite={(exercise) => isDrillExerciseFavorite(favoriteSentences, exercise)}
             onToggleFavorite={toggleDrillFavorite}
             questId={activeQuestId}
@@ -1138,6 +1148,7 @@ function App() {
               onToggleInfiniteMode={() => setInfiniteBuilderMode((enabled) => !enabled)}
               isFavorite={isExerciseFavorite(favoriteSentences, item.exercise)}
               onToggleFavorite={() => toggleFavoriteSentence(item.exercise)}
+              furiganaDefault={furiganaOn}
             />
           </Suspense>
         </div>,
