@@ -464,7 +464,7 @@ function App() {
   const hubChrome = showHubChrome
     ? (
       <AppHeaderControls
-        hideUser={settingsExpanded || profileMenuOpen}
+        hideUser={profileMenuOpen}
         profileOpen={profileMenuOpen}
         settingsOpen={settingsExpanded}
         onProfile={toggleProfileMenu}
@@ -485,7 +485,7 @@ function App() {
   const desktopNav = (
     <DesktopPrimaryNav
       currentView={view}
-      hideUser={settingsExpanded || profileMenuOpen}
+      hideUser={profileMenuOpen}
       profileOpen={profileMenuOpen}
       settingsOpen={settingsExpanded}
       onProfile={toggleProfileMenu}
@@ -509,7 +509,6 @@ function App() {
       englishOn={englishOn}
       speechOn={speechOn}
       speechSupported={speechSupported}
-      speechDetail={speechOn ? 'On' : 'Off'}
       onToggleFurigana={() => setFuriganaOn((value) => !value)}
       onToggleEnglish={() => setEnglishOn((value) => !value)}
       onToggleSpeech={() => setSpeechOn((value) => !value)}

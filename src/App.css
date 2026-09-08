@@ -282,16 +282,16 @@ body:has(.dashboard) {
     top: 0;
     z-index: 40;
     display: grid;
-    grid-template-columns: 1.7rem max-content 1.7rem;
+    grid-template-columns: 1.7rem minmax(0, 1fr) 1.7rem;
     align-items: center;
     column-gap: 0.45rem;
     box-sizing: border-box;
-    width: max-content;
-    max-width: calc(100% - 2rem);
+    width: 100%;
+    max-width: none;
     height: 1.85rem;
     min-height: 1.85rem;
     max-height: 1.85rem;
-    margin: 0 auto 0.35rem;
+    margin: 0 0 0.35rem;
     padding: 0;
     overflow: visible;
     border: 0;
@@ -731,6 +731,9 @@ body:has(.dashboard) {
   border-radius: 999px;
   background: color-mix(in srgb, var(--text-muted) 28%, transparent);
   cursor: pointer;
+  /* The knob slides first; the track colour follows a beat later so turning
+     the switch off reads as "move, then unhighlight". */
+  transition: background-color 150ms ease 60ms;
 }
 
 .dashboard-profile-section .dashboard-profile-switch i {
@@ -741,7 +744,7 @@ body:has(.dashboard) {
   background: color-mix(in srgb, var(--surface) 92%, white);
   box-shadow: 0 0.08rem 0.18rem color-mix(in srgb, #000 28%, transparent);
   transform: translateX(0);
-  transition: transform 140ms ease;
+  transition: transform 150ms ease;
 }
 
 .dashboard-profile-section .dashboard-profile-switch.is-on {

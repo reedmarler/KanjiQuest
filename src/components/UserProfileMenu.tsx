@@ -13,7 +13,6 @@ type UserProfileMenuProps = {
   englishOn: boolean
   speechOn: boolean
   speechSupported: boolean
-  speechDetail: string
   onToggleFurigana: () => void
   onToggleEnglish: () => void
   onToggleSpeech: () => void
@@ -46,7 +45,6 @@ export function UserProfileMenu({
   englishOn,
   speechOn,
   speechSupported,
-  speechDetail,
   onToggleFurigana,
   onToggleEnglish,
   onToggleSpeech,
@@ -209,7 +207,7 @@ export function UserProfileMenu({
           </div>
           <div className="dashboard-profile-toggle-row">
             <span>Voice</span>
-            <small>{speechSupported ? speechDetail : 'Unavailable'}</small>
+            {!speechSupported && <small>Unavailable</small>}
             <button
               type="button"
               className={`dashboard-profile-switch${speechOn ? ' is-on' : ''}`}
