@@ -601,7 +601,7 @@ body:has(.dashboard) {
 .dashboard-profile-section-label,
 .dashboard-profile-today small {
   color: var(--kyogre-light);
-  font: 800 0.6rem/1 'Outfit', system-ui, sans-serif;
+  font: 800 0.66rem/1 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -610,7 +610,7 @@ body:has(.dashboard) {
   margin: 0;
   overflow: hidden;
   color: var(--text);
-  font-size: 1.22rem;
+  font-size: 1.34rem;
   line-height: 1.1;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -635,7 +635,7 @@ body:has(.dashboard) {
   border-bottom: 1px solid color-mix(in srgb, var(--kyogre-light) 48%, transparent);
   background: transparent;
   color: var(--text);
-  font: 800 1.22rem/1.1 'Outfit', system-ui, sans-serif;
+  font: 800 1.34rem/1.1 'Outfit', system-ui, sans-serif;
 }
 
 .dashboard-profile-name-form input:focus {
@@ -683,7 +683,7 @@ body:has(.dashboard) {
 }
 
 .dashboard-profile-today b {
-  font-size: 1.15rem;
+  font-size: 1.28rem;
   line-height: 1;
 }
 
@@ -719,7 +719,7 @@ body:has(.dashboard) {
   align-items: center;
   gap: 0.2rem 0.55rem;
   width: 100%;
-  min-height: 2.45rem;
+  min-height: 2.62rem;
   padding: 0.48rem 0.55rem;
   border: 1px solid transparent;
   border-radius: 8px;
@@ -747,6 +747,14 @@ body:has(.dashboard) {
   text-align: center;
 }
 
+.dashboard-profile-section button .dashboard-profile-display-toggle {
+  overflow: visible;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .dashboard-profile-section .dashboard-profile-display-toggle:not(.is-active) {
   border-color: color-mix(in srgb, var(--text-muted) 18%, transparent);
   background: color-mix(in srgb, #000 18%, var(--surface-2));
@@ -767,7 +775,7 @@ body:has(.dashboard) {
 
 .dashboard-profile-section button span {
   overflow: hidden;
-  font-size: 0.86rem;
+  font-size: 0.96rem;
   font-weight: 800;
   line-height: 1.15;
   text-overflow: ellipsis;
@@ -778,7 +786,7 @@ body:has(.dashboard) {
   justify-self: end;
   overflow: hidden;
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: 0.74rem;
   line-height: 1.2;
   text-align: right;
   text-overflow: ellipsis;
@@ -791,16 +799,29 @@ body:has(.dashboard) {
 
 .dashboard-profile-toggle-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.35rem 0.55rem;
-  min-height: 2.45rem;
+  width: 100%;
+  min-height: 2.62rem;
   padding: 0.42rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
-.dashboard-profile-toggle-row span {
+.dashboard-profile-toggle-row:hover {
+  border-color: color-mix(in srgb, var(--kyogre-light) 28%, transparent);
+  background: color-mix(in srgb, var(--kyogre) 10%, var(--surface-2));
+}
+
+.dashboard-profile-toggle-label {
   overflow: hidden;
-  font-size: 0.86rem;
+  font-size: 0.96rem;
   font-weight: 800;
   line-height: 1.15;
   text-overflow: ellipsis;

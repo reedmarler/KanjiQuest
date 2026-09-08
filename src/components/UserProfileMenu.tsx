@@ -198,32 +198,32 @@ export function UserProfileMenu({
           </button>
         </section>
 
-        <section className="dashboard-profile-section dashboard-profile-preferences" aria-label="Default Preferences">
-          <span className="dashboard-profile-section-label">Default Preferences</span>
-          <div className="dashboard-profile-toggle-row">
-            <span>Furigana</span>
-            <button
-              type="button"
-              className={`control-chip control-chip-compact app-display-toggle dashboard-profile-display-toggle${furiganaOn ? ' is-active' : ''}`}
-              onClick={onToggleFurigana}
-              aria-pressed={furiganaOn}
-              aria-label={`Furigana ${furiganaOn ? 'on' : 'off'}`}
-            >
+        <section className="dashboard-profile-section dashboard-profile-preferences" aria-label="App-Wide Defaults">
+          <span className="dashboard-profile-section-label">App-Wide Defaults</span>
+          <button
+            type="button"
+            className="dashboard-profile-toggle-row"
+            onClick={onToggleFurigana}
+            aria-pressed={furiganaOn}
+            aria-label={`Furigana ${furiganaOn ? 'on' : 'off'}`}
+          >
+            <span className="dashboard-profile-toggle-label">Furigana</span>
+            <span className={`control-chip control-chip-compact app-display-toggle dashboard-profile-display-toggle${furiganaOn ? ' is-active' : ''}`} aria-hidden="true">
               &#12405;&#12426;
-            </button>
-          </div>
-          <div className="dashboard-profile-toggle-row">
-            <span>English</span>
-            <button
-              type="button"
-              className={`control-chip control-chip-compact app-display-toggle dashboard-profile-display-toggle${englishOn ? ' is-active' : ''}`}
-              onClick={onToggleEnglish}
-              aria-pressed={englishOn}
-              aria-label={`English ${englishOn ? 'on' : 'off'}`}
-            >
+            </span>
+          </button>
+          <button
+            type="button"
+            className="dashboard-profile-toggle-row"
+            onClick={onToggleEnglish}
+            aria-pressed={englishOn}
+            aria-label={`English ${englishOn ? 'on' : 'off'}`}
+          >
+            <span className="dashboard-profile-toggle-label">English</span>
+            <span className={`control-chip control-chip-compact app-display-toggle dashboard-profile-display-toggle${englishOn ? ' is-active' : ''}`} aria-hidden="true">
               EN
-            </button>
-          </div>
+            </span>
+          </button>
         </section>
 
         <section className="dashboard-profile-section dashboard-profile-data" aria-label="Data and account">
