@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 const PROFILE_STORAGE_KEY = 'kanji-quest-user-profile-v1'
 const PROFILE_EVENT = 'kanji-quest-user-profile-change'
@@ -99,6 +99,12 @@ export async function readProfilePhoto(file: File) {
 
 export function useUserProfile() {
   const [profile, setProfile] = useState(loadUserProfile)
+  // Mirrors the current profile so updateProfile can merge a partial without a
+  // functional setState updater — the persistence side effect (which dispatches
+  // a DOM event other subscribers react to) must run in the caller's event
+  // handler, never inside a render-phase updater.
+  const profileRef = useRef(profile)
+  profileRef.current = profile
 
   useEffect(() => {
     function sync() {
@@ -109,16 +115,16 @@ export function useUserProfile() {
   }, [])
 
   const updateProfile = useCallback((partial: Partial<UserProfile>) => {
-    setProfile((current) => {
-      const next: UserProfile = {
-        name: (partial.name ?? current.name).trim() || DEFAULT_NAME,
-        photo: partial.photo === undefined ? current.photo : partial.photo,
-        tagline: (partial.tagline === undefined ? current.tagline : partial.tagline).trim().slice(0, TAGLINE_MAX),
-        createdAt: current.createdAt || Date.now(),
-      }
-      saveUserProfile(next)
-      return next
-    })
+    const current = profileRef.current
+    const next: UserProfile = {
+      name: (partial.name ?? current.name).trim() || DEFAULT_NAME,
+      photo: partial.photo === undefined ? current.photo : partial.photo,
+      tagline: (partial.tagline === undefined ? current.tagline : partial.tagline).trim().slice(0, TAGLINE_MAX),
+      createdAt: current.createdAt || Date.now(),
+    }
+    profileRef.current = next
+    setProfile(next)
+    saveUserProfile(next)
   }, [])
 
   return [profile, updateProfile] as const

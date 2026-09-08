@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 const GOALS_STORAGE_KEY = 'kanji-quest-daily-goals-v1'
 const GOALS_EVENT = 'kanji-quest-daily-goals-change'
@@ -64,6 +64,10 @@ export function dailyGoalPercent(doneCount: number) {
 
 export function useDailyGoals() {
   const [done, setDone] = useState<DailyGoalId[]>(() => loadDailyGoalProgress().done)
+  // See useUserProfile: persisting dispatches a DOM event other subscribers
+  // react to, so it must not run inside a render-phase setState updater.
+  const doneRef = useRef(done)
+  doneRef.current = done
 
   useEffect(() => {
     function sync() {
@@ -73,22 +77,22 @@ export function useDailyGoals() {
     return () => window.removeEventListener(GOALS_EVENT, sync)
   }, [])
 
-  const toggleGoal = useCallback((id: DailyGoalId) => {
-    setDone((current) => {
-      const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
-      saveDailyGoalProgress(next)
-      return next
-    })
+  const commit = useCallback((next: DailyGoalId[]) => {
+    doneRef.current = next
+    setDone(next)
+    saveDailyGoalProgress(next)
   }, [])
 
+  const toggleGoal = useCallback((id: DailyGoalId) => {
+    const current = doneRef.current
+    commit(current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+  }, [commit])
+
   const completeGoal = useCallback((id: DailyGoalId) => {
-    setDone((current) => {
-      if (current.includes(id)) return current
-      const next = [...current, id]
-      saveDailyGoalProgress(next)
-      return next
-    })
-  }, [])
+    const current = doneRef.current
+    if (current.includes(id)) return
+    commit([...current, id])
+  }, [commit])
 
   return {
     goals: DAILY_GOALS,
