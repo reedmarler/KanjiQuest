@@ -207,12 +207,14 @@ function MobileQuestLanding({
 
   return (
     <section className="quest-mobile-landing" aria-label="Featured quest">
-      <img className="quest-mobile-art" src="/quest-mobile-landing.jpg" alt={`${quest.title} featured quest`} />
-      <button type="button" className="quest-mobile-hit quest-mobile-hit-profile" onClick={onOpenQuest} aria-label="Open featured quest details" />
-      <button type="button" className="quest-mobile-hit quest-mobile-hit-ink" onClick={onOpenInkRoad} aria-label="Open Ink Road map" />
-      <button type="button" className="quest-mobile-hit quest-mobile-hit-shop" onClick={onOpenQuest} aria-label="Open quest rewards" />
-      <button type="button" className="quest-mobile-hit quest-mobile-hit-settings" onClick={onOpenSettings} aria-label="Open settings" />
-      <button type="button" className="quest-mobile-hit quest-mobile-hit-challenge" onClick={() => onOpenStep(nextStep)} aria-label={`Challenge ${quest.title}`} />
+      <div className="quest-mobile-frame">
+        <img className="quest-mobile-art" src="/quest-mobile-landing.jpg" alt={`${quest.title} featured quest`} />
+        <button type="button" className="quest-mobile-hit quest-mobile-hit-profile" onClick={onOpenQuest} aria-label="Open featured quest details" />
+        <button type="button" className="quest-mobile-hit quest-mobile-hit-ink" onClick={onOpenInkRoad} aria-label="Open Ink Road map" />
+        <button type="button" className="quest-mobile-hit quest-mobile-hit-shop" onClick={onOpenQuest} aria-label="Open quest rewards" />
+        <button type="button" className="quest-mobile-hit quest-mobile-hit-settings" onClick={onOpenSettings} aria-label="Open settings" />
+        <button type="button" className="quest-mobile-hit quest-mobile-hit-challenge" onClick={() => onOpenStep(nextStep)} aria-label={`Challenge ${quest.title}`} />
+      </div>
     </section>
   )
 }
