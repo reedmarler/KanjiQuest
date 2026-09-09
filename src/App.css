@@ -13564,22 +13564,19 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 /* Simplified quest selection: one current mission, one quiet road. */
-.quest-hub-simple {
-  width: min(100%, 54rem);
+.quest-trail-page {
+  width: min(100%, 40rem);
 }
 
-/* The corner-pinned profile/settings pair (same as the Dashboard's) would
-   otherwise share this row and force the count and Ink Road preview to
-   squeeze into whatever width is left between them, wrapping onto two
-   lines — drop the whole row below the pinned pair instead, the same way
-   the tool menus' headings do. */
-.quest-hub-simple .quest-topbar {
+/* Clear the corner-pinned profile/settings pair (same as the Dashboard's)
+   so the header does not tuck under it on mobile. */
+.quest-trail-page .quest-trail-goal {
   margin-top: 2.2rem;
 }
 
-@media (max-width: 430px) {
-  .quest-hub-simple .quest-topbar > span {
-    font-size: .48rem;
+@media (min-width: 721px) {
+  .quest-trail-page .quest-trail-goal {
+    margin-top: 0;
   }
 }
 
@@ -15455,159 +15452,144 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 
-/* --- Quest hub: the journey ------------------------------------------- */
 
-/* States the destination before the twelve stops to it. Without this the
-   quest list reads as chores; with it, each one is a step toward the lantern. */
-.journey-goal {
-  display: flex;
-  gap: .9rem;
-  align-items: flex-start;
-  margin-bottom: .7rem;
-  padding: 1rem 1.1rem;
+/* --- Quest hub: the road --------------------------------------------------
+   Almost wordless. A lantern mark and a relit-fraction up top; below it a
+   line of stops, each one a kanji tile with the guardian who waits there
+   and five step-glyphs that fill in as you clear them. */
+
+.quest-trail-goal {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: .7rem;
+  margin-bottom: 1.1rem;
+  padding: .85rem .95rem;
   border: 1px solid color-mix(in srgb, var(--sakura) 30%, var(--border));
   border-radius: 16px;
   background:
-    radial-gradient(120% 140% at 88% 0%, color-mix(in srgb, var(--sakura) 13%, transparent), transparent 62%),
+    radial-gradient(120% 160% at 92% 0%, color-mix(in srgb, var(--sakura) 15%, transparent), transparent 60%),
     var(--surface);
 }
 
-.journey-goal-mark {
-  flex: none;
+.quest-trail-goal-mark {
   display: grid;
   place-items: center;
-  width: 3rem;
-  height: 3rem;
-  border: 1px solid color-mix(in srgb, var(--sakura) 42%, var(--border));
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid color-mix(in srgb, var(--sakura) 44%, var(--border));
   border-radius: 12px;
-  background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+  background: color-mix(in srgb, var(--sakura) 16%, var(--surface-2));
   color: var(--sakura-light);
-  font-size: 1.5rem;
-  line-height: 1;
+  font: 400 1.4rem/1 'Noto Sans JP', sans-serif;
 }
 
-.journey-goal-copy { flex: 1; min-width: 0; }
-
-.journey-goal-eyebrow {
-  color: var(--sakura-light);
-  font-size: .5rem;
-  font-weight: 800;
-  letter-spacing: .16em;
-}
-
-.journey-goal-copy h1 {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: .5rem;
-  margin: .2rem 0 .3rem;
-  font-size: 1.12rem;
-  line-height: 1.15;
-}
-
-.journey-goal-copy h1 small {
-  color: var(--text-muted);
-  font-size: .66rem;
-  font-weight: 600;
-}
-
-.journey-goal-copy > p {
-  margin: 0 0 .68rem;
-  color: var(--text-muted);
-  font-size: .63rem;
-  line-height: 1.5;
-}
-
-.journey-goal-copy > p b { color: var(--text); font-weight: 700; }
-
-.journey-goal-track {
-  height: .34rem;
+.quest-trail-goal-meter {
+  height: .42rem;
+  overflow: hidden;
   border-radius: 999px;
   background: color-mix(in srgb, var(--text-muted) 20%, transparent);
-  overflow: hidden;
 }
 
-.journey-goal-fill {
+.quest-trail-goal-meter > i {
+  display: block;
   height: 100%;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--sakura), var(--sakura-light));
   transition: width 400ms ease;
 }
 
-.journey-goal-tally {
-  display: flex;
-  align-items: baseline;
-  gap: .34rem;
-  margin-top: .4rem;
-  color: var(--text-muted);
-  font-size: .57rem;
+.quest-trail-goal-count {
+  color: var(--sakura-light);
+  font: 800 1.05rem/1 'Outfit', system-ui, sans-serif;
 }
 
-.journey-goal-tally b { color: var(--sakura-light); font-size: .8rem; }
-
-/* --- Quest hub: the road -----------------------------------------------
-   One continuous path for the whole campaign, arcs marked as gates along
-   it rather than as separate boxed sections — the map is the menu, so it
-   reads as one road rather than a stack of chore lists. */
-
-.quest-path-gate {
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  margin: 1rem 0 .55rem -1.15rem;
-  padding-left: 1.15rem;
+.quest-trail-goal-count span {
   color: var(--text-muted);
+  font-size: .7rem;
+  font-weight: 700;
 }
 
-.quest-path-gate-mark {
-  flex: none;
+.quest-trail-map-link {
   display: grid;
   place-items: center;
-  width: 1.7rem;
-  height: 1.7rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--surface-2);
-  color: var(--sakura-light);
-  font-size: .85rem;
-  line-height: 1;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease;
 }
 
-.quest-path-gate-copy { display: grid; gap: .02rem; min-width: 0; }
-.quest-path-gate-copy b { font-size: .68rem; color: var(--text); }
-.quest-path-gate-copy small { color: var(--text-muted); font-size: .48rem; }
+.quest-trail-map-link:hover {
+  border-color: color-mix(in srgb, var(--sakura) 42%, var(--border));
+  color: var(--sakura-light);
+}
 
-/* The path itself. The connecting line is what makes a list of buttons read
-   as consecutive stops rather than a menu of options. */
-.journey-path {
+/* The road. A single line runs behind every stop so it reads as one path. */
+.quest-trail {
   position: relative;
   margin: 0;
-  padding: 0 0 0 1.15rem;
+  padding: 0 0 0 1.9rem;
   list-style: none;
 }
 
-.journey-path::before {
+.quest-trail::before {
   content: '';
   position: absolute;
-  left: .48rem;
-  top: .9rem;
-  bottom: .9rem;
+  left: .69rem;
+  top: 1.4rem;
+  bottom: 1.4rem;
   width: 2px;
   border-radius: 2px;
-  background: color-mix(in srgb, var(--text-muted) 22%, transparent);
+  background: color-mix(in srgb, var(--text-muted) 24%, transparent);
 }
 
-.journey-path > li { position: relative; }
+.quest-trail > li { position: relative; }
 
-.journey-stop {
+/* Arc change: just the arc's kanji on the line, no chapter blurb. */
+.quest-trail-gate {
   display: flex;
   align-items: center;
-  gap: .6rem;
+  margin: 1rem 0 .6rem -1.9rem;
+  padding-left: 1.9rem;
+}
+
+.quest-trail-gate::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  margin-left: .55rem;
+  background: color-mix(in srgb, var(--sakura) 26%, var(--border));
+}
+
+.quest-trail-gate > span {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-left: -.02rem;
+  border: 1px solid color-mix(in srgb, var(--sakura) 40%, var(--border));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--sakura) 12%, var(--surface-2));
+  color: var(--sakura-light);
+  font: 400 .8rem/1 'Noto Sans JP', sans-serif;
+}
+
+.quest-trail-stop {
+  display: grid;
+  grid-template-columns: 1.4rem 3.4rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .7rem;
   width: 100%;
-  margin: 0;
-  padding: .5rem .6rem;
+  margin: .12rem 0;
+  padding: .5rem .55rem;
   border: 1px solid transparent;
-  border-radius: 11px;
+  border-radius: 14px;
   background: transparent;
   color: var(--text);
   font: inherit;
@@ -15616,109 +15598,215 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   transition: border-color 140ms ease, background 140ms ease;
 }
 
-.journey-stop-dot {
-  position: relative;
-  z-index: 1;
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-left: -1.4rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--text-muted);
-  font-size: .58rem;
-  font-weight: 800;
-}
-
-.journey-stop-copy { display: grid; gap: .06rem; min-width: 0; }
-.journey-stop-copy b { font-size: .7rem; }
-.journey-stop-copy small { color: var(--text-muted); font-size: .54rem; }
-
-.journey-stop:not(:disabled):hover {
+.quest-trail-stop:not(:disabled):hover {
   border-color: var(--border);
   background: var(--surface-2);
 }
 
-.journey-stop.is-done .journey-stop-dot {
-  border-color: color-mix(in srgb, var(--rayquaza) 52%, var(--border));
-  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface));
+/* Spine marker — sits on the line. Number until cleared, then a check. */
+.quest-trail-node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-left: -1.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font: 800 .56rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.quest-trail-stop.is-done .quest-trail-node {
+  border-color: color-mix(in srgb, var(--rayquaza) 55%, var(--border));
+  background: color-mix(in srgb, var(--rayquaza) 24%, var(--surface));
   color: var(--rayquaza-light);
 }
 
-.journey-stop.is-current {
-  border-color: color-mix(in srgb, var(--sakura) 45%, var(--border));
-  background: color-mix(in srgb, var(--sakura) 10%, var(--surface-2));
-}
-
-.journey-stop.is-current .journey-stop-dot {
+.quest-trail-stop.is-current .quest-trail-node {
   border-color: var(--sakura);
-  background: color-mix(in srgb, var(--sakura) 26%, var(--surface));
+  background: color-mix(in srgb, var(--sakura) 28%, var(--surface));
   color: var(--sakura-light);
 }
 
-.journey-stop:disabled { cursor: not-allowed; opacity: .5; }
-
-.journey-stop-flag {
-  margin-left: auto;
-  padding: .12rem .38rem;
-  border: 1px solid color-mix(in srgb, var(--gold, #d9b45a) 50%, var(--border));
-  border-radius: 999px;
-  color: var(--gold, #d9b45a);
-  font-size: .45rem;
-  font-weight: 800;
-  letter-spacing: .1em;
-  white-space: nowrap;
+/* The quest's own kanji, the guardian tucked into its corner. */
+.quest-trail-symbol {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
 }
 
-/* A quiet ring around wherever the traveller actually stands, so the road
-   reads at a glance instead of needing the "in progress" label read out. */
-@keyframes journey-stop-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 55%, transparent); }
+.quest-trail-stop.is-current .quest-trail-symbol {
+  border-color: color-mix(in srgb, var(--sakura) 48%, var(--border));
+  background:
+    radial-gradient(120% 120% at 50% 0%, color-mix(in srgb, var(--sakura) 16%, transparent), transparent 70%),
+    color-mix(in srgb, var(--surface-2) 82%, transparent);
+}
+
+.quest-trail-stop.is-done .quest-trail-symbol {
+  border-color: color-mix(in srgb, var(--rayquaza) 40%, var(--border));
+}
+
+.quest-trail-symbol-kanji {
+  color: var(--text);
+  font: 400 1.9rem/1 'Noto Sans JP', sans-serif;
+}
+
+.quest-trail-symbol-kanji[data-len='2'] { font-size: 1.15rem; letter-spacing: -.02em; }
+.quest-trail-symbol-kanji[data-len='3'] { font-size: .86rem; }
+
+.quest-trail-stop.is-locked .quest-trail-symbol-kanji {
+  font-size: 1.1rem;
+  filter: grayscale(1);
+  opacity: .5;
+}
+
+.quest-trail-guardian {
+  position: absolute;
+  right: -.4rem;
+  bottom: -.4rem;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  overflow: hidden;
+  border: 1.5px solid var(--surface);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sakura) 20%, var(--surface-2));
+  color: var(--sakura-light);
+  font: 400 .62rem/1 'Noto Sans JP', sans-serif;
+}
+
+.quest-trail-guardian img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.quest-trail-finale {
+  position: absolute;
+  top: -.42rem;
+  left: -.36rem;
+  color: var(--gold, #d9b45a);
+  font-size: .8rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, #000 40%, transparent));
+}
+
+/* Five steps as glyph chips: 語 漢 文 話 戦, filled as they're cleared. */
+.quest-trail-steps {
+  display: flex;
+  gap: .28rem;
+  min-width: 0;
+}
+
+.quest-trail-step {
+  display: grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: color-mix(in srgb, var(--text-muted) 70%, transparent);
+  font: 400 .74rem/1 'Noto Sans JP', sans-serif;
+  font-style: normal;
+}
+
+.quest-trail-step.is-done {
+  border-color: color-mix(in srgb, var(--rayquaza) 48%, var(--border));
+  background: color-mix(in srgb, var(--rayquaza) 20%, var(--surface-2));
+  color: var(--rayquaza-light);
+}
+
+.quest-trail-step.is-next {
+  border-color: color-mix(in srgb, var(--sakura) 55%, var(--border));
+  background: color-mix(in srgb, var(--sakura) 16%, var(--surface-2));
+  color: var(--sakura-light);
+}
+
+.quest-trail-stop.is-locked .quest-trail-step {
+  border-style: dashed;
+  opacity: .4;
+}
+
+.quest-trail-level {
+  justify-self: end;
+  padding: .12rem .38rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font: 800 .5rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: .06em;
+}
+
+.quest-trail-level.lvl-N5 { border-color: color-mix(in srgb, var(--rayquaza) 40%, var(--border)); color: var(--rayquaza-light); }
+.quest-trail-level.lvl-N4 { border-color: color-mix(in srgb, var(--kyogre-light) 40%, var(--border)); color: var(--kyogre-light); }
+.quest-trail-level.lvl-N3 { border-color: color-mix(in srgb, var(--sakura) 44%, var(--border)); color: var(--sakura-light); }
+
+.quest-trail-stop.is-locked { cursor: not-allowed; opacity: .55; }
+.quest-trail-stop.is-locked .quest-trail-level { color: var(--text-muted); border-color: var(--border); }
+
+/* A quiet ring on wherever the traveller stands, and the two-beat
+   "you cleared that / this opened" when a quest flips complete. */
+@keyframes quest-trail-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 50%, transparent); }
   50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--sakura) 0%, transparent); }
 }
 
-.journey-stop.is-current .journey-stop-dot {
-  animation: journey-stop-pulse 2.2s ease-in-out infinite;
+.quest-trail-stop.is-current .quest-trail-node {
+  animation: quest-trail-pulse 2.2s ease-in-out infinite;
 }
 
-/* The two beats of "you just did that, and this is what opened up" —
-   the whole of what "movement" along the path looks like here. */
-@keyframes journey-stop-cleared-pop {
+@keyframes quest-trail-pop {
   0% { transform: scale(1); }
   40% { transform: scale(1.4); }
   65% { transform: scale(.9); }
   100% { transform: scale(1); }
 }
 
-.journey-stop.is-just-cleared .journey-stop-dot {
-  animation: journey-stop-cleared-pop 620ms cubic-bezier(.34, 1.56, .64, 1);
+.quest-trail-stop.is-just-cleared .quest-trail-node {
+  animation: quest-trail-pop 620ms cubic-bezier(.34, 1.56, .64, 1);
 }
 
-@keyframes journey-stop-unlock-ping {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 65%, transparent); }
+@keyframes quest-trail-ping {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 60%, transparent); }
   100% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--sakura) 0%, transparent); }
 }
 
-.journey-stop.is-just-unlocked .journey-stop-dot {
-  animation: journey-stop-unlock-ping 900ms ease-out 2;
+.quest-trail-stop.is-just-unlocked .quest-trail-node {
+  animation: quest-trail-ping 900ms ease-out 2;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .journey-stop.is-current .journey-stop-dot,
-  .journey-stop.is-just-cleared .journey-stop-dot,
-  .journey-stop.is-just-unlocked .journey-stop-dot {
+  .quest-trail-stop.is-current .quest-trail-node,
+  .quest-trail-stop.is-just-cleared .quest-trail-node,
+  .quest-trail-stop.is-just-unlocked .quest-trail-node {
     animation: none;
   }
 }
 
-@media (max-width: 720px) {
-  .journey-goal { padding: .85rem .9rem; gap: .7rem; }
-  .journey-goal-mark { width: 2.5rem; height: 2.5rem; font-size: 1.25rem; }
-  .journey-goal-copy h1 { font-size: .98rem; }
-  .quest-path-gate { margin-left: -1.15rem; }
+@media (max-width: 460px) {
+  .quest-trail-stop {
+    grid-template-columns: 1.4rem 3rem minmax(0, 1fr);
+    gap: .55rem;
+    row-gap: .3rem;
+  }
+  .quest-trail-symbol { width: 3rem; height: 3rem; }
+  .quest-trail-symbol-kanji { font-size: 1.65rem; }
+  .quest-trail-level {
+    grid-column: 2 / -1;
+    justify-self: start;
+  }
+  .quest-trail-steps { gap: .22rem; }
+  .quest-trail-step { width: 1.4rem; height: 1.4rem; font-size: .66rem; }
 }
 
 /* --- Quest sheet: tap a stop, see the whole story ----------------------

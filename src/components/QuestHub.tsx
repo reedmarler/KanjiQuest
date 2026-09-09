@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CAMPAIGN_ARCS, CAMPAIGN_GOAL, QUESTS, isQuestUnlocked, type QuestDefinition } from '../data/questCampaign'
+import { CAMPAIGN_GOAL, QUESTS, getArcById, isQuestUnlocked, type QuestDefinition } from '../data/questCampaign'
 import { completedQuestSteps, isQuestComplete, QUEST_STEPS, type QuestProgress, type QuestStep } from '../lib/questProgress'
 import { earnedRelics } from '../lib/relics'
 
@@ -13,12 +13,18 @@ interface QuestHubProps {
   progress: QuestProgress
 }
 
-const STEP_DETAILS: ReadonlyArray<{ id: QuestStep; number: string; title: string }> = [
-  { id: 'vocab', number: '01', title: 'Prepare' },
-  { id: 'kanji', number: '02', title: 'Read kanji' },
-  { id: 'grammar', number: '03', title: 'Use grammar' },
-  { id: 'scene', number: '04', title: 'Read scene' },
-  { id: 'checkpoint', number: '05', title: 'Guardian battle' },
+/**
+ * The five things a quest asks of you, each as a single kanji so the hub can
+ * show what a quest involves without a line of prose per stop: 語 learn the
+ * words, 漢 read its kanji, 文 drill its grammar, 話 read the scene, 戦 face
+ * the guardian.
+ */
+const STEP_DETAILS: ReadonlyArray<{ id: QuestStep; number: string; title: string; glyph: string }> = [
+  { id: 'vocab', number: '01', title: 'Prepare', glyph: '語' },
+  { id: 'kanji', number: '02', title: 'Read kanji', glyph: '漢' },
+  { id: 'grammar', number: '03', title: 'Use grammar', glyph: '文' },
+  { id: 'scene', number: '04', title: 'Read scene', glyph: '話' },
+  { id: 'checkpoint', number: '05', title: 'Guardian battle', glyph: '戦' },
 ]
 
 export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGrammar, onOpenScene, onOpenCheckpoint, progress }: QuestHubProps) {
@@ -29,7 +35,6 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
   const [openQuestId, setOpenQuestId] = useState<string | null>(null)
   const openQuest = QUESTS.find((quest) => quest.id === openQuestId) ?? null
 
-  const clearedCount = QUESTS.filter((quest) => questComplete(quest.id)).length
   const relicCount = earnedRelics(progress).length
 
   /*
@@ -66,53 +71,43 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
   }
 
   return (
-    <main className="quest-hub quest-hub-simple">
-      <header className="quest-topbar">
-        <span>{clearedCount} / {QUESTS.length} quests complete</span>
-        {/* The map is a preview sitting beside this list, not a replacement:
-            the point is to compare walking a road against reading a list. */}
-        <button type="button" className="quest-topbar-preview" onClick={onOpenInkRoad}>
-          Ink Road <small>preview</small>
+    <main className="quest-hub quest-trail-page">
+      {/* Header is a picture, not a sentence: the lantern mark, how much of it
+          is relit, and a shortcut to the illustrated map. */}
+      <header className="quest-trail-goal">
+        <span className="quest-trail-goal-mark" aria-hidden="true">{CAMPAIGN_GOAL.mark}</span>
+        <div
+          className="quest-trail-goal-meter"
+          role="img"
+          aria-label={`${CAMPAIGN_GOAL.title}: ${relicCount} of ${QUESTS.length} seals recovered`}
+        >
+          <i style={{ width: `${(relicCount / QUESTS.length) * 100}%` }} />
+        </div>
+        <b className="quest-trail-goal-count" aria-hidden="true">{relicCount}<span>/{QUESTS.length}</span></b>
+        <button type="button" className="quest-trail-map-link" onClick={onOpenInkRoad} aria-label="Preview the illustrated Ink Road map">
+          <span aria-hidden="true">&#x26E9;</span>
         </button>
       </header>
 
-      <section className="journey-goal" aria-labelledby="journey-goal-title">
-        <span className="journey-goal-mark" aria-hidden="true">{CAMPAIGN_GOAL.mark}</span>
-        <div className="journey-goal-copy">
-          <span className="journey-goal-eyebrow">THE JOURNEY</span>
-          <h1 id="journey-goal-title">{CAMPAIGN_GOAL.title}<small lang="ja">{CAMPAIGN_GOAL.japanese}</small></h1>
-          <p>{CAMPAIGN_GOAL.premise} Villagers, shopkeepers, and lords along the road are offering rewards to whoever helps.</p>
-          <div className="journey-goal-track" role="img" aria-label={`${relicCount} of ${QUESTS.length} seals recovered`}>
-            <div className="journey-goal-fill" style={{ width: `${(relicCount / QUESTS.length) * 100}%` }} />
-          </div>
-          <div className="journey-goal-tally">
-            <b>{relicCount}</b><span>of {QUESTS.length} seals recovered</span>
-          </div>
-        </div>
-      </section>
-
-      {/* One continuous road for the whole campaign — tapping any open stop
-          is the only way in, so nothing about a quest loads until you ask
-          for it. Arc gates sit inline on the road rather than as their own
-          boxed sections, so it still reads as one path, not twelve errands. */}
-      <ol className="journey-path" aria-label="Quest path">
+      {/* One continuous road for the whole campaign. Each stop shows its own
+          kanji, the guardian waiting there, and which of its five steps are
+          done — enough to pick where to go without reading a brief. Tapping
+          one opens its sheet; nothing else loads until then. */}
+      <ol className="quest-trail" aria-label="Quest path">
         {QUESTS.map((quest, index) => {
           const isOpen = isQuestUnlocked(quest, questComplete)
           const done = questComplete(quest.id)
           const isCurrent = frontier?.id === quest.id
           const isFinale = quest.number === QUESTS.length
           const previousArcId = index > 0 ? QUESTS[index - 1]!.arcId : null
-          const gate = quest.arcId !== previousArcId ? CAMPAIGN_ARCS.find((arc) => arc.id === quest.arcId) : undefined
+          const gate = quest.arcId !== previousArcId ? getArcById(quest.arcId) : undefined
+          const stepsDone = STEP_DETAILS.filter((step) => progress[quest.id]?.[step.id]).length
 
           return (
             <li key={quest.id}>
               {gate && (
-                <div className="quest-path-gate">
-                  <span className="quest-path-gate-mark" aria-hidden="true">{gate.mark}</span>
-                  <div className="quest-path-gate-copy">
-                    <b>{gate.title}</b>
-                    <small>{gate.subtitle}</small>
-                  </div>
+                <div className="quest-trail-gate" role="separator" aria-label={gate.title}>
+                  <span aria-hidden="true">{gate.mark}</span>
                 </div>
               )}
               <button
@@ -120,18 +115,44 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
                 disabled={!isOpen}
                 onClick={() => setOpenQuestId(quest.id)}
                 aria-pressed={openQuestId === quest.id}
+                aria-label={isOpen
+                  ? `${quest.title}, ${quest.level}, ${stepsDone} of ${STEP_DETAILS.length} steps done${done ? ', complete' : isCurrent ? ', current' : ''}`
+                  : `Quest ${quest.number}, locked`}
                 onAnimationEnd={() => {
                   if (justCleared === quest.id) setJustCleared(null)
                   if (justUnlocked === quest.id) setJustUnlocked(null)
                 }}
-                className={`journey-stop${done ? ' is-done' : ''}${isCurrent ? ' is-current' : ''}${isFinale ? ' is-finale' : ''}${justCleared === quest.id ? ' is-just-cleared' : ''}${justUnlocked === quest.id ? ' is-just-unlocked' : ''}`}
+                className={`quest-trail-stop${done ? ' is-done' : ''}${isCurrent ? ' is-current' : ''}${isFinale ? ' is-finale' : ''}${!isOpen ? ' is-locked' : ''}${justCleared === quest.id ? ' is-just-cleared' : ''}${justUnlocked === quest.id ? ' is-just-unlocked' : ''}`}
               >
-                <span className="journey-stop-dot" aria-hidden="true">{done ? '✓' : quest.number}</span>
-                <span className="journey-stop-copy">
-                  <b>{isOpen ? quest.title : 'Sealed'}</b>
-                  <small>{isOpen ? `${quest.level} · ${quest.guardian.name}` : quest.level}</small>
+                <span className="quest-trail-node" aria-hidden="true">{done ? '✓' : quest.number}</span>
+
+                <span className="quest-trail-symbol" aria-hidden="true">
+                  <span className="quest-trail-symbol-kanji" lang="ja" data-len={quest.symbol.length}>
+                    {isOpen ? quest.symbol : '🔒'}
+                  </span>
+                  {isOpen && (
+                    <span className="quest-trail-guardian">
+                      {quest.guardian.portrait
+                        ? <img src={quest.guardian.portrait} alt="" />
+                        : <span lang="ja">{quest.guardian.mark}</span>}
+                    </span>
+                  )}
+                  {isFinale && <span className="quest-trail-finale" aria-hidden="true">&#x2605;</span>}
                 </span>
-                {isFinale && <span className="journey-stop-flag">FINALE</span>}
+
+                <span className="quest-trail-steps" aria-hidden="true">
+                  {STEP_DETAILS.map((step, stepIndex) => (
+                    <i
+                      key={step.id}
+                      className={`quest-trail-step${isOpen && stepIndex < stepsDone ? ' is-done' : ''}${isOpen && stepIndex === stepsDone && !done ? ' is-next' : ''}`}
+                      lang="ja"
+                    >
+                      {isOpen ? step.glyph : ''}
+                    </i>
+                  ))}
+                </span>
+
+                <span className={`quest-trail-level lvl-${quest.level}`} aria-hidden="true">{quest.level}</span>
               </button>
             </li>
           )
