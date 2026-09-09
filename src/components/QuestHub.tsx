@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { CAMPAIGN_GOAL, QUESTS, getArcById, isQuestUnlocked, type QuestDefinition } from '../data/questCampaign'
 import { completedQuestSteps, isQuestComplete, QUEST_STEPS, type QuestProgress, type QuestStep } from '../lib/questProgress'
 import { earnedRelics } from '../lib/relics'
@@ -63,23 +62,14 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
     return () => window.clearTimeout(timer)
   }, [progress])
 
+  // App wraps these to run the "setting off" clip before the step loads.
   const openStep = (quest: QuestDefinition, step: QuestStep) => {
+    setOpenQuestId(null)
     if (step === 'vocab') onOpenVocab(quest.vocabularySetId, quest.id)
     else if (step === 'kanji') onOpenKanji(quest.id)
     else if (step === 'grammar') onOpenGrammar(quest.id)
     else if (step === 'scene') onOpenScene(quest.id)
     else onOpenCheckpoint(quest.id)
-  }
-
-  // Setting into a quest plays a short intro first, then hands off to the step.
-  // prefers-reduced-motion skips straight through.
-  const [pendingStep, setPendingStep] = useState<{ quest: QuestDefinition; step: QuestStep } | null>(null)
-  const beginStep = (quest: QuestDefinition, step: QuestStep) => {
-    setOpenQuestId(null)
-    const skipIntro = typeof window !== 'undefined'
-      && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    if (skipIntro) openStep(quest, step)
-    else setPendingStep({ quest, step })
   }
 
   return (
@@ -180,60 +170,10 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
           quest={openQuest}
           progress={progress}
           onClose={() => setOpenQuestId(null)}
-          onOpenStep={(step) => beginStep(openQuest, step)}
-        />
-      )}
-
-      {pendingStep && (
-        <QuestBeginIntro
-          quest={pendingStep.quest}
-          onDone={() => {
-            const { quest, step } = pendingStep
-            setPendingStep(null)
-            openStep(quest, step)
-          }}
+          onOpenStep={(step) => openStep(openQuest, step)}
         />
       )}
     </main>
-  )
-}
-
-/**
- * The full-screen "setting off" clip that plays between choosing a quest step
- * and the step loading. Any tap, the clip ending, or a stall skips it — it is
- * a flourish, never a gate.
- */
-function QuestBeginIntro({ quest, onDone }: { quest: QuestDefinition; onDone: () => void }) {
-  const videoRef = useRef<HTMLVideoElement | null>(null)
-  const doneRef = useRef(onDone)
-  doneRef.current = onDone
-
-  useEffect(() => {
-    const finish = () => doneRef.current()
-    // Hard ceiling so a clip that never fires 'ended' (decode failure, tab
-    // backgrounded mid-play) still hands off.
-    const timer = window.setTimeout(finish, 6500)
-    const video = videoRef.current
-    video?.play().catch(finish)
-    return () => window.clearTimeout(timer)
-  }, [])
-
-  return createPortal(
-    <div className="quest-begin-intro" role="dialog" aria-label={`Beginning ${quest.title}`} onClick={() => doneRef.current()}>
-      <video
-        ref={videoRef}
-        className="quest-begin-video"
-        src="/quest-begin.mp4"
-        autoPlay
-        playsInline
-        preload="auto"
-        onEnded={() => doneRef.current()}
-        onError={() => doneRef.current()}
-      />
-      <span className="quest-begin-name" lang="ja">{quest.symbol}</span>
-      <button type="button" className="quest-begin-skip" onClick={() => doneRef.current()}>Skip</button>
-    </div>,
-    document.body,
   )
 }
 

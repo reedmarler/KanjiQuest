@@ -15842,13 +15842,15 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   place-items: center;
   isolation: isolate;
   background: #000;
+  opacity: 1;
   cursor: pointer;
-  animation: quest-begin-fade 220ms ease both;
+  transition: opacity 460ms ease;
 }
 
-@keyframes quest-begin-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* Exit is two beats: the video dips out to the black behind it, then the
+   whole black sheet lifts off the next screen (now mounted underneath). */
+.quest-begin-intro.is-in {
+  opacity: 0;
 }
 
 .quest-begin-video {
@@ -15860,18 +15862,12 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   /* Keep the frame on the page's own composited layer rather than a
      hardware video plane that can sink behind everything else. */
   transform: translateZ(0);
+  transition: opacity 340ms ease;
 }
 
-.quest-begin-name {
-  position: absolute;
-  bottom: 8%;
-  left: 0;
-  right: 0;
-  text-align: center;
-  color: color-mix(in srgb, #fff 88%, transparent);
-  font: 400 clamp(2rem, 12vw, 4rem)/1 'Noto Sans JP', sans-serif;
-  text-shadow: 0 0 1.4rem color-mix(in srgb, var(--sakura) 70%, transparent), 0 .2rem .6rem #000;
-  pointer-events: none;
+.quest-begin-intro.is-out .quest-begin-video,
+.quest-begin-intro.is-in .quest-begin-video {
+  opacity: 0;
 }
 
 .quest-begin-skip {
@@ -15891,7 +15887,8 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .quest-begin-intro { animation: none; }
+  .quest-begin-intro,
+  .quest-begin-video { transition: none; }
 }
 
 /* --- Quest sheet: tap a stop, see the whole story ----------------------

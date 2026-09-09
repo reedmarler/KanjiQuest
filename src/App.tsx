@@ -29,6 +29,7 @@ import type { DrillExercise } from './lib/drillExercises'
 import { Dashboard, HERO_SPEECH_STORAGE_KEY } from './components/Dashboard'
 import { AppHeaderControls } from './components/AppHeaderControls'
 import { UserProfileMenu } from './components/UserProfileMenu'
+import { QuestBeginIntro } from './components/QuestBeginIntro'
 import type { DailyGoalId } from './lib/dailyGoals'
 import { displayProfilePhoto, useUserProfile } from './lib/userProfile'
 import { stopSpeaking } from './lib/speech'
@@ -269,6 +270,8 @@ function App() {
   const [libraryTab, setLibraryTab] = useState<LibraryTab>('vocab')
   const [questVocabTopicId, setQuestVocabTopicId] = useState<string | undefined>()
   const [activeQuestId, setActiveQuestId] = useState<string | undefined>()
+  // Holds the deferred navigation while the quest "setting off" clip plays.
+  const [questIntroRun, setQuestIntroRun] = useState<(() => void) | null>(null)
   const [questProgress, setQuestProgress] = useState(loadQuestProgress)
   const [achievementMetrics, setAchievementMetrics] = useState(loadAchievementMetrics)
   const [practiceReturnView, setPracticeReturnView] = useState<View>('dashboard')
@@ -317,6 +320,15 @@ function App() {
     setView(next)
     setProfileMenuOpen(false)
     if (next !== 'dashboard') setSettingsExpanded(false)
+  }, [])
+
+  // Play the short "setting off" clip, then run the navigation. Reduced-motion
+  // skips straight to the step.
+  const runQuestStep = useCallback((navigate: () => void) => {
+    const reduced = typeof window !== 'undefined'
+      && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    if (reduced) navigate()
+    else setQuestIntroRun(() => navigate)
   }, [])
 
   const openDailyGoal = useCallback((id: DailyGoalId) => {
@@ -587,6 +599,12 @@ function App() {
         {framed}
         {mobileNav}
         {profileMenu}
+        {questIntroRun && (
+          <QuestBeginIntro
+            onNavigate={questIntroRun}
+            onFinish={() => setQuestIntroRun(null)}
+          />
+        )}
       </>
     )
   }
@@ -709,30 +727,30 @@ function App() {
           <QuestHub
             onOpenInkRoad={() => setView('ink-road')}
             progress={questProgress}
-            onOpenVocab={(topicId, questId) => {
+            onOpenVocab={(topicId, questId) => runQuestStep(() => {
               setQuestVocabTopicId(topicId)
               setActiveQuestId(questId)
               setPracticeReturnView('quests')
               setView('vocab-practice')
-            }}
-            onOpenKanji={(questId) => {
+            })}
+            onOpenKanji={(questId) => runQuestStep(() => {
               setActiveQuestId(questId)
               setPracticeReturnView('quests')
               setView('kanji')
-            }}
-            onOpenGrammar={(questId) => {
+            })}
+            onOpenGrammar={(questId) => runQuestStep(() => {
               setActiveQuestId(questId)
               setPracticeReturnView('quests')
               setView('grammar')
-            }}
-            onOpenScene={(questId) => {
+            })}
+            onOpenScene={(questId) => runQuestStep(() => {
               setActiveQuestId(questId)
               setView('quest-scene')
-            }}
-            onOpenCheckpoint={(questId) => {
+            })}
+            onOpenCheckpoint={(questId) => runQuestStep(() => {
               setActiveQuestId(questId)
               setView('quest-checkpoint')
-            }}
+            })}
           />
         </Suspense>
       </div>,
