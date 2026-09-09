@@ -3,6 +3,7 @@ import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
 import { loadProgress, recordReview } from './lib/storage'
+import { useSwipeNav } from './lib/useSwipeNav'
 import { completeQuestStep, loadQuestProgress, type QuestStep } from './lib/questProgress'
 import { loadAchievementMetrics, recordBossBattle, recordQuestScene } from './lib/achievementProgress'
 import { getQuestById } from './data/questCampaign'
@@ -115,6 +116,9 @@ type View =
   | 'backup-sync'
 
 type PrimaryNavTab = 'home' | 'quest' | 'study' | 'beginner' | 'more'
+
+/** The five primary tabs, in bottom-nav order, for left/right swipe navigation. */
+const HUB_TABS: readonly View[] = ['dashboard', 'quests', 'study-tools', 'beginner-zone', 'additional-tools']
 
 function primaryNavTabForView(view: View): PrimaryNavTab {
   if (view === 'dashboard' || view === 'profile' || view === 'settings' || view === 'daily-goals' || view === 'backup-sync') return 'home'
@@ -519,6 +523,15 @@ function App() {
     || view === 'study-tools'
     || view === 'beginner-zone'
     || view === 'additional-tools'
+
+  // Swipe left/right across a hub screen to move to the next / previous tab,
+  // the same order the bottom nav is in. Deeper screens keep the axis free.
+  useSwipeNav(showHubChrome && !profileMenuOpen && !settingsExpanded, (direction) => {
+    const index = HUB_TABS.indexOf(view)
+    const next = index + direction
+    if (index < 0 || next < 0 || next >= HUB_TABS.length) return
+    goToView(HUB_TABS[next]!)
+  })
   const hubChrome = showHubChrome
     ? (
       <AppHeaderControls
