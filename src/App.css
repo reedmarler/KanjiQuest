@@ -13568,16 +13568,34 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   width: min(100%, 40rem);
 }
 
-/* Clear the corner-pinned profile/settings pair (same as the Dashboard's)
-   so the header does not tuck under it on mobile. */
-.quest-trail-page .quest-trail-goal {
+/* The eyes banner leads the page; clear the corner-pinned profile/settings
+   pair (same as the Dashboard's) so it does not tuck under them on mobile. */
+.quest-trail-banner {
+  position: relative;
   margin-top: 2.2rem;
+  margin-bottom: .9rem;
+  aspect-ratio: 3.2;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--sakura) 32%, var(--border));
+  border-radius: 16px;
+}
+
+.quest-trail-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+.quest-trail-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--bg) 78%, transparent));
 }
 
 @media (min-width: 721px) {
-  .quest-trail-page .quest-trail-goal {
-    margin-top: 0;
-  }
+  .quest-trail-banner { margin-top: 0; }
 }
 
 /* Quest kanji tiles never change horizontal alignment when details appear.
@@ -15813,6 +15831,67 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
   .quest-trail-steps { gap: .22rem; }
   .quest-trail-step { width: 1.4rem; height: 1.4rem; font-size: .66rem; }
+}
+
+/* --- Quest begin: the "setting off" clip ------------------------------- */
+.quest-begin-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  background: #000;
+  cursor: pointer;
+  animation: quest-begin-fade 220ms ease both;
+}
+
+@keyframes quest-begin-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.quest-begin-video {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Keep the frame on the page's own composited layer rather than a
+     hardware video plane that can sink behind everything else. */
+  transform: translateZ(0);
+}
+
+.quest-begin-name {
+  position: absolute;
+  bottom: 8%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: color-mix(in srgb, #fff 88%, transparent);
+  font: 400 clamp(2rem, 12vw, 4rem)/1 'Noto Sans JP', sans-serif;
+  text-shadow: 0 0 1.4rem color-mix(in srgb, var(--sakura) 70%, transparent), 0 .2rem .6rem #000;
+  pointer-events: none;
+}
+
+.quest-begin-skip {
+  position: absolute;
+  top: max(1rem, env(safe-area-inset-top));
+  right: 1rem;
+  padding: .4rem .9rem;
+  border: 1px solid color-mix(in srgb, #fff 40%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, #000 45%, transparent);
+  color: #fff;
+  font: 800 .7rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  backdrop-filter: blur(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quest-begin-intro { animation: none; }
 }
 
 /* --- Quest sheet: tap a stop, see the whole story ----------------------
