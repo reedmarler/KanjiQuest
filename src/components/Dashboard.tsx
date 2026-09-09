@@ -89,7 +89,7 @@ const HERO_MODE_CHOICES = [
  * that is simply wrong. That one contrasts across sentences instead, each step
  * reaching for a particle the last one did not use.
  */
-const HERO_SWAP_FOCUS_OPTIONS: ReadonlyArray<{ focus: HeroSwapFocus | null; label: string; disabledReason?: string }> = [
+const HERO_SWAP_FOCUS_OPTIONS: ReadonlyArray<{ focus: HeroSwapFocus | null; label: string; disabledReason?: string; availableAt?: string }> = [
   { focus: 'noun', label: 'Nouns' },
   { focus: 'particle', label: 'Particles' },
   { focus: 'verb', label: 'Verbs' },
@@ -429,8 +429,16 @@ export function Dashboard({
   const focusOptions = HERO_SWAP_FOCUS_OPTIONS.map((option) => {
     if (!option.focus) return option
     if (focusAvailableAt(option.focus, heroLevel)) return option
-    const levels = HERO_FOCUS_LEVELS[option.focus].join(', ')
-    return { ...option, focus: null, disabledReason: `${option.label} has no patterns at ${heroLevel} — this drill runs at ${levels}` }
+    const runsAt = HERO_FOCUS_LEVELS[option.focus]
+    // JLPT-ordered easiest-first, so first/last bracket the usable difficulty
+    // band the learner needs to drop into for this drill.
+    const availableAt = runsAt.length === 1 ? `${runsAt[0]} only` : `${runsAt[0]}–${runsAt[runsAt.length - 1]}`
+    return {
+      ...option,
+      focus: null,
+      availableAt,
+      disabledReason: `${option.label} has no patterns at ${heroLevel} — this drill runs at ${runsAt.join(', ')}`,
+    }
   })
   const storyRolloverId = useMemo(() => {
     if (!storyMode || storyPlaybackMode === 'repeat' || storiesAtLevel.length < 2) return storyId
@@ -850,17 +858,19 @@ export function Dashboard({
 
               {grammarMode && (
                 <div className="hero-swap-mode-grid" role="group" aria-label="Grammar focus">
-                  {focusOptions.map(({ focus, label, disabledReason }) => (
+                  {focusOptions.map(({ focus, label, disabledReason, availableAt }) => (
                     <button
                       key={label}
                       type="button"
                       className={`hero-swap-mode-panel${focus && swapFocus === focus ? ' is-active' : ''}`}
                       aria-pressed={focus ? swapFocus === focus : undefined}
+                      aria-label={focus ? undefined : disabledReason}
                       onClick={focus ? () => setSwapFocus((current) => (current === focus ? null : focus)) : undefined}
                       disabled={!focus}
                       title={focus ? undefined : disabledReason}
                     >
-                      {label}
+                      <span>{label}</span>
+                      {!focus && availableAt && <small className="hero-swap-mode-hint">{availableAt}</small>}
                     </button>
                   ))}
                 </div>
