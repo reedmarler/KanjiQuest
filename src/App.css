@@ -502,7 +502,7 @@ body:has(.dashboard) {
   height: 2rem;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
-  border-radius: 999px;
+  border-radius: 0.55rem;
   background: color-mix(in srgb, var(--surface-2) 82%, transparent);
   color: var(--text-muted);
   font: 800 0.72rem/1 'Outfit', system-ui, sans-serif;
@@ -514,7 +514,7 @@ body:has(.dashboard) {
   place-items: center;
   width: 1.2rem;
   aspect-ratio: 1;
-  border-radius: 999px;
+  border-radius: 0.38rem;
   background: color-mix(in srgb, var(--kyogre) 16%, transparent);
 }
 
@@ -976,7 +976,7 @@ body:has(.dashboard) {
 .account-page-heading h1 {
   margin: 0;
   color: var(--text);
-  font-size: 2.1rem;
+  font-size: 1.82rem;
   line-height: 1.12;
 }
 
@@ -989,8 +989,8 @@ body:has(.dashboard) {
 /* ---- Profile + Daily quests: shared panel look, cousin to the kana chart ---- */
 .profile-page,
 .daily-quests-page {
-  --panel-radius: 18px;
-  --panel-shadow: 0 14px 30px rgba(8, 8, 18, 0.34);
+  --panel-radius: 12px;
+  --panel-shadow: 0 10px 22px rgba(8, 8, 18, 0.28);
 }
 
 .profile-hero,
@@ -998,8 +998,8 @@ body:has(.dashboard) {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 1.1rem;
-  padding: 1rem;
+  gap: 0.82rem;
+  padding: 0.78rem;
   border: 1px solid color-mix(in srgb, var(--kyogre-light) 30%, var(--border));
   border-radius: var(--panel-radius);
   background:
@@ -1028,10 +1028,10 @@ body:has(.dashboard) {
 
 .profile-hero-photo img {
   display: block;
-  width: 5rem;
+  width: 3.75rem;
   aspect-ratio: 1;
   border: 1px solid color-mix(in srgb, var(--kyogre-light) 40%, transparent);
-  border-radius: 16px;
+  border-radius: 10px;
   background: color-mix(in srgb, var(--kyogre) 18%, var(--surface-2));
   object-fit: cover;
 }
@@ -1041,7 +1041,7 @@ body:has(.dashboard) {
   inset-inline: 0;
   bottom: 0;
   padding: 0.16rem 0;
-  border-radius: 0 0 16px 16px;
+  border-radius: 0 0 10px 10px;
   background: color-mix(in srgb, var(--surface) 78%, transparent);
   color: var(--kyogre-light);
   font: 800 0.54rem/1 'Outfit', system-ui, sans-serif;
@@ -1068,7 +1068,7 @@ body:has(.dashboard) {
 .profile-hero-identity {
   min-width: 0;
   display: grid;
-  gap: 0.22rem;
+  gap: 0.16rem;
 }
 
 .profile-hero-label {
@@ -1095,19 +1095,14 @@ body:has(.dashboard) {
 .profile-hero-name-form input {
   min-width: 0;
   overflow: hidden;
-  font: 800 1.5rem/1.2 'Outfit', system-ui, sans-serif;
+  font: 800 1.24rem/1.15 'Outfit', system-ui, sans-serif;
   color: var(--text);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .profile-hero-name em {
-  flex: none;
-  color: var(--text-muted);
-  font: 800 0.58rem/1 'Outfit', system-ui, sans-serif;
-  font-style: normal;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  display: none;
 }
 
 .profile-hero-name-form input,
@@ -1126,7 +1121,7 @@ body:has(.dashboard) {
 }
 
 .profile-hero-tagline-form input {
-  font: 500 0.86rem/1.3 'Outfit', system-ui, sans-serif;
+  font: 500 0.78rem/1.25 'Outfit', system-ui, sans-serif;
 }
 
 .profile-hero-tagline {
@@ -1137,7 +1132,7 @@ body:has(.dashboard) {
   border: 0;
   background: transparent;
   color: var(--text-muted);
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1150,39 +1145,39 @@ body:has(.dashboard) {
 }
 
 .profile-hero-since {
-  margin: 0.28rem 0 0;
+  margin: 0.18rem 0 0;
   color: color-mix(in srgb, var(--text-muted) 82%, transparent);
-  font-size: 0.72rem;
+  font-size: 0.66rem;
 }
 
 .profile-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.6rem;
+  gap: 0.45rem;
 }
 
 .profile-stats article {
   display: grid;
   gap: 0.12rem;
-  padding: 0.8rem 0.9rem;
+  padding: 0.62rem 0.72rem;
   border: 1px solid color-mix(in srgb, var(--kyogre-light) 18%, var(--border));
-  border-radius: 12px;
+  border-radius: 8px;
   background: color-mix(in srgb, var(--surface-2) 52%, transparent);
 }
 
 .profile-stats b {
-  font: 800 1.4rem/1.05 'Outfit', system-ui, sans-serif;
+  font: 800 1.14rem/1.05 'Outfit', system-ui, sans-serif;
   color: var(--text);
 }
 
 .profile-stats span {
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.66rem;
 }
 
 .profile-fields {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.38rem;
 }
 
 .profile-fields article {
@@ -1190,27 +1185,27 @@ body:has(.dashboard) {
   align-items: baseline;
   justify-content: space-between;
   gap: 0.8rem;
-  padding: 0.8rem 0.9rem;
+  padding: 0.62rem 0.72rem;
   border: 1px solid color-mix(in srgb, var(--text-muted) 15%, var(--border));
-  border-radius: 10px;
+  border-radius: 8px;
   background: color-mix(in srgb, var(--surface-2) 44%, transparent);
 }
 
 .profile-fields span {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 800;
   color: var(--text);
 }
 
 .profile-fields small {
   color: var(--text-muted);
-  font-size: 0.76rem;
+  font-size: 0.7rem;
 }
 
 .profile-fields-note {
   margin: 0.1rem 0.2rem 0;
   color: color-mix(in srgb, var(--text-muted) 80%, transparent);
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   line-height: 1.35;
 }
 
@@ -1457,18 +1452,21 @@ body:has(.dashboard) {
 }
 
 .backup-sync-auth-grid,
-.backup-sync-choice-grid {
+.backup-sync-choice-grid,
+.backup-sync-email-form {
   display: grid;
   gap: 0.55rem;
 }
 
 .backup-sync-auth-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .backup-sync-auth-grid button,
 .backup-sync-choice-grid button,
-.backup-sync-export {
+.backup-sync-export,
+.backup-sync-secondary,
+.backup-sync-email-form button {
   min-height: 2.6rem;
   padding: 0.62rem 0.7rem;
   border: 1px solid color-mix(in srgb, var(--kyogre-light) 28%, var(--border));
@@ -1479,10 +1477,37 @@ body:has(.dashboard) {
   cursor: pointer;
 }
 
+.backup-sync-email-form {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.backup-sync-email-form input {
+  min-width: 0;
+  height: 2.6rem;
+  padding: 0 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 20%, var(--border));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  color: var(--text);
+  font: 600 0.82rem/1 'Outfit', system-ui, sans-serif;
+}
+
+.backup-sync-email-form input:focus {
+  border-color: color-mix(in srgb, var(--kyogre-light) 52%, var(--border));
+  outline: none;
+}
+
 .backup-sync-auth-grid button:disabled,
-.backup-sync-choice-grid button:disabled {
+.backup-sync-choice-grid button:disabled,
+.backup-sync-email-form button:disabled {
   opacity: 0.46;
   cursor: default;
+}
+
+.backup-sync-signed-in,
+.backup-sync-message {
+  color: var(--kyogre-light) !important;
+  font-weight: 800;
 }
 
 .backup-sync-choice-grid {
@@ -1510,7 +1535,8 @@ body:has(.dashboard) {
 
 @media (max-width: 720px) {
   .backup-sync-auth-grid,
-  .backup-sync-choice-grid {
+  .backup-sync-choice-grid,
+  .backup-sync-email-form {
     grid-template-columns: 1fr;
   }
 }
@@ -4081,8 +4107,19 @@ body:has(.dashboard) {
 }
 
 .hero-swap-mode-panel:disabled {
-  opacity: 0.45;
+  flex-direction: column;
+  gap: 0.12rem;
+  opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* The band of difficulties this drill actually runs at — shown in place of a
+   tooltip, which never appears on a touch device. */
+.hero-swap-mode-hint {
+  color: color-mix(in srgb, var(--sakura-light) 66%, var(--text-muted));
+  font: 800 0.44rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .hero-swap-mode-panel:disabled:hover {

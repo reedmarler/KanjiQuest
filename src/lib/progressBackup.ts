@@ -28,13 +28,17 @@ export function progressBackupStats(snapshot = kanjiQuestStorageSnapshot()) {
   return { entries, bytes }
 }
 
-export function exportProgressBackup() {
-  const payload: ProgressBackupPayload = {
+export function createProgressBackupPayload(): ProgressBackupPayload {
+  return {
     app: 'Kanji Quest',
     version: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
     localStorage: kanjiQuestStorageSnapshot(),
   }
+}
+
+export function exportProgressBackup() {
+  const payload = createProgressBackupPayload()
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')

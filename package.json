@@ -23,6 +23,7 @@
     "build:voice": "tsx scripts/build-voice-library.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },

@@ -75,7 +75,6 @@ export function ProfilePage({ onBack }: { onBack: () => void }) {
     <main className="account-page profile-page">
       <header className="account-page-heading">
         <AppBackButton onClick={onBack} aria-label="Back" />
-        <small>You</small>
         <h1>Profile</h1>
       </header>
 
@@ -106,7 +105,6 @@ export function ProfilePage({ onBack }: { onBack: () => void }) {
           ) : (
             <button type="button" className="profile-hero-name" onClick={startRename}>
               <b>{profile.name}</b>
-              <em>Edit</em>
             </button>
           )}
 
