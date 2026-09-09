@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { markStudiedToday } from './storage'
 
 const GOALS_STORAGE_KEY = 'kanji-quest-daily-goals-v1'
 const GOALS_EVENT = 'kanji-quest-daily-goals-change'
@@ -85,13 +86,19 @@ export function useDailyGoals() {
 
   const toggleGoal = useCallback((id: DailyGoalId) => {
     const current = doneRef.current
-    commit(current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+    if (current.includes(id)) {
+      commit(current.filter((item) => item !== id))
+    } else {
+      commit([...current, id])
+      markStudiedToday()
+    }
   }, [commit])
 
   const completeGoal = useCallback((id: DailyGoalId) => {
     const current = doneRef.current
     if (current.includes(id)) return
     commit([...current, id])
+    markStudiedToday()
   }, [commit])
 
   return {

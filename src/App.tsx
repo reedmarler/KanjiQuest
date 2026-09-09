@@ -2,7 +2,7 @@ import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, us
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
-import { loadProgress } from './lib/storage'
+import { loadProgress, recordReview } from './lib/storage'
 import { completeQuestStep, loadQuestProgress, type QuestStep } from './lib/questProgress'
 import { loadAchievementMetrics, recordBossBattle, recordQuestScene } from './lib/achievementProgress'
 import { getQuestById } from './data/questCampaign'
@@ -399,6 +399,7 @@ function App() {
       pool = recordWrong(id, pool)
     }
     updateWrongPool(pool)
+    recordReview()
   }, [wrongPool, updateWrongPool])
 
   const toggleFavorite = useCallback((favorite: FavoriteSentence) => {

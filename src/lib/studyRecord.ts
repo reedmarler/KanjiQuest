@@ -1,5 +1,5 @@
 import { createProgress, reviewCard } from './srs'
-import { loadProgress, saveProgress } from './storage'
+import { loadProgress, markStudiedToday, recordReview, saveProgress } from './storage'
 import type { CardProgress } from './types'
 
 /**
@@ -62,6 +62,7 @@ export function recordAnswer(cardId: string, grade: Grade): void {
   const current = store()
   const existing = current[cardId] ?? createProgress(cardId)
   commit({ ...current, [cardId]: reviewCard(existing, QUALITY[grade]) })
+  recordReview()
 }
 
 /** Convenience for screens whose only signal is right or wrong. */
@@ -80,6 +81,7 @@ export function recordResult(cardId: string, correct: boolean): void {
  */
 export function recordSeen(cardId: string): void {
   if (!cardId) return
+  markStudiedToday()
   const current = store()
   if (current[cardId]) return
   commit({ ...current, [cardId]: { ...createProgress(cardId), lastReviewed: Date.now() } })

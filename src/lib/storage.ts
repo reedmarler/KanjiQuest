@@ -1,5 +1,5 @@
 import type { AppStats, CardProgress } from './types'
-import { createProgress } from './srs'
+import { createProgress, isLearned } from './srs'
 
 const PROGRESS_KEY = 'kanji-quest-progress'
 const STATS_KEY = 'kanji-quest-stats'
@@ -58,4 +58,24 @@ export function updateStreak(stats: AppStats): AppStats {
   }
 
   return { ...stats, streak, lastStudyDate: today }
+}
+
+/**
+ * The write side of AppStats. Nothing updated these for a long time, so the
+ * streak and review count the profile and daily-quests pages show were stuck
+ * at zero. Study screens call one of these whenever the learner does something.
+ */
+
+/** One graded review: advance the day streak (once per day) and count it. */
+export function recordReview(): void {
+  const stats = updateStreak(loadStats())
+  const cardsLearned = Object.values(loadProgress()).filter(isLearned).length
+  saveStats({ ...stats, totalReviews: stats.totalReviews + 1, cardsLearned })
+}
+
+/** The learner did something today (met a card, ticked a quest) — streak only. */
+export function markStudiedToday(): void {
+  const stats = loadStats()
+  const next = updateStreak(stats)
+  if (next !== stats) saveStats(next)
 }
