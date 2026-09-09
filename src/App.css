@@ -15632,72 +15632,78 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 /* The quest's own kanji, the guardian tucked into its corner. */
+/* The stop's face is the enemy you'll fight there; the quest's own kanji
+   drops to a small tag in the corner. */
 .quest-trail-symbol {
   position: relative;
   display: grid;
   place-items: center;
   width: 3.4rem;
   height: 3.4rem;
+  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 13px;
   background: color-mix(in srgb, var(--surface-2) 82%, transparent);
 }
 
 .quest-trail-stop.is-current .quest-trail-symbol {
-  border-color: color-mix(in srgb, var(--sakura) 48%, var(--border));
-  background:
-    radial-gradient(120% 120% at 50% 0%, color-mix(in srgb, var(--sakura) 16%, transparent), transparent 70%),
-    color-mix(in srgb, var(--surface-2) 82%, transparent);
+  border-color: color-mix(in srgb, var(--sakura) 55%, var(--border));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sakura) 30%, transparent);
 }
 
 .quest-trail-stop.is-done .quest-trail-symbol {
-  border-color: color-mix(in srgb, var(--rayquaza) 40%, var(--border));
+  border-color: color-mix(in srgb, var(--rayquaza) 45%, var(--border));
 }
 
-.quest-trail-symbol-kanji {
-  color: var(--text);
-  font: 400 1.9rem/1 'Noto Sans JP', sans-serif;
-}
-
-.quest-trail-symbol-kanji[data-len='2'] { font-size: 1.15rem; letter-spacing: -.02em; }
-.quest-trail-symbol-kanji[data-len='3'] { font-size: .86rem; }
-
-.quest-trail-stop.is-locked .quest-trail-symbol-kanji {
-  font-size: 1.1rem;
-  filter: grayscale(1);
-  opacity: .5;
-}
-
-.quest-trail-guardian {
-  position: absolute;
-  right: -.4rem;
-  bottom: -.4rem;
-  display: grid;
-  place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  overflow: hidden;
-  border: 1.5px solid var(--surface);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--sakura) 20%, var(--surface-2));
-  color: var(--sakura-light);
-  font: 400 .62rem/1 'Noto Sans JP', sans-serif;
-}
-
-.quest-trail-guardian img {
+.quest-trail-enemy {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 12%;
 }
+
+.quest-trail-stop.is-done .quest-trail-enemy {
+  filter: grayscale(.55) brightness(.82);
+}
+
+.quest-trail-enemy-mark {
+  color: var(--sakura-light);
+  font: 400 1.7rem/1 'Noto Sans JP', sans-serif;
+}
+
+.quest-trail-symbol-locked {
+  font-size: 1.15rem;
+  opacity: .45;
+}
+
+/* Category kanji, small, over the portrait's bottom edge. */
+.quest-trail-tag {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  min-width: 1.1rem;
+  padding: .06rem .16rem;
+  border-radius: 7px 0 12px 0;
+  background: color-mix(in srgb, #000 62%, transparent);
+  color: #fff;
+  font: 500 .7rem/1 'Noto Sans JP', sans-serif;
+  text-align: center;
+  backdrop-filter: blur(2px);
+}
+
+.quest-trail-tag[data-len='2'] { font-size: .5rem; letter-spacing: -.02em; }
+.quest-trail-tag[data-len='3'] { font-size: .4rem; }
 
 .quest-trail-finale {
   position: absolute;
-  top: -.42rem;
-  left: -.36rem;
+  top: -.06rem;
+  left: -.06rem;
+  padding: .04rem .16rem 0;
+  border-radius: 12px 0 8px 0;
+  background: color-mix(in srgb, #000 55%, transparent);
   color: var(--gold, #d9b45a);
-  font-size: .8rem;
+  font-size: .72rem;
   line-height: 1;
-  filter: drop-shadow(0 1px 2px color-mix(in srgb, #000 40%, transparent));
 }
 
 /* Five steps as glyph chips: 語 漢 文 話 戦, filled as they're cleared. */
@@ -15800,7 +15806,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     row-gap: .3rem;
   }
   .quest-trail-symbol { width: 3rem; height: 3rem; }
-  .quest-trail-symbol-kanji { font-size: 1.65rem; }
+  .quest-trail-enemy-mark { font-size: 1.4rem; }
   .quest-trail-level {
     grid-column: 2 / -1;
     justify-self: start;

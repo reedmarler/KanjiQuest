@@ -127,15 +127,13 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
                 <span className="quest-trail-node" aria-hidden="true">{done ? '✓' : quest.number}</span>
 
                 <span className="quest-trail-symbol" aria-hidden="true">
-                  <span className="quest-trail-symbol-kanji" lang="ja" data-len={quest.symbol.length}>
-                    {isOpen ? quest.symbol : '🔒'}
-                  </span>
+                  {isOpen
+                    ? (quest.guardian.portrait
+                        ? <img className="quest-trail-enemy" src={quest.guardian.portrait} alt="" loading="lazy" />
+                        : <span className="quest-trail-enemy-mark" lang="ja">{quest.guardian.mark}</span>)
+                    : <span className="quest-trail-symbol-locked">&#x1F512;</span>}
                   {isOpen && (
-                    <span className="quest-trail-guardian">
-                      {quest.guardian.portrait
-                        ? <img src={quest.guardian.portrait} alt="" />
-                        : <span lang="ja">{quest.guardian.mark}</span>}
-                    </span>
+                    <span className="quest-trail-tag" lang="ja" data-len={quest.symbol.length}>{quest.symbol}</span>
                   )}
                   {isFinale && <span className="quest-trail-finale" aria-hidden="true">&#x2605;</span>}
                 </span>
