@@ -415,7 +415,9 @@ body:has(.dashboard) {
 
   .desktop-primary-nav-user {
     overflow: hidden;
-    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+    border-radius: 0.55rem;
+    background: color-mix(in srgb, var(--surface-2) 82%, transparent);
   }
 
   .desktop-primary-nav-user img {
