@@ -11445,19 +11445,22 @@ body:has(.dashboard) {
     min-height: calc(100dvh - 2.15rem);
   }
 
+  /* The study nav above the card and the fixed bottom nav below it both eat
+     into the screen; subtract for both so the card's own controls clear the
+     bottom bar instead of hiding behind it. */
   .kanji-learning-card {
-    height: calc(100vh - 8.2rem);
-    height: calc(100dvh - 8.2rem);
-    max-height: calc(100vh - 8.2rem);
-    max-height: calc(100dvh - 8.2rem);
+    height: calc(100vh - 11rem);
+    height: calc(100dvh - 11rem);
+    max-height: calc(100vh - 11rem);
+    max-height: calc(100dvh - 11rem);
     padding: clamp(0.8rem, 3vw, 1.1rem);
   }
 
   .kanji-lab-paths .kanji-learning-card {
-    height: calc(100vh - 9rem);
-    height: calc(100dvh - 9rem);
-    max-height: calc(100vh - 9rem);
-    max-height: calc(100dvh - 9rem);
+    height: calc(100vh - 12rem);
+    height: calc(100dvh - 12rem);
+    max-height: calc(100vh - 12rem);
+    max-height: calc(100dvh - 12rem);
   }
 
   .kanji-learning-meta {
