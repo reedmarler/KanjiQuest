@@ -82,6 +82,7 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
       <MobileQuestLanding
         quest={featuredQuest}
         progress={progress}
+        profileName={userProfile.name}
         profilePhoto={userProfile.photo}
         onOpenInkRoad={onOpenInkRoad}
         onOpenProfile={onOpenProfile}
@@ -196,6 +197,7 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
 function MobileQuestLanding({
   quest,
   progress,
+  profileName,
   profilePhoto,
   onOpenInkRoad,
   onOpenProfile,
@@ -205,6 +207,7 @@ function MobileQuestLanding({
 }: {
   quest: QuestDefinition
   progress: QuestProgress
+  profileName: string
   profilePhoto: string | null
   onOpenInkRoad: () => void
   onOpenProfile: () => void
@@ -221,6 +224,17 @@ function MobileQuestLanding({
         <button type="button" className="quest-mobile-profile-button" onClick={onOpenProfile} aria-label="Open profile">
           <img src={displayProfilePhoto(profilePhoto)} alt="" />
         </button>
+        <div className="quest-mobile-player-panel">
+          <button type="button" className="quest-mobile-name-button" onClick={onOpenProfile}>
+            {profileName}
+          </button>
+          <span className="quest-mobile-level">Lv.1</span>
+          <span className="quest-mobile-live-xp" role="img" aria-label="0 of 100 XP">
+            <i />
+          </span>
+          <small>0 / 100 XP</small>
+        </div>
+        <div className="quest-mobile-motto-cover" aria-hidden="true" />
         <button type="button" className="quest-mobile-hit quest-mobile-hit-ink" onClick={onOpenInkRoad} aria-label="Open Ink Road map" />
         <button type="button" className="quest-mobile-hit quest-mobile-hit-shop" onClick={onOpenQuest} aria-label="Open quest rewards" />
         <button type="button" className="quest-mobile-hit quest-mobile-hit-settings" onClick={onOpenSettings} aria-label="Open settings" />
