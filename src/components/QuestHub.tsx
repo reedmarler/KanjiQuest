@@ -38,6 +38,7 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
 
   const [openQuestId, setOpenQuestId] = useState<string | null>(null)
   const openQuest = QUESTS.find((quest) => quest.id === openQuestId) ?? null
+  const [mobileChallengeOpen, setMobileChallengeOpen] = useState(false)
 
   const relicCount = earnedRelics(progress).length
   const [userProfile] = useUserProfile()
@@ -88,8 +89,14 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
         onOpenProfile={onOpenProfile}
         onOpenQuest={() => setOpenQuestId(featuredQuest.id)}
         onOpenSettings={onOpenSettings}
-        onOpenStep={(step) => openStep(featuredQuest, step)}
+        onOpenChallenge={() => setMobileChallengeOpen(true)}
       />
+      {mobileChallengeOpen && (
+        <MobileQuestChallengeScreen
+          quest={featuredQuest}
+          onBack={() => setMobileChallengeOpen(false)}
+        />
+      )}
 
       {/* The samurai's eyes across the top — the campaign's face before its
           map. */}
@@ -203,7 +210,7 @@ function MobileQuestLanding({
   onOpenProfile,
   onOpenQuest,
   onOpenSettings,
-  onOpenStep,
+  onOpenChallenge,
 }: {
   quest: QuestDefinition
   progress: QuestProgress
@@ -213,7 +220,7 @@ function MobileQuestLanding({
   onOpenProfile: () => void
   onOpenQuest: () => void
   onOpenSettings: () => void
-  onOpenStep: (step: QuestStep) => void
+  onOpenChallenge: () => void
 }) {
   const nextStep = QUEST_STEPS.find((step) => !progress[quest.id]?.[step]) ?? 'checkpoint'
 
@@ -238,7 +245,24 @@ function MobileQuestLanding({
         <button type="button" className="quest-mobile-hit quest-mobile-hit-ink" onClick={onOpenInkRoad} aria-label="Open Ink Road map" />
         <button type="button" className="quest-mobile-hit quest-mobile-hit-shop" onClick={onOpenQuest} aria-label="Open quest rewards" />
         <button type="button" className="quest-mobile-hit quest-mobile-hit-settings" onClick={onOpenSettings} aria-label="Open settings" />
-        <button type="button" className="quest-mobile-hit quest-mobile-hit-challenge" onClick={() => onOpenStep(nextStep)} aria-label={`Challenge ${quest.title}`} />
+        <button type="button" className="quest-mobile-hit quest-mobile-hit-challenge" onClick={onOpenChallenge} aria-label={`Open ${quest.title} challenge`} data-next-step={nextStep} />
+      </div>
+    </section>
+  )
+}
+
+function MobileQuestChallengeScreen({
+  quest,
+  onBack,
+}: {
+  quest: QuestDefinition
+  onBack: () => void
+}) {
+  return (
+    <section className="quest-mobile-challenge-screen" aria-label={`${quest.title} challenge steps`}>
+      <div className="quest-mobile-challenge-frame">
+        <img className="quest-mobile-challenge-art" src="/quest-mobile-challenge.jpg" alt={`${quest.title} challenge steps`} />
+        <button type="button" className="quest-mobile-challenge-back" onClick={onBack} aria-label="Back to quest landing" />
       </div>
     </section>
   )

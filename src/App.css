@@ -16658,6 +16658,69 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     width: 94.6%;
     height: 11.9%;
   }
+
+  body:has(.quest-mobile-landing):not(:has(.quest-mobile-challenge-screen)) .mobile-bottom-nav {
+    display: grid;
+  }
+
+  body:has(.quest-mobile-landing):not(:has(.quest-mobile-challenge-screen)) .quest-mobile-frame {
+    height: min(calc(100dvh - 5.25rem - env(safe-area-inset-bottom)), calc(100vw * 1138 / 752));
+  }
+
+  body:has(.quest-mobile-challenge-screen) .mobile-bottom-nav {
+    display: none;
+  }
+
+  .quest-mobile-challenge-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: #050713;
+  }
+
+  .quest-mobile-challenge-frame {
+    position: relative;
+    width: min(100vw, calc(100dvh * 861 / 1280));
+    height: min(100dvh, calc(100vw * 1280 / 861));
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 861 / 1280;
+    overflow: hidden;
+    background: #050713;
+  }
+
+  .quest-mobile-challenge-art {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .quest-mobile-challenge-back {
+    position: absolute;
+    left: 1.7%;
+    top: 1.5%;
+    z-index: 2;
+    width: 13%;
+    height: 8%;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .quest-mobile-challenge-back:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, .9);
+    outline-offset: -2px;
+  }
 }
 
 /* --- Quest begin: the "setting off" clip ------------------------------- */
