@@ -125,9 +125,12 @@ export function UserProfileMenu({
                 />
               </form>
             ) : (
-              <button type="button" className="dashboard-profile-name" onClick={startRename}>
-                <h2>{profile.name}</h2>
-              </button>
+              <>
+                <button type="button" className="dashboard-profile-name" onClick={startRename}>
+                  <h2>{profile.name}</h2>
+                </button>
+                {profile.tagline && <p className="dashboard-profile-tagline">{profile.tagline}</p>}
+              </>
             )}
           </div>
           <button type="button" className="dashboard-profile-close" onClick={onClose} aria-label="Close user menu">
