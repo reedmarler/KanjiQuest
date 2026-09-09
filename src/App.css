@@ -16465,6 +16465,91 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 }
 
+@media (max-width: 720px) {
+  .quest-mobile-landing {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #050713;
+  }
+
+  .quest-mobile-landing::before,
+  .quest-mobile-landing::after {
+    display: none;
+  }
+
+  .quest-mobile-art {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .quest-mobile-hit {
+    position: absolute;
+    z-index: 2;
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: transparent;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .quest-mobile-hit:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, .9);
+    outline-offset: -2px;
+  }
+
+  .quest-mobile-hit-profile {
+    left: 2.2%;
+    top: 5.4%;
+    width: 16.7%;
+    height: 10.2%;
+    border-radius: 50%;
+  }
+
+  .quest-mobile-hit-ink {
+    left: 53.6%;
+    top: 6.2%;
+    width: 19.4%;
+    height: 9.7%;
+  }
+
+  .quest-mobile-hit-shop {
+    left: 74.5%;
+    top: 6.4%;
+    width: 12.8%;
+    height: 9.3%;
+  }
+
+  .quest-mobile-hit-settings {
+    left: 88%;
+    top: 6.1%;
+    width: 10.4%;
+    height: 10%;
+  }
+
+  .quest-mobile-hit-challenge {
+    left: 2.7%;
+    top: 84.4%;
+    width: 94.6%;
+    height: 11.9%;
+  }
+}
+
 /* --- Quest begin: the "setting off" clip ------------------------------- */
 .quest-begin-intro {
   position: fixed;

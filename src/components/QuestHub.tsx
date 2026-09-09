@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { CAMPAIGN_GOAL, QUESTS, getArcById, isQuestUnlocked, type QuestDefinition } from '../data/questCampaign'
 import { completedQuestSteps, isQuestComplete, QUEST_STEPS, type QuestProgress, type QuestStep } from '../lib/questProgress'
 import { earnedRelics } from '../lib/relics'
-import { displayProfilePhoto, useUserProfile } from '../lib/userProfile'
 
 interface QuestHubProps {
   onOpenInkRoad: () => void
@@ -39,7 +38,6 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
   const openQuest = QUESTS.find((quest) => quest.id === openQuestId) ?? null
 
   const relicCount = earnedRelics(progress).length
-  const [userProfile] = useUserProfile()
 
   /*
    * The only "movement" this menu shows: when a quest flips to complete, its
@@ -81,8 +79,6 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
       <MobileQuestLanding
         quest={featuredQuest}
         progress={progress}
-        relicCount={relicCount}
-        profilePhoto={userProfile.photo}
         onOpenInkRoad={onOpenInkRoad}
         onOpenQuest={() => setOpenQuestId(featuredQuest.id)}
         onOpenSettings={onOpenSettings}
@@ -195,8 +191,6 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
 function MobileQuestLanding({
   quest,
   progress,
-  relicCount,
-  profilePhoto,
   onOpenInkRoad,
   onOpenQuest,
   onOpenSettings,
@@ -204,111 +198,21 @@ function MobileQuestLanding({
 }: {
   quest: QuestDefinition
   progress: QuestProgress
-  relicCount: number
-  profilePhoto: string | null
   onOpenInkRoad: () => void
   onOpenQuest: () => void
   onOpenSettings: () => void
   onOpenStep: (step: QuestStep) => void
 }) {
-  const completed = completedQuestSteps(progress, quest.id)
-  const finished = isQuestComplete(progress, quest.id)
   const nextStep = QUEST_STEPS.find((step) => !progress[quest.id]?.[step]) ?? 'checkpoint'
-  const xpPercent = 2350 / 4200
 
   return (
     <section className="quest-mobile-landing" aria-label="Featured quest">
-      <header className="quest-mobile-status">
-        <button type="button" className="quest-mobile-avatar" onClick={onOpenQuest} aria-label="Open featured quest details">
-          <img src={displayProfilePhoto(profilePhoto)} alt="" />
-        </button>
-        <div className="quest-mobile-player">
-          <div className="quest-mobile-name-line">
-            <b lang="ja">言語の侍</b>
-            <span>Lv.18</span>
-          </div>
-          <span className="quest-mobile-xp-bar" role="img" aria-label="2350 of 4200 XP">
-            <i style={{ width: `${xpPercent * 100}%` }} />
-          </span>
-          <small>2,350 / 4,200 XP</small>
-        </div>
-        <button type="button" className="quest-mobile-ink" onClick={onOpenInkRoad} aria-label="Open Ink Road map">
-          <span aria-hidden="true">🪶</span>
-          <b>墨</b>
-          <strong>{relicCount * 80 + 1240}</strong>
-        </button>
-        <button type="button" className="quest-mobile-shop" onClick={onOpenQuest} aria-label="Open quest rewards">
-          <span aria-hidden="true">袋</span>
-          <b>SHOP</b>
-        </button>
-        <button type="button" className="quest-mobile-cog" onClick={onOpenSettings} aria-label="Open settings">
-          <span aria-hidden="true">⚙</span>
-          <b>設定</b>
-        </button>
-      </header>
-
-      <div className="quest-mobile-motto" aria-hidden="true">
-        <span />
-        <b>💡 Keep the helm. <em>Spend the ink.</em></b>
-        <span />
-      </div>
-
-      <article className={`quest-mobile-card is-${quest.guardian.battleStyle}`}>
-        <div className="quest-mobile-card-label">
-          <span aria-hidden="true">✦</span>
-          <b>FEATURED QUEST</b>
-        </div>
-        <div className="quest-mobile-title">
-          <h1 lang="ja">{quest.symbol}の鬼</h1>
-          <p>{quest.title}</p>
-        </div>
-
-        <div className="quest-mobile-scene" aria-label={`${quest.guardian.name} waits for ${quest.title}`}>
-          <img className="quest-mobile-scene-bg" src="/quest-battlefield.png" alt="" />
-          {quest.guardian.portrait && <img className="quest-mobile-guardian" src={quest.guardian.portrait} alt="" />}
-          <img className="quest-mobile-hero" src="/quest-mascot-battle.png" alt="" />
-          <span className="quest-mobile-lantern" lang="ja">{quest.guardian.mark}</span>
-        </div>
-
-        <section className="quest-mobile-rewards" aria-label="Rewards">
-          <h2>REWARDS</h2>
-          <div>
-            <span lang="ja">{quest.reward.mark}</span>
-            <b>{quest.reward.name}</b>
-            <small>{finished ? 'restored' : 'first clear'}</small>
-          </div>
-          <div>
-            <span aria-hidden="true">💧</span>
-            <b>墨 x80</b>
-            <small>quest ink</small>
-          </div>
-          <div>
-            <span aria-hidden="true">%</span>
-            <b>Armory</b>
-            <small>30% off</small>
-          </div>
-        </section>
-
-        <section className="quest-mobile-skills" aria-label={`${completed} of ${STEP_DETAILS.length} quest skills complete`}>
-          <h2>SKILLS</h2>
-          <div>
-            {STEP_DETAILS.slice(0, 4).map((step) => (
-              <span
-                key={step.id}
-                className={progress[quest.id]?.[step.id] ? 'is-done' : step.id === nextStep ? 'is-next' : ''}
-                lang="ja"
-              >
-                {step.glyph}
-              </span>
-            ))}
-          </div>
-        </section>
-      </article>
-
-      <button type="button" className="quest-mobile-challenge" onClick={() => onOpenStep(nextStep)}>
-        <span lang="ja">{finished ? '復習する' : '挑戦する'}</span>
-        <b>{finished ? 'Review' : 'Challenge'}</b>
-      </button>
+      <img className="quest-mobile-art" src="/quest-mobile-landing.jpg" alt={`${quest.title} featured quest`} />
+      <button type="button" className="quest-mobile-hit quest-mobile-hit-profile" onClick={onOpenQuest} aria-label="Open featured quest details" />
+      <button type="button" className="quest-mobile-hit quest-mobile-hit-ink" onClick={onOpenInkRoad} aria-label="Open Ink Road map" />
+      <button type="button" className="quest-mobile-hit quest-mobile-hit-shop" onClick={onOpenQuest} aria-label="Open quest rewards" />
+      <button type="button" className="quest-mobile-hit quest-mobile-hit-settings" onClick={onOpenSettings} aria-label="Open settings" />
+      <button type="button" className="quest-mobile-hit quest-mobile-hit-challenge" onClick={() => onOpenStep(nextStep)} aria-label={`Challenge ${quest.title}`} />
     </section>
   )
 }
