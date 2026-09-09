@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { CAMPAIGN_GOAL, QUESTS, getArcById, isQuestUnlocked, type QuestDefinition } from '../data/questCampaign'
 import { completedQuestSteps, isQuestComplete, QUEST_STEPS, type QuestProgress, type QuestStep } from '../lib/questProgress'
 import { earnedRelics } from '../lib/relics'
+import { displayProfilePhoto, useUserProfile } from '../lib/userProfile'
 
 interface QuestHubProps {
   onOpenInkRoad: () => void
@@ -10,6 +11,7 @@ interface QuestHubProps {
   onOpenGrammar: (questId: string) => void
   onOpenScene: (questId: string) => void
   onOpenCheckpoint: (questId: string) => void
+  onOpenProfile: () => void
   onOpenSettings: () => void
   progress: QuestProgress
 }
@@ -28,7 +30,7 @@ const STEP_DETAILS: ReadonlyArray<{ id: QuestStep; number: string; title: string
   { id: 'checkpoint', number: '05', title: 'Guardian battle', glyph: '戦' },
 ]
 
-export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGrammar, onOpenScene, onOpenCheckpoint, onOpenSettings, progress }: QuestHubProps) {
+export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGrammar, onOpenScene, onOpenCheckpoint, onOpenProfile, onOpenSettings, progress }: QuestHubProps) {
   const questComplete = useMemo(() => (questId: string) => isQuestComplete(progress, questId), [progress])
   const unlocked = useMemo(() => QUESTS.filter((quest) => isQuestUnlocked(quest, questComplete)), [questComplete])
   const frontier = unlocked.find((quest) => !questComplete(quest.id)) ?? null
@@ -38,6 +40,7 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
   const openQuest = QUESTS.find((quest) => quest.id === openQuestId) ?? null
 
   const relicCount = earnedRelics(progress).length
+  const [userProfile] = useUserProfile()
 
   /*
    * The only "movement" this menu shows: when a quest flips to complete, its
@@ -79,7 +82,9 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
       <MobileQuestLanding
         quest={featuredQuest}
         progress={progress}
+        profilePhoto={userProfile.photo}
         onOpenInkRoad={onOpenInkRoad}
+        onOpenProfile={onOpenProfile}
         onOpenQuest={() => setOpenQuestId(featuredQuest.id)}
         onOpenSettings={onOpenSettings}
         onOpenStep={(step) => openStep(featuredQuest, step)}
@@ -191,14 +196,18 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
 function MobileQuestLanding({
   quest,
   progress,
+  profilePhoto,
   onOpenInkRoad,
+  onOpenProfile,
   onOpenQuest,
   onOpenSettings,
   onOpenStep,
 }: {
   quest: QuestDefinition
   progress: QuestProgress
+  profilePhoto: string | null
   onOpenInkRoad: () => void
+  onOpenProfile: () => void
   onOpenQuest: () => void
   onOpenSettings: () => void
   onOpenStep: (step: QuestStep) => void
@@ -209,7 +218,9 @@ function MobileQuestLanding({
     <section className="quest-mobile-landing" aria-label="Featured quest">
       <div className="quest-mobile-frame">
         <img className="quest-mobile-art" src="/quest-mobile-landing.jpg" alt={`${quest.title} featured quest`} />
-        <button type="button" className="quest-mobile-hit quest-mobile-hit-profile" onClick={onOpenQuest} aria-label="Open featured quest details" />
+        <button type="button" className="quest-mobile-profile-button" onClick={onOpenProfile} aria-label="Open profile">
+          <img src={displayProfilePhoto(profilePhoto)} alt="" />
+        </button>
         <button type="button" className="quest-mobile-hit quest-mobile-hit-ink" onClick={onOpenInkRoad} aria-label="Open Ink Road map" />
         <button type="button" className="quest-mobile-hit quest-mobile-hit-shop" onClick={onOpenQuest} aria-label="Open quest rewards" />
         <button type="button" className="quest-mobile-hit quest-mobile-hit-settings" onClick={onOpenSettings} aria-label="Open settings" />

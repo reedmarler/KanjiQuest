@@ -739,6 +739,7 @@ function App() {
         <Suspense fallback={<RouteLoading label="Quests" />}>
           <QuestHub
             onOpenInkRoad={() => setView('ink-road')}
+            onOpenProfile={() => setView('profile')}
             onOpenSettings={() => setView('settings')}
             progress={questProgress}
             onOpenVocab={(topicId, questId) => runQuestStep(() => {
