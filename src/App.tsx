@@ -767,7 +767,7 @@ function App() {
   if (view === 'daily-goals') {
     return withMobileNav(
       <div className="app">
-        <Suspense fallback={<RouteLoading label="Daily Goals" />}>
+        <Suspense fallback={<RouteLoading label="Daily quests" />}>
           <DailyGoalsPage onBack={() => setView('dashboard')} onOpenGoal={openDailyGoal} />
         </Suspense>
       </div>,

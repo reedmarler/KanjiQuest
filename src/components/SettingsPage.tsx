@@ -22,7 +22,6 @@ export function SettingsPage({
     <main className="account-page settings-page">
       <header className="account-page-heading">
         <AppBackButton onClick={onBack} aria-label="Back" />
-        <small>Preferences</small>
         <h1>Settings</h1>
       </header>
 
