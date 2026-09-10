@@ -291,7 +291,7 @@ function App() {
   const [beginnerQuizReturnView, setBeginnerQuizReturnView] = useState<'beginner-zone' | 'hiragana-chart' | 'katakana-chart'>('beginner-zone')
   const [shrineRegionId, setShrineRegionId] = useState('tsuzuri')
   const [speedRunReturnView, setSpeedRunReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools'>('dashboard')
-  const [pictureReturnView, setPictureReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools'>('dashboard')
+  const [pictureReturnView, setPictureReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools' | 'quests'>('dashboard')
   /*
    * Whether the sentence session on screen is the lab copy. The lab runs on
    * the same session machinery as the real builder — same exercises, same
@@ -758,6 +758,11 @@ function App() {
               setPracticeReturnView('quests')
               setView('grammar')
             })}
+            onOpenPictures={(questId) => {
+              setActiveQuestId(questId)
+              setPictureReturnView('quests')
+              setView('picture-practice')
+            }}
             onOpenScene={(questId) => runQuestStep(() => {
               setActiveQuestId(questId)
               setView('quest-scene')

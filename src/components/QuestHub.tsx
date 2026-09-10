@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { CAMPAIGN_GOAL, QUESTS, getArcById, isQuestUnlocked, type QuestDefinition } from '../data/questCampaign'
 import { completedQuestSteps, isQuestComplete, QUEST_STEPS, type QuestProgress, type QuestStep } from '../lib/questProgress'
 import { earnedRelics } from '../lib/relics'
@@ -9,6 +9,7 @@ interface QuestHubProps {
   onOpenVocab: (topicId: string, questId: string) => void
   onOpenKanji: (questId: string) => void
   onOpenGrammar: (questId: string) => void
+  onOpenPictures: (questId: string) => void
   onOpenScene: (questId: string) => void
   onOpenCheckpoint: (questId: string) => void
   onOpenProfile: () => void
@@ -30,7 +31,7 @@ const STEP_DETAILS: ReadonlyArray<{ id: QuestStep; number: string; title: string
   { id: 'checkpoint', number: '05', title: 'Guardian battle', glyph: '戦' },
 ]
 
-export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGrammar, onOpenScene, onOpenCheckpoint, onOpenProfile, onOpenSettings, progress }: QuestHubProps) {
+export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGrammar, onOpenPictures, onOpenScene, onOpenCheckpoint, onOpenProfile, onOpenSettings, progress }: QuestHubProps) {
   const questComplete = useMemo(() => (questId: string) => isQuestComplete(progress, questId), [progress])
   const unlocked = useMemo(() => QUESTS.filter((quest) => isQuestUnlocked(quest, questComplete)), [questComplete])
   const frontier = unlocked.find((quest) => !questComplete(quest.id)) ?? null
@@ -101,6 +102,9 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
           onOpenProfile={onOpenProfile}
           onOpenQuest={() => setOpenQuestId(featuredQuest.id)}
           onOpenSettings={onOpenSettings}
+          progress={progress}
+          onOpenStep={(step) => openStep(featuredQuest, step)}
+          onOpenPictures={() => onOpenPictures(featuredQuest.id)}
         />
       )}
 
@@ -266,6 +270,9 @@ function MobileQuestChallengeScreen({
   onOpenProfile,
   onOpenQuest,
   onOpenSettings,
+  progress,
+  onOpenStep,
+  onOpenPictures,
 }: {
   quest: QuestDefinition
   profileName: string
@@ -275,12 +282,24 @@ function MobileQuestChallengeScreen({
   onOpenProfile: () => void
   onOpenQuest: () => void
   onOpenSettings: () => void
+  progress: QuestProgress
+  onOpenStep: (step: QuestStep) => void
+  onOpenPictures: () => void
 }) {
+  const stepsDone = completedQuestSteps(progress, quest.id)
+  const activeStep = QUEST_STEPS.find((step) => !progress[quest.id]?.[step]) ?? 'checkpoint'
+  const showProgress = stepsDone > 0 && !isQuestComplete(progress, quest.id)
+  const progressDegrees = `${Math.round((stepsDone / QUEST_STEPS.length) * 360)}deg`
+
   return (
     <section className="quest-mobile-challenge-screen" aria-label={`${quest.title} challenge steps`}>
       <div className="quest-mobile-challenge-frame">
         <img className="quest-mobile-challenge-art" src="/quest-mobile-challenge.jpg" alt={`${quest.title} challenge steps`} />
         <div className="quest-mobile-shared-header" aria-hidden="true" />
+        <div className="quest-mobile-soul-balance" aria-label="1240 souls">
+          <span lang="ja" aria-hidden="true">魂</span>
+          <b>1240</b>
+        </div>
         <button type="button" className="quest-mobile-profile-button" onClick={onOpenProfile} aria-label="Open profile">
           <img src={displayProfilePhoto(profilePhoto)} alt="" />
         </button>
@@ -297,6 +316,19 @@ function MobileQuestChallengeScreen({
         <button type="button" className="quest-mobile-hit quest-mobile-hit-ink" onClick={onOpenInkRoad} aria-label="Open Ink Road map" />
         <button type="button" className="quest-mobile-hit quest-mobile-hit-shop" onClick={onOpenQuest} aria-label="Open quest rewards" />
         <button type="button" className="quest-mobile-hit quest-mobile-hit-settings" onClick={onOpenSettings} aria-label="Open settings" />
+        <button type="button" className="quest-mobile-challenge-row quest-mobile-challenge-row-vocab" onClick={() => onOpenStep('vocab')} aria-label="Open words practice" />
+        <button type="button" className="quest-mobile-challenge-row quest-mobile-challenge-row-kanji" onClick={() => onOpenStep('kanji')} aria-label="Open kanji practice" />
+        <button type="button" className="quest-mobile-challenge-row quest-mobile-challenge-row-sentences" onClick={() => onOpenStep('grammar')} aria-label="Open sentence practice" />
+        <button type="button" className="quest-mobile-challenge-row quest-mobile-challenge-row-pictures" onClick={onOpenPictures} aria-label="Open picture mode" />
+        <button type="button" className="quest-mobile-challenge-row quest-mobile-challenge-row-battle" onClick={() => onOpenStep('checkpoint')} aria-label="Open battle challenge" />
+        {showProgress && (
+          <span
+            className={`quest-mobile-step-progress quest-mobile-step-progress-${activeStep}`}
+            style={{ '--quest-mobile-step-progress': progressDegrees } as CSSProperties}
+            role="img"
+            aria-label={`${stepsDone} of ${QUEST_STEPS.length} quest steps complete`}
+          />
+        )}
         <button type="button" className="quest-mobile-challenge-back" onClick={onBack} aria-label="Back to quest landing" />
       </div>
     </section>
