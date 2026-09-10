@@ -16428,7 +16428,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform: translateY(-10.65%);
+    transform: translateY(-8.65%);
     user-select: none;
     -webkit-user-drag: none;
   }
@@ -16446,7 +16446,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .quest-mobile-challenge-separator {
     position: absolute;
     left: 0;
-    top: 10.8%;
+    top: 12.8%;
     z-index: 3;
     width: 100%;
     height: 5.2%;
@@ -16520,23 +16520,23 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 
   .quest-mobile-challenge-row-vocab {
-    top: 35%;
+    top: 37%;
   }
 
   .quest-mobile-challenge-row-kanji {
-    top: 48.2%;
+    top: 50.2%;
   }
 
   .quest-mobile-challenge-row-sentences {
-    top: 61.3%;
+    top: 63.3%;
   }
 
   .quest-mobile-challenge-row-pictures {
-    top: 74.6%;
+    top: 76.6%;
   }
 
   .quest-mobile-challenge-row-battle {
-    top: 87.6%;
+    top: 89.6%;
   }
 
   .quest-mobile-step-progress {
@@ -16574,23 +16574,23 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 
   .quest-mobile-step-progress-vocab {
-    top: 38.5%;
+    top: 40.5%;
   }
 
   .quest-mobile-step-progress-kanji {
-    top: 51.7%;
+    top: 53.7%;
   }
 
   .quest-mobile-step-progress-grammar {
-    top: 64.8%;
+    top: 66.8%;
   }
 
   .quest-mobile-step-progress-scene {
-    top: 78.1%;
+    top: 80.1%;
   }
 
   .quest-mobile-step-progress-checkpoint {
-    top: 91.1%;
+    top: 93.1%;
   }
 
   .quest-mobile-challenge-back {
