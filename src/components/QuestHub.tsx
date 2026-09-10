@@ -69,7 +69,6 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
     return () => window.clearTimeout(timer)
   }, [progress])
 
-  // App wraps these to run the "setting off" clip before the step loads.
   const openStep = (quest: QuestDefinition, step: QuestStep) => {
     setOpenQuestId(null)
     if (step === 'vocab') onOpenVocab(quest.vocabularySetId, quest.id)
@@ -296,6 +295,7 @@ function MobileQuestChallengeScreen({
       <div className="quest-mobile-challenge-frame">
         <img className="quest-mobile-challenge-art" src="/quest-mobile-challenge.jpg" alt={`${quest.title} challenge steps`} />
         <div className="quest-mobile-shared-header" aria-hidden="true" />
+        <div className="quest-mobile-challenge-separator" aria-hidden="true" />
         <div className="quest-mobile-soul-balance" aria-label="1240 souls">
           <span lang="ja" aria-hidden="true">魂</span>
           <b>1240</b>
@@ -329,7 +329,9 @@ function MobileQuestChallengeScreen({
             aria-label={`${stepsDone} of ${QUEST_STEPS.length} quest steps complete`}
           />
         )}
-        <button type="button" className="quest-mobile-challenge-back" onClick={onBack} aria-label="Back to quest landing" />
+        <button type="button" className="quest-mobile-challenge-back" onClick={onBack} aria-label="Back to quest landing">
+          <span aria-hidden="true">‹</span>
+        </button>
       </div>
     </section>
   )
