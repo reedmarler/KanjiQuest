@@ -94,7 +94,13 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
       {mobileChallengeOpen && (
         <MobileQuestChallengeScreen
           quest={featuredQuest}
+          profileName={userProfile.name}
+          profilePhoto={userProfile.photo}
           onBack={() => setMobileChallengeOpen(false)}
+          onOpenInkRoad={onOpenInkRoad}
+          onOpenProfile={onOpenProfile}
+          onOpenQuest={() => setOpenQuestId(featuredQuest.id)}
+          onOpenSettings={onOpenSettings}
         />
       )}
 
@@ -253,15 +259,44 @@ function MobileQuestLanding({
 
 function MobileQuestChallengeScreen({
   quest,
+  profileName,
+  profilePhoto,
   onBack,
+  onOpenInkRoad,
+  onOpenProfile,
+  onOpenQuest,
+  onOpenSettings,
 }: {
   quest: QuestDefinition
+  profileName: string
+  profilePhoto: string | null
   onBack: () => void
+  onOpenInkRoad: () => void
+  onOpenProfile: () => void
+  onOpenQuest: () => void
+  onOpenSettings: () => void
 }) {
   return (
     <section className="quest-mobile-challenge-screen" aria-label={`${quest.title} challenge steps`}>
       <div className="quest-mobile-challenge-frame">
         <img className="quest-mobile-challenge-art" src="/quest-mobile-challenge.jpg" alt={`${quest.title} challenge steps`} />
+        <div className="quest-mobile-shared-header" aria-hidden="true" />
+        <button type="button" className="quest-mobile-profile-button" onClick={onOpenProfile} aria-label="Open profile">
+          <img src={displayProfilePhoto(profilePhoto)} alt="" />
+        </button>
+        <div className="quest-mobile-player-panel">
+          <button type="button" className="quest-mobile-name-button" onClick={onOpenProfile}>
+            {profileName}
+          </button>
+          <span className="quest-mobile-level">Lv.1</span>
+          <span className="quest-mobile-live-xp" role="img" aria-label="0 of 100 XP">
+            <i />
+          </span>
+          <small>0 / 100 XP</small>
+        </div>
+        <button type="button" className="quest-mobile-hit quest-mobile-hit-ink" onClick={onOpenInkRoad} aria-label="Open Ink Road map" />
+        <button type="button" className="quest-mobile-hit quest-mobile-hit-shop" onClick={onOpenQuest} aria-label="Open quest rewards" />
+        <button type="button" className="quest-mobile-hit quest-mobile-hit-settings" onClick={onOpenSettings} aria-label="Open settings" />
         <button type="button" className="quest-mobile-challenge-back" onClick={onBack} aria-label="Back to quest landing" />
       </div>
     </section>

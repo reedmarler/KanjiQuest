@@ -16705,11 +16705,30 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     -webkit-user-drag: none;
   }
 
+  .quest-mobile-shared-header {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 2;
+    height: 11%;
+    background: #080b1b url('/quest-mobile-landing.jpg') top center / 100% auto no-repeat;
+    box-shadow: 0 .35rem .8rem rgba(0, 0, 0, .24);
+    pointer-events: none;
+  }
+
+  .quest-mobile-challenge-screen .quest-mobile-hit {
+    z-index: 4;
+  }
+
+  .quest-mobile-challenge-screen .quest-mobile-profile-button,
+  .quest-mobile-challenge-screen .quest-mobile-player-panel {
+    z-index: 5;
+  }
+
   .quest-mobile-challenge-back {
     position: absolute;
     left: 1.7%;
-    top: 1.5%;
-    z-index: 2;
+    top: 11.8%;
+    z-index: 4;
     width: 13%;
     height: 8%;
     min-width: 0;
