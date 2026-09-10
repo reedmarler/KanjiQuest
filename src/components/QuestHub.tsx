@@ -250,6 +250,10 @@ function MobileQuestLanding({
           </span>
           <small>0 / 100 XP</small>
         </div>
+        <div className="quest-mobile-soul-balance" aria-label="1240 souls">
+          <span lang="ja" aria-hidden="true">魂</span>
+          <b>1240</b>
+        </div>
         <div className="quest-mobile-motto-cover" aria-hidden="true" />
         <button type="button" className="quest-mobile-hit quest-mobile-hit-ink" onClick={onOpenInkRoad} aria-label="Open Ink Road map" />
         <button type="button" className="quest-mobile-hit quest-mobile-hit-shop" onClick={onOpenQuest} aria-label="Open quest rewards" />
