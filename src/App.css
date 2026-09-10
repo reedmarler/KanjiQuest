@@ -16514,22 +16514,23 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
   .quest-mobile-challenge-frame {
     position: relative;
-    width: min(100vw, calc((100dvh - 5.25rem - env(safe-area-inset-bottom)) * 784 / 1296));
-    height: min(calc(100dvh - 5.25rem - env(safe-area-inset-bottom)), calc(100vw * 1296 / 784));
+    width: min(100vw, calc((100dvh - 5.25rem - env(safe-area-inset-bottom)) * 784 / 1168));
+    height: min(calc(100dvh - 5.25rem - env(safe-area-inset-bottom)), calc(100vw * 1168 / 784));
     max-width: 100%;
     max-height: 100%;
-    aspect-ratio: 784 / 1296;
+    aspect-ratio: 784 / 1168;
     overflow: hidden;
     background: #050713;
   }
 
   .quest-mobile-challenge-art {
     position: absolute;
-    inset: 9.88% 0 0;
+    inset: 11% 0 auto;
     display: block;
     width: 100%;
-    height: 90.12%;
-    object-fit: contain;
+    height: 100%;
+    object-fit: cover;
+    transform: translateY(-10.65%);
     user-select: none;
     -webkit-user-drag: none;
   }
@@ -16538,7 +16539,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     position: absolute;
     inset: 0 0 auto;
     z-index: 2;
-    height: 9.88%;
+    height: 11%;
     background: #080b1b url('/quest-mobile-landing.jpg') top center / 100% auto no-repeat;
     box-shadow: 0 .35rem .8rem rgba(0, 0, 0, .24);
     pointer-events: none;
@@ -16547,7 +16548,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .quest-mobile-challenge-separator {
     position: absolute;
     left: 0;
-    top: 9.7%;
+    top: 10.8%;
     z-index: 3;
     width: 100%;
     height: 5.2%;
@@ -16564,11 +16565,6 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .quest-mobile-challenge-screen .quest-mobile-profile-button,
   .quest-mobile-challenge-screen .quest-mobile-player-panel {
     z-index: 5;
-  }
-
-  .quest-mobile-challenge-screen .quest-mobile-player-panel {
-    top: 1.26%;
-    height: 8.02%;
   }
 
   .quest-mobile-soul-balance {
@@ -16590,50 +16586,23 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 
   .quest-mobile-soul-balance span {
-    position: relative;
-    isolation: isolate;
-    display: grid;
-    place-items: center;
-    width: 1.92em;
-    aspect-ratio: 1;
-    border-radius: 48% 52% 58% 42%;
-    background:
-      radial-gradient(circle at 50% 60%, #2b103d 0 35%, transparent 37%),
-      radial-gradient(circle at 50% 58%, #ff56ad 0 50%, #771e72 73%, transparent 75%);
-    color: #fff0d0;
-    font: 900 clamp(.82rem, 4.8vw, 1.35rem)/1 'Noto Sans JP', sans-serif;
-    box-shadow: 0 0 .65rem rgba(255, 55, 146, .9);
-    transform: rotate(-3deg);
-  }
-
-  .quest-mobile-soul-balance span::before,
-  .quest-mobile-soul-balance span::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    background: linear-gradient(145deg, #ff84cf 8%, #f02c91 48%, #672070 88%);
-    filter: drop-shadow(0 0 .28rem rgba(255, 50, 151, .95));
-  }
-
-  .quest-mobile-soul-balance span::before {
-    inset: -42% 13% 43% 40%;
-    border-radius: 90% 12% 82% 28%;
-    transform: rotate(14deg) skewY(-12deg);
-  }
-
-  .quest-mobile-soul-balance span::after {
-    inset: -18% 51% 51% -2%;
-    border-radius: 82% 18% 70% 30%;
-    transform: rotate(-24deg);
+    display: block;
+    width: 2.05em;
+    height: 2.45em;
+    overflow: hidden;
+    background-image: url('/quest-mobile-challenge.jpg');
+    background-repeat: no-repeat;
+    background-size: 1037.35% 1280%;
+    background-position: 89% 39.4%;
+    color: transparent;
+    font-size: clamp(.82rem, 4.25vw, 1.18rem);
+    filter: drop-shadow(0 0 .25rem rgba(255, 50, 151, .78));
   }
 
   .quest-mobile-soul-balance b {
-    font: 800 clamp(.82rem, 4.9vw, 1.38rem)/1 'Outfit', sans-serif;
-  }
-
-  .quest-mobile-challenge-screen .quest-mobile-soul-balance {
-    top: .63%;
-    height: 8.83%;
+    color: #f4dba8;
+    font: 700 clamp(.82rem, 4.65vw, 1.3rem)/1 Georgia, 'Times New Roman', serif;
+    text-shadow: 0 0 .24rem rgba(238, 173, 92, .36), 0 .08rem .08rem rgba(0, 0, 0, .9);
   }
 
   .quest-mobile-challenge-row {
@@ -16641,7 +16610,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     left: 2.4%;
     z-index: 4;
     width: 95.2%;
-    height: 10.82%;
+    height: 12%;
     min-width: 0;
     min-height: 0;
     padding: 0;
@@ -16653,23 +16622,23 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 
   .quest-mobile-challenge-row-vocab {
-    top: 41.1%;
+    top: 35%;
   }
 
   .quest-mobile-challenge-row-kanji {
-    top: 53%;
+    top: 48.2%;
   }
 
   .quest-mobile-challenge-row-sentences {
-    top: 64.8%;
+    top: 61.3%;
   }
 
   .quest-mobile-challenge-row-pictures {
-    top: 76.8%;
+    top: 74.6%;
   }
 
   .quest-mobile-challenge-row-battle {
-    top: 88.4%;
+    top: 87.6%;
   }
 
   .quest-mobile-step-progress {
@@ -16707,29 +16676,29 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 
   .quest-mobile-step-progress-vocab {
-    top: 44.2%;
+    top: 38.5%;
   }
 
   .quest-mobile-step-progress-kanji {
-    top: 56.1%;
+    top: 51.7%;
   }
 
   .quest-mobile-step-progress-grammar {
-    top: 67.9%;
+    top: 64.8%;
   }
 
   .quest-mobile-step-progress-scene {
-    top: 79.9%;
+    top: 78.1%;
   }
 
   .quest-mobile-step-progress-checkpoint {
-    top: 91.6%;
+    top: 91.1%;
   }
 
   .quest-mobile-challenge-back {
     position: absolute;
     left: 5.6%;
-    top: 25.3%;
+    top: 17.5%;
     z-index: 8;
     display: grid;
     place-items: center;
