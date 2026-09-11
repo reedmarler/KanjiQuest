@@ -19,10 +19,8 @@ type DashboardQuestCardProps = {
 
 // The illustrated panel (/quest-art/featured-quest.jpg) bakes in the frame,
 // art, "FEATURED QUEST", the quest symbol and title, and the Continue frame.
-// Everything that tracks real progress — the region count, the trail nodes,
-// the finial and the "steps left" line — is drawn live on top of a mask that
-// hides the painted trail, so it stays true to the current quest.
-const TRAIL_DOTS = Math.max(2, QUEST_STEPS.length - 2)
+// The raindrop finial is still drawn live so it can respond to quest progress,
+// while the dashboard keeps the rest of the panel visually clean.
 
 export function DashboardQuestCard({
   questProgress,
@@ -37,15 +35,7 @@ export function DashboardQuestCard({
   const complete = !nextQuest
   const quest = nextQuest ?? QUESTS[QUESTS.length - 1]!
   const stepsDone = complete ? QUEST_STEPS.length : completedQuestSteps(questProgress, quest.id)
-  const stepsLeft = QUEST_STEPS.length - stepsDone
-  const questMinutes = Math.max(3, stepsLeft * 3)
-  const arcQuests = QUESTS.filter((item) => item.arcId === quest.arcId)
-  const arcCleared = arcQuests.filter((item) => isQuestComplete(questProgress, item.id)).length
   const dropLit = stepsDone >= QUEST_STEPS.length - 1
-
-  const subtitle = complete
-    ? 'Campaign complete'
-    : `${stepsLeft === 1 ? '1 step left' : `${stepsLeft} steps left`} · ~${questMinutes} min`
 
   return (
     <section
@@ -61,20 +51,7 @@ export function DashboardQuestCard({
         aria-label={complete ? 'Open the campaign map' : `Open quest ${quest.number}: ${quest.title}`}
       />
 
-      <div
-        className="featured-quest-trail"
-        role="img"
-        aria-label={`${stepsDone} of ${QUEST_STEPS.length} steps done · ${arcCleared} of ${arcQuests.length} quests cleared in this region`}
-      >
-        <span className="featured-quest-count">{arcCleared}/{arcQuests.length}</span>
-        <span className="featured-quest-line" />
-        {Array.from({ length: TRAIL_DOTS }).map((_, index) => (
-          <i
-            key={index}
-            className={`featured-quest-node${index < stepsDone ? ' is-done' : ''}`}
-            style={{ left: `${31.7 + (index / (TRAIL_DOTS - 1)) * 37.7}%` }}
-          />
-        ))}
+      <div className="featured-quest-trail" aria-hidden="true">
         <span className={`featured-quest-drop${dropLit ? ' is-lit' : ''}`}>
           <svg viewBox="0 0 24 30" aria-hidden="true">
             <path d="M12 1C12 1 3.5 14 3.5 19.5A8.5 8.5 0 0 0 20.5 19.5C20.5 14 12 1 12 1Z" />
@@ -87,10 +64,8 @@ export function DashboardQuestCard({
         type="button"
         className="featured-quest-cta"
         onClick={onContinueStudy}
-        aria-label={complete ? 'Replay a quest' : `Continue quest — ${subtitle}`}
-      >
-        <span className="featured-quest-cta-sub">{subtitle}</span>
-      </button>
+        aria-label={complete ? 'Replay a quest' : 'Continue quest'}
+      />
     </section>
   )
 }

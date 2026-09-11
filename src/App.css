@@ -4924,10 +4924,8 @@ body:has(.dashboard) {
 
 /* Featured quest: an illustrated hero for the home page. The frame, art,
    "FEATURED QUEST", quest symbol/title and the Continue frame are baked into
-   /quest-art/featured-quest.jpg. The painted trail is covered by a mask, then
-   the region count, nodes, finial and "steps left" line are drawn live so the
-   panel stays true to the current quest. Trail geometry is calibrated to the
-   art: baseline at 60% of the panel height. */
+   /quest-art/featured-quest.jpg. The raindrop finial is drawn live so it can
+   react to quest progress. */
 .featured-quest {
   position: relative;
   aspect-ratio: 906 / 550;
@@ -5061,8 +5059,7 @@ body:has(.dashboard) {
   stroke: #ffe6a0;
 }
 
-/* Continue — the painted gold frame stays; the tap target and the live
-   "steps left" line are drawn on top. */
+/* Continue — the painted gold frame stays; this transparent layer is the tap target. */
 .featured-quest-cta {
   position: absolute;
   left: 14.5%;
