@@ -4922,10 +4922,8 @@ body:has(.dashboard) {
   margin-bottom: 0.6rem;
 }
 
-/* Featured quest: an illustrated hero for the home page. The frame, art,
-   "FEATURED QUEST", quest symbol/title and the Continue frame are baked into
-   /quest-art/featured-quest.jpg. The raindrop finial is drawn live so it can
-   react to quest progress. */
+/* Featured quest: an illustrated hero for the home page. The frame, art and
+   Continue frame are baked into /quest-art/featured-quest.jpg. */
 .featured-quest {
   position: relative;
   aspect-ratio: 906 / 550;
@@ -4958,105 +4956,6 @@ body:has(.dashboard) {
 .featured-quest-cta:focus-visible {
   outline: 2px solid rgba(233, 213, 255, 0.85);
   outline-offset: -3px;
-}
-
-.featured-quest-trail {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-/* Region count — sits exactly over the painted "5/6" pill. */
-.featured-quest-count {
-  position: absolute;
-  left: 7.4%;
-  top: 60%;
-  display: grid;
-  place-items: center;
-  width: 9%;
-  height: 9.2%;
-  transform: translateY(-50%);
-  border-radius: 10px;
-  background: rgba(44, 28, 66, 0.96);
-  box-shadow: inset 0 0 0 1.5px rgba(203, 160, 236, 0.85);
-  color: #efe6fb;
-  font: 800 clamp(0.6rem, 3.2vw, 1rem)/1 'Outfit', system-ui, sans-serif;
-  font-variant-numeric: tabular-nums;
-}
-
-.featured-quest-line {
-  position: absolute;
-  left: 17%;
-  right: 13%;
-  top: 60%;
-  height: 0.09rem;
-  transform: translateY(-50%);
-  border-radius: 999px;
-  background: linear-gradient(90deg, #e7a2ff, #d886f7);
-  box-shadow:
-    0 0 8px 1px #da83f6,
-    0 0 18px 4px rgba(218, 131, 246, 0.45);
-}
-
-.featured-quest-node {
-  position: absolute;
-  top: 60%;
-  z-index: 1;
-  width: 3%;
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: rgba(206, 178, 236, 0.4);
-}
-
-.featured-quest-node.is-done {
-  background: #f6ecff;
-  box-shadow:
-    0 0 7px 2px rgba(246, 236, 255, 0.7),
-    0 0 0 0.18rem rgba(168, 96, 224, 0.35);
-}
-
-/* Raindrop finial — sits over the painted drop; turns gold once the guardian
-   step is reached. */
-.featured-quest-drop {
-  position: absolute;
-  left: 87.6%;
-  top: 58%;
-  z-index: 1;
-  width: 8.6%;
-  aspect-ratio: 24 / 30;
-  transform: translate(-50%, -50%);
-  filter:
-    drop-shadow(0 0 6px #c86cf0)
-    drop-shadow(0 0 14px rgba(200, 108, 240, 0.6));
-}
-
-.featured-quest-drop svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.featured-quest-drop path {
-  fill: #2a1442;
-  stroke: #dd8cf6;
-  stroke-width: 1.6;
-  transition: fill 200ms ease, stroke 200ms ease;
-}
-
-.featured-quest-drop ellipse {
-  fill: rgba(232, 214, 247, 0.5);
-}
-
-.featured-quest-drop.is-lit {
-  filter:
-    drop-shadow(0 0 6px #f4c86a)
-    drop-shadow(0 0 13px rgba(244, 200, 106, 0.55));
-}
-
-.featured-quest-drop.is-lit path {
-  fill: #e8b45c;
-  stroke: #ffe6a0;
 }
 
 /* Continue — the painted gold frame stays; this transparent layer is the tap target. */
@@ -16402,7 +16301,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     display: grid;
     place-items: start center;
     box-sizing: border-box;
-    padding-top: clamp(1.5rem, 5dvh, 2.75rem);
+    padding-top: clamp(.45rem, 1.4dvh, .95rem);
     overflow: hidden;
     background: #050713;
   }
@@ -16420,7 +16319,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
   .quest-mobile-challenge-art {
     position: absolute;
-    inset: 11% 0 auto;
+    inset: 12.3% 0 auto;
     display: block;
     width: 100%;
     height: 100%;
@@ -16443,7 +16342,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .quest-mobile-challenge-separator {
     position: absolute;
     left: 0;
-    top: 10.8%;
+    top: 12.1%;
     z-index: 3;
     width: 100%;
     height: 5.2%;
@@ -16517,23 +16416,23 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 
   .quest-mobile-challenge-row-vocab {
-    top: 35%;
+    top: 36.3%;
   }
 
   .quest-mobile-challenge-row-kanji {
-    top: 48.2%;
+    top: 49.5%;
   }
 
   .quest-mobile-challenge-row-sentences {
-    top: 61.3%;
+    top: 62.6%;
   }
 
   .quest-mobile-challenge-row-pictures {
-    top: 74.6%;
+    top: 75.9%;
   }
 
   .quest-mobile-challenge-row-battle {
-    top: 87.6%;
+    top: 88.6%;
   }
 
   .quest-mobile-step-progress {
@@ -16571,29 +16470,29 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 
   .quest-mobile-step-progress-vocab {
-    top: 38.5%;
+    top: 39.8%;
   }
 
   .quest-mobile-step-progress-kanji {
-    top: 51.7%;
+    top: 53%;
   }
 
   .quest-mobile-step-progress-grammar {
-    top: 64.8%;
+    top: 66.1%;
   }
 
   .quest-mobile-step-progress-scene {
-    top: 78.1%;
+    top: 79.4%;
   }
 
   .quest-mobile-step-progress-checkpoint {
-    top: 91.1%;
+    top: 92.1%;
   }
 
   .quest-mobile-challenge-back {
     position: absolute;
     left: 5.6%;
-    top: 10.9%;
+    top: 12.2%;
     z-index: 8;
     display: grid;
     place-items: center;
