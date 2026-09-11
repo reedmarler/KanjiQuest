@@ -261,6 +261,7 @@ type SessionItem =
 
 function App() {
   const [view, setView] = useState<View>('dashboard')
+  const [questLandingResetToken, setQuestLandingResetToken] = useState(0)
   const [progress] = useState<Record<string, CardProgress>>(() => loadProgress())
   const [wrongPool, setWrongPool] = useState(() => loadWrongPool())
   const [session, setSession] = useState<SessionItem[]>([])
@@ -322,6 +323,13 @@ function App() {
     setProfileMenuOpen(false)
     if (next !== 'dashboard') setSettingsExpanded(false)
   }, [])
+
+  const goToQuests = useCallback(() => {
+    if (view === 'quests') {
+      setQuestLandingResetToken((token) => token + 1)
+    }
+    goToView('quests')
+  }, [goToView, view])
 
   const openDailyGoal = useCallback((id: DailyGoalId) => {
     setProfileMenuOpen(false)
@@ -537,7 +545,7 @@ function App() {
     <MobileBottomNav
       currentView={view}
       onHome={() => goToView('dashboard')}
-      onQuests={() => goToView('quests')}
+      onQuests={goToQuests}
       onStudy={() => goToView('study-tools')}
       onBeginner={() => goToView('beginner-zone')}
       onMore={() => goToView('additional-tools')}
@@ -554,7 +562,7 @@ function App() {
       onProfile={toggleProfileMenu}
       onSettings={toggleSettingsPanel}
       onHome={() => goToView('dashboard')}
-      onQuests={() => goToView('quests')}
+      onQuests={goToQuests}
       onStudy={() => goToView('study-tools')}
       onBeginner={() => goToView('beginner-zone')}
       onMore={() => goToView('additional-tools')}
@@ -720,6 +728,7 @@ function App() {
       <div className="app">
         <Suspense fallback={<RouteLoading label="Quests" />}>
           <QuestHub
+            key={questLandingResetToken}
             onOpenInkRoad={() => setView('ink-road')}
             onOpenProfile={() => setView('profile')}
             onOpenSettings={() => setView('settings')}
