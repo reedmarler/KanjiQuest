@@ -16307,7 +16307,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 
   .quest-mobile-challenge-frame {
-    --quest-mobile-content-shift: clamp(3.4rem, 8.1dvh, 5.6rem);
+    --quest-mobile-content-shift: clamp(1.2rem, 3dvh, 2rem);
     position: relative;
     width: min(100vw, calc((100dvh - 5.25rem - env(safe-area-inset-bottom)) * 784 / 1168));
     height: min(calc(100dvh - 5.25rem - env(safe-area-inset-bottom)), calc(100vw * 1168 / 784));
@@ -16337,19 +16337,6 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     height: 11%;
     background: #080b1b url('/quest-mobile-landing.jpg') top center / 100% auto no-repeat;
     box-shadow: 0 .35rem .8rem rgba(0, 0, 0, .24);
-    pointer-events: none;
-  }
-
-  .quest-mobile-challenge-separator {
-    position: absolute;
-    left: 0;
-    top: 10.8%;
-    z-index: 3;
-    width: 100%;
-    height: 7%;
-    background:
-      linear-gradient(180deg, #050713 0 58%, rgba(5, 7, 19, .92) 76%, rgba(5, 7, 19, 0));
-    box-shadow: 0 .45rem .75rem rgba(0, 0, 0, .28);
     pointer-events: none;
   }
 
@@ -16387,11 +16374,13 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     overflow: hidden;
     background-image: url('/quest-soul-icon.jpg');
     background-repeat: no-repeat;
-    background-size: cover;
+    background-size: contain;
     background-position: center;
+    border-radius: 50%;
     color: transparent;
     font-size: clamp(.82rem, 4.25vw, 1.18rem);
     filter: drop-shadow(0 0 .25rem rgba(255, 50, 151, .78));
+    mix-blend-mode: screen;
   }
 
   .quest-mobile-soul-balance b {
@@ -16484,42 +16473,6 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
   .quest-mobile-step-progress-checkpoint {
     top: calc(94.9% + var(--quest-mobile-content-shift));
-  }
-
-  .quest-mobile-challenge-back {
-    position: absolute;
-    left: 5.6%;
-    top: 18.5%;
-    z-index: 8;
-    display: grid;
-    place-items: center;
-    width: 7.6%;
-    aspect-ratio: 1;
-    height: auto;
-    min-width: 0;
-    min-height: 0;
-    padding: 0;
-    border: 1px solid rgba(250, 218, 154, .82);
-    border-radius: 50%;
-    background:
-      radial-gradient(circle at 35% 30%, rgba(255, 246, 205, .24), transparent 42%),
-      linear-gradient(145deg, rgba(28, 20, 30, .94), rgba(9, 8, 18, .94));
-    color: #ffedbc;
-    box-shadow: 0 0 .65rem rgba(255, 204, 118, .34), inset 0 0 0 1px rgba(0, 0, 0, .42);
-    cursor: pointer;
-    text-shadow: 0 .06rem .08rem rgba(0, 0, 0, .9);
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .quest-mobile-challenge-back span {
-    display: block;
-    transform: translateY(-3%);
-    font: 900 clamp(1rem, 7.2vw, 2rem)/.82 'Outfit', sans-serif;
-  }
-
-  .quest-mobile-challenge-back:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, .9);
-    outline-offset: -2px;
   }
 
   .quest-mobile-challenge-row:focus-visible {

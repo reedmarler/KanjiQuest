@@ -96,7 +96,6 @@ export function QuestHub({ onOpenInkRoad, onOpenVocab, onOpenKanji, onOpenGramma
           quest={featuredQuest}
           profileName={userProfile.name}
           profilePhoto={userProfile.photo}
-          onBack={() => setMobileChallengeOpen(false)}
           onOpenInkRoad={onOpenInkRoad}
           onOpenProfile={onOpenProfile}
           onOpenQuest={() => setOpenQuestId(featuredQuest.id)}
@@ -268,7 +267,6 @@ function MobileQuestChallengeScreen({
   quest,
   profileName,
   profilePhoto,
-  onBack,
   onOpenInkRoad,
   onOpenProfile,
   onOpenQuest,
@@ -280,7 +278,6 @@ function MobileQuestChallengeScreen({
   quest: QuestDefinition
   profileName: string
   profilePhoto: string | null
-  onBack: () => void
   onOpenInkRoad: () => void
   onOpenProfile: () => void
   onOpenQuest: () => void
@@ -299,7 +296,6 @@ function MobileQuestChallengeScreen({
       <div className="quest-mobile-challenge-frame">
         <img className="quest-mobile-challenge-art" src="/quest-mobile-challenge.jpg?v=2" alt={`${quest.title} challenge steps`} />
         <div className="quest-mobile-shared-header" aria-hidden="true" />
-        <div className="quest-mobile-challenge-separator" aria-hidden="true" />
         <div className="quest-mobile-soul-balance" aria-label="1240 souls">
           <span lang="ja" aria-hidden="true">魂</span>
           <b>1240</b>
@@ -336,9 +332,6 @@ function MobileQuestChallengeScreen({
             aria-valuenow={stepsDone}
           />
         )}
-        <button type="button" className="quest-mobile-challenge-back" onClick={onBack} aria-label="Back to quest landing">
-          <span aria-hidden="true">‹</span>
-        </button>
       </div>
     </section>
   )
