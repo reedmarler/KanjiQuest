@@ -292,12 +292,12 @@ function MobileQuestChallengeScreen({
   const stepsDone = completedQuestSteps(progress, quest.id)
   const activeStep = QUEST_STEPS.find((step) => !progress[quest.id]?.[step]) ?? 'checkpoint'
   const showProgress = stepsDone > 0 && !isQuestComplete(progress, quest.id)
-  const progressDegrees = `${Math.round((stepsDone / QUEST_STEPS.length) * 360)}deg`
+  const progressPercent = `${Math.round((stepsDone / QUEST_STEPS.length) * 100)}%`
 
   return (
     <section className="quest-mobile-challenge-screen" aria-label={`${quest.title} challenge steps`}>
       <div className="quest-mobile-challenge-frame">
-        <img className="quest-mobile-challenge-art" src="/quest-mobile-challenge.jpg" alt={`${quest.title} challenge steps`} />
+        <img className="quest-mobile-challenge-art" src="/quest-mobile-challenge.jpg?v=2" alt={`${quest.title} challenge steps`} />
         <div className="quest-mobile-shared-header" aria-hidden="true" />
         <div className="quest-mobile-challenge-separator" aria-hidden="true" />
         <div className="quest-mobile-soul-balance" aria-label="1240 souls">
@@ -328,9 +328,12 @@ function MobileQuestChallengeScreen({
         {showProgress && (
           <span
             className={`quest-mobile-step-progress quest-mobile-step-progress-${activeStep}`}
-            style={{ '--quest-mobile-step-progress': progressDegrees } as CSSProperties}
-            role="img"
+            style={{ '--quest-mobile-step-progress': progressPercent } as CSSProperties}
+            role="progressbar"
             aria-label={`${stepsDone} of ${QUEST_STEPS.length} quest steps complete`}
+            aria-valuemin={0}
+            aria-valuemax={QUEST_STEPS.length}
+            aria-valuenow={stepsDone}
           />
         )}
         <button type="button" className="quest-mobile-challenge-back" onClick={onBack} aria-label="Back to quest landing">

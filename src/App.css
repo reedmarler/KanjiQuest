@@ -16177,7 +16177,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     align-items: baseline;
     column-gap: 2.8%;
     row-gap: 4.5%;
-    width: 29.4%;
+    width: 28.4%;
     height: 8.9%;
     padding: .35% 0 .15%;
     background:
@@ -16210,7 +16210,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .quest-mobile-live-xp {
     grid-column: 1 / -1;
     display: block;
-    width: 100%;
+    width: 96%;
     height: 21%;
     min-height: .26rem;
     overflow: hidden;
@@ -16301,25 +16301,26 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     display: grid;
     place-items: start center;
     box-sizing: border-box;
-    padding-top: clamp(.45rem, 1.4dvh, .95rem);
+    padding-top: 0;
     overflow: hidden;
     background: #050713;
   }
 
   .quest-mobile-challenge-frame {
+    --quest-mobile-content-shift: clamp(3.75rem, 9.6dvh, 6.4rem);
     position: relative;
     width: min(100vw, calc((100dvh - 5.25rem - env(safe-area-inset-bottom)) * 784 / 1168));
     height: min(calc(100dvh - 5.25rem - env(safe-area-inset-bottom)), calc(100vw * 1168 / 784));
     max-width: 100%;
     max-height: 100%;
     aspect-ratio: 784 / 1168;
-    overflow: hidden;
+    overflow: visible;
     background: #050713;
   }
 
   .quest-mobile-challenge-art {
     position: absolute;
-    inset: 12.3% 0 auto;
+    inset: calc(12.3% + var(--quest-mobile-content-shift)) 0 auto;
     display: block;
     width: 100%;
     height: 100%;
@@ -16342,12 +16343,12 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .quest-mobile-challenge-separator {
     position: absolute;
     left: 0;
-    top: 12.1%;
+    top: 10.8%;
     z-index: 3;
     width: 100%;
-    height: 5.2%;
+    height: 7%;
     background:
-      linear-gradient(180deg, rgba(5, 7, 19, .98), rgba(7, 8, 22, .9) 58%, rgba(7, 8, 22, .1));
+      linear-gradient(180deg, #050713 0 58%, rgba(5, 7, 19, .92) 76%, rgba(5, 7, 19, 0));
     box-shadow: 0 .45rem .75rem rgba(0, 0, 0, .28);
     pointer-events: none;
   }
@@ -16363,16 +16364,16 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
   .quest-mobile-soul-balance {
     position: absolute;
-    left: 52.8%;
+    left: 51%;
     top: .7%;
     z-index: 6;
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: minmax(0, 42%) minmax(0, 58%);
     align-items: center;
-    gap: 4%;
-    width: 20.2%;
+    gap: 0;
+    width: 23.2%;
     height: 9.8%;
-    padding: 0 1.2%;
+    padding: 0 .5%;
     background: linear-gradient(90deg, rgba(8, 11, 28, .99), rgba(8, 11, 28, .94));
     color: #f8dfae;
     text-shadow: 0 0 .35rem rgba(255, 69, 151, .88), 0 .08rem .08rem rgba(0, 0, 0, .82);
@@ -16381,21 +16382,24 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
   .quest-mobile-soul-balance span {
     display: block;
-    width: 2.05em;
-    height: 2.45em;
+    width: 100%;
+    height: 2.35em;
     overflow: hidden;
-    background-image: url('/quest-mobile-challenge.jpg');
+    background-image: url('/quest-soul-icon.jpg');
     background-repeat: no-repeat;
-    background-size: 1037.35% 1280%;
-    background-position: 89% 39.4%;
+    background-size: cover;
+    background-position: center;
     color: transparent;
     font-size: clamp(.82rem, 4.25vw, 1.18rem);
     filter: drop-shadow(0 0 .25rem rgba(255, 50, 151, .78));
   }
 
   .quest-mobile-soul-balance b {
+    min-width: 0;
+    justify-self: center;
+    overflow: hidden;
     color: #f4dba8;
-    font: 700 clamp(.82rem, 4.65vw, 1.3rem)/1 Georgia, 'Times New Roman', serif;
+    font: 700 clamp(.78rem, 4vw, 1.12rem)/1 Georgia, 'Times New Roman', serif;
     text-shadow: 0 0 .24rem rgba(238, 173, 92, .36), 0 .08rem .08rem rgba(0, 0, 0, .9);
   }
 
@@ -16416,83 +16420,76 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 
   .quest-mobile-challenge-row-vocab {
-    top: 36.3%;
+    top: calc(36.3% + var(--quest-mobile-content-shift));
   }
 
   .quest-mobile-challenge-row-kanji {
-    top: 49.5%;
+    top: calc(49.5% + var(--quest-mobile-content-shift));
   }
 
   .quest-mobile-challenge-row-sentences {
-    top: 62.6%;
+    top: calc(62.6% + var(--quest-mobile-content-shift));
   }
 
   .quest-mobile-challenge-row-pictures {
-    top: 75.9%;
+    top: calc(75.9% + var(--quest-mobile-content-shift));
   }
 
   .quest-mobile-challenge-row-battle {
-    top: 88.6%;
+    top: calc(88.6% + var(--quest-mobile-content-shift));
   }
 
   .quest-mobile-step-progress {
     position: absolute;
-    left: 58.7%;
+    left: 58.2%;
     z-index: 7;
     display: block;
-    width: 8.8%;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background:
-      radial-gradient(circle, #10091c 0 49%, transparent 50%),
-      conic-gradient(#ff5aaa 0 var(--quest-mobile-step-progress), rgba(255, 190, 96, .18) var(--quest-mobile-step-progress) 360deg);
-    box-shadow: 0 0 .45rem rgba(255, 75, 166, .82), inset 0 0 0 1px rgba(255, 205, 132, .7);
-    pointer-events: none;
-  }
-
-  .quest-mobile-step-progress::before {
-    content: "";
-    position: absolute;
-    inset: -58% -210%;
-    z-index: -1;
+    width: 20.4%;
+    height: 1.35%;
+    min-height: .38rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 154, 204, .7);
     border-radius: 999px;
-    background: linear-gradient(90deg, rgba(14, 11, 31, .94), rgba(25, 12, 39, .88));
-    box-shadow: inset 0 0 0 1px rgba(255, 90, 175, .5);
+    background: rgba(8, 7, 23, .96);
+    box-shadow: 0 0 .38rem rgba(255, 75, 166, .46), inset 0 0 .25rem rgba(0, 0, 0, .9);
+    pointer-events: none;
   }
 
   .quest-mobile-step-progress::after {
     content: "";
     position: absolute;
-    inset: 24%;
-    border-radius: 50%;
-    background: #ff5aaa;
-    box-shadow: 0 0 .35rem rgba(255, 90, 175, .95);
+    inset: 0 auto 0 0;
+    width: var(--quest-mobile-step-progress);
+    border-radius: inherit;
+    background: linear-gradient(90deg, #ff4fa3, #ff8bc7);
+    box-shadow: 0 0 .45rem rgba(255, 90, 175, .9);
+    transition: width 320ms ease;
   }
 
   .quest-mobile-step-progress-vocab {
-    top: 39.8%;
+    top: calc(42.6% + var(--quest-mobile-content-shift));
   }
 
   .quest-mobile-step-progress-kanji {
-    top: 53%;
+    top: calc(55.8% + var(--quest-mobile-content-shift));
   }
 
   .quest-mobile-step-progress-grammar {
-    top: 66.1%;
+    top: calc(68.9% + var(--quest-mobile-content-shift));
   }
 
   .quest-mobile-step-progress-scene {
-    top: 79.4%;
+    top: calc(82.2% + var(--quest-mobile-content-shift));
   }
 
   .quest-mobile-step-progress-checkpoint {
-    top: 92.1%;
+    top: calc(94.9% + var(--quest-mobile-content-shift));
   }
 
   .quest-mobile-challenge-back {
     position: absolute;
     left: 5.6%;
-    top: 12.2%;
+    top: calc(12.2% + min(2.2dvh, 1.35rem));
     z-index: 8;
     display: grid;
     place-items: center;
