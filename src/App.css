@@ -16307,7 +16307,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 
   .quest-mobile-challenge-frame {
-    --quest-mobile-content-shift: clamp(3.75rem, 9.6dvh, 6.4rem);
+    --quest-mobile-content-shift: clamp(3.4rem, 8.1dvh, 5.6rem);
     position: relative;
     width: min(100vw, calc((100dvh - 5.25rem - env(safe-area-inset-bottom)) * 784 / 1168));
     height: min(calc(100dvh - 5.25rem - env(safe-area-inset-bottom)), calc(100vw * 1168 / 784));
@@ -16489,7 +16489,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .quest-mobile-challenge-back {
     position: absolute;
     left: 5.6%;
-    top: calc(12.2% + min(2.2dvh, 1.35rem));
+    top: 18.5%;
     z-index: 8;
     display: grid;
     place-items: center;
