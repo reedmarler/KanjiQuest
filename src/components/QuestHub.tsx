@@ -294,7 +294,7 @@ function MobileQuestChallengeScreen({
   return (
     <section className="quest-mobile-challenge-screen" aria-label={`${quest.title} challenge steps`}>
       <div className="quest-mobile-challenge-frame">
-        <img className="quest-mobile-challenge-art" src="/quest-mobile-challenge.jpg?v=3" alt={`${quest.title} challenge steps`} />
+        <img className="quest-mobile-challenge-art" src="/quest-mobile-challenge.jpg?v=4" alt={`${quest.title} challenge steps`} />
         <div className="quest-mobile-shared-header" aria-hidden="true" />
         <div className="quest-mobile-soul-balance" aria-label="1240 souls">
           <span lang="ja" aria-hidden="true">魂</span>
