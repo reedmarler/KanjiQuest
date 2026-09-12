@@ -16084,7 +16084,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 }
 
-@media (max-width: 720px) {
+@media (min-width: 0) {
   .quest-mobile-landing {
     position: relative;
     display: grid;
@@ -16478,6 +16478,67 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   .quest-mobile-challenge-row:focus-visible {
     outline: 2px solid rgba(255, 255, 255, .9);
     outline-offset: -2px;
+  }
+}
+
+@media (min-width: 721px) {
+  html:has(.quest-mobile-landing),
+  body:has(.quest-mobile-landing) {
+    background: #050713;
+  }
+
+  body:has(.quest-mobile-landing) .app {
+    width: 100%;
+    max-width: none;
+    min-height: calc(100dvh - 4rem);
+    padding: 0;
+    overflow: hidden;
+    zoom: 1;
+  }
+
+  body:has(.quest-mobile-landing):not(:has(.quest-mobile-challenge-screen)) .mobile-bottom-nav,
+  body:has(.quest-mobile-challenge-screen) .mobile-bottom-nav {
+    display: none;
+  }
+
+  .quest-trail-page {
+    width: 100%;
+    min-height: calc(100dvh - 4rem);
+  }
+
+  .quest-trail-page > .quest-trail-banner,
+  .quest-trail-page > .quest-trail-goal,
+  .quest-trail-page > .quest-trail {
+    display: none;
+  }
+
+  .quest-mobile-landing {
+    height: calc(100dvh - 4rem);
+    min-height: 0;
+    place-items: center;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(119, 48, 154, .16), transparent 34%),
+      #050713;
+  }
+
+  body:has(.quest-mobile-landing):not(:has(.quest-mobile-challenge-screen)) .quest-mobile-frame,
+  .quest-mobile-frame {
+    width: min(100vw, calc((100dvh - 4rem) * 784 / 1168));
+    height: min(calc(100dvh - 4rem), calc(100vw * 1168 / 784));
+  }
+
+  .quest-mobile-challenge-screen {
+    inset: 4rem 0 0;
+    place-items: center;
+  }
+
+  .quest-mobile-challenge-frame {
+    width: min(100vw, calc((100dvh - 4rem) * 784 / 1168));
+    height: min(calc(100dvh - 4rem), calc(100vw * 1168 / 784));
+  }
+
+  .quest-mobile-challenge-row-battle {
+    height: calc(12% - var(--quest-mobile-content-shift));
   }
 }
 
