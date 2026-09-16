@@ -833,6 +833,7 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
       const baseFrame = current
       const rotated = new Set<string>()
       const swapped = new Map<string, ParticleAlternative>()
+      let particleRotations = 0
       for (const rotation of particleRotationWalk(baseFrame, index)) {
         if (steps.length >= stepCount) break
         rotated.add(rotation.key)
@@ -844,6 +845,7 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
           templateRefresh: false,
         })
         current = rotation.frame
+        particleRotations += 1
       }
       /*
        * With the particles spent, the word they attach to is what is worth
@@ -868,9 +870,18 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
           if (changed.length === 1) {
             steps.push({ frame: next, changed, slotWidths: HERO_SLOT_WIDTHS, templateRefresh: false })
             current = next
+            particleRotations += 1
           }
         }
       }
+      /*
+       * A sentence whose particles turned out to license no swap at all is a
+       * still frame wearing the drill's name, same as the sweep and focus
+       * cases below: keeping it would put this pattern's full-sentence step
+       * directly next to the following pattern's, with no component swap
+       * between them. Drop it and let the walk try another pattern.
+       */
+      if (particleRotations === 0) steps.pop()
       continue
     }
 
@@ -930,13 +941,16 @@ function buildDatabaseHeroSteps(level: JlptLevel, sequenceSeed: number, stepCoun
       current = next.frame
     }
     /*
-     * A focused sentence that produced no rotation is a still frame wearing a
-     * drill's name: the slot was there but every candidate for it failed the
-     * naturalness or single-slot check. Drop it and let the walk find a
-     * sentence that can actually be worked. Particles are exempt — that drill
-     * is the sentence changing, so it has no rotations by design.
+     * A sentence that produced no rotation is a still frame wearing a full
+     * sentence's step: the slot was there but every candidate for it failed
+     * the naturalness or single-slot check. Keeping it would land this
+     * pattern's full-sentence swap directly next to the following pattern's,
+     * with no component swap shown in between — exactly the "swap a whole
+     * sentence, then swap another whole sentence" jump the stream is built to
+     * avoid. Drop it and let the walk find a sentence that can actually be
+     * worked, in both the focused drills and the ordinary all-slot sweep.
      */
-    if (focus && rotations === 0) steps.pop()
+    if (rotations === 0) steps.pop()
   }
 
   return steps
