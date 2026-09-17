@@ -122,6 +122,7 @@ function speechVolumeIcon(volume: number): string {
 
 import { HERO_FOCUS_LEVELS, focusAvailableAt, type HeroSwapFocus } from '../lib/heroSequence'
 const RotatingHeroSentence = lazy(() => import('./RotatingHeroSentence').then((module) => ({ default: module.RotatingHeroSentence })))
+const SHOW_LEGACY_PROGRESS_RUNNER = false
 
 function ProgressRunnerVideo() {
   const loopStartSeconds = 3
@@ -884,7 +885,7 @@ export function Dashboard({
         )}
       </section>
 
-      {false && (
+      {SHOW_LEGACY_PROGRESS_RUNNER && (
         <section className="progress-section progress-compact">
           <div className="progress-header">
             <span>Progress</span>

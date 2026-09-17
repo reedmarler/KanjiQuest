@@ -16542,6 +16542,52 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   }
 }
 
+/* Wide screens keep the illustrated featured quest intact while putting the
+   campaign road to work in the space that used to be empty on both sides. */
+@media (min-width: 980px) {
+  .quest-trail-page {
+    display: grid;
+    grid-template-columns: minmax(25rem, 42%) minmax(30rem, 58%);
+    grid-template-rows: auto minmax(0, 1fr);
+    width: min(100%, 92rem);
+    height: calc(100dvh - 4rem);
+    min-height: 0;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #050713;
+  }
+
+  .quest-mobile-landing {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    height: calc(100dvh - 4rem);
+    border-right: 1px solid rgba(233, 168, 255, .2);
+    background:
+      radial-gradient(circle at 50% 42%, rgba(119, 48, 154, .2), transparent 38%),
+      #050713;
+  }
+
+  .quest-trail-page > .quest-trail-goal {
+    grid-column: 2;
+    grid-row: 1;
+    display: grid;
+    margin: 1.15rem 1.25rem .7rem;
+    border-radius: 8px;
+  }
+
+  .quest-trail-page > .quest-trail {
+    grid-column: 2;
+    grid-row: 2;
+    display: block;
+    min-height: 0;
+    margin: 0 1rem 1rem 1.25rem;
+    padding: 0 .5rem 1rem 1.9rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+}
+
 /* --- Quest sheet: tap a stop, see the whole story ----------------------
    Everything that used to sit permanently on the hub — the patron's ask,
    the guardian, the reward, the step-by-step breakdown — now lives here,

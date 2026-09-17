@@ -198,7 +198,7 @@ export function RotatingHeroSentence({
   const pendingSeed = useMemo(() => newSequenceSeed(), [jlptLevel])
   const pendingSteps = useMemo(
     () => levelIsPending ? buildHeroSteps(wrongPool, progress, jlptLevel, pendingSeed, STARTER_STEP_COUNT, swapFocus ?? undefined, favouriteWordSet) : null,
-    [levelIsPending, wrongPool, progress, jlptLevel, pendingSeed, swapFocus],
+    [levelIsPending, wrongPool, progress, jlptLevel, pendingSeed, swapFocus, favouriteWordSet],
   )
 
   const advanceSentence = useCallback(() => {
