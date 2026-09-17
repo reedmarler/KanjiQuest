@@ -20,7 +20,7 @@ export function DashboardQuestCard({
   return (
     <section
       className="featured-quest"
-      aria-label="Featured quest: Clinic Lane"
+      aria-label="Quests"
     >
       <img className="featured-quest-art" src="/quest-art/featured-quest.jpg" alt="" />
 
@@ -28,14 +28,14 @@ export function DashboardQuestCard({
         type="button"
         className="featured-quest-open"
         onClick={onOpenQuests}
-        aria-label="Open Clinic Lane"
+        aria-label="Open quests"
       />
 
       <button
         type="button"
         className="featured-quest-cta"
         onClick={onContinueStudy}
-        aria-label="Continue Clinic Lane"
+        aria-label="Open quests"
       />
     </section>
   )
