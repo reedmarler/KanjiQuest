@@ -42110,7 +42110,9 @@
       ],
       "tags": [
         "household",
-        "n5"
+        "n5",
+        "bedding",
+        "home"
       ],
       "status": "approved",
       "source": "kanji-quest",
@@ -42119,7 +42121,7 @@
       ],
       "approvedAt": "2026-08-02T02:07:09.220Z",
       "reviewedAt": "2026-08-02T02:07:09.220Z",
-      "updatedAt": "2026-08-02T02:07:09.220Z"
+      "updatedAt": "2026-09-17T03:23:15.092Z"
     },
     {
       "id": "reviewed-vocab-core-expansion-092",
@@ -51541,6 +51543,62 @@
       "approvedAt": "2026-08-02T02:13:24.092Z",
       "reviewedAt": "2026-08-02T02:13:24.092Z",
       "updatedAt": "2026-08-02T02:16:41.882Z"
+    },
+    {
+      "id": "reviewed-vocab-focus-sports-04",
+      "sourceId": "vocab-focus-sports-04",
+      "kind": "vocabulary",
+      "japanese": "監督",
+      "reading": "かんとく",
+      "english": "coach; manager",
+      "preferredTranslation": "coach",
+      "jlpt": "N3",
+      "category": "People & Living Things",
+      "categories": [
+        "People & Living Things"
+      ],
+      "tags": [
+        "person",
+        "occupation",
+        "sport",
+        "human",
+        "n3"
+      ],
+      "status": "approved",
+      "source": "kanji-quest",
+      "allowedRoles": [
+        "People & Living Things"
+      ],
+      "approvedAt": "2026-09-17T03:23:15.092Z",
+      "reviewedAt": "2026-09-17T03:23:15.092Z",
+      "updatedAt": "2026-09-17T03:23:15.092Z"
+    },
+    {
+      "id": "reviewed-vocab-focus-home-08",
+      "sourceId": "vocab-focus-home-08",
+      "kind": "vocabulary",
+      "japanese": "石けん",
+      "reading": "せっけん",
+      "english": "soap",
+      "preferredTranslation": "soap",
+      "jlpt": "N5",
+      "category": "Objects",
+      "categories": [
+        "Objects"
+      ],
+      "tags": [
+        "home",
+        "personal-care",
+        "n5"
+      ],
+      "status": "approved",
+      "source": "kanji-quest",
+      "allowedRoles": [
+        "Objects"
+      ],
+      "approvedAt": "2026-09-17T03:23:15.092Z",
+      "reviewedAt": "2026-09-17T03:23:15.092Z",
+      "updatedAt": "2026-09-17T03:23:15.092Z"
     }
   ]
 }

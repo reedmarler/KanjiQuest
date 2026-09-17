@@ -251,6 +251,29 @@ function toCategoryWordRecord(card: StudyCard): WordRecord {
 }
 
 /**
+ * Study-only cards an approved vocabulary record already covers.
+ *
+ * Content Studio's "N left to review" count is driven by this list, but a
+ * card's own reviewed flag lives only in the browser that clicked "save" —
+ * it never made it into the exported seed. So a word reviewed months ago
+ * came back as pending on every fresh clone, even though `approvedWords()`
+ * had been serving its real, reviewed record the whole time. Matching by
+ * `sourceId` catches a record this exact card was reviewed into; matching by
+ * japanese+reading catches the word already being covered by a *different*
+ * source (a manual entry, a different deck) that reaches the same slot.
+ */
+function approvedVocabularyKeys(): { sourceIds: Set<string>; wordKeys: Set<string> } {
+  const sourceIds = new Set<string>()
+  const wordKeys = new Set<string>()
+  for (const record of getApprovedContentRecords()) {
+    if (record.kind !== 'vocabulary') continue
+    if (record.sourceId) sourceIds.add(record.sourceId)
+    wordKeys.add(`${record.japanese}|${record.reading}`)
+  }
+  return { sourceIds, wordKeys }
+}
+
+/**
  * The study-only words the generator refuses to use until a human has checked
  * their category and tags, carrying the classifier's unverified guess so a
  * reviewer has somewhere to start. Approving one in Content Studio stores a
@@ -258,8 +281,10 @@ function toCategoryWordRecord(card: StudyCard): WordRecord {
  * per-word path that the rejected confidence heuristic was standing in for.
  */
 export function getPendingReviewWords(): CategoryWordRecord[] {
+  const { sourceIds, wordKeys } = approvedVocabularyKeys()
   return allCards
-    .filter(card => card.type === 'vocab' && isStudyOnlyDeck(card.id))
+    .filter(card => card.type === 'vocab' && isStudyOnlyDeck(card.id)
+      && !sourceIds.has(card.id) && !wordKeys.has(`${card.front}|${card.reading ?? 'Reading needed'}`))
     .map(toCategoryWordRecord)
     .sort((a, b) => a.english.localeCompare(b.english))
 }
