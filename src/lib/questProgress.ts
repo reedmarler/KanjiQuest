@@ -21,6 +21,13 @@ export function completeQuestStep(progress: QuestProgress, questId: string, step
   return next
 }
 
+export function completeQuest(progress: QuestProgress, questId: string): QuestProgress {
+  const completed = Object.fromEntries(QUEST_STEPS.map((step) => [step, true])) as Record<QuestStep, true>
+  const next = { ...progress, [questId]: completed }
+  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next)) } catch { /* keep in memory */ }
+  return next
+}
+
 export function completedQuestSteps(progress: QuestProgress, questId: string) {
   return QUEST_STEPS.filter((step) => progress[questId]?.[step]).length
 }
