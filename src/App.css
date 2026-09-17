@@ -22345,3 +22345,109 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   .simple-quest-action { grid-template-columns: 1fr; gap: .45rem; }
   .simple-quest-action .btn { min-height: 2.8rem; }
 }
+
+/* Quest landing skeleton. Keep this deliberately plain until quest content is defined. */
+.quest-skeleton-page {
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 34rem);
+  margin: 0 auto;
+}
+
+.quest-skeleton-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding: .9rem .15rem .15rem;
+}
+
+.quest-skeleton-header h1 {
+  margin: 0;
+  padding-bottom: .06em;
+  color: var(--text);
+  font-size: 2.5rem;
+  line-height: 1.18;
+  letter-spacing: 0;
+}
+
+.quest-difficulty-toggle {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: .18rem;
+  padding: .2rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+}
+
+.quest-difficulty-toggle button {
+  min-height: 2rem;
+  padding: .4rem .55rem;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-muted);
+  font: 700 .55rem/1 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.quest-difficulty-toggle button:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.quest-difficulty-toggle button.is-active {
+  background: color-mix(in srgb, var(--kyogre) 24%, var(--surface-2));
+  color: var(--kyogre-light);
+}
+
+.quest-difficulty-toggle button:focus-visible {
+  outline: 2px solid var(--kyogre-light);
+  outline-offset: 1px;
+}
+
+.quest-skeleton-list {
+  display: grid;
+  gap: .75rem;
+}
+
+.quest-skeleton-card {
+  display: flex;
+  align-items: center;
+  min-height: 5.4rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 24%, var(--border));
+  border-radius: 7px;
+  background: var(--surface);
+}
+
+.quest-skeleton-card span {
+  color: var(--text);
+  font-size: .92rem;
+  font-weight: 700;
+}
+
+@media (min-width: 721px) {
+  .quest-skeleton-header {
+    margin-top: .2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .quest-skeleton-header {
+    gap: .55rem;
+    padding-inline: 0;
+  }
+
+  .quest-skeleton-header h1 {
+    font-size: 2rem;
+  }
+
+  .quest-difficulty-toggle button {
+    padding-inline: .35rem;
+    font-size: .48rem;
+  }
+}
