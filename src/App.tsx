@@ -383,8 +383,6 @@ function App() {
     [progress],
   )
   const activeQuest = getQuestById(activeQuestId)
-  const wrongCount = Object.keys(wrongPool).length
-  const hasQuestProgress = Object.keys(questProgress).length > 0
 
   function openBeginnerQuiz(script: Extract<BeginnerScript, 'hiragana' | 'katakana'>, returnView: 'beginner-zone' | 'hiragana-chart' | 'katakana-chart') {
     setBeginnerQuizReturnView(returnView)
@@ -502,15 +500,7 @@ function App() {
   }
 
   const openContinueStudy = () => {
-    if (hasQuestProgress) {
-      setView('quests')
-      return
-    }
-    if (wrongCount > 0 || learnedCount > 0) {
-      setView('study-tools')
-      return
-    }
-    setView('beginner-zone')
+    setView('quests')
   }
 
   const showHubChrome = view === 'dashboard'
@@ -728,11 +718,6 @@ function App() {
         <Suspense fallback={<RouteLoading label="Quests" />}>
           <QuestHub
             key={questLandingResetToken}
-            progress={questProgress}
-            onOpenCheckpoint={(questId) => {
-              setActiveQuestId(questId)
-              setView('quest-checkpoint')
-            }}
           />
         </Suspense>
       </div>,

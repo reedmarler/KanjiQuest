@@ -1,9 +1,4 @@
-import { useMemo } from 'react'
-import { QUESTS } from '../data/questCampaign'
-import {
-  isQuestComplete,
-  type QuestProgress,
-} from '../lib/questProgress'
+import type { QuestProgress } from '../lib/questProgress'
 
 type DashboardQuestCardProps = {
   questProgress: QuestProgress
@@ -19,22 +14,13 @@ type DashboardQuestCardProps = {
 // art, and Continue frame while the transparent layers below keep the card tappable.
 
 export function DashboardQuestCard({
-  questProgress,
   onContinueStudy,
   onOpenQuests,
 }: DashboardQuestCardProps) {
-  const nextQuest = useMemo(
-    () => QUESTS.find((quest) => !isQuestComplete(questProgress, quest.id)),
-    [questProgress],
-  )
-
-  const complete = !nextQuest
-  const quest = nextQuest ?? QUESTS[QUESTS.length - 1]!
-
   return (
     <section
       className="featured-quest"
-      aria-label={complete ? 'Campaign complete' : `Featured quest: ${quest.title}`}
+      aria-label="Featured quest: Clinic Lane"
     >
       <img className="featured-quest-art" src="/quest-art/featured-quest.jpg" alt="" />
 
@@ -42,14 +28,14 @@ export function DashboardQuestCard({
         type="button"
         className="featured-quest-open"
         onClick={onOpenQuests}
-        aria-label={complete ? 'Open the campaign map' : `Open quest ${quest.number}: ${quest.title}`}
+        aria-label="Open Clinic Lane"
       />
 
       <button
         type="button"
         className="featured-quest-cta"
         onClick={onContinueStudy}
-        aria-label={complete ? 'Replay a quest' : 'Continue quest'}
+        aria-label="Continue Clinic Lane"
       />
     </section>
   )
