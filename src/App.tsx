@@ -4,10 +4,9 @@ import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
 import { loadProgress, recordReview } from './lib/storage'
 import { useSwipeNav } from './lib/useSwipeNav'
-import { completeQuestStep, loadQuestProgress, type QuestStep } from './lib/questProgress'
-import { loadAchievementMetrics, recordBossBattle, recordQuestScene } from './lib/achievementProgress'
+import { completeQuest, completeQuestStep, loadQuestProgress, type QuestStep } from './lib/questProgress'
+import { loadAchievementMetrics, recordQuestScene } from './lib/achievementProgress'
 import { getQuestById } from './data/questCampaign'
-import { buildRelicLoadout } from './lib/relics'
 import {
   favoriteFromExercise,
   favoriteFromDrillExercise,
@@ -729,35 +728,7 @@ function App() {
         <Suspense fallback={<RouteLoading label="Quests" />}>
           <QuestHub
             key={questLandingResetToken}
-            onOpenInkRoad={() => setView('ink-road')}
-            onOpenProfile={() => setView('profile')}
-            onOpenSettings={() => setView('settings')}
             progress={questProgress}
-            onOpenVocab={(topicId, questId) => {
-              setQuestVocabTopicId(topicId)
-              setActiveQuestId(questId)
-              setPracticeReturnView('quests')
-              setView('vocab-practice')
-            }}
-            onOpenKanji={(questId) => {
-              setActiveQuestId(questId)
-              setPracticeReturnView('quests')
-              setView('kanji')
-            }}
-            onOpenGrammar={(questId) => {
-              setActiveQuestId(questId)
-              setPracticeReturnView('quests')
-              setView('grammar')
-            }}
-            onOpenPictures={(questId) => {
-              setActiveQuestId(questId)
-              setPictureReturnView('quests')
-              setView('picture-practice')
-            }}
-            onOpenScene={(questId) => {
-              setActiveQuestId(questId)
-              setView('quest-scene')
-            }}
             onOpenCheckpoint={(questId) => {
               setActiveQuestId(questId)
               setView('quest-checkpoint')
@@ -1091,13 +1062,8 @@ function App() {
           <QuestCheckpoint
             questId={activeQuestId}
             onBack={() => setView('quests')}
-            onDashboard={() => setView('dashboard')}
-            loadout={buildRelicLoadout(questProgress)}
-            onBattleResult={({ won, perfect }) => {
-              if (activeQuestId) setAchievementMetrics((current) => recordBossBattle(current, activeQuestId, won, perfect))
-            }}
             onComplete={() => {
-              finishQuestStep('checkpoint')
+              if (activeQuestId) setQuestProgress((current) => completeQuest(current, activeQuestId))
               setView('quests')
             }}
           />

@@ -475,6 +475,19 @@ const actionAdverbWords = new Set([
   // in Japanese but English wants them after the verb ("eats again", "eats
   // late"), which is the same reason たくさん and 少し are excluded.
   '時々','ちゃんと','やっと','いきなり','思わず',
+  // Reviewed adverbial forms that were previously stranded in the Object
+  // bucket. Each works directly before the action verbs served by n5-09 and
+  // has a natural pre-verbal English gloss.
+  '慎重に','真剣に','わざと','無事に',
+  '簡単に','容易に','実際に','下手に','間違って','自由に',
+  '意図的に','無意識に','安全に',
+  'たまたま','真っ直ぐ',
+])
+// These describe execution quality or process and sound natural with reading,
+// writing, and tool use, but not with every action (for example, 効率的に食べる).
+const structuredActionAdverbWords = new Set([
+  ...actionAdverbWords,
+  '上手に','正しく','自動的に','積極的に','効率的に',
 ])
 // A distinct array instance: fillVerbSlots keys the word filter off this
 // identity, the same way it keys the reading-manner widening off
@@ -560,7 +573,7 @@ const verbs: VerbUsageRecord[] = [
   { id:'taberu-adverb', japanese:'食べる', reading:'たべる', english:'eat', englishThird:'eats', verbClass:'ichidan', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','eating','ichidan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
   { id:'nomu-adverb', japanese:'飲む', reading:'のむ', english:'drink', englishThird:'drinks', verbClass:'godan-mu', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Food','Drink','Medicine'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','drinking','godan','transitive','drink'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food','Drink','Medicine'],tags:drinkableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
   { id:'miru-adverb', japanese:'見る', reading:'みる', english:'watch', englishThird:'watches', verbClass:'ichidan', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Object','Media','Technology'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','perception','watching','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Media','Technology'],tags:watchableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
-  { id:'tsukau-adverb', japanese:'使う', reading:'つかう', english:'use', englishThird:'uses', verbClass:'godan-u', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:usableToolTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
+  { id:'tsukau-adverb', japanese:'使う', reading:'つかう', english:'use', englishThird:'uses', verbClass:'godan-u', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:usableToolTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:structuredActionAdverbWords} } },
   { id:'tsukuru-adverb', japanese:'作る', reading:'つくる', english:'make', englishThird:'makes', verbClass:'godan-ru', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','godan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:['bread','dessert','cake','pie','pastry','baked','noodles','sushi','dish','meal']}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
   { id:'iku-ni', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-02', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
   // n5-30, means of transport (〜で行きます). The Vehicle category had 13 words
@@ -572,7 +585,7 @@ const verbs: VerbUsageRecord[] = [
   { id:'taberu-location', japanese:'食べる', reading:'たべる', english:'eat', englishThird:'eats', verbClass:'ichidan', sentencePattern:'n5-03', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','consumption','eating','ichidan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:eatingLocationTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'hanasu-companion', japanese:'話す', reading:'はなす', english:'talk', englishThird:'talks', verbClass:'godan-su', sentencePattern:'n5-04', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} with {Companion}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','speaking','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, companion:{categories:['Person'],tags:humanSubjectTags} } },
   { id:'okiru-time', japanese:'起きる', reading:'おきる', english:'wake up', englishThird:'wakes up', verbClass:'ichidan', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','sleeping','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
-  { id:'yomu-adverb', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
+  { id:'yomu-adverb', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:structuredActionAdverbWords} } },
   { id:'iku-e', japanese:'行く', reading:'いく', english:'go', englishThird:'goes', verbClass:'godan-ku-iku', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','motion','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
   { id:'kau-basic', japanese:'買う', reading:'かう', english:'buy', englishThird:'buys', verbClass:'godan-u', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','shopping','godan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'tsukuru-basic', japanese:'作る', reading:'つくる', english:'make', englishThird:'makes', verbClass:'godan-ru', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','cooking','godan','transitive','food'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:['bread','dessert','cake','pie','pastry','baked','noodles','sushi','dish','meal']} } },
@@ -589,7 +602,7 @@ const verbs: VerbUsageRecord[] = [
   { id:'yomu-location', japanese:'読む', reading:'よむ', english:'read', englishThird:'reads', verbClass:'godan-mu', sentencePattern:'n5-03', subjectCategories:['Person'], objectCategories:['Object','Book','Document','Media'], translationTemplate:'{Subject} {Verb} {Object} {Location}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','reading','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, location:{categories:['Place','Building','Room'],tags:eatingLocationTags}, object:{categories:['Object','Book','Document','Media'],tags:readableTags} } },
   { id:'neru-time', japanese:'寝る', reading:'ねる', english:'sleep', englishThird:'sleeps', verbClass:'ichidan', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','daily-life','sleeping','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
   { id:'oyogu-time', japanese:'泳ぐ', reading:'およぐ', english:'swim', englishThird:'swims', verbClass:'godan-gu', sentencePattern:'n5-05', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} {Time}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','sports','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, time:{categories:['Time'],tags:wakeTimeTags} } },
-  { id:'kaku-adverb', japanese:'書く', reading:'かく', english:'write', englishThird:'writes', verbClass:'godan-ku', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Document'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','writing','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Document'],tags:readableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:actionAdverbWords} } },
+  { id:'kaku-adverb', japanese:'書く', reading:'かく', english:'write', englishThird:'writes', verbClass:'godan-ku', sentencePattern:'n5-09', subjectCategories:['Person'], objectCategories:['Document'], translationTemplate:'{Subject} {Adverb} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','communication','writing','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Document'],tags:readableTags}, adverb:{categories:['Adverb'],tags:actionAdverbTags,words:structuredActionAdverbWords} } },
   { id:'uru-basic', japanese:'売る', reading:'うる', english:'sell', englishThird:'sells', verbClass:'godan-ru', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Food'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','commerce','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Food'],tags:edibleTags} } },
   { id:'motsu-basic', japanese:'持つ', reading:'もつ', english:'hold', englishThird:'holds', verbClass:'godan-tsu', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Technology','Object'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','possession','godan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Technology','Object'],tags:handHeldObjectTags} } },
   { id:'hashiru-destination', japanese:'走る', reading:'はしる', english:'run', englishThird:'runs', verbClass:'godan-ru', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','sports','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
@@ -621,6 +634,11 @@ const verbs: VerbUsageRecord[] = [
   { id:'akeru-basic', japanese:'開ける', reading:'あける', english:'open', englishThird:'opens', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Object','Furniture'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Object','Furniture'],tags:['door','window','box','bag','bottle','jar','suitcase']} } },
   { id:'shimeru-basic', japanese:'閉める', reading:'しめる', english:'close', englishThird:'closes', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Tool','Object','Furniture'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','action','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Tool','Object','Furniture'],tags:['door','window','box','bag','bottle','jar','suitcase']} } },
   { id:'hajimeru-basic', japanese:'始める', reading:'はじめる', english:'begin', englishThird:'begins', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Activity','Event'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','time','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Activity','Event'],tags:['studying','working','practice','exercise','meal','meeting','event','activity']} } },
+  { id:'ukeru-exam', japanese:'受ける', reading:'うける', english:'take', englishThird:'takes', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Event'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','education','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Event'],tags:['exam'],words:new Set(['試験'])} } },
+  { id:'miru-match', japanese:'見る', reading:'みる', english:'watch', englishThird:'watches', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Event'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','perception','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Event'],tags:['match','competition'],words:new Set(['試合'])} } },
+  { id:'kanjiru-emotion', japanese:'感じる', reading:'かんじる', english:'feel', englishThird:'feels', verbClass:'ichidan', sentencePattern:'n5-01', subjectCategories:['Person'], objectCategories:['Emotion'], translationTemplate:'{Subject} {Verb} {Object}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','emotion','ichidan','transitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, object:{categories:['Emotion'],tags:[CANONICAL_CATEGORY_TAGS.Emotion]} } },
+  { id:'kawaru-world', japanese:'変わる', reading:'かわる', english:'change', englishThird:'changes', verbClass:'godan-ru', sentencePattern:'n5-28', subjectCategories:['Place'], objectCategories:[], translationTemplate:'{Subject} {Verb}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','change','godan','intransitive'], slots:{ subject:{categories:['Place'],tags:['world'],words:new Set(['世界'])} } },
+  { id:'mawaru-earth', japanese:'回る', reading:'まわる', english:'turn', englishThird:'turns', verbClass:'godan-ru', sentencePattern:'n5-28', subjectCategories:['Place'], objectCategories:[], translationTemplate:'{Subject} {Verb}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','godan','intransitive'], slots:{ subject:{categories:['Place'],tags:['earth','planet'],words:new Set(['地球'])} } },
   { id:'wakareru-companion', japanese:'別れる', reading:'わかれる', english:'break up', englishThird:'breaks up', verbClass:'ichidan', sentencePattern:'n5-04', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} with {Companion}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','social','ichidan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, companion:{categories:['Person'],tags:humanSubjectTags} } },
   { id:'modoru-destination', japanese:'戻る', reading:'もどる', english:'go back', englishThird:'goes back', verbClass:'godan-ru', sentencePattern:'n5-10', subjectCategories:['Person'], objectCategories:[], translationTemplate:'{Subject} {Verb} to {Destination}.', supportedGrammarForms:['dictionary','masu'], tags:['verb','movement','godan','intransitive'], slots:{ subject:{categories:['Person'],tags:humanSubjectTags}, destination:{categories:['Place','Building','Room'],tags:standaloneDestinationTags} } },
   // 勤める takes its workplace with に ("works at" as affiliation), unlike 働く
@@ -1316,6 +1334,7 @@ function subjectPossessive(subject: WordRecord) {
 
 function contextualSlotEnglish(slot: string,word: WordRecord,filled: Record<string,WordRecord>,verb?: VerbUsageRecord) {
   if (slot === 'object' && word.japanese === 'テレビ' && verb && mediumNotDeviceVerbs.has(verb.japanese)) return 'television'
+  if (slot === 'object' && verb?.id === 'kanjiru-emotion') return primaryEnglishGloss(word.preferredTranslation || word.english)
   if (slot === 'companion' && filled.subject) {
     const manWords=new Set(['男','男性'])
     const womanWords=new Set(['女','女性'])
@@ -1338,6 +1357,8 @@ function relatedPersonEnglish(slot: string, word: WordRecord, subject: WordRecor
 }
 
 function contextualSubjectEnglish(word: WordRecord,verb: VerbUsageRecord,filled: Record<string,WordRecord>) {
+  if (word.japanese === '世界') return 'the world'
+  if (word.japanese === '地球') return 'Earth'
   if (word.japanese !== '客') return englishPhrase(word,'subject')
   if (verb.tags.some(tag=>['consumption','eating','drinking'].includes(tag))) return 'a customer'
   if (verb.tags.some(tag=>['movement','motion'].includes(tag))) {
@@ -1897,6 +1918,21 @@ const TIME_ADVERBIALS: ReadonlyArray<{japanese:string;reading:string;english:str
   { japanese:'来月', reading:'らいげつ', english:'next month', tense:'future' },
   { japanese:'来年', reading:'らいねん', english:'next year', tense:'future' },
   { japanese:'将来', reading:'しょうらい', english:'in the future', tense:'future' },
+  { japanese:'現在', reading:'げんざい', english:'currently', tense:'present' },
+  { japanese:'当時', reading:'とうじ', english:'at that time', tense:'past' },
+  { japanese:'今度', reading:'こんど', english:'next time', tense:'future' },
+  { japanese:'今回', reading:'こんかい', english:'this time', tense:'present' },
+  { japanese:'先程', reading:'さきほど', english:'a little while ago', tense:'past' },
+  { japanese:'さっき', reading:'さっき', english:'a little while ago', tense:'past' },
+  { japanese:'今後', reading:'こんご', english:'from now on', tense:'future' },
+  { japanese:'以前', reading:'いぜん', english:'before', tense:'past' },
+  { japanese:'過去', reading:'かこ', english:'in the past', tense:'past' },
+  { japanese:'毎月', reading:'まいつき', english:'every month', tense:'present' },
+  { japanese:'毎回', reading:'まいかい', english:'every time', tense:'present' },
+  { japanese:'しょっちゅう', reading:'しょっちゅう', english:'all the time', tense:'present' },
+  { japanese:'しばらく', reading:'しばらく', english:'for a while', tense:'present' },
+  { japanese:'今すぐ', reading:'いますぐ', english:'right now', tense:'present' },
+  { japanese:'まもなく', reading:'まもなく', english:'shortly', tense:'future' },
 ]
 const timeAdverbialWords = new Set(TIME_ADVERBIALS.map(entry => entry.japanese))
 
@@ -1974,7 +2010,7 @@ const questionWords = new Set(QUESTION_FRAMES.map(entry => entry.japanese))
 const WEATHER_FRAMES: ReadonlyArray<{
   japanese:string
   reading:string
-  shape:'state'|'falls'|'strong'|'quality'|'pretty'
+  shape:'state'|'falls'|'strong'|'quality'|'pretty'|'level'
   english:string
 }> = [
   { japanese:'雨', reading:'あめ', shape:'state', english:'rainy' },
@@ -1989,6 +2025,11 @@ const WEATHER_FRAMES: ReadonlyArray<{
   { japanese:'景色', reading:'けしき', shape:'pretty', english:'scenery' },
   { japanese:'星', reading:'ほし', shape:'pretty', english:'stars' },
   { japanese:'雲', reading:'くも', shape:'pretty', english:'clouds' },
+  { japanese:'台風', reading:'たいふう', shape:'strong', english:'typhoon' },
+  { japanese:'嵐', reading:'あらし', shape:'strong', english:'storm' },
+  { japanese:'霧', reading:'きり', shape:'state', english:'foggy' },
+  { japanese:'気温', reading:'きおん', shape:'level', english:'temperature' },
+  { japanese:'湿気', reading:'しっけ', shape:'level', english:'humidity' },
 ]
 const weatherWords = new Set(WEATHER_FRAMES.map(entry => entry.japanese))
 
@@ -2006,6 +2047,9 @@ const SEQUENCE_ADVERBIALS: ReadonlyArray<{japanese:string;reading:string;english
   { japanese:'先に', reading:'さきに', english:'First of all', base:'先' },
   { japanese:'後で', reading:'あとで', english:'Later', base:'後' },
   { japanese:'最後に', reading:'さいごに', english:'Last', base:'最後' },
+  { japanese:'次に', reading:'つぎに', english:'Next' },
+  { japanese:'続いて', reading:'つづいて', english:'Next' },
+  { japanese:'順番に', reading:'じゅんばんに', english:'In order' },
 ]
 const sequenceAdverbialWords = new Set(SEQUENCE_ADVERBIALS.flatMap(e => e.base ? [e.japanese, e.base] : [e.japanese]))
 
@@ -3335,7 +3379,12 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
   if (patternId === 'n5-39') {
     // まず本を読みます — ordering an action rather than dating it, so there is
     // no particle and no tense to agree with.
-    let index = Math.abs(options.slotSeeds?.sequence ?? options.slotSeeds?.ending ?? seed + 1660) % SEQUENCE_ADVERBIALS.length
+    const requiredIndex = options.requiredWord
+      ? SEQUENCE_ADVERBIALS.findIndex(entry => entry.japanese === options.requiredWord || entry.base === options.requiredWord)
+      : -1
+    let index = requiredIndex >= 0
+      ? requiredIndex
+      : Math.abs(options.slotSeeds?.sequence ?? options.slotSeeds?.ending ?? seed + 1660) % SEQUENCE_ADVERBIALS.length
     if (options.avoidWords?.sequence && SEQUENCE_ADVERBIALS[index]!.japanese === options.avoidWords.sequence) {
       index = (index + 1) % SEQUENCE_ADVERBIALS.length
     }
@@ -3357,7 +3406,12 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     return finish(furigana,english,{subject,object},{sequence:slot,ending:{...slot,id:`sequence-ending-${index}`,tags:['ending']}},['A sequence adverbial orders the action and takes no particle.'])
   }
   if (patternId === 'n5-38') {
-    let weatherIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1650) % WEATHER_FRAMES.length
+    const requiredWeatherIndex = options.requiredWord
+      ? WEATHER_FRAMES.findIndex(entry => entry.japanese === options.requiredWord)
+      : -1
+    let weatherIndex = requiredWeatherIndex >= 0
+      ? requiredWeatherIndex
+      : Math.abs(options.slotSeeds?.ending ?? seed + 1650) % WEATHER_FRAMES.length
     if (options.avoidWords?.ending && WEATHER_FRAMES[weatherIndex]!.japanese === options.avoidWords.ending) {
       weatherIndex = (weatherIndex + 1) % WEATHER_FRAMES.length
     }
@@ -3387,6 +3441,11 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
       const good = Math.abs(seed + 1652) % 2 === 0
       const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('が'),{text:good?'いいです':'悪いです',reading:good?'いいです':'わるいです',slot:'adjective'}]
       return finish(furigana,`The ${weather.english} is ${good?'good':'bad'} ${time.english}.`,{},extra,['天気 takes a quality adjective, not a weather noun.'])
+    }
+    if (weather.shape === 'level') {
+      const high = Math.abs(seed + 1652) % 2 === 0
+      const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('が'),{text:high?'高いです':'低いです',reading:high?'たかいです':'ひくいです',slot:'adjective'}]
+      return finish(furigana,`The ${weather.english} is ${high?'high':'low'} ${time.english}.`,{},extra,['気温 and 湿気 take a level adjective.'])
     }
     const furigana=[timePart,literalPart('は','わ'),weatherPart,literalPart('が'),{text:'きれいです',reading:'きれいです',slot:'adjective'}]
     const isPlural = isPluralPhrase(weather.english)
@@ -3472,7 +3531,12 @@ function additionalN5Sentence(seed: number,patternId: string,options: CategorySe
     const subject = pick(humans, 1621, 'subject')
     const object = pick(candidates, 1622, 'object')
     if (!subject || !object) return null
-    let timeIndex = Math.abs(options.slotSeeds?.ending ?? seed + 1623) % TIME_ADVERBIALS.length
+    const requiredTimeIndex = options.requiredWord
+      ? TIME_ADVERBIALS.findIndex(entry => entry.japanese === options.requiredWord)
+      : -1
+    let timeIndex = requiredTimeIndex >= 0
+      ? requiredTimeIndex
+      : Math.abs(options.slotSeeds?.ending ?? seed + 1623) % TIME_ADVERBIALS.length
     if (options.avoidWords?.ending && TIME_ADVERBIALS[timeIndex]!.japanese === options.avoidWords.ending) {
       timeIndex = (timeIndex + 1) % TIME_ADVERBIALS.length
     }
@@ -6825,9 +6889,17 @@ export function generateSentenceForWord(word: string, seed = 1): GeneratedPrevie
   }
 
   const direct = (() => {
-    for (let attempt = 0; attempt < SEEDS_PER_PATTERN; attempt += 1) {
-      const sentence = generateCategorySentence(seed + attempt, undefined, 'N5', { requiredWord: word })
-      if (suitableExample(sentence)) return sentence
+    const requiredRecords = generatorWords().filter(record => record.japanese === word)
+    const compatibleVerbs = verbs.filter(verb => requiredRecords.some(record => Object.values(verb.slots).some(rule => (
+      categoryMatch(record,rule.categories)
+      && (!rule.tags?.length || matchingTags(record,rule.tags).length > 0)
+      && (!rule.words || rule.words.has(record.japanese))
+    ))))
+    for (const verb of compatibleVerbs) {
+      for (let attempt = 0; attempt < SEEDS_PER_PATTERN; attempt += 1) {
+        const sentence = generateCategorySentence(seed + attempt, undefined, 'N5', { requiredWord: word, verbId:verb.id })
+        if (suitableExample(sentence)) return sentence
+      }
     }
     return null
   })()

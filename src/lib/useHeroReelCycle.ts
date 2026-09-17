@@ -84,11 +84,6 @@ export function useHeroReelCycle({
   const inPostGrow =
     growing && (phase === 'postSwap' || phase === 'shrink' || phase === 'unhighlight')
 
-  function beginCyclePhase() {
-    if (alreadyHighlighted) return 'swap' as const
-    return 'highlight' as const
-  }
-
   useLayoutEffect(() => {
     if (!needsChange) {
       settledKeyRef.current = stepKey
@@ -117,8 +112,9 @@ export function useHeroReelCycle({
     const swapAt = holdMs + preSwapMs
     const postAt = swapAt + HERO_SWAP_MS + HERO_SWAP_SETTLE_MS
     const doneAt = postAt + postSwapMs
+    const beginCyclePhase = alreadyHighlighted ? 'swap' : 'highlight'
 
-    setPhase(holdMs > 0 ? 'hold' : beginCyclePhase())
+    setPhase(holdMs > 0 ? 'hold' : beginCyclePhase)
 
     const timers: number[] = []
 
@@ -126,7 +122,7 @@ export function useHeroReelCycle({
       timers.push(
         window.setTimeout(() => {
           if (animId !== animIdRef.current) return
-          setPhase(beginCyclePhase())
+          setPhase(beginCyclePhase)
         }, holdMs),
       )
     }

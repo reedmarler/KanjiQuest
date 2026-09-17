@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 
 interface TraceCanvasProps {
   char: string
@@ -101,7 +101,7 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
   const drawingRef = useRef(false)
   const lastPointRef = useRef<{ x: number; y: number } | null>(null)
 
-  const chars = [...char]
+  const chars = useMemo(() => [...char], [char])
   const charCount = Math.max(1, chars.length)
   const vertical = useNarrowViewport() && charCount > 1
   const width = vertical ? SIZE : SIZE * charCount
@@ -160,7 +160,7 @@ export function TraceCanvas({ char, showGuide = true, overlay, compactSingleChar
 
     const ink = inkCanvasRef.current
     if (ink) ink.getContext('2d')!.clearRect(0, 0, width, height)
-  }, [char, showGuide, vertical, guideFontRatio, offsetX, offsetY, guideFit, guideFitMargin])
+  }, [chars, width, height, showGuide, vertical, guideFontRatio, offsetX, offsetY, guideFit, guideFitMargin])
 
   function clearInk() {
     const ink = inkCanvasRef.current

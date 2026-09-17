@@ -21974,3 +21974,374 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   color: var(--text-muted);
   font-size: 0.55rem;
 }
+
+/* Compact quests: one list, one five-question practice screen. */
+.simple-quest-hub {
+  width: min(100%, 58rem);
+  margin: 0 auto;
+  padding-bottom: 2rem;
+}
+
+.simple-quest-hero {
+  position: relative;
+  height: 11rem;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background: #171820;
+}
+
+.simple-quest-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 46%;
+}
+
+.simple-quest-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(7, 8, 13, .92), rgba(7, 8, 13, .48) 62%, rgba(7, 8, 13, .12));
+}
+
+.simple-quest-hero-copy {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 1.35rem;
+  max-width: 22rem;
+  color: #fff;
+  transform: translateY(-50%);
+}
+
+.simple-quest-hero-copy > span,
+.simple-quest-copy > span,
+.simple-quest-question > header span,
+.simple-quest-result > small,
+.simple-quest-challenge-topbar span {
+  color: #f0c36a;
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.simple-quest-hero-copy h1 {
+  margin: .12rem 0;
+  font-size: 2rem;
+  line-height: 1.05;
+}
+
+.simple-quest-hero-copy p {
+  margin: .35rem 0 0;
+  color: rgba(255, 255, 255, .82);
+  font-size: .82rem;
+}
+
+.simple-quest-summary {
+  display: grid;
+  grid-template-columns: auto minmax(5rem, 1fr) auto;
+  align-items: center;
+  gap: .9rem;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.simple-quest-summary > div:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: .35rem;
+}
+
+.simple-quest-summary strong {
+  color: var(--text);
+  font-size: 1.35rem;
+}
+
+.simple-quest-summary span,
+.simple-quest-summary b {
+  color: var(--text-muted);
+  font-size: .65rem;
+}
+
+.simple-quest-summary-track,
+.simple-quest-progress {
+  height: .38rem;
+  overflow: hidden;
+  border-radius: 99px;
+  background: var(--surface-2);
+}
+
+.simple-quest-summary-track i,
+.simple-quest-progress i {
+  display: block;
+  height: 100%;
+  background: var(--rayquaza);
+  transition: width 220ms ease;
+}
+
+.simple-quest-list {
+  display: grid;
+  gap: .55rem;
+  padding: 1rem;
+}
+
+.simple-quest-row {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) 5.2rem;
+  align-items: center;
+  gap: .8rem;
+  min-height: 5.25rem;
+  padding: .7rem .75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.simple-quest-row.is-current {
+  border-color: color-mix(in srgb, var(--kyogre-light) 60%, var(--border));
+  box-shadow: inset 3px 0 var(--kyogre-light);
+}
+
+.simple-quest-row.is-complete {
+  border-color: color-mix(in srgb, var(--rayquaza) 44%, var(--border));
+}
+
+.simple-quest-symbol {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--sakura-light);
+  font: 700 1.35rem/1 'Noto Sans JP', sans-serif;
+}
+
+.simple-quest-row.is-complete .simple-quest-symbol {
+  color: var(--rayquaza-light);
+}
+
+.simple-quest-copy {
+  min-width: 0;
+}
+
+.simple-quest-copy h2 {
+  margin: .12rem 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: .94rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.simple-quest-copy p {
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: .66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.simple-quest-start {
+  min-height: 2.35rem;
+  padding: .45rem .7rem;
+  border: 1px solid color-mix(in srgb, var(--kyogre-light) 55%, var(--border));
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--kyogre) 14%, var(--surface-2));
+  color: var(--kyogre-light);
+  font: 700 .67rem 'Outfit', sans-serif;
+}
+
+.simple-quest-start:disabled {
+  border-color: var(--border);
+  color: var(--text-muted);
+  opacity: .55;
+}
+
+.simple-quest-challenge {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  width: min(100%, 42rem);
+  min-height: calc(100dvh - 6rem);
+  margin: 0 auto;
+}
+
+.simple-quest-challenge-topbar {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  min-height: 3.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.simple-quest-challenge-topbar > .app-back-slot {
+  flex: 0 0 var(--app-back-width);
+}
+
+.app .simple-quest-challenge-topbar .app-back-slot > .app-back-button {
+  position: relative;
+  top: auto;
+  left: auto;
+}
+
+.simple-quest-challenge-topbar > div {
+  display: grid;
+  flex: 1 1 auto;
+  gap: .05rem;
+  min-width: 0;
+}
+
+.simple-quest-challenge-topbar strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: .82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.simple-quest-progress {
+  height: .3rem;
+  border-radius: 0;
+}
+
+.simple-quest-question,
+.simple-quest-result {
+  align-self: start;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.simple-quest-question > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.simple-quest-question > header b {
+  color: var(--kyogre-light);
+  font-size: .66rem;
+}
+
+.simple-quest-english {
+  margin: 1.2rem 0 .45rem;
+  color: var(--text-muted);
+  font-size: .82rem;
+  text-align: center;
+}
+
+.simple-quest-question h1 {
+  min-height: 4.5rem;
+  margin: 0;
+  padding: .9rem;
+  color: var(--text);
+  font: 600 1.45rem/1.7 'Noto Sans JP', sans-serif;
+  text-align: center;
+}
+
+.simple-quest-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .6rem;
+  margin: .85rem 0;
+}
+
+.simple-quest-options button {
+  min-width: 0;
+  min-height: 3.25rem;
+  padding: .65rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: 600 1.05rem 'Noto Sans JP', sans-serif;
+}
+
+.simple-quest-options button.is-selected {
+  border-color: var(--kyogre-light);
+  background: color-mix(in srgb, var(--kyogre) 16%, var(--surface-2));
+}
+
+.simple-quest-options button.is-correct {
+  border-color: var(--rayquaza-light);
+  background: color-mix(in srgb, var(--rayquaza) 16%, var(--surface-2));
+}
+
+.simple-quest-options button.is-wrong {
+  border-color: var(--sakura-light);
+  background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+}
+
+.simple-quest-action {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7rem;
+  align-items: center;
+  gap: .8rem;
+  min-height: 3.6rem;
+}
+
+.simple-quest-action > p {
+  display: grid;
+  gap: .08rem;
+  margin: 0;
+  font-size: .7rem;
+}
+
+.simple-quest-action > p strong { color: var(--text); }
+.simple-quest-action > p span { color: var(--text-muted); }
+.simple-quest-action > p.is-correct strong { color: var(--rayquaza-light); }
+.simple-quest-action > p.is-wrong strong { color: var(--sakura-light); }
+.simple-quest-action .btn { width: 100%; }
+
+.simple-quest-result {
+  display: grid;
+  justify-items: center;
+  gap: .55rem;
+  padding: 2rem 1.25rem;
+  text-align: center;
+}
+
+.simple-quest-result-mark {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  aspect-ratio: 1;
+  border: 1px solid var(--sakura-light);
+  border-radius: 8px;
+  color: var(--sakura-light);
+  font: 700 2rem 'Noto Sans JP', sans-serif;
+}
+
+.simple-quest-result.is-passed .simple-quest-result-mark {
+  border-color: var(--rayquaza-light);
+  color: var(--rayquaza-light);
+}
+
+.simple-quest-result h1 { margin: .2rem 0 0; font-size: 1.35rem; }
+.simple-quest-result p { margin: 0 0 .55rem; color: var(--text-muted); font-size: .78rem; }
+.simple-quest-result .btn { min-width: 10rem; }
+
+@media (max-width: 720px) {
+  .simple-quest-hub { padding-bottom: 5rem; }
+  .simple-quest-hero { height: 9.5rem; }
+  .simple-quest-hero-copy { left: 1rem; }
+  .simple-quest-hero-copy h1 { font-size: 1.65rem; }
+  .simple-quest-summary { gap: .6rem; padding: .85rem .8rem; }
+  .simple-quest-list { padding: .75rem .65rem; }
+  .simple-quest-row { grid-template-columns: 2.65rem minmax(0, 1fr) 4.6rem; gap: .6rem; padding: .65rem; }
+  .simple-quest-symbol { width: 2.65rem; font-size: 1.15rem; }
+  .simple-quest-start { padding-inline: .4rem; }
+  .simple-quest-challenge { min-height: calc(100dvh - 5rem); padding-bottom: 4rem; }
+  .simple-quest-question,
+  .simple-quest-result { margin-top: .75rem; padding: 1rem .8rem; }
+  .simple-quest-question h1 { font-size: 1.2rem; }
+  .simple-quest-options { grid-template-columns: 1fr; gap: .5rem; }
+  .simple-quest-options button { min-height: 3rem; }
+  .simple-quest-action { grid-template-columns: 1fr; gap: .45rem; }
+  .simple-quest-action .btn { min-height: 2.8rem; }
+}

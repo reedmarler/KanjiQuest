@@ -52,7 +52,26 @@ const wordRepairs: Record<string,{ category:string; english:string; preferredTra
   '本人': { category:'People & Living Things', english:'the person himself or herself', preferredTranslation:'the person', tags:['person','individual','human'] },
   'ご飯': { category:'Food & Drink', english:'rice / meal', preferredTranslation:'meal', tags:['rice','meal','staple-food','edible'] },
   '男性': { category:'People & Living Things', english:'man / male person', preferredTranslation:'man', tags:['person','man','male','adult','human'] },
+  '弁護士': { category:'People & Living Things', english:'lawyer / attorney', preferredTranslation:'lawyer', tags:['person','occupation','lawyer','human'] },
+  '消防士': { category:'People & Living Things', english:'firefighter', preferredTranslation:'firefighter', tags:['person','occupation','firefighter','human'] },
+  '裁判官': { category:'People & Living Things', english:'judge', preferredTranslation:'judge', tags:['person','occupation','judge','human'] },
+  '薬剤師': { category:'People & Living Things', english:'pharmacist', preferredTranslation:'pharmacist', tags:['person','occupation','pharmacist','human'] },
+  '教授': { category:'People & Living Things', english:'professor', preferredTranslation:'professor', tags:['person','occupation','teacher','human'] },
+  '先輩': { category:'People & Living Things', english:'senior colleague', preferredTranslation:'senior colleague', tags:['person','colleague','senior','human'] },
+  '後輩': { category:'People & Living Things', english:'junior colleague', preferredTranslation:'junior colleague', tags:['person','colleague','junior','human'] },
+  'ニュース': { category:'Media', english:'news', preferredTranslation:'news', tags:['media','news','information','readable','loanword'] },
+  '台風': { category:'Weather', english:'typhoon', preferredTranslation:'typhoon', tags:['weather','storm','wind','nature'] },
+  'さっき': { category:'Time', english:'a little while ago', preferredTranslation:'a little while ago', tags:['time','recent-past','relative-time'] },
 }
+
+// These are complete adverbial forms, not physical objects. Several came from
+// focused lists that skipped the spreadsheet classifier and therefore fell
+// back to Objects despite carrying an adverbial English gloss.
+const actionAdverbRecords = new Set([
+  '静かに','丁寧に','慎重に','真剣に','上手に','正しく','わざと','無事に',
+  '簡単に','容易に','実際に','下手に','間違って','自由に','自動的に','積極的に',
+  '効率的に','意図的に','無意識に','安全に',
+])
 
 /**
  * Readings the source data records wrongly, as opposed to merely in romaji.
@@ -130,6 +149,10 @@ function repairKnownCategoryErrors(record: ContentRecord): ContentRecord {
   }
   const senseRepair=senseRepairs[`${record.japanese}|${record.reading.trim().toLowerCase()}`] ?? wordRepairs[record.japanese]
   if (senseRepair) return { ...record, english:senseRepair.english, preferredTranslation:senseRepair.preferredTranslation ?? record.preferredTranslation, category:senseRepair.category, categories:[senseRepair.category], tags:[...senseRepair.tags], allowedRoles:[senseRepair.category] }
+  if (actionAdverbRecords.has(record.japanese)) {
+    const adverbTags = repairedTags.filter(tag => !['noun','unclassified','concrete','object'].includes(tag))
+    return { ...record, category:'Descriptors', categories:['Descriptors'], tags:[...adverbTags,'adverb','adverbial-manner'], allowedRoles:['Descriptors'] }
+  }
   const tags = record.tags.map(tag => tag.trim().replace(/([a-z0-9])([A-Z])/g,'$1-$2').toLowerCase().replace(/[_\s]+/g,'-'))
   if (!tags.some(tag => ['body-part','bodypart','blood','anatomy'].includes(tag))) return record
   return { ...record, category:'Objects', categories:['Objects'], allowedRoles:['Objects'] }

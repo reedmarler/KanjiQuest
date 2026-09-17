@@ -31,14 +31,35 @@ const SENSE_METADATA: Record<string,VocabularySenseMetadata> = {
 const WORD_METADATA: Record<string,VocabularySenseMetadata> = {
   '家庭': { category:'Objects', tags:['Household','Family','Abstract','Noun'] },
   '通り': { category:'Places', tags:['Street','Road','Route','Urban','Noun'] },
+  '弁護士': { category:'People & Living Things', tags:['Person','Occupation','Lawyer','Human'] },
+  '消防士': { category:'People & Living Things', tags:['Person','Occupation','Firefighter','Human'] },
+  '裁判官': { category:'People & Living Things', tags:['Person','Occupation','Judge','Human'] },
+  '薬剤師': { category:'People & Living Things', tags:['Person','Occupation','Pharmacist','Human'] },
+  '教授': { category:'People & Living Things', tags:['Person','Occupation','Teacher','Human'] },
+  '先輩': { category:'People & Living Things', tags:['Person','Colleague','Senior','Human'] },
+  '後輩': { category:'People & Living Things', tags:['Person','Colleague','Junior','Human'] },
+  'ニュース': { category:'Objects', tags:['Media','News','Information','Readable','Loanword'] },
+  '台風': { category:'Objects', tags:['Weather','Storm','Wind','Nature'] },
+  'さっき': { category:'Time & Numbers', tags:['Time','RecentPast','RelativeTime'] },
 }
+
+const ACTION_ADVERB_WORDS = new Set([
+  '静かに','丁寧に','慎重に','真剣に','上手に','正しく','わざと','無事に',
+  '簡単に','容易に','実際に','下手に','間違って','自由に','自動的に','積極的に',
+  '効率的に','意図的に','無意識に','安全に','いきなり','ちゃんと','やっと','たまたま','真っ直ぐ',
+])
 
 function senseKey(word: string, reading?: string) {
   return `${word.trim()}|${reading?.trim().toLowerCase() ?? ''}`
 }
 
 export function getVocabularyMetadata(word: string, reading?: string): VocabularySenseMetadata | undefined {
-  const metadata = SENSE_METADATA[senseKey(word,reading)] ?? WORD_METADATA[word.trim()] ?? getImportedVocabularyMetadata(word)
+  const normalizedWord = word.trim()
+  let metadata: VocabularySenseMetadata | undefined = SENSE_METADATA[senseKey(word,reading)] ?? WORD_METADATA[normalizedWord]
+  if (!metadata && ACTION_ADVERB_WORDS.has(normalizedWord)) {
+    metadata = { category:'Descriptors', tags:['Adverb','AdverbialManner'] }
+  }
+  if (!metadata) metadata = getImportedVocabularyMetadata(word) as VocabularySenseMetadata | undefined
   if (!metadata) return undefined
   if (metadata.tags.some(tag => tag.replace(/[-_\s]/g,'').toLowerCase() === 'bodypart')) return { ...metadata, category:'Objects' }
   return metadata

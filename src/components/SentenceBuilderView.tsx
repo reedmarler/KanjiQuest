@@ -409,7 +409,7 @@ export function SentenceBuilderView({
   onToggleFavorite,
   furiganaDefault,
 }: SentenceBuilderViewProps) {
-  const segments = exercise.segments ?? []
+  const segments = useMemo(() => exercise.segments ?? [], [exercise.segments])
   const readings = exercise.segmentReadings
   const [draft, setDraft] = useState('')
   const [picked, setPicked] = useState<BuilderTile[]>([])
@@ -440,15 +440,15 @@ export function SentenceBuilderView({
   const levelPickerRef = useRef<HTMLDivElement>(null)
   const checkScrollPositionRef = useRef({ x: 0, y: 0 })
   const inputBoxCenterRef = useRef<number | null>(null)
-  const tiles = segments.flatMap((word, index) => {
+  const tiles = useMemo(() => segments.flatMap((word, index) => {
     const displayWord = stripTrailingPeriod(word)
     const displayReading = readings?.[index] ? stripTrailingPeriod(readings[index]) : readings?.[index]
 
     return splitParticles
       ? splitParticleTiles(displayWord, displayReading, exercise.segmentMeanings?.[index], index)
       : [{ id: `${index}-word`, word: displayWord, reading: displayReading, meaning: exercise.segmentMeanings?.[index], isParticle: false }]
-  })
-  const shuffled = useMemo(() => shuffle(tiles), [exercise.id, splitParticles])
+  }), [segments, readings, exercise.segmentMeanings, splitParticles])
+  const shuffled = useMemo(() => shuffle(tiles), [tiles])
 
   const isCorrect =
     answered &&

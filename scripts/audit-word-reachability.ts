@@ -36,12 +36,17 @@ const orphans = rows.filter(row => !row.reachable)
 const blockedOnly = orphans.filter(row => row.tagBlockedBy.length > 0)
 const noSlot = orphans.filter(row => row.tagBlockedBy.length === 0)
 const pct = (n: number) => ((n / rows.length) * 100).toFixed(1)
+// Ratchet the reviewed baseline: future vocabulary imports may add genuinely
+// unsupported grammar, but they must not silently make the usable-word pool
+// worse. Lower this ceiling whenever another coverage batch lands.
+const MAX_UNREACHABLE_WORDS = 259
 
 console.log(`Words visible to the generator: ${rows.length}`)
 console.log(`  reachable:   ${reachable.length} (${pct(reachable.length)}%)`)
 console.log(`  unreachable: ${orphans.length} (${pct(orphans.length)}%)`)
 console.log(`    every accepting slot filters them out: ${blockedOnly.length}`)
 console.log(`    no slot takes the category at all:     ${noSlot.length}`)
+console.log(`  quality gate: at most ${MAX_UNREACHABLE_WORDS} unreachable words`)
 
 console.log(`\nCanonical tag violations: ${violations.length}`)
 if (violations.length) {
@@ -136,5 +141,9 @@ if (process.argv.includes('--pools')) {
   console.log(`\nMedian distinct-sentence space among live verbs: ${median?.space.toLocaleString() ?? 0}`)
 }
 
-// Only the invariant fails the run; unreachability is reported, not enforced.
-process.exitCode = violations.length > 0 ? 1 : 0
+const reachabilityRegressed = orphans.length > MAX_UNREACHABLE_WORDS
+if (reachabilityRegressed) {
+  console.error(`\nFAIL: unreachable vocabulary rose to ${orphans.length}; maximum is ${MAX_UNREACHABLE_WORDS}.`)
+}
+
+process.exitCode = violations.length > 0 || reachabilityRegressed ? 1 : 0
