@@ -1,4 +1,4 @@
-import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react'
+import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -27,6 +27,7 @@ import type { GenerationComplexity } from './lib/generationComplexity'
 import type { SentenceExercise } from './data/sentenceExercises'
 import type { DrillExercise } from './lib/drillExercises'
 import { Dashboard, HERO_SPEECH_STORAGE_KEY } from './components/Dashboard'
+import { KanaChartPanel } from './components/KanaChartPanel'
 import { AppHeaderControls } from './components/AppHeaderControls'
 import { UserProfileMenu } from './components/UserProfileMenu'
 import type { DailyGoalId } from './lib/dailyGoals'
@@ -40,7 +41,7 @@ import {
 } from './lib/displayPreferences'
 import { SessionComplete } from './components/SessionComplete'
 import type { LibraryTab } from './components/LibraryPanel'
-import { getBeginnerDeck, type BeginnerScript } from './data/beginnerMnemonics'
+import type { BeginnerScript } from './data/beginnerMnemonics'
 import './App.css'
 
 const ContentStudio = lazy(() => import('./components/ContentStudio').then((module) => ({ default: module.ContentStudio })))
@@ -169,7 +170,6 @@ function MobileBottomNav({
 }
 
 type BeginnerZoneProps = {
-  onOpenChart: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>) => void
   onOpenQuiz: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>) => void
   onOpenKana: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>, rowIndex: number, charIndex: number) => void
   onOpenKanji: () => void
@@ -178,7 +178,6 @@ type BeginnerZoneProps = {
 }
 
 function BeginnerZone({
-  onOpenChart,
   onOpenQuiz,
   onOpenKana,
   onOpenKanji,
@@ -187,10 +186,6 @@ function BeginnerZone({
 }: BeginnerZoneProps) {
   const [page, setPage] = useState<'guide' | 'resources'>('guide')
   const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>('hiragana')
-  const chartScrollRef = useRef<HTMLDivElement>(null)
-  const deck = getBeginnerDeck(script)
-  const columns = deck.rows.map((row, rowIndex) => ({ row, rowIndex })).reverse()
-  const vowels = ['a', 'i', 'u', 'e', 'o']
   const actions = [
     { mark: '聞', label: 'Quiz', tone: 'green', onClick: () => onOpenQuiz('hiragana') },
     { mark: '書', label: 'Quiz', tone: 'amber', onClick: () => onOpenQuiz('katakana') },
@@ -198,11 +193,6 @@ function BeginnerZone({
     { mark: '絵', label: 'Pics', tone: 'teal', onClick: onOpenPictures },
     { mark: '⚡', label: 'Speed', tone: 'gold', onClick: onOpenSpeedRun },
   ]
-
-  useLayoutEffect(() => {
-    const chart = chartScrollRef.current
-    if (chart) chart.scrollLeft = chart.scrollWidth
-  }, [page, script])
 
   if (page === 'guide') {
     return (
@@ -279,55 +269,14 @@ function BeginnerZone({
         </button>
       </header>
 
-      <section className="beginner-zone-chart" aria-label={`${deck.title} starter chart`}>
-        <div className="beginner-zone-chart-top">
-          <div className="beginner-zone-tabs" role="group" aria-label="Kana script">
-            {(['hiragana', 'katakana'] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={script === option ? 'is-active' : ''}
-                onClick={() => setScript(option)}
-                aria-pressed={script === option}
-              >
-                {option === 'hiragana' ? 'Hiragana' : 'Katakana'}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            className="beginner-zone-expand"
-            onClick={() => onOpenChart(script)}
-            aria-label={`Open the full ${deck.title} chart`}
-            title={`Open full ${deck.title} chart`}
-          >
-            <span aria-hidden="true">&#8599;</span>
-          </button>
-        </div>
-
-        <div className="beginner-zone-kana-scroll" ref={chartScrollRef} aria-label={`Scrollable ${deck.title} chart`}>
-          <div className="beginner-zone-kana-grid" style={{ gridTemplateColumns: `repeat(${columns.length}, var(--beginner-zone-kana-cell))` }}>
-            {columns.map(({ row }) => <small key={row.id}>{row.characters[0]?.romaji || row.label}</small>)}
-            {vowels.map((vowel, charIndex) => (
-              <div className="beginner-zone-kana-row" key={vowel}>
-                {columns.map(({ row, rowIndex }) => {
-                  const character = row.characters[charIndex]
-                  if (!character) return <span key={row.id} className="beginner-zone-kana-empty" aria-hidden="true" />
-                  return (
-                    <button
-                      key={character.char}
-                      type="button"
-                      onClick={() => onOpenKana(script, rowIndex, charIndex)}
-                      aria-label={`Practice ${character.char}, ${character.romaji}`}
-                    >
-                      <span lang="ja">{character.char}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
+      <section className={`beginner-zone-kana-panel beginner-zone-kana-panel--${script}`}>
+        <KanaChartPanel
+          key={script}
+          script={script}
+          onOpenQuiz={() => onOpenQuiz(script)}
+          onSwitchScript={() => setScript((current) => current === 'hiragana' ? 'katakana' : 'hiragana')}
+          onSelectCharacter={(rowIndex, charIndex) => onOpenKana(script, rowIndex, charIndex)}
+        />
       </section>
 
       <section className="beginner-zone-actions" aria-label="Beginner activities">
@@ -1012,7 +961,6 @@ function App() {
     return withMobileNav(
       <div className="app beginner-zone-page">
         <BeginnerZone
-          onOpenChart={(script) => setView(script === 'hiragana' ? 'hiragana-chart' : 'katakana-chart')}
           onOpenQuiz={(script) => openBeginnerQuiz(script, 'beginner-zone')}
           onOpenKana={(script, rowIndex, charIndex) => {
             setBeginnerScript(script)

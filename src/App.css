@@ -425,127 +425,14 @@ body:has(.beginner-word-writing-card) .app,
   outline-offset: 2px;
 }
 
-.beginner-zone-chart {
+.beginner-zone-kana-panel {
   display: grid;
-  gap: 0.72rem;
-  padding: 0.7rem;
-  border: 1px solid color-mix(in srgb, var(--sakura-light) 16%, var(--border));
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--surface) 92%, #24151f);
-}
-
-.beginner-zone-chart-top {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 2rem;
-  align-items: center;
   gap: 0.55rem;
 }
 
-.beginner-zone-tabs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  padding: 0.12rem;
-  border: 1px solid color-mix(in srgb, var(--text-muted) 18%, var(--border));
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
-}
-
-.beginner-zone-tabs button,
-.beginner-zone-expand {
-  min-width: 0;
-  border: 0;
-  color: var(--text-muted);
-  font: 600 0.68rem/1 'Outfit', system-ui, sans-serif;
-  cursor: pointer;
-}
-
-.beginner-zone-tabs button {
-  min-height: 1.85rem;
-  padding: 0.25rem;
-  border-radius: 7px;
-  background: transparent;
-}
-
-.beginner-zone-tabs button.is-active {
-  background: color-mix(in srgb, var(--sakura) 17%, var(--surface-2));
-  color: var(--sakura-light);
-}
-
-.beginner-zone-expand {
-  display: grid;
-  place-items: center;
-  width: 2rem;
-  height: 2rem;
-  border: 1px solid color-mix(in srgb, var(--text-muted) 22%, var(--border));
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--surface-2) 76%, transparent);
-  font-size: 0.9rem;
-}
-
-.beginner-zone-tabs button:focus-visible,
-.beginner-zone-expand:focus-visible,
-.beginner-zone-kana-row button:focus-visible,
 .beginner-zone-actions button:focus-visible {
   outline: 2px solid var(--sakura-light);
   outline-offset: 2px;
-}
-
-.beginner-zone-kana-scroll {
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-inline: contain;
-  scrollbar-color: color-mix(in srgb, var(--sakura) 48%, transparent) transparent;
-  scrollbar-width: thin;
-  touch-action: pan-x;
-}
-
-.beginner-zone-kana-grid {
-  --beginner-zone-kana-cell: 2.35rem;
-  display: grid;
-  grid-template-rows: 0.85rem repeat(5, var(--beginner-zone-kana-cell));
-  gap: 0.34rem;
-  width: max-content;
-  min-width: 100%;
-  padding-bottom: 0.32rem;
-}
-
-.beginner-zone-kana-grid > small {
-  overflow: hidden;
-  color: color-mix(in srgb, var(--sakura-light) 82%, var(--text-muted));
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1.15;
-  text-align: center;
-}
-
-.beginner-zone-kana-row {
-  display: contents;
-}
-
-.beginner-zone-kana-row button,
-.beginner-zone-kana-empty {
-  display: grid;
-  place-items: center;
-  min-width: 0;
-  aspect-ratio: 1;
-  border-radius: 9px;
-}
-
-.beginner-zone-kana-row button {
-  border: 1px solid color-mix(in srgb, #f2bfd8 40%, transparent);
-  background: linear-gradient(135deg, #b8427e, #dc6fa7);
-  color: #fff;
-  font: 700 1.08rem/1 'Noto Sans JP', sans-serif;
-  cursor: pointer;
-  box-shadow: 0 0.18rem 0.45rem color-mix(in srgb, var(--sakura) 15%, transparent);
-  transition: border-color 150ms ease, filter 150ms ease, transform 150ms ease;
-}
-
-.beginner-zone-kana-row button:hover {
-  border-color: color-mix(in srgb, #fff 58%, var(--sakura-light));
-  filter: brightness(1.1);
-  transform: translateY(-1px);
 }
 
 .beginner-zone-actions {
@@ -595,10 +482,6 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @media (max-width: 720px) {
-  .beginner-zone-kana-grid {
-    --beginner-zone-kana-cell: 2rem;
-  }
-
   .beginner-zone-start {
     grid-template-columns: 3rem minmax(0, 1fr);
   }
@@ -638,18 +521,6 @@ body:has(.beginner-word-writing-card) .app,
 
   .beginner-zone-resources-panel i {
     display: none;
-  }
-
-  .beginner-zone-chart {
-    padding: 0.55rem;
-  }
-
-  .beginner-zone-kana-grid {
-    gap: 0.25rem;
-  }
-
-  .beginner-zone-kana-row button {
-    font-size: 0.96rem;
   }
 
   .beginner-zone-actions {
@@ -18220,12 +18091,16 @@ button.counter-example {
    --------------------------------------------------------------------------- */
 
 :root:has(.hiragana-chart-page--hiragana),
-body:has(.hiragana-chart-page--hiragana) {
+body:has(.hiragana-chart-page--hiragana),
+:root:has(.beginner-zone-kana-panel--hiragana),
+body:has(.beginner-zone-kana-panel--hiragana) {
   background: linear-gradient(180deg, #211b36 0%, #191729 64%, #11131f 100%);
 }
 
 :root:has(.hiragana-chart-page--katakana),
-body:has(.hiragana-chart-page--katakana) {
+body:has(.hiragana-chart-page--katakana),
+:root:has(.beginner-zone-kana-panel--katakana),
+body:has(.beginner-zone-kana-panel--katakana) {
   background: linear-gradient(180deg, #12243a 0%, #151d31 62%, #101624 100%);
 }
 
@@ -18240,7 +18115,8 @@ body:has(.hiragana-chart-page--katakana) {
    ever carry one script modifier class, never this base one alongside it. */
 .hiragana-chart-page,
 .beginner-learner--hiragana,
-.beginner-learner--katakana {
+.beginner-learner--katakana,
+.beginner-zone-kana-panel {
   --hiragana-paper: #fffdfc;
   --hiragana-paper-soft: #fff6f9;
   --hiragana-ink: #241b22;
@@ -18344,7 +18220,8 @@ body:has(.hiragana-chart-page--katakana) {
 }
 
 .hiragana-chart-page--katakana,
-.beginner-learner--katakana {
+.beginner-learner--katakana,
+.beginner-zone-kana-panel--katakana {
   --kana-chart-accent: var(--kyogre);
   --kana-chart-accent-strong: var(--kyogre);
   --kana-chart-accent-soft: var(--kyogre-light);
@@ -18611,7 +18488,8 @@ body:has(.hiragana-chart-page--katakana) {
   pointer-events: none;
 }
 
-.hiragana-chart-page.is-romaji-hidden .hiragana-chart-cell-romaji {
+.hiragana-chart-page.is-romaji-hidden .hiragana-chart-cell-romaji,
+.hiragana-chart-board.is-romaji-hidden .hiragana-chart-cell-romaji {
   display: none;
 }
 
