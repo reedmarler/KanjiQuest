@@ -232,7 +232,7 @@ function BeginnerZone({
         </button>
       </header>
 
-      <section className="beginner-zone-chart" aria-label={`${deck.title} starter chart`}>
+      <section className={`beginner-zone-chart beginner-zone-chart--${script}`} aria-label={`${deck.title} starter chart`}>
         <div className="beginner-zone-chart-top">
           <div className="beginner-zone-tabs" role="group" aria-label="Kana script">
             {(['hiragana', 'katakana'] as const).map((option) => (
