@@ -370,7 +370,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone-kana-grid {
-  --beginner-zone-kana-cell: 2.35rem;
+  --beginner-zone-kana-cell: 2.65rem;
   display: grid;
   grid-template-rows: 0.85rem repeat(5, var(--beginner-zone-kana-cell));
   gap: 0.34rem;
@@ -405,7 +405,7 @@ body:has(.beginner-word-writing-card) .app,
   border: 1px solid color-mix(in srgb, #f2bfd8 40%, transparent);
   background: linear-gradient(135deg, #b8427e, #dc6fa7);
   color: #fff;
-  font: 700 1.08rem/1 'Noto Sans JP', sans-serif;
+  font: 700 1.2rem/1 'Noto Sans JP', sans-serif;
   cursor: pointer;
   box-shadow: 0 0.18rem 0.45rem color-mix(in srgb, var(--sakura) 15%, transparent);
   transition: border-color 150ms ease, filter 150ms ease, transform 150ms ease;
@@ -417,7 +417,8 @@ body:has(.beginner-word-writing-card) .app,
   transform: translateY(-1px);
 }
 
-.beginner-zone-chart--hiragana {
+.beginner-zone-chart--hiragana,
+.beginner-zone-chart--katakana {
   border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 24%, var(--border));
   background:
     radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--kana-chart-accent-soft) 10%, transparent), transparent 24%),
@@ -427,33 +428,50 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone-chart--hiragana .beginner-zone-tabs,
-.beginner-zone-chart--hiragana .beginner-zone-expand {
+.beginner-zone-chart--hiragana .beginner-zone-expand,
+.beginner-zone-chart--katakana .beginner-zone-tabs,
+.beginner-zone-chart--katakana .beginner-zone-expand {
   border-color: var(--kana-chart-panel-border);
   background: var(--kana-chart-heading-bg);
 }
 
-.beginner-zone-chart--hiragana .beginner-zone-tabs button.is-active {
+.beginner-zone-chart--hiragana .beginner-zone-tabs button.is-active,
+.beginner-zone-chart--katakana .beginner-zone-tabs button.is-active {
   background: linear-gradient(135deg, var(--kana-chart-button-active-start), var(--kana-chart-button-active-end));
   color: #fff;
 }
 
 .beginner-zone-chart--hiragana .beginner-zone-expand,
-.beginner-zone-chart--hiragana .beginner-zone-kana-grid > small {
+.beginner-zone-chart--hiragana .beginner-zone-kana-grid > small,
+.beginner-zone-chart--katakana .beginner-zone-expand,
+.beginner-zone-chart--katakana .beginner-zone-kana-grid > small {
   color: var(--kana-chart-accent-soft);
 }
 
-.beginner-zone-chart--hiragana .beginner-zone-kana-row button {
+.beginner-zone-chart--hiragana .beginner-zone-kana-row button,
+.beginner-zone-chart--katakana .beginner-zone-kana-row button {
   border-color: var(--kana-chart-grid-line);
   background: var(--kana-chart-cell);
   color: var(--kana-chart-text);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kana-chart-grid-line) 55%, transparent);
 }
 
-.beginner-zone-chart--hiragana .beginner-zone-kana-row button:hover {
+.beginner-zone-chart--hiragana .beginner-zone-kana-row button:hover,
+.beginner-zone-chart--katakana .beginner-zone-kana-row button:hover {
   border-color: color-mix(in srgb, var(--kana-chart-accent-soft) 52%, transparent);
   background: var(--kana-chart-hover-bg);
   filter: none;
   box-shadow: 0 0.25rem 0.7rem color-mix(in srgb, #000 18%, transparent);
+}
+
+.beginner-zone-chart--hiragana .beginner-zone-kana-scroll,
+.beginner-zone-chart--katakana .beginner-zone-kana-scroll {
+  scrollbar-color: color-mix(in srgb, var(--kana-chart-accent) 48%, transparent) transparent;
+}
+
+.beginner-zone-chart--hiragana button:focus-visible,
+.beginner-zone-chart--katakana button:focus-visible {
+  outline-color: var(--kana-chart-accent-soft);
 }
 
 .beginner-zone-actions {
@@ -504,7 +522,7 @@ body:has(.beginner-word-writing-card) .app,
 
 @media (max-width: 720px) {
   .beginner-zone-kana-grid {
-    --beginner-zone-kana-cell: 2rem;
+    --beginner-zone-kana-cell: 2.35rem;
   }
 }
 
@@ -527,7 +545,7 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-zone-kana-row button {
-    font-size: 0.96rem;
+    font-size: 1.08rem;
   }
 
   .beginner-zone-actions {
@@ -18105,7 +18123,9 @@ body:has(.beginner-zone-chart--hiragana) {
 }
 
 :root:has(.hiragana-chart-page--katakana),
-body:has(.hiragana-chart-page--katakana) {
+body:has(.hiragana-chart-page--katakana),
+:root:has(.beginner-zone-chart--katakana),
+body:has(.beginner-zone-chart--katakana) {
   background: linear-gradient(180deg, #12243a 0%, #151d31 62%, #101624 100%);
 }
 
@@ -18121,7 +18141,8 @@ body:has(.hiragana-chart-page--katakana) {
 .hiragana-chart-page,
 .beginner-learner--hiragana,
 .beginner-learner--katakana,
-.beginner-zone-chart--hiragana {
+.beginner-zone-chart--hiragana,
+.beginner-zone-chart--katakana {
   --hiragana-paper: #fffdfc;
   --hiragana-paper-soft: #fff6f9;
   --hiragana-ink: #241b22;
@@ -18225,7 +18246,8 @@ body:has(.hiragana-chart-page--katakana) {
 }
 
 .hiragana-chart-page--katakana,
-.beginner-learner--katakana {
+.beginner-learner--katakana,
+.beginner-zone-chart--katakana {
   --kana-chart-accent: var(--kyogre);
   --kana-chart-accent-strong: var(--kyogre);
   --kana-chart-accent-soft: var(--kyogre-light);
