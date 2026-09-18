@@ -1,4 +1,4 @@
-import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react'
+import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -41,7 +41,6 @@ import {
 import { SessionComplete } from './components/SessionComplete'
 import type { LibraryTab } from './components/LibraryPanel'
 import { getBeginnerDeck, type BeginnerScript } from './data/beginnerMnemonics'
-import { loadNumberMap, MASTERY_STORAGE_PREFIX, MASTERY_TARGET, storageKey } from './lib/beginnerMastery'
 import './App.css'
 
 const ContentStudio = lazy(() => import('./components/ContentStudio').then((module) => ({ default: module.ContentStudio })))
@@ -187,9 +186,9 @@ function BeginnerZone({
   onOpenSpeedRun,
 }: BeginnerZoneProps) {
   const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>('hiragana')
+  const chartScrollRef = useRef<HTMLDivElement>(null)
   const deck = getBeginnerDeck(script)
-  const mastery = loadNumberMap(storageKey(MASTERY_STORAGE_PREFIX, script))
-  const columns = deck.rows.slice(0, 7).map((row, rowIndex) => ({ row, rowIndex })).reverse()
+  const columns = deck.rows.map((row, rowIndex) => ({ row, rowIndex })).reverse()
   const vowels = ['a', 'i', 'u', 'e', 'o']
   const actions = [
     { mark: '聞', label: 'Quiz', tone: 'green', onClick: () => onOpenQuiz('hiragana') },
@@ -198,6 +197,11 @@ function BeginnerZone({
     { mark: '絵', label: 'Pics', tone: 'teal', onClick: onOpenPictures },
     { mark: '⚡', label: 'Speed', tone: 'gold', onClick: onOpenSpeedRun },
   ]
+
+  useLayoutEffect(() => {
+    const chart = chartScrollRef.current
+    if (chart) chart.scrollLeft = chart.scrollWidth
+  }, [script])
 
   return (
     <main className="beginner-zone">
@@ -229,29 +233,28 @@ function BeginnerZone({
           </button>
         </div>
 
-        <div className="beginner-zone-kana-grid">
-          {columns.map(({ row }) => <small key={row.id}>{row.characters[0]?.romaji.replace(/[aiueo]$/, '') || 'a'}</small>)}
-          {vowels.map((vowel, charIndex) => (
-            <div className="beginner-zone-kana-row" key={vowel}>
-              {columns.map(({ row, rowIndex }) => {
-                const character = row.characters[charIndex]
-                if (!character) return <span key={row.id} className="beginner-zone-kana-empty" aria-hidden="true" />
-                const learned = (mastery[character.char] ?? 0) >= MASTERY_TARGET
-                const started = (mastery[character.char] ?? 0) > 0
-                return (
-                  <button
-                    key={character.char}
-                    type="button"
-                    className={`${learned ? 'is-learned' : ''}${!learned && started ? ' is-started' : ''}`}
-                    onClick={() => onOpenKana(script, rowIndex, charIndex)}
-                    aria-label={`Practice ${character.char}, ${character.romaji}`}
-                  >
-                    <span lang="ja">{character.char}</span>
-                  </button>
-                )
-              })}
-            </div>
-          ))}
+        <div className="beginner-zone-kana-scroll" ref={chartScrollRef} aria-label={`Scrollable ${deck.title} chart`}>
+          <div className="beginner-zone-kana-grid" style={{ gridTemplateColumns: `repeat(${columns.length}, 2.35rem)` }}>
+            {columns.map(({ row }) => <small key={row.id}>{row.characters[0]?.romaji || row.label}</small>)}
+            {vowels.map((vowel, charIndex) => (
+              <div className="beginner-zone-kana-row" key={vowel}>
+                {columns.map(({ row, rowIndex }) => {
+                  const character = row.characters[charIndex]
+                  if (!character) return <span key={row.id} className="beginner-zone-kana-empty" aria-hidden="true" />
+                  return (
+                    <button
+                      key={character.char}
+                      type="button"
+                      onClick={() => onOpenKana(script, rowIndex, charIndex)}
+                      aria-label={`Practice ${character.char}, ${character.romaji}`}
+                    >
+                      <span lang="ja">{character.char}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -626,7 +629,6 @@ function App() {
         profilePhoto={userProfile.photo}
         onProfile={toggleProfileMenu}
         onSettings={toggleSettingsPanel}
-        statusLabel={view === 'beginner-zone' ? '魂 2 / 5' : undefined}
       />
     )
     : null

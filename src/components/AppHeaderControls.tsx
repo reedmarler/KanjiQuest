@@ -12,7 +12,6 @@ export function AppHeaderControls({
   profilePhoto,
   onProfile,
   onSettings,
-  statusLabel,
 }: {
   hideUser?: boolean
   profileOpen?: boolean
@@ -21,7 +20,6 @@ export function AppHeaderControls({
   profilePhoto: string | null
   onProfile: () => void
   onSettings: () => void
-  statusLabel?: string
 }) {
   return (
     <>
@@ -39,13 +37,13 @@ export function AppHeaderControls({
       </button>
       <button
         type="button"
-        className={`dashboard-page-settings control-icon-button control-settings-button${statusLabel ? ' is-status' : ''}${settingsOpen ? ' is-active' : ''}`}
+        className={`dashboard-page-settings control-icon-button control-settings-button${settingsOpen ? ' is-active' : ''}`}
         onClick={onSettings}
         aria-label={settingsOpen ? 'Hide settings' : 'Show settings'}
         aria-expanded={settingsOpen}
         title={settingsOpen ? 'Hide settings' : 'Show settings'}
       >
-        <span aria-hidden="true">{statusLabel ?? '\u2699'}</span>
+        <span aria-hidden="true">&#9881;</span>
       </button>
     </>
   )
