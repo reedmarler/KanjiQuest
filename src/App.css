@@ -532,17 +532,18 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone-kana-row button {
-  border: 1px solid color-mix(in srgb, var(--sakura-light) 24%, transparent);
-  background: color-mix(in srgb, var(--sakura) 16%, var(--surface-2));
-  color: var(--sakura-light);
+  border: 1px solid color-mix(in srgb, #f2bfd8 40%, transparent);
+  background: linear-gradient(135deg, #b8427e, #dc6fa7);
+  color: #fff;
   font: 700 1.08rem/1 'Noto Sans JP', sans-serif;
   cursor: pointer;
-  transition: border-color 150ms ease, background 150ms ease, color 150ms ease, transform 150ms ease;
+  box-shadow: 0 0.18rem 0.45rem color-mix(in srgb, var(--sakura) 15%, transparent);
+  transition: border-color 150ms ease, filter 150ms ease, transform 150ms ease;
 }
 
 .beginner-zone-kana-row button:hover {
-  border-color: color-mix(in srgb, var(--sakura-light) 62%, transparent);
-  background: color-mix(in srgb, var(--sakura) 24%, var(--surface-2));
+  border-color: color-mix(in srgb, #fff 58%, var(--sakura-light));
+  filter: brightness(1.1);
   transform: translateY(-1px);
 }
 
