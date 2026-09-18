@@ -503,6 +503,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-zone-kana-grid {
   --beginner-zone-kana-cell: 2.35rem;
   display: grid;
+  grid-template-rows: 0.85rem repeat(5, var(--beginner-zone-kana-cell));
   gap: 0.34rem;
   width: max-content;
   min-width: 100%;
