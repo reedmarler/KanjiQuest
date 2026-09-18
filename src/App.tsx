@@ -197,61 +197,14 @@ function BeginnerZone({
   if (page === 'guide') {
     return (
       <main className="beginner-zone beginner-zone--guide">
-        <header className="beginner-zone-guide-header">
-          <div>
-            <small>NEW LEARNER PATH</small>
-            <h1>Beginner Zone</h1>
-            <p>Build a strong foundation one small step at a time.</p>
-          </div>
-          <button type="button" className="beginner-zone-resources-panel" onClick={() => setPage('resources')}>
-            <span aria-hidden="true" lang="ja">資</span>
-            <span>
-              <b>Resources</b>
-              <small>Charts & practice</small>
-            </span>
-            <i aria-hidden="true">&#8594;</i>
-          </button>
-        </header>
-
-        <section className="beginner-zone-start">
-          <div className="beginner-zone-start-mark" aria-hidden="true" lang="ja">あ</div>
-          <div className="beginner-zone-start-copy">
-            <small>START HERE</small>
-            <h2>Learn your first Hiragana</h2>
-            <p>Meet five sounds, trace each shape, then check what you remember.</p>
-          </div>
-          <button type="button" className="beginner-zone-start-button" onClick={() => onOpenKana('hiragana', 0, 0)}>
-            Begin the あ row
-            <span aria-hidden="true">&#8594;</span>
-          </button>
-        </section>
-
-        <section className="beginner-zone-path" aria-labelledby="beginner-path-title">
-          <div className="beginner-zone-path-heading">
-            <small>YOUR LEARNING PATH</small>
-            <h2 id="beginner-path-title">Foundation steps</h2>
-          </div>
-          <div className="beginner-zone-path-steps">
-            <button type="button" onClick={() => onOpenKana('hiragana', 0, 0)}>
-              <span>1</span>
-              <b>Hiragana</b>
-              <small>Core Japanese sounds</small>
-              <i>Start here</i>
-            </button>
-            <button type="button" onClick={() => onOpenKana('katakana', 0, 0)}>
-              <span>2</span>
-              <b>Katakana</b>
-              <small>Words from other languages</small>
-              <i>Next step</i>
-            </button>
-            <button type="button" onClick={onOpenKanji}>
-              <span>3</span>
-              <b>First Kanji</b>
-              <small>Meaning through characters</small>
-              <i>After kana</i>
-            </button>
-          </div>
-        </section>
+        <button type="button" className="beginner-zone-resources-panel" onClick={() => setPage('resources')}>
+          <span aria-hidden="true" lang="ja">資</span>
+          <span>
+            <b>Resources</b>
+            <small>Charts & practice</small>
+          </span>
+          <i aria-hidden="true">&#8594;</i>
+        </button>
       </main>
     )
   }
