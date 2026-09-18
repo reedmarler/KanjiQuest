@@ -40,7 +40,8 @@ import {
 } from './lib/displayPreferences'
 import { SessionComplete } from './components/SessionComplete'
 import type { LibraryTab } from './components/LibraryPanel'
-import type { BeginnerScript } from './data/beginnerMnemonics'
+import { getBeginnerDeck, type BeginnerScript } from './data/beginnerMnemonics'
+import { loadNumberMap, MASTERY_STORAGE_PREFIX, MASTERY_TARGET, storageKey } from './lib/beginnerMastery'
 import './App.css'
 
 const ContentStudio = lazy(() => import('./components/ContentStudio').then((module) => ({ default: module.ContentStudio })))
@@ -165,6 +166,104 @@ function MobileBottomNav({
         </button>
       ))}
     </nav>
+  )
+}
+
+type BeginnerZoneProps = {
+  onOpenChart: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>) => void
+  onOpenQuiz: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>) => void
+  onOpenKana: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>, rowIndex: number, charIndex: number) => void
+  onOpenKanji: () => void
+  onOpenPictures: () => void
+  onOpenSpeedRun: () => void
+}
+
+function BeginnerZone({
+  onOpenChart,
+  onOpenQuiz,
+  onOpenKana,
+  onOpenKanji,
+  onOpenPictures,
+  onOpenSpeedRun,
+}: BeginnerZoneProps) {
+  const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>('hiragana')
+  const deck = getBeginnerDeck(script)
+  const mastery = loadNumberMap(storageKey(MASTERY_STORAGE_PREFIX, script))
+  const columns = deck.rows.slice(0, 7).map((row, rowIndex) => ({ row, rowIndex })).reverse()
+  const vowels = ['a', 'i', 'u', 'e', 'o']
+  const actions = [
+    { mark: '聞', label: 'Quiz', tone: 'green', onClick: () => onOpenQuiz('hiragana') },
+    { mark: '書', label: 'Quiz', tone: 'amber', onClick: () => onOpenQuiz('katakana') },
+    { mark: '一', label: 'Kanji', tone: 'violet', onClick: onOpenKanji },
+    { mark: '絵', label: 'Pics', tone: 'teal', onClick: onOpenPictures },
+    { mark: '⚡', label: 'Speed', tone: 'gold', onClick: onOpenSpeedRun },
+  ]
+
+  return (
+    <main className="beginner-zone">
+      <h1>Beginner Zone</h1>
+
+      <section className="beginner-zone-chart" aria-label={`${deck.title} starter chart`}>
+        <div className="beginner-zone-chart-top">
+          <div className="beginner-zone-tabs" role="group" aria-label="Kana script">
+            {(['hiragana', 'katakana'] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                className={script === option ? 'is-active' : ''}
+                onClick={() => setScript(option)}
+                aria-pressed={script === option}
+              >
+                {option === 'hiragana' ? 'Hiragana' : 'Katakana'}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="beginner-zone-expand"
+            onClick={() => onOpenChart(script)}
+            aria-label={`Open the full ${deck.title} chart`}
+            title={`Open full ${deck.title} chart`}
+          >
+            <span aria-hidden="true">&#8599;</span>
+          </button>
+        </div>
+
+        <div className="beginner-zone-kana-grid">
+          {columns.map(({ row }) => <small key={row.id}>{row.characters[0]?.romaji.replace(/[aiueo]$/, '') || 'a'}</small>)}
+          {vowels.map((vowel, charIndex) => (
+            <div className="beginner-zone-kana-row" key={vowel}>
+              {columns.map(({ row, rowIndex }) => {
+                const character = row.characters[charIndex]
+                if (!character) return <span key={row.id} className="beginner-zone-kana-empty" aria-hidden="true" />
+                const learned = (mastery[character.char] ?? 0) >= MASTERY_TARGET
+                const started = (mastery[character.char] ?? 0) > 0
+                return (
+                  <button
+                    key={character.char}
+                    type="button"
+                    className={`${learned ? 'is-learned' : ''}${!learned && started ? ' is-started' : ''}`}
+                    onClick={() => onOpenKana(script, rowIndex, charIndex)}
+                    aria-label={`Practice ${character.char}, ${character.romaji}`}
+                  >
+                    <span lang="ja">{character.char}</span>
+                  </button>
+                )
+              })}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="beginner-zone-actions" aria-label="Beginner activities">
+        {actions.map((action) => (
+          <button key={`${action.label}-${action.mark}`} type="button" onClick={action.onClick}>
+            <span className={`beginner-zone-action-mark is-${action.tone}`} aria-hidden="true" lang="ja">{action.mark}</span>
+            <small>{action.label}</small>
+          </button>
+        ))}
+      </section>
+    </main>
   )
 }
 
@@ -527,6 +626,7 @@ function App() {
         profilePhoto={userProfile.photo}
         onProfile={toggleProfileMenu}
         onSettings={toggleSettingsPanel}
+        statusLabel={view === 'beginner-zone' ? '魂 2 / 5' : undefined}
       />
     )
     : null
@@ -837,33 +937,30 @@ function App() {
   if (view === 'beginner-zone') {
     return withMobileNav(
       <div className="app beginner-zone-page">
-        <ToolMenuPage
-          title="Beginner Zone"
-          tools={[
-            { mark: 'あ', title: 'Hiragana Chart', detail: 'Kana rows.', accent: 'sakura', onClick: () => setView('hiragana-chart') },
-            { mark: 'ア', title: 'Katakana Chart', detail: 'Kana rows.', accent: 'kyogre', onClick: () => setView('katakana-chart') },
-            { mark: '聞', title: 'Hiragana Quiz', detail: 'Listen and write.', accent: 'rayquaza', onClick: () => openBeginnerQuiz('hiragana', 'beginner-zone') },
-            { mark: '書', title: 'Katakana Quiz', detail: 'Listen and write.', accent: 'amber', onClick: () => openBeginnerQuiz('katakana', 'beginner-zone') },
-            { mark: '一', title: 'First Kanji', detail: 'Starter kanji.', accent: 'sumi', onClick: () => {
-              setBeginnerScript('kanji')
-              setBeginnerInitialRowIndex(0)
-              setBeginnerInitialCharIndex(0)
-              setBeginnerLearnerReturnView('beginner-zone')
-              setView('beginner-learner')
-            } },
-            { mark: '絵', title: 'Pictures', detail: 'Image word matching.', accent: 'rayquaza', onClick: () => {
-              setPictureReturnView('beginner-zone')
-              setView('picture-practice')
-            } },
-            { mark: '⚡', title: 'Speed Run', detail: 'Fast kana recall.', accent: 'rayquaza', onClick: () => {
-              setSpeedRunReturnView('beginner-zone')
-              setView('beginner-speed-run')
-            } },
-          ]}
-          footerAction={{
-            prompt: 'Too easy?',
-            label: 'Check out Study Tools',
-            onClick: () => setView('study-tools'),
+        <BeginnerZone
+          onOpenChart={(script) => setView(script === 'hiragana' ? 'hiragana-chart' : 'katakana-chart')}
+          onOpenQuiz={(script) => openBeginnerQuiz(script, 'beginner-zone')}
+          onOpenKana={(script, rowIndex, charIndex) => {
+            setBeginnerScript(script)
+            setBeginnerInitialRowIndex(rowIndex)
+            setBeginnerInitialCharIndex(charIndex)
+            setBeginnerLearnerReturnView('beginner-zone')
+            setView('beginner-learner')
+          }}
+          onOpenKanji={() => {
+            setBeginnerScript('kanji')
+            setBeginnerInitialRowIndex(0)
+            setBeginnerInitialCharIndex(0)
+            setBeginnerLearnerReturnView('beginner-zone')
+            setView('beginner-learner')
+          }}
+          onOpenPictures={() => {
+            setPictureReturnView('beginner-zone')
+            setView('picture-practice')
+          }}
+          onOpenSpeedRun={() => {
+            setSpeedRunReturnView('beginner-zone')
+            setView('beginner-speed-run')
           }}
         />
       </div>,

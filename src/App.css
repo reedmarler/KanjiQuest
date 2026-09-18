@@ -157,6 +157,263 @@ body:has(.beginner-word-writing-card) .app,
   padding-top: 0.5rem;
 }
 
+/* Beginner Zone hub: a compact, chart-first home inspired by the mobile
+   reference. Its destinations and study state are still the app's own. */
+.beginner-zone-page {
+  width: min(100%, 34rem);
+}
+
+.beginner-zone {
+  display: grid;
+  gap: 0.85rem;
+  width: 100%;
+  margin: 0 auto;
+  padding-top: 2.5rem;
+}
+
+.beginner-zone > h1 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  background: linear-gradient(135deg, var(--text), var(--sakura));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.beginner-zone-chart {
+  display: grid;
+  gap: 0.72rem;
+  padding: 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--sakura-light) 16%, var(--border));
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 92%, #24151f);
+}
+
+.beginner-zone-chart-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2rem;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.beginner-zone-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 0.12rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 18%, var(--border));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+}
+
+.beginner-zone-tabs button,
+.beginner-zone-expand {
+  min-width: 0;
+  border: 0;
+  color: var(--text-muted);
+  font: 600 0.68rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.beginner-zone-tabs button {
+  min-height: 1.85rem;
+  padding: 0.25rem;
+  border-radius: 7px;
+  background: transparent;
+}
+
+.beginner-zone-tabs button.is-active {
+  background: color-mix(in srgb, var(--sakura) 17%, var(--surface-2));
+  color: var(--sakura-light);
+}
+
+.beginner-zone-expand {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 22%, var(--border));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface-2) 76%, transparent);
+  font-size: 0.9rem;
+}
+
+.beginner-zone-tabs button:focus-visible,
+.beginner-zone-expand:focus-visible,
+.beginner-zone-kana-row button:focus-visible,
+.beginner-zone-actions button:focus-visible {
+  outline: 2px solid var(--sakura-light);
+  outline-offset: 2px;
+}
+
+.beginner-zone-kana-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.34rem;
+}
+
+.beginner-zone-kana-grid > small {
+  overflow: hidden;
+  color: color-mix(in srgb, var(--text-muted) 72%, transparent);
+  font-size: 0.43rem;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+}
+
+.beginner-zone-kana-row {
+  display: contents;
+}
+
+.beginner-zone-kana-row button,
+.beginner-zone-kana-empty {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  aspect-ratio: 1;
+  border-radius: 9px;
+}
+
+.beginner-zone-kana-row button {
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--surface-2) 78%, transparent);
+  color: color-mix(in srgb, var(--text-muted) 54%, transparent);
+  font: 700 1.08rem/1 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.beginner-zone-kana-row button:hover {
+  border-color: color-mix(in srgb, var(--sakura-light) 42%, transparent);
+  color: var(--sakura-light);
+  transform: translateY(-1px);
+}
+
+.beginner-zone-kana-row button.is-started {
+  background: color-mix(in srgb, var(--sakura) 11%, var(--surface-2));
+  color: color-mix(in srgb, var(--sakura-light) 75%, var(--text-muted));
+}
+
+.beginner-zone-kana-row button.is-learned {
+  border-color: color-mix(in srgb, var(--sakura-light) 22%, transparent);
+  background: color-mix(in srgb, var(--sakura) 15%, var(--surface-2));
+  color: var(--sakura-light);
+}
+
+.beginner-zone-actions {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.45rem;
+  padding: 0 0.35rem;
+}
+
+.beginner-zone-actions button {
+  display: grid;
+  justify-items: center;
+  gap: 0.32rem;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.beginner-zone-action-mark {
+  display: grid;
+  place-items: center;
+  width: 2.55rem;
+  height: 2.55rem;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  font: 700 1.02rem/1 'Noto Sans JP', sans-serif;
+}
+
+.beginner-zone-action-mark.is-green { background: #14251f; color: #71d2ad; }
+.beginner-zone-action-mark.is-amber { background: #2a2116; color: #e7b765; }
+.beginner-zone-action-mark.is-violet { background: #211b34; color: #bfa5ff; }
+.beginner-zone-action-mark.is-teal { background: #122522; color: #73cdbd; }
+.beginner-zone-action-mark.is-gold { background: #292117; color: #f1bd36; }
+
+.beginner-zone-actions small {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 0.54rem;
+  font-weight: 500;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.beginner-zone-page .dashboard-page-settings.is-status {
+  width: auto;
+  min-width: 3.55rem;
+  padding: 0 0.62rem;
+  border: 1px solid color-mix(in srgb, var(--amber-light) 22%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--amber) 5%, transparent);
+  color: color-mix(in srgb, var(--amber-light) 82%, var(--text));
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .app.beginner-zone-page {
+    min-height: 100dvh;
+    padding: 0.5rem 0.7rem calc(6rem + env(safe-area-inset-bottom));
+  }
+
+  .beginner-zone-page .dashboard-profile-placeholder {
+    left: 0.9rem;
+  }
+
+  .beginner-zone-page .dashboard-page-settings {
+    right: 0.9rem;
+  }
+
+  .beginner-zone {
+    max-width: 24rem;
+  }
+
+  body:has(.beginner-zone-page) .mobile-bottom-nav {
+    right: 0.7rem;
+    bottom: calc(0.65rem + env(safe-area-inset-bottom));
+    left: 0.7rem;
+    padding: 0.3rem;
+    border: 1px solid color-mix(in srgb, var(--kyogre-light) 18%, var(--border));
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--surface) 96%, #101019);
+  }
+}
+
+@media (max-width: 360px) {
+  .beginner-zone-chart {
+    padding: 0.55rem;
+  }
+
+  .beginner-zone-kana-grid {
+    gap: 0.25rem;
+  }
+
+  .beginner-zone-kana-row button {
+    font-size: 0.96rem;
+  }
+
+  .beginner-zone-actions {
+    gap: 0.25rem;
+    padding-inline: 0;
+  }
+
+  .beginner-zone-action-mark {
+    width: 2.3rem;
+    height: 2.3rem;
+  }
+}
+
 .beginner-zone-page .tool-menu-page,
 .study-tools-page .tool-menu-page,
 .additional-tools-page .tool-menu-page {
