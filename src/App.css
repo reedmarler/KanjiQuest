@@ -220,23 +220,6 @@ body:has(.beginner-word-writing-card) .app,
   transition: box-shadow 150ms ease;
 }
 
-.beginner-zone-wheel-kanji {
-  --node-accent: #bfa5ff;
-  --node-accent-soft: #d8caff;
-  display: grid;
-  justify-items: center;
-  gap: 0.4rem;
-  border: 0;
-  background: transparent;
-  color: var(--text);
-  font: inherit;
-  cursor: pointer;
-}
-
-.beginner-zone-wheel-kanji b {
-  font-size: 0.78rem;
-}
-
 /* The ring's own selection slot sits at its bottom (180deg); the wheel area
    is pushed to the bottom of the page with margin-top: auto so it reads as
    "almost the last thing on screen," with the Go button right under it. */
@@ -271,6 +254,42 @@ body:has(.beginner-word-writing-card) .app,
   stroke-dasharray: 3 3;
 }
 
+/* Whichever script currently sits at the bottom selection slot fills the
+   ring's interior with a faint scatter of its own characters; the other two
+   layers stay stacked underneath at zero opacity for a clean crossfade. */
+.beginner-zone-wheel-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  clip-path: circle(50% at 50% 50%);
+  pointer-events: none;
+  user-select: none;
+}
+
+.beginner-zone-wheel-bg-layer {
+  --layer-accent: var(--sakura);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.beginner-zone-wheel-bg-layer.is-visible {
+  opacity: 1;
+}
+
+.beginner-zone-wheel-bg-layer.is-blue { --layer-accent: var(--kyogre); }
+.beginner-zone-wheel-bg-layer.is-violet { --layer-accent: #bfa5ff; }
+
+.beginner-zone-wheel-bg-layer span {
+  position: absolute;
+  color: color-mix(in srgb, var(--layer-accent) 60%, transparent);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .beginner-zone-wheel-node {
   --node-accent: var(--sakura);
   --node-accent-soft: var(--sakura-light);
@@ -293,6 +312,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone-wheel-node.is-blue { --node-accent: var(--kyogre); --node-accent-soft: var(--kyogre-light); }
+.beginner-zone-wheel-node.is-violet { --node-accent: #bfa5ff; --node-accent-soft: #d8caff; }
 
 .beginner-zone-wheel-node.is-selected {
   transform: translate(-50%, -50%) scale(1.12);
@@ -320,7 +340,6 @@ body:has(.beginner-word-writing-card) .app,
   cursor: pointer;
 }
 
-.beginner-zone-wheel-kanji:focus-visible,
 .beginner-zone-wheel-node:focus-visible,
 .beginner-zone-wheel-go:focus-visible {
   outline: 2px solid var(--sakura-light);

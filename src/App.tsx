@@ -186,27 +186,45 @@ function getBeginnerZoneVowelIndex(char: string, romaji: string): number {
     ?? 4
 }
 
+type BeginnerZoneWheelScriptId = Extract<BeginnerScript, 'hiragana' | 'katakana'> | 'kanji'
+
 type BeginnerZoneWheelScript = {
-  id: Extract<BeginnerScript, 'hiragana' | 'katakana'>
-  tone: 'pink' | 'blue'
+  id: BeginnerZoneWheelScriptId
+  tone: 'pink' | 'blue' | 'violet'
   mark: string
   label: string
   /** Degrees clockwise from the top of the wheel, at rest (wheelAngle 0). */
   baseAngle: number
 }
 
-// The two scripts sit opposite each other on the wheel (180deg apart) so a
-// half turn always swaps which one is down at the selection slot.
+// All three scripts sit on the ring, 120deg apart. Hiragana starts at the
+// bottom (180deg, the selection slot right above the Go button) with
+// katakana and kanji at the two upper vertices — an upside-down triangle,
+// its single point resting on the selection slot.
 const BEGINNER_ZONE_WHEEL_SCRIPTS: BeginnerZoneWheelScript[] = [
-  { id: 'hiragana', tone: 'pink', mark: 'あ', label: 'Hiragana', baseAngle: 90 },
-  { id: 'katakana', tone: 'blue', mark: 'ア', label: 'Katakana', baseAngle: 270 },
+  { id: 'hiragana', tone: 'pink', mark: 'あ', label: 'Hiragana', baseAngle: 180 },
+  { id: 'katakana', tone: 'blue', mark: 'ア', label: 'Katakana', baseAngle: 300 },
+  { id: 'kanji', tone: 'violet', mark: '字', label: 'Kanji', baseAngle: 60 },
 ]
 
 const BEGINNER_ZONE_WHEEL_RADIUS = 37
-/** wheelAngle values where a script sits exactly at the bottom (180deg) selection slot. */
-const BEGINNER_ZONE_WHEEL_SNAP_ANGLES: Record<Extract<BeginnerScript, 'hiragana' | 'katakana'>, number> = {
-  hiragana: 90,
-  katakana: 270,
+
+// A handful of fixed positions inside the ring that each script's background
+// fill reuses — only the glyphs and color change between scripts.
+const BEGINNER_ZONE_WHEEL_BG_SLOTS: { x: number; y: number; size: number; rotate: number }[] = [
+  { x: 24, y: 26, size: 2.1, rotate: -8 },
+  { x: 70, y: 20, size: 1.6, rotate: 10 },
+  { x: 50, y: 46, size: 2.7, rotate: -4 },
+  { x: 18, y: 66, size: 1.8, rotate: 6 },
+  { x: 78, y: 62, size: 1.9, rotate: -12 },
+  { x: 40, y: 82, size: 1.4, rotate: 5 },
+  { x: 80, y: 84, size: 1.3, rotate: -6 },
+]
+
+const BEGINNER_ZONE_WHEEL_BG_CHARS: Record<BeginnerZoneWheelScriptId, string[]> = {
+  hiragana: ['あ', 'い', 'う', 'え', 'お', 'か', 'さ'],
+  katakana: ['ア', 'イ', 'ウ', 'エ', 'オ', 'カ', 'サ'],
+  kanji: ['一', '二', '三', '人', '日', '木', '水'],
 }
 
 function beginnerZoneWheelPoint(angleDeg: number): { x: number; y: number } {
@@ -222,11 +240,26 @@ function beginnerZoneAngularDistanceTo180(angleDeg: number): number {
   return Math.min(diff, 360 - diff)
 }
 
+/** The wheelAngle that brings the given script's marker to the bottom (180deg) selection slot. */
+function beginnerZoneSnapAngleFor(id: BeginnerZoneWheelScriptId): number {
+  const script = BEGINNER_ZONE_WHEEL_SCRIPTS.find((item) => item.id === id)!
+  return (180 - script.baseAngle + 360) % 360
+}
+
 function beginnerZoneNearestSnapAngle(angleDeg: number): number {
   const normalized = ((angleDeg % 360) + 360) % 360
-  const distTo90 = Math.min(Math.abs(normalized - 90), 360 - Math.abs(normalized - 90))
-  const distTo270 = Math.min(Math.abs(normalized - 270), 360 - Math.abs(normalized - 270))
-  return distTo90 <= distTo270 ? 90 : 270
+  let nearest = 0
+  let nearestDistance = Infinity
+  for (const script of BEGINNER_ZONE_WHEEL_SCRIPTS) {
+    const snapTarget = beginnerZoneSnapAngleFor(script.id)
+    const diff = Math.abs(normalized - snapTarget)
+    const distance = Math.min(diff, 360 - diff)
+    if (distance < nearestDistance) {
+      nearestDistance = distance
+      nearest = snapTarget
+    }
+  }
+  return nearest
 }
 
 function BeginnerZone({
@@ -239,7 +272,7 @@ function BeginnerZone({
 }: BeginnerZoneProps) {
   const [page, setPage] = useState<'guide' | 'resources'>('guide')
   const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>('hiragana')
-  const [wheelAngle, setWheelAngle] = useState(BEGINNER_ZONE_WHEEL_SNAP_ANGLES.hiragana)
+  const [wheelAngle, setWheelAngle] = useState(beginnerZoneSnapAngleFor('hiragana'))
   const [isWheelDragging, setIsWheelDragging] = useState(false)
   const wheelRef = useRef<HTMLDivElement>(null)
   const wheelDragRef = useRef<{
@@ -335,11 +368,6 @@ function BeginnerZone({
 
     return (
       <main className="beginner-zone beginner-zone--intro">
-        <button type="button" className="beginner-zone-wheel-kanji" onClick={onOpenKanji}>
-          <span className="beginner-zone-wheel-mark" aria-hidden="true" lang="ja">字</span>
-          <b>Kanji</b>
-        </button>
-
         <div className="beginner-zone-wheel-area">
           <div
             ref={wheelRef}
@@ -349,6 +377,29 @@ function BeginnerZone({
             onPointerUp={handleWheelPointerUp}
             onPointerCancel={handleWheelPointerUp}
           >
+            <div className="beginner-zone-wheel-bg" aria-hidden="true">
+              {BEGINNER_ZONE_WHEEL_SCRIPTS.map((item) => (
+                <div
+                  key={item.id}
+                  className={`beginner-zone-wheel-bg-layer is-${item.tone}${item.id === wheelSelectedScript ? ' is-visible' : ''}`}
+                >
+                  {BEGINNER_ZONE_WHEEL_BG_SLOTS.map((slot, slotIndex) => (
+                    <span
+                      key={slotIndex}
+                      lang="ja"
+                      style={{
+                        left: `${slot.x}%`,
+                        top: `${slot.y}%`,
+                        fontSize: `${slot.size}rem`,
+                        transform: `translate(-50%, -50%) rotate(${slot.rotate}deg)`,
+                      }}
+                    >
+                      {BEGINNER_ZONE_WHEEL_BG_CHARS[item.id][slotIndex]}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
             <svg className="beginner-zone-wheel-ring" viewBox="0 0 100 100" aria-hidden="true">
               <circle cx="50" cy="50" r={BEGINNER_ZONE_WHEEL_RADIUS} />
             </svg>
@@ -360,7 +411,7 @@ function BeginnerZone({
                   type="button"
                   className={`beginner-zone-wheel-node is-${item.tone}${item.id === wheelSelectedScript ? ' is-selected' : ''}`}
                   style={{ left: `${point.x}%`, top: `${point.y}%` }}
-                  onClick={() => setWheelAngle(BEGINNER_ZONE_WHEEL_SNAP_ANGLES[item.id])}
+                  onClick={() => setWheelAngle(beginnerZoneSnapAngleFor(item.id))}
                   aria-pressed={item.id === wheelSelectedScript}
                 >
                   <span className="beginner-zone-wheel-mark" aria-hidden="true" lang="ja">{item.mark}</span>
@@ -374,6 +425,10 @@ function BeginnerZone({
             type="button"
             className="beginner-zone-wheel-go"
             onClick={() => {
+              if (wheelSelectedScript === 'kanji') {
+                onOpenKanji()
+                return
+              }
               setScript(wheelSelectedScript)
               setPage('resources')
             }}
