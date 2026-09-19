@@ -298,11 +298,13 @@ body:has(.beginner-word-writing-card) .app,
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 0.72rem;
-  width: min(calc(100% + 2rem), 23.5rem);
+  width: min(100%, 23.5rem);
   min-width: 0;
   aspect-ratio: 1;
   margin-inline: auto;
   box-sizing: border-box;
+  justify-self: center;
+  overflow: hidden;
   padding: 0.7rem;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 16%, var(--border));
   border-radius: 18px;
@@ -366,6 +368,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone-kana-scroll {
+  container-type: inline-size;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
@@ -378,10 +381,11 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone-kana-grid {
-  --beginner-zone-kana-cell: 2.65rem;
+  --beginner-zone-kana-gap: 0.34rem;
+  --beginner-zone-kana-cell: calc((100cqw - (6 * var(--beginner-zone-kana-gap))) / 7);
   display: grid;
   grid-template-rows: 0.85rem repeat(5, var(--beginner-zone-kana-cell));
-  gap: 0.34rem;
+  gap: var(--beginner-zone-kana-gap);
   width: max-content;
   min-width: 100%;
   padding-bottom: 0.32rem;
@@ -541,8 +545,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @media (max-width: 720px) {
-  .beginner-zone-kana-grid {
-    --beginner-zone-kana-cell: 2.35rem;
+  .app.beginner-zone-page:has(.beginner-zone--resources) {
+    padding-inline: 0.65rem;
   }
 }
 
@@ -561,7 +565,7 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-zone-kana-grid {
-    gap: 0.25rem;
+    --beginner-zone-kana-gap: 0.25rem;
   }
 
   .beginner-zone-kana-row button {
