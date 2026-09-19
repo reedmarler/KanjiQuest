@@ -381,7 +381,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone-kana-grid {
-  --beginner-zone-kana-gap: 0.1rem;
+  --beginner-zone-kana-gap: 0px;
   --beginner-zone-kana-cell: calc((100cqw - (6 * var(--beginner-zone-kana-gap))) / 7);
   display: grid;
   grid-template-rows: 0.85rem repeat(5, var(--beginner-zone-kana-cell));
@@ -412,7 +412,7 @@ body:has(.beginner-word-writing-card) .app,
   place-items: center;
   min-width: 0;
   aspect-ratio: 1;
-  border-radius: 5px;
+  border-radius: 2px;
 }
 
 .beginner-zone-kana-row button {
@@ -565,7 +565,7 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-zone-kana-grid {
-    --beginner-zone-kana-gap: 0.08rem;
+    --beginner-zone-kana-gap: 0px;
   }
 
   .beginner-zone-kana-row button {
