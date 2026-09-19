@@ -177,6 +177,15 @@ type BeginnerZoneProps = {
   onOpenSpeedRun: () => void
 }
 
+const BEGINNER_ZONE_VOWEL_ROWS: Record<string, number> = { a: 0, i: 1, u: 2, e: 3, o: 4 }
+const BEGINNER_ZONE_ROW_OVERRIDES: Record<string, number> = { を: 2, ヲ: 2, ん: 4, ン: 4 }
+
+function getBeginnerZoneVowelIndex(char: string, romaji: string): number {
+  return BEGINNER_ZONE_ROW_OVERRIDES[char]
+    ?? BEGINNER_ZONE_VOWEL_ROWS[romaji.charAt(romaji.length - 1)]
+    ?? 4
+}
+
 function BeginnerZone({
   onOpenChart,
   onOpenQuiz,
@@ -264,14 +273,17 @@ function BeginnerZone({
             {vowels.map((vowel, charIndex) => (
               <div className="beginner-zone-kana-row" key={vowel}>
                 {columns.map(({ row, rowIndex }) => {
-                  const character = row.characters[charIndex]
-                  if (!character) return <span key={row.id} className="beginner-zone-kana-empty" aria-hidden="true" />
+                  const characterEntry = row.characters
+                    .map((character, characterIndex) => ({ character, characterIndex }))
+                    .find(({ character }) => getBeginnerZoneVowelIndex(character.char, character.romaji) === charIndex)
+                  if (!characterEntry) return <span key={row.id} className="beginner-zone-kana-empty" aria-hidden="true" />
+                  const { character, characterIndex } = characterEntry
                   return (
                     <button
                       key={character.char}
                       type="button"
                       className={character.char.length > 1 ? 'is-contracted' : undefined}
-                      onClick={() => onOpenKana(script, rowIndex, charIndex)}
+                      onClick={() => onOpenKana(script, rowIndex, characterIndex)}
                       aria-label={`Practice ${character.char}, ${character.romaji}`}
                     >
                       <span lang="ja">{character.char}</span>
