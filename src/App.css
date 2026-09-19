@@ -382,8 +382,8 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-zone-kana-grid {
   --beginner-zone-kana-gap: 0px;
-  --beginner-zone-kana-cell: calc((100cqw - (6 * var(--beginner-zone-kana-gap))) / 7);
   --beginner-zone-kana-label: 1.35rem;
+  --beginner-zone-kana-cell: calc((100cqw - var(--beginner-zone-kana-label) - (6 * var(--beginner-zone-kana-gap))) / 7);
   display: grid;
   grid-template-rows: 0.85rem repeat(5, var(--beginner-zone-kana-cell));
   gap: var(--beginner-zone-kana-gap);
