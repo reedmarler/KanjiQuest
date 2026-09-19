@@ -197,126 +197,80 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone--intro {
-  padding-top: 1.5rem;
-}
-
-.beginner-zone-intro-lede {
-  margin: -0.4rem 0 0;
-  color: var(--text-muted);
-  font-size: 0.82rem;
-  line-height: 1.4;
-}
-
-.beginner-zone-intro-cards {
   display: grid;
-  gap: 0.6rem;
+  grid-template-rows: 1fr auto auto;
+  justify-items: center;
+  gap: 1.6rem;
+  min-height: min(68vh, 30rem);
+  padding-top: 0;
 }
 
-.beginner-zone-intro-card {
-  --card-accent: var(--sakura);
-  --card-accent-soft: var(--sakura-light);
-  --card-mark-bg: color-mix(in srgb, var(--card-accent) 20%, var(--surface-2));
+.beginner-zone-intro-panel {
+  --panel-accent: var(--sakura);
+  --panel-accent-soft: var(--sakura-light);
   display: grid;
-  gap: 0.6rem;
-  padding: 0.8rem;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--surface-2);
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: opacity 200ms ease, filter 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  justify-items: center;
+  align-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: center;
 }
 
-.beginner-zone-intro-card.is-dimmed {
-  opacity: 0.6;
-  filter: saturate(0.7) blur(0.3px);
-}
+.beginner-zone-intro-panel.is-blue { --panel-accent: var(--kyogre); --panel-accent-soft: var(--kyogre-light); }
+.beginner-zone-intro-panel.is-violet { --panel-accent: #bfa5ff; --panel-accent-soft: #d8caff; }
 
-.beginner-zone-intro-card.is-active {
-  border-color: color-mix(in srgb, var(--card-accent) 45%, var(--border));
-  box-shadow: 0 0.4rem 1rem color-mix(in srgb, var(--card-accent) 16%, transparent);
-}
-
-.beginner-zone-intro-card.is-blue { --card-accent: var(--kyogre); --card-accent-soft: var(--kyogre-light); }
-.beginner-zone-intro-card.is-violet { --card-accent: #bfa5ff; --card-accent-soft: #d8caff; }
-
-.beginner-zone-intro-card-head {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-}
-
-.beginner-zone-intro-card-mark {
+.beginner-zone-intro-mark {
   display: grid;
   place-items: center;
-  width: 2.4rem;
+  width: 5.5rem;
   aspect-ratio: 1;
-  border-radius: 11px;
-  background: var(--card-mark-bg);
-  color: var(--card-accent-soft);
-  font: 700 1.15rem/1 'Noto Sans JP', sans-serif;
+  border-radius: 26px;
+  background: color-mix(in srgb, var(--panel-accent) 20%, var(--surface-2));
+  color: var(--panel-accent-soft);
+  font: 700 2.6rem/1 'Noto Sans JP', sans-serif;
+  box-shadow: 0 0.6rem 1.6rem color-mix(in srgb, var(--panel-accent) 22%, transparent);
 }
 
-.beginner-zone-intro-card-title {
-  display: grid;
-  min-width: 0;
-  gap: 0.12rem;
-}
-
-.beginner-zone-intro-card-title b {
-  font-size: 0.92rem;
-  line-height: 1;
-}
-
-.beginner-zone-intro-card-title small {
-  color: var(--text-muted);
-  font-size: 0.68rem;
-}
-
-.beginner-zone-intro-card-body {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.beginner-zone-intro-card-body > small {
+.beginner-zone-intro-panel h1 {
+  margin: 0;
   color: var(--text);
-  font-size: 0.8rem;
+  font-size: 1.6rem;
+}
+
+.beginner-zone-intro-panel p {
+  margin: 0;
+  max-width: 18rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
   line-height: 1.4;
 }
 
-.beginner-zone-intro-example {
+.beginner-zone-intro-dots {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
   gap: 0.5rem;
-  padding: 0.5rem 0.65rem;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--card-accent) 12%, var(--surface));
 }
 
-.beginner-zone-intro-example > span {
-  font: 700 1.3rem/1 'Noto Sans JP', sans-serif;
+.beginner-zone-intro-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--border);
+  cursor: pointer;
+  transition: background 150ms ease, width 150ms ease;
 }
 
-.beginner-zone-intro-example > small {
-  color: var(--text-muted);
-  font-size: 0.7rem;
-}
-
-.beginner-zone-intro-fact {
-  color: var(--card-accent-soft);
-  font-size: 0.74rem;
-  font-weight: 600;
-  line-height: 1.35;
+.beginner-zone-intro-dot.is-active {
+  width: 1.4rem;
+  background: var(--sakura);
 }
 
 .beginner-zone-intro-actions {
   display: grid;
   justify-items: center;
   gap: 0.5rem;
-  padding-top: 0.2rem;
+  padding-bottom: 0.4rem;
 }
 
 .beginner-zone-intro-next {
@@ -343,7 +297,7 @@ body:has(.beginner-word-writing-card) .app,
   cursor: pointer;
 }
 
-.beginner-zone-intro-card:focus-visible,
+.beginner-zone-intro-dot:focus-visible,
 .beginner-zone-intro-next:focus-visible,
 .beginner-zone-intro-skip:focus-visible {
   outline: 2px solid var(--sakura-light);
