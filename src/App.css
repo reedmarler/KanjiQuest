@@ -369,6 +369,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-zone-kana-scroll {
   container-type: inline-size;
+  align-self: center;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
