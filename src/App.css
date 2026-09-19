@@ -196,75 +196,158 @@ body:has(.beginner-word-writing-card) .app,
   -webkit-text-fill-color: transparent;
 }
 
-.beginner-zone--guide {
-  place-items: center;
-  align-content: center;
-  min-height: min(70vh, 32rem);
-  padding-top: 0;
+.beginner-zone--intro {
+  padding-top: 1.5rem;
 }
 
-.beginner-zone-resources-panel {
+.beginner-zone-intro-lede {
+  margin: -0.4rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.beginner-zone-intro-cards {
   display: grid;
-  grid-template-columns: 1.8rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 4rem;
-  padding: 0.55rem;
-  border: 1px solid color-mix(in srgb, var(--kyogre-light) 30%, var(--border));
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--kyogre) 10%, var(--surface));
+  gap: 0.6rem;
+}
+
+.beginner-zone-intro-card {
+  --card-accent: var(--sakura);
+  --card-accent-soft: var(--sakura-light);
+  --card-mark-bg: color-mix(in srgb, var(--card-accent) 20%, var(--surface-2));
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-2);
   color: var(--text);
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+  transition: opacity 200ms ease, filter 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
 }
 
-.beginner-zone--guide .beginner-zone-resources-panel {
-  width: min(100%, 20rem);
-  min-height: 5rem;
-  padding: 0.8rem;
+.beginner-zone-intro-card.is-dimmed {
+  opacity: 0.6;
+  filter: saturate(0.7) blur(0.3px);
 }
 
-.beginner-zone-resources-panel > span:first-child {
+.beginner-zone-intro-card.is-active {
+  border-color: color-mix(in srgb, var(--card-accent) 45%, var(--border));
+  box-shadow: 0 0.4rem 1rem color-mix(in srgb, var(--card-accent) 16%, transparent);
+}
+
+.beginner-zone-intro-card.is-blue { --card-accent: var(--kyogre); --card-accent-soft: var(--kyogre-light); }
+.beginner-zone-intro-card.is-violet { --card-accent: #bfa5ff; --card-accent-soft: #d8caff; }
+
+.beginner-zone-intro-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.beginner-zone-intro-card-mark {
   display: grid;
   place-items: center;
-  width: 1.8rem;
+  width: 2.4rem;
   aspect-ratio: 1;
-  border-radius: 7px;
-  background: color-mix(in srgb, var(--kyogre) 22%, var(--surface-2));
-  color: var(--kyogre-light);
-  font: 800 0.88rem/1 'Noto Sans JP', sans-serif;
+  border-radius: 11px;
+  background: var(--card-mark-bg);
+  color: var(--card-accent-soft);
+  font: 700 1.15rem/1 'Noto Sans JP', sans-serif;
 }
 
-.beginner-zone-resources-panel > span:nth-child(2) {
+.beginner-zone-intro-card-title {
   display: grid;
   min-width: 0;
   gap: 0.12rem;
 }
 
-.beginner-zone-resources-panel b {
-  font-size: 0.7rem;
+.beginner-zone-intro-card-title b {
+  font-size: 0.92rem;
   line-height: 1;
 }
 
-.beginner-zone-resources-panel small {
-  overflow: hidden;
+.beginner-zone-intro-card-title small {
   color: var(--text-muted);
-  font-size: 0.47rem;
-  line-height: 1.15;
+  font-size: 0.68rem;
 }
 
-.beginner-zone-resources-panel i {
-  color: var(--kyogre-light);
-  font-size: 0.78rem;
-  font-style: normal;
+.beginner-zone-intro-card-body {
+  display: grid;
+  gap: 0.55rem;
 }
 
-.beginner-zone-resources-panel:hover {
-  border-color: var(--kyogre-light);
-  background: color-mix(in srgb, var(--kyogre) 16%, var(--surface));
-  transform: translateY(-1px);
+.beginner-zone-intro-card-body > small {
+  color: var(--text);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.beginner-zone-intro-example {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--card-accent) 12%, var(--surface));
+}
+
+.beginner-zone-intro-example > span {
+  font: 700 1.3rem/1 'Noto Sans JP', sans-serif;
+}
+
+.beginner-zone-intro-example > small {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.beginner-zone-intro-fact {
+  color: var(--card-accent-soft);
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.beginner-zone-intro-actions {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding-top: 0.2rem;
+}
+
+.beginner-zone-intro-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: min(100%, 16rem);
+  justify-content: center;
+  padding: 0.75rem 1.4rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--sakura), var(--sakura-light));
+  color: #1c1420;
+  font: 700 0.9rem/1 'Outfit', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.beginner-zone-intro-skip {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: 600 0.76rem/1 'Outfit', system-ui, sans-serif;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.beginner-zone-intro-card:focus-visible,
+.beginner-zone-intro-next:focus-visible,
+.beginner-zone-intro-skip:focus-visible {
+  outline: 2px solid var(--sakura-light);
+  outline-offset: 2px;
 }
 
 .beginner-zone-resources-header {
@@ -288,7 +371,6 @@ body:has(.beginner-word-writing-card) .app,
   cursor: pointer;
 }
 
-.beginner-zone-resources-panel:focus-visible,
 .beginner-zone-resources-header button:focus-visible {
   outline: 2px solid var(--sakura-light);
   outline-offset: 2px;
@@ -590,15 +672,6 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @media (max-width: 360px) {
-  .beginner-zone-resources-panel {
-    grid-template-columns: 1.7rem minmax(0, 1fr);
-    padding: 0.45rem;
-  }
-
-  .beginner-zone-resources-panel i {
-    display: none;
-  }
-
   .beginner-zone-chart {
     padding: 0.55rem;
   }

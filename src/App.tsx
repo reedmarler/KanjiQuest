@@ -186,6 +186,53 @@ function getBeginnerZoneVowelIndex(char: string, romaji: string): number {
     ?? 4
 }
 
+type BeginnerZoneIntroScript = {
+  id: 'hiragana' | 'katakana' | 'kanji'
+  tone: 'pink' | 'blue' | 'violet'
+  mark: string
+  label: string
+  native: string
+  tagline: string
+  example: { text: string; romaji: string; meaning: string }
+  fact: string
+}
+
+// The kanji example is deliberately the same word as the hiragana one (ねこ
+// / 猫, "cat") so the sequence reads as "one word, three ways to write it"
+// rather than three unrelated facts.
+const BEGINNER_ZONE_INTRO: BeginnerZoneIntroScript[] = [
+  {
+    id: 'hiragana',
+    tone: 'pink',
+    mark: 'あ',
+    label: 'Hiragana',
+    native: 'ひらがな',
+    tagline: 'The base sounds of Japanese. Native words and all of its grammar are built from these 46 characters.',
+    example: { text: 'ねこ', romaji: 'neko', meaning: 'cat' },
+    fact: "You'll use hiragana the most — start here.",
+  },
+  {
+    id: 'katakana',
+    tone: 'blue',
+    mark: 'ア',
+    label: 'Katakana',
+    native: 'カタカナ',
+    tagline: 'The exact same sounds as hiragana, just drawn differently. Used for foreign words, names, and emphasis.',
+    example: { text: 'コーヒー', romaji: 'koohii', meaning: 'coffee' },
+    fact: 'If you can read hiragana, katakana is the same skill in a new shape.',
+  },
+  {
+    id: 'kanji',
+    tone: 'violet',
+    mark: '字',
+    label: 'Kanji',
+    native: '漢字',
+    tagline: 'Characters borrowed from Chinese that carry meaning, not just sound. Thousands exist.',
+    example: { text: '猫', romaji: 'neko', meaning: 'cat — same word as above' },
+    fact: "That's a much longer road. Hiragana and katakana come first.",
+  },
+]
+
 function BeginnerZone({
   onOpenChart,
   onOpenQuiz,
@@ -195,6 +242,7 @@ function BeginnerZone({
   onOpenSpeedRun,
 }: BeginnerZoneProps) {
   const [page, setPage] = useState<'guide' | 'resources'>('guide')
+  const [introStep, setIntroStep] = useState(0)
   const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>('hiragana')
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const deck = getBeginnerDeck(script)
@@ -222,17 +270,69 @@ function BeginnerZone({
     return () => window.cancelAnimationFrame(frame)
   }, [page, script])
 
+  useEffect(() => {
+    if (page === 'guide') setIntroStep(0)
+  }, [page])
+
   if (page === 'guide') {
+    const isLastIntroStep = introStep === BEGINNER_ZONE_INTRO.length - 1
     return (
-      <main className="beginner-zone beginner-zone--guide">
-        <button type="button" className="beginner-zone-resources-panel" onClick={() => setPage('resources')}>
-          <span aria-hidden="true" lang="ja">資</span>
-          <span>
-            <b>Resources</b>
-            <small>Charts & practice</small>
-          </span>
-          <i aria-hidden="true">&#8594;</i>
-        </button>
+      <main className="beginner-zone beginner-zone--intro">
+        <header className="beginner-zone-resources-header">
+          <div>
+            <small>BEGINNER ZONE</small>
+            <h1>How Japanese Works</h1>
+          </div>
+        </header>
+        <p className="beginner-zone-intro-lede">Three systems work together to write it. Learn them one at a time.</p>
+
+        <div className="beginner-zone-intro-cards" role="tablist" aria-label="Japanese writing systems">
+          {BEGINNER_ZONE_INTRO.map((intro, index) => {
+            const isActive = index === introStep
+            return (
+              <button
+                key={intro.id}
+                type="button"
+                role="tab"
+                className={`beginner-zone-intro-card is-${intro.tone}${isActive ? ' is-active' : ' is-dimmed'}`}
+                onClick={() => setIntroStep(index)}
+                aria-selected={isActive}
+              >
+                <span className="beginner-zone-intro-card-head">
+                  <span className="beginner-zone-intro-card-mark" aria-hidden="true" lang="ja">{intro.mark}</span>
+                  <span className="beginner-zone-intro-card-title">
+                    <b>{intro.label}</b>
+                    <small lang="ja">{intro.native}</small>
+                  </span>
+                </span>
+                {isActive && (
+                  <span className="beginner-zone-intro-card-body">
+                    <small>{intro.tagline}</small>
+                    <span className="beginner-zone-intro-example">
+                      <span lang="ja">{intro.example.text}</span>
+                      <small>{intro.example.romaji} — {intro.example.meaning}</small>
+                    </span>
+                    <small className="beginner-zone-intro-fact">{intro.fact}</small>
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="beginner-zone-intro-actions">
+          <button
+            type="button"
+            className="beginner-zone-intro-next"
+            onClick={() => (isLastIntroStep ? setPage('resources') : setIntroStep((step) => step + 1))}
+          >
+            {isLastIntroStep ? 'Start with Hiragana' : `Next: ${BEGINNER_ZONE_INTRO[introStep + 1]!.label}`}
+            <span aria-hidden="true">&#8594;</span>
+          </button>
+          <button type="button" className="beginner-zone-intro-skip" onClick={() => setPage('resources')}>
+            Skip to the charts
+          </button>
+        </div>
       </main>
     )
   }
