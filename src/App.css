@@ -296,7 +296,13 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-zone-chart {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 0.72rem;
+  width: min(calc(100% + 2rem), 23.5rem);
+  min-width: 0;
+  aspect-ratio: 1;
+  margin-inline: auto;
+  box-sizing: border-box;
   padding: 0.7rem;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 16%, var(--border));
   border-radius: 18px;
@@ -364,6 +370,8 @@ body:has(.beginner-word-writing-card) .app,
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-inline: contain;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
   scrollbar-color: color-mix(in srgb, var(--sakura) 48%, transparent) transparent;
   scrollbar-width: thin;
   touch-action: pan-x;
@@ -381,6 +389,8 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-zone-kana-grid > small {
   overflow: hidden;
+  scroll-snap-align: end;
+  scroll-snap-stop: always;
   color: color-mix(in srgb, var(--sakura-light) 82%, var(--text-muted));
   font-size: 0.72rem;
   font-weight: 700;
@@ -409,6 +419,16 @@ body:has(.beginner-word-writing-card) .app,
   cursor: pointer;
   box-shadow: 0 0.18rem 0.45rem color-mix(in srgb, var(--sakura) 15%, transparent);
   transition: border-color 150ms ease, filter 150ms ease, transform 150ms ease;
+}
+
+.beginner-zone-kana-row button > span {
+  white-space: nowrap;
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+}
+
+.beginner-zone-kana-row button.is-contracted {
+  font-size: 1.08rem;
 }
 
 .beginner-zone-kana-row button:hover {

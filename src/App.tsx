@@ -270,6 +270,7 @@ function BeginnerZone({
                     <button
                       key={character.char}
                       type="button"
+                      className={character.char.length > 1 ? 'is-contracted' : undefined}
                       onClick={() => onOpenKana(script, rowIndex, charIndex)}
                       aria-label={`Practice ${character.char}, ${character.romaji}`}
                     >
