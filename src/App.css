@@ -197,111 +197,94 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone--intro {
-  display: grid;
-  grid-template-rows: 1fr auto auto;
-  justify-items: center;
-  gap: 1.6rem;
+  place-items: center;
+  align-content: center;
   min-height: min(68vh, 30rem);
   padding-top: 0;
 }
 
-.beginner-zone-intro-panel {
-  --panel-accent: var(--sakura);
-  --panel-accent-soft: var(--sakura-light);
-  display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 0.75rem;
-  width: 100%;
-  text-align: center;
-}
-
-.beginner-zone-intro-panel.is-blue { --panel-accent: var(--kyogre); --panel-accent-soft: var(--kyogre-light); }
-.beginner-zone-intro-panel.is-violet { --panel-accent: #bfa5ff; --panel-accent-soft: #d8caff; }
-
-.beginner-zone-intro-mark {
-  display: grid;
-  place-items: center;
-  width: 5.5rem;
+.beginner-zone-triangle {
+  position: relative;
+  width: min(100%, 21rem);
   aspect-ratio: 1;
-  border-radius: 26px;
-  background: color-mix(in srgb, var(--panel-accent) 20%, var(--surface-2));
-  color: var(--panel-accent-soft);
-  font: 700 2.6rem/1 'Noto Sans JP', sans-serif;
-  box-shadow: 0 0.6rem 1.6rem color-mix(in srgb, var(--panel-accent) 22%, transparent);
+  margin: 0 auto;
 }
 
-.beginner-zone-intro-panel h1 {
-  margin: 0;
-  color: var(--text);
-  font-size: 1.6rem;
+.beginner-zone-triangle-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
-.beginner-zone-intro-panel p {
-  margin: 0;
-  max-width: 18rem;
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  line-height: 1.4;
+.beginner-zone-triangle-ring circle {
+  fill: none;
+  stroke: color-mix(in srgb, var(--sakura-light) 30%, var(--border));
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
 }
 
-.beginner-zone-intro-dots {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.beginner-zone-intro-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: var(--border);
-  cursor: pointer;
-  transition: background 150ms ease, width 150ms ease;
-}
-
-.beginner-zone-intro-dot.is-active {
-  width: 1.4rem;
-  background: var(--sakura);
-}
-
-.beginner-zone-intro-actions {
+.beginner-zone-triangle-node {
+  --node-accent: var(--sakura);
+  --node-accent-soft: var(--sakura-light);
+  position: absolute;
   display: grid;
   justify-items: center;
-  gap: 0.5rem;
-  padding-bottom: 0.4rem;
-}
-
-.beginner-zone-intro-next {
-  display: inline-flex;
-  align-items: center;
   gap: 0.4rem;
-  min-width: min(100%, 16rem);
-  justify-content: center;
-  padding: 0.75rem 1.4rem;
-  border: 0;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--sakura), var(--sakura-light));
-  color: #1c1420;
-  font: 700 0.9rem/1 'Outfit', system-ui, sans-serif;
-  cursor: pointer;
-}
-
-.beginner-zone-intro-skip {
   border: 0;
   background: transparent;
-  color: var(--text-muted);
-  font: 600 0.76rem/1 'Outfit', system-ui, sans-serif;
-  text-decoration: underline;
+  color: var(--text);
+  font: inherit;
   cursor: pointer;
 }
 
-.beginner-zone-intro-dot:focus-visible,
-.beginner-zone-intro-next:focus-visible,
-.beginner-zone-intro-skip:focus-visible {
+.beginner-zone-triangle-node.is-blue { --node-accent: var(--kyogre); --node-accent-soft: var(--kyogre-light); }
+.beginner-zone-triangle-node.is-violet { --node-accent: #bfa5ff; --node-accent-soft: #d8caff; }
+
+.beginner-zone-triangle-node.is-top {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.beginner-zone-triangle-node.is-bottom-left {
+  bottom: 0;
+  left: 0;
+}
+
+.beginner-zone-triangle-node.is-bottom-right {
+  bottom: 0;
+  right: 0;
+}
+
+.beginner-zone-triangle-mark {
+  display: grid;
+  place-items: center;
+  width: 4.4rem;
+  aspect-ratio: 1;
+  border: 2px solid color-mix(in srgb, var(--node-accent) 45%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--node-accent) 20%, var(--surface-2));
+  color: var(--node-accent-soft);
+  font: 700 1.9rem/1 'Noto Sans JP', sans-serif;
+  box-shadow: 0 0.5rem 1.2rem color-mix(in srgb, var(--node-accent) 22%, transparent);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.beginner-zone-triangle-node:hover .beginner-zone-triangle-mark,
+.beginner-zone-triangle-node:focus-visible .beginner-zone-triangle-mark {
+  transform: translateY(-2px);
+  box-shadow: 0 0.7rem 1.5rem color-mix(in srgb, var(--node-accent) 30%, transparent);
+}
+
+.beginner-zone-triangle-node b {
+  font-size: 0.78rem;
+}
+
+.beginner-zone-triangle-node:focus-visible {
   outline: 2px solid var(--sakura-light);
-  outline-offset: 2px;
+  outline-offset: 4px;
+  border-radius: 12px;
 }
 
 .beginner-zone-resources-header {

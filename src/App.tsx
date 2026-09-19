@@ -189,15 +189,15 @@ function getBeginnerZoneVowelIndex(char: string, romaji: string): number {
 type BeginnerZoneIntroScript = {
   id: 'hiragana' | 'katakana' | 'kanji'
   tone: 'pink' | 'blue' | 'violet'
+  position: 'top' | 'bottom-left' | 'bottom-right'
   mark: string
   label: string
-  blurb: string
 }
 
 const BEGINNER_ZONE_INTRO: BeginnerZoneIntroScript[] = [
-  { id: 'hiragana', tone: 'pink', mark: 'あ', label: 'Hiragana', blurb: "The basics. You'll use this most." },
-  { id: 'katakana', tone: 'blue', mark: 'ア', label: 'Katakana', blurb: 'Same sounds, new shapes. For foreign words.' },
-  { id: 'kanji', tone: 'violet', mark: '字', label: 'Kanji', blurb: 'Meaning-based characters. Comes later.' },
+  { id: 'kanji', tone: 'violet', position: 'top', mark: '字', label: 'Kanji' },
+  { id: 'katakana', tone: 'blue', position: 'bottom-left', mark: 'ア', label: 'Katakana' },
+  { id: 'hiragana', tone: 'pink', position: 'bottom-right', mark: 'あ', label: 'Hiragana' },
 ]
 
 function BeginnerZone({
@@ -209,7 +209,6 @@ function BeginnerZone({
   onOpenSpeedRun,
 }: BeginnerZoneProps) {
   const [page, setPage] = useState<'guide' | 'resources'>('guide')
-  const [introStep, setIntroStep] = useState(0)
   const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>('hiragana')
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const deck = getBeginnerDeck(script)
@@ -237,49 +236,31 @@ function BeginnerZone({
     return () => window.cancelAnimationFrame(frame)
   }, [page, script])
 
-  useEffect(() => {
-    if (page === 'guide') setIntroStep(0)
-  }, [page])
-
   if (page === 'guide') {
-    const intro = BEGINNER_ZONE_INTRO[introStep]!
-    const isLastIntroStep = introStep === BEGINNER_ZONE_INTRO.length - 1
     return (
       <main className="beginner-zone beginner-zone--intro">
-        <div className={`beginner-zone-intro-panel is-${intro.tone}`}>
-          <span className="beginner-zone-intro-mark" aria-hidden="true" lang="ja">{intro.mark}</span>
-          <h1>{intro.label}</h1>
-          <p>{intro.blurb}</p>
-        </div>
-
-        <div className="beginner-zone-intro-dots" role="tablist" aria-label="Japanese writing systems">
-          {BEGINNER_ZONE_INTRO.map((item, index) => (
+        <div className="beginner-zone-triangle">
+          <svg className="beginner-zone-triangle-ring" viewBox="0 0 100 100" aria-hidden="true">
+            <circle cx="50" cy="50" r="39" />
+          </svg>
+          {BEGINNER_ZONE_INTRO.map((intro) => (
             <button
-              key={item.id}
+              key={intro.id}
               type="button"
-              role="tab"
-              className={`beginner-zone-intro-dot${index === introStep ? ' is-active' : ''}`}
-              onClick={() => setIntroStep(index)}
-              aria-selected={index === introStep}
-              aria-label={`Show ${item.label}`}
-            />
-          ))}
-        </div>
-
-        <div className="beginner-zone-intro-actions">
-          <button
-            type="button"
-            className="beginner-zone-intro-next"
-            onClick={() => (isLastIntroStep ? setPage('resources') : setIntroStep((step) => step + 1))}
-          >
-            {isLastIntroStep ? 'Start with Hiragana' : 'Next'}
-            <span aria-hidden="true">&#8594;</span>
-          </button>
-          {!isLastIntroStep && (
-            <button type="button" className="beginner-zone-intro-skip" onClick={() => setPage('resources')}>
-              Skip
+              className={`beginner-zone-triangle-node is-${intro.tone} is-${intro.position}`}
+              onClick={() => {
+                if (intro.id === 'kanji') {
+                  onOpenKanji()
+                  return
+                }
+                setScript(intro.id)
+                setPage('resources')
+              }}
+            >
+              <span className="beginner-zone-triangle-mark" aria-hidden="true" lang="ja">{intro.mark}</span>
+              <b>{intro.label}</b>
             </button>
-          )}
+          ))}
         </div>
       </main>
     )
