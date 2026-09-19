@@ -210,7 +210,16 @@ function BeginnerZone({
 
   useLayoutEffect(() => {
     const chart = chartScrollRef.current
-    if (chart) chart.scrollLeft = chart.scrollWidth
+    if (!chart) return
+
+    chart.style.scrollBehavior = 'auto'
+    chart.scrollLeft = chart.scrollWidth
+    const frame = window.requestAnimationFrame(() => {
+      chart.scrollLeft = chart.scrollWidth
+      chart.style.removeProperty('scroll-behavior')
+    })
+
+    return () => window.cancelAnimationFrame(frame)
   }, [page, script])
 
   if (page === 'guide') {
@@ -267,7 +276,7 @@ function BeginnerZone({
           </button>
         </div>
 
-        <div className="beginner-zone-kana-scroll" ref={chartScrollRef} aria-label={`Scrollable ${deck.title} chart`}>
+        <div key={script} className="beginner-zone-kana-scroll" ref={chartScrollRef} aria-label={`Scrollable ${deck.title} chart`}>
           <div className="beginner-zone-kana-grid" style={{ gridTemplateColumns: `repeat(${columns.length}, var(--beginner-zone-kana-cell))` }}>
             {columns.map(({ row }) => <small key={row.id}>{row.characters[0]?.romaji || row.label}</small>)}
             {vowels.map((vowel, charIndex) => (
