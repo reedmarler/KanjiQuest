@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 _restore_extract
+/outputs/ink-realm-verification/
 *.local
 backend/sentence_generator/*.sqlite3
 __pycache__/

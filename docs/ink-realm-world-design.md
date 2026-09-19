@@ -1,5 +1,10 @@
 # The Ink Realm — World Map & Traversal Design
 
+> September 19: [First Light](ink-realm-first-quest.md) implements the first
+> adventure chapter using this setting. Its story progress is separate from
+> measured SRS mastery. The older traversal and study-tool proposals below remain
+> design background, not a description of the currently playable Quest tab.
+
 Design document for the Kanji Quest world map, replacing the current quest panel
 (`src/components/QuestHub.tsx` + `src/data/questCampaign.ts`).
 

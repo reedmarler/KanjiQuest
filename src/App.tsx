@@ -668,7 +668,7 @@ type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
 
 function App() {
-  const [view, setView] = useState<View>('dashboard')
+  const [view, setView] = useState<View>(() => window.location.hash === '#quests' ? 'quests' : 'dashboard')
   const [questLandingResetToken, setQuestLandingResetToken] = useState(0)
   const [progress] = useState<Record<string, CardProgress>>(() => loadProgress())
   const [wrongPool, setWrongPool] = useState(() => loadWrongPool())
@@ -1123,7 +1123,7 @@ function App() {
 
   if (view === 'quests') {
     return withMobileNav(
-      <div className="app">
+      <div className="app realm-app">
         <Suspense fallback={<RouteLoading label="Quests" />}>
           <QuestHub
             key={questLandingResetToken}
