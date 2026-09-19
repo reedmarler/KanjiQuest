@@ -1,4 +1,4 @@
-import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react'
+import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactElement, type ReactNode } from 'react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -186,19 +186,48 @@ function getBeginnerZoneVowelIndex(char: string, romaji: string): number {
     ?? 4
 }
 
-type BeginnerZoneIntroScript = {
-  id: 'hiragana' | 'katakana' | 'kanji'
-  tone: 'pink' | 'blue' | 'violet'
-  position: 'top' | 'bottom-left' | 'bottom-right'
+type BeginnerZoneWheelScript = {
+  id: Extract<BeginnerScript, 'hiragana' | 'katakana'>
+  tone: 'pink' | 'blue'
   mark: string
   label: string
+  /** Degrees clockwise from the top of the wheel, at rest (wheelAngle 0). */
+  baseAngle: number
 }
 
-const BEGINNER_ZONE_INTRO: BeginnerZoneIntroScript[] = [
-  { id: 'kanji', tone: 'violet', position: 'top', mark: '字', label: 'Kanji' },
-  { id: 'katakana', tone: 'blue', position: 'bottom-left', mark: 'ア', label: 'Katakana' },
-  { id: 'hiragana', tone: 'pink', position: 'bottom-right', mark: 'あ', label: 'Hiragana' },
+// The two scripts sit opposite each other on the wheel (180deg apart) so a
+// half turn always swaps which one is down at the selection slot.
+const BEGINNER_ZONE_WHEEL_SCRIPTS: BeginnerZoneWheelScript[] = [
+  { id: 'hiragana', tone: 'pink', mark: 'あ', label: 'Hiragana', baseAngle: 90 },
+  { id: 'katakana', tone: 'blue', mark: 'ア', label: 'Katakana', baseAngle: 270 },
 ]
+
+const BEGINNER_ZONE_WHEEL_RADIUS = 37
+/** wheelAngle values where a script sits exactly at the bottom (180deg) selection slot. */
+const BEGINNER_ZONE_WHEEL_SNAP_ANGLES: Record<Extract<BeginnerScript, 'hiragana' | 'katakana'>, number> = {
+  hiragana: 90,
+  katakana: 270,
+}
+
+function beginnerZoneWheelPoint(angleDeg: number): { x: number; y: number } {
+  const rad = (angleDeg * Math.PI) / 180
+  return {
+    x: 50 + BEGINNER_ZONE_WHEEL_RADIUS * Math.sin(rad),
+    y: 50 - BEGINNER_ZONE_WHEEL_RADIUS * Math.cos(rad),
+  }
+}
+
+function beginnerZoneAngularDistanceTo180(angleDeg: number): number {
+  const diff = Math.abs(angleDeg - 180)
+  return Math.min(diff, 360 - diff)
+}
+
+function beginnerZoneNearestSnapAngle(angleDeg: number): number {
+  const normalized = ((angleDeg % 360) + 360) % 360
+  const distTo90 = Math.min(Math.abs(normalized - 90), 360 - Math.abs(normalized - 90))
+  const distTo270 = Math.min(Math.abs(normalized - 270), 360 - Math.abs(normalized - 270))
+  return distTo90 <= distTo270 ? 90 : 270
+}
 
 function BeginnerZone({
   onOpenChart,
@@ -210,6 +239,17 @@ function BeginnerZone({
 }: BeginnerZoneProps) {
   const [page, setPage] = useState<'guide' | 'resources'>('guide')
   const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>('hiragana')
+  const [wheelAngle, setWheelAngle] = useState(BEGINNER_ZONE_WHEEL_SNAP_ANGLES.hiragana)
+  const [isWheelDragging, setIsWheelDragging] = useState(false)
+  const wheelRef = useRef<HTMLDivElement>(null)
+  const wheelDragRef = useRef<{
+    pointerId: number
+    startClientX: number
+    startClientY: number
+    startPointerAngle: number
+    startWheelAngle: number
+    captured: boolean
+  } | null>(null)
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const deck = getBeginnerDeck(script)
   const columns = deck.rows.map((row, rowIndex) => ({ row, rowIndex })).reverse()
@@ -236,31 +276,111 @@ function BeginnerZone({
     return () => window.cancelAnimationFrame(frame)
   }, [page, script])
 
+  function wheelPointerAngle(clientX: number, clientY: number): number {
+    const wheel = wheelRef.current
+    if (!wheel) return 0
+    const rect = wheel.getBoundingClientRect()
+    const dx = clientX - (rect.left + rect.width / 2)
+    const dy = clientY - (rect.top + rect.height / 2)
+    return (Math.atan2(dx, -dy) * 180) / Math.PI
+  }
+
+  function handleWheelPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    // Capture is deferred to the first real move (see handleWheelPointerMove)
+    // rather than grabbed here — capturing immediately retargets the
+    // pointer's click away from whichever marker button was tapped, which
+    // would silently break "tap a marker to select it."
+    wheelDragRef.current = {
+      pointerId: event.pointerId,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startPointerAngle: wheelPointerAngle(event.clientX, event.clientY),
+      startWheelAngle: wheelAngle,
+      captured: false,
+    }
+  }
+
+  function handleWheelPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    const drag = wheelDragRef.current
+    if (!drag || drag.pointerId !== event.pointerId) return
+    if (!drag.captured) {
+      const movedDistance = Math.hypot(event.clientX - drag.startClientX, event.clientY - drag.startClientY)
+      if (movedDistance < 4) return
+      event.currentTarget.setPointerCapture(event.pointerId)
+      drag.captured = true
+      setIsWheelDragging(true)
+    }
+    const currentPointerAngle = wheelPointerAngle(event.clientX, event.clientY)
+    setWheelAngle(drag.startWheelAngle + (currentPointerAngle - drag.startPointerAngle))
+  }
+
+  function handleWheelPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    const drag = wheelDragRef.current
+    if (!drag || drag.pointerId !== event.pointerId) return
+    wheelDragRef.current = null
+    if (!drag.captured) return
+    setIsWheelDragging(false)
+    setWheelAngle((current) => beginnerZoneNearestSnapAngle(current))
+  }
+
   if (page === 'guide') {
+    const wheelNormalizedAngle = ((wheelAngle % 360) + 360) % 360
+    const wheelScripts = BEGINNER_ZONE_WHEEL_SCRIPTS.map((item) => ({
+      ...item,
+      angle: (item.baseAngle + wheelNormalizedAngle) % 360,
+    }))
+    const wheelSelectedScript = wheelScripts.reduce((closest, item) =>
+      beginnerZoneAngularDistanceTo180(item.angle) < beginnerZoneAngularDistanceTo180(closest.angle) ? item : closest
+    ).id
+
     return (
       <main className="beginner-zone beginner-zone--intro">
-        <div className="beginner-zone-triangle">
-          <svg className="beginner-zone-triangle-ring" viewBox="0 0 100 100" aria-hidden="true">
-            <circle cx="50" cy="50" r="39" />
-          </svg>
-          {BEGINNER_ZONE_INTRO.map((intro) => (
-            <button
-              key={intro.id}
-              type="button"
-              className={`beginner-zone-triangle-node is-${intro.tone} is-${intro.position}`}
-              onClick={() => {
-                if (intro.id === 'kanji') {
-                  onOpenKanji()
-                  return
-                }
-                setScript(intro.id)
-                setPage('resources')
-              }}
-            >
-              <span className="beginner-zone-triangle-mark" aria-hidden="true" lang="ja">{intro.mark}</span>
-              <b>{intro.label}</b>
-            </button>
-          ))}
+        <button type="button" className="beginner-zone-wheel-kanji" onClick={onOpenKanji}>
+          <span className="beginner-zone-wheel-mark" aria-hidden="true" lang="ja">字</span>
+          <b>Kanji</b>
+        </button>
+
+        <div className="beginner-zone-wheel-area">
+          <div
+            ref={wheelRef}
+            className={`beginner-zone-wheel${isWheelDragging ? ' is-dragging' : ''}`}
+            onPointerDown={handleWheelPointerDown}
+            onPointerMove={handleWheelPointerMove}
+            onPointerUp={handleWheelPointerUp}
+            onPointerCancel={handleWheelPointerUp}
+          >
+            <svg className="beginner-zone-wheel-ring" viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" r={BEGINNER_ZONE_WHEEL_RADIUS} />
+            </svg>
+            {wheelScripts.map((item) => {
+              const point = beginnerZoneWheelPoint(item.angle)
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`beginner-zone-wheel-node is-${item.tone}${item.id === wheelSelectedScript ? ' is-selected' : ''}`}
+                  style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                  onClick={() => setWheelAngle(BEGINNER_ZONE_WHEEL_SNAP_ANGLES[item.id])}
+                  aria-pressed={item.id === wheelSelectedScript}
+                >
+                  <span className="beginner-zone-wheel-mark" aria-hidden="true" lang="ja">{item.mark}</span>
+                  <b>{item.label}</b>
+                </button>
+              )
+            })}
+          </div>
+
+          <button
+            type="button"
+            className="beginner-zone-wheel-go"
+            onClick={() => {
+              setScript(wheelSelectedScript)
+              setPage('resources')
+            }}
+          >
+            Go
+            <span aria-hidden="true">&#8594;</span>
+          </button>
         </div>
       </main>
     )
