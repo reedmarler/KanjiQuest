@@ -383,16 +383,44 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-zone-kana-grid {
   --beginner-zone-kana-gap: 0px;
   --beginner-zone-kana-cell: calc((100cqw - (6 * var(--beginner-zone-kana-gap))) / 7);
+  --beginner-zone-kana-label: 1.35rem;
   display: grid;
-  grid-template-rows: repeat(5, var(--beginner-zone-kana-cell));
+  grid-template-rows: 0.85rem repeat(5, var(--beginner-zone-kana-cell));
   gap: var(--beginner-zone-kana-gap);
   width: max-content;
   min-width: 100%;
   padding-bottom: 0.32rem;
 }
 
+.beginner-zone-kana-col-label,
+.beginner-zone-kana-corner {
+  overflow: hidden;
+  scroll-snap-align: end;
+  scroll-snap-stop: always;
+}
+
+.beginner-zone-kana-col-label {
+  color: color-mix(in srgb, var(--sakura-light) 82%, var(--text-muted));
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+}
+
 .beginner-zone-kana-row {
   display: contents;
+}
+
+.beginner-zone-kana-row-label {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--sakura-light) 82%, var(--text-muted));
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: lowercase;
 }
 
 .beginner-zone-kana-row button,
@@ -422,21 +450,6 @@ body:has(.beginner-word-writing-card) .app,
   white-space: nowrap;
   writing-mode: horizontal-tb;
   text-orientation: mixed;
-  transform: translateY(-0.22rem);
-}
-
-.beginner-zone-kana-cell-romaji {
-  position: absolute;
-  right: 0.1rem;
-  bottom: 0.14rem;
-  left: 0.1rem;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.4rem;
-  font-weight: 600;
-  line-height: 1;
-  text-align: center;
-  text-transform: lowercase;
-  pointer-events: none;
 }
 
 .beginner-zone-kana-row button.is-contracted {
@@ -477,13 +490,12 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone-chart--hiragana .beginner-zone-expand,
-.beginner-zone-chart--katakana .beginner-zone-expand {
+.beginner-zone-chart--hiragana .beginner-zone-kana-col-label,
+.beginner-zone-chart--hiragana .beginner-zone-kana-row-label,
+.beginner-zone-chart--katakana .beginner-zone-expand,
+.beginner-zone-chart--katakana .beginner-zone-kana-col-label,
+.beginner-zone-chart--katakana .beginner-zone-kana-row-label {
   color: var(--kana-chart-accent-soft);
-}
-
-.beginner-zone-chart--hiragana .beginner-zone-kana-cell-romaji,
-.beginner-zone-chart--katakana .beginner-zone-kana-cell-romaji {
-  color: var(--kana-chart-muted);
 }
 
 .beginner-zone-chart--hiragana .beginner-zone-kana-grid,

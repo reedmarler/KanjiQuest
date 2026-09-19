@@ -277,7 +277,12 @@ function BeginnerZone({
         </div>
 
         <div key={script} className="beginner-zone-kana-scroll" ref={chartScrollRef} aria-label={`Scrollable ${deck.title} chart`}>
-          <div className="beginner-zone-kana-grid" style={{ gridTemplateColumns: `repeat(${columns.length}, var(--beginner-zone-kana-cell))` }}>
+          <div
+            className="beginner-zone-kana-grid"
+            style={{ gridTemplateColumns: `repeat(${columns.length}, var(--beginner-zone-kana-cell)) var(--beginner-zone-kana-label)` }}
+          >
+            {columns.map(({ row }) => <small key={row.id} className="beginner-zone-kana-col-label">{row.characters[0]?.romaji || row.label}</small>)}
+            <span className="beginner-zone-kana-corner" aria-hidden="true" />
             {vowels.map((vowel, charIndex) => (
               <div className="beginner-zone-kana-row" key={vowel}>
                 {columns.map(({ row, rowIndex }) => {
@@ -295,10 +300,10 @@ function BeginnerZone({
                       aria-label={`Practice ${character.char}, ${character.romaji}`}
                     >
                       <span lang="ja">{character.char}</span>
-                      <small className="beginner-zone-kana-cell-romaji">{character.romaji}</small>
                     </button>
                   )
                 })}
+                <small className="beginner-zone-kana-row-label">{vowel}</small>
               </div>
             ))}
           </div>
