@@ -205,11 +205,14 @@ body:has(.beginner-word-writing-card) .app,
   padding-bottom: 0.6rem;
 }
 
+/* Fixed to the viewport corner rather than flowed with the page content, so
+   it doesn't compete with the wheel for width on narrow screens — it sits
+   just above the bottom nav bar regardless of how tall the wheel gets. */
 .beginner-zone-mascot-area {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  width: 100%;
+  position: fixed;
+  bottom: calc(5.4rem + env(safe-area-inset-bottom));
+  left: 1rem;
+  z-index: 40;
 }
 
 .beginner-zone-mascot {
@@ -237,14 +240,17 @@ body:has(.beginner-word-writing-card) .app,
   object-fit: cover;
 }
 
+/* Pinned near the top of the screen rather than anchored off the mascot's
+   own bottom-left position — the mascot sits right above the wheel there,
+   and a bubble opening from it would cover the wheel and the Go button. */
 .beginner-zone-mascot-bubble {
-  position: absolute;
-  top: calc(100% + 0.6rem);
+  position: fixed;
+  top: 4.6rem;
   left: 50%;
-  z-index: 2;
+  z-index: 45;
   display: grid;
   gap: 0.4rem;
-  width: min(90vw, 21rem);
+  width: min(88vw, 22rem);
   padding: 0.9rem 1.1rem;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 30%, var(--border));
   border-radius: 14px;
