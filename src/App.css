@@ -200,21 +200,99 @@ body:has(.beginner-word-writing-card) .app,
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: min(80vh, 34rem);
+  min-height: min(85vh, 38rem);
   padding-top: 1.2rem;
   padding-bottom: 0.6rem;
+}
+
+.beginner-zone-mascot-area {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.beginner-zone-mascot {
+  width: 4.2rem;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 2px solid color-mix(in srgb, var(--sakura-light) 45%, transparent);
+  border-radius: 50%;
+  background: var(--surface-2);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 0.5rem 1.2rem color-mix(in srgb, var(--sakura) 20%, transparent);
+  transition: transform 150ms ease;
+}
+
+.beginner-zone-mascot:hover,
+.beginner-zone-mascot:focus-visible {
+  transform: translateY(-2px);
+}
+
+.beginner-zone-mascot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.beginner-zone-mascot-bubble {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: 50%;
+  z-index: 2;
+  display: grid;
+  gap: 0.4rem;
+  width: min(90vw, 21rem);
+  padding: 0.9rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--sakura-light) 30%, var(--border));
+  border-radius: 14px;
+  background: var(--surface-2);
+  box-shadow: 0 0.8rem 1.8rem rgba(0, 0, 0, 0.4);
+  transform: translateX(-50%);
+}
+
+.beginner-zone-mascot-bubble b {
+  padding-right: 1.2rem;
+  font-size: 0.85rem;
+}
+
+.beginner-zone-mascot-bubble p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.beginner-zone-mascot-bubble-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.beginner-zone-mascot:focus-visible,
+.beginner-zone-mascot-bubble-close:focus-visible {
+  outline: 2px solid var(--sakura-light);
+  outline-offset: 2px;
 }
 
 .beginner-zone-wheel-mark {
   display: grid;
   place-items: center;
-  width: 3.6rem;
+  width: 4.6rem;
   aspect-ratio: 1;
   border: 2px solid color-mix(in srgb, var(--node-accent) 45%, transparent);
   border-radius: 50%;
   background: color-mix(in srgb, var(--node-accent) 20%, var(--surface-2));
   color: var(--node-accent-soft);
-  font: 700 1.55rem/1 'Noto Sans JP', sans-serif;
+  font: 700 2rem/1 'Noto Sans JP', sans-serif;
   box-shadow: 0 0.5rem 1.2rem color-mix(in srgb, var(--node-accent) 22%, transparent);
   pointer-events: none;
   transition: box-shadow 150ms ease;
@@ -235,7 +313,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-zone-wheel {
   position: relative;
-  width: min(100%, 15rem);
+  width: min(100%, 23rem);
   aspect-ratio: 1;
   touch-action: none;
 }
@@ -323,7 +401,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone-wheel-node b {
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   pointer-events: none;
 }
 

@@ -30,7 +30,7 @@ import { Dashboard, HERO_SPEECH_STORAGE_KEY } from './components/Dashboard'
 import { AppHeaderControls } from './components/AppHeaderControls'
 import { UserProfileMenu } from './components/UserProfileMenu'
 import type { DailyGoalId } from './lib/dailyGoals'
-import { displayProfilePhoto, useUserProfile } from './lib/userProfile'
+import { DEFAULT_PROFILE_PHOTO, displayProfilePhoto, useUserProfile } from './lib/userProfile'
 import { stopSpeaking } from './lib/speech'
 import {
   APP_ENGLISH_DEFAULT_KEY,
@@ -212,13 +212,13 @@ const BEGINNER_ZONE_WHEEL_RADIUS = 37
 // A handful of fixed positions inside the ring that each script's background
 // fill reuses — only the glyphs and color change between scripts.
 const BEGINNER_ZONE_WHEEL_BG_SLOTS: { x: number; y: number; size: number; rotate: number }[] = [
-  { x: 24, y: 26, size: 2.1, rotate: -8 },
-  { x: 70, y: 20, size: 1.6, rotate: 10 },
-  { x: 50, y: 46, size: 2.7, rotate: -4 },
-  { x: 18, y: 66, size: 1.8, rotate: 6 },
-  { x: 78, y: 62, size: 1.9, rotate: -12 },
-  { x: 40, y: 82, size: 1.4, rotate: 5 },
-  { x: 80, y: 84, size: 1.3, rotate: -6 },
+  { x: 24, y: 26, size: 3, rotate: -8 },
+  { x: 70, y: 20, size: 2.3, rotate: 10 },
+  { x: 50, y: 46, size: 3.8, rotate: -4 },
+  { x: 18, y: 66, size: 2.6, rotate: 6 },
+  { x: 78, y: 62, size: 2.7, rotate: -12 },
+  { x: 40, y: 82, size: 2, rotate: 5 },
+  { x: 80, y: 84, size: 1.9, rotate: -6 },
 ]
 
 const BEGINNER_ZONE_WHEEL_BG_CHARS: Record<BeginnerZoneWheelScriptId, string[]> = {
@@ -274,6 +274,7 @@ function BeginnerZone({
   const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>('hiragana')
   const [wheelAngle, setWheelAngle] = useState(beginnerZoneSnapAngleFor('hiragana'))
   const [isWheelDragging, setIsWheelDragging] = useState(false)
+  const [showHiraganaExplainer, setShowHiraganaExplainer] = useState(false)
   const wheelRef = useRef<HTMLDivElement>(null)
   const wheelDragRef = useRef<{
     pointerId: number
@@ -308,6 +309,20 @@ function BeginnerZone({
 
     return () => window.cancelAnimationFrame(frame)
   }, [page, script])
+
+  // The mascot's own intro: the moment someone first lands on Beginner Zone,
+  // spin the wheel to hiragana and explain it, same as tapping the mascot
+  // does later.
+  useEffect(() => {
+    setWheelAngle(beginnerZoneSnapAngleFor('hiragana'))
+    setShowHiraganaExplainer(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function handleMascotClick() {
+    setWheelAngle(beginnerZoneSnapAngleFor('hiragana'))
+    setShowHiraganaExplainer(true)
+  }
 
   function wheelPointerAngle(clientX: number, clientY: number): number {
     const wheel = wheelRef.current
@@ -368,6 +383,35 @@ function BeginnerZone({
 
     return (
       <main className="beginner-zone beginner-zone--intro">
+        <div className="beginner-zone-mascot-area">
+          <button
+            type="button"
+            className="beginner-zone-mascot"
+            onClick={handleMascotClick}
+            aria-label="What is hiragana?"
+          >
+            <img src={DEFAULT_PROFILE_PHOTO} alt="" />
+          </button>
+          {showHiraganaExplainer && (
+            <div className="beginner-zone-mascot-bubble" role="status">
+              <button
+                type="button"
+                className="beginner-zone-mascot-bubble-close"
+                onClick={() => setShowHiraganaExplainer(false)}
+                aria-label="Close"
+              >
+                &#215;
+              </button>
+              <b>What's Hiragana?</b>
+              <p>
+                Hiragana is the phonetic base of written Japanese — 46 characters that spell out every native word
+                and all of its grammar. Each one is always the same single sound, which is why it's the best place
+                to start.
+              </p>
+            </div>
+          )}
+        </div>
+
         <div className="beginner-zone-wheel-area">
           <div
             ref={wheelRef}
