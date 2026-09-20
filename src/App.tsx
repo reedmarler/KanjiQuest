@@ -211,14 +211,17 @@ const BEGINNER_ZONE_WHEEL_RADIUS = 37
 
 // A handful of fixed positions inside the ring that each script's background
 // fill reuses — only the glyphs and color change between scripts.
+// Kept well inside BEGINNER_ZONE_WHEEL_RADIUS (37) — each slot's distance
+// from center plus roughly half its glyph size still lands short of the
+// ring, so nothing pokes past the circle it's meant to stay inside.
 const BEGINNER_ZONE_WHEEL_BG_SLOTS: { x: number; y: number; size: number; rotate: number }[] = [
-  { x: 24, y: 26, size: 3, rotate: -8 },
-  { x: 70, y: 20, size: 2.3, rotate: 10 },
-  { x: 50, y: 46, size: 3.8, rotate: -4 },
-  { x: 18, y: 66, size: 2.6, rotate: 6 },
-  { x: 78, y: 62, size: 2.7, rotate: -12 },
-  { x: 40, y: 82, size: 2, rotate: 5 },
-  { x: 80, y: 84, size: 1.9, rotate: -6 },
+  { x: 35, y: 36, size: 2.3, rotate: -8 },
+  { x: 64, y: 33, size: 1.9, rotate: 10 },
+  { x: 50, y: 50, size: 3, rotate: -4 },
+  { x: 32, y: 62, size: 2, rotate: 6 },
+  { x: 68, y: 60, size: 2.1, rotate: -12 },
+  { x: 44, y: 71, size: 1.6, rotate: 5 },
+  { x: 60, y: 70, size: 1.6, rotate: -6 },
 ]
 
 const BEGINNER_ZONE_WHEEL_BG_CHARS: Record<BeginnerZoneWheelScriptId, string[]> = {
@@ -421,7 +424,11 @@ function BeginnerZone({
             onPointerUp={handleWheelPointerUp}
             onPointerCancel={handleWheelPointerUp}
           >
-            <div className="beginner-zone-wheel-bg" aria-hidden="true">
+            <div
+              className="beginner-zone-wheel-bg"
+              aria-hidden="true"
+              style={{ clipPath: `circle(${BEGINNER_ZONE_WHEEL_RADIUS}% at 50% 50%)` }}
+            >
               {BEGINNER_ZONE_WHEEL_SCRIPTS.map((item) => (
                 <div
                   key={item.id}

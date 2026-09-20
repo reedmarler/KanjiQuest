@@ -339,8 +339,8 @@ body:has(.beginner-word-writing-card) .app,
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border-radius: 50%;
-  clip-path: circle(50% at 50% 50%);
+  /* clip-path radius is set inline to match BEGINNER_ZONE_WHEEL_RADIUS, so
+     the glyphs stay inside the ring itself rather than the wider square box. */
   pointer-events: none;
   user-select: none;
 }
