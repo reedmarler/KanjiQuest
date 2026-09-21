@@ -479,6 +479,7 @@ body:has(.beginner-word-writing-card) .app,
   grid-template-columns: minmax(0, 1fr) 2rem;
   align-items: center;
   gap: 0.55rem;
+  transform: translateY(-0.7rem);
 }
 
 .beginner-zone-tabs {
