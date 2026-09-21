@@ -533,7 +533,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-zone-kana-scroll {
   container-type: inline-size;
-  align-self: end;
+  align-self: center;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
@@ -665,7 +665,6 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-zone-chart--hiragana .beginner-zone-kana-grid,
 .beginner-zone-chart--katakana .beginner-zone-kana-grid {
-  border-top: 1px solid var(--kana-chart-grid-line);
   border-left: 1px solid var(--kana-chart-grid-line);
 }
 
