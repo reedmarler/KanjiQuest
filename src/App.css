@@ -171,6 +171,10 @@ body:has(.beginner-word-writing-card) .app,
   padding-top: 2.5rem;
 }
 
+.beginner-zone--resources {
+  gap: 0.6rem;
+}
+
 .beginner-zone-resources-header > div {
   min-width: 0;
 }
