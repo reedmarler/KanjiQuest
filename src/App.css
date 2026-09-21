@@ -533,7 +533,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-zone-kana-scroll {
   container-type: inline-size;
-  align-self: center;
+  align-self: start;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
@@ -554,7 +554,6 @@ body:has(.beginner-word-writing-card) .app,
   gap: var(--beginner-zone-kana-gap);
   width: max-content;
   min-width: 100%;
-  padding-bottom: 0.32rem;
 }
 
 .beginner-zone-kana-col-label,
