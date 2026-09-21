@@ -537,7 +537,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-zone-kana-scroll {
   container-type: inline-size;
-  align-self: start;
+  align-self: stretch;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
@@ -554,8 +554,9 @@ body:has(.beginner-word-writing-card) .app,
   --beginner-zone-kana-label: 1.35rem;
   --beginner-zone-kana-cell: calc((100cqw - var(--beginner-zone-kana-label) - (6 * var(--beginner-zone-kana-gap))) / 7);
   display: grid;
-  grid-template-rows: 0.85rem repeat(5, var(--beginner-zone-kana-cell));
+  grid-template-rows: 0.85rem repeat(5, minmax(0, 1fr));
   gap: var(--beginner-zone-kana-gap);
+  height: 100%;
   width: max-content;
   min-width: 100%;
 }
@@ -596,7 +597,7 @@ body:has(.beginner-word-writing-card) .app,
   display: grid;
   place-items: center;
   min-width: 0;
-  aspect-ratio: 1;
+  height: 100%;
   border-radius: 0;
 }
 
