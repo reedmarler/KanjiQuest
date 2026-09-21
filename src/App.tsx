@@ -98,6 +98,7 @@ type View =
   | 'achievements'
   | 'study-tools'
   | 'additional-tools'
+  | 'intro'
   | 'favorite-words'
   | 'beginner-zone'
   | 'hiragana-chart'
@@ -113,17 +114,18 @@ type View =
   | 'daily-goals'
   | 'backup-sync'
 
-type PrimaryNavTab = 'home' | 'quest' | 'study' | 'beginner' | 'more'
+type PrimaryNavTab = 'home' | 'quest' | 'study' | 'beginner' | 'intro'
 
 /** The five primary tabs, in bottom-nav order, for left/right swipe navigation. */
-const HUB_TABS: readonly View[] = ['dashboard', 'quests', 'study-tools', 'beginner-zone', 'additional-tools']
+const HUB_TABS: readonly View[] = ['dashboard', 'quests', 'study-tools', 'beginner-zone', 'intro']
 
-function primaryNavTabForView(view: View): PrimaryNavTab {
+function primaryNavTabForView(view: View): PrimaryNavTab | null {
   if (view === 'dashboard' || view === 'profile' || view === 'settings' || view === 'daily-goals' || view === 'backup-sync') return 'home'
   if (view === 'quests' || view === 'ink-road' || view === 'shrine-trial' || view === 'quest-scene' || view === 'quest-checkpoint') return 'quest'
   if (view === 'study-tools' || view === 'kanji' || view === 'vocab-practice' || view === 'counter-practice' || view === 'grammar' || view === 'study' || view === 'study-loading' || view === 'complete') return 'study'
   if (view === 'beginner-zone' || view === 'hiragana-chart' || view === 'katakana-chart' || view === 'hiragana-quiz' || view === 'katakana-quiz' || view === 'beginner-learner' || view === 'beginner-speed-run' || view === 'picture-practice') return 'beginner'
-  return 'more'
+  if (view === 'intro') return 'intro'
+  return null
 }
 
 function MobileBottomNav({
@@ -132,14 +134,14 @@ function MobileBottomNav({
   onQuests,
   onStudy,
   onBeginner,
-  onMore,
+  onIntro,
 }: {
   currentView: View
   onHome: () => void
   onQuests: () => void
   onStudy: () => void
   onBeginner: () => void
-  onMore: () => void
+  onIntro: () => void
 }) {
   const activeTab = primaryNavTabForView(currentView)
   const items: Array<{ tab: PrimaryNavTab; label: string; mark: string; onClick: () => void }> = [
@@ -147,7 +149,7 @@ function MobileBottomNav({
     { tab: 'quest', label: 'Quest', mark: '旅', onClick: onQuests },
     { tab: 'study', label: 'Study', mark: '学', onClick: onStudy },
     { tab: 'beginner', label: 'Beginner', mark: 'あ', onClick: onBeginner },
-    { tab: 'more', label: 'More', mark: '他', onClick: onMore },
+    { tab: 'intro', label: 'Intro', mark: '入', onClick: onIntro },
   ]
 
   return (
@@ -169,12 +171,15 @@ function MobileBottomNav({
 }
 
 type BeginnerZoneProps = {
-  onOpenChart: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>) => void
-  onOpenQuiz: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>) => void
-  onOpenKana: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>, rowIndex: number, charIndex: number) => void
+  initialScript: Extract<BeginnerScript, 'hiragana' | 'katakana'>
+  intro?: boolean
+  onOpenIntroScript?: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>) => void
+  onOpenChart?: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>) => void
+  onOpenQuiz?: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>) => void
+  onOpenKana?: (script: Extract<BeginnerScript, 'hiragana' | 'katakana'>, rowIndex: number, charIndex: number) => void
   onOpenKanji: () => void
-  onOpenPictures: () => void
-  onOpenSpeedRun: () => void
+  onOpenPictures?: () => void
+  onOpenSpeedRun?: () => void
 }
 
 const BEGINNER_ZONE_VOWEL_ROWS: Record<string, number> = { a: 0, i: 1, u: 2, e: 3, o: 4 }
@@ -266,6 +271,9 @@ function beginnerZoneNearestSnapAngle(angleDeg: number): number {
 }
 
 function BeginnerZone({
+  initialScript,
+  intro = false,
+  onOpenIntroScript,
   onOpenChart,
   onOpenQuiz,
   onOpenKana,
@@ -273,8 +281,7 @@ function BeginnerZone({
   onOpenPictures,
   onOpenSpeedRun,
 }: BeginnerZoneProps) {
-  const [page, setPage] = useState<'guide' | 'resources'>('guide')
-  const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>('hiragana')
+  const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>(initialScript)
   const [wheelAngle, setWheelAngle] = useState(beginnerZoneSnapAngleFor('hiragana'))
   const [isWheelDragging, setIsWheelDragging] = useState(false)
   const [showHiraganaExplainer, setShowHiraganaExplainer] = useState(false)
@@ -292,8 +299,8 @@ function BeginnerZone({
   const columns = deck.rows.map((row, rowIndex) => ({ row, rowIndex })).reverse()
   const vowels = ['a', 'i', 'u', 'e', 'o']
   const actions = [
-    { mark: '聞', label: 'Quiz', tone: 'green', onClick: () => onOpenQuiz('hiragana') },
-    { mark: '書', label: 'Quiz', tone: 'amber', onClick: () => onOpenQuiz('katakana') },
+    { mark: '聞', label: 'Quiz', tone: 'green', onClick: () => onOpenQuiz?.('hiragana') },
+    { mark: '書', label: 'Quiz', tone: 'amber', onClick: () => onOpenQuiz?.('katakana') },
     { mark: '一', label: 'Kanji', tone: 'violet', onClick: onOpenKanji },
     { mark: '絵', label: 'Pics', tone: 'teal', onClick: onOpenPictures },
     { mark: '⚡', label: 'Speed', tone: 'gold', onClick: onOpenSpeedRun },
@@ -311,12 +318,13 @@ function BeginnerZone({
     })
 
     return () => window.cancelAnimationFrame(frame)
-  }, [page, script])
+  }, [script])
 
   // The mascot's own intro: the moment someone first lands on Beginner Zone,
   // spin the wheel to hiragana and explain it, same as tapping the mascot
   // does later.
   useEffect(() => {
+    if (!intro) return
     setWheelAngle(beginnerZoneSnapAngleFor('hiragana'))
     setShowHiraganaExplainer(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -374,7 +382,7 @@ function BeginnerZone({
     setWheelAngle((current) => beginnerZoneNearestSnapAngle(current))
   }
 
-  if (page === 'guide') {
+  if (intro) {
     const wheelNormalizedAngle = ((wheelAngle % 360) + 360) % 360
     const wheelScripts = BEGINNER_ZONE_WHEEL_SCRIPTS.map((item) => ({
       ...item,
@@ -480,8 +488,7 @@ function BeginnerZone({
                 onOpenKanji()
                 return
               }
-              setScript(wheelSelectedScript)
-              setPage('resources')
+              onOpenIntroScript?.(wheelSelectedScript)
             }}
           >
             Go
@@ -491,7 +498,6 @@ function BeginnerZone({
       </main>
     )
   }
-
   return (
     <main className="beginner-zone beginner-zone--resources">
       <header className="beginner-zone-resources-header">
@@ -499,10 +505,6 @@ function BeginnerZone({
           <small>BEGINNER ZONE</small>
           <h1>Resources</h1>
         </div>
-        <button type="button" onClick={() => setPage('guide')}>
-          <span aria-hidden="true">&#8592;</span>
-          Guide
-        </button>
       </header>
 
       <section className={`beginner-zone-chart beginner-zone-chart--${script}`} aria-label={`${deck.title} starter chart`}>
@@ -523,7 +525,7 @@ function BeginnerZone({
           <button
             type="button"
             className="beginner-zone-expand"
-            onClick={() => onOpenChart(script)}
+            onClick={() => onOpenChart?.(script)}
             aria-label={`Open the full ${deck.title} chart`}
             title={`Open full ${deck.title} chart`}
           >
@@ -551,7 +553,7 @@ function BeginnerZone({
                       key={character.char}
                       type="button"
                       className={character.char.length > 1 ? 'is-contracted' : undefined}
-                      onClick={() => onOpenKana(script, rowIndex, characterIndex)}
+                      onClick={() => onOpenKana?.(script, rowIndex, characterIndex)}
                       aria-label={`Practice ${character.char}, ${character.romaji}`}
                     >
                       <span lang="ja">{character.char}</span>
@@ -590,7 +592,7 @@ function DesktopPrimaryNav({
   onQuests,
   onStudy,
   onBeginner,
-  onMore,
+  onIntro,
 }: {
   currentView: View
   hideUser: boolean
@@ -604,7 +606,7 @@ function DesktopPrimaryNav({
   onQuests: () => void
   onStudy: () => void
   onBeginner: () => void
-  onMore: () => void
+  onIntro: () => void
 }) {
   const activeTab = primaryNavTabForView(currentView)
   const items: Array<{ tab: PrimaryNavTab; label: string; mark: string; onClick: () => void }> = [
@@ -612,7 +614,7 @@ function DesktopPrimaryNav({
     { tab: 'quest', label: 'Quest', mark: '旅', onClick: onQuests },
     { tab: 'study', label: 'Study', mark: '学', onClick: onStudy },
     { tab: 'beginner', label: 'Beginner', mark: 'あ', onClick: onBeginner },
-    { tab: 'more', label: 'More', mark: '他', onClick: onMore },
+    { tab: 'intro', label: 'Intro', mark: '入', onClick: onIntro },
   ]
 
   return (
@@ -686,6 +688,7 @@ function App() {
   const [achievementMetrics, setAchievementMetrics] = useState(loadAchievementMetrics)
   const [practiceReturnView, setPracticeReturnView] = useState<View>('dashboard')
   const [beginnerScript, setBeginnerScript] = useState<BeginnerScript>('hiragana')
+  const [beginnerZoneScript, setBeginnerZoneScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>('hiragana')
   // Which row (and which character within it) the learner opens on. Zero for
   // the normal Beginner Zone tiles; set to a specific character when a kana
   // chart links straight into one.
@@ -916,7 +919,7 @@ function App() {
     || view === 'quests'
     || view === 'study-tools'
     || view === 'beginner-zone'
-    || view === 'additional-tools'
+    || view === 'intro'
 
   // Swipe left/right across a hub screen to move to the next / previous tab,
   // the same order the bottom nav is in. Deeper screens keep the axis free.
@@ -946,7 +949,7 @@ function App() {
       onQuests={goToQuests}
       onStudy={() => goToView('study-tools')}
       onBeginner={() => goToView('beginner-zone')}
-      onMore={() => goToView('additional-tools')}
+      onIntro={() => goToView('intro')}
     />
   )
   const desktopNav = (
@@ -963,7 +966,7 @@ function App() {
       onQuests={goToQuests}
       onStudy={() => goToView('study-tools')}
       onBeginner={() => goToView('beginner-zone')}
-      onMore={() => goToView('additional-tools')}
+      onIntro={() => goToView('intro')}
     />
   )
   const profileMenu = (
@@ -979,6 +982,7 @@ function App() {
       onOpenLearningSettings={() => goToView('settings')}
       onOpenQuests={() => goToView('quests')}
       onOpenAchievements={() => goToView('achievements')}
+      onOpenMore={() => goToView('additional-tools')}
       onOpenBackupSync={() => goToView('backup-sync')}
     />
   )
@@ -1247,6 +1251,8 @@ function App() {
     return withMobileNav(
       <div className="app beginner-zone-page">
         <BeginnerZone
+          key={beginnerZoneScript}
+          initialScript={beginnerZoneScript}
           onOpenChart={(script) => setView(script === 'hiragana' ? 'hiragana-chart' : 'katakana-chart')}
           onOpenQuiz={(script) => openBeginnerQuiz(script, 'beginner-zone')}
           onOpenKana={(script, rowIndex, charIndex) => {
@@ -1270,6 +1276,28 @@ function App() {
           onOpenSpeedRun={() => {
             setSpeedRunReturnView('beginner-zone')
             setView('beginner-speed-run')
+          }}
+        />
+      </div>,
+    )
+  }
+
+  if (view === 'intro') {
+    return withMobileNav(
+      <div className="app beginner-zone-page">
+        <BeginnerZone
+          intro
+          initialScript={beginnerZoneScript}
+          onOpenIntroScript={(script) => {
+            setBeginnerZoneScript(script)
+            setView('beginner-zone')
+          }}
+          onOpenKanji={() => {
+            setBeginnerScript('kanji')
+            setBeginnerInitialRowIndex(0)
+            setBeginnerInitialCharIndex(0)
+            setBeginnerLearnerReturnView('beginner-zone')
+            setView('beginner-learner')
           }}
         />
       </div>,

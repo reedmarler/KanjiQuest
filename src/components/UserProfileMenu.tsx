@@ -15,6 +15,7 @@ type UserProfileMenuProps = {
   onOpenLearningSettings: () => void
   onOpenQuests: () => void
   onOpenAchievements: () => void
+  onOpenMore: () => void
   onOpenBackupSync: () => void
 }
 
@@ -30,6 +31,7 @@ export function UserProfileMenu({
   onOpenLearningSettings,
   onOpenQuests,
   onOpenAchievements,
+  onOpenMore,
   onOpenBackupSync,
 }: UserProfileMenuProps) {
   const importFileRef = useRef<HTMLInputElement | null>(null)
@@ -161,6 +163,9 @@ export function UserProfileMenu({
           </button>
           <button type="button" onClick={onOpenAchievements}>
             <span>Achievements</span>
+          </button>
+          <button type="button" onClick={onOpenMore}>
+            <span>More</span>
           </button>
         </section>
 
