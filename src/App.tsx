@@ -208,7 +208,7 @@ const BEGINNER_INTRO_SCRIPTS: Array<{
 const BEGINNER_INTRO_STEPS = [
   {
     id: 'welcome',
-    eyebrow: 'KANJI QUEST GUIDE',
+    eyebrow: '',
     title: 'Do you want to learn Japanese?',
     body: 'Here are the three different writing systems that are used:',
   },
@@ -321,7 +321,7 @@ function BeginnerZone({
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
           </div>
           <div className="beginner-intro-speech" key={`speech-${step.id}`} aria-live="polite">
-            <small>{step.eyebrow}</small>
+            {step.eyebrow && <small>{step.eyebrow}</small>}
             <h1>{step.title}</h1>
             <p>{step.body}</p>
           </div>
@@ -332,8 +332,8 @@ function BeginnerZone({
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {introStep === 0 && (
               <div className="beginner-intro-wheel-placeholder">
-                <strong>3</strong>
-                <small>writing systems</small>
+                <strong lang="ja">あ</strong>
+                <small>Hiragana</small>
               </div>
             )}
             {isFinalStep && (
