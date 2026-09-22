@@ -269,8 +269,8 @@ function IntroBlurSwapText({ text, animate = true }: { text: string; animate?: b
     const swapTimer = window.setTimeout(() => {
       displayedTextRef.current = text
       setDisplayedText(text)
-    }, 1080)
-    const revealTimer = window.setTimeout(() => setIsBlurring(false), 1200)
+    }, 1260)
+    const revealTimer = window.setTimeout(() => setIsBlurring(false), 1400)
 
     return () => {
       window.clearTimeout(swapTimer)
