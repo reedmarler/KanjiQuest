@@ -300,13 +300,15 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-ring {
-  --intro-ring-fill: conic-gradient(transparent 0 100%);
   position: absolute;
+  z-index: 0;
   inset: 1.75rem;
   border-radius: 50%;
-  background: var(--intro-ring-fill);
+  background: conic-gradient(transparent 0 100%);
   mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
-  animation: beginner-intro-ring-arrive 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  opacity: 0;
+  transform: rotate(-120deg) scale(0.84);
+  transition: opacity 280ms ease, transform 760ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-ring::after {
@@ -317,31 +319,36 @@ body:has(.beginner-word-writing-card) .app,
   border-radius: 50%;
 }
 
-.beginner-intro-lesson.is-hiragana .beginner-intro-ring {
-  --intro-ring-fill: conic-gradient(from -60deg, var(--sakura-light) 0 33.333%, transparent 33.333% 100%);
+.beginner-intro-ring.is-visible { opacity: 1; }
+.beginner-intro-orbit.has-1-docked .beginner-intro-ring {
+  background: conic-gradient(from -60deg, var(--sakura-light) 0 30%, transparent 30% 100%);
+  transform: rotate(0deg) scale(1);
 }
 
-.beginner-intro-lesson.is-katakana .beginner-intro-ring {
-  --intro-ring-fill: conic-gradient(from -60deg, var(--sakura-light) 0 33.333%, #70cfe0 33.333% 66.666%, transparent 66.666% 100%);
+.beginner-intro-orbit.has-2-docked .beginner-intro-ring {
+  background: conic-gradient(from -60deg, var(--sakura-light) 0 30%, transparent 30% 35%, #70cfe0 35% 63%, transparent 63% 100%);
+  transform: rotate(120deg) scale(1);
 }
 
-.beginner-intro-lesson.is-kanji .beginner-intro-ring,
+.beginner-intro-orbit.has-3-docked .beginner-intro-ring {
+  background: conic-gradient(from -60deg, var(--sakura-light) 0 30%, transparent 30% 35%, #70cfe0 35% 63%, transparent 63% 68%, #f0bf63 68% 96%, transparent 96% 100%);
+  transform: rotate(240deg) scale(1);
+}
+
 .beginner-intro-lesson.is-together .beginner-intro-ring {
-  --intro-ring-fill: conic-gradient(from -60deg, var(--sakura-light) 0 33.333%, #70cfe0 33.333% 66.666%, #f0bf63 66.666% 100%);
-}
-
-.beginner-intro-lesson.is-together .beginner-intro-ring::after {
   animation: beginner-intro-spin 8s linear infinite;
 }
 
-.beginner-intro-center {
+.beginner-intro-wheel-placeholder,
+.beginner-intro-wheel-complete {
   position: absolute;
+  z-index: 1;
   top: 50%;
   left: 50%;
   display: grid;
   place-items: center;
   align-content: center;
-  width: 7.1rem;
+  width: 7.3rem;
   aspect-ratio: 1;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 22%, var(--border));
   border-radius: 50%;
@@ -350,12 +357,26 @@ body:has(.beginner-word-writing-card) .app,
   transform: translate(-50%, -50%);
 }
 
-.beginner-intro-center strong {
-  color: var(--text);
-  font: 700 2.25rem/1 'Noto Sans JP', sans-serif;
+.beginner-intro-wheel-placeholder {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+  animation: beginner-intro-copy-in 420ms ease both;
 }
 
-.beginner-intro-center small {
+.beginner-intro-wheel-complete {
+  width: 7.1rem;
+  animation: beginner-intro-complete-pop 480ms 680ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.beginner-intro-wheel-placeholder strong,
+.beginner-intro-wheel-complete strong {
+  color: var(--text);
+  font: 700 2.25rem/1 'Noto Sans JP', sans-serif;
+  white-space: nowrap;
+}
+
+.beginner-intro-wheel-placeholder small,
+.beginner-intro-wheel-complete small {
   margin-top: 0.35rem;
   color: var(--text-muted);
   font-size: 0.55rem;
@@ -369,6 +390,8 @@ body:has(.beginner-word-writing-card) .app,
   display: grid;
   justify-items: center;
   gap: 0.22rem;
+  top: 50%;
+  left: 50%;
   width: 4.4rem;
   padding: 0;
   border: 0;
@@ -377,19 +400,31 @@ body:has(.beginner-word-writing-card) .app,
   font: inherit;
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, -50%) scale(0.35);
+  transform: translate(-50%, -50%) scale(0.55);
+  transition: top 760ms cubic-bezier(0.22, 1, 0.36, 1), left 760ms cubic-bezier(0.22, 1, 0.36, 1), width 760ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease, transform 760ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.beginner-intro-node.is-hiragana { top: 13%; left: 50%; }
-.beginner-intro-node.is-katakana { top: 75%; left: 82%; --intro-node: #70cfe0; }
-.beginner-intro-node.is-kanji { top: 75%; left: 18%; --intro-node: #f0bf63; }
+.beginner-intro-node.is-katakana { --intro-node: #70cfe0; }
+.beginner-intro-node.is-kanji { --intro-node: #f0bf63; }
 
-.beginner-intro-node.is-revealed {
+.beginner-intro-node.is-focused {
+  z-index: 3;
+  width: 9.4rem;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.beginner-intro-node.is-docked {
+  width: 4.4rem;
   opacity: 1;
   pointer-events: auto;
   cursor: pointer;
-  animation: beginner-intro-node-arrive 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform: translate(-50%, -50%) scale(1);
 }
+
+.beginner-intro-node.is-slot-top { top: 12%; left: 50%; }
+.beginner-intro-node.is-slot-right { top: 75%; left: 82%; }
+.beginner-intro-node.is-slot-left { top: 75%; left: 18%; }
 
 .beginner-intro-node span {
   display: grid;
@@ -402,6 +437,7 @@ body:has(.beginner-word-writing-card) .app,
   color: var(--intro-node);
   font: 700 1.35rem/1 'Noto Sans JP', sans-serif;
   box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-node) 15%, transparent);
+  transition: width 760ms cubic-bezier(0.22, 1, 0.36, 1), font-size 760ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 300ms ease;
 }
 
 .beginner-intro-node b {
@@ -409,8 +445,34 @@ body:has(.beginner-word-writing-card) .app,
   line-height: 1;
 }
 
-.beginner-intro-node.is-current span {
-  box-shadow: 0 0 0 0.28rem color-mix(in srgb, var(--intro-node) 12%, transparent), 0 0.45rem 1.25rem color-mix(in srgb, var(--intro-node) 25%, transparent);
+.beginner-intro-node small {
+  max-height: 0;
+  color: var(--intro-node);
+  font-size: 0.53rem;
+  font-weight: 700;
+  opacity: 0;
+  transition: max-height 260ms ease, opacity 260ms ease;
+}
+
+.beginner-intro-node.is-focused span {
+  width: 8.6rem;
+  font-size: 4rem;
+  box-shadow: 0 0 0 0.45rem color-mix(in srgb, var(--intro-node) 10%, transparent), 0 0.8rem 2rem color-mix(in srgb, var(--intro-node) 24%, transparent);
+}
+
+.beginner-intro-node.is-focused b {
+  margin-top: 0.55rem;
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.beginner-intro-node.is-focused small {
+  max-height: 1rem;
+  opacity: 1;
+}
+
+.beginner-intro-node.is-docked span {
+  box-shadow: 0 0 0 0.22rem color-mix(in srgb, var(--intro-node) 10%, transparent), 0 0.35rem 1rem color-mix(in srgb, var(--intro-node) 20%, transparent);
 }
 
 .beginner-intro-example {
@@ -423,7 +485,11 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-copy-in 420ms 100ms ease both;
 }
 
-.beginner-intro-example.is-katakana { --intro-example: #70cfe0; grid-template-columns: 1fr 1fr; column-gap: 0.7rem; }
+.beginner-intro-lesson.is-transitioning .beginner-intro-example {
+  animation: beginner-intro-copy-out 260ms ease both;
+}
+
+.beginner-intro-example.is-katakana { --intro-example: #70cfe0; }
 .beginner-intro-example.is-kanji { --intro-example: #f0bf63; }
 .beginner-intro-example.is-together { --intro-example: #bfa5ff; }
 
@@ -433,14 +499,38 @@ body:has(.beginner-word-writing-card) .app,
   color: var(--intro-example);
 }
 
-.beginner-intro-example > strong,
-.beginner-intro-example > div > strong {
-  color: var(--text);
-  font: 700 2rem/1.2 'Noto Sans JP', sans-serif;
+.beginner-intro-word-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  width: 100%;
 }
 
-.beginner-intro-example.is-katakana > div > strong { font-size: 1.45rem; }
-.beginner-intro-example.is-katakana > div:last-child > strong { font-size: 1.1rem; }
+.beginner-intro-example.is-katakana .beginner-intro-word-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.beginner-intro-word-list > span {
+  min-width: 0;
+}
+
+.beginner-intro-word-list b,
+.beginner-intro-word-list small {
+  display: block;
+}
+
+.beginner-intro-word-list b {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font: 700 1.25rem/1.2 'Noto Sans JP', sans-serif;
+}
+
+.beginner-intro-word-list small {
+  margin-top: 0.18rem;
+  color: var(--text-muted);
+  font-size: 0.55rem;
+  line-height: 1.25;
+}
 
 .beginner-intro-example p {
   display: flex;
@@ -455,7 +545,8 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-example p span { display: block; }
 
 .beginner-intro-example.is-together > strong {
-  font-size: 2.15rem;
+  color: var(--text);
+  font: 700 2.15rem/1.2 'Noto Sans JP', sans-serif;
   letter-spacing: 0;
 }
 
@@ -527,6 +618,12 @@ body:has(.beginner-word-writing-card) .app,
   height: 0.9rem;
 }
 
+.beginner-intro-back:disabled,
+.beginner-intro-next:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .beginner-intro-node:focus-visible,
 .beginner-intro-back:focus-visible,
 .beginner-intro-replay:focus-visible,
@@ -540,14 +637,14 @@ body:has(.beginner-word-writing-card) .app,
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes beginner-intro-ring-arrive {
-  from { opacity: 0.25; transform: rotate(-55deg) scale(0.84); }
-  to { opacity: 1; transform: rotate(0) scale(1); }
+@keyframes beginner-intro-copy-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(0.3rem); }
 }
 
-@keyframes beginner-intro-node-arrive {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.35) rotate(-25deg); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
+@keyframes beginner-intro-complete-pop {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 @keyframes beginner-intro-spin {
@@ -605,11 +702,15 @@ body:has(.beginner-word-writing-card) .app,
 
   .beginner-intro-orbit { width: min(100%, 13.5rem); }
   .beginner-intro-ring { inset: 1.5rem; }
-  .beginner-intro-center { width: 6rem; }
-  .beginner-intro-center strong { font-size: 1.85rem; }
+  .beginner-intro-wheel-placeholder { width: 6rem; }
+  .beginner-intro-wheel-placeholder strong,
+  .beginner-intro-wheel-complete strong { font-size: 1.85rem; }
   .beginner-intro-node { width: 3.8rem; }
   .beginner-intro-node span { width: 2.65rem; font-size: 1.15rem; }
   .beginner-intro-node b { font-size: 0.5rem; }
+  .beginner-intro-node.is-focused { width: 8.2rem; }
+  .beginner-intro-node.is-focused span { width: 7.25rem; font-size: 3.35rem; }
+  .beginner-intro-node.is-focused b { font-size: 0.75rem; }
 
   .beginner-intro-example {
     min-height: 7.2rem;
@@ -618,8 +719,6 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-example p { justify-content: center; }
-  .beginner-intro-example.is-katakana { text-align: left; }
-  .beginner-intro-example.is-katakana p { justify-content: flex-start; }
   .beginner-intro-example.is-together > strong { font-size: 1.85rem; }
 }
 
@@ -627,16 +726,21 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-speech h1 { font-size: 0.87rem; }
   .beginner-intro-speech p { font-size: 0.57rem; }
   .beginner-intro-orbit { width: 12.4rem; }
-  .beginner-intro-example.is-katakana > div:last-child > strong { font-size: 0.95rem; }
+  .beginner-intro-node.is-focused span { width: 6.7rem; font-size: 3rem; }
+  .beginner-intro-word-list { gap: 0.3rem; }
+  .beginner-intro-word-list b { font-size: 1.05rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .beginner-intro-speech,
   .beginner-intro-ring,
-  .beginner-intro-node.is-revealed,
+  .beginner-intro-node,
+  .beginner-intro-node span,
   .beginner-intro-example,
-  .beginner-intro-lesson.is-together .beginner-intro-ring::after {
+  .beginner-intro-wheel-placeholder,
+  .beginner-intro-wheel-complete {
     animation: none;
+    transition-duration: 0.01ms;
   }
 }
 

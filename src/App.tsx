@@ -198,52 +198,43 @@ const BEGINNER_INTRO_SCRIPTS: Array<{
   id: BeginnerIntroScriptId
   label: string
   mark: string
+  descriptor: string
 }> = [
-  { id: 'hiragana', label: 'Hiragana', mark: 'あ' },
-  { id: 'katakana', label: 'Katakana', mark: 'ア' },
-  { id: 'kanji', label: 'Kanji', mark: '山' },
+  { id: 'hiragana', label: 'Hiragana', mark: 'あ', descriptor: 'simple + curly' },
+  { id: 'katakana', label: 'Katakana', mark: 'ア', descriptor: 'sharp + straight' },
+  { id: 'kanji', label: 'Kanji', mark: '山', descriptor: 'words + ideas' },
 ]
 
 const BEGINNER_INTRO_STEPS = [
   {
     id: 'welcome',
-    eyebrow: 'YOUR FIRST JAPANESE LESSON',
-    title: 'Hey, so you want to learn Japanese?',
-    body: 'Let\'s start with the three components of the written language.',
-    centerMark: '日',
-    centerLabel: 'Japanese writing',
+    eyebrow: 'KANJI QUEST GUIDE',
+    title: 'Do you want to learn Japanese?',
+    body: 'Here are the three different writing systems that are used:',
   },
   {
     id: 'hiragana',
     eyebrow: 'ONE OF THREE',
-    title: 'First, Hiragana',
-    body: 'Hiragana is the simple, curly script. It spells Japanese sounds and is used for grammar and many native Japanese words.',
-    centerMark: 'あ',
-    centerLabel: 'soft + flowing',
+    title: 'Hiragana',
+    body: 'Hiragana is one of the Japanese alphabets. Its shapes are simple and curly. This one is used for native Japanese words like sushi, tsunami, and samurai.',
   },
   {
     id: 'katakana',
     eyebrow: 'TWO OF THREE',
-    title: 'Next, Katakana',
-    body: 'Katakana uses straighter, sharper lines. It represents the same sounds and is often used for words borrowed from other languages.',
-    centerMark: 'ア',
-    centerLabel: 'sharp + straight',
+    title: 'Katakana',
+    body: 'Katakana is the second Japanese alphabet. It uses straighter, sharper lines for words that Japanese borrows, or other non-native Japanese words, like bus to basu or taxi to takushii.',
   },
   {
     id: 'kanji',
     eyebrow: 'THREE OF THREE',
-    title: 'Then, Kanji',
-    body: 'Kanji are characters that carry meaning. They came to Japan from China and represent whole words and ideas.',
-    centerMark: '山',
-    centerLabel: 'meaning + ideas',
+    title: 'Kanji',
+    body: 'Kanji are old Chinese characters used in Japanese to represent whole words and ideas. One character can carry meaning, like mountain, person, or teacher.',
   },
   {
     id: 'together',
     eyebrow: 'THE FULL PICTURE',
-    title: 'They work together',
-    body: 'Japanese mixes all three in the same sentence. You do not need to learn everything at once. We\'ll start with Hiragana.',
-    centerMark: '日本語',
-    centerLabel: 'Japanese',
+    title: 'Three systems, one language',
+    body: 'Hiragana, Katakana, and Kanji work together in everyday Japanese. You do not need to learn them all at once. We\'ll start with Hiragana.',
   },
 ] as const
 
@@ -260,6 +251,8 @@ function BeginnerZone({
 }: BeginnerZoneProps) {
   const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>(initialScript)
   const [introStep, setIntroStep] = useState(0)
+  const [introTransitioning, setIntroTransitioning] = useState(false)
+  const introTransitionTimerRef = useRef<number | null>(null)
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const deck = getBeginnerDeck(script)
   const columns = deck.rows.map((row, rowIndex) => ({ row, rowIndex })).reverse()
@@ -286,9 +279,39 @@ function BeginnerZone({
     return () => window.cancelAnimationFrame(frame)
   }, [script])
 
+  useEffect(() => () => {
+    if (introTransitionTimerRef.current !== null) window.clearTimeout(introTransitionTimerRef.current)
+  }, [])
+
+  function goToIntroStep(nextStep: number) {
+    if (introTransitionTimerRef.current !== null) window.clearTimeout(introTransitionTimerRef.current)
+    introTransitionTimerRef.current = null
+    setIntroTransitioning(false)
+    setIntroStep(nextStep)
+  }
+
+  function advanceIntro() {
+    if (introTransitioning) return
+    if (introStep === 0) {
+      setIntroStep(1)
+      return
+    }
+    if (introStep >= 4) return
+
+    setIntroTransitioning(true)
+    introTransitionTimerRef.current = window.setTimeout(() => {
+      setIntroStep((current) => Math.min(4, current + 1))
+      setIntroTransitioning(false)
+      introTransitionTimerRef.current = null
+    }, 760)
+  }
+
   if (intro) {
     const step = BEGINNER_INTRO_STEPS[introStep]
-    const revealedScripts = Math.min(3, Math.max(0, introStep))
+    const activeScriptIndex = introStep >= 1 && introStep <= 3 ? introStep - 1 : -1
+    const completedScripts = introStep === 4
+      ? 3
+      : Math.max(0, introStep - 1) + (introTransitioning ? 1 : 0)
     const isFinalStep = introStep === BEGINNER_INTRO_STEPS.length - 1
 
     return (
@@ -304,28 +327,39 @@ function BeginnerZone({
           </div>
         </header>
 
-        <section className={`beginner-intro-lesson is-${step.id}`} aria-label="The three Japanese writing systems">
-          <div className="beginner-intro-orbit" key={`orbit-${step.id}`}>
-            <div className="beginner-intro-ring" aria-hidden="true" />
-            <div className="beginner-intro-center">
-              <strong lang="ja">{step.centerMark}</strong>
-              <small>{step.centerLabel}</small>
-            </div>
+        <section className={`beginner-intro-lesson is-${step.id}${introTransitioning ? ' is-transitioning' : ''}`} aria-label="The three Japanese writing systems">
+          <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
+            <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
+            {introStep === 0 && (
+              <div className="beginner-intro-wheel-placeholder">
+                <strong>3</strong>
+                <small>writing systems</small>
+              </div>
+            )}
+            {isFinalStep && (
+              <div className="beginner-intro-wheel-complete">
+                <strong lang="ja">日本語</strong>
+                <small>Japanese</small>
+              </div>
+            )}
             {BEGINNER_INTRO_SCRIPTS.map((item, index) => {
-              const isRevealed = index < revealedScripts
-              const isCurrent = step.id === item.id || step.id === 'together'
+              const isFocused = !introTransitioning && index === activeScriptIndex
+              const isDocked = index < completedScripts
+              const dockAge = completedScripts - 1 - index
+              const dockSlot = dockAge === 0 ? 'top' : dockAge === 1 ? 'right' : 'left'
               return (
                 <button
                   key={item.id}
                   type="button"
-                  className={`beginner-intro-node is-${item.id}${isRevealed ? ' is-revealed' : ''}${isCurrent ? ' is-current' : ''}`}
-                  onClick={() => isRevealed && setIntroStep(index + 1)}
-                  disabled={!isRevealed}
-                  aria-label={`${item.label}${isRevealed ? '' : ' has not been introduced yet'}`}
-                  aria-pressed={step.id === item.id}
+                  className={`beginner-intro-node is-${item.id}${isFocused ? ' is-focused' : ''}${isDocked ? ` is-docked is-slot-${dockSlot}` : ''}`}
+                  onClick={() => isDocked && !introTransitioning && goToIntroStep(index + 1)}
+                  disabled={!isDocked}
+                  aria-label={isFocused ? `${item.label}, currently being introduced` : item.label}
+                  aria-pressed={isFocused}
                 >
                   <span lang="ja">{item.mark}</span>
                   <b>{item.label}</b>
+                  <small>{item.descriptor}</small>
                 </button>
               )
             })}
@@ -333,23 +367,31 @@ function BeginnerZone({
 
           {step.id === 'hiragana' && (
             <div className="beginner-intro-example is-hiragana" key="hiragana-example">
-              <small>NATIVE JAPANESE WORD</small>
-              <strong lang="ja">さくら</strong>
-              <p><b>sakura</b><span>cherry blossom</span></p>
+              <small>NATIVE JAPANESE WORDS</small>
+              <div className="beginner-intro-word-list">
+                <span><b lang="ja">すし</b><small>sushi</small></span>
+                <span><b lang="ja">つなみ</b><small>tsunami</small></span>
+                <span><b lang="ja">さむらい</b><small>samurai</small></span>
+              </div>
             </div>
           )}
           {step.id === 'katakana' && (
             <div className="beginner-intro-example is-katakana" key="katakana-example">
               <small>BORROWED WORDS</small>
-              <div><strong lang="ja">バス</strong><p><b>basu</b><span>bus</span></p></div>
-              <div><strong lang="ja">エスカレーター</strong><p><b>esukareetaa</b><span>escalator</span></p></div>
+              <div className="beginner-intro-word-list">
+                <span><b lang="ja">バス</b><small>bus → basu</small></span>
+                <span><b lang="ja">タクシー</b><small>taxi → takushii</small></span>
+              </div>
             </div>
           )}
           {step.id === 'kanji' && (
             <div className="beginner-intro-example is-kanji" key="kanji-example">
-              <small>ONE CHARACTER, ONE IDEA</small>
-              <strong lang="ja">山</strong>
-              <p><b>やま · yama</b><span>mountain</span></p>
+              <small>CHARACTERS WITH MEANING</small>
+              <div className="beginner-intro-word-list">
+                <span><b lang="ja">山</b><small>mountain</small></span>
+                <span><b lang="ja">人</b><small>person</small></span>
+                <span><b lang="ja">先生</b><small>teacher</small></span>
+              </div>
             </div>
           )}
           {step.id === 'together' && (
@@ -371,13 +413,13 @@ function BeginnerZone({
           </div>
           <div>
             {introStep > 0 && (
-              <button type="button" className="beginner-intro-back" onClick={() => setIntroStep((current) => current - 1)} aria-label="Previous introduction step">
+              <button type="button" className="beginner-intro-back" onClick={() => goToIntroStep(introStep - 1)} disabled={introTransitioning} aria-label="Previous introduction step">
                 <ArrowLeft aria-hidden="true" />
               </button>
             )}
             {isFinalStep ? (
               <>
-                <button type="button" className="beginner-intro-replay" onClick={() => setIntroStep(0)} aria-label="Replay introduction">
+                <button type="button" className="beginner-intro-replay" onClick={() => goToIntroStep(0)} aria-label="Replay introduction">
                   <RotateCcw aria-hidden="true" />
                 </button>
                 <button type="button" className="beginner-intro-next" onClick={() => onOpenIntroScript?.('hiragana')}>
@@ -386,8 +428,8 @@ function BeginnerZone({
                 </button>
               </>
             ) : (
-              <button type="button" className="beginner-intro-next" onClick={() => setIntroStep((current) => current + 1)}>
-                {introStep === 0 ? 'Show me' : 'Continue'}
+              <button type="button" className="beginner-intro-next" onClick={advanceIntro} disabled={introTransitioning}>
+                {introTransitioning ? 'Adding to the wheel...' : introStep === 0 ? 'Meet Hiragana' : introStep === 1 ? 'Next: Katakana' : introStep === 2 ? 'Next: Kanji' : 'Complete the wheel'}
                 <ArrowRight aria-hidden="true" />
               </button>
             )}
