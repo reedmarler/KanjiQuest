@@ -342,22 +342,16 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel {
   position: absolute;
-  top: 50%;
+  top: 56%;
   left: 50%;
-  width: 11.5rem;
+  width: 13.5rem;
   aspect-ratio: 1;
-  padding: 0;
   border: 2px dashed color-mix(in srgb, var(--sakura-light) 38%, var(--border));
   border-radius: 50%;
   background: color-mix(in srgb, var(--surface-2) 32%, transparent);
   color: var(--text-muted);
-  cursor: pointer;
   transform: translate(-50%, -50%);
   animation: beginner-intro-placeholder-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.beginner-intro-empty-wheel:hover {
-  border-color: color-mix(in srgb, var(--sakura-light) 72%, var(--border));
 }
 
 .beginner-intro-empty-slot {
@@ -377,6 +371,39 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-empty-slot.is-slot-top { top: 0; left: 50%; transform: translate(-50%, -50%); }
 .beginner-intro-empty-slot.is-slot-right { top: 75%; left: 93%; transform: translate(-50%, -50%); }
 .beginner-intro-empty-slot.is-slot-left { top: 75%; left: 7%; transform: translate(-50%, -50%); }
+
+.beginner-intro-slot-question,
+.beginner-intro-slot-hiragana {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  inset: 0;
+}
+
+.beginner-intro-slot-hiragana {
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 5rem;
+  opacity: 0;
+  transform: rotate(-18deg) scale(0.45);
+}
+
+.beginner-intro-empty-wheel.is-revealing .is-slot-top {
+  animation: beginner-intro-slot-expand 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.beginner-intro-empty-wheel.is-revealing .is-slot-right,
+.beginner-intro-empty-wheel.is-revealing .is-slot-left {
+  animation: beginner-intro-slot-fade 300ms ease forwards;
+}
+
+.beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
+  animation: beginner-intro-question-out 360ms 260ms ease forwards;
+}
+
+.beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana {
+  animation: beginner-intro-hiragana-in 440ms 430ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
 
 .beginner-intro-wheel-placeholder,
 .beginner-intro-wheel-complete {
@@ -694,6 +721,40 @@ body:has(.beginner-word-writing-card) .app,
   to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
+@keyframes beginner-intro-slot-expand {
+  0% {
+    top: 0;
+    width: 3.2rem;
+    border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
+    transform: translate(-50%, -50%);
+  }
+  42% {
+    top: 50%;
+    width: 3.2rem;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    top: 50%;
+    width: 100%;
+    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
+    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes beginner-intro-slot-fade {
+  to { opacity: 0; transform: translate(-50%, -50%) scale(0.75); }
+}
+
+@keyframes beginner-intro-question-out {
+  to { opacity: 0; transform: rotate(16deg) scale(0.45); }
+}
+
+@keyframes beginner-intro-hiragana-in {
+  to { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+
 @keyframes beginner-intro-copy-out {
   from { opacity: 1; transform: translateY(0); }
   to { opacity: 0; transform: translateY(0.3rem); }
@@ -776,7 +837,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-lesson.is-systems { min-height: 18rem; }
   .beginner-intro-orbit { width: min(100%, 17rem); }
   .beginner-intro-ring { inset: 1.9rem; }
-  .beginner-intro-empty-wheel { width: 13.2rem; }
+  .beginner-intro-empty-wheel { width: 15rem; }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
   .beginner-intro-wheel-placeholder strong { font-size: 4.8rem; }
   .beginner-intro-wheel-complete strong { font-size: 1.85rem; }
@@ -804,7 +865,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-speech h1 { font-size: 1.05rem; }
   .beginner-intro-speech p { font-size: 0.7rem; }
   .beginner-intro-orbit { width: min(100%, 15.5rem); }
-  .beginner-intro-empty-wheel { width: 12rem; }
+  .beginner-intro-empty-wheel { width: 13.5rem; }
   .beginner-intro-wheel-placeholder { width: 9.6rem; }
   .beginner-intro-node.is-focused { width: 10rem; }
   .beginner-intro-node.is-focused span { width: 9rem; font-size: 4rem; }
@@ -823,6 +884,25 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-wheel-complete {
     animation: none;
     transition-duration: 0.01ms;
+  }
+
+  .beginner-intro-empty-wheel.is-revealing .is-slot-top {
+    top: 50%;
+    width: 100%;
+    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
+    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+    transform: translate(-50%, -50%);
+  }
+
+  .beginner-intro-empty-wheel.is-revealing .is-slot-right,
+  .beginner-intro-empty-wheel.is-revealing .is-slot-left,
+  .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
+    opacity: 0;
+  }
+
+  .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana {
+    opacity: 1;
+    transform: none;
   }
 }
 

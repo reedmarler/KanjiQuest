@@ -215,8 +215,8 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'systems',
     eyebrow: '',
-    title: 'Japanese uses three writing system',
-    body: '',
+    title: 'Japanese uses three writing systems.',
+    body: 'First is Hiragana. It\'s the basic Japanese alphabet. You\'ll use it every day.',
   },
   {
     id: 'hiragana',
@@ -337,11 +337,14 @@ function BeginnerZone({
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {introStep <= 1 && (
-              <button type="button" className="beginner-intro-empty-wheel" onClick={advanceIntro} aria-label={introStep === 0 ? 'Show the three Japanese writing systems' : 'Start with Hiragana'}>
-                <span className="beginner-intro-empty-slot is-slot-top" aria-hidden="true">?</span>
+              <div className={`beginner-intro-empty-wheel${introStep === 1 ? ' is-revealing' : ''}`} aria-hidden="true">
+                <span className="beginner-intro-empty-slot is-slot-top">
+                  <span className="beginner-intro-slot-question">?</span>
+                  <span className="beginner-intro-slot-hiragana" lang="ja">あ</span>
+                </span>
                 <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">?</span>
                 <span className="beginner-intro-empty-slot is-slot-left" aria-hidden="true">?</span>
-              </button>
+              </div>
             )}
             {isFinalStep && (
               <div className="beginner-intro-wheel-complete">
@@ -436,7 +439,7 @@ function BeginnerZone({
               </>
             ) : (
               <button type="button" className="beginner-intro-next" onClick={advanceIntro} disabled={introTransitioning}>
-                {introTransitioning ? 'Adding to the wheel...' : introStep === 0 ? 'Show me' : introStep === 1 ? 'Meet Hiragana' : introStep === 2 ? 'Next: Katakana' : introStep === 3 ? 'Next: Kanji' : 'Complete the wheel'}
+                {introTransitioning ? 'Adding to the wheel...' : introStep === 0 ? 'Next' : introStep === 1 ? 'Next' : introStep === 2 ? 'Next: Katakana' : introStep === 3 ? 'Next: Kanji' : 'Complete the wheel'}
                 <ArrowRight aria-hidden="true" />
               </button>
             )}
