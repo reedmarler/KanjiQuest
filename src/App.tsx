@@ -250,6 +250,37 @@ const BEGINNER_INTRO_STEPS = [
   },
 ] as const
 
+function IntroBlurSwapText({ text, animate = true }: { text: string; animate?: boolean }) {
+  const displayedTextRef = useRef(text)
+  const [displayedText, setDisplayedText] = useState(text)
+  const [isBlurring, setIsBlurring] = useState(false)
+
+  useEffect(() => {
+    if (text === displayedTextRef.current) return
+
+    if (!animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      displayedTextRef.current = text
+      setDisplayedText(text)
+      setIsBlurring(false)
+      return
+    }
+
+    setIsBlurring(true)
+    const swapTimer = window.setTimeout(() => {
+      displayedTextRef.current = text
+      setDisplayedText(text)
+    }, 1080)
+    const revealTimer = window.setTimeout(() => setIsBlurring(false), 1200)
+
+    return () => {
+      window.clearTimeout(swapTimer)
+      window.clearTimeout(revealTimer)
+    }
+  }, [animate, text])
+
+  return <span className={`beginner-intro-blur-text ${isBlurring ? 'is-blurring' : 'is-clear'}`}>{displayedText}</span>
+}
+
 function BeginnerZone({
   initialScript,
   intro = false,
@@ -334,7 +365,7 @@ function BeginnerZone({
           </div>
           <div className="beginner-intro-speech" key={`speech-${introStep <= 2 ? 'opening' : step.id}`} aria-live="polite">
             {step.eyebrow && <small>{step.eyebrow}</small>}
-            <h1>{step.title}</h1>
+            <h1><IntroBlurSwapText text={step.title} animate={introStep <= 2} /></h1>
             {step.body && <p>{step.body}</p>}
           </div>
         </header>
@@ -440,7 +471,10 @@ function BeginnerZone({
               </>
             ) : (
               <button type="button" className={`beginner-intro-next${introStep === 0 ? ' is-yes' : ''}`} onClick={advanceIntro} disabled={introTransitioning}>
-                {introTransitioning ? 'Adding to the wheel...' : introStep === 0 ? 'Yes!' : introStep <= 2 ? 'Next' : introStep === 3 ? 'Next: Katakana' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
+                <IntroBlurSwapText
+                  text={introTransitioning ? 'Adding to the wheel...' : introStep === 0 ? 'Yes!' : introStep <= 2 ? 'Next' : introStep === 3 ? 'Next: Katakana' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
+                  animate={introStep <= 1}
+                />
                 <ArrowRight aria-hidden="true" />
               </button>
             )}
