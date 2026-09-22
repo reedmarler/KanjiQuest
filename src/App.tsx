@@ -213,12 +213,6 @@ const BEGINNER_INTRO_STEPS = [
     body: '',
   },
   {
-    id: 'accepted',
-    eyebrow: '',
-    title: 'Want to learn Japanese?',
-    body: '',
-  },
-  {
     id: 'simple',
     eyebrow: '',
     title: 'Let\'s start with something simple.',
@@ -310,15 +304,15 @@ function BeginnerZone({
 
   function advanceIntro() {
     if (introTransitioning) return
-    if (introStep < 4) {
+    if (introStep < 3) {
       setIntroStep((current) => current + 1)
       return
     }
-    if (introStep >= 7) return
+    if (introStep >= 6) return
 
     setIntroTransitioning(true)
     introTransitionTimerRef.current = window.setTimeout(() => {
-      setIntroStep((current) => Math.min(7, current + 1))
+      setIntroStep((current) => Math.min(6, current + 1))
       setIntroTransitioning(false)
       introTransitionTimerRef.current = null
     }, 760)
@@ -326,10 +320,10 @@ function BeginnerZone({
 
   if (intro) {
     const step = BEGINNER_INTRO_STEPS[introStep]
-    const activeScriptIndex = introStep >= 4 && introStep <= 6 ? introStep - 4 : -1
-    const completedScripts = introStep === 7
+    const activeScriptIndex = introStep >= 3 && introStep <= 5 ? introStep - 3 : -1
+    const completedScripts = introStep === 6
       ? 3
-      : Math.max(0, introStep - 4) + (introTransitioning ? 1 : 0)
+      : Math.max(0, introStep - 3) + (introTransitioning ? 1 : 0)
     const isFinalStep = introStep === BEGINNER_INTRO_STEPS.length - 1
 
     return (
@@ -338,7 +332,7 @@ function BeginnerZone({
           <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
           </div>
-          <div className="beginner-intro-speech" key={`speech-${step.id === 'accepted' ? 'welcome' : step.id}`} aria-live="polite">
+          <div className="beginner-intro-speech" key={`speech-${step.id}`} aria-live="polite">
             {step.eyebrow && <small>{step.eyebrow}</small>}
             <h1>{step.title}</h1>
             {step.body && <p>{step.body}</p>}
@@ -348,8 +342,8 @@ function BeginnerZone({
         <section className={`beginner-intro-lesson is-${step.id}${introTransitioning ? ' is-transitioning' : ''}`} aria-label="The three Japanese writing systems">
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
-            {introStep >= 1 && introStep <= 3 && (
-              <div className={`beginner-intro-empty-wheel${introStep === 3 ? ' is-revealing' : ''}`} aria-hidden="true">
+            {introStep >= 1 && introStep <= 2 && (
+              <div className={`beginner-intro-empty-wheel${introStep === 2 ? ' is-revealing' : ''}`} aria-hidden="true">
                 <span className="beginner-intro-empty-slot is-slot-top">
                   <span className="beginner-intro-slot-question">?</span>
                   <span className="beginner-intro-slot-hiragana" lang="ja">あ</span>
@@ -374,7 +368,7 @@ function BeginnerZone({
                   key={item.id}
                   type="button"
                   className={`beginner-intro-node is-${item.id}${isFocused ? ' is-focused' : ''}${isDocked ? ` is-docked is-slot-${dockSlot}` : ''}`}
-                  onClick={() => isDocked && !introTransitioning && goToIntroStep(index + 4)}
+                  onClick={() => isDocked && !introTransitioning && goToIntroStep(index + 3)}
                   disabled={!isDocked}
                   aria-label={isFocused ? `${item.label}, currently being introduced` : item.label}
                   aria-pressed={isFocused}
@@ -446,7 +440,7 @@ function BeginnerZone({
               </>
             ) : (
               <button type="button" className={`beginner-intro-next${introStep === 0 ? ' is-yes' : ''}`} onClick={advanceIntro} disabled={introTransitioning}>
-                {introTransitioning ? 'Adding to the wheel...' : introStep === 0 ? 'Yes!' : introStep <= 3 ? 'Next' : introStep === 4 ? 'Next: Katakana' : introStep === 5 ? 'Next: Kanji' : 'Complete the wheel'}
+                {introTransitioning ? 'Adding to the wheel...' : introStep === 0 ? 'Yes!' : introStep <= 2 ? 'Next' : introStep === 3 ? 'Next: Katakana' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
                 <ArrowRight aria-hidden="true" />
               </button>
             )}

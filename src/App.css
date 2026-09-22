@@ -289,7 +289,6 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-lesson.is-welcome,
-.beginner-intro-lesson.is-accepted,
 .beginner-intro-lesson.is-simple,
 .beginner-intro-lesson.is-systems {
   grid-template-columns: 1fr;
@@ -346,7 +345,7 @@ body:has(.beginner-word-writing-card) .app,
   position: absolute;
   top: 63%;
   left: 50%;
-  width: 16rem;
+  width: 17.5rem;
   aspect-ratio: 1;
   border: 2px dashed color-mix(in srgb, var(--sakura-light) 38%, var(--border));
   border-radius: 50%;
@@ -360,7 +359,7 @@ body:has(.beginner-word-writing-card) .app,
   position: absolute;
   display: grid;
   place-items: center;
-  width: 3.8rem;
+  width: 4.4rem;
   aspect-ratio: 1;
   border: 2px solid color-mix(in srgb, var(--text-muted) 35%, var(--border));
   border-radius: 50%;
@@ -643,7 +642,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-controls.is-lowered {
-  transform: translateY(1.35rem);
+  transform: translateY(2.25rem);
 }
 
 .beginner-intro-controls > div:last-child {
@@ -724,13 +723,13 @@ body:has(.beginner-word-writing-card) .app,
 @keyframes beginner-intro-slot-expand {
   0% {
     top: 0;
-    width: 3.8rem;
+    width: 4.4rem;
     border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
     transform: translate(-50%, -50%);
   }
   42% {
     top: 50%;
-    width: 3.8rem;
+    width: 4.4rem;
     transform: translate(-50%, -50%);
   }
   100% {
@@ -834,12 +833,11 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-lesson.is-welcome { min-height: 18rem; }
-  .beginner-intro-lesson.is-accepted { min-height: 19.5rem; }
-  .beginner-intro-lesson.is-simple { min-height: 19.5rem; }
-  .beginner-intro-lesson.is-systems { min-height: 19.5rem; }
+  .beginner-intro-lesson.is-simple { min-height: 22rem; }
+  .beginner-intro-lesson.is-systems { min-height: 22rem; }
   .beginner-intro-orbit { width: min(100%, 17rem); }
   .beginner-intro-ring { inset: 1.9rem; }
-  .beginner-intro-empty-wheel { width: 17.5rem; }
+  .beginner-intro-empty-wheel { width: 19rem; }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
   .beginner-intro-wheel-placeholder strong { font-size: 4.8rem; }
   .beginner-intro-wheel-complete strong { font-size: 1.85rem; }
@@ -868,7 +866,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-speech h1 { font-size: 1.05rem; }
   .beginner-intro-speech p { font-size: 0.7rem; }
   .beginner-intro-orbit { width: min(100%, 15.5rem); }
-  .beginner-intro-empty-wheel { width: 16rem; }
+  .beginner-intro-empty-wheel { width: 17.2rem; }
   .beginner-intro-wheel-placeholder { width: 9.6rem; }
   .beginner-intro-node.is-focused { width: 10rem; }
   .beginner-intro-node.is-focused span { width: 9rem; font-size: 4rem; }
