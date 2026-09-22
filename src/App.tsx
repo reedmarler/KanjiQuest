@@ -1,4 +1,5 @@
-import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactElement, type ReactNode } from 'react'
+import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react'
+import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -191,84 +192,60 @@ function getBeginnerZoneVowelIndex(char: string, romaji: string): number {
     ?? 4
 }
 
-type BeginnerZoneWheelScriptId = Extract<BeginnerScript, 'hiragana' | 'katakana'> | 'kanji'
+type BeginnerIntroScriptId = 'hiragana' | 'katakana' | 'kanji'
 
-type BeginnerZoneWheelScript = {
-  id: BeginnerZoneWheelScriptId
-  tone: 'pink' | 'blue' | 'violet'
-  mark: string
+const BEGINNER_INTRO_SCRIPTS: Array<{
+  id: BeginnerIntroScriptId
   label: string
-  /** Degrees clockwise from the top of the wheel, at rest (wheelAngle 0). */
-  baseAngle: number
-}
-
-// All three scripts sit on the ring, 120deg apart. Hiragana starts at the
-// bottom (180deg, the selection slot right above the Go button) with
-// katakana and kanji at the two upper vertices — an upside-down triangle,
-// its single point resting on the selection slot.
-const BEGINNER_ZONE_WHEEL_SCRIPTS: BeginnerZoneWheelScript[] = [
-  { id: 'hiragana', tone: 'pink', mark: 'あ', label: 'Hiragana', baseAngle: 180 },
-  { id: 'katakana', tone: 'blue', mark: 'ア', label: 'Katakana', baseAngle: 300 },
-  { id: 'kanji', tone: 'violet', mark: '字', label: 'Kanji', baseAngle: 60 },
+  mark: string
+}> = [
+  { id: 'hiragana', label: 'Hiragana', mark: 'あ' },
+  { id: 'katakana', label: 'Katakana', mark: 'ア' },
+  { id: 'kanji', label: 'Kanji', mark: '山' },
 ]
 
-const BEGINNER_ZONE_WHEEL_RADIUS = 37
-
-// A handful of fixed positions inside the ring that each script's background
-// fill reuses — only the glyphs and color change between scripts.
-// Kept well inside BEGINNER_ZONE_WHEEL_RADIUS (37) — each slot's distance
-// from center plus roughly half its glyph size still lands short of the
-// ring, so nothing pokes past the circle it's meant to stay inside.
-const BEGINNER_ZONE_WHEEL_BG_SLOTS: { x: number; y: number; size: number; rotate: number }[] = [
-  { x: 35, y: 36, size: 2.3, rotate: -8 },
-  { x: 64, y: 33, size: 1.9, rotate: 10 },
-  { x: 50, y: 50, size: 3, rotate: -4 },
-  { x: 32, y: 62, size: 2, rotate: 6 },
-  { x: 68, y: 60, size: 2.1, rotate: -12 },
-  { x: 44, y: 71, size: 1.6, rotate: 5 },
-  { x: 60, y: 70, size: 1.6, rotate: -6 },
-]
-
-const BEGINNER_ZONE_WHEEL_BG_CHARS: Record<BeginnerZoneWheelScriptId, string[]> = {
-  hiragana: ['あ', 'い', 'う', 'え', 'お', 'か', 'さ'],
-  katakana: ['ア', 'イ', 'ウ', 'エ', 'オ', 'カ', 'サ'],
-  kanji: ['一', '二', '三', '人', '日', '木', '水'],
-}
-
-function beginnerZoneWheelPoint(angleDeg: number): { x: number; y: number } {
-  const rad = (angleDeg * Math.PI) / 180
-  return {
-    x: 50 + BEGINNER_ZONE_WHEEL_RADIUS * Math.sin(rad),
-    y: 50 - BEGINNER_ZONE_WHEEL_RADIUS * Math.cos(rad),
-  }
-}
-
-function beginnerZoneAngularDistanceTo180(angleDeg: number): number {
-  const diff = Math.abs(angleDeg - 180)
-  return Math.min(diff, 360 - diff)
-}
-
-/** The wheelAngle that brings the given script's marker to the bottom (180deg) selection slot. */
-function beginnerZoneSnapAngleFor(id: BeginnerZoneWheelScriptId): number {
-  const script = BEGINNER_ZONE_WHEEL_SCRIPTS.find((item) => item.id === id)!
-  return (180 - script.baseAngle + 360) % 360
-}
-
-function beginnerZoneNearestSnapAngle(angleDeg: number): number {
-  const normalized = ((angleDeg % 360) + 360) % 360
-  let nearest = 0
-  let nearestDistance = Infinity
-  for (const script of BEGINNER_ZONE_WHEEL_SCRIPTS) {
-    const snapTarget = beginnerZoneSnapAngleFor(script.id)
-    const diff = Math.abs(normalized - snapTarget)
-    const distance = Math.min(diff, 360 - diff)
-    if (distance < nearestDistance) {
-      nearestDistance = distance
-      nearest = snapTarget
-    }
-  }
-  return nearest
-}
+const BEGINNER_INTRO_STEPS = [
+  {
+    id: 'welcome',
+    eyebrow: 'YOUR FIRST JAPANESE LESSON',
+    title: 'Hey, so you want to learn Japanese?',
+    body: 'Let\'s start with the three components of the written language.',
+    centerMark: '日',
+    centerLabel: 'Japanese writing',
+  },
+  {
+    id: 'hiragana',
+    eyebrow: 'ONE OF THREE',
+    title: 'First, Hiragana',
+    body: 'Hiragana is the simple, curly script. It spells Japanese sounds and is used for grammar and many native Japanese words.',
+    centerMark: 'あ',
+    centerLabel: 'soft + flowing',
+  },
+  {
+    id: 'katakana',
+    eyebrow: 'TWO OF THREE',
+    title: 'Next, Katakana',
+    body: 'Katakana uses straighter, sharper lines. It represents the same sounds and is often used for words borrowed from other languages.',
+    centerMark: 'ア',
+    centerLabel: 'sharp + straight',
+  },
+  {
+    id: 'kanji',
+    eyebrow: 'THREE OF THREE',
+    title: 'Then, Kanji',
+    body: 'Kanji are characters that carry meaning. They came to Japan from China and represent whole words and ideas.',
+    centerMark: '山',
+    centerLabel: 'meaning + ideas',
+  },
+  {
+    id: 'together',
+    eyebrow: 'THE FULL PICTURE',
+    title: 'They work together',
+    body: 'Japanese mixes all three in the same sentence. You do not need to learn everything at once. We\'ll start with Hiragana.',
+    centerMark: '日本語',
+    centerLabel: 'Japanese',
+  },
+] as const
 
 function BeginnerZone({
   initialScript,
@@ -282,18 +259,7 @@ function BeginnerZone({
   onOpenSpeedRun,
 }: BeginnerZoneProps) {
   const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>(initialScript)
-  const [wheelAngle, setWheelAngle] = useState(beginnerZoneSnapAngleFor('hiragana'))
-  const [isWheelDragging, setIsWheelDragging] = useState(false)
-  const [showHiraganaExplainer, setShowHiraganaExplainer] = useState(false)
-  const wheelRef = useRef<HTMLDivElement>(null)
-  const wheelDragRef = useRef<{
-    pointerId: number
-    startClientX: number
-    startClientY: number
-    startPointerAngle: number
-    startWheelAngle: number
-    captured: boolean
-  } | null>(null)
+  const [introStep, setIntroStep] = useState(0)
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const deck = getBeginnerDeck(script)
   const columns = deck.rows.map((row, rowIndex) => ({ row, rowIndex })).reverse()
@@ -320,181 +286,113 @@ function BeginnerZone({
     return () => window.cancelAnimationFrame(frame)
   }, [script])
 
-  // The mascot's own intro: the moment someone first lands on Beginner Zone,
-  // spin the wheel to hiragana and explain it, same as tapping the mascot
-  // does later.
-  useEffect(() => {
-    if (!intro) return
-    setWheelAngle(beginnerZoneSnapAngleFor('hiragana'))
-    setShowHiraganaExplainer(true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  function handleMascotClick() {
-    setWheelAngle(beginnerZoneSnapAngleFor('hiragana'))
-    setShowHiraganaExplainer(true)
-  }
-
-  function wheelPointerAngle(clientX: number, clientY: number): number {
-    const wheel = wheelRef.current
-    if (!wheel) return 0
-    const rect = wheel.getBoundingClientRect()
-    const dx = clientX - (rect.left + rect.width / 2)
-    const dy = clientY - (rect.top + rect.height / 2)
-    return (Math.atan2(dx, -dy) * 180) / Math.PI
-  }
-
-  function handleWheelPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-    // Capture is deferred to the first real move (see handleWheelPointerMove)
-    // rather than grabbed here — capturing immediately retargets the
-    // pointer's click away from whichever marker button was tapped, which
-    // would silently break "tap a marker to select it."
-    wheelDragRef.current = {
-      pointerId: event.pointerId,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startPointerAngle: wheelPointerAngle(event.clientX, event.clientY),
-      startWheelAngle: wheelAngle,
-      captured: false,
-    }
-  }
-
-  function handleWheelPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
-    const drag = wheelDragRef.current
-    if (!drag || drag.pointerId !== event.pointerId) return
-    if (!drag.captured) {
-      const movedDistance = Math.hypot(event.clientX - drag.startClientX, event.clientY - drag.startClientY)
-      if (movedDistance < 4) return
-      event.currentTarget.setPointerCapture(event.pointerId)
-      drag.captured = true
-      setIsWheelDragging(true)
-    }
-    const currentPointerAngle = wheelPointerAngle(event.clientX, event.clientY)
-    setWheelAngle(drag.startWheelAngle + (currentPointerAngle - drag.startPointerAngle))
-  }
-
-  function handleWheelPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
-    const drag = wheelDragRef.current
-    if (!drag || drag.pointerId !== event.pointerId) return
-    wheelDragRef.current = null
-    if (!drag.captured) return
-    setIsWheelDragging(false)
-    setWheelAngle((current) => beginnerZoneNearestSnapAngle(current))
-  }
-
   if (intro) {
-    const wheelNormalizedAngle = ((wheelAngle % 360) + 360) % 360
-    const wheelScripts = BEGINNER_ZONE_WHEEL_SCRIPTS.map((item) => ({
-      ...item,
-      angle: (item.baseAngle + wheelNormalizedAngle) % 360,
-    }))
-    const wheelSelectedScript = wheelScripts.reduce((closest, item) =>
-      beginnerZoneAngularDistanceTo180(item.angle) < beginnerZoneAngularDistanceTo180(closest.angle) ? item : closest
-    ).id
+    const step = BEGINNER_INTRO_STEPS[introStep]
+    const revealedScripts = Math.min(3, Math.max(0, introStep))
+    const isFinalStep = introStep === BEGINNER_INTRO_STEPS.length - 1
 
     return (
       <main className="beginner-zone beginner-zone--intro">
-        <div className="beginner-zone-mascot-area">
-          <button
-            type="button"
-            className="beginner-zone-mascot"
-            onClick={handleMascotClick}
-            aria-label="What is hiragana?"
-          >
+        <header className="beginner-intro-guide">
+          <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
-          </button>
-          {showHiraganaExplainer && (
-            <div className="beginner-zone-mascot-bubble" role="status">
-              <button
-                type="button"
-                className="beginner-zone-mascot-bubble-close"
-                onClick={() => setShowHiraganaExplainer(false)}
-                aria-label="Close"
-              >
-                &#215;
-              </button>
-              <b>What's Hiragana?</b>
-              <p>
-                Hiragana is the phonetic base of written Japanese — 46 characters that spell out every native word
-                and all of its grammar. Each one is always the same single sound, which is why it's the best place
-                to start.
-              </p>
-            </div>
-          )}
-        </div>
+          </div>
+          <div className="beginner-intro-speech" key={`speech-${step.id}`} aria-live="polite">
+            <small>{step.eyebrow}</small>
+            <h1>{step.title}</h1>
+            <p>{step.body}</p>
+          </div>
+        </header>
 
-        <div className="beginner-zone-wheel-area">
-          <div
-            ref={wheelRef}
-            className={`beginner-zone-wheel${isWheelDragging ? ' is-dragging' : ''}`}
-            onPointerDown={handleWheelPointerDown}
-            onPointerMove={handleWheelPointerMove}
-            onPointerUp={handleWheelPointerUp}
-            onPointerCancel={handleWheelPointerUp}
-          >
-            <div
-              className="beginner-zone-wheel-bg"
-              aria-hidden="true"
-              style={{ clipPath: `circle(${BEGINNER_ZONE_WHEEL_RADIUS}% at 50% 50%)` }}
-            >
-              {BEGINNER_ZONE_WHEEL_SCRIPTS.map((item) => (
-                <div
-                  key={item.id}
-                  className={`beginner-zone-wheel-bg-layer is-${item.tone}${item.id === wheelSelectedScript ? ' is-visible' : ''}`}
-                >
-                  {BEGINNER_ZONE_WHEEL_BG_SLOTS.map((slot, slotIndex) => (
-                    <span
-                      key={slotIndex}
-                      lang="ja"
-                      style={{
-                        left: `${slot.x}%`,
-                        top: `${slot.y}%`,
-                        fontSize: `${slot.size}rem`,
-                        transform: `translate(-50%, -50%) rotate(${slot.rotate}deg)`,
-                      }}
-                    >
-                      {BEGINNER_ZONE_WHEEL_BG_CHARS[item.id][slotIndex]}
-                    </span>
-                  ))}
-                </div>
-              ))}
+        <section className={`beginner-intro-lesson is-${step.id}`} aria-label="The three Japanese writing systems">
+          <div className="beginner-intro-orbit" key={`orbit-${step.id}`}>
+            <div className="beginner-intro-ring" aria-hidden="true" />
+            <div className="beginner-intro-center">
+              <strong lang="ja">{step.centerMark}</strong>
+              <small>{step.centerLabel}</small>
             </div>
-            <svg className="beginner-zone-wheel-ring" viewBox="0 0 100 100" aria-hidden="true">
-              <circle cx="50" cy="50" r={BEGINNER_ZONE_WHEEL_RADIUS} />
-            </svg>
-            {wheelScripts.map((item) => {
-              const point = beginnerZoneWheelPoint(item.angle)
+            {BEGINNER_INTRO_SCRIPTS.map((item, index) => {
+              const isRevealed = index < revealedScripts
+              const isCurrent = step.id === item.id || step.id === 'together'
               return (
                 <button
                   key={item.id}
                   type="button"
-                  className={`beginner-zone-wheel-node is-${item.tone}${item.id === wheelSelectedScript ? ' is-selected' : ''}`}
-                  style={{ left: `${point.x}%`, top: `${point.y}%` }}
-                  onClick={() => setWheelAngle(beginnerZoneSnapAngleFor(item.id))}
-                  aria-pressed={item.id === wheelSelectedScript}
+                  className={`beginner-intro-node is-${item.id}${isRevealed ? ' is-revealed' : ''}${isCurrent ? ' is-current' : ''}`}
+                  onClick={() => isRevealed && setIntroStep(index + 1)}
+                  disabled={!isRevealed}
+                  aria-label={`${item.label}${isRevealed ? '' : ' has not been introduced yet'}`}
+                  aria-pressed={step.id === item.id}
                 >
-                  <span className="beginner-zone-wheel-mark" aria-hidden="true" lang="ja">{item.mark}</span>
+                  <span lang="ja">{item.mark}</span>
                   <b>{item.label}</b>
                 </button>
               )
             })}
           </div>
 
-          <button
-            type="button"
-            className="beginner-zone-wheel-go"
-            onClick={() => {
-              if (wheelSelectedScript === 'kanji') {
-                onOpenKanji()
-                return
-              }
-              onOpenIntroScript?.(wheelSelectedScript)
-            }}
-          >
-            Go
-            <span aria-hidden="true">&#8594;</span>
-          </button>
-        </div>
+          {step.id === 'hiragana' && (
+            <div className="beginner-intro-example is-hiragana" key="hiragana-example">
+              <small>NATIVE JAPANESE WORD</small>
+              <strong lang="ja">さくら</strong>
+              <p><b>sakura</b><span>cherry blossom</span></p>
+            </div>
+          )}
+          {step.id === 'katakana' && (
+            <div className="beginner-intro-example is-katakana" key="katakana-example">
+              <small>BORROWED WORDS</small>
+              <div><strong lang="ja">バス</strong><p><b>basu</b><span>bus</span></p></div>
+              <div><strong lang="ja">エスカレーター</strong><p><b>esukareetaa</b><span>escalator</span></p></div>
+            </div>
+          )}
+          {step.id === 'kanji' && (
+            <div className="beginner-intro-example is-kanji" key="kanji-example">
+              <small>ONE CHARACTER, ONE IDEA</small>
+              <strong lang="ja">山</strong>
+              <p><b>やま · yama</b><span>mountain</span></p>
+            </div>
+          )}
+          {step.id === 'together' && (
+            <div className="beginner-intro-example is-together" key="together-example">
+              <small>ALL THREE TOGETHER</small>
+              <strong lang="ja">
+                <span className="is-kanji">山</span><span className="is-hiragana">の</span><span className="is-katakana">ホテル</span>
+              </strong>
+              <p><span>yama no hoteru</span><b>mountain hotel</b></p>
+            </div>
+          )}
+        </section>
+
+        <footer className="beginner-intro-controls">
+          <div className="beginner-intro-progress" aria-label={`Step ${introStep + 1} of ${BEGINNER_INTRO_STEPS.length}`}>
+            {BEGINNER_INTRO_STEPS.map((item, index) => (
+              <span key={item.id} className={index <= introStep ? 'is-complete' : ''} aria-hidden="true" />
+            ))}
+          </div>
+          <div>
+            {introStep > 0 && (
+              <button type="button" className="beginner-intro-back" onClick={() => setIntroStep((current) => current - 1)} aria-label="Previous introduction step">
+                <ArrowLeft aria-hidden="true" />
+              </button>
+            )}
+            {isFinalStep ? (
+              <>
+                <button type="button" className="beginner-intro-replay" onClick={() => setIntroStep(0)} aria-label="Replay introduction">
+                  <RotateCcw aria-hidden="true" />
+                </button>
+                <button type="button" className="beginner-intro-next" onClick={() => onOpenIntroScript?.('hiragana')}>
+                  Start with Hiragana
+                  <ArrowRight aria-hidden="true" />
+                </button>
+              </>
+            ) : (
+              <button type="button" className="beginner-intro-next" onClick={() => setIntroStep((current) => current + 1)}>
+                {introStep === 0 ? 'Show me' : 'Continue'}
+                <ArrowRight aria-hidden="true" />
+              </button>
+            )}
+          </div>
+        </footer>
       </main>
     )
   }
