@@ -221,8 +221,8 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'systems',
     eyebrow: '',
-    title: 'Japanese uses three writing systems.',
-    body: 'First is Hiragana. It\'s the basic Japanese alphabet. You\'ll use it every day.',
+    title: 'Let\'s start with something simple: the alphabet!',
+    body: '',
   },
   {
     id: 'hiragana',
@@ -328,11 +328,11 @@ function BeginnerZone({
 
     return (
       <main className="beginner-zone beginner-zone--intro">
-        <header className="beginner-intro-guide">
+        <header className={`beginner-intro-guide is-${step.id}`}>
           <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
           </div>
-          <div className="beginner-intro-speech" key={`speech-${step.id}`} aria-live="polite">
+          <div className="beginner-intro-speech" key={`speech-${step.id === 'systems' ? 'simple' : step.id}`} aria-live="polite">
             {step.eyebrow && <small>{step.eyebrow}</small>}
             <h1>{step.title}</h1>
             {step.body && <p>{step.body}</p>}

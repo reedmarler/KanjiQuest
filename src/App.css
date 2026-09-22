@@ -272,6 +272,10 @@ body:has(.beginner-word-writing-card) .app,
   line-height: 1.18;
 }
 
+.beginner-intro-guide.is-welcome .beginner-intro-speech h1 {
+  font-size: 2.44rem;
+}
+
 .beginner-intro-speech p {
   margin: 0;
   color: var(--text-muted);
@@ -638,7 +642,7 @@ body:has(.beginner-word-writing-card) .app,
   display: grid;
   justify-items: center;
   width: 100%;
-  transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 1400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-controls.is-lowered {
@@ -674,18 +678,20 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-next {
   gap: 0.4rem;
+  width: 8.7rem;
   min-width: 8.7rem;
   padding: 0.65rem 1rem;
   background: linear-gradient(135deg, var(--sakura), var(--sakura-light));
   color: #1c1420;
   box-shadow: 0 0.55rem 1.35rem color-mix(in srgb, var(--sakura) 18%, transparent);
-  transition: min-width 620ms cubic-bezier(0.22, 1, 0.36, 1), min-height 620ms cubic-bezier(0.22, 1, 0.36, 1), font-size 620ms cubic-bezier(0.22, 1, 0.36, 1), transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width 1400ms cubic-bezier(0.22, 1, 0.36, 1), min-width 1400ms cubic-bezier(0.22, 1, 0.36, 1), min-height 1400ms cubic-bezier(0.22, 1, 0.36, 1), font-size 1400ms cubic-bezier(0.22, 1, 0.36, 1), transform 1400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-next.is-yes {
-  min-width: 11.5rem;
-  min-height: 4rem;
-  font-size: 1.15rem;
+  width: min(19rem, calc(100vw - 3rem));
+  min-width: min(19rem, calc(100vw - 3rem));
+  min-height: 8rem;
+  font-size: 2.1rem;
   transform: translateY(-9.5rem);
 }
 
@@ -694,6 +700,11 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-next svg {
   width: 0.9rem;
   height: 0.9rem;
+}
+
+.beginner-intro-next.is-yes svg {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .beginner-intro-back:disabled,
@@ -822,6 +833,7 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-speech h1 { font-size: 1.18rem; }
+  .beginner-intro-guide.is-welcome .beginner-intro-speech h1 { font-size: 2.36rem; }
   .beginner-intro-speech p { font-size: 0.78rem; line-height: 1.48; }
 
   .beginner-intro-lesson {
@@ -864,6 +876,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-mascot { left: -1.4rem; width: 8.5rem; }
   .beginner-intro-speech { min-height: 8.5rem; }
   .beginner-intro-speech h1 { font-size: 1.05rem; }
+  .beginner-intro-guide.is-welcome .beginner-intro-speech h1 { font-size: 2.1rem; }
   .beginner-intro-speech p { font-size: 0.7rem; }
   .beginner-intro-orbit { width: min(100%, 15.5rem); }
   .beginner-intro-empty-wheel { width: 17.2rem; }
