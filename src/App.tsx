@@ -209,8 +209,14 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'welcome',
     eyebrow: '',
-    title: 'Do you want to learn Japanese?',
-    body: 'Here are the three different writing systems that are used:',
+    title: 'Want to learn Japanese?',
+    body: 'Let\'s start with something simple.',
+  },
+  {
+    id: 'systems',
+    eyebrow: '',
+    title: 'Japanese uses three writing system',
+    body: '',
   },
   {
     id: 'hiragana',
@@ -292,15 +298,15 @@ function BeginnerZone({
 
   function advanceIntro() {
     if (introTransitioning) return
-    if (introStep === 0) {
-      setIntroStep(1)
+    if (introStep < 2) {
+      setIntroStep((current) => current + 1)
       return
     }
-    if (introStep >= 4) return
+    if (introStep >= 5) return
 
     setIntroTransitioning(true)
     introTransitionTimerRef.current = window.setTimeout(() => {
-      setIntroStep((current) => Math.min(4, current + 1))
+      setIntroStep((current) => Math.min(5, current + 1))
       setIntroTransitioning(false)
       introTransitionTimerRef.current = null
     }, 760)
@@ -308,10 +314,10 @@ function BeginnerZone({
 
   if (intro) {
     const step = BEGINNER_INTRO_STEPS[introStep]
-    const activeScriptIndex = introStep >= 1 && introStep <= 3 ? introStep - 1 : -1
-    const completedScripts = introStep === 4
+    const activeScriptIndex = introStep >= 2 && introStep <= 4 ? introStep - 2 : -1
+    const completedScripts = introStep === 5
       ? 3
-      : Math.max(0, introStep - 1) + (introTransitioning ? 1 : 0)
+      : Math.max(0, introStep - 2) + (introTransitioning ? 1 : 0)
     const isFinalStep = introStep === BEGINNER_INTRO_STEPS.length - 1
 
     return (
@@ -323,18 +329,19 @@ function BeginnerZone({
           <div className="beginner-intro-speech" key={`speech-${step.id}`} aria-live="polite">
             {step.eyebrow && <small>{step.eyebrow}</small>}
             <h1>{step.title}</h1>
-            <p>{step.body}</p>
+            {step.body && <p>{step.body}</p>}
           </div>
         </header>
 
         <section className={`beginner-intro-lesson is-${step.id}${introTransitioning ? ' is-transitioning' : ''}`} aria-label="The three Japanese writing systems">
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
-            {introStep === 0 && (
-              <div className="beginner-intro-wheel-placeholder">
-                <strong lang="ja">あ</strong>
-                <small>Hiragana</small>
-              </div>
+            {introStep <= 1 && (
+              <button type="button" className="beginner-intro-empty-wheel" onClick={advanceIntro} aria-label={introStep === 0 ? 'Show the three Japanese writing systems' : 'Start with Hiragana'}>
+                <span className="beginner-intro-empty-slot is-slot-top" aria-hidden="true">?</span>
+                <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">?</span>
+                <span className="beginner-intro-empty-slot is-slot-left" aria-hidden="true">?</span>
+              </button>
             )}
             {isFinalStep && (
               <div className="beginner-intro-wheel-complete">
@@ -429,7 +436,7 @@ function BeginnerZone({
               </>
             ) : (
               <button type="button" className="beginner-intro-next" onClick={advanceIntro} disabled={introTransitioning}>
-                {introTransitioning ? 'Adding to the wheel...' : introStep === 0 ? 'Meet Hiragana' : introStep === 1 ? 'Next: Katakana' : introStep === 2 ? 'Next: Kanji' : 'Complete the wheel'}
+                {introTransitioning ? 'Adding to the wheel...' : introStep === 0 ? 'Show me' : introStep === 1 ? 'Meet Hiragana' : introStep === 2 ? 'Next: Katakana' : introStep === 3 ? 'Next: Kanji' : 'Complete the wheel'}
                 <ArrowRight aria-hidden="true" />
               </button>
             )}
@@ -549,6 +556,7 @@ function DesktopPrimaryNav({
   onIntro: () => void
 }) {
   const activeTab = primaryNavTabForView(currentView)
+  const hideCornerControls = currentView === 'intro'
   const items: Array<{ tab: PrimaryNavTab; label: string; mark: string; onClick: () => void }> = [
     { tab: 'home', label: 'Home', mark: '家', onClick: onHome },
     { tab: 'quest', label: 'Quest', mark: '旅', onClick: onQuests },
@@ -562,13 +570,13 @@ function DesktopPrimaryNav({
       <nav className="desktop-primary-nav" aria-label="Primary">
         <button
           type="button"
-          className={`desktop-primary-nav-user${profileOpen ? ' is-active' : ''}${hideUser ? ' is-hidden' : ''}`}
+          className={`desktop-primary-nav-user${profileOpen ? ' is-active' : ''}${hideUser || hideCornerControls ? ' is-hidden' : ''}`}
           onClick={onProfile}
           aria-label="Open user menu"
           aria-expanded={profileOpen}
           aria-controls="dashboard-profile-menu"
           title="User menu"
-          tabIndex={hideUser ? -1 : undefined}
+          tabIndex={hideUser || hideCornerControls ? -1 : undefined}
         >
           <img src={displayProfilePhoto(profilePhoto)} alt="" />
         </button>
@@ -588,11 +596,12 @@ function DesktopPrimaryNav({
         </div>
         <button
           type="button"
-          className={`desktop-primary-nav-settings${settingsOpen ? ' is-active' : ''}`}
+          className={`desktop-primary-nav-settings${settingsOpen ? ' is-active' : ''}${hideCornerControls ? ' is-hidden' : ''}`}
           onClick={onSettings}
           aria-label={settingsOpen ? 'Hide settings' : 'Show settings'}
           aria-expanded={settingsOpen}
           title={settingsOpen ? 'Hide settings' : 'Show settings'}
+          tabIndex={hideCornerControls ? -1 : undefined}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -869,7 +878,7 @@ function App() {
     if (index < 0 || next < 0 || next >= HUB_TABS.length) return
     goToView(HUB_TABS[next]!)
   })
-  const hubChrome = showHubChrome
+  const hubChrome = showHubChrome && view !== 'intro'
     ? (
       <AppHeaderControls
         hideUser={profileMenuOpen}
