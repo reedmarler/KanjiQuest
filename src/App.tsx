@@ -315,7 +315,7 @@ function BeginnerZone({
       setIntroStep((current) => Math.min(6, current + 1))
       setIntroTransitioning(false)
       introTransitionTimerRef.current = null
-    }, 760)
+    }, 1140)
   }
 
   if (intro) {

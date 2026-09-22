@@ -214,7 +214,7 @@ body:has(.beginner-word-writing-card) .app,
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  transition: transform 1400ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 2100ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-guide.is-welcome {
@@ -246,7 +246,7 @@ body:has(.beginner-word-writing-card) .app,
   border: 1px solid color-mix(in srgb, var(--sakura-light) 24%, var(--border));
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface-2) 94%, var(--sakura) 6%);
-  animation: beginner-intro-copy-in 360ms ease both;
+  animation: beginner-intro-copy-in 540ms ease both;
 }
 
 .beginner-intro-speech::before {
@@ -320,7 +320,7 @@ body:has(.beginner-word-writing-card) .app,
   mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
   opacity: 0;
   transform: rotate(-120deg) scale(0.84);
-  transition: opacity 280ms ease, transform 760ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 420ms ease, transform 1140ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-ring::after {
@@ -348,7 +348,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-lesson.is-together .beginner-intro-ring {
-  animation: beginner-intro-spin 8s linear infinite;
+  animation: beginner-intro-spin 12s linear infinite;
 }
 
 .beginner-intro-empty-wheel {
@@ -362,7 +362,7 @@ body:has(.beginner-word-writing-card) .app,
   background: color-mix(in srgb, var(--surface-2) 32%, transparent);
   color: var(--text-muted);
   transform: translate(-50%, -50%);
-  animation: beginner-intro-placeholder-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: beginner-intro-placeholder-in 630ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .beginner-intro-empty-slot {
@@ -400,20 +400,20 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-top {
-  animation: beginner-intro-slot-expand 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-slot-expand 1350ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-right,
 .beginner-intro-empty-wheel.is-revealing .is-slot-left {
-  animation: beginner-intro-slot-fade 300ms ease forwards;
+  animation: beginner-intro-slot-fade 450ms ease forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
-  animation: beginner-intro-question-out 360ms 260ms ease forwards;
+  animation: beginner-intro-question-out 540ms 390ms ease forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana {
-  animation: beginner-intro-hiragana-in 440ms 430ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-hiragana-in 660ms 645ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-wheel-placeholder,
@@ -440,12 +440,12 @@ body:has(.beginner-word-writing-card) .app,
   border-color: color-mix(in srgb, var(--sakura-light) 55%, var(--border));
   background: color-mix(in srgb, var(--sakura) 13%, var(--surface-2));
   box-shadow: 0 0 0 0.45rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.8rem 2rem color-mix(in srgb, var(--sakura) 20%, transparent);
-  animation: beginner-intro-placeholder-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: beginner-intro-placeholder-in 630ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .beginner-intro-wheel-complete {
   width: 7.1rem;
-  animation: beginner-intro-complete-pop 480ms 680ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: beginner-intro-complete-pop 720ms 1020ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .beginner-intro-wheel-placeholder strong,
@@ -491,7 +491,7 @@ body:has(.beginner-word-writing-card) .app,
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, -50%) scale(0.55);
-  transition: top 760ms cubic-bezier(0.22, 1, 0.36, 1), left 760ms cubic-bezier(0.22, 1, 0.36, 1), width 760ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease, transform 760ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: top 1140ms cubic-bezier(0.22, 1, 0.36, 1), left 1140ms cubic-bezier(0.22, 1, 0.36, 1), width 1140ms cubic-bezier(0.22, 1, 0.36, 1), opacity 390ms ease, transform 1140ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-node.is-katakana { --intro-node: #70cfe0; }
@@ -527,7 +527,7 @@ body:has(.beginner-word-writing-card) .app,
   color: var(--intro-node);
   font: 700 1.35rem/1 'Noto Sans JP', sans-serif;
   box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-node) 15%, transparent);
-  transition: width 760ms cubic-bezier(0.22, 1, 0.36, 1), font-size 760ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 300ms ease;
+  transition: width 1140ms cubic-bezier(0.22, 1, 0.36, 1), font-size 1140ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 450ms ease;
 }
 
 .beginner-intro-node b {
@@ -541,7 +541,7 @@ body:has(.beginner-word-writing-card) .app,
   font-size: 0.53rem;
   font-weight: 700;
   opacity: 0;
-  transition: max-height 260ms ease, opacity 260ms ease;
+  transition: max-height 390ms ease, opacity 390ms ease;
 }
 
 .beginner-intro-node.is-focused span {
@@ -572,11 +572,11 @@ body:has(.beginner-word-writing-card) .app,
   min-height: 8.25rem;
   padding: 0.75rem 0;
   border-block: 1px solid color-mix(in srgb, var(--intro-example) 24%, var(--border));
-  animation: beginner-intro-copy-in 420ms 100ms ease both;
+  animation: beginner-intro-copy-in 630ms 150ms ease both;
 }
 
 .beginner-intro-lesson.is-transitioning .beginner-intro-example {
-  animation: beginner-intro-copy-out 260ms ease both;
+  animation: beginner-intro-copy-out 390ms ease both;
 }
 
 .beginner-intro-example.is-katakana { --intro-example: #70cfe0; }
@@ -648,7 +648,7 @@ body:has(.beginner-word-writing-card) .app,
   display: grid;
   justify-items: center;
   width: 100%;
-  transition: transform 1400ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 2100ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-controls.is-lowered {
@@ -690,7 +690,7 @@ body:has(.beginner-word-writing-card) .app,
   background: linear-gradient(135deg, var(--sakura), var(--sakura-light));
   color: #1c1420;
   box-shadow: 0 0.55rem 1.35rem color-mix(in srgb, var(--sakura) 18%, transparent);
-  transition: width 1400ms cubic-bezier(0.22, 1, 0.36, 1), min-width 1400ms cubic-bezier(0.22, 1, 0.36, 1), min-height 1400ms cubic-bezier(0.22, 1, 0.36, 1), font-size 1400ms cubic-bezier(0.22, 1, 0.36, 1), transform 1400ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width 2100ms cubic-bezier(0.22, 1, 0.36, 1), min-width 2100ms cubic-bezier(0.22, 1, 0.36, 1), min-height 2100ms cubic-bezier(0.22, 1, 0.36, 1), font-size 2100ms cubic-bezier(0.22, 1, 0.36, 1), transform 2100ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-next.is-yes {
