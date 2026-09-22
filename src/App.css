@@ -851,7 +851,7 @@ body:has(.beginner-word-writing-card) .app,
     min-height: 0;
   }
 
-  .beginner-intro-lesson.is-welcome { min-height: 18rem; }
+  .beginner-intro-lesson.is-welcome { min-height: 22rem; }
   .beginner-intro-lesson.is-simple { min-height: 22rem; }
   .beginner-intro-lesson.is-systems { min-height: 22rem; }
   .beginner-intro-orbit { width: min(100%, 17rem); }

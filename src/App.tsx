@@ -332,7 +332,7 @@ function BeginnerZone({
           <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
           </div>
-          <div className="beginner-intro-speech" key={`speech-${step.id === 'systems' ? 'simple' : step.id}`} aria-live="polite">
+          <div className="beginner-intro-speech" key={`speech-${introStep <= 2 ? 'opening' : step.id}`} aria-live="polite">
             {step.eyebrow && <small>{step.eyebrow}</small>}
             <h1>{step.title}</h1>
             {step.body && <p>{step.body}</p>}
