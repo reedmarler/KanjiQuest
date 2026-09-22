@@ -348,7 +348,7 @@ function BeginnerZone({
         <section className={`beginner-intro-lesson is-${step.id}${introTransitioning ? ' is-transitioning' : ''}`} aria-label="The three Japanese writing systems">
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
-            {introStep >= 2 && introStep <= 3 && (
+            {introStep >= 1 && introStep <= 3 && (
               <div className={`beginner-intro-empty-wheel${introStep === 3 ? ' is-revealing' : ''}`} aria-hidden="true">
                 <span className="beginner-intro-empty-slot is-slot-top">
                   <span className="beginner-intro-slot-question">?</span>
@@ -427,7 +427,7 @@ function BeginnerZone({
           )}
         </section>
 
-        <footer className="beginner-intro-controls">
+        <footer className={`beginner-intro-controls${introStep > 0 ? ' is-lowered' : ''}`}>
           <div>
             {introStep >= 2 && (
               <button type="button" className="beginner-intro-back" onClick={() => goToIntroStep(introStep - 1)} disabled={introTransitioning} aria-label="Previous introduction step">
