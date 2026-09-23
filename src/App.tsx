@@ -215,13 +215,13 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'simple',
     eyebrow: '',
-    title: 'Let\'s start with something simple.',
+    title: 'Japanese uses three writing systems.',
     body: '',
   },
   {
     id: 'systems',
     eyebrow: '',
-    title: 'Let\'s start with something simple: the alphabet!',
+    title: 'Hiragana is the Japanese alphabet. It is used for native Japanese words.',
     body: '',
   },
   {
@@ -437,6 +437,7 @@ function BeginnerZone({
               <div className={`beginner-intro-empty-wheel${introStep === 2 ? ' is-revealing' : ''}`} aria-hidden="true">
                 <span className="beginner-intro-empty-slot is-slot-top">
                   <span className="beginner-intro-slot-question">?</span>
+                  <span className="beginner-intro-slot-label">Hiragana</span>
                   <span className="beginner-intro-slot-hiragana" lang="ja">あ</span>
                 </span>
                 <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">?</span>
