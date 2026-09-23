@@ -250,9 +250,7 @@ const BEGINNER_INTRO_STEPS = [
   },
 ] as const
 
-const INTRO_OPENING_BLUR_MS = 700
-const INTRO_OPENING_MOVE_DELAY_MS = 520
-const INTRO_OPENING_MOVE_MS = 2600
+const INTRO_OPENING_MOVE_MS = 1820
 
 function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: string; animate?: boolean; durationMs?: number }) {
   const displayedTextRef = useRef(text)
@@ -363,11 +361,8 @@ function BeginnerZone({
     if (introStep === 0) {
       setIntroOpeningPreview(true)
       setIntroOpeningShrinkDone(false)
-      introOpeningTimerRef.current = window.setTimeout(() => {
-        setIntroStep(1)
-        setIntroOpeningShrinking(true)
-        introOpeningTimerRef.current = null
-      }, INTRO_OPENING_MOVE_DELAY_MS)
+      setIntroStep(1)
+      setIntroOpeningShrinking(true)
       return
     }
     if (introStep < 3) {
@@ -432,7 +427,7 @@ function BeginnerZone({
           </div>
           <div className="beginner-intro-speech" key={`speech-${displayIntroStep <= 2 ? 'opening' : step.id}`} aria-live="polite">
             {step.eyebrow && <small>{step.eyebrow}</small>}
-            <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_BLUR_MS : 1400} /></h1>
+            <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_MS : 1400} /></h1>
             {step.body && <p>{step.body}</p>}
           </div>
         </header>
@@ -547,7 +542,7 @@ function BeginnerZone({
                 <IntroBlurSwapText
                   text={introTransitioning ? 'Adding to the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep <= 2 ? 'Next' : introStep === 3 ? 'Next: Katakana' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
                   animate={displayIntroStep <= 1}
-                  durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_BLUR_MS : 1400}
+                  durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_MS : 1400}
                 />
                 <ArrowRight aria-hidden="true" />
               </button>

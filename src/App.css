@@ -201,7 +201,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-zone--intro {
-  --intro-opening-move-duration: 2600ms;
+  --intro-opening-move-duration: 1820ms;
   --intro-welcome-shift: clamp(3.5rem, 10dvh, 6.5rem);
   grid-template-rows: auto minmax(0, 1fr) auto;
   min-height: min(43rem, calc(100dvh - 6.25rem));
