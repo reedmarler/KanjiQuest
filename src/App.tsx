@@ -1,4 +1,4 @@
-import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react'
+import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
 import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
@@ -250,7 +250,7 @@ const BEGINNER_INTRO_STEPS = [
   },
 ] as const
 
-function IntroBlurSwapText({ text, animate = true }: { text: string; animate?: boolean }) {
+function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: string; animate?: boolean; durationMs?: number }) {
   const displayedTextRef = useRef(text)
   const [displayedText, setDisplayedText] = useState(text)
   const [isBlurring, setIsBlurring] = useState(false)
@@ -269,16 +269,23 @@ function IntroBlurSwapText({ text, animate = true }: { text: string; animate?: b
     const swapTimer = window.setTimeout(() => {
       displayedTextRef.current = text
       setDisplayedText(text)
-    }, 1260)
-    const revealTimer = window.setTimeout(() => setIsBlurring(false), 1400)
+    }, durationMs / 2)
+    const revealTimer = window.setTimeout(() => setIsBlurring(false), durationMs)
 
     return () => {
       window.clearTimeout(swapTimer)
       window.clearTimeout(revealTimer)
     }
-  }, [animate, text])
+  }, [animate, durationMs, text])
 
-  return <span className={`beginner-intro-blur-text ${isBlurring ? 'is-blurring' : 'is-clear'}`}>{displayedText}</span>
+  return (
+    <span
+      className={`beginner-intro-blur-text ${isBlurring ? 'is-blurring' : 'is-clear'}`}
+      style={{ '--intro-blur-duration': `${durationMs}ms` } as CSSProperties}
+    >
+      {displayedText}
+    </span>
+  )
 }
 
 function BeginnerZone({
@@ -393,7 +400,7 @@ function BeginnerZone({
           </div>
           <div className="beginner-intro-speech" key={`speech-${displayIntroStep <= 2 ? 'opening' : step.id}`} aria-live="polite">
             {step.eyebrow && <small>{step.eyebrow}</small>}
-            <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} /></h1>
+            <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep === 0 ? 5200 : 1400} /></h1>
             {step.body && <p>{step.body}</p>}
           </div>
         </header>
@@ -502,6 +509,7 @@ function BeginnerZone({
                 <IntroBlurSwapText
                   text={introTransitioning ? 'Adding to the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep <= 2 ? 'Next' : introStep === 3 ? 'Next: Katakana' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
                   animate={displayIntroStep <= 1}
+                  durationMs={introOpeningPreview && introStep === 0 ? 5200 : 1400}
                 />
                 <ArrowRight aria-hidden="true" />
               </button>

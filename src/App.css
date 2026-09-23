@@ -290,16 +290,16 @@ body:has(.beginner-word-writing-card) .app,
   filter: blur(5px);
   opacity: 0.32;
   transition:
-    filter 1400ms linear,
-    opacity 1400ms linear;
+    filter var(--intro-blur-duration, 1400ms) linear,
+    opacity var(--intro-blur-duration, 1400ms) linear;
 }
 
 .beginner-intro-blur-text.is-clear {
   filter: blur(0);
   opacity: 1;
   transition:
-    filter 1400ms linear,
-    opacity 1400ms linear;
+    filter var(--intro-blur-duration, 1400ms) linear,
+    opacity var(--intro-blur-duration, 1400ms) linear;
 }
 
 .beginner-intro-guide.is-welcome .beginner-intro-speech h1,
@@ -727,13 +727,17 @@ body:has(.beginner-word-writing-card) .app,
   max-width: 19rem;
   height: 8rem;
   font-size: 2.1rem;
-  transform: translateY(var(--intro-yes-y)) scale(1);
+  transform: translateY(var(--intro-yes-y));
   transform-origin: center;
 }
 
 .beginner-intro-next.is-yes.is-shrinking {
   pointer-events: none;
   animation: beginner-intro-yes-shrink 5200ms linear forwards;
+}
+
+.beginner-intro-next.is-yes.is-shrinking svg {
+  animation: beginner-intro-yes-icon-shrink 5200ms linear forwards;
 }
 
 .beginner-intro-back svg,
@@ -770,10 +774,29 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-yes-shrink {
   from {
-    transform: translateY(var(--intro-yes-y)) scale(1, 1);
+    width: calc(100vw - 4.4rem);
+    max-width: 19rem;
+    height: 8rem;
+    font-size: 2.1rem;
+    transform: translateY(var(--intro-yes-y));
   }
   to {
-    transform: translateY(0) scale(0.65, 0.32);
+    width: 8.7rem;
+    max-width: 8.7rem;
+    height: 2.55rem;
+    font-size: 0.72rem;
+    transform: translateY(0);
+  }
+}
+
+@keyframes beginner-intro-yes-icon-shrink {
+  from {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  to {
+    width: 0.9rem;
+    height: 0.9rem;
   }
 }
 
