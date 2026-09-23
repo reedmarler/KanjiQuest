@@ -267,23 +267,21 @@ function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: 
       return
     }
 
+    const halfDurationMs = durationMs / 2
     setIsBlurring(true)
     const swapTimer = window.setTimeout(() => {
       displayedTextRef.current = text
       setDisplayedText(text)
-    }, durationMs / 2)
-    const revealTimer = window.setTimeout(() => setIsBlurring(false), durationMs)
+      setIsBlurring(false)
+    }, halfDurationMs)
 
-    return () => {
-      window.clearTimeout(swapTimer)
-      window.clearTimeout(revealTimer)
-    }
+    return () => window.clearTimeout(swapTimer)
   }, [animate, durationMs, text])
 
   return (
     <span
       className={`beginner-intro-blur-text ${isBlurring ? 'is-blurring' : 'is-clear'}`}
-      style={{ '--intro-blur-duration': `${durationMs}ms` } as CSSProperties}
+      style={{ '--intro-blur-duration': `${durationMs / 2}ms` } as CSSProperties}
     >
       {displayedText}
     </span>
