@@ -221,7 +221,7 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'systems',
     eyebrow: '',
-    title: 'Hiragana is the Japanese alphabet. It is used for native Japanese words.',
+    title: 'Hiragana is the Japanese alphabet. It\'s used for native Japanese words like sushi or tsunami. It\'s simple and curvy.',
     body: '',
   },
   {
@@ -278,12 +278,25 @@ function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: 
     return () => window.clearTimeout(swapTimer)
   }, [animate, durationMs, text])
 
+  function renderIntroText(value: string) {
+    if (value.startsWith('Hiragana is')) {
+      return (
+        <>
+          <span className="beginner-intro-title-highlight">Hiragana</span>
+          {value.slice('Hiragana'.length)}
+        </>
+      )
+    }
+
+    return value
+  }
+
   return (
     <span
       className={`beginner-intro-blur-text ${isBlurring ? 'is-blurring' : 'is-clear'}`}
       style={{ '--intro-blur-duration': `${durationMs / 2}ms` } as CSSProperties}
     >
-      {displayedText}
+      {renderIntroText(displayedText)}
     </span>
   )
 }
@@ -439,6 +452,10 @@ function BeginnerZone({
                   <span className="beginner-intro-slot-question">?</span>
                   <span className="beginner-intro-slot-label">Hiragana</span>
                   <span className="beginner-intro-slot-hiragana" lang="ja">あ</span>
+                  <span className="beginner-intro-slot-words">
+                    <span><b lang="ja">すし</b><small>sushi</small></span>
+                    <span><b lang="ja">つなみ</b><small>tsunami</small></span>
+                  </span>
                 </span>
                 <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">?</span>
                 <span className="beginner-intro-empty-slot is-slot-left" aria-hidden="true">?</span>
@@ -465,7 +482,15 @@ function BeginnerZone({
                   aria-label={isFocused ? `${item.label}, currently being introduced` : item.label}
                   aria-pressed={isFocused}
                 >
-                  <span lang="ja">{item.mark}</span>
+                  <span className="beginner-intro-node-mark" lang="ja">
+                    <span className="beginner-intro-node-glyph">{item.mark}</span>
+                    {item.id === 'hiragana' && isFocused && (
+                      <span className="beginner-intro-node-words">
+                        <span><b lang="ja">すし</b><small>sushi</small></span>
+                        <span><b lang="ja">つなみ</b><small>tsunami</small></span>
+                      </span>
+                    )}
+                  </span>
                   <b>{item.label}</b>
                   <small>{item.descriptor}</small>
                 </button>
@@ -473,16 +498,6 @@ function BeginnerZone({
             })}
           </div>
 
-          {step.id === 'hiragana' && (
-            <div className="beginner-intro-example is-hiragana" key="hiragana-example">
-              <small>NATIVE JAPANESE WORDS</small>
-              <div className="beginner-intro-word-list">
-                <span><b lang="ja">すし</b><small>sushi</small></span>
-                <span><b lang="ja">つなみ</b><small>tsunami</small></span>
-                <span><b lang="ja">さむらい</b><small>samurai</small></span>
-              </div>
-            </div>
-          )}
           {step.id === 'katakana' && (
             <div className="beginner-intro-example is-katakana" key="katakana-example">
               <small>BORROWED WORDS</small>
