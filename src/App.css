@@ -709,9 +709,12 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-next {
   box-sizing: border-box;
+  --intro-next-width: 8.7rem;
+  --intro-next-height: 2.55rem;
+  --intro-yes-scale: 2.18;
   gap: 0.4rem;
-  width: 8.7rem;
-  height: 2.55rem;
+  width: var(--intro-next-width);
+  height: var(--intro-next-height);
   min-width: 0;
   min-height: 0;
   padding: 0.65rem 1rem;
@@ -723,11 +726,8 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-next.is-yes {
   --intro-yes-y: calc(-9.5rem + var(--intro-welcome-shift));
-  width: calc(100vw - 4.4rem);
-  max-width: 19rem;
-  height: 8rem;
-  font-size: 2.1rem;
-  transform: translateY(var(--intro-yes-y));
+  font-size: 0.96rem;
+  transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
   transform-origin: center;
 }
 
@@ -738,11 +738,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-next.is-yes.is-shrinking.is-shrink-done {
-  width: 8.7rem;
-  max-width: 8.7rem;
-  height: 2.55rem;
   font-size: 0.72rem;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
   pointer-events: auto;
 }
 
@@ -765,8 +762,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-next.is-yes svg {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .beginner-intro-back:disabled,
@@ -790,25 +787,19 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-yes-shrink {
   from {
-    width: calc(100vw - 4.4rem);
-    max-width: 19rem;
-    height: 8rem;
-    font-size: 2.1rem;
-    transform: translateY(var(--intro-yes-y));
+    font-size: 0.96rem;
+    transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
   }
   to {
-    width: 8.7rem;
-    max-width: 8.7rem;
-    height: 2.55rem;
     font-size: 0.72rem;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
 @keyframes beginner-intro-yes-icon-shrink {
   from {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 0.9rem;
+    height: 0.9rem;
   }
   to {
     width: 0.9rem;
