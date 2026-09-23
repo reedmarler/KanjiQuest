@@ -242,6 +242,10 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-speech {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 6.5rem;
   min-height: 6.5rem;
   padding: 0.75rem 0.85rem;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 24%, var(--border));
@@ -404,6 +408,8 @@ body:has(.beginner-word-writing-card) .app,
   color: color-mix(in srgb, var(--text-muted) 75%, var(--text));
   font: 700 1.25rem/1 'Outfit', system-ui, sans-serif;
   box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+  backface-visibility: hidden;
+  will-change: opacity, transform, filter;
 }
 
 .beginner-intro-empty-slot.is-slot-top { top: 0; left: 50%; transform: translate(-50%, -50%); }
@@ -443,7 +449,12 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-top {
-  animation: beginner-intro-slot-expand 1350ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  top: 50%;
+  width: 100%;
+  border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
+  background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+  box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
+  animation: beginner-intro-slot-expand 960ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-right,
@@ -731,8 +742,8 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-next {
   box-sizing: border-box;
-  --intro-next-width: 8.7rem;
-  --intro-next-height: 2.55rem;
+  --intro-next-width: 8.1rem;
+  --intro-next-height: 2.4rem;
   --intro-yes-scale: 2.18;
   gap: 0.4rem;
   width: var(--intro-next-width);
@@ -747,7 +758,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-next.is-yes {
-  --intro-yes-y: 0.75rem;
+  --intro-yes-y: 0.85rem;
   font-size: 0.96rem;
   transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
   transform-origin: center;
@@ -848,25 +859,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-slot-expand {
-  0% {
-    top: 0;
-    width: 4.4rem;
-    border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
-    transform: translate(-50%, -50%);
-  }
-  42% {
-    top: 50%;
-    width: 4.4rem;
-    transform: translate(-50%, -50%);
-  }
-  100% {
-    top: 50%;
-    width: 100%;
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
-    transform: translate(-50%, -50%);
-  }
+  from { opacity: 0.72; filter: blur(5px); transform: translate(-50%, -50%) rotate(-16deg) scale(0.22); }
+  to { opacity: 1; filter: blur(0); transform: translate(-50%, -50%) rotate(0deg) scale(1); }
 }
 
 @keyframes beginner-intro-slot-fade {
@@ -937,20 +931,18 @@ body:has(.beginner-word-writing-card) .app,
 
   .beginner-intro-mascot {
     position: absolute;
-    top: -0.15rem;
-    left: -1.6rem;
+    top: 0.1rem;
+    left: -1.25rem;
     z-index: 2;
-    width: 9.3rem;
+    width: 8.25rem;
   }
 
   .beginner-intro-speech {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    width: calc(100% - 5.8rem);
-    min-height: 9.3rem;
-    margin-left: 5.8rem;
-    padding: 0.8rem 0.75rem 0.8rem 2.25rem;
+    width: calc(100% - 5.15rem);
+    height: 8.65rem;
+    min-height: 8.65rem;
+    margin-left: 5.15rem;
+    padding: 0.75rem 0.72rem 0.75rem 2.05rem;
   }
 
   .beginner-intro-speech h1 { font-size: 1.18rem; }
@@ -991,14 +983,14 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-example p { justify-content: center; }
   .beginner-intro-example.is-together > strong { font-size: 1.85rem; }
   .beginner-intro-next.is-yes {
-    --intro-yes-y: 0.75rem;
+    --intro-yes-y: 0.85rem;
   }
 }
 
 @media (max-width: 360px) {
-  .beginner-intro-guide { min-height: 8.5rem; }
-  .beginner-intro-mascot { left: -1.4rem; width: 8.5rem; }
-  .beginner-intro-speech { min-height: 8.5rem; }
+  .beginner-intro-guide { min-height: 8.1rem; }
+  .beginner-intro-mascot { left: -1.1rem; width: 7.8rem; }
+  .beginner-intro-speech { height: 8.1rem; min-height: 8.1rem; }
   .beginner-intro-speech h1 { font-size: 1.05rem; }
   .beginner-intro-guide.is-welcome .beginner-intro-speech h1,
   .beginner-intro-guide.is-simple .beginner-intro-speech h1 { font-size: 1.47rem; }
