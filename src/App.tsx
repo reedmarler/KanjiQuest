@@ -1,4 +1,4 @@
-import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
+import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type AnimationEvent, type CSSProperties, type ReactElement, type ReactNode } from 'react'
 import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
@@ -357,15 +357,10 @@ function BeginnerZone({
     if (introStep === 0) {
       setIntroOpeningPreview(true)
       introOpeningTimerRef.current = window.setTimeout(() => {
+        setIntroStep(1)
         setIntroOpeningShrinking(true)
         introOpeningTimerRef.current = null
       }, 720)
-      introOpeningFinishTimerRef.current = window.setTimeout(() => {
-        setIntroStep(1)
-        setIntroOpeningPreview(false)
-        setIntroOpeningShrinking(false)
-        introOpeningFinishTimerRef.current = null
-      }, 2600)
       return
     }
     if (introStep < 3) {
@@ -382,10 +377,35 @@ function BeginnerZone({
     }, 1140)
   }
 
+  const finishIntroOpeningShrink = useCallback(() => {
+    if (!introOpeningShrinking) return
+    setIntroOpeningShrinking(false)
+    setIntroOpeningPreview(false)
+  }, [introOpeningShrinking])
+
+  function handleIntroNextAnimationEnd(event: AnimationEvent<HTMLButtonElement>) {
+    if (event.animationName === 'beginner-intro-yes-shrink') {
+      finishIntroOpeningShrink()
+    }
+  }
+
+  useEffect(() => {
+    if (!introOpeningShrinking) return undefined
+
+    introOpeningFinishTimerRef.current = window.setTimeout(() => {
+      finishIntroOpeningShrink()
+      introOpeningFinishTimerRef.current = null
+    }, 2800)
+
+    return () => {
+      if (introOpeningFinishTimerRef.current !== null) window.clearTimeout(introOpeningFinishTimerRef.current)
+      introOpeningFinishTimerRef.current = null
+    }
+  }, [finishIntroOpeningShrink, introOpeningShrinking])
+
   if (intro) {
     const displayIntroStep = introOpeningPreview && introStep === 0 ? 1 : introStep
     const step = BEGINNER_INTRO_STEPS[displayIntroStep]
-    const layoutStep = introOpeningShrinking && introStep === 0 ? 1 : introStep
     const activeScriptIndex = introStep >= 3 && introStep <= 5 ? introStep - 3 : -1
     const completedScripts = introStep === 6
       ? 3
@@ -400,7 +420,7 @@ function BeginnerZone({
           </div>
           <div className="beginner-intro-speech" key={`speech-${displayIntroStep <= 2 ? 'opening' : step.id}`} aria-live="polite">
             {step.eyebrow && <small>{step.eyebrow}</small>}
-            <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep === 0 ? 2600 : 1400} /></h1>
+            <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep <= 1 ? 2600 : 1400} /></h1>
             {step.body && <p>{step.body}</p>}
           </div>
         </header>
@@ -408,7 +428,7 @@ function BeginnerZone({
         <section className={`beginner-intro-lesson is-${step.id}${introTransitioning ? ' is-transitioning' : ''}`} aria-label="The three Japanese writing systems">
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
-            {layoutStep >= 1 && layoutStep <= 2 && (
+            {introStep >= 1 && introStep <= 2 && (
               <div className={`beginner-intro-empty-wheel${introStep === 2 ? ' is-revealing' : ''}`} aria-hidden="true">
                 <span className="beginner-intro-empty-slot is-slot-top">
                   <span className="beginner-intro-slot-question">?</span>
@@ -487,7 +507,7 @@ function BeginnerZone({
           )}
         </section>
 
-        <footer className={`beginner-intro-controls${layoutStep > 0 ? ' is-lowered' : ''}`}>
+        <footer className={`beginner-intro-controls${introStep > 0 ? ' is-lowered' : ''}`}>
           <div>
             {introStep >= 2 && (
               <button type="button" className="beginner-intro-back" onClick={() => goToIntroStep(introStep - 1)} disabled={introTransitioning} aria-label="Previous introduction step">
@@ -505,11 +525,17 @@ function BeginnerZone({
                 </button>
               </>
             ) : (
-              <button type="button" className={`beginner-intro-next${introStep === 0 ? ' is-yes' : ''}${introOpeningShrinking ? ' is-shrinking' : ''}`} onClick={advanceIntro} disabled={introTransitioning}>
+              <button
+                type="button"
+                className={`beginner-intro-next${introStep === 0 || introOpeningShrinking ? ' is-yes' : ''}${introOpeningShrinking ? ' is-shrinking' : ''}`}
+                onAnimationEnd={handleIntroNextAnimationEnd}
+                onClick={advanceIntro}
+                disabled={introTransitioning}
+              >
                 <IntroBlurSwapText
                   text={introTransitioning ? 'Adding to the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep <= 2 ? 'Next' : introStep === 3 ? 'Next: Katakana' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
                   animate={displayIntroStep <= 1}
-                  durationMs={introOpeningPreview && introStep === 0 ? 2600 : 1400}
+                  durationMs={introOpeningPreview && introStep <= 1 ? 2600 : 1400}
                 />
                 <ArrowRight aria-hidden="true" />
               </button>
