@@ -734,10 +734,12 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-next.is-yes.is-shrinking {
   pointer-events: none;
   animation: beginner-intro-yes-shrink 2600ms linear forwards;
+  transition: none;
 }
 
 .beginner-intro-next.is-yes.is-shrinking svg {
   animation: beginner-intro-yes-icon-shrink 2600ms linear forwards;
+  transition: none;
 }
 
 .beginner-intro-back svg,

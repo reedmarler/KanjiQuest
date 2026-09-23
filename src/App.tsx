@@ -365,7 +365,7 @@ function BeginnerZone({
         setIntroOpeningPreview(false)
         setIntroOpeningShrinking(false)
         introOpeningFinishTimerRef.current = null
-      }, 3300)
+      }, 2600)
       return
     }
     if (introStep < 3) {
