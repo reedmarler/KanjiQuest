@@ -303,6 +303,7 @@ function BeginnerZone({
   const [introStep, setIntroStep] = useState(0)
   const [introOpeningPreview, setIntroOpeningPreview] = useState(false)
   const [introOpeningShrinking, setIntroOpeningShrinking] = useState(false)
+  const [introOpeningShrinkDone, setIntroOpeningShrinkDone] = useState(false)
   const [introTransitioning, setIntroTransitioning] = useState(false)
   const introTransitionTimerRef = useRef<number | null>(null)
   const introOpeningTimerRef = useRef<number | null>(null)
@@ -349,13 +350,15 @@ function BeginnerZone({
     setIntroTransitioning(false)
     setIntroOpeningPreview(false)
     setIntroOpeningShrinking(false)
+    setIntroOpeningShrinkDone(false)
     setIntroStep(nextStep)
   }
 
   function advanceIntro() {
-    if (introTransitioning || introOpeningPreview || introOpeningShrinking) return
+    if (introTransitioning || introOpeningPreview || (introOpeningShrinking && !introOpeningShrinkDone)) return
     if (introStep === 0) {
       setIntroOpeningPreview(true)
+      setIntroOpeningShrinkDone(false)
       introOpeningTimerRef.current = window.setTimeout(() => {
         setIntroStep(1)
         setIntroOpeningShrinking(true)
@@ -364,6 +367,8 @@ function BeginnerZone({
       return
     }
     if (introStep < 3) {
+      setIntroOpeningShrinking(false)
+      setIntroOpeningShrinkDone(false)
       setIntroStep((current) => current + 1)
       return
     }
@@ -379,8 +384,8 @@ function BeginnerZone({
 
   const finishIntroOpeningShrink = useCallback(() => {
     if (!introOpeningShrinking) return
-    setIntroOpeningShrinking(false)
     setIntroOpeningPreview(false)
+    setIntroOpeningShrinkDone(true)
   }, [introOpeningShrinking])
 
   function handleIntroNextAnimationEnd(event: AnimationEvent<HTMLButtonElement>) {
@@ -527,7 +532,7 @@ function BeginnerZone({
             ) : (
               <button
                 type="button"
-                className={`beginner-intro-next${introStep === 0 || introOpeningShrinking ? ' is-yes' : ''}${introOpeningShrinking ? ' is-shrinking' : ''}`}
+                className={`beginner-intro-next${introStep === 0 || introOpeningShrinking ? ' is-yes' : ''}${introOpeningShrinking ? ' is-shrinking' : ''}${introOpeningShrinkDone ? ' is-shrink-done' : ''}`}
                 onAnimationEnd={handleIntroNextAnimationEnd}
                 onClick={advanceIntro}
                 disabled={introTransitioning}

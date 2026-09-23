@@ -737,9 +737,23 @@ body:has(.beginner-word-writing-card) .app,
   transition: none;
 }
 
+.beginner-intro-next.is-yes.is-shrinking.is-shrink-done {
+  width: 8.7rem;
+  max-width: 8.7rem;
+  height: 2.55rem;
+  font-size: 0.72rem;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 .beginner-intro-next.is-yes.is-shrinking svg {
   animation: beginner-intro-yes-icon-shrink 2600ms linear forwards;
   transition: none;
+}
+
+.beginner-intro-next.is-yes.is-shrinking.is-shrink-done svg {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .beginner-intro-back svg,
