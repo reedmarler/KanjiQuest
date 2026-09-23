@@ -379,6 +379,10 @@ function BeginnerZone({
     if (introStep < 3) {
       setIntroOpeningShrinking(false)
       setIntroOpeningShrinkDone(false)
+      if (introStep === 2) {
+        onOpenIntroScript?.('hiragana')
+        return
+      }
       setIntroStep((current) => current + 1)
       return
     }
@@ -461,7 +465,7 @@ function BeginnerZone({
                 <span className="beginner-intro-empty-slot is-slot-left" aria-hidden="true">?</span>
               </div>
             )}
-            {isFinalStep && (
+            {introStep === 6 && (
               <div className="beginner-intro-wheel-complete">
                 <strong lang="ja">日本語</strong>
                 <small>Japanese</small>
