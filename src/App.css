@@ -379,9 +379,9 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel {
   position: absolute;
-  top: 63%;
+  top: 52%;
   left: 50%;
-  width: 17.5rem;
+  width: min(17.5rem, 82dvw);
   aspect-ratio: 1;
   border: 2px dashed color-mix(in srgb, var(--sakura-light) 38%, var(--border));
   border-radius: 50%;
@@ -389,6 +389,7 @@ body:has(.beginner-word-writing-card) .app,
   color: var(--text-muted);
   transform: translate(-50%, -50%);
   animation: beginner-intro-wheel-swirl-in 980ms cubic-bezier(0.2, 0.9, 0.24, 1) both;
+  transform-origin: center;
 }
 
 .beginner-intro-empty-slot {
@@ -817,12 +818,17 @@ body:has(.beginner-word-writing-card) .app,
   0% {
     opacity: 0;
     filter: blur(12px);
-    transform: translate(-50%, -50%) rotate(-240deg) scale(0.16);
+    transform: translate(-50%, -50%) rotate(-280deg) scale(0.08);
   }
-  58% {
-    opacity: 0.78;
+  42% {
+    opacity: 0.52;
+    filter: blur(6px);
+    transform: translate(-50%, -50%) rotate(-110deg) scale(0.54);
+  }
+  74% {
+    opacity: 0.86;
     filter: blur(2px);
-    transform: translate(-50%, -50%) rotate(22deg) scale(1.06);
+    transform: translate(-50%, -50%) rotate(20deg) scale(1.04);
   }
   100% {
     opacity: 1;
@@ -951,7 +957,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-lesson.is-systems { min-height: 22rem; }
   .beginner-intro-orbit { width: min(100%, 17rem); }
   .beginner-intro-ring { inset: 1.9rem; }
-  .beginner-intro-empty-wheel { width: 19rem; }
+  .beginner-intro-empty-wheel { width: min(17rem, 82dvw); }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
   .beginner-intro-wheel-placeholder strong { font-size: 4.8rem; }
   .beginner-intro-wheel-complete strong { font-size: 1.85rem; }
@@ -984,7 +990,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-guide.is-simple .beginner-intro-speech h1 { font-size: 1.47rem; }
   .beginner-intro-speech p { font-size: 0.7rem; }
   .beginner-intro-orbit { width: min(100%, 15.5rem); }
-  .beginner-intro-empty-wheel { width: 17.2rem; }
+  .beginner-intro-empty-wheel { width: min(15.5rem, 82dvw); }
   .beginner-intro-wheel-placeholder { width: 9.6rem; }
   .beginner-intro-node.is-focused { width: 10rem; }
   .beginner-intro-node.is-focused span { width: 9rem; font-size: 4rem; }
