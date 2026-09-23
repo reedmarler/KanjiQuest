@@ -250,6 +250,10 @@ const BEGINNER_INTRO_STEPS = [
   },
 ] as const
 
+const INTRO_OPENING_BLUR_MS = 700
+const INTRO_OPENING_MOVE_DELAY_MS = 520
+const INTRO_OPENING_MOVE_MS = 2600
+
 function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: string; animate?: boolean; durationMs?: number }) {
   const displayedTextRef = useRef(text)
   const [displayedText, setDisplayedText] = useState(text)
@@ -363,7 +367,7 @@ function BeginnerZone({
         setIntroStep(1)
         setIntroOpeningShrinking(true)
         introOpeningTimerRef.current = null
-      }, 720)
+      }, INTRO_OPENING_MOVE_DELAY_MS)
       return
     }
     if (introStep < 3) {
@@ -400,7 +404,7 @@ function BeginnerZone({
     introOpeningFinishTimerRef.current = window.setTimeout(() => {
       finishIntroOpeningShrink()
       introOpeningFinishTimerRef.current = null
-    }, 2800)
+    }, INTRO_OPENING_MOVE_MS + 200)
 
     return () => {
       if (introOpeningFinishTimerRef.current !== null) window.clearTimeout(introOpeningFinishTimerRef.current)
@@ -411,6 +415,9 @@ function BeginnerZone({
   if (intro) {
     const displayIntroStep = introOpeningPreview && introStep === 0 ? 1 : introStep
     const step = BEGINNER_INTRO_STEPS[displayIntroStep]
+    const guideStep = introOpeningPreview && introStep === 0 && !introOpeningShrinking
+      ? BEGINNER_INTRO_STEPS[0]
+      : step
     const activeScriptIndex = introStep >= 3 && introStep <= 5 ? introStep - 3 : -1
     const completedScripts = introStep === 6
       ? 3
@@ -419,13 +426,13 @@ function BeginnerZone({
 
     return (
       <main className="beginner-zone beginner-zone--intro">
-        <header className={`beginner-intro-guide is-${step.id}`}>
+        <header className={`beginner-intro-guide is-${guideStep.id}`}>
           <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
           </div>
           <div className="beginner-intro-speech" key={`speech-${displayIntroStep <= 2 ? 'opening' : step.id}`} aria-live="polite">
             {step.eyebrow && <small>{step.eyebrow}</small>}
-            <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep <= 1 ? 2600 : 1400} /></h1>
+            <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_BLUR_MS : 1400} /></h1>
             {step.body && <p>{step.body}</p>}
           </div>
         </header>
@@ -540,7 +547,7 @@ function BeginnerZone({
                 <IntroBlurSwapText
                   text={introTransitioning ? 'Adding to the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep <= 2 ? 'Next' : introStep === 3 ? 'Next: Katakana' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
                   animate={displayIntroStep <= 1}
-                  durationMs={introOpeningPreview && introStep <= 1 ? 2600 : 1400}
+                  durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_BLUR_MS : 1400}
                 />
                 <ArrowRight aria-hidden="true" />
               </button>
