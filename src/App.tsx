@@ -250,7 +250,7 @@ const BEGINNER_INTRO_STEPS = [
   },
 ] as const
 
-const INTRO_OPENING_MOVE_MS = 1820
+const INTRO_OPENING_MOVE_MS = 1274
 
 function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: string; animate?: boolean; durationMs?: number }) {
   const displayedTextRef = useRef(text)
