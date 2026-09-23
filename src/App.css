@@ -1113,6 +1113,9 @@ body:has(.beginner-word-writing-card) .app,
 
   .beginner-intro-example p { justify-content: center; }
   .beginner-intro-example.is-together > strong { font-size: 1.85rem; }
+  .beginner-intro-controls.is-lowered {
+    transform: translateY(0.75rem);
+  }
   .beginner-intro-next.is-yes {
     --intro-yes-y: 0.85rem;
   }
