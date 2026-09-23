@@ -722,11 +722,18 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-next.is-yes {
+  --intro-yes-y: calc(-9.5rem + var(--intro-welcome-shift));
   width: calc(100vw - 4.4rem);
   max-width: 19rem;
   height: 8rem;
   font-size: 2.1rem;
-  transform: translateY(calc(-9.5rem + var(--intro-welcome-shift)));
+  transform: translateY(var(--intro-yes-y)) scale(1);
+  transform-origin: center;
+}
+
+.beginner-intro-next.is-yes.is-shrinking {
+  pointer-events: none;
+  animation: beginner-intro-yes-shrink 5200ms linear forwards;
 }
 
 .beginner-intro-back svg,
@@ -759,6 +766,15 @@ body:has(.beginner-word-writing-card) .app,
 @keyframes beginner-intro-copy-in {
   from { opacity: 0; transform: translateY(0.35rem); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes beginner-intro-yes-shrink {
+  from {
+    transform: translateY(var(--intro-yes-y)) scale(1, 1);
+  }
+  to {
+    transform: translateY(0) scale(0.65, 0.32);
+  }
 }
 
 @keyframes beginner-intro-placeholder-in {
@@ -905,7 +921,9 @@ body:has(.beginner-word-writing-card) .app,
 
   .beginner-intro-example p { justify-content: center; }
   .beginner-intro-example.is-together > strong { font-size: 1.85rem; }
-  .beginner-intro-next.is-yes { transform: translateY(calc(-10.25rem + var(--intro-welcome-shift))); }
+  .beginner-intro-next.is-yes {
+    --intro-yes-y: calc(-10.25rem + var(--intro-welcome-shift));
+  }
 }
 
 @media (max-width: 360px) {

@@ -295,9 +295,11 @@ function BeginnerZone({
   const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>(initialScript)
   const [introStep, setIntroStep] = useState(0)
   const [introOpeningPreview, setIntroOpeningPreview] = useState(false)
+  const [introOpeningShrinking, setIntroOpeningShrinking] = useState(false)
   const [introTransitioning, setIntroTransitioning] = useState(false)
   const introTransitionTimerRef = useRef<number | null>(null)
   const introOpeningTimerRef = useRef<number | null>(null)
+  const introOpeningFinishTimerRef = useRef<number | null>(null)
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const deck = getBeginnerDeck(script)
   const columns = deck.rows.map((row, rowIndex) => ({ row, rowIndex })).reverse()
@@ -327,27 +329,36 @@ function BeginnerZone({
   useEffect(() => () => {
     if (introTransitionTimerRef.current !== null) window.clearTimeout(introTransitionTimerRef.current)
     if (introOpeningTimerRef.current !== null) window.clearTimeout(introOpeningTimerRef.current)
+    if (introOpeningFinishTimerRef.current !== null) window.clearTimeout(introOpeningFinishTimerRef.current)
   }, [])
 
   function goToIntroStep(nextStep: number) {
     if (introTransitionTimerRef.current !== null) window.clearTimeout(introTransitionTimerRef.current)
     if (introOpeningTimerRef.current !== null) window.clearTimeout(introOpeningTimerRef.current)
+    if (introOpeningFinishTimerRef.current !== null) window.clearTimeout(introOpeningFinishTimerRef.current)
     introTransitionTimerRef.current = null
     introOpeningTimerRef.current = null
+    introOpeningFinishTimerRef.current = null
     setIntroTransitioning(false)
     setIntroOpeningPreview(false)
+    setIntroOpeningShrinking(false)
     setIntroStep(nextStep)
   }
 
   function advanceIntro() {
-    if (introTransitioning || introOpeningPreview) return
+    if (introTransitioning || introOpeningPreview || introOpeningShrinking) return
     if (introStep === 0) {
       setIntroOpeningPreview(true)
       introOpeningTimerRef.current = window.setTimeout(() => {
-        setIntroStep(1)
-        setIntroOpeningPreview(false)
+        setIntroOpeningShrinking(true)
         introOpeningTimerRef.current = null
       }, 720)
+      introOpeningFinishTimerRef.current = window.setTimeout(() => {
+        setIntroStep(1)
+        setIntroOpeningPreview(false)
+        setIntroOpeningShrinking(false)
+        introOpeningFinishTimerRef.current = null
+      }, 7000)
       return
     }
     if (introStep < 3) {
@@ -367,7 +378,7 @@ function BeginnerZone({
   if (intro) {
     const displayIntroStep = introOpeningPreview && introStep === 0 ? 1 : introStep
     const step = BEGINNER_INTRO_STEPS[displayIntroStep]
-    const layoutStep = introStep
+    const layoutStep = introOpeningShrinking && introStep === 0 ? 1 : introStep
     const activeScriptIndex = introStep >= 3 && introStep <= 5 ? introStep - 3 : -1
     const completedScripts = introStep === 6
       ? 3
@@ -487,7 +498,7 @@ function BeginnerZone({
                 </button>
               </>
             ) : (
-              <button type="button" className={`beginner-intro-next${layoutStep === 0 ? ' is-yes' : ''}`} onClick={advanceIntro} disabled={introTransitioning}>
+              <button type="button" className={`beginner-intro-next${introStep === 0 ? ' is-yes' : ''}${introOpeningShrinking ? ' is-shrinking' : ''}`} onClick={advanceIntro} disabled={introTransitioning}>
                 <IntroBlurSwapText
                   text={introTransitioning ? 'Adding to the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep <= 2 ? 'Next' : introStep === 3 ? 'Next: Katakana' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
                   animate={displayIntroStep <= 1}
