@@ -294,8 +294,10 @@ function BeginnerZone({
 }: BeginnerZoneProps) {
   const [script, setScript] = useState<Extract<BeginnerScript, 'hiragana' | 'katakana'>>(initialScript)
   const [introStep, setIntroStep] = useState(0)
+  const [introOpeningPreview, setIntroOpeningPreview] = useState(false)
   const [introTransitioning, setIntroTransitioning] = useState(false)
   const introTransitionTimerRef = useRef<number | null>(null)
+  const introOpeningTimerRef = useRef<number | null>(null)
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const deck = getBeginnerDeck(script)
   const columns = deck.rows.map((row, rowIndex) => ({ row, rowIndex })).reverse()
@@ -324,17 +326,30 @@ function BeginnerZone({
 
   useEffect(() => () => {
     if (introTransitionTimerRef.current !== null) window.clearTimeout(introTransitionTimerRef.current)
+    if (introOpeningTimerRef.current !== null) window.clearTimeout(introOpeningTimerRef.current)
   }, [])
 
   function goToIntroStep(nextStep: number) {
     if (introTransitionTimerRef.current !== null) window.clearTimeout(introTransitionTimerRef.current)
+    if (introOpeningTimerRef.current !== null) window.clearTimeout(introOpeningTimerRef.current)
     introTransitionTimerRef.current = null
+    introOpeningTimerRef.current = null
     setIntroTransitioning(false)
+    setIntroOpeningPreview(false)
     setIntroStep(nextStep)
   }
 
   function advanceIntro() {
-    if (introTransitioning) return
+    if (introTransitioning || introOpeningPreview) return
+    if (introStep === 0) {
+      setIntroOpeningPreview(true)
+      introOpeningTimerRef.current = window.setTimeout(() => {
+        setIntroStep(1)
+        setIntroOpeningPreview(false)
+        introOpeningTimerRef.current = null
+      }, 720)
+      return
+    }
     if (introStep < 3) {
       setIntroStep((current) => current + 1)
       return
@@ -350,7 +365,9 @@ function BeginnerZone({
   }
 
   if (intro) {
-    const step = BEGINNER_INTRO_STEPS[introStep]
+    const displayIntroStep = introOpeningPreview && introStep === 0 ? 1 : introStep
+    const step = BEGINNER_INTRO_STEPS[displayIntroStep]
+    const layoutStep = introStep
     const activeScriptIndex = introStep >= 3 && introStep <= 5 ? introStep - 3 : -1
     const completedScripts = introStep === 6
       ? 3
@@ -363,9 +380,9 @@ function BeginnerZone({
           <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
           </div>
-          <div className="beginner-intro-speech" key={`speech-${introStep <= 2 ? 'opening' : step.id}`} aria-live="polite">
+          <div className="beginner-intro-speech" key={`speech-${displayIntroStep <= 2 ? 'opening' : step.id}`} aria-live="polite">
             {step.eyebrow && <small>{step.eyebrow}</small>}
-            <h1><IntroBlurSwapText text={step.title} animate={introStep <= 2} /></h1>
+            <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} /></h1>
             {step.body && <p>{step.body}</p>}
           </div>
         </header>
@@ -373,7 +390,7 @@ function BeginnerZone({
         <section className={`beginner-intro-lesson is-${step.id}${introTransitioning ? ' is-transitioning' : ''}`} aria-label="The three Japanese writing systems">
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
-            {introStep >= 1 && introStep <= 2 && (
+            {layoutStep >= 1 && layoutStep <= 2 && (
               <div className={`beginner-intro-empty-wheel${introStep === 2 ? ' is-revealing' : ''}`} aria-hidden="true">
                 <span className="beginner-intro-empty-slot is-slot-top">
                   <span className="beginner-intro-slot-question">?</span>
@@ -452,7 +469,7 @@ function BeginnerZone({
           )}
         </section>
 
-        <footer className={`beginner-intro-controls${introStep > 0 ? ' is-lowered' : ''}`}>
+        <footer className={`beginner-intro-controls${layoutStep > 0 ? ' is-lowered' : ''}`}>
           <div>
             {introStep >= 2 && (
               <button type="button" className="beginner-intro-back" onClick={() => goToIntroStep(introStep - 1)} disabled={introTransitioning} aria-label="Previous introduction step">
@@ -470,10 +487,10 @@ function BeginnerZone({
                 </button>
               </>
             ) : (
-              <button type="button" className={`beginner-intro-next${introStep === 0 ? ' is-yes' : ''}`} onClick={advanceIntro} disabled={introTransitioning}>
+              <button type="button" className={`beginner-intro-next${layoutStep === 0 ? ' is-yes' : ''}`} onClick={advanceIntro} disabled={introTransitioning}>
                 <IntroBlurSwapText
-                  text={introTransitioning ? 'Adding to the wheel...' : introStep === 0 ? 'Yes!' : introStep <= 2 ? 'Next' : introStep === 3 ? 'Next: Katakana' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
-                  animate={introStep <= 1}
+                  text={introTransitioning ? 'Adding to the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep <= 2 ? 'Next' : introStep === 3 ? 'Next: Katakana' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
+                  animate={displayIntroStep <= 1}
                 />
                 <ArrowRight aria-hidden="true" />
               </button>
