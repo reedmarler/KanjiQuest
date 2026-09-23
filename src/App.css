@@ -215,9 +215,7 @@ body:has(.beginner-word-writing-card) .app,
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  transition:
-    grid-template-columns var(--intro-opening-move-duration) linear,
-    transform var(--intro-opening-move-duration) linear;
+  transition: transform var(--intro-opening-move-duration) linear;
 }
 
 .beginner-intro-guide.is-welcome {
@@ -232,15 +230,12 @@ body:has(.beginner-word-writing-card) .app,
   border-radius: 50%;
   background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
   box-shadow: 0 0.45rem 1.1rem color-mix(in srgb, var(--sakura) 18%, transparent);
-  transition: width var(--intro-opening-move-duration) linear;
-}
-
-.beginner-intro-guide.is-simple {
-  grid-template-columns: 3.25rem minmax(0, 1fr);
+  transform-origin: center;
+  transition: transform var(--intro-opening-move-duration) linear;
 }
 
 .beginner-intro-guide.is-simple .beginner-intro-mascot {
-  width: 3.25rem;
+  transform: scale(0.83);
 }
 
 .beginner-intro-mascot img {
@@ -962,15 +957,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-speech p { font-size: 0.78rem; line-height: 1.48; }
 
   .beginner-intro-guide.is-simple .beginner-intro-mascot {
-    top: 0.45rem;
-    left: -0.8rem;
-    width: 7.1rem;
-  }
-
-  .beginner-intro-guide.is-simple .beginner-intro-speech {
-    width: calc(100% - 4.55rem);
-    margin-left: 4.55rem;
-    padding-left: 1.75rem;
+    transform: scale(0.86);
   }
 
   .beginner-intro-lesson {
@@ -1019,13 +1006,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-guide.is-simple .beginner-intro-speech h1 { font-size: 1.47rem; }
   .beginner-intro-speech p { font-size: 0.7rem; }
   .beginner-intro-guide.is-simple .beginner-intro-mascot {
-    left: -0.75rem;
-    width: 6.7rem;
-  }
-  .beginner-intro-guide.is-simple .beginner-intro-speech {
-    width: calc(100% - 4.2rem);
-    margin-left: 4.2rem;
-    padding-left: 1.55rem;
+    transform: scale(0.86);
   }
   .beginner-intro-orbit { width: min(100%, 15.5rem); }
   .beginner-intro-empty-wheel { width: min(14.5rem, 76dvw); }
