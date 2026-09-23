@@ -708,20 +708,23 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-next {
+  box-sizing: border-box;
   gap: 0.4rem;
   width: 8.7rem;
-  min-width: 8.7rem;
+  height: 2.55rem;
+  min-width: 0;
+  min-height: 0;
   padding: 0.65rem 1rem;
   background: linear-gradient(135deg, var(--sakura), var(--sakura-light));
   color: #1c1420;
   box-shadow: 0 0.55rem 1.35rem color-mix(in srgb, var(--sakura) 18%, transparent);
-  transition: width 2400ms linear, min-width 2400ms linear, min-height 2400ms linear, font-size 2400ms linear, transform 2400ms linear;
+  transition: width 2400ms linear, height 2400ms linear, font-size 2400ms linear, transform 2400ms linear;
 }
 
 .beginner-intro-next.is-yes {
-  width: min(19rem, calc(100vw - 3rem));
-  min-width: min(19rem, calc(100vw - 3rem));
-  min-height: 8rem;
+  width: calc(100vw - 4.4rem);
+  max-width: 19rem;
+  height: 8rem;
   font-size: 2.1rem;
   transform: translateY(calc(-9.5rem + var(--intro-welcome-shift)));
 }
