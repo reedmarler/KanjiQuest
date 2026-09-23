@@ -379,7 +379,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel {
   position: absolute;
-  top: 48%;
+  top: 52%;
   left: 50%;
   width: min(16rem, 76dvw);
   aspect-ratio: 1;
@@ -727,7 +727,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-next.is-yes {
-  --intro-yes-y: calc(-9.5rem + var(--intro-welcome-shift));
+  --intro-yes-y: 0.75rem;
   font-size: 0.96rem;
   transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
   transform-origin: center;
@@ -967,7 +967,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-example p { justify-content: center; }
   .beginner-intro-example.is-together > strong { font-size: 1.85rem; }
   .beginner-intro-next.is-yes {
-    --intro-yes-y: calc(-10.25rem + var(--intro-welcome-shift));
+    --intro-yes-y: 0.75rem;
   }
 }
 
