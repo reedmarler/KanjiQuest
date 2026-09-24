@@ -342,6 +342,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-guide.is-welcome .beginner-intro-speech,
+.beginner-intro-guide.is-systems .beginner-intro-speech,
 .beginner-intro-guide.is-simple .beginner-intro-speech {
   justify-self: start;
   width: var(--intro-speech-width, fit-content);
@@ -481,10 +482,10 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-slot-label {
   right: 0;
-  bottom: calc(100% + 0.5rem);
+  bottom: calc(100% + 0.75rem);
   left: 0;
   color: var(--sakura-light);
-  font: 800 0.72rem/1 'Outfit', system-ui, sans-serif;
+  font: 800 0.95rem/1 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.04em;
   opacity: 0;
   transform: translateY(0.35rem) scale(0.92);
@@ -493,7 +494,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-hiragana {
   color: var(--text);
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 5rem;
+  font-size: 6rem;
   opacity: 0;
   transform: rotate(-18deg) scale(0.45);
 }
@@ -531,9 +532,9 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-slot-words small {
-  margin-top: 0.12rem;
+  margin-top: 0;
   color: var(--text-muted);
-  font-size: 0.42rem;
+  font-size: 0.58rem;
   font-weight: 800;
 }
 
@@ -543,7 +544,7 @@ body:has(.beginner-word-writing-card) .app,
   border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
   background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
   box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
-  animation: beginner-intro-slot-expand 960ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-slot-expand 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-right,
@@ -552,19 +553,19 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
-  animation: beginner-intro-question-out 540ms 390ms ease forwards;
+  animation: beginner-intro-question-out 640ms 520ms ease forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-label {
-  animation: beginner-intro-hiragana-label-in 660ms 570ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-hiragana-label-in 720ms 850ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana {
-  animation: beginner-intro-hiragana-in 660ms 645ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-hiragana-in 720ms 940ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-words {
-  animation: beginner-intro-slot-words-in 660ms 740ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-slot-words-in 720ms 1050ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-wheel-placeholder,
@@ -864,7 +865,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-controls.is-lowered {
-  transform: translateY(2.25rem);
+  transform: none;
 }
 
 .beginner-intro-controls > div:last-child {
@@ -1126,6 +1127,7 @@ body:has(.beginner-word-writing-card) .app,
     line-height: 1.16;
   }
   .beginner-intro-guide.is-welcome .beginner-intro-speech,
+  .beginner-intro-guide.is-systems .beginner-intro-speech,
   .beginner-intro-guide.is-simple .beginner-intro-speech {
     width: var(--intro-speech-width, fit-content);
     max-width: 100%;
