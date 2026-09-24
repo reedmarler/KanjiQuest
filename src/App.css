@@ -511,6 +511,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-hiragana small {
   color: var(--sakura-light);
   font: 800 0.22em/1 'Outfit', system-ui, sans-serif;
+  opacity: 0;
 }
 
 .beginner-intro-slot-hiragana span {
@@ -563,16 +564,16 @@ body:has(.beginner-word-writing-card) .app,
   border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
   background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
   box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
-  animation: beginner-intro-slot-expand 1400ms 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: beginner-intro-slot-expand 1400ms 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-right,
 .beginner-intro-empty-wheel.is-revealing .is-slot-left {
-  animation: beginner-intro-slot-fade 360ms 1100ms ease forwards;
+  animation: beginner-intro-slot-fade 360ms 1230ms ease forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
-  animation: beginner-intro-question-out 180ms ease forwards;
+  animation: beginner-intro-question-out 360ms ease forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-label {
@@ -580,7 +581,11 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana {
-  animation: beginner-intro-hiragana-in 1520ms 120ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-hiragana-in 1700ms 140ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana small {
+  animation: beginner-intro-romaji-in 360ms 1380ms ease forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-words {
@@ -1047,6 +1052,7 @@ body:has(.beginner-word-writing-card) .app,
   0% {
     top: 0;
     width: 4.4rem;
+    height: 4.4rem;
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -1054,6 +1060,7 @@ body:has(.beginner-word-writing-card) .app,
   58% {
     top: 50%;
     width: 4.4rem;
+    height: 4.4rem;
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(-8deg) scale(1);
@@ -1061,6 +1068,7 @@ body:has(.beginner-word-writing-card) .app,
   to {
     top: 50%;
     width: 100%;
+    height: var(--intro-empty-wheel-size);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -1072,7 +1080,12 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-question-out {
-  to { opacity: 0; transform: rotate(16deg) scale(0.45); }
+  0% { opacity: 1; transform: translateX(0) rotate(0deg) scale(1); }
+  18% { opacity: 0.9; transform: translateX(-0.22rem) rotate(-8deg) scale(0.98); }
+  36% { opacity: 0.74; transform: translateX(0.22rem) rotate(8deg) scale(0.96); }
+  54% { opacity: 0.52; transform: translateX(-0.16rem) rotate(-6deg) scale(0.9); }
+  72% { opacity: 0.28; transform: translateX(0.12rem) rotate(5deg) scale(0.78); }
+  to { opacity: 0; transform: translateX(0) rotate(16deg) scale(0.45); }
 }
 
 @keyframes beginner-intro-hiragana-label-in {
@@ -1081,9 +1094,13 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-hiragana-in {
   0% { opacity: 0; transform: rotate(-18deg) scale(0.45); }
-  12% { opacity: 1; transform: rotate(0deg) scale(0.55); }
-  68% { opacity: 1; transform: rotate(0deg) scale(0.55); }
+  14% { opacity: 1; transform: rotate(0deg) scale(0.55); }
+  58% { opacity: 1; transform: rotate(0deg) scale(0.55); }
   to { opacity: 1; transform: translate(-2.15rem, -0.55rem) rotate(0deg) scale(1); }
+}
+
+@keyframes beginner-intro-romaji-in {
+  to { opacity: 1; }
 }
 
 @keyframes beginner-intro-slot-words-in {
