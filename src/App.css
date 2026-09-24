@@ -1068,6 +1068,10 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-speech h1 { font-size: 1.12rem; }
+  .beginner-intro-guide.is-systems .beginner-intro-speech h1 {
+    font-size: 1rem;
+    line-height: 1.16;
+  }
   .beginner-intro-guide.is-welcome .beginner-intro-speech h1,
   .beginner-intro-guide.is-simple .beginner-intro-speech h1 { font-size: 1.65rem; }
   .beginner-intro-speech p { font-size: 0.78rem; line-height: 1.48; }
@@ -1126,6 +1130,10 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-mascot { left: -1.1rem; width: 7.8rem; }
   .beginner-intro-speech { height: 9.45rem; min-height: 9.45rem; }
   .beginner-intro-speech h1 { font-size: 1rem; }
+  .beginner-intro-guide.is-systems .beginner-intro-speech h1 {
+    font-size: 0.9rem;
+    line-height: 1.15;
+  }
   .beginner-intro-guide.is-welcome .beginner-intro-speech h1,
   .beginner-intro-guide.is-simple .beginner-intro-speech h1 { font-size: 1.47rem; }
   .beginner-intro-speech p { font-size: 0.7rem; }
