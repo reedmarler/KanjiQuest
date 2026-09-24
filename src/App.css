@@ -202,6 +202,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-zone--intro {
   --intro-opening-move-duration: 1274ms;
+  --intro-speech-resize-duration: 637ms;
   --intro-welcome-shift: clamp(3.5rem, 10dvh, 6.5rem);
   position: relative;
   grid-template-rows: auto minmax(0, 1fr) auto;
@@ -265,10 +266,10 @@ body:has(.beginner-word-writing-card) .app,
   overflow: hidden;
   animation: beginner-intro-copy-in 540ms ease both;
   transition:
-    width var(--intro-opening-move-duration) linear,
-    height var(--intro-opening-move-duration) linear,
-    min-height var(--intro-opening-move-duration) linear,
-    padding var(--intro-opening-move-duration) linear;
+    width var(--intro-speech-resize-duration) linear,
+    height var(--intro-speech-resize-duration) linear,
+    min-height var(--intro-speech-resize-duration) linear,
+    padding var(--intro-speech-resize-duration) linear;
 }
 
 .beginner-intro-speech::before {
