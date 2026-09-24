@@ -279,6 +279,16 @@ function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: 
   }, [animate, durationMs, text])
 
   function renderIntroText(value: string) {
+    if (value === 'Japanese uses three writing systems.') {
+      return (
+        <>
+          Japanese uses three
+          <br />
+          writing systems.
+        </>
+      )
+    }
+
     if (value.startsWith('Hiragana is')) {
       return (
         <>

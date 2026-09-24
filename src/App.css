@@ -327,6 +327,22 @@ body:has(.beginner-word-writing-card) .app,
   font-size: 1.71rem;
 }
 
+.beginner-intro-guide.is-simple .beginner-intro-speech {
+  justify-self: start;
+  width: fit-content;
+  max-width: min(100%, 18rem);
+  height: auto;
+  min-height: 0;
+  padding: 0.95rem 1.05rem;
+}
+
+.beginner-intro-guide.is-simple .beginner-intro-speech h1 {
+  margin: 0;
+  font-size: 1.46rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
 .beginner-intro-speech p {
   margin: 0;
   color: var(--text-muted);
@@ -1087,8 +1103,20 @@ body:has(.beginner-word-writing-card) .app,
     font-size: 1rem;
     line-height: 1.16;
   }
-  .beginner-intro-guide.is-welcome .beginner-intro-speech h1,
-  .beginner-intro-guide.is-simple .beginner-intro-speech h1 { font-size: 1.65rem; }
+  .beginner-intro-guide.is-welcome .beginner-intro-speech h1 { font-size: 1.65rem; }
+  .beginner-intro-guide.is-simple .beginner-intro-speech {
+    width: fit-content;
+    max-width: calc(100% - 5.15rem);
+    height: auto;
+    min-height: 0;
+    margin-left: 5.15rem;
+    padding: 0.9rem 1rem 0.9rem 2.05rem;
+  }
+  .beginner-intro-guide.is-simple .beginner-intro-speech h1 {
+    font-size: 1.42rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
   .beginner-intro-speech p { font-size: 0.78rem; line-height: 1.48; }
 
   .beginner-intro-guide.is-simple .beginner-intro-mascot {
