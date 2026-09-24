@@ -498,11 +498,23 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-slot-hiragana {
+  align-content: center;
+  gap: 0.04em;
   color: var(--text);
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 6rem;
+  line-height: 0.78;
   opacity: 0;
   transform: rotate(-18deg) scale(0.45);
+}
+
+.beginner-intro-slot-hiragana small {
+  color: var(--sakura-light);
+  font: 800 0.22em/1 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-intro-slot-hiragana span {
+  display: block;
 }
 
 .beginner-intro-slot-words {
@@ -516,6 +528,12 @@ body:has(.beginner-word-writing-card) .app,
   font-family: 'Outfit', system-ui, sans-serif;
   opacity: 0;
   transform: translateY(calc(-50% + 0.45rem)) scale(0.94);
+}
+
+.beginner-intro-slot-words > b {
+  color: var(--sakura-light);
+  font: 800 0.52rem/1 'Outfit', system-ui, sans-serif;
+  text-align: center;
 }
 
 .beginner-intro-slot-words > span {
@@ -534,11 +552,6 @@ body:has(.beginner-word-writing-card) .app,
   line-height: 1;
 }
 
-.beginner-intro-slot-words b {
-  color: var(--text);
-  font: 800 0.82rem/1 'Noto Sans JP', sans-serif;
-}
-
 .beginner-intro-slot-words small {
   margin-top: 0;
   color: var(--text);
@@ -547,8 +560,6 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-top {
-  top: 50%;
-  width: 100%;
   border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
   background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
   box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
@@ -557,7 +568,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-right,
 .beginner-intro-empty-wheel.is-revealing .is-slot-left {
-  opacity: 1;
+  animation: beginner-intro-slot-fade 360ms 1100ms ease forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
@@ -746,9 +757,16 @@ body:has(.beginner-word-writing-card) .app,
   bottom: 0.6rem;
   left: 0.42rem;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.26rem;
   font-family: 'Outfit', system-ui, sans-serif;
+}
+
+.beginner-intro-node-words > b {
+  grid-column: 1 / -1;
+  color: var(--sakura-light);
+  font: 800 0.48rem/1 'Outfit', system-ui, sans-serif;
+  text-align: center;
 }
 
 .beginner-intro-node-words > span {
@@ -761,17 +779,11 @@ body:has(.beginner-word-writing-card) .app,
   background: color-mix(in srgb, var(--surface-2) 52%, transparent);
 }
 
-.beginner-intro-node-words b,
 .beginner-intro-node-words small {
   display: block;
   min-width: 0;
   line-height: 1;
   text-align: center;
-}
-
-.beginner-intro-node-words b {
-  color: var(--text);
-  font: 800 0.74rem/1 'Noto Sans JP', sans-serif;
 }
 
 .beginner-intro-node-words small {
@@ -1032,9 +1044,27 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-slot-expand {
-  0% { opacity: 0.72; filter: blur(5px); transform: translate(-50%, -50%) translateY(calc(var(--intro-empty-wheel-size) / -2)) rotate(-16deg) scale(0.275); }
-  42% { opacity: 0.86; filter: blur(2px); transform: translate(-50%, -50%) translateY(0) rotate(-8deg) scale(0.275); }
-  to { opacity: 1; filter: blur(0); transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  0% {
+    top: 0;
+    width: 4.4rem;
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  58% {
+    top: 50%;
+    width: 4.4rem;
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(-8deg) scale(1);
+  }
+  to {
+    top: 50%;
+    width: 100%;
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
 }
 
 @keyframes beginner-intro-slot-fade {
@@ -1269,7 +1299,10 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-empty-wheel.is-revealing .is-slot-right,
-  .beginner-intro-empty-wheel.is-revealing .is-slot-left,
+  .beginner-intro-empty-wheel.is-revealing .is-slot-left {
+    opacity: 0;
+  }
+
   .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
     opacity: 0;
   }

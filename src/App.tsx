@@ -526,10 +526,15 @@ function BeginnerZone({
                 <span className="beginner-intro-empty-slot is-slot-top">
                   <span className="beginner-intro-slot-question">?</span>
                   <span className="beginner-intro-slot-label">Hiragana</span>
-                  <span className="beginner-intro-slot-hiragana" lang="ja">あ</span>
+                  <span className="beginner-intro-slot-hiragana" lang="ja">
+                    <small lang="en">a</small>
+                    <span>あ</span>
+                  </span>
                   <span className="beginner-intro-slot-words">
+                    <b>Examples:</b>
                     <span><small>sushi</small></span>
                     <span><small>tsunami</small></span>
+                    <span><small>samurai</small></span>
                   </span>
                 </span>
                 <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">?</span>
@@ -561,8 +566,10 @@ function BeginnerZone({
                     <span className="beginner-intro-node-glyph">{item.mark}</span>
                     {item.id === 'hiragana' && isFocused && (
                       <span className="beginner-intro-node-words">
+                        <b>Examples:</b>
                         <span><small>sushi</small></span>
                         <span><small>tsunami</small></span>
+                        <span><small>samurai</small></span>
                       </span>
                     )}
                   </span>
