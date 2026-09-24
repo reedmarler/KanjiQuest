@@ -531,7 +531,7 @@ function BeginnerZone({
                     <span>あ</span>
                   </span>
                   <span className="beginner-intro-slot-words">
-                    <b>Examples:</b>
+                    <b>Native Words:</b>
                     <span><small>sushi</small></span>
                     <span><small>tsunami</small></span>
                     <span><small>samurai</small></span>
@@ -566,7 +566,7 @@ function BeginnerZone({
                     <span className="beginner-intro-node-glyph">{item.mark}</span>
                     {item.id === 'hiragana' && isFocused && (
                       <span className="beginner-intro-node-words">
-                        <b>Examples:</b>
+                        <b>Native Words:</b>
                         <span><small>sushi</small></span>
                         <span><small>tsunami</small></span>
                         <span><small>samurai</small></span>
