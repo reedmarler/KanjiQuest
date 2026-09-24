@@ -331,7 +331,9 @@ function BeginnerZone({
   const introTransitionTimerRef = useRef<number | null>(null)
   const introOpeningTimerRef = useRef<number | null>(null)
   const introOpeningFinishTimerRef = useRef<number | null>(null)
+  const introSpeechContentRef = useRef<HTMLDivElement>(null)
   const chartScrollRef = useRef<HTMLDivElement>(null)
+  const [introSpeechSize, setIntroSpeechSize] = useState<{ width: number; height: number } | null>(null)
   const deck = getBeginnerDeck(script)
   const columns = deck.rows.map((row, rowIndex) => ({ row, rowIndex })).reverse()
   const vowels = ['a', 'i', 'u', 'e', 'o']
@@ -432,6 +434,50 @@ function BeginnerZone({
     }
   }, [finishIntroOpeningShrink, introOpeningShrinking])
 
+  useLayoutEffect(() => {
+    if (!intro) return undefined
+
+    const content = introSpeechContentRef.current
+    if (!content) return undefined
+    const speech = content.parentElement
+    if (!(speech instanceof HTMLElement)) return undefined
+    const contentNode = content
+    const speechNode = speech
+
+    let frame = 0
+    function updateSpeechSize() {
+      if (frame) window.cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(() => {
+        const style = window.getComputedStyle(speechNode)
+        const horizontalPadding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
+        const verticalPadding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+        const contentRect = contentNode.getBoundingClientRect()
+        const nextSize = {
+          width: Math.ceil(contentRect.width + horizontalPadding),
+          height: Math.ceil(contentRect.height + verticalPadding),
+        }
+
+        setIntroSpeechSize((current) => (
+          current && Math.abs(current.width - nextSize.width) < 1 && Math.abs(current.height - nextSize.height) < 1
+            ? current
+            : nextSize
+        ))
+        frame = 0
+      })
+    }
+
+    updateSpeechSize()
+    const observer = new ResizeObserver(updateSpeechSize)
+    observer.observe(contentNode)
+    window.addEventListener('resize', updateSpeechSize)
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame)
+      observer.disconnect()
+      window.removeEventListener('resize', updateSpeechSize)
+    }
+  }, [intro, introOpeningPreview, introStep, introTransitioning])
+
   if (intro) {
     const displayIntroStep = introOpeningPreview && introStep === 0 ? 1 : introStep
     const step = BEGINNER_INTRO_STEPS[displayIntroStep]
@@ -450,10 +496,19 @@ function BeginnerZone({
           <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
           </div>
-          <div className="beginner-intro-speech" aria-live="polite">
-            {step.eyebrow && <small>{step.eyebrow}</small>}
-            <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_MS : 1400} /></h1>
-            {step.body && <p>{step.body}</p>}
+          <div
+            className="beginner-intro-speech"
+            aria-live="polite"
+            style={introSpeechSize ? {
+              '--intro-speech-width': `${introSpeechSize.width}px`,
+              '--intro-speech-height': `${introSpeechSize.height}px`,
+            } as CSSProperties : undefined}
+          >
+            <div className="beginner-intro-speech-inner" ref={introSpeechContentRef}>
+              {step.eyebrow && <small>{step.eyebrow}</small>}
+              <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_MS : 1400} /></h1>
+              {step.body && <p>{step.body}</p>}
+            </div>
           </div>
         </header>
 
