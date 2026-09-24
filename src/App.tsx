@@ -252,6 +252,29 @@ const BEGINNER_INTRO_STEPS = [
 
 const INTRO_OPENING_MOVE_MS = 1274
 
+function renderIntroDisplayText(value: string) {
+  if (value === 'Japanese uses three writing systems.') {
+    return (
+      <>
+        Japanese uses three
+        <br />
+        writing systems.
+      </>
+    )
+  }
+
+  if (value.startsWith('Hiragana is')) {
+    return (
+      <>
+        <span className="beginner-intro-title-highlight">Hiragana</span>
+        {value.slice('Hiragana'.length)}
+      </>
+    )
+  }
+
+  return value
+}
+
 function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: string; animate?: boolean; durationMs?: number }) {
   const displayedTextRef = useRef(text)
   const [displayedText, setDisplayedText] = useState(text)
@@ -278,35 +301,12 @@ function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: 
     return () => window.clearTimeout(swapTimer)
   }, [animate, durationMs, text])
 
-  function renderIntroText(value: string) {
-    if (value === 'Japanese uses three writing systems.') {
-      return (
-        <>
-          Japanese uses three
-          <br />
-          writing systems.
-        </>
-      )
-    }
-
-    if (value.startsWith('Hiragana is')) {
-      return (
-        <>
-          <span className="beginner-intro-title-highlight">Hiragana</span>
-          {value.slice('Hiragana'.length)}
-        </>
-      )
-    }
-
-    return value
-  }
-
   return (
     <span
       className={`beginner-intro-blur-text ${isBlurring ? 'is-blurring' : 'is-clear'}`}
       style={{ '--intro-blur-duration': `${durationMs / 2}ms` } as CSSProperties}
     >
-      {renderIntroText(displayedText)}
+      {renderIntroDisplayText(displayedText)}
     </span>
   )
 }
@@ -332,6 +332,7 @@ function BeginnerZone({
   const introOpeningTimerRef = useRef<number | null>(null)
   const introOpeningFinishTimerRef = useRef<number | null>(null)
   const introSpeechContentRef = useRef<HTMLDivElement>(null)
+  const introSpeechMeasureRef = useRef<HTMLDivElement>(null)
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const [introSpeechSize, setIntroSpeechSize] = useState<{ width: number; height: number } | null>(null)
   const deck = getBeginnerDeck(script)
@@ -437,7 +438,7 @@ function BeginnerZone({
   useLayoutEffect(() => {
     if (!intro) return undefined
 
-    const content = introSpeechContentRef.current
+    const content = introSpeechMeasureRef.current ?? introSpeechContentRef.current
     if (!content) return undefined
     const speech = content.parentElement
     if (!(speech instanceof HTMLElement)) return undefined
@@ -507,6 +508,11 @@ function BeginnerZone({
             <div className="beginner-intro-speech-inner" ref={introSpeechContentRef}>
               {step.eyebrow && <small>{step.eyebrow}</small>}
               <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_MS : 1400} /></h1>
+              {step.body && <p>{step.body}</p>}
+            </div>
+            <div className="beginner-intro-speech-inner beginner-intro-speech-measure" ref={introSpeechMeasureRef} aria-hidden="true">
+              {step.eyebrow && <small>{step.eyebrow}</small>}
+              <h1>{renderIntroDisplayText(step.title)}</h1>
               {step.body && <p>{step.body}</p>}
             </div>
           </div>
