@@ -291,7 +291,6 @@ body:has(.beginner-word-writing-card) .app,
   color: var(--text);
   font-size: 1.22rem;
   line-height: 1.18;
-  transition: font-size 2400ms linear;
 }
 
 .beginner-intro-title-highlight {
@@ -831,8 +830,12 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-controls > div:last-child {
-  display: flex;
+  --intro-control-side: 2.55rem;
+  --intro-control-main: 8.1rem;
+  display: grid;
+  grid-template-columns: var(--intro-control-side) var(--intro-control-main) var(--intro-control-side);
   justify-content: center;
+  align-items: center;
   gap: 0.45rem;
   width: 100%;
 }
@@ -855,6 +858,12 @@ body:has(.beginner-word-writing-card) .app,
   width: 2.55rem;
   background: var(--surface-2);
   color: var(--text-muted);
+}
+
+.beginner-intro-control-spacer {
+  display: block;
+  width: 2.55rem;
+  min-height: 2.55rem;
 }
 
 .beginner-intro-next {

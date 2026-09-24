@@ -534,21 +534,22 @@ function BeginnerZone({
 
         <footer className={`beginner-intro-controls${introStep > 0 ? ' is-lowered' : ''}`}>
           <div>
-            {introStep >= 2 && (
+            {isFinalStep ? (
+              <button type="button" className="beginner-intro-replay" onClick={() => goToIntroStep(0)} aria-label="Replay introduction">
+                <RotateCcw aria-hidden="true" />
+              </button>
+            ) : introStep >= 2 ? (
               <button type="button" className="beginner-intro-back" onClick={() => goToIntroStep(introStep - 1)} disabled={introTransitioning} aria-label="Previous introduction step">
                 <ArrowLeft aria-hidden="true" />
               </button>
+            ) : (
+              <span className="beginner-intro-control-spacer" aria-hidden="true" />
             )}
             {isFinalStep ? (
-              <>
-                <button type="button" className="beginner-intro-replay" onClick={() => goToIntroStep(0)} aria-label="Replay introduction">
-                  <RotateCcw aria-hidden="true" />
-                </button>
-                <button type="button" className="beginner-intro-next" onClick={() => onOpenIntroScript?.('hiragana')}>
-                  Start with Hiragana
-                  <ArrowRight aria-hidden="true" />
-                </button>
-              </>
+              <button type="button" className="beginner-intro-next" onClick={() => onOpenIntroScript?.('hiragana')}>
+                Start with Hiragana
+                <ArrowRight aria-hidden="true" />
+              </button>
             ) : (
               <button
                 type="button"
@@ -565,6 +566,7 @@ function BeginnerZone({
                 <ArrowRight aria-hidden="true" />
               </button>
             )}
+            <span className="beginner-intro-control-spacer" aria-hidden="true" />
           </div>
         </footer>
       </main>
