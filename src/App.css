@@ -1069,7 +1069,7 @@ body:has(.beginner-word-writing-card) .app,
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) translateY(calc(var(--intro-empty-wheel-size) / 2)) rotate(-8deg) scale(1);
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
   to {
     width: 100%;
@@ -1079,7 +1079,7 @@ body:has(.beginner-word-writing-card) .app,
     box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) translateY(calc(var(--intro-empty-wheel-size) / 2)) rotate(0deg) scale(1);
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
 }
 
@@ -1203,9 +1203,14 @@ body:has(.beginner-word-writing-card) .app,
   }
   .beginner-intro-guide.is-welcome .beginner-intro-speech h1,
   .beginner-intro-guide.is-simple .beginner-intro-speech h1 {
-    font-size: clamp(1.18rem, 5.05vw, 1.42rem);
     font-weight: 600;
     line-height: 1.2;
+  }
+  .beginner-intro-guide.is-welcome .beginner-intro-speech h1 {
+    font-size: 1.42rem;
+  }
+  .beginner-intro-guide.is-simple .beginner-intro-speech h1 {
+    font-size: clamp(1.18rem, 5.05vw, 1.42rem);
     white-space: nowrap;
   }
   .beginner-intro-speech p { font-size: 0.78rem; line-height: 1.48; }
