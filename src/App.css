@@ -1078,23 +1078,29 @@ body:has(.beginner-word-writing-card) .app,
 
   .beginner-intro-guide {
     position: relative;
-    display: block;
+    display: grid;
+    grid-template-columns: 5.15rem minmax(0, 1fr);
+    align-items: center;
     min-height: 10.35rem;
   }
 
   .beginner-intro-mascot {
-    position: absolute;
-    top: 0.1rem;
+    position: relative;
+    top: auto;
     left: -1.25rem;
     z-index: 2;
+    grid-column: 1;
+    grid-row: 1;
     width: 8.25rem;
   }
 
   .beginner-intro-speech {
-    width: calc(100% - 5.15rem);
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
     height: 10.35rem;
     min-height: 10.35rem;
-    margin-left: 5.15rem;
+    margin-left: 0;
     padding: 0.75rem 0.72rem 0.75rem 2.05rem;
   }
 
@@ -1106,10 +1112,10 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-guide.is-welcome .beginner-intro-speech h1 { font-size: 1.65rem; }
   .beginner-intro-guide.is-simple .beginner-intro-speech {
     width: fit-content;
-    max-width: calc(100% - 5.15rem);
+    max-width: 100%;
     height: auto;
     min-height: 0;
-    margin-left: 5.15rem;
+    margin-left: 0;
     padding: 0.9rem 1rem 0.9rem 2.05rem;
   }
   .beginner-intro-guide.is-simple .beginner-intro-speech h1 {
