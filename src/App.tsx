@@ -440,7 +440,7 @@ function BeginnerZone({
           <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
           </div>
-          <div className="beginner-intro-speech" key={`speech-${displayIntroStep <= 2 ? 'opening' : step.id}`} aria-live="polite">
+          <div className="beginner-intro-speech" aria-live="polite">
             {step.eyebrow && <small>{step.eyebrow}</small>}
             <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_MS : 1400} /></h1>
             {step.body && <p>{step.body}</p>}

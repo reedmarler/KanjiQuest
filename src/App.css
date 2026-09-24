@@ -307,8 +307,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-blur-text.is-blurring {
-  filter: blur(14px);
-  opacity: 0.08;
+  filter: blur(8px);
+  opacity: 0.18;
   transition:
     filter var(--intro-blur-duration, 1400ms) linear,
     opacity var(--intro-blur-duration, 1400ms) linear;
@@ -1095,6 +1095,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-lesson.is-welcome { min-height: 22rem; }
   .beginner-intro-lesson.is-simple { min-height: 22rem; }
   .beginner-intro-lesson.is-systems { min-height: 20.4rem; }
+  .beginner-intro-lesson.is-hiragana { min-height: 20.4rem; }
   .beginner-intro-orbit { width: min(100%, 17rem); }
   .beginner-intro-ring { inset: 1.9rem; }
   .beginner-intro-empty-wheel { --intro-empty-wheel-size: min(15.5rem, 76dvw); }
