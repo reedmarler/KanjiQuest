@@ -557,7 +557,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-right,
 .beginner-intro-empty-wheel.is-revealing .is-slot-left {
-  animation: beginner-intro-slot-fade 450ms ease forwards;
+  opacity: 1;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
