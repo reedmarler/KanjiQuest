@@ -1056,7 +1056,7 @@ body:has(.beginner-word-writing-card) .app,
     grid-template-rows: auto auto auto;
     align-content: start;
     min-height: calc(100dvh - 6rem);
-    padding: 0.5rem 0 calc(6.85rem + env(safe-area-inset-bottom));
+    padding: 0.5rem 0 calc(8.35rem + env(safe-area-inset-bottom));
     gap: 0.65rem;
   }
 
@@ -1134,7 +1134,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-example p { justify-content: center; }
   .beginner-intro-example.is-together > strong { font-size: 1.85rem; }
   .beginner-intro-controls {
-    bottom: calc(2.75rem + env(safe-area-inset-bottom));
+    bottom: calc(4.25rem + env(safe-area-inset-bottom));
   }
   .beginner-intro-controls.is-lowered {
     transform: none;
