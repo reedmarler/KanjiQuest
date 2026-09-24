@@ -1140,7 +1140,7 @@ body:has(.beginner-word-writing-card) .app,
     transform: none;
   }
   .beginner-intro-next.is-yes {
-    --intro-yes-y: 0;
+    --intro-yes-y: -1.5rem;
   }
 }
 
