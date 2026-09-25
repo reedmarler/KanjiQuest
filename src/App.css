@@ -1293,7 +1293,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-ring { inset: 1.9rem; }
   .beginner-intro-empty-wheel {
     --intro-empty-wheel-size: min(14.75rem, 72dvw);
-    --intro-expanded-wheel-size: min(22.1rem, 96dvw);
+    --intro-expanded-wheel-size: min(18.8rem, 81.6dvw);
     --intro-expanded-start-scale: 0.2;
     top: 58%;
   }
