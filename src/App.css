@@ -292,8 +292,9 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-speech-inner {
   display: inline-grid;
   align-content: center;
-  justify-items: start;
+  justify-items: center;
   max-width: 100%;
+  text-align: center;
 }
 
 .beginner-intro-speech-copy {
@@ -1266,7 +1267,7 @@ body:has(.beginner-word-writing-card) .app,
     transform: none;
   }
   .beginner-intro-next.is-yes {
-    --intro-yes-y: -1.5rem;
+    --intro-yes-y: -2rem;
   }
 }
 
