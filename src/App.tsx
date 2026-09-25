@@ -253,6 +253,16 @@ const BEGINNER_INTRO_STEPS = [
 const INTRO_OPENING_MOVE_MS = 1274
 
 function renderIntroDisplayText(value: string) {
+  if (value === 'Want to learn Japanese?') {
+    return (
+      <>
+        Want to learn
+        <br />
+        Japanese?
+      </>
+    )
+  }
+
   if (value === 'Japanese uses three writing systems.') {
     return (
       <>
