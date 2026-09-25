@@ -529,7 +529,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-hiragana span {
   display: block;
   line-height: 1;
-  transform: translateX(-0.12em);
+  transform: translateX(-0.16em);
 }
 
 .beginner-intro-slot-words {
@@ -1124,11 +1124,10 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-question-out {
-  0% { opacity: 1; transform: translateX(0) rotate(0deg) scale(1); }
-  22% { opacity: 0.96; transform: translateX(-0.08rem) rotate(-3deg) scale(0.99); }
-  44% { opacity: 0.78; transform: translateX(0.08rem) rotate(3deg) scale(0.96); }
-  68% { opacity: 0.42; transform: translateX(-0.04rem) rotate(-1.5deg) scale(0.86); }
-  to { opacity: 0; transform: translateX(0) rotate(0deg) scale(0.64); }
+  0% { opacity: 1; filter: blur(0); transform: translateX(0) rotate(0deg) scale(1); }
+  30% { opacity: 0.92; filter: blur(1px); transform: translateX(-0.04rem) rotate(-1.5deg) scale(0.98); }
+  62% { opacity: 0.42; filter: blur(4px); transform: translateX(0.04rem) rotate(1.5deg) scale(0.84); }
+  to { opacity: 0; filter: blur(8px); transform: translateX(0) rotate(0deg) scale(0.64); }
 }
 
 @keyframes beginner-intro-hiragana-label-in {
@@ -1136,12 +1135,12 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-hiragana-in {
-  0% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.3); }
-  16% { opacity: 0.18; transform: translate(0, 0) rotate(0deg) scale(0.32); }
-  33% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.38); }
-  72% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.38); }
-  91% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
-  to { opacity: 1; transform: translate(-2.15rem, -0.55rem) rotate(0deg) scale(1); }
+  0% { opacity: 0; filter: blur(8px); transform: translate(0, 0) rotate(0deg) scale(0.3); }
+  16% { opacity: 0.18; filter: blur(5px); transform: translate(0, 0) rotate(0deg) scale(0.32); }
+  33% { opacity: 1; filter: blur(0); transform: translate(0, 0) rotate(0deg) scale(0.38); }
+  72% { opacity: 1; filter: blur(0); transform: translate(0, 0) rotate(0deg) scale(0.38); }
+  91% { opacity: 1; filter: blur(0); transform: translate(0, 0) rotate(0deg) scale(1); }
+  to { opacity: 1; filter: blur(0); transform: translate(-2.15rem, -0.55rem) rotate(0deg) scale(1); }
 }
 
 @keyframes beginner-intro-romaji-in {
