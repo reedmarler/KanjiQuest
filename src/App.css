@@ -507,6 +507,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-slot-hiragana {
+  --intro-kana-optical-x: -0.42rem;
   align-content: center;
   justify-items: center;
   color: var(--text);
@@ -520,7 +521,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-hiragana small {
   position: absolute;
   top: 3.55rem;
-  left: 50%;
+  left: calc(50% + var(--intro-kana-optical-x));
   color: #fff;
   font: 800 0.22em/1 'Outfit', system-ui, sans-serif;
   opacity: 0;
@@ -530,6 +531,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-hiragana span {
   display: block;
   line-height: 1;
+  transform: translateX(var(--intro-kana-optical-x));
 }
 
 .beginner-intro-slot-words {
@@ -1135,14 +1137,14 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-hiragana-in {
-  0% { opacity: 0; filter: blur(8px); transform: translate(0, 0) rotate(0deg) scale(0.3); }
-  16% { opacity: 0.18; filter: blur(5px); transform: translate(0, 0) rotate(0deg) scale(0.32); }
-  33% { opacity: 1; filter: blur(0); transform: translate(0, 0) rotate(0deg) scale(0.38); }
-  72% { opacity: 1; filter: blur(0); transform: translate(0, 0) rotate(0deg) scale(0.38); }
-  78% { opacity: 1; filter: blur(0); transform: translate(0, 0) rotate(0deg) scale(0.55); }
-  84% { opacity: 1; filter: blur(0); transform: translate(0, 0) rotate(0deg) scale(0.74); }
-  91% { opacity: 1; filter: blur(0); transform: translate(0, 0) rotate(0deg) scale(1); }
-  94% { opacity: 1; filter: blur(0); transform: translate(0, 0) rotate(0deg) scale(1); }
+  0% { opacity: 0; filter: blur(8px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.3); }
+  16% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.32); }
+  33% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
+  72% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
+  78% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.55); }
+  84% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.74); }
+  91% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
+  94% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
   to { opacity: 1; filter: blur(0); transform: translate(-2.15rem, 0) rotate(0deg) scale(1); }
 }
 
@@ -1206,6 +1208,7 @@ body:has(.beginner-word-writing-card) .app,
     min-height: 10.75rem;
   }
 
+  .beginner-intro-guide.is-simple,
   .beginner-intro-guide.is-systems {
     margin-top: -0.85rem;
     margin-bottom: -0.35rem;
