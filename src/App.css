@@ -1100,62 +1100,7 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  74% {
-    top: 50%;
-    width: 28%;
-    height: 28%;
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0.08rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.45rem 1.1rem rgba(0, 0, 0, 0.22);
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-  76% {
-    top: 50%;
-    width: 40%;
-    height: 40%;
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0.12rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.5rem 1.25rem rgba(0, 0, 0, 0.23);
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-  80% {
-    top: 50%;
-    width: 64%;
-    height: 64%;
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0.28rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.7rem 1.7rem rgba(0, 0, 0, 0.24);
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-  82% {
-    top: 50%;
-    width: 76%;
-    height: 76%;
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0.36rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.8rem 1.9rem rgba(0, 0, 0, 0.24);
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-  84% {
-    top: 50%;
-    width: 88%;
-    height: 88%;
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0.45rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.9rem 2.2rem rgba(0, 0, 0, 0.25);
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-  86% {
+  88% {
     top: 50%;
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-size);
@@ -1199,14 +1144,8 @@ body:has(.beginner-word-writing-card) .app,
   10% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.32); }
   21% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
   72% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  74% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.47); }
-  76% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.56); }
-  78% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.65); }
-  80% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.74); }
-  82% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.83); }
-  84% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.92); }
-  86% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
-  90% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
+  88% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
+  92% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
   to { opacity: 1; filter: blur(0); transform: translate(-2.15rem, 0) rotate(0deg) scale(1); }
 }
 
@@ -1341,7 +1280,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-ring { inset: 1.9rem; }
   .beginner-intro-empty-wheel {
     --intro-empty-wheel-size: min(14.75rem, 72dvw);
-    --intro-expanded-wheel-size: min(16rem, 74dvw);
+    --intro-expanded-wheel-size: min(18.4rem, 85dvw);
     top: 58%;
   }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: 58%; }
