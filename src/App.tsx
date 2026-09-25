@@ -252,6 +252,7 @@ const BEGINNER_INTRO_STEPS = [
 
 const INTRO_OPENING_MOVE_MS = 1274
 const INTRO_SPEECH_RESIZE_MS = 560
+const INTRO_STANDARD_SPEECH_STEP_INDEX = 2
 
 function renderIntroDisplayText(value: string) {
   if (value === 'Want to learn Japanese?') {
@@ -349,6 +350,7 @@ function BeginnerZone({
   const introSpeechDisplayStepRef = useRef(0)
   const introSpeechContentRef = useRef<HTMLDivElement>(null)
   const introSpeechMeasureRef = useRef<HTMLDivElement>(null)
+  const introSpeechWidthMeasureRef = useRef<HTMLDivElement>(null)
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const [introSpeechSize, setIntroSpeechSize] = useState<{ width: number; height: number } | null>(null)
   const deck = getBeginnerDeck(script)
@@ -464,10 +466,12 @@ function BeginnerZone({
     if (!intro) return undefined
 
     const content = introSpeechMeasureRef.current ?? introSpeechContentRef.current
-    if (!content) return undefined
+    const widthProbe = introSpeechWidthMeasureRef.current ?? content
+    if (!content || !widthProbe) return undefined
     const speech = content.parentElement
     if (!(speech instanceof HTMLElement)) return undefined
     const contentNode = content
+    const widthProbeNode = widthProbe
     const speechNode = speech
 
     let frame = 0
@@ -489,10 +493,11 @@ function BeginnerZone({
         const maxOuterWidth = Math.min(18 * parseFloat(window.getComputedStyle(document.documentElement).fontSize), availableOuterWidth)
         const maxContentWidth = Math.max(0, maxOuterWidth - horizontalPadding - horizontalBorder)
 
-        contentNode.style.width = 'max-content'
-        contentNode.style.maxWidth = 'none'
-        const contentWidth = Math.min(contentNode.getBoundingClientRect().width, maxContentWidth)
+        widthProbeNode.style.width = 'max-content'
+        widthProbeNode.style.maxWidth = 'none'
+        const contentWidth = Math.min(widthProbeNode.getBoundingClientRect().width, maxContentWidth)
         contentNode.style.width = `${contentWidth}px`
+        contentNode.style.maxWidth = 'none'
         const contentRect = contentNode.getBoundingClientRect()
         const nextSize = {
           width: Math.ceil(contentWidth + horizontalPadding + horizontalBorder),
@@ -589,6 +594,9 @@ function BeginnerZone({
               {step.eyebrow && <small>{step.eyebrow}</small>}
               <h1>{renderIntroDisplayText(step.title)}</h1>
               {step.body && <p>{step.body}</p>}
+            </div>
+            <div className="beginner-intro-speech-inner beginner-intro-speech-measure is-systems" ref={introSpeechWidthMeasureRef} aria-hidden="true">
+              <h1>{renderIntroDisplayText(BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX].title)}</h1>
             </div>
           </div>
         </header>
