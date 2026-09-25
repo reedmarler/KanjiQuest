@@ -214,7 +214,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-guide {
   display: grid;
   grid-template-columns: 3.9rem minmax(0, 1fr);
-  align-items: center;
+  align-items: start;
   gap: 0.75rem;
   width: 100%;
   transition: transform var(--intro-opening-move-duration) linear;
@@ -222,6 +222,12 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-guide.is-welcome {
   transform: translateY(var(--intro-welcome-shift));
+}
+
+.beginner-intro-guide.is-welcome .beginner-intro-mascot,
+.beginner-intro-guide.is-simple .beginner-intro-mascot,
+.beginner-intro-guide.is-systems .beginner-intro-mascot {
+  margin-top: calc((var(--intro-speech-height, 6.5rem) - 3.9rem) / 2);
 }
 
 .beginner-intro-mascot {
@@ -233,7 +239,9 @@ body:has(.beginner-word-writing-card) .app,
   background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
   box-shadow: 0 0.45rem 1.1rem color-mix(in srgb, var(--sakura) 18%, transparent);
   transform-origin: center;
-  transition: transform var(--intro-opening-move-duration) linear;
+  transition:
+    margin-top var(--intro-speech-resize-duration) linear,
+    transform var(--intro-opening-move-duration) linear;
 }
 
 .beginner-intro-guide.is-simple .beginner-intro-mascot {
@@ -257,6 +265,7 @@ body:has(.beginner-word-writing-card) .app,
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-self: start;
   height: 6.5rem;
   min-height: 6.5rem;
   padding: 0.95rem 0.95rem;
@@ -1162,7 +1171,7 @@ body:has(.beginner-word-writing-card) .app,
     position: relative;
     display: grid;
     grid-template-columns: 5.15rem minmax(0, 1fr);
-    align-items: center;
+    align-items: start;
     min-height: 10.35rem;
   }
 
@@ -1184,6 +1193,12 @@ body:has(.beginner-word-writing-card) .app,
     min-height: 10.35rem;
     margin-left: 0;
     padding: 0.9rem 0.9rem 0.9rem 2.05rem;
+  }
+
+  .beginner-intro-guide.is-welcome .beginner-intro-mascot,
+  .beginner-intro-guide.is-simple .beginner-intro-mascot,
+  .beginner-intro-guide.is-systems .beginner-intro-mascot {
+    margin-top: calc((var(--intro-speech-height, 10.35rem) - 8.25rem) / 2);
   }
 
   .beginner-intro-speech h1 { font-size: 1.12rem; }
