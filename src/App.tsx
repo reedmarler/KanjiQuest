@@ -251,6 +251,7 @@ const BEGINNER_INTRO_STEPS = [
 ] as const
 
 const INTRO_OPENING_MOVE_MS = 1274
+const INTRO_SPEECH_RESIZE_MS = 560
 
 function renderIntroDisplayText(value: string) {
   if (value === 'Want to learn Japanese?') {
@@ -338,9 +339,14 @@ function BeginnerZone({
   const [introOpeningShrinking, setIntroOpeningShrinking] = useState(false)
   const [introOpeningShrinkDone, setIntroOpeningShrinkDone] = useState(false)
   const [introTransitioning, setIntroTransitioning] = useState(false)
+  const [introSpeechDisplayStep, setIntroSpeechDisplayStep] = useState(0)
+  const [introSpeechCopyBlurred, setIntroSpeechCopyBlurred] = useState(false)
   const introTransitionTimerRef = useRef<number | null>(null)
   const introOpeningTimerRef = useRef<number | null>(null)
   const introOpeningFinishTimerRef = useRef<number | null>(null)
+  const introSpeechTimerRef = useRef<number | null>(null)
+  const introSpeechFrameRef = useRef<number | null>(null)
+  const introSpeechDisplayStepRef = useRef(0)
   const introSpeechContentRef = useRef<HTMLDivElement>(null)
   const introSpeechMeasureRef = useRef<HTMLDivElement>(null)
   const chartScrollRef = useRef<HTMLDivElement>(null)
@@ -374,19 +380,28 @@ function BeginnerZone({
     if (introTransitionTimerRef.current !== null) window.clearTimeout(introTransitionTimerRef.current)
     if (introOpeningTimerRef.current !== null) window.clearTimeout(introOpeningTimerRef.current)
     if (introOpeningFinishTimerRef.current !== null) window.clearTimeout(introOpeningFinishTimerRef.current)
+    if (introSpeechTimerRef.current !== null) window.clearTimeout(introSpeechTimerRef.current)
+    if (introSpeechFrameRef.current !== null) window.cancelAnimationFrame(introSpeechFrameRef.current)
   }, [])
 
   function goToIntroStep(nextStep: number) {
     if (introTransitionTimerRef.current !== null) window.clearTimeout(introTransitionTimerRef.current)
     if (introOpeningTimerRef.current !== null) window.clearTimeout(introOpeningTimerRef.current)
     if (introOpeningFinishTimerRef.current !== null) window.clearTimeout(introOpeningFinishTimerRef.current)
+    if (introSpeechTimerRef.current !== null) window.clearTimeout(introSpeechTimerRef.current)
+    if (introSpeechFrameRef.current !== null) window.cancelAnimationFrame(introSpeechFrameRef.current)
     introTransitionTimerRef.current = null
     introOpeningTimerRef.current = null
     introOpeningFinishTimerRef.current = null
+    introSpeechTimerRef.current = null
+    introSpeechFrameRef.current = null
     setIntroTransitioning(false)
     setIntroOpeningPreview(false)
     setIntroOpeningShrinking(false)
     setIntroOpeningShrinkDone(false)
+    introSpeechDisplayStepRef.current = nextStep
+    setIntroSpeechDisplayStep(nextStep)
+    setIntroSpeechCopyBlurred(false)
     setIntroStep(nextStep)
   }
 
@@ -460,12 +475,28 @@ function BeginnerZone({
       if (frame) window.cancelAnimationFrame(frame)
       frame = window.requestAnimationFrame(() => {
         const style = window.getComputedStyle(speechNode)
+        const guide = speechNode.parentElement
+        if (!guide) {
+          frame = 0
+          return
+        }
+
         const horizontalPadding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
         const verticalPadding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+        const horizontalBorder = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth)
+        const verticalBorder = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth)
+        const availableOuterWidth = guide.getBoundingClientRect().right - speechNode.getBoundingClientRect().left
+        const maxOuterWidth = Math.min(18 * parseFloat(window.getComputedStyle(document.documentElement).fontSize), availableOuterWidth)
+        const maxContentWidth = Math.max(0, maxOuterWidth - horizontalPadding - horizontalBorder)
+
+        contentNode.style.width = 'max-content'
+        contentNode.style.maxWidth = 'none'
+        const contentWidth = Math.min(contentNode.getBoundingClientRect().width, maxContentWidth)
+        contentNode.style.width = `${contentWidth}px`
         const contentRect = contentNode.getBoundingClientRect()
         const nextSize = {
-          width: Math.ceil(contentRect.width + horizontalPadding),
-          height: Math.ceil(contentRect.height + verticalPadding),
+          width: Math.ceil(contentWidth + horizontalPadding + horizontalBorder),
+          height: Math.ceil(contentRect.height + verticalPadding + verticalBorder),
         }
 
         setIntroSpeechSize((current) => (
@@ -478,20 +509,51 @@ function BeginnerZone({
     }
 
     updateSpeechSize()
-    const observer = new ResizeObserver(updateSpeechSize)
-    observer.observe(contentNode)
     window.addEventListener('resize', updateSpeechSize)
 
     return () => {
       if (frame) window.cancelAnimationFrame(frame)
-      observer.disconnect()
       window.removeEventListener('resize', updateSpeechSize)
     }
   }, [intro, introOpeningPreview, introStep, introTransitioning])
 
+  const displayIntroStep = introOpeningPreview && introStep === 0 ? 1 : introStep
+
+  useEffect(() => {
+    if (!intro || displayIntroStep === introSpeechDisplayStepRef.current) return undefined
+
+    if (introSpeechTimerRef.current !== null) window.clearTimeout(introSpeechTimerRef.current)
+    if (introSpeechFrameRef.current !== null) window.cancelAnimationFrame(introSpeechFrameRef.current)
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      introSpeechDisplayStepRef.current = displayIntroStep
+      setIntroSpeechDisplayStep(displayIntroStep)
+      setIntroSpeechCopyBlurred(false)
+      return undefined
+    }
+
+    setIntroSpeechCopyBlurred(true)
+    introSpeechTimerRef.current = window.setTimeout(() => {
+      introSpeechDisplayStepRef.current = displayIntroStep
+      setIntroSpeechDisplayStep(displayIntroStep)
+      introSpeechFrameRef.current = window.requestAnimationFrame(() => {
+        setIntroSpeechCopyBlurred(false)
+        introSpeechFrameRef.current = null
+      })
+      introSpeechTimerRef.current = null
+    }, INTRO_SPEECH_RESIZE_MS)
+
+    return () => {
+      if (introSpeechTimerRef.current !== null) window.clearTimeout(introSpeechTimerRef.current)
+      if (introSpeechFrameRef.current !== null) window.cancelAnimationFrame(introSpeechFrameRef.current)
+      introSpeechTimerRef.current = null
+      introSpeechFrameRef.current = null
+    }
+  }, [displayIntroStep, intro])
+
   if (intro) {
-    const displayIntroStep = introOpeningPreview && introStep === 0 ? 1 : introStep
     const step = BEGINNER_INTRO_STEPS[displayIntroStep]
+    const speechDisplayStep = BEGINNER_INTRO_STEPS[introSpeechDisplayStep]
     const guideStep = introOpeningPreview && introStep === 0 && !introOpeningShrinking
       ? BEGINNER_INTRO_STEPS[0]
       : step
@@ -503,7 +565,7 @@ function BeginnerZone({
 
     return (
       <main className="beginner-zone beginner-zone--intro">
-        <header className={`beginner-intro-guide is-${guideStep.id}${introOpeningShrinking ? ' is-opening-copy-swap' : ''}`}>
+        <header className={`beginner-intro-guide is-${guideStep.id}`}>
           <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
           </div>
@@ -515,12 +577,15 @@ function BeginnerZone({
               '--intro-speech-height': `${introSpeechSize.height}px`,
             } as CSSProperties : undefined}
           >
-            <div className="beginner-intro-speech-inner" ref={introSpeechContentRef}>
-              {step.eyebrow && <small>{step.eyebrow}</small>}
-              <h1><IntroBlurSwapText text={step.title} animate={displayIntroStep <= 2} durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_MS : 1400} /></h1>
-              {step.body && <p>{step.body}</p>}
+            <div
+              className={`beginner-intro-speech-inner beginner-intro-speech-copy is-${speechDisplayStep.id}${introSpeechCopyBlurred ? ' is-blurred' : ''}`}
+              ref={introSpeechContentRef}
+            >
+              {speechDisplayStep.eyebrow && <small>{speechDisplayStep.eyebrow}</small>}
+              <h1>{renderIntroDisplayText(speechDisplayStep.title)}</h1>
+              {speechDisplayStep.body && <p>{speechDisplayStep.body}</p>}
             </div>
-            <div className="beginner-intro-speech-inner beginner-intro-speech-measure" ref={introSpeechMeasureRef} aria-hidden="true">
+            <div className={`beginner-intro-speech-inner beginner-intro-speech-measure is-${step.id}`} ref={introSpeechMeasureRef} aria-hidden="true">
               {step.eyebrow && <small>{step.eyebrow}</small>}
               <h1>{renderIntroDisplayText(step.title)}</h1>
               {step.body && <p>{step.body}</p>}

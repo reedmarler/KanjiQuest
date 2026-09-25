@@ -202,7 +202,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-zone--intro {
   --intro-opening-move-duration: 1274ms;
-  --intro-speech-resize-duration: 637ms;
+  --intro-speech-resize-duration: 560ms;
   --intro-welcome-shift: clamp(3.5rem, 10dvh, 6.5rem);
   position: relative;
   grid-template-rows: auto minmax(0, 1fr) auto;
@@ -262,13 +262,17 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-speech {
   position: relative;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-self: start;
-  height: 6.5rem;
-  min-height: 6.5rem;
-  padding: 0.95rem 0.95rem;
+  justify-self: start;
+  width: var(--intro-speech-width, fit-content);
+  max-width: min(100%, 18rem);
+  height: var(--intro-speech-height, auto);
+  min-height: 0;
+  padding: 0.95rem 1.05rem;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 24%, var(--border));
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface-2) 94%, var(--sakura) 6%);
@@ -277,8 +281,7 @@ body:has(.beginner-word-writing-card) .app,
   transition:
     width var(--intro-speech-resize-duration) linear,
     height var(--intro-speech-resize-duration) linear,
-    min-height var(--intro-speech-resize-duration) linear,
-    padding var(--intro-speech-resize-duration) linear;
+    min-height var(--intro-speech-resize-duration) linear;
 }
 
 .beginner-intro-speech::before {
@@ -299,6 +302,18 @@ body:has(.beginner-word-writing-card) .app,
   align-content: center;
   justify-items: start;
   max-width: 100%;
+}
+
+.beginner-intro-speech-copy {
+  filter: blur(0);
+  opacity: 1;
+  transition: filter 240ms linear, opacity 240ms linear;
+  will-change: filter, opacity;
+}
+
+.beginner-intro-speech-copy.is-blurred {
+  filter: blur(8px);
+  opacity: 0.12;
 }
 
 .beginner-intro-speech-measure {
@@ -351,28 +366,19 @@ body:has(.beginner-word-writing-card) .app,
     opacity var(--intro-blur-duration, 1400ms) linear;
 }
 
-.beginner-intro-guide.is-welcome .beginner-intro-speech h1,
-.beginner-intro-guide.is-simple .beginner-intro-speech h1 {
-  font-size: 1.71rem;
-}
-
-.beginner-intro-guide.is-welcome .beginner-intro-speech,
-.beginner-intro-guide.is-systems .beginner-intro-speech,
-.beginner-intro-guide.is-simple .beginner-intro-speech {
-  justify-self: start;
-  width: var(--intro-speech-width, fit-content);
-  max-width: min(100%, 18rem);
-  height: var(--intro-speech-height, auto);
-  min-height: 0;
-  padding: 0.95rem 1.05rem;
-}
-
-.beginner-intro-guide.is-welcome .beginner-intro-speech h1,
-.beginner-intro-guide.is-simple .beginner-intro-speech h1 {
+.beginner-intro-speech-inner.is-welcome h1,
+.beginner-intro-speech-inner.is-simple h1 {
   margin: 0;
-  font-size: 1.46rem;
   font-weight: 600;
   line-height: 1.2;
+}
+
+.beginner-intro-speech-inner.is-welcome h1 {
+  font-size: 1.46rem;
+}
+
+.beginner-intro-speech-inner.is-simple h1 {
+  font-size: 1.26rem;
 }
 
 .beginner-intro-speech p {
@@ -1188,11 +1194,12 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-speech {
     grid-column: 2;
     grid-row: 1;
-    width: 100%;
-    height: 10.35rem;
-    min-height: 10.35rem;
+    width: var(--intro-speech-width, fit-content);
+    max-width: 100%;
+    height: var(--intro-speech-height, auto);
+    min-height: 0;
     margin-left: 0;
-    padding: 0.9rem 0.9rem 0.9rem 2.05rem;
+    padding: 0.9rem 1rem 0.9rem 2.05rem;
   }
 
   .beginner-intro-guide.is-welcome .beginner-intro-mascot,
@@ -1202,35 +1209,22 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-speech h1 { font-size: 1.12rem; }
-  .beginner-intro-guide.is-systems .beginner-intro-speech h1 {
+  .beginner-intro-speech-inner.is-systems h1 {
     font-size: 1rem;
     line-height: 1.16;
   }
-  .beginner-intro-guide.is-welcome .beginner-intro-speech,
-  .beginner-intro-guide.is-systems .beginner-intro-speech,
-  .beginner-intro-guide.is-simple .beginner-intro-speech {
-    width: var(--intro-speech-width, fit-content);
-    max-width: 100%;
-    height: var(--intro-speech-height, auto);
-    min-height: 0;
-    margin-left: 0;
-    padding: 0.9rem 1rem 0.9rem 2.05rem;
-  }
-  .beginner-intro-guide.is-welcome .beginner-intro-speech h1,
-  .beginner-intro-guide.is-simple .beginner-intro-speech h1 {
+  .beginner-intro-speech-inner.is-welcome h1,
+  .beginner-intro-speech-inner.is-simple h1 {
     font-weight: 600;
     line-height: 1.2;
   }
-  .beginner-intro-guide.is-welcome .beginner-intro-speech h1 {
+  .beginner-intro-speech-inner.is-welcome h1 {
     font-size: 1.42rem;
-  }
-  .beginner-intro-guide.is-simple .beginner-intro-speech h1 {
-    font-size: clamp(1.18rem, 5.05vw, 1.42rem);
     white-space: nowrap;
   }
-  .beginner-intro-guide.is-opening-copy-swap .beginner-intro-speech h1 {
-    font-size: 1.42rem;
-    white-space: normal;
+  .beginner-intro-speech-inner.is-simple h1 {
+    font-size: 1.1rem;
+    white-space: nowrap;
   }
   .beginner-intro-speech p { font-size: 0.78rem; line-height: 1.48; }
 
@@ -1290,14 +1284,13 @@ body:has(.beginner-word-writing-card) .app,
 @media (max-width: 360px) {
   .beginner-intro-guide { min-height: 9.45rem; }
   .beginner-intro-mascot { left: -1.1rem; width: 7.8rem; }
-  .beginner-intro-speech { height: 9.45rem; min-height: 9.45rem; }
   .beginner-intro-speech h1 { font-size: 1rem; }
-  .beginner-intro-guide.is-systems .beginner-intro-speech h1 {
+  .beginner-intro-speech-inner.is-systems h1 {
     font-size: 0.9rem;
     line-height: 1.15;
   }
-  .beginner-intro-guide.is-welcome .beginner-intro-speech h1,
-  .beginner-intro-guide.is-simple .beginner-intro-speech h1 { font-size: 1.47rem; }
+  .beginner-intro-speech-inner.is-welcome h1 { font-size: 1.3rem; }
+  .beginner-intro-speech-inner.is-simple h1 { font-size: 1.08rem; }
   .beginner-intro-speech p { font-size: 0.7rem; }
   .beginner-intro-guide.is-simple .beginner-intro-mascot {
     transform: scale(0.86);
