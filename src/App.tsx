@@ -475,50 +475,52 @@ function BeginnerZone({
     const speechNode = speech
 
     let frame = 0
-    function updateSpeechSize() {
-      if (frame) window.cancelAnimationFrame(frame)
-      frame = window.requestAnimationFrame(() => {
-        const style = window.getComputedStyle(speechNode)
-        const guide = speechNode.parentElement
-        if (!guide) {
-          frame = 0
-          return
-        }
-
-        const horizontalPadding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
-        const verticalPadding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
-        const horizontalBorder = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth)
-        const verticalBorder = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth)
-        const availableOuterWidth = guide.getBoundingClientRect().right - speechNode.getBoundingClientRect().left
-        const maxOuterWidth = Math.min(18 * parseFloat(window.getComputedStyle(document.documentElement).fontSize), availableOuterWidth)
-        const maxContentWidth = Math.max(0, maxOuterWidth - horizontalPadding - horizontalBorder)
-
-        widthProbeNode.style.width = 'max-content'
-        widthProbeNode.style.maxWidth = 'none'
-        const contentWidth = Math.min(widthProbeNode.getBoundingClientRect().width, maxContentWidth)
-        contentNode.style.width = `${contentWidth}px`
-        contentNode.style.maxWidth = 'none'
-        const contentRect = contentNode.getBoundingClientRect()
-        const nextSize = {
-          width: Math.ceil(contentWidth + horizontalPadding + horizontalBorder),
-          height: Math.ceil(contentRect.height + verticalPadding + verticalBorder),
-        }
-
-        setIntroSpeechSize((current) => (
-          current && Math.abs(current.width - nextSize.width) < 1 && Math.abs(current.height - nextSize.height) < 1
-            ? current
-            : nextSize
-        ))
+    function measureSpeechSize() {
+      const style = window.getComputedStyle(speechNode)
+      const guide = speechNode.parentElement
+      if (!guide) {
         frame = 0
-      })
+        return
+      }
+
+      const horizontalPadding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
+      const verticalPadding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+      const horizontalBorder = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth)
+      const verticalBorder = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth)
+      const availableOuterWidth = guide.getBoundingClientRect().right - speechNode.getBoundingClientRect().left
+      const maxOuterWidth = Math.min(18 * parseFloat(window.getComputedStyle(document.documentElement).fontSize), availableOuterWidth)
+      const maxContentWidth = Math.max(0, maxOuterWidth - horizontalPadding - horizontalBorder)
+
+      widthProbeNode.style.width = 'max-content'
+      widthProbeNode.style.maxWidth = 'none'
+      const contentWidth = Math.min(widthProbeNode.getBoundingClientRect().width, maxContentWidth)
+      contentNode.style.width = `${contentWidth}px`
+      contentNode.style.maxWidth = 'none'
+      const contentRect = contentNode.getBoundingClientRect()
+      const nextSize = {
+        width: Math.ceil(contentWidth + horizontalPadding + horizontalBorder),
+        height: Math.ceil(contentRect.height + verticalPadding + verticalBorder),
+      }
+
+      setIntroSpeechSize((current) => (
+        current && Math.abs(current.width - nextSize.width) < 1 && Math.abs(current.height - nextSize.height) < 1
+          ? current
+          : nextSize
+      ))
+      frame = 0
     }
 
-    updateSpeechSize()
-    window.addEventListener('resize', updateSpeechSize)
+    function scheduleSpeechSizeUpdate() {
+      if (frame) window.cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(measureSpeechSize)
+    }
+
+    measureSpeechSize()
+    window.addEventListener('resize', scheduleSpeechSizeUpdate)
 
     return () => {
       if (frame) window.cancelAnimationFrame(frame)
-      window.removeEventListener('resize', updateSpeechSize)
+      window.removeEventListener('resize', scheduleSpeechSizeUpdate)
     }
   }, [intro, introOpeningPreview, introStep, introTransitioning])
 

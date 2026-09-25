@@ -271,9 +271,9 @@ body:has(.beginner-word-writing-card) .app,
   overflow: hidden;
   animation: beginner-intro-copy-in 540ms ease both;
   transition:
-    width var(--intro-speech-resize-duration) linear,
-    height var(--intro-speech-resize-duration) linear,
-    min-height var(--intro-speech-resize-duration) linear;
+    width var(--intro-speech-resize-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    height var(--intro-speech-resize-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    min-height var(--intro-speech-resize-duration) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-speech::before {
