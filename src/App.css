@@ -529,6 +529,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-hiragana span {
   display: block;
   line-height: 1;
+  transform: translateY(0.03em);
 }
 
 .beginner-intro-slot-words {
@@ -583,7 +584,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
-  animation: beginner-intro-question-out 620ms ease-in-out forwards;
+  animation: beginner-intro-question-out 760ms ease-in-out forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-label {
@@ -591,7 +592,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana {
-  animation: beginner-intro-hiragana-in 2420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-hiragana-in 2420ms linear forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana small {
@@ -1102,10 +1103,10 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-question-out {
   0% { opacity: 1; transform: translateX(0) rotate(0deg) scale(1); }
-  22% { opacity: 0.92; transform: translateX(-0.14rem) rotate(-5deg) scale(0.99); }
-  44% { opacity: 0.72; transform: translateX(0.14rem) rotate(5deg) scale(0.96); }
-  68% { opacity: 0.38; transform: translateX(-0.08rem) rotate(-3deg) scale(0.84); }
-  to { opacity: 0; transform: translateX(0) rotate(0deg) scale(0.56); }
+  20% { opacity: 0.95; transform: translateX(-0.1rem) rotate(-4deg) scale(0.99); }
+  40% { opacity: 0.8; transform: translateX(0.1rem) rotate(4deg) scale(0.96); }
+  66% { opacity: 0.46; transform: translateX(-0.05rem) rotate(-2deg) scale(0.86); }
+  to { opacity: 0; transform: translateX(0) rotate(0deg) scale(0.62); }
 }
 
 @keyframes beginner-intro-hiragana-label-in {
@@ -1114,7 +1115,7 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-hiragana-in {
   0% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.3); }
-  26% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.38); }
+  31% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.38); }
   69% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.38); }
   to { opacity: 1; transform: translate(-2.15rem, -0.55rem) rotate(0deg) scale(1); }
 }
@@ -1238,7 +1239,7 @@ body:has(.beginner-word-writing-card) .app,
 
   .beginner-intro-lesson.is-welcome { min-height: 22rem; }
   .beginner-intro-lesson.is-simple { min-height: 22rem; }
-  .beginner-intro-lesson.is-systems { min-height: 20.4rem; }
+  .beginner-intro-lesson.is-systems { min-height: 22rem; }
   .beginner-intro-lesson.is-hiragana { min-height: 20.4rem; }
   .beginner-intro-orbit { width: min(100%, 17rem); }
   .beginner-intro-ring { inset: 1.9rem; }
