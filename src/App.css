@@ -1228,6 +1228,10 @@ body:has(.beginner-word-writing-card) .app,
     font-size: clamp(1.18rem, 5.05vw, 1.42rem);
     white-space: nowrap;
   }
+  .beginner-intro-guide.is-opening-copy-swap .beginner-intro-speech h1 {
+    font-size: 1.42rem;
+    white-space: normal;
+  }
   .beginner-intro-speech p { font-size: 0.78rem; line-height: 1.48; }
 
   .beginner-intro-guide.is-simple .beginner-intro-mascot {
