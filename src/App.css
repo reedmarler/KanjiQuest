@@ -574,32 +574,32 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-top {
-  animation: beginner-intro-slot-expand 1400ms 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: beginner-intro-slot-expand 1400ms 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-right,
 .beginner-intro-empty-wheel.is-revealing .is-slot-left {
-  animation: beginner-intro-slot-fade 360ms 1230ms ease forwards;
+  animation: beginner-intro-slot-fade 360ms 1430ms ease forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
-  animation: beginner-intro-question-out 360ms ease forwards;
+  animation: beginner-intro-question-out 620ms ease-in-out forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-label {
-  animation: beginner-intro-hiragana-label-in 720ms 1260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-hiragana-label-in 720ms 1460ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana {
-  animation: beginner-intro-hiragana-in 1400ms 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-hiragana-in 2020ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana small {
-  animation: beginner-intro-romaji-in 360ms 1380ms ease forwards;
+  animation: beginner-intro-romaji-in 360ms 1580ms ease forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-words {
-  animation: beginner-intro-slot-words-in 720ms 1320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-slot-words-in 720ms 1520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-wheel-placeholder,
@@ -1114,7 +1114,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-hiragana-in {
-  0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.38); }
+  0% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.3); }
+  31% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.38); }
   58% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.38); }
   to { opacity: 1; transform: translate(-2.15rem, -0.55rem) rotate(0deg) scale(1); }
 }
