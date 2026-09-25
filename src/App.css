@@ -217,7 +217,10 @@ body:has(.beginner-word-writing-card) .app,
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  transition: transform var(--intro-opening-move-duration) linear;
+  transition:
+    transform var(--intro-opening-move-duration) linear,
+    margin-top var(--intro-opening-move-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    margin-bottom var(--intro-opening-move-duration) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-guide.is-welcome {
@@ -586,7 +589,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
-  animation: beginner-intro-question-out 900ms ease-in-out forwards;
+  animation: beginner-intro-question-out 560ms ease-in-out forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-label {
@@ -1138,8 +1141,8 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-hiragana-in {
   0% { opacity: 0; filter: blur(8px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.3); }
-  16% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.32); }
-  33% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
+  10% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.32); }
+  21% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
   72% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
   78% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.55); }
   84% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.74); }
