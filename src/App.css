@@ -446,6 +446,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel {
   --intro-empty-wheel-size: min(16rem, 76dvw);
+  --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.2);
   position: absolute;
   top: 56%;
   left: 50%;
@@ -1097,8 +1098,8 @@ body:has(.beginner-word-writing-card) .app,
   }
   91% {
     top: 50%;
-    width: calc(var(--intro-empty-wheel-size) * 1.2);
-    height: calc(var(--intro-empty-wheel-size) * 1.2);
+    width: var(--intro-expanded-wheel-size);
+    height: var(--intro-expanded-wheel-size);
     border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
     background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
     box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
@@ -1108,8 +1109,8 @@ body:has(.beginner-word-writing-card) .app,
   }
   to {
     top: 50%;
-    width: calc(var(--intro-empty-wheel-size) * 1.2);
-    height: calc(var(--intro-empty-wheel-size) * 1.2);
+    width: var(--intro-expanded-wheel-size);
+    height: var(--intro-expanded-wheel-size);
     border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
     background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
     box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
@@ -1194,8 +1195,8 @@ body:has(.beginner-word-writing-card) .app,
     grid-template-rows: auto auto auto;
     align-content: start;
     min-height: calc(100dvh - 6rem);
-    padding: 0.5rem 0 calc(8.35rem + env(safe-area-inset-bottom));
-    gap: 0.65rem;
+    padding: 0 0 calc(8.35rem + env(safe-area-inset-bottom));
+    gap: 0.35rem;
   }
 
   .beginner-intro-guide {
@@ -1203,7 +1204,12 @@ body:has(.beginner-word-writing-card) .app,
     display: grid;
     grid-template-columns: 5.15rem minmax(0, 1fr);
     align-items: center;
-    min-height: 12rem;
+    min-height: 10.75rem;
+  }
+
+  .beginner-intro-guide.is-systems {
+    margin-top: -0.85rem;
+    margin-bottom: -0.35rem;
   }
 
   .beginner-intro-mascot {
@@ -1264,16 +1270,17 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-lesson.is-welcome { min-height: 22rem; }
-  .beginner-intro-lesson.is-simple { min-height: 22rem; }
-  .beginner-intro-lesson.is-systems { min-height: 22rem; }
+  .beginner-intro-lesson.is-simple { min-height: 21rem; }
+  .beginner-intro-lesson.is-systems { min-height: 21rem; }
   .beginner-intro-lesson.is-hiragana { min-height: 20.4rem; }
   .beginner-intro-orbit { width: min(100%, 17rem); }
   .beginner-intro-ring { inset: 1.9rem; }
   .beginner-intro-empty-wheel {
-    --intro-empty-wheel-size: min(15.5rem, 76dvw);
-    top: 63%;
+    --intro-empty-wheel-size: min(14.75rem, 72dvw);
+    --intro-expanded-wheel-size: min(16rem, 74dvw);
+    top: 58%;
   }
-  .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: 63%; }
+  .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: 58%; }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
   .beginner-intro-wheel-placeholder strong { font-size: 4.8rem; }
   .beginner-intro-wheel-complete strong { font-size: 1.85rem; }
