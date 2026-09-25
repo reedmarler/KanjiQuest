@@ -493,7 +493,7 @@ function BeginnerZone({
 
     return (
       <main className="beginner-zone beginner-zone--intro">
-        <header className={`beginner-intro-guide is-${guideStep.id}${introOpeningShrinking ? ' is-opening-shrink' : ''}`}>
+        <header className={`beginner-intro-guide is-${guideStep.id}`}>
           <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
           </div>
