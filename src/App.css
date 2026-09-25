@@ -224,6 +224,12 @@ body:has(.beginner-word-writing-card) .app,
   transform: translateY(var(--intro-welcome-shift));
 }
 
+.beginner-intro-guide.is-opening-shrink .beginner-intro-speech {
+  width: var(--intro-speech-width, fit-content);
+  height: var(--intro-speech-height, auto);
+  min-height: 0;
+}
+
 .beginner-intro-mascot {
   width: 3.9rem;
   aspect-ratio: 1;
@@ -364,6 +370,10 @@ body:has(.beginner-word-writing-card) .app,
   font-size: 1.46rem;
   font-weight: 600;
   line-height: 1.2;
+}
+
+.beginner-intro-guide.is-opening-shrink .beginner-intro-speech h1 {
+  white-space: normal;
 }
 
 .beginner-intro-speech p {
@@ -566,6 +576,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-top {
+  top: 50%;
   animation: beginner-intro-slot-expand 1400ms 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -1089,11 +1100,9 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-question-out {
   0% { opacity: 1; transform: translateX(0) rotate(0deg) scale(1); }
-  18% { opacity: 0.9; transform: translateX(-0.22rem) rotate(-8deg) scale(0.98); }
-  36% { opacity: 0.74; transform: translateX(0.22rem) rotate(8deg) scale(0.96); }
-  54% { opacity: 0.52; transform: translateX(-0.16rem) rotate(-6deg) scale(0.9); }
-  72% { opacity: 0.28; transform: translateX(0.12rem) rotate(5deg) scale(0.78); }
-  to { opacity: 0; transform: translateX(0) rotate(16deg) scale(0.45); }
+  28% { opacity: 0.86; transform: translateX(-0.06rem) rotate(-2deg) scale(0.98); }
+  56% { opacity: 0.52; transform: translateX(0.06rem) rotate(2deg) scale(0.92); }
+  to { opacity: 0; transform: translateX(0) rotate(0deg) scale(0.66); }
 }
 
 @keyframes beginner-intro-hiragana-label-in {
