@@ -518,9 +518,9 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-slot-hiragana small {
   position: absolute;
-  top: 0.48rem;
+  top: 0.72rem;
   left: 50%;
-  color: var(--sakura-light);
+  color: #fff;
   font: 800 0.22em/1 'Outfit', system-ui, sans-serif;
   opacity: 0;
   transform: translateX(-50%);
@@ -944,6 +944,7 @@ body:has(.beginner-word-writing-card) .app,
   box-sizing: border-box;
   --intro-next-width: 8.1rem;
   --intro-next-height: 2.4rem;
+  --intro-next-rest-y: 0rem;
   --intro-yes-scale: 2.18;
   gap: 0.4rem;
   width: var(--intro-next-width);
@@ -954,6 +955,7 @@ body:has(.beginner-word-writing-card) .app,
   background: linear-gradient(135deg, var(--sakura), var(--sakura-light));
   color: #1c1420;
   box-shadow: 0 0.55rem 1.35rem color-mix(in srgb, var(--sakura) 18%, transparent);
+  transform: translateY(var(--intro-next-rest-y));
   transition: width var(--intro-opening-move-duration) linear, height var(--intro-opening-move-duration) linear, font-size var(--intro-opening-move-duration) linear, transform var(--intro-opening-move-duration) linear;
 }
 
@@ -972,7 +974,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-next.is-yes.is-shrinking.is-shrink-done {
   font-size: 0.72rem;
-  transform: translateY(0) scale(1);
+  transform: translateY(var(--intro-next-rest-y)) scale(1);
   pointer-events: auto;
 }
 
@@ -1025,7 +1027,7 @@ body:has(.beginner-word-writing-card) .app,
   }
   to {
     font-size: 0.72rem;
-    transform: translateY(0) scale(1);
+    transform: translateY(var(--intro-next-rest-y)) scale(1);
   }
 }
 
