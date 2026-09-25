@@ -518,7 +518,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-slot-hiragana small {
   position: absolute;
-  top: 2.35rem;
+  top: 2.82rem;
   left: 50%;
   color: #fff;
   font: 800 0.22em/1 'Outfit', system-ui, sans-serif;
@@ -1114,8 +1114,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-hiragana-in {
-  0% { opacity: 1; transform: rotate(0deg) scale(0.38); }
-  58% { opacity: 1; transform: rotate(0deg) scale(0.38); }
+  0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.38); }
+  58% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.38); }
   to { opacity: 1; transform: translate(-2.15rem, -0.55rem) rotate(0deg) scale(1); }
 }
 
@@ -1242,7 +1242,10 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-lesson.is-hiragana { min-height: 20.4rem; }
   .beginner-intro-orbit { width: min(100%, 17rem); }
   .beginner-intro-ring { inset: 1.9rem; }
-  .beginner-intro-empty-wheel { --intro-empty-wheel-size: min(15.5rem, 76dvw); }
+  .beginner-intro-empty-wheel {
+    --intro-empty-wheel-size: min(15.5rem, 76dvw);
+    top: 63%;
+  }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: 63%; }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
   .beginner-intro-wheel-placeholder strong { font-size: 4.8rem; }
