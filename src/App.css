@@ -1263,6 +1263,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-example p { justify-content: center; }
   .beginner-intro-example.is-together > strong { font-size: 1.85rem; }
   .beginner-intro-controls {
+    position: fixed;
     bottom: calc(4.25rem + env(safe-area-inset-bottom));
   }
   .beginner-intro-controls.is-lowered {
