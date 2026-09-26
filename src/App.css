@@ -452,7 +452,7 @@ body:has(.beginner-word-writing-card) .app,
   --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.2);
   --intro-expanded-start-scale: 0.23;
   position: absolute;
-  top: 56%;
+  top: calc(56% + 15px);
   left: 50%;
   width: var(--intro-empty-wheel-size);
   aspect-ratio: 1;
@@ -1326,9 +1326,9 @@ body:has(.beginner-word-writing-card) .app,
     --intro-empty-wheel-size: min(14.75rem, 72dvw);
     --intro-expanded-wheel-size: min(18.8rem, 81.6dvw);
     --intro-expanded-start-scale: 0.2;
-    top: 58%;
+    top: calc(58% + 15px);
   }
-  .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: 58%; }
+  .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px); }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
   .beginner-intro-wheel-placeholder strong { font-size: 4.8rem; }
   .beginner-intro-wheel-complete strong { font-size: 1.85rem; }

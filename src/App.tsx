@@ -228,7 +228,7 @@ const BEGINNER_INTRO_STEPS = [
     id: 'hiragana',
     eyebrow: 'ONE OF THREE',
     title: 'Hiragana',
-    body: 'Hiragana is one of the Japanese alphabets. Its shapes are simple and curly. This one is used for native Japanese words like sushi, tsunami, and samurai.',
+    body: 'Hiragana is one of the Japanese alphabets. Its shapes are simple and curly. This one is used for native Japanese words like sushi, tsunami, and sake.',
   },
   {
     id: 'katakana',
@@ -619,7 +619,7 @@ function BeginnerZone({
                     <b>Native Words:</b>
                     <span><i lang="ja">すし</i><small>sushi</small></span>
                     <span><i lang="ja">つなみ</i><small>tsunami</small></span>
-                    <span><i lang="ja">さむらい</i><small>samurai</small></span>
+                    <span><i lang="ja">さけ</i><small>sake</small></span>
                   </span>
                 </span>
                 <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">?</span>
@@ -654,7 +654,7 @@ function BeginnerZone({
                         <b>Native Words:</b>
                         <span><i lang="ja">すし</i><small>sushi</small></span>
                         <span><i lang="ja">つなみ</i><small>tsunami</small></span>
-                        <span><i lang="ja">さむらい</i><small>samurai</small></span>
+                        <span><i lang="ja">さけ</i><small>sake</small></span>
                       </span>
                     )}
                   </span>
