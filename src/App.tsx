@@ -598,6 +598,9 @@ function BeginnerZone({
 
   if (intro) {
     const step = BEGINNER_INTRO_STEPS[displayIntroStep]
+    const speechMeasureStep = displayIntroStep === 3
+      ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
+      : step
     const speechDisplayStep = BEGINNER_INTRO_STEPS[introSpeechDisplayStep]
     const guideStep = introOpeningPreview && introStep === 0 && !introOpeningShrinking
       ? BEGINNER_INTRO_STEPS[0]
@@ -634,10 +637,10 @@ function BeginnerZone({
               <h1>{renderIntroDisplayText(speechDisplayStep.title)}</h1>
               {speechDisplayStep.body && <p>{speechDisplayStep.body}</p>}
             </div>
-            <div className={`beginner-intro-speech-inner beginner-intro-speech-measure is-${step.id}`} ref={introSpeechMeasureRef} aria-hidden="true">
-              {step.eyebrow && <small>{step.eyebrow}</small>}
-              <h1>{renderIntroDisplayText(step.title)}</h1>
-              {step.body && <p>{step.body}</p>}
+            <div className={`beginner-intro-speech-inner beginner-intro-speech-measure is-${speechMeasureStep.id}`} ref={introSpeechMeasureRef} aria-hidden="true">
+              {speechMeasureStep.eyebrow && <small>{speechMeasureStep.eyebrow}</small>}
+              <h1>{renderIntroDisplayText(speechMeasureStep.title)}</h1>
+              {speechMeasureStep.body && <p>{speechMeasureStep.body}</p>}
             </div>
             <div className="beginner-intro-speech-inner beginner-intro-speech-measure is-systems" ref={introSpeechWidthMeasureRef} aria-hidden="true">
               <h1>{renderIntroDisplayText(BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX].title)}</h1>

@@ -732,7 +732,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .is-previous-slot {
-  animation: beginner-intro-slot-expand 2700ms linear reverse both;
+  animation: beginner-intro-slot-switch-previous 6000ms linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot {
@@ -802,7 +802,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-kana {
-  animation: beginner-intro-previous-kana-reverse 6000ms linear both;
+  animation: beginner-intro-previous-kana-park 6000ms linear both;
 }
 
 .beginner-intro-wheel-placeholder,
@@ -1363,7 +1363,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-slot-switch-previous {
-  0%, 12% {
+  0%, 10% {
     top: 50%;
     left: 50%;
     width: var(--intro-expanded-wheel-size);
@@ -1375,19 +1375,7 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  12.59% {
-    top: 50%;
-    left: 50%;
-    width: var(--intro-expanded-wheel-size);
-    height: var(--intro-expanded-wheel-size);
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(var(--intro-expanded-start-scale));
-  }
-  12.6% {
+  28% {
     top: 50%;
     left: 50%;
     width: 4.4rem;
@@ -1395,18 +1383,6 @@ body:has(.beginner-word-writing-card) .app,
     border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
     background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-  30.15% {
-    top: 0;
-    left: 50%;
-    width: 4.4rem;
-    height: 4.4rem;
-    border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
-    background: var(--surface-2);
-    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -1493,8 +1469,9 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-slot-switch-side {
-  0%, 64% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  82%, to { opacity: 0; transform: translate(-50%, -50%) scale(0.75); }
+  0%, 45% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  61%, 64% { opacity: 1; transform: translate(-50%, -50%) rotate(-120deg) scale(1); }
+  82%, to { opacity: 0; transform: translate(-50%, -50%) rotate(-120deg) scale(0.75); }
 }
 
 @keyframes beginner-intro-question-out {
@@ -1585,59 +1562,29 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-slot-previous-copy-out {
   0% { opacity: 1; filter: blur(0); }
-  9.33%, to { opacity: 0; filter: blur(4px); }
+  10%, to { opacity: 0; filter: blur(4px); }
 }
 
-@keyframes beginner-intro-previous-kana-reverse {
-  0%, 3.6% {
+@keyframes beginner-intro-previous-kana-park {
+  0%, 10% {
     opacity: 1;
     filter: blur(0);
     transform: translate(-2.45rem, 0) scale(1);
   }
-  5.4% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-0.34rem, 0) scale(1);
-  }
-  7.2% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-0.34rem, 0) scale(1.08);
-  }
-  9.9% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-0.34rem, 0) scale(1.25);
-  }
-  12.59% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-0.34rem, 0) scale(1.4);
-  }
-  12.6% {
+  28% {
     opacity: 1;
     filter: blur(0);
     transform: translate(-0.34rem, 0) scale(0.38);
   }
-  13.5% {
+  45% {
     opacity: 1;
     filter: blur(0);
     transform: translate(-0.34rem, 0) scale(0.38);
   }
-  35.55% {
+  61%, to {
     opacity: 1;
     filter: blur(0);
     transform: translate(-0.34rem, 0) scale(0.38);
-  }
-  40.5% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-0.34rem, 0) scale(0.32);
-  }
-  45%, to {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-0.34rem, 0) scale(0.3);
   }
 }
 
