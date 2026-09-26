@@ -295,9 +295,9 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-speech-inner {
   display: inline-grid;
   align-content: center;
-  justify-items: center;
+  justify-items: start;
   max-width: 100%;
-  text-align: center;
+  text-align: left;
 }
 
 .beginner-intro-speech-copy {
@@ -554,6 +554,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-words > b {
   color: var(--sakura-light);
   font: 800 0.76rem/1 'Outfit', system-ui, sans-serif;
+  padding-left: 0.46rem;
   text-align: left;
 }
 
@@ -803,6 +804,7 @@ body:has(.beginner-word-writing-card) .app,
   grid-column: 1 / -1;
   color: var(--sakura-light);
   font: 800 0.68rem/1 'Outfit', system-ui, sans-serif;
+  padding-left: 0.12rem;
   text-align: left;
 }
 
