@@ -617,9 +617,9 @@ function BeginnerZone({
                   </span>
                   <span className="beginner-intro-slot-words">
                     <b>Native Words:</b>
-                    <span><small>sushi</small></span>
-                    <span><small>tsunami</small></span>
-                    <span><small>samurai</small></span>
+                    <span><i lang="ja">すし</i><small>sushi</small></span>
+                    <span><i lang="ja">つなみ</i><small>tsunami</small></span>
+                    <span><i lang="ja">さむらい</i><small>samurai</small></span>
                   </span>
                 </span>
                 <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">?</span>
@@ -652,9 +652,9 @@ function BeginnerZone({
                     {item.id === 'hiragana' && isFocused && (
                       <span className="beginner-intro-node-words">
                         <b>Native Words:</b>
-                        <span><small>sushi</small></span>
-                        <span><small>tsunami</small></span>
-                        <span><small>samurai</small></span>
+                        <span><i lang="ja">すし</i><small>sushi</small></span>
+                        <span><i lang="ja">つなみ</i><small>tsunami</small></span>
+                        <span><i lang="ja">さむらい</i><small>samurai</small></span>
                       </span>
                     )}
                   </span>

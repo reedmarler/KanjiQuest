@@ -540,10 +540,10 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-slot-words {
   top: 50%;
-  right: 1rem;
+  right: 0.8rem;
   bottom: auto;
   left: auto;
-  width: 6.8rem;
+  width: 7.6rem;
   grid-template-columns: 1fr;
   gap: 0.38rem;
   font-family: 'Outfit', system-ui, sans-serif;
@@ -554,30 +554,45 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-words > b {
   color: var(--sakura-light);
   font: 800 0.76rem/1 'Outfit', system-ui, sans-serif;
-  text-align: center;
+  text-align: left;
 }
 
 .beginner-intro-slot-words > span {
-  display: grid;
-  justify-items: center;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.38rem;
   min-width: 0;
-  padding: 0.32rem 0.34rem 0.34rem;
+  padding: 0.32rem 0.46rem 0.34rem;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 34%, transparent);
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface-2) 48%, transparent);
 }
 
 .beginner-intro-slot-words b,
+.beginner-intro-slot-words i,
 .beginner-intro-slot-words small {
   display: block;
   line-height: 1;
 }
 
+.beginner-intro-slot-words i {
+  flex: 0 0 2.5rem;
+  color: var(--sakura-light);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 800;
+  text-align: left;
+}
+
 .beginner-intro-slot-words small {
+  flex: 1 1 auto;
   margin-top: 0;
   color: var(--text);
   font-size: 0.86rem;
   font-weight: 800;
+  text-align: left;
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-top {
@@ -788,12 +803,14 @@ body:has(.beginner-word-writing-card) .app,
   grid-column: 1 / -1;
   color: var(--sakura-light);
   font: 800 0.68rem/1 'Outfit', system-ui, sans-serif;
-  text-align: center;
+  text-align: left;
 }
 
 .beginner-intro-node-words > span {
-  display: grid;
-  justify-items: center;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.12rem;
   min-width: 0;
   padding: 0.17rem 0.12rem 0.2rem;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 34%, transparent);
@@ -801,14 +818,25 @@ body:has(.beginner-word-writing-card) .app,
   background: color-mix(in srgb, var(--surface-2) 52%, transparent);
 }
 
+.beginner-intro-node-words i,
 .beginner-intro-node-words small {
   display: block;
   min-width: 0;
   line-height: 1;
-  text-align: center;
+  text-align: left;
+}
+
+.beginner-intro-node-words i {
+  flex: 0 0 0.9rem;
+  color: var(--sakura-light);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.48rem;
+  font-style: normal;
+  font-weight: 800;
 }
 
 .beginner-intro-node-words small {
+  flex: 1 1 auto;
   margin-top: 0.11rem;
   color: var(--text);
   font-size: 0.56rem;
