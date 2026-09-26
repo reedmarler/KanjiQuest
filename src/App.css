@@ -572,7 +572,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-slot-words > span {
   display: grid;
-  grid-template-columns: 2.5rem minmax(0, 1fr);
+  grid-template-columns: 2.5rem auto minmax(0, 1fr);
   align-items: baseline;
   justify-items: start;
   column-gap: 0.38rem;
@@ -585,13 +585,14 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-slot-words b,
 .beginner-intro-slot-words i,
+.beginner-intro-slot-words em,
 .beginner-intro-slot-words small {
   display: block;
   line-height: 1;
 }
 
 .beginner-intro-slot-words i {
-  color: var(--intro-reveal-accent);
+  color: #fff;
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 0.82rem;
   font-style: normal;
@@ -599,9 +600,16 @@ body:has(.beginner-word-writing-card) .app,
   text-align: left;
 }
 
+.beginner-intro-slot-words em {
+  color: #fff;
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
 .beginner-intro-slot-words small {
   margin-top: 0;
-  color: var(--text);
+  color: #fff;
   font-size: 0.86rem;
   font-weight: 800;
   text-align: left;
@@ -673,7 +681,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-slot-previous-words > span {
   display: grid;
-  grid-template-columns: 2.5rem minmax(0, 1fr);
+  grid-template-columns: 2.5rem auto minmax(0, 1fr);
   align-items: baseline;
   justify-items: start;
   column-gap: 0.38rem;
@@ -686,13 +694,14 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-slot-previous-words b,
 .beginner-intro-slot-previous-words i,
+.beginner-intro-slot-previous-words em,
 .beginner-intro-slot-previous-words small {
   display: block;
   line-height: 1;
 }
 
 .beginner-intro-slot-previous-words i {
-  color: var(--sakura-light);
+  color: #fff;
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 0.82rem;
   font-style: normal;
@@ -700,8 +709,15 @@ body:has(.beginner-word-writing-card) .app,
   text-align: left;
 }
 
+.beginner-intro-slot-previous-words em {
+  color: #fff;
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
 .beginner-intro-slot-previous-words small {
-  color: var(--text);
+  color: #fff;
   font-size: 0.86rem;
   font-weight: 800;
   text-align: left;
@@ -958,7 +974,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-node-words > span {
   display: grid;
-  grid-template-columns: 0.9rem minmax(0, 1fr);
+  grid-template-columns: 0.9rem auto minmax(0, 1fr);
   align-items: baseline;
   justify-items: start;
   column-gap: 0.12rem;
@@ -970,6 +986,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-node-words i,
+.beginner-intro-node-words em,
 .beginner-intro-node-words small {
   display: block;
   min-width: 0;
@@ -978,16 +995,23 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-node-words i {
-  color: var(--sakura-light);
+  color: #fff;
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 0.48rem;
   font-style: normal;
   font-weight: 800;
 }
 
+.beginner-intro-node-words em {
+  color: #fff;
+  font-size: 0.42rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
 .beginner-intro-node-words small {
   margin-top: 0.11rem;
-  color: var(--text);
+  color: #fff;
   font-size: 0.56rem;
   font-weight: 800;
 }
