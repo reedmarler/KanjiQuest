@@ -339,6 +339,11 @@ body:has(.beginner-word-writing-card) .app,
   text-shadow: 0 0 1rem color-mix(in srgb, var(--sakura) 42%, transparent);
 }
 
+.beginner-intro-speech-inner.is-katakana-reveal .beginner-intro-title-highlight {
+  color: #70cfe0;
+  text-shadow: 0 0 1rem color-mix(in srgb, #4ba5c9 42%, transparent);
+}
+
 .beginner-intro-blur-text {
   display: inline-block;
   filter: blur(0);
@@ -451,6 +456,8 @@ body:has(.beginner-word-writing-card) .app,
   --intro-empty-wheel-size: min(16rem, 76dvw);
   --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.2);
   --intro-expanded-start-scale: 0.23;
+  --intro-reveal-accent: var(--sakura-light);
+  --intro-reveal-base: var(--sakura);
   position: absolute;
   top: calc(56% + 15px);
   left: 50%;
@@ -463,6 +470,11 @@ body:has(.beginner-word-writing-card) .app,
   transform: translate(-50%, -50%);
   animation: beginner-intro-wheel-swirl-in 1600ms cubic-bezier(0.2, 0.9, 0.24, 1) both;
   transform-origin: center;
+}
+
+.beginner-intro-empty-wheel.is-katakana {
+  --intro-reveal-accent: #70cfe0;
+  --intro-reveal-base: #4ba5c9;
 }
 
 .beginner-intro-empty-slot {
@@ -503,7 +515,7 @@ body:has(.beginner-word-writing-card) .app,
   right: 0;
   bottom: calc(100% + 1.25rem);
   left: 0;
-  color: var(--sakura-light);
+  color: var(--intro-reveal-accent);
   font: 800 2.9rem/0.9 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.04em;
   opacity: 0;
@@ -552,7 +564,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-slot-words > b {
-  color: var(--sakura-light);
+  color: var(--intro-reveal-accent);
   font: 800 0.76rem/1 'Outfit', system-ui, sans-serif;
   padding-left: 0.46rem;
   text-align: left;
@@ -566,7 +578,7 @@ body:has(.beginner-word-writing-card) .app,
   column-gap: 0.38rem;
   min-width: 0;
   padding: 0.32rem 0.46rem 0.34rem;
-  border: 1px solid color-mix(in srgb, var(--sakura-light) 34%, transparent);
+  border: 1px solid color-mix(in srgb, var(--intro-reveal-accent) 34%, transparent);
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface-2) 48%, transparent);
 }
@@ -579,7 +591,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-slot-words i {
-  color: var(--sakura-light);
+  color: var(--intro-reveal-accent);
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 0.82rem;
   font-style: normal;
@@ -700,11 +712,11 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching {
-  animation: beginner-intro-wheel-switch-rotate 5400ms linear both;
+  animation: beginner-intro-wheel-switch-rotate 6000ms linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-slot-top {
-  animation: beginner-intro-slot-switch 5400ms linear both;
+  animation: beginner-intro-slot-switch 6000ms linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-right,
@@ -714,7 +726,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-switching .is-slot-right,
 .beginner-intro-empty-wheel.is-switching .is-slot-left {
-  animation: beginner-intro-slot-switch-side 5400ms linear both;
+  animation: beginner-intro-slot-switch-side 6000ms linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
@@ -722,7 +734,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-question {
-  animation: beginner-intro-question-switch 5400ms linear both;
+  animation: beginner-intro-question-switch 6000ms linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-label {
@@ -730,7 +742,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-label {
-  animation: beginner-intro-hiragana-label-in 720ms 5000ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-switch-label-in 6000ms linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana {
@@ -738,7 +750,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-hiragana {
-  animation: beginner-intro-katakana-in 5400ms linear forwards;
+  animation: beginner-intro-katakana-in 6000ms linear forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana small {
@@ -746,7 +758,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-hiragana small {
-  animation: beginner-intro-romaji-in 360ms 5300ms ease forwards;
+  animation: beginner-intro-switch-romaji-in 6000ms linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-words {
@@ -754,11 +766,11 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-words {
-  animation: beginner-intro-slot-words-in 560ms 5400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-switch-words-in 6000ms linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous {
-  animation: beginner-intro-slot-previous-out 5400ms linear both;
+  animation: beginner-intro-slot-previous-out 6000ms linear both;
 }
 
 .beginner-intro-wheel-placeholder,
@@ -1236,7 +1248,7 @@ body:has(.beginner-word-writing-card) .app,
   0%, 38% {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  56%, to {
+  54%, to {
     transform: translate(-50%, -50%) rotate(360deg) scale(1);
   }
 }
@@ -1322,7 +1334,7 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  20% {
+  12% {
     top: 50%;
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-size);
@@ -1333,7 +1345,7 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(var(--intro-expanded-start-scale));
   }
-  20.01% {
+  12.01% {
     top: 50%;
     width: 4.4rem;
     height: 4.4rem;
@@ -1344,7 +1356,7 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  38%, 60% {
+  34%, 60% {
     top: 0;
     width: 4.4rem;
     height: 4.4rem;
@@ -1355,35 +1367,35 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  72% {
+  82% {
     top: 50%;
     width: 4.4rem;
     height: 4.4rem;
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  72.01% {
+  82.01% {
     top: 50%;
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-size);
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(var(--intro-expanded-start-scale));
   }
-  88%, to {
+  94%, to {
     top: 50%;
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-size);
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -1395,9 +1407,9 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-slot-switch-side {
-  0%, 20% { opacity: 0; transform: translate(-50%, -50%) scale(0.75); }
-  38%, 62% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  72%, to { opacity: 0; transform: translate(-50%, -50%) scale(0.75); }
+  0%, 12% { opacity: 0; transform: translate(-50%, -50%) scale(0.75); }
+  34%, 64% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  82%, to { opacity: 0; transform: translate(-50%, -50%) scale(0.75); }
 }
 
 @keyframes beginner-intro-question-out {
@@ -1408,13 +1420,18 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-question-switch {
-  0%, 30% { opacity: 0; filter: blur(0); transform: translateX(0) rotate(0deg) scale(0.64); }
-  38%, 60% { opacity: 1; filter: blur(0); transform: translateX(0) rotate(0deg) scale(1); }
-  66% { opacity: 0.42; filter: blur(4px); transform: translateX(0.04rem) rotate(1.5deg) scale(0.84); }
-  72%, to { opacity: 0; filter: blur(8px); transform: translateX(0) rotate(0deg) scale(0.64); }
+  0%, 22% { opacity: 0; filter: blur(0); transform: translateX(0) rotate(0deg) scale(0.64); }
+  34%, 64% { opacity: 1; filter: blur(0); transform: translateX(0) rotate(0deg) scale(1); }
+  72% { opacity: 0.42; filter: blur(4px); transform: translateX(0.04rem) rotate(1.5deg) scale(0.84); }
+  82%, to { opacity: 0; filter: blur(8px); transform: translateX(0) rotate(0deg) scale(0.64); }
 }
 
 @keyframes beginner-intro-hiragana-label-in {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes beginner-intro-switch-label-in {
+  0%, 88% { opacity: 0; transform: translateY(0.35rem) scale(0.92); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
@@ -1433,15 +1450,15 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-katakana-in {
-  0%, 58% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  62% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
+  0%, 64% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
   70% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  72% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  72.01% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.4); }
-  78% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.25); }
-  84% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.08); }
-  88% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
-  92% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
+  80% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
+  82% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
+  82.01% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.4); }
+  88% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.25); }
+  92% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.08); }
+  94% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
+  96% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
   to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) rotate(0deg) scale(1); }
 }
 
@@ -1449,13 +1466,23 @@ body:has(.beginner-word-writing-card) .app,
   to { opacity: 1; }
 }
 
+@keyframes beginner-intro-switch-romaji-in {
+  0%, 93% { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes beginner-intro-slot-words-in {
   to { opacity: 1; transform: translateY(-50%) scale(1); }
 }
 
+@keyframes beginner-intro-switch-words-in {
+  0%, 94% { opacity: 0; transform: translateY(calc(-50% + 0.45rem)) scale(0.94); }
+  to { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
 @keyframes beginner-intro-slot-previous-out {
-  0%, 16% { opacity: 1; filter: blur(0); }
-  22% { opacity: 0; filter: blur(4px); }
+  0%, 10% { opacity: 1; filter: blur(0); }
+  16% { opacity: 0; filter: blur(0); }
   to { opacity: 0; filter: blur(4px); }
 }
 
