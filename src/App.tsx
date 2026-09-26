@@ -650,7 +650,7 @@ function BeginnerZone({
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {isRevealWheelVisible && (
               <div className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep === 3 ? ' is-switching' : ''}`} aria-hidden="true">
-                <span className="beginner-intro-empty-slot is-slot-top">
+                <span className={`beginner-intro-empty-slot is-slot-top${introStep === 2 ? ' is-reveal-slot' : ''}${introStep === 3 ? ' is-previous-slot' : ''}`}>
                   <span className="beginner-intro-slot-question">?</span>
                   {introStep === 3 && (
                     <span className="beginner-intro-slot-previous">
@@ -667,20 +667,41 @@ function BeginnerZone({
                       </span>
                     </span>
                   )}
-                  <span className="beginner-intro-slot-label">{revealContent.label}</span>
-                  <span className="beginner-intro-slot-hiragana" lang="ja">
-                    <small lang="en">{revealContent.romaji}</small>
-                    <span>{revealContent.mark}</span>
-                  </span>
-                  <span className="beginner-intro-slot-words">
-                    <b>{revealContent.heading}</b>
-                    {revealContent.words.map((word) => (
-                      <span key={word.romaji}><i lang="ja">{word.kana}</i><em>-</em><small>{word.romaji}</small></span>
-                    ))}
-                  </span>
+                  {introStep === 2 && (
+                    <>
+                      <span className="beginner-intro-slot-label">{revealContent.label}</span>
+                      <span className="beginner-intro-slot-hiragana" lang="ja">
+                        <small lang="en">{revealContent.romaji}</small>
+                        <span>{revealContent.mark}</span>
+                      </span>
+                      <span className="beginner-intro-slot-words">
+                        <b>{revealContent.heading}</b>
+                        {revealContent.words.map((word) => (
+                          <span key={word.romaji}><i lang="ja">{word.kana}</i><em>-</em><small>{word.romaji}</small></span>
+                        ))}
+                      </span>
+                    </>
+                  )}
                 </span>
                 <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">?</span>
-                <span className="beginner-intro-empty-slot is-slot-left" aria-hidden="true">?</span>
+                <span className={`beginner-intro-empty-slot is-slot-left${introStep === 3 ? ' is-reveal-slot' : ''}`} aria-hidden="true">
+                  {introStep === 3 ? <span className="beginner-intro-slot-question">?</span> : '?'}
+                  {introStep === 3 && (
+                    <>
+                      <span className="beginner-intro-slot-label">{revealContent.label}</span>
+                      <span className="beginner-intro-slot-hiragana" lang="ja">
+                        <small lang="en">{revealContent.romaji}</small>
+                        <span>{revealContent.mark}</span>
+                      </span>
+                      <span className="beginner-intro-slot-words">
+                        <b>{revealContent.heading}</b>
+                        {revealContent.words.map((word) => (
+                          <span key={word.romaji}><i lang="ja">{word.kana}</i><em>-</em><small>{word.romaji}</small></span>
+                        ))}
+                      </span>
+                    </>
+                  )}
+                </span>
               </div>
             )}
             {introStep === 6 && (
