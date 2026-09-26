@@ -732,7 +732,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .is-previous-slot {
-  animation: beginner-intro-slot-expand 2700ms linear reverse both;
+  animation: beginner-intro-slot-switch-previous 6000ms linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot {
@@ -754,22 +754,6 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-switching .is-previous-slot .beginner-intro-slot-question {
   opacity: 0;
-}
-
-.beginner-intro-empty-wheel.is-switching .is-previous-slot .beginner-intro-slot-label {
-  animation: beginner-intro-hiragana-label-in 720ms linear reverse both;
-}
-
-.beginner-intro-empty-wheel.is-switching .is-previous-slot .beginner-intro-slot-hiragana {
-  animation: beginner-intro-hiragana-in 2700ms linear reverse both;
-}
-
-.beginner-intro-empty-wheel.is-switching .is-previous-slot .beginner-intro-slot-hiragana small {
-  animation: beginner-intro-romaji-in 360ms linear reverse both;
-}
-
-.beginner-intro-empty-wheel.is-switching .is-previous-slot .beginner-intro-slot-words {
-  animation: beginner-intro-slot-words-in 560ms linear reverse both;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-question {
@@ -806,6 +790,19 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-words {
   animation: beginner-intro-switch-words-in 6000ms linear both;
+}
+
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous {
+  animation: beginner-intro-previous-content-upright 6000ms linear both;
+}
+
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-label,
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words {
+  animation: beginner-intro-slot-previous-copy-out 2700ms linear both;
+}
+
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-kana {
+  animation: beginner-intro-previous-kana-park 6000ms linear both;
 }
 
 .beginner-intro-wheel-placeholder,
@@ -1365,6 +1362,45 @@ body:has(.beginner-word-writing-card) .app,
   }
 }
 
+@keyframes beginner-intro-slot-switch-previous {
+  0%, 10% {
+    top: 50%;
+    left: 50%;
+    width: var(--intro-expanded-wheel-size);
+    height: var(--intro-expanded-wheel-size);
+    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
+    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  28% {
+    top: 50%;
+    left: 50%;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
+    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  45%, to {
+    top: 0;
+    left: 50%;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
+    background: var(--surface-2);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+}
+
 @keyframes beginner-intro-slot-switch-reveal {
   0%, 61% {
     top: 75%;
@@ -1503,6 +1539,53 @@ body:has(.beginner-word-writing-card) .app,
 @keyframes beginner-intro-switch-words-in {
   0%, 94% { opacity: 0; transform: translateY(calc(-50% + 0.45rem)) scale(0.94); }
   to { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+@keyframes beginner-intro-slot-previous-out {
+  0%, 45% { opacity: 1; filter: blur(0); }
+  54% { opacity: 0; filter: blur(0); }
+  to { opacity: 0; filter: blur(4px); }
+}
+
+@keyframes beginner-intro-previous-content-upright {
+  0%, 45% {
+    opacity: 1;
+    filter: blur(0);
+    transform: rotate(0deg);
+  }
+  61%, to {
+    opacity: 1;
+    filter: blur(0);
+    transform: rotate(-120deg);
+  }
+}
+
+@keyframes beginner-intro-slot-previous-copy-out {
+  0% { opacity: 1; filter: blur(0); }
+  10%, to { opacity: 0; filter: blur(4px); }
+}
+
+@keyframes beginner-intro-previous-kana-park {
+  0%, 10% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-2.45rem, 0) scale(1);
+  }
+  28% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-0.34rem, 0) scale(0.38);
+  }
+  45% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-0.34rem, 0) scale(0.38);
+  }
+  61%, to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-0.34rem, 0) scale(0.38);
+  }
 }
 
 @keyframes beginner-intro-copy-out {
