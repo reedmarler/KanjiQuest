@@ -656,19 +656,19 @@ function BeginnerZone({
                 <span className={`beginner-intro-empty-slot is-slot-top${introStep === 2 ? ' is-reveal-slot' : ''}${introStep === 3 ? ' is-previous-slot' : ''}`}>
                   <span className="beginner-intro-slot-question">?</span>
                   {introStep === 3 && (
-                    <span className="beginner-intro-slot-previous">
-                      <span className="beginner-intro-slot-previous-label">{previousRevealContent.label}</span>
-                      <span className="beginner-intro-slot-previous-kana" lang="ja">
+                    <>
+                      <span className="beginner-intro-slot-label">{previousRevealContent.label}</span>
+                      <span className="beginner-intro-slot-hiragana" lang="ja">
                         <small lang="en">{previousRevealContent.romaji}</small>
                         <span>{previousRevealContent.mark}</span>
                       </span>
-                      <span className="beginner-intro-slot-previous-words">
+                      <span className="beginner-intro-slot-words">
                         <b>{previousRevealContent.heading}</b>
                         {previousRevealContent.words.map((word) => (
                           <span key={word.romaji}><i lang="ja">{word.kana}</i><em>-</em><small>{word.romaji}</small></span>
                         ))}
                       </span>
-                    </span>
+                    </>
                   )}
                   {introStep === 2 && (
                     <>
