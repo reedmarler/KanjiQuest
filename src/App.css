@@ -796,6 +796,15 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-slot-previous-out 6000ms linear both;
 }
 
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-label,
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words {
+  animation: beginner-intro-slot-previous-copy-out 6000ms linear both;
+}
+
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-kana {
+  animation: beginner-intro-previous-kana-reverse 6000ms linear both;
+}
+
 .beginner-intro-wheel-placeholder,
 .beginner-intro-wheel-complete {
   position: absolute;
@@ -1366,19 +1375,7 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  14% {
-    top: 50%;
-    left: 50%;
-    width: var(--intro-expanded-wheel-size);
-    height: var(--intro-expanded-wheel-size);
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(var(--intro-expanded-start-scale));
-  }
-  14.01% {
+  20% {
     top: 50%;
     left: 50%;
     width: 4.4rem;
@@ -1417,6 +1414,18 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
+  54.01% {
+    top: 0;
+    left: 50%;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
+    background: var(--surface-2);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(-120deg) scale(1);
+  }
   82% {
     top: 50%;
     left: 50%;
@@ -1427,7 +1436,7 @@ body:has(.beginner-word-writing-card) .app,
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    transform: translate(-50%, -50%) rotate(-120deg) scale(1);
   }
   82.01% {
     top: 50%;
@@ -1439,7 +1448,7 @@ body:has(.beginner-word-writing-card) .app,
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(var(--intro-expanded-start-scale));
+    transform: translate(-50%, -50%) rotate(-120deg) scale(var(--intro-expanded-start-scale));
   }
   94%, to {
     top: 50%;
@@ -1451,7 +1460,7 @@ body:has(.beginner-word-writing-card) .app,
     box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    transform: translate(-50%, -50%) rotate(-120deg) scale(1);
   }
 }
 
@@ -1535,6 +1544,34 @@ body:has(.beginner-word-writing-card) .app,
   0%, 58% { opacity: 1; filter: blur(0); }
   66% { opacity: 0; filter: blur(0); }
   to { opacity: 0; filter: blur(4px); }
+}
+
+@keyframes beginner-intro-slot-previous-copy-out {
+  0%, 8% { opacity: 1; filter: blur(0); }
+  18%, to { opacity: 0; filter: blur(4px); }
+}
+
+@keyframes beginner-intro-previous-kana-reverse {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-2.45rem, 0) scale(1);
+  }
+  20% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-0.34rem, 0) scale(0.38);
+  }
+  58% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-0.34rem, 0) scale(0.38);
+  }
+  66%, to {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translate(-0.34rem, 0) scale(0.34);
+  }
 }
 
 @keyframes beginner-intro-copy-out {
