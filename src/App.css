@@ -559,10 +559,11 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-slot-words > span {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
   align-items: baseline;
-  justify-content: flex-start;
-  gap: 0.38rem;
+  justify-items: start;
+  column-gap: 0.38rem;
   min-width: 0;
   padding: 0.32rem 0.46rem 0.34rem;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 34%, transparent);
@@ -578,7 +579,6 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-slot-words i {
-  flex: 0 0 2.5rem;
   color: var(--sakura-light);
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 0.82rem;
@@ -588,7 +588,6 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-slot-words small {
-  flex: 1 1 auto;
   margin-top: 0;
   color: var(--text);
   font-size: 0.86rem;
@@ -809,10 +808,11 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-node-words > span {
-  display: flex;
+  display: grid;
+  grid-template-columns: 0.9rem minmax(0, 1fr);
   align-items: baseline;
-  justify-content: flex-start;
-  gap: 0.12rem;
+  justify-items: start;
+  column-gap: 0.12rem;
   min-width: 0;
   padding: 0.17rem 0.12rem 0.2rem;
   border: 1px solid color-mix(in srgb, var(--sakura-light) 34%, transparent);
@@ -829,7 +829,6 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-node-words i {
-  flex: 0 0 0.9rem;
   color: var(--sakura-light);
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 0.48rem;
@@ -838,7 +837,6 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-node-words small {
-  flex: 1 1 auto;
   margin-top: 0.11rem;
   color: var(--text);
   font-size: 0.56rem;
@@ -1192,7 +1190,7 @@ body:has(.beginner-word-writing-card) .app,
   84% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.08); }
   88% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
   92% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
-  to { opacity: 1; filter: blur(0); transform: translate(-2.15rem, 0) rotate(0deg) scale(1); }
+  to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) rotate(0deg) scale(1); }
 }
 
 @keyframes beginner-intro-romaji-in {
