@@ -194,6 +194,31 @@ function getBeginnerZoneVowelIndex(char: string, romaji: string): number {
 
 type BeginnerIntroScriptId = 'hiragana' | 'katakana' | 'kanji'
 
+const BEGINNER_INTRO_REVEAL_CONTENT = {
+  hiragana: {
+    label: 'Hiragana',
+    mark: 'あ',
+    romaji: 'a',
+    heading: 'Native Words:',
+    words: [
+      { kana: 'すし', romaji: 'sushi' },
+      { kana: 'つなみ', romaji: 'tsunami' },
+      { kana: 'さけ', romaji: 'sake' },
+    ],
+  },
+  katakana: {
+    label: 'Katakana',
+    mark: 'ア',
+    romaji: 'a',
+    heading: 'Loan words:',
+    words: [
+      { kana: 'ビール', romaji: 'beer' },
+      { kana: 'ホテル', romaji: 'hoteru' },
+      { kana: 'カメラ', romaji: 'camera' },
+    ],
+  },
+} as const
+
 const BEGINNER_INTRO_SCRIPTS: Array<{
   id: BeginnerIntroScriptId
   label: string
@@ -225,10 +250,10 @@ const BEGINNER_INTRO_STEPS = [
     body: '',
   },
   {
-    id: 'hiragana',
-    eyebrow: 'ONE OF THREE',
-    title: 'Hiragana',
-    body: 'Hiragana is one of the Japanese alphabets. Its shapes are simple and curly. This one is used for native Japanese words like sushi, tsunami, and sake.',
+    id: 'katakana-reveal',
+    eyebrow: '',
+    title: 'Katakana is used for foreign words. It is more blocky and angular.',
+    body: '',
   },
   {
     id: 'katakana',
@@ -280,6 +305,15 @@ function renderIntroDisplayText(value: string) {
       <>
         <span className="beginner-intro-title-highlight">Hiragana</span>
         {value.slice('Hiragana'.length)}
+      </>
+    )
+  }
+
+  if (value.startsWith('Katakana is')) {
+    return (
+      <>
+        <span className="beginner-intro-title-highlight">Katakana</span>
+        {value.slice('Katakana'.length)}
       </>
     )
   }
@@ -420,10 +454,14 @@ function BeginnerZone({
       setIntroOpeningShrinking(false)
       setIntroOpeningShrinkDone(false)
       if (introStep === 2) {
-        onOpenIntroScript?.('hiragana')
+        setIntroStep(3)
         return
       }
       setIntroStep((current) => current + 1)
+      return
+    }
+    if (introStep === 3) {
+      onOpenIntroScript?.('hiragana')
       return
     }
     if (introStep >= 6) return
@@ -564,11 +602,15 @@ function BeginnerZone({
     const guideStep = introOpeningPreview && introStep === 0 && !introOpeningShrinking
       ? BEGINNER_INTRO_STEPS[0]
       : step
-    const activeScriptIndex = introStep >= 3 && introStep <= 5 ? introStep - 3 : -1
+    const activeScriptIndex = introStep >= 4 && introStep <= 5 ? introStep - 3 : -1
     const completedScripts = introStep === 6
       ? 3
       : Math.max(0, introStep - 3) + (introTransitioning ? 1 : 0)
     const isFinalStep = introStep === BEGINNER_INTRO_STEPS.length - 1
+    const revealScript = introStep === 3 ? 'katakana' : 'hiragana'
+    const revealContent = BEGINNER_INTRO_REVEAL_CONTENT[revealScript]
+    const previousRevealContent = BEGINNER_INTRO_REVEAL_CONTENT.hiragana
+    const isRevealWheelVisible = introStep >= 1 && introStep <= 3
 
     return (
       <main className="beginner-zone beginner-zone--intro">
@@ -606,20 +648,35 @@ function BeginnerZone({
         <section className={`beginner-intro-lesson is-${step.id}${introTransitioning ? ' is-transitioning' : ''}`} aria-label="The three Japanese writing systems">
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
-            {introStep >= 1 && introStep <= 2 && (
-              <div className={`beginner-intro-empty-wheel${introStep === 2 ? ' is-revealing' : ''}`} aria-hidden="true">
+            {isRevealWheelVisible && (
+              <div className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep === 3 ? ' is-switching' : ''}`} aria-hidden="true">
                 <span className="beginner-intro-empty-slot is-slot-top">
                   <span className="beginner-intro-slot-question">?</span>
-                  <span className="beginner-intro-slot-label">Hiragana</span>
+                  {introStep === 3 && (
+                    <span className="beginner-intro-slot-previous">
+                      <span className="beginner-intro-slot-previous-label">{previousRevealContent.label}</span>
+                      <span className="beginner-intro-slot-previous-kana" lang="ja">
+                        <small lang="en">{previousRevealContent.romaji}</small>
+                        <span>{previousRevealContent.mark}</span>
+                      </span>
+                      <span className="beginner-intro-slot-previous-words">
+                        <b>{previousRevealContent.heading}</b>
+                        {previousRevealContent.words.map((word) => (
+                          <span key={word.romaji}><i lang="ja">{word.kana}</i><small>{word.romaji}</small></span>
+                        ))}
+                      </span>
+                    </span>
+                  )}
+                  <span className="beginner-intro-slot-label">{revealContent.label}</span>
                   <span className="beginner-intro-slot-hiragana" lang="ja">
-                    <small lang="en">a</small>
-                    <span>あ</span>
+                    <small lang="en">{revealContent.romaji}</small>
+                    <span>{revealContent.mark}</span>
                   </span>
                   <span className="beginner-intro-slot-words">
-                    <b>Native Words:</b>
-                    <span><i lang="ja">すし</i><small>sushi</small></span>
-                    <span><i lang="ja">つなみ</i><small>tsunami</small></span>
-                    <span><i lang="ja">さけ</i><small>sake</small></span>
+                    <b>{revealContent.heading}</b>
+                    {revealContent.words.map((word) => (
+                      <span key={word.romaji}><i lang="ja">{word.kana}</i><small>{word.romaji}</small></span>
+                    ))}
                   </span>
                 </span>
                 <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">?</span>
@@ -651,10 +708,10 @@ function BeginnerZone({
                     <span className="beginner-intro-node-glyph">{item.mark}</span>
                     {item.id === 'hiragana' && isFocused && (
                       <span className="beginner-intro-node-words">
-                        <b>Native Words:</b>
-                        <span><i lang="ja">すし</i><small>sushi</small></span>
-                        <span><i lang="ja">つなみ</i><small>tsunami</small></span>
-                        <span><i lang="ja">さけ</i><small>sake</small></span>
+                        <b>{BEGINNER_INTRO_REVEAL_CONTENT.hiragana.heading}</b>
+                        {BEGINNER_INTRO_REVEAL_CONTENT.hiragana.words.map((word) => (
+                          <span key={word.romaji}><i lang="ja">{word.kana}</i><small>{word.romaji}</small></span>
+                        ))}
                       </span>
                     )}
                   </span>
@@ -722,7 +779,7 @@ function BeginnerZone({
                 disabled={introTransitioning}
               >
                 <IntroBlurSwapText
-                  text={introTransitioning ? 'Adding to the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep <= 2 ? 'Next' : introStep === 3 ? 'Next: Katakana' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
+                  text={introTransitioning ? 'Adding to the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep <= 3 ? 'Next' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
                   animate={displayIntroStep <= 1}
                   durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_MS : 1400}
                 />
