@@ -732,7 +732,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .is-previous-slot {
-  animation: beginner-intro-slot-switch-previous 6000ms linear both;
+  animation: beginner-intro-slot-expand 2700ms linear reverse both;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot {
@@ -793,12 +793,12 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous {
-  animation: beginner-intro-slot-previous-out 6000ms linear both;
+  animation: beginner-intro-previous-content-upright 6000ms linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-label,
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words {
-  animation: beginner-intro-slot-previous-copy-out 6000ms linear both;
+  animation: beginner-intro-slot-previous-copy-out 2700ms linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-kana {
@@ -1285,10 +1285,10 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-wheel-switch-rotate {
-  0%, 38% {
+  0%, 45% {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  54%, to {
+  61%, to {
     transform: translate(-50%, -50%) rotate(120deg) scale(1);
   }
 }
@@ -1426,7 +1426,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-slot-switch-reveal {
-  0%, 54% {
+  0%, 61% {
     top: 75%;
     left: 7%;
     width: 4.4rem;
@@ -1438,9 +1438,9 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  54.01% {
-    top: 0;
-    left: 50%;
+  61.01% {
+    top: 75%;
+    left: 7%;
     width: 4.4rem;
     height: 4.4rem;
     border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
@@ -1570,6 +1570,19 @@ body:has(.beginner-word-writing-card) .app,
   to { opacity: 0; filter: blur(4px); }
 }
 
+@keyframes beginner-intro-previous-content-upright {
+  0%, 45% {
+    opacity: 1;
+    filter: blur(0);
+    transform: rotate(0deg);
+  }
+  61%, to {
+    opacity: 1;
+    filter: blur(0);
+    transform: rotate(-120deg);
+  }
+}
+
 @keyframes beginner-intro-slot-previous-copy-out {
   0% { opacity: 1; filter: blur(0); }
   9.33%, to { opacity: 0; filter: blur(4px); }
@@ -1592,17 +1605,17 @@ body:has(.beginner-word-writing-card) .app,
     transform: translate(-0.34rem, 0) scale(1.08);
   }
   9.9% {
-    opacity: 0;
+    opacity: 1;
     filter: blur(0);
     transform: translate(-0.34rem, 0) scale(1.25);
   }
   12.59% {
-    opacity: 0;
+    opacity: 1;
     filter: blur(0);
     transform: translate(-0.34rem, 0) scale(1.4);
   }
   12.6% {
-    opacity: 0;
+    opacity: 1;
     filter: blur(0);
     transform: translate(-0.34rem, 0) scale(0.38);
   }
@@ -1617,13 +1630,13 @@ body:has(.beginner-word-writing-card) .app,
     transform: translate(-0.34rem, 0) scale(0.38);
   }
   40.5% {
-    opacity: 0.18;
-    filter: blur(5px);
+    opacity: 1;
+    filter: blur(0);
     transform: translate(-0.34rem, 0) scale(0.32);
   }
   45%, to {
-    opacity: 0;
-    filter: blur(8px);
+    opacity: 1;
+    filter: blur(0);
     transform: translate(-0.34rem, 0) scale(0.3);
   }
 }
