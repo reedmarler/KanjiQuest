@@ -221,7 +221,7 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'systems',
     eyebrow: '',
-    title: 'Hiragana is the Japanese alphabet. It\'s used for native Japanese words. It\'s simple and curvy.',
+    title: 'Hiragana is used for native Japanese words. It\'s curvy and simple.',
     body: '',
   },
   {
