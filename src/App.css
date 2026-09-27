@@ -1594,9 +1594,9 @@ body:has(.beginner-word-writing-card) .app,
   0% { opacity: 0; filter: blur(8px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.3); }
   7.7% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.32); }
   16.2%, 44.7%, 46.3% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  55.5% { opacity: 1; filter: blur(0); transform: translate(0.14rem, 0) rotate(0deg) scale(0.58); }
-  64.8% { opacity: 1; filter: blur(0); transform: translate(0.14rem, 0) rotate(0deg) scale(0.78); }
-  74.1%, 77.1% { opacity: 1; filter: blur(0); transform: translate(0.14rem, 0) rotate(0deg) scale(1); }
+  55.5% { opacity: 1; filter: blur(0); transform: translate(0.24rem, 0) rotate(0deg) scale(0.58); }
+  64.8% { opacity: 1; filter: blur(0); transform: translate(0.24rem, 0) rotate(0deg) scale(0.78); }
+  74.1%, 77.1% { opacity: 1; filter: blur(0); transform: translate(0.24rem, 0) rotate(0deg) scale(1); }
   to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) rotate(0deg) scale(1); }
 }
 
@@ -1614,9 +1614,9 @@ body:has(.beginner-word-writing-card) .app,
   0%, 60.35% { opacity: 0; filter: blur(8px); transform: translate(-0.34rem, 0) scale(0.3); }
   63.41% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) scale(0.32); }
   66.77%, 78.08%, 78.7% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
-  82.36% { opacity: 1; filter: blur(0); transform: translate(0.14rem, 0) scale(0.58); }
-  86.04% { opacity: 1; filter: blur(0); transform: translate(0.14rem, 0) scale(0.78); }
-  89.74%, 90.94% { opacity: 1; filter: blur(0); transform: translate(0.14rem, 0) scale(1); }
+  82.36% { opacity: 1; filter: blur(0); transform: translate(0.24rem, 0) scale(0.58); }
+  86.04% { opacity: 1; filter: blur(0); transform: translate(0.24rem, 0) scale(0.78); }
+  89.74%, 90.94% { opacity: 1; filter: blur(0); transform: translate(0.24rem, 0) scale(1); }
   to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) scale(1); }
 }
 
@@ -18961,7 +18961,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 #build-badge::after {
-  content: '#860';
+  content: '#861';
   font: 700 .5rem/1.6 'Outfit', system-ui, sans-serif;
   letter-spacing: .02em;
 }
