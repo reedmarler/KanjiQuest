@@ -622,6 +622,12 @@ body:has(.beginner-word-writing-card) .app,
   background: color-mix(in srgb, var(--surface-2) 48%, transparent);
 }
 
+.beginner-intro-slot-words > span.is-english-only,
+.beginner-intro-slot-previous-words > span.is-english-only,
+.beginner-intro-node-words > span.is-english-only {
+  grid-template-columns: 1fr;
+}
+
 .beginner-intro-slot-words b,
 .beginner-intro-slot-words i,
 .beginner-intro-slot-words em,
@@ -1436,9 +1442,9 @@ body:has(.beginner-word-writing-card) .app,
     left: 50%;
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-size);
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
+    border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);

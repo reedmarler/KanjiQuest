@@ -199,11 +199,11 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     label: 'Hiragana',
     mark: 'あ',
     romaji: 'a',
-    heading: 'Native Words:',
+    heading: 'Examples:',
     words: [
-      { kana: 'すし', romaji: 'sushi' },
-      { kana: 'とうふ', romaji: 'tofu' },
-      { kana: 'さけ', romaji: 'sake' },
+      { kana: '', romaji: 'sushi' },
+      { kana: '', romaji: 'tofu' },
+      { kana: '', romaji: 'sake' },
     ],
   },
   katakana: {
@@ -672,7 +672,10 @@ function BeginnerZone({
                       <span className="beginner-intro-slot-previous-words">
                         <b>{previousRevealContent.heading}</b>
                         {previousRevealContent.words.map((word) => (
-                          <span key={word.romaji}><i lang="ja">{word.kana}</i><em>-</em><small>{word.romaji}</small></span>
+                          <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
+                            {word.kana && <><i lang="ja">{word.kana}</i><em>-</em></>}
+                            <small>{word.romaji}</small>
+                          </span>
                         ))}
                       </span>
                     </span>
@@ -687,7 +690,10 @@ function BeginnerZone({
                       <span className="beginner-intro-slot-words">
                         <b>{revealContent.heading}</b>
                         {revealContent.words.map((word) => (
-                          <span key={word.romaji}><i lang="ja">{word.kana}</i><em>-</em><small>{word.romaji}</small></span>
+                          <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
+                            {word.kana && <><i lang="ja">{word.kana}</i><em>-</em></>}
+                            <small>{word.romaji}</small>
+                          </span>
                         ))}
                       </span>
                     </>
@@ -710,7 +716,10 @@ function BeginnerZone({
                       <span className="beginner-intro-slot-words">
                         <b>{revealContent.heading}</b>
                         {revealContent.words.map((word) => (
-                          <span key={word.romaji}><i lang="ja">{word.kana}</i><em>-</em><small>{word.romaji}</small></span>
+                          <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
+                            {word.kana && <><i lang="ja">{word.kana}</i><em>-</em></>}
+                            <small>{word.romaji}</small>
+                          </span>
                         ))}
                       </span>
                     </>
@@ -745,7 +754,10 @@ function BeginnerZone({
                       <span className="beginner-intro-node-words">
                         <b>{BEGINNER_INTRO_REVEAL_CONTENT.hiragana.heading}</b>
                         {BEGINNER_INTRO_REVEAL_CONTENT.hiragana.words.map((word) => (
-                          <span key={word.romaji}><i lang="ja">{word.kana}</i><em>-</em><small>{word.romaji}</small></span>
+                          <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
+                            {word.kana && <><i lang="ja">{word.kana}</i><em>-</em></>}
+                            <small>{word.romaji}</small>
+                          </span>
                         ))}
                       </span>
                     )}
