@@ -1508,7 +1508,7 @@ body:has(.beginner-word-writing-card) .app,
     border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-reveal-base) 18%, transparent);
-    opacity: 0;
+    opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(-120deg) scale(1);
   }
@@ -1612,9 +1612,9 @@ body:has(.beginner-word-writing-card) .app,
   7.7% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.32); }
   16.2% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
   44.7% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  46.3% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  46.31% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.4); }
-  55.5% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.25); }
+  46.3% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
+  46.31% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.6522); }
+  55.5% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.25); }
   64.8% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.08); }
   74.1%, 77.1% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
   to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) rotate(0deg) scale(1); }
@@ -1625,9 +1625,9 @@ body:has(.beginner-word-writing-card) .app,
   63.41% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) scale(0.32); }
   66.77% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
   78.08% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
-  78.7% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
-  78.71% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.4); }
-  82.36% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.25); }
+  78.7% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
+  78.71% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.6522); }
+  82.36% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.25); }
   86.04% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.08); }
   89.74%, 90.94% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1); }
   to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) scale(1); }
@@ -18965,7 +18965,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 #build-badge::after {
-  content: '#850';
+  content: '#851';
   font: 700 .5rem/1.6 'Outfit', system-ui, sans-serif;
   letter-spacing: .02em;
 }
