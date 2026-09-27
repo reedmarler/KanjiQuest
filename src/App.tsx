@@ -257,7 +257,7 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'systems',
     eyebrow: '',
-    title: 'Hiragana is used for native Japanese words. It\'s curvy and simple.',
+    title: 'Hiragana is used for native Japanese words. This is the first of 46 Hiragana.',
     body: '',
   },
   {

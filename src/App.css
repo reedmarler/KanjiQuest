@@ -626,6 +626,31 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-previous-words > span.is-english-only,
 .beginner-intro-node-words > span.is-english-only {
   grid-template-columns: 1fr;
+  padding-block: 0.2rem;
+  border: 0;
+  background: transparent;
+}
+
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words,
+.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words {
+  right: 0.15rem;
+  width: 8rem;
+}
+
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > b,
+.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words > b {
+  font-size: 0.9rem;
+}
+
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words small,
+.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words small {
+  font-size: 1.02rem;
+}
+
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana small,
+.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana small {
+  top: 3.8rem;
+  left: calc(50% - 0.22rem);
 }
 
 .beginner-intro-slot-words b,
