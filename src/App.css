@@ -406,6 +406,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-lesson.is-simple,
 .beginner-intro-lesson.is-systems,
 .beginner-intro-lesson.is-katakana-reveal,
+.beginner-intro-lesson.is-kanji-reveal,
 .beginner-intro-lesson.is-hiragana {
   grid-template-columns: 1fr;
 }
@@ -463,6 +464,8 @@ body:has(.beginner-word-writing-card) .app,
   --intro-switch-duration: 8828ms;
   --intro-reveal-accent: var(--sakura-light);
   --intro-reveal-base: var(--sakura);
+  --intro-previous-accent: var(--sakura-light);
+  --intro-previous-base: var(--sakura);
   position: absolute;
   z-index: 2;
   top: calc(56% + 15px);
@@ -481,6 +484,13 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-empty-wheel.is-katakana {
   --intro-reveal-accent: #70cfe0;
   --intro-reveal-base: #4ba5c9;
+}
+
+.beginner-intro-empty-wheel.is-kanji {
+  --intro-reveal-accent: #f0bf63;
+  --intro-reveal-base: #c78b32;
+  --intro-previous-accent: #70cfe0;
+  --intro-previous-base: #4ba5c9;
 }
 
 .beginner-intro-empty-slot {
@@ -503,6 +513,22 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-empty-slot.is-slot-top { top: 2px; left: 50%; transform: translate(-50%, -50%); }
 .beginner-intro-empty-slot.is-slot-right { top: 75%; left: 93%; transform: translate(-50%, -50%); }
 .beginner-intro-empty-slot.is-slot-left { top: 75%; left: 7%; transform: translate(-50%, -50%); }
+
+.beginner-intro-empty-slot.is-complete-hiragana {
+  border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
+  background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+  color: var(--sakura-light);
+}
+
+.beginner-intro-slot-docked-glyph {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  inset: 0;
+  color: var(--text);
+  font: 700 2.15rem/1 'Noto Sans JP', sans-serif;
+  transform: translateY(-0.08em);
+}
 
 .beginner-intro-slot-question,
 .beginner-intro-slot-label,
@@ -640,7 +666,7 @@ body:has(.beginner-word-writing-card) .app,
   right: 0;
   bottom: calc(100% + 1.25rem);
   left: 0;
-  color: var(--sakura-light);
+  color: var(--intro-previous-accent);
   font: 800 2.9rem/0.9 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.04em;
   text-align: center;
@@ -687,7 +713,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-slot-previous-words > b {
-  color: var(--sakura-light);
+  color: var(--intro-previous-accent);
   font: 800 0.76rem/1 'Outfit', system-ui, sans-serif;
   padding-left: 0.46rem;
   text-align: left;
@@ -701,7 +727,7 @@ body:has(.beginner-word-writing-card) .app,
   column-gap: 0.38rem;
   min-width: 0;
   padding: 0.32rem 0.46rem 0.34rem;
-  border: 1px solid color-mix(in srgb, var(--sakura-light) 34%, transparent);
+  border: 1px solid color-mix(in srgb, var(--intro-previous-accent) 34%, transparent);
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface-2) 48%, transparent);
 }
@@ -1395,9 +1421,9 @@ body:has(.beginner-word-writing-card) .app,
     top: 50%;
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-size);
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
+    border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -1422,9 +1448,9 @@ body:has(.beginner-word-writing-card) .app,
     left: 50%;
     width: 4.4rem;
     height: 4.4rem;
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -1434,9 +1460,9 @@ body:has(.beginner-word-writing-card) .app,
     left: 50%;
     width: 4.4rem;
     height: 4.4rem;
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--sakura) 18%, transparent);
+    border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
+    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-previous-base) 18%, transparent);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -1446,9 +1472,9 @@ body:has(.beginner-word-writing-card) .app,
     left: 50%;
     width: 4.4rem;
     height: 4.4rem;
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--sakura) 18%, transparent);
+    border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
+    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-previous-base) 18%, transparent);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) translate(1.732px, -1px) rotate(0deg) scale(1);

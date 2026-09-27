@@ -217,6 +217,17 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
       { kana: 'カメラ', romaji: 'camera' },
     ],
   },
+  kanji: {
+    label: 'Kanji',
+    mark: '漢',
+    romaji: 'kan',
+    heading: 'Examples:',
+    words: [
+      { kana: '—', romaji: 'placeholder 1' },
+      { kana: '—', romaji: 'placeholder 2' },
+      { kana: '—', romaji: 'placeholder 3' },
+    ],
+  },
 } as const
 
 const BEGINNER_INTRO_SCRIPTS: Array<{
@@ -256,16 +267,10 @@ const BEGINNER_INTRO_STEPS = [
     body: '',
   },
   {
-    id: 'katakana',
-    eyebrow: 'TWO OF THREE',
-    title: 'Katakana',
-    body: 'Katakana is the second Japanese alphabet. It uses straighter, sharper lines for words that Japanese borrows, or other non-native Japanese words, like bus to basu or taxi to takushii.',
-  },
-  {
-    id: 'kanji',
-    eyebrow: 'THREE OF THREE',
-    title: 'Kanji',
-    body: 'Kanji are old Chinese characters used in Japanese to represent whole words and ideas. One character can carry meaning, like mountain, person, or teacher.',
+    id: 'kanji-reveal',
+    eyebrow: '',
+    title: 'Kanji introduction placeholder.',
+    body: '',
   },
   {
     id: 'together',
@@ -452,7 +457,7 @@ function BeginnerZone({
       setIntroOpeningShrinking(true)
       return
     }
-    if (introStep < 3) {
+    if (introStep < 4) {
       setIntroOpeningShrinking(false)
       setIntroOpeningShrinkDone(false)
       if (introStep === 2) {
@@ -462,15 +467,11 @@ function BeginnerZone({
       setIntroStep((current) => current + 1)
       return
     }
-    if (introStep === 3) {
-      onOpenIntroScript?.('hiragana')
-      return
-    }
-    if (introStep >= 6) return
+    if (introStep >= 5) return
 
     setIntroTransitioning(true)
     introTransitionTimerRef.current = window.setTimeout(() => {
-      setIntroStep((current) => Math.min(6, current + 1))
+      setIntroStep((current) => Math.min(5, current + 1))
       setIntroTransitioning(false)
       introTransitionTimerRef.current = null
     }, 1140)
@@ -609,15 +610,17 @@ function BeginnerZone({
       : (introOpeningPreview && introStep === 0 && !introOpeningShrinking
           ? BEGINNER_INTRO_STEPS[0]
           : step)
-    const activeScriptIndex = introStep >= 4 && introStep <= 5 ? introStep - 3 : -1
-    const completedScripts = introStep === 6
+    const activeScriptIndex = -1
+    const completedScripts = introStep === 5
       ? 3
-      : Math.max(0, introStep - 3) + (introTransitioning ? 1 : 0)
+      : 0
     const isFinalStep = introStep === BEGINNER_INTRO_STEPS.length - 1
-    const revealScript = introStep === 3 ? 'katakana' : 'hiragana'
+    const revealScript = introStep === 4 ? 'kanji' : introStep === 3 ? 'katakana' : 'hiragana'
     const revealContent = BEGINNER_INTRO_REVEAL_CONTENT[revealScript]
-    const previousRevealContent = BEGINNER_INTRO_REVEAL_CONTENT.hiragana
-    const isRevealWheelVisible = introStep >= 1 && introStep <= 3
+    const previousRevealContent = introStep === 4
+      ? BEGINNER_INTRO_REVEAL_CONTENT.katakana
+      : BEGINNER_INTRO_REVEAL_CONTENT.hiragana
+    const isRevealWheelVisible = introStep >= 1 && introStep <= 4
 
     return (
       <main className={`beginner-zone beginner-zone--intro${introPaused ? ' is-intro-paused' : ''}`}>
@@ -656,10 +659,10 @@ function BeginnerZone({
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {isRevealWheelVisible && (
-              <div className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep === 3 ? ' is-switching' : ''}`} aria-hidden="true">
-                <span className={`beginner-intro-empty-slot is-slot-top${introStep === 2 ? ' is-reveal-slot' : ''}${introStep === 3 ? ' is-previous-slot' : ''}`}>
-                  <span className="beginner-intro-slot-question">?</span>
-                  {introStep === 3 && (
+              <div className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 ? ' is-switching' : ''}`} aria-hidden="true">
+                <span className={`beginner-intro-empty-slot is-slot-top${introStep === 2 ? ' is-reveal-slot' : ''}${introStep >= 3 ? ' is-previous-slot' : ''}`}>
+                  <span className="beginner-intro-slot-question">1</span>
+                  {introStep >= 3 && (
                     <span className="beginner-intro-slot-previous">
                       <span className="beginner-intro-slot-previous-label">{previousRevealContent.label}</span>
                       <span className="beginner-intro-slot-previous-kana" lang="ja">
@@ -690,12 +693,14 @@ function BeginnerZone({
                     </>
                   )}
                 </span>
-                <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">
-                  <span className="beginner-intro-slot-question">?</span>
+                <span className={`beginner-intro-empty-slot is-slot-right${introStep === 4 ? ' is-complete-hiragana' : ''}`} aria-hidden="true">
+                  {introStep === 4
+                    ? <span className="beginner-intro-slot-docked-glyph" lang="ja">あ</span>
+                    : <span className="beginner-intro-slot-question">3</span>}
                 </span>
-                <span className={`beginner-intro-empty-slot is-slot-left${introStep === 3 ? ' is-reveal-slot' : ''}`} aria-hidden="true">
-                  <span className="beginner-intro-slot-question">?</span>
-                  {introStep === 3 && (
+                <span className={`beginner-intro-empty-slot is-slot-left${introStep >= 3 ? ' is-reveal-slot' : ''}`} aria-hidden="true">
+                  <span className="beginner-intro-slot-question">{introStep === 4 ? '3' : '2'}</span>
+                  {introStep >= 3 && (
                     <>
                       <span className="beginner-intro-slot-label">{revealContent.label}</span>
                       <span className="beginner-intro-slot-hiragana" lang="ja">
@@ -713,7 +718,7 @@ function BeginnerZone({
                 </span>
               </div>
             )}
-            {introStep === 6 && (
+            {introStep === 5 && (
               <div className="beginner-intro-wheel-complete">
                 <strong lang="ja">日本語</strong>
                 <small>Japanese</small>
@@ -752,25 +757,6 @@ function BeginnerZone({
             })}
           </div>
 
-          {step.id === 'katakana' && (
-            <div className="beginner-intro-example is-katakana" key="katakana-example">
-              <small>BORROWED WORDS</small>
-              <div className="beginner-intro-word-list">
-                <span><b lang="ja">バス</b><small>bus → basu</small></span>
-                <span><b lang="ja">タクシー</b><small>taxi → takushii</small></span>
-              </div>
-            </div>
-          )}
-          {step.id === 'kanji' && (
-            <div className="beginner-intro-example is-kanji" key="kanji-example">
-              <small>CHARACTERS WITH MEANING</small>
-              <div className="beginner-intro-word-list">
-                <span><b lang="ja">山</b><small>mountain</small></span>
-                <span><b lang="ja">人</b><small>person</small></span>
-                <span><b lang="ja">先生</b><small>teacher</small></span>
-              </div>
-            </div>
-          )}
           {step.id === 'together' && (
             <div className="beginner-intro-example is-together" key="together-example">
               <small>ALL THREE TOGETHER</small>
@@ -809,7 +795,7 @@ function BeginnerZone({
                 disabled={introTransitioning}
               >
                 <IntroBlurSwapText
-                  text={introTransitioning ? 'Adding to the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep <= 3 ? 'Next' : introStep === 4 ? 'Next: Kanji' : 'Complete the wheel'}
+                  text={introTransitioning ? 'Completing the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep < 4 ? 'Next' : 'Complete the wheel'}
                   animate={displayIntroStep <= 1}
                   durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_MS : 1400}
                 />
