@@ -796,8 +796,16 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-hiragana-in 3500ms linear forwards;
 }
 
+.beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana > span {
+  animation: beginner-intro-hiragana-glyph-expand 3500ms linear forwards;
+}
+
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-hiragana {
   animation: beginner-intro-katakana-in var(--intro-switch-duration) linear forwards;
+}
+
+.beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-hiragana > span {
+  animation: beginner-intro-katakana-glyph-expand var(--intro-switch-duration) linear forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana small {
@@ -1583,27 +1591,35 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-hiragana-in {
-  0% { opacity: 0; filter: blur(8px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.3); }
-  7.7% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.32); }
-  16.2% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  44.7% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  46.3% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  55.5% { opacity: 1; filter: blur(0); transform: translate(-0.256rem, 0) rotate(0deg) scale(0.58); }
-  64.8% { opacity: 1; filter: blur(0); transform: translate(-0.172rem, 0) rotate(0deg) scale(0.78); }
-  74.1%, 77.1% { opacity: 1; filter: blur(0); transform: translate(-0.08rem, 0) rotate(0deg) scale(1); }
-  to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) rotate(0deg) scale(1); }
+  0% { opacity: 0; filter: blur(8px); transform: translate(-0.08rem, 0) rotate(0deg); }
+  7.7% { opacity: 0.18; filter: blur(5px); transform: translate(-0.08rem, 0) rotate(0deg); }
+  16.2%, 77.1% { opacity: 1; filter: blur(0); transform: translate(-0.08rem, 0) rotate(0deg); }
+  to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) rotate(0deg); }
+}
+
+@keyframes beginner-intro-hiragana-glyph-expand {
+  0% { transform: translate(var(--intro-kana-optical-x), -0.34rem) scale(0.3); }
+  7.7% { transform: translate(var(--intro-kana-optical-x), -0.34rem) scale(0.32); }
+  16.2%, 46.3% { transform: translate(var(--intro-kana-optical-x), -0.34rem) scale(0.38); }
+  55.5% { transform: translate(var(--intro-kana-optical-x), -0.34rem) scale(0.58); }
+  64.8% { transform: translate(var(--intro-kana-optical-x), -0.34rem) scale(0.78); }
+  74.1%, to { transform: translate(var(--intro-kana-optical-x), -0.34rem) scale(1); }
 }
 
 @keyframes beginner-intro-katakana-in {
-  0%, 60.35% { opacity: 0; filter: blur(8px); transform: translate(-0.34rem, 0) scale(0.3); }
-  63.41% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) scale(0.32); }
-  66.77% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
-  78.08% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
-  78.7% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
-  82.36% { opacity: 1; filter: blur(0); transform: translate(-0.256rem, 0) scale(0.58); }
-  86.04% { opacity: 1; filter: blur(0); transform: translate(-0.172rem, 0) scale(0.78); }
-  89.74%, 90.94% { opacity: 1; filter: blur(0); transform: translate(-0.08rem, 0) scale(1); }
-  to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) scale(1); }
+  0%, 60.35% { opacity: 0; filter: blur(8px); transform: translate(-0.08rem, 0); }
+  63.41% { opacity: 0.18; filter: blur(5px); transform: translate(-0.08rem, 0); }
+  66.77%, 90.94% { opacity: 1; filter: blur(0); transform: translate(-0.08rem, 0); }
+  to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0); }
+}
+
+@keyframes beginner-intro-katakana-glyph-expand {
+  0%, 60.35% { transform: translateX(var(--intro-kana-optical-x)) scale(0.3); }
+  63.41% { transform: translateX(var(--intro-kana-optical-x)) scale(0.32); }
+  66.77%, 78.7% { transform: translateX(var(--intro-kana-optical-x)) scale(0.38); }
+  82.36% { transform: translateX(var(--intro-kana-optical-x)) scale(0.58); }
+  86.04% { transform: translateX(var(--intro-kana-optical-x)) scale(0.78); }
+  89.74%, to { transform: translateX(var(--intro-kana-optical-x)) scale(1); }
 }
 
 @keyframes beginner-intro-romaji-in {
@@ -18937,7 +18953,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 #build-badge::after {
-  content: '#854';
+  content: '#855';
   font: 700 .5rem/1.6 'Outfit', system-ui, sans-serif;
   letter-spacing: .02em;
 }
