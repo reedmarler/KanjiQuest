@@ -1,5 +1,5 @@
 import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type AnimationEvent, type CSSProperties, type ReactElement, type ReactNode } from 'react'
-import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Pause, Play, RotateCcw } from 'lucide-react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -202,7 +202,7 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     heading: 'Native Words:',
     words: [
       { kana: 'すし', romaji: 'sushi' },
-      { kana: 'つなみ', romaji: 'tsunami' },
+      { kana: 'とうふ', romaji: 'tofu' },
       { kana: 'さけ', romaji: 'sake' },
     ],
   },
@@ -213,7 +213,7 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     heading: 'Loan words:',
     words: [
       { kana: 'ビール', romaji: 'beer' },
-      { kana: 'ホテル', romaji: 'hoteru' },
+      { kana: 'ホテル', romaji: 'hotel' },
       { kana: 'カメラ', romaji: 'camera' },
     ],
   },
@@ -374,6 +374,7 @@ function BeginnerZone({
   const [introOpeningShrinking, setIntroOpeningShrinking] = useState(false)
   const [introOpeningShrinkDone, setIntroOpeningShrinkDone] = useState(false)
   const [introTransitioning, setIntroTransitioning] = useState(false)
+  const [introPaused, setIntroPaused] = useState(false)
   const [introSpeechDisplayStep, setIntroSpeechDisplayStep] = useState(0)
   const [introSpeechCopyBlurred, setIntroSpeechCopyBlurred] = useState(false)
   const introTransitionTimerRef = useRef<number | null>(null)
@@ -432,6 +433,7 @@ function BeginnerZone({
     introSpeechTimerRef.current = null
     introSpeechFrameRef.current = null
     setIntroTransitioning(false)
+    setIntroPaused(false)
     setIntroOpeningPreview(false)
     setIntroOpeningShrinking(false)
     setIntroOpeningShrinkDone(false)
@@ -602,9 +604,11 @@ function BeginnerZone({
       ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
       : step
     const speechDisplayStep = BEGINNER_INTRO_STEPS[introSpeechDisplayStep]
-    const guideStep = introOpeningPreview && introStep === 0 && !introOpeningShrinking
-      ? BEGINNER_INTRO_STEPS[0]
-      : step
+    const guideStep = displayIntroStep === 3
+      ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
+      : (introOpeningPreview && introStep === 0 && !introOpeningShrinking
+          ? BEGINNER_INTRO_STEPS[0]
+          : step)
     const activeScriptIndex = introStep >= 4 && introStep <= 5 ? introStep - 3 : -1
     const completedScripts = introStep === 6
       ? 3
@@ -616,7 +620,7 @@ function BeginnerZone({
     const isRevealWheelVisible = introStep >= 1 && introStep <= 3
 
     return (
-      <main className="beginner-zone beginner-zone--intro">
+      <main className={`beginner-zone beginner-zone--intro${introPaused ? ' is-intro-paused' : ''}`}>
         <header className={`beginner-intro-guide is-${guideStep.id}`}>
           <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
@@ -630,7 +634,7 @@ function BeginnerZone({
             } as CSSProperties : undefined}
           >
             <div
-              className={`beginner-intro-speech-inner beginner-intro-speech-copy is-${speechDisplayStep.id}${introSpeechCopyBlurred ? ' is-blurred' : ''}`}
+              className={`beginner-intro-speech-inner beginner-intro-speech-copy is-${speechDisplayStep.id}${introSpeechCopyBlurred ? ' is-blurred' : ''}${displayIntroStep === 3 ? ' is-katakana-delayed-reveal' : ''}`}
               ref={introSpeechContentRef}
             >
               {speechDisplayStep.eyebrow && <small>{speechDisplayStep.eyebrow}</small>}
@@ -686,9 +690,11 @@ function BeginnerZone({
                     </>
                   )}
                 </span>
-                <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">?</span>
+                <span className="beginner-intro-empty-slot is-slot-right" aria-hidden="true">
+                  <span className="beginner-intro-slot-question">?</span>
+                </span>
                 <span className={`beginner-intro-empty-slot is-slot-left${introStep === 3 ? ' is-reveal-slot' : ''}`} aria-hidden="true">
-                  {introStep === 3 ? <span className="beginner-intro-slot-question">?</span> : '?'}
+                  <span className="beginner-intro-slot-question">?</span>
                   {introStep === 3 && (
                     <>
                       <span className="beginner-intro-slot-label">{revealContent.label}</span>
@@ -810,7 +816,19 @@ function BeginnerZone({
                 <ArrowRight aria-hidden="true" />
               </button>
             )}
-            <span className="beginner-intro-control-spacer" aria-hidden="true" />
+            {!isFinalStep ? (
+              <button
+                type="button"
+                className="beginner-intro-pause"
+                onClick={() => setIntroPaused((current) => !current)}
+                aria-label={introPaused ? 'Resume introduction animation' : 'Pause introduction animation'}
+                aria-pressed={introPaused}
+              >
+                {introPaused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+              </button>
+            ) : (
+              <span className="beginner-intro-control-spacer" aria-hidden="true" />
+            )}
           </div>
         </footer>
       </main>

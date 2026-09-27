@@ -312,6 +312,10 @@ body:has(.beginner-word-writing-card) .app,
   opacity: 0.12;
 }
 
+.beginner-intro-speech-copy.is-katakana-delayed-reveal {
+  animation: beginner-intro-speech-katakana-reveal 8828ms linear both;
+}
+
 .beginner-intro-speech-measure {
   position: absolute;
   visibility: hidden;
@@ -407,6 +411,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-orbit {
+  --intro-empty-wheel-size: min(16rem, 76dvw);
   position: relative;
   width: min(100%, 16rem);
   aspect-ratio: 1;
@@ -454,12 +459,13 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel {
-  --intro-empty-wheel-size: min(16rem, 76dvw);
-  --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.2);
+  --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.3);
   --intro-expanded-start-scale: 0.23;
+  --intro-switch-duration: 8828ms;
   --intro-reveal-accent: var(--sakura-light);
   --intro-reveal-base: var(--sakura);
   position: absolute;
+  z-index: 2;
   top: calc(56% + 15px);
   left: 50%;
   width: var(--intro-empty-wheel-size);
@@ -480,6 +486,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-slot {
   position: absolute;
+  z-index: 2;
   display: grid;
   place-items: center;
   width: 4.4rem;
@@ -494,7 +501,7 @@ body:has(.beginner-word-writing-card) .app,
   will-change: top, width, height, opacity, transform, filter;
 }
 
-.beginner-intro-empty-slot.is-slot-top { top: 0; left: 50%; transform: translate(-50%, -50%); }
+.beginner-intro-empty-slot.is-slot-top { top: 2px; left: 50%; transform: translate(-50%, -50%); }
 .beginner-intro-empty-slot.is-slot-right { top: 75%; left: 93%; transform: translate(-50%, -50%); }
 .beginner-intro-empty-slot.is-slot-left { top: 75%; left: 7%; transform: translate(-50%, -50%); }
 
@@ -551,6 +558,10 @@ body:has(.beginner-word-writing-card) .app,
   transform: translateX(var(--intro-kana-optical-x));
 }
 
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana span {
+  transform: translate(var(--intro-kana-optical-x), -0.34rem);
+}
+
 .beginner-intro-slot-words {
   top: 50%;
   right: 0.8rem;
@@ -558,6 +569,8 @@ body:has(.beginner-word-writing-card) .app,
   left: auto;
   width: 7.6rem;
   grid-template-columns: 1fr;
+  align-items: stretch;
+  justify-items: stretch;
   gap: 0.38rem;
   font-family: 'Outfit', system-ui, sans-serif;
   opacity: 0;
@@ -727,35 +740,40 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-revealing .is-reveal-slot {
   animation: beginner-intro-slot-expand 2700ms linear both;
+  z-index: 4;
 }
 
 .beginner-intro-empty-wheel.is-switching {
-  animation: beginner-intro-wheel-switch-rotate 6000ms linear both;
+  animation: beginner-intro-wheel-switch-rotate var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-previous-slot {
-  animation: beginner-intro-slot-switch-previous 6000ms linear both;
+  animation: beginner-intro-slot-switch-previous var(--intro-switch-duration) linear both;
+  z-index: 4;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot {
-  animation: beginner-intro-slot-switch-reveal 6000ms linear both;
+  animation: beginner-intro-slot-switch-reveal var(--intro-switch-duration) linear both;
+  z-index: 1;
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-slot-right,
 .beginner-intro-empty-wheel.is-revealing .is-slot-left {
-  animation: beginner-intro-slot-fade 360ms 1940ms ease forwards;
+  z-index: 1;
+  animation: none;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-slot-right {
-  animation: beginner-intro-slot-switch-side 6000ms linear both;
+  animation: beginner-intro-slot-switch-side var(--intro-switch-duration) linear both;
+  z-index: 1;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-slot-left:not(.is-reveal-slot) {
   opacity: 0;
-  animation: beginner-intro-slot-switch-left-in 6000ms linear both;
+  animation: beginner-intro-slot-switch-left-in var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-question {
+.beginner-intro-empty-wheel.is-revealing .is-reveal-slot .beginner-intro-slot-question {
   animation: beginner-intro-question-out 560ms ease-in-out forwards;
 }
 
@@ -764,56 +782,63 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-question {
-  animation: beginner-intro-question-switch 6000ms linear both;
+  animation: beginner-intro-question-switch var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-label {
-  animation: beginner-intro-hiragana-label-in 720ms 2500ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-hiragana-label-in 720ms 3300ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-label {
-  animation: beginner-intro-switch-label-in 6000ms linear both;
+  animation: beginner-intro-switch-label-in var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana {
-  animation: beginner-intro-hiragana-in 2700ms linear forwards;
+  animation: beginner-intro-hiragana-in 3500ms linear forwards;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-hiragana {
-  animation: beginner-intro-katakana-in 6000ms linear forwards;
+  animation: beginner-intro-katakana-in var(--intro-switch-duration) linear forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana small {
-  animation: beginner-intro-romaji-in 360ms 2600ms ease forwards;
+  animation: beginner-intro-romaji-in 360ms 3400ms ease forwards;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-hiragana small {
-  animation: beginner-intro-switch-romaji-in 6000ms linear both;
+  animation: beginner-intro-switch-romaji-in var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-words {
-  animation: beginner-intro-slot-words-in 560ms 2700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-slot-words-in 560ms 3500ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-words {
-  animation: beginner-intro-switch-words-in 6000ms linear both;
+  animation: beginner-intro-switch-words-in var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous {
-  animation: beginner-intro-previous-content-upright 6000ms linear both;
+  animation: beginner-intro-previous-content-upright var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-label,
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-label {
+  animation: beginner-intro-slot-previous-label-out 1100ms ease-in-out both;
+}
+
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words {
-  animation: beginner-intro-slot-previous-copy-out 2700ms linear both;
+  animation: beginner-intro-slot-previous-words-out 1100ms ease-in-out both;
+}
+
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-kana small {
+  animation: beginner-intro-previous-romaji-blur-out 1100ms ease-in-out both;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-kana {
-  animation: beginner-intro-previous-kana-park 6000ms linear both;
+  animation: beginner-intro-previous-kana-park var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-kana span {
-  animation: beginner-intro-previous-kana-glyph-center 6000ms linear both;
+  animation: beginner-intro-previous-kana-glyph-center var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-wheel-placeholder,
@@ -1138,6 +1163,12 @@ body:has(.beginner-word-writing-card) .app,
   transform: none;
 }
 
+.beginner-zone--intro.is-intro-paused *,
+.beginner-zone--intro.is-intro-paused *::before,
+.beginner-zone--intro.is-intro-paused *::after {
+  animation-play-state: paused !important;
+}
+
 .beginner-intro-controls > div:last-child {
   --intro-control-side: 2.55rem;
   --intro-control-main: 8.1rem;
@@ -1151,6 +1182,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-back,
 .beginner-intro-replay,
+.beginner-intro-pause,
 .beginner-intro-next {
   display: inline-flex;
   align-items: center;
@@ -1163,10 +1195,16 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-back,
-.beginner-intro-replay {
+.beginner-intro-replay,
+.beginner-intro-pause {
   width: 2.55rem;
   background: var(--surface-2);
   color: var(--text-muted);
+}
+
+.beginner-intro-pause[aria-pressed="true"] {
+  color: var(--sakura-light);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sakura-light) 38%, transparent);
 }
 
 .beginner-intro-control-spacer {
@@ -1225,6 +1263,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-back svg,
 .beginner-intro-replay svg,
+.beginner-intro-pause svg,
 .beginner-intro-next svg {
   width: 0.9rem;
   height: 0.9rem;
@@ -1245,6 +1284,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-node:focus-visible,
 .beginner-intro-back:focus-visible,
 .beginner-intro-replay:focus-visible,
+.beginner-intro-pause:focus-visible,
 .beginner-intro-next:focus-visible {
   outline: 2px solid var(--sakura-light);
   outline-offset: 3px;
@@ -1296,17 +1336,23 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-wheel-switch-rotate {
-  0%, 45% {
+  0%, 45.7% {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  61%, to {
+  60.35%, to {
     transform: translate(-50%, -50%) rotate(120deg) scale(1);
   }
 }
 
+@keyframes beginner-intro-speech-katakana-reveal {
+  0% { opacity: 1; filter: blur(0); }
+  6.4%, 78.7% { opacity: 0.12; filter: blur(8px); }
+  90.94%, to { opacity: 1; filter: blur(0); }
+}
+
 @keyframes beginner-intro-slot-expand {
   0% {
-    top: 0;
+    top: 2px;
     width: 4.4rem;
     height: 4.4rem;
     border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
@@ -1316,8 +1362,8 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  33% {
-    top: 0;
+  20% {
+    top: 2px;
     width: 4.4rem;
     height: 4.4rem;
     border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
@@ -1327,7 +1373,7 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  72% {
+  60% {
     top: 50%;
     width: 4.4rem;
     height: 4.4rem;
@@ -1338,7 +1384,7 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  72.01% {
+  60.01% {
     top: 50%;
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-size);
@@ -1348,17 +1394,6 @@ body:has(.beginner-word-writing-card) .app,
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(var(--intro-expanded-start-scale));
-  }
-  88% {
-    top: 50%;
-    width: var(--intro-expanded-wheel-size);
-    height: var(--intro-expanded-wheel-size);
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--sakura) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
   to {
     top: 50%;
@@ -1374,7 +1409,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-slot-switch-previous {
-  0%, 24% {
+  0%, 19.6% {
     top: 50%;
     left: 50%;
     width: var(--intro-expanded-wheel-size);
@@ -1386,7 +1421,7 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  38% {
+  31% {
     top: 50%;
     left: 50%;
     width: 4.4rem;
@@ -1398,8 +1433,8 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  42%, to {
-    top: 0;
+  45.7% {
+    top: 2px;
     left: 50%;
     width: 4.4rem;
     height: 4.4rem;
@@ -1410,22 +1445,23 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
+  60.35%, to {
+    top: 2px;
+    left: 50%;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
+    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--sakura) 18%, transparent);
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) translate(1.732px, -1px) rotate(0deg) scale(1);
+  }
 }
 
 @keyframes beginner-intro-slot-switch-reveal {
-  0%, 23.99% {
-    top: 75%;
-    left: 7%;
-    width: 4.4rem;
-    height: 4.4rem;
-    border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
-    background: var(--surface-2);
-    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
-    opacity: 0;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(0.75);
-  }
-  24%, 61% {
+  0% {
+    z-index: 1;
     top: 75%;
     left: 7%;
     width: 4.4rem;
@@ -1437,7 +1473,21 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  61.01%, 72% {
+  19.6%, 45.7% {
+    z-index: 1;
+    top: 75%;
+    left: 7%;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
+    background: var(--surface-2);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  60.35% {
+    z-index: 1;
     top: 75%;
     left: 7%;
     width: 4.4rem;
@@ -1449,7 +1499,34 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(-120deg) scale(1);
   }
-  82% {
+  60.36% {
+    z-index: 5;
+    top: 75%;
+    left: 7%;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-reveal-base) 18%, transparent);
+    opacity: 0;
+    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(-120deg) scale(1);
+  }
+  66.7% {
+    z-index: 5;
+    top: 75%;
+    left: 7%;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-reveal-base) 18%, transparent);
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(-120deg) scale(1);
+  }
+  78.7% {
+    z-index: 5;
     top: 50%;
     left: 50%;
     width: 4.4rem;
@@ -1461,7 +1538,8 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(-120deg) scale(1);
   }
-  82.01% {
+  78.71% {
+    z-index: 5;
     top: 50%;
     left: 50%;
     width: var(--intro-expanded-wheel-size);
@@ -1473,7 +1551,8 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(-120deg) scale(var(--intro-expanded-start-scale));
   }
-  94%, to {
+  90.94%, to {
+    z-index: 5;
     top: 50%;
     left: 50%;
     width: var(--intro-expanded-wheel-size);
@@ -1491,16 +1570,18 @@ body:has(.beginner-word-writing-card) .app,
   to { opacity: 0; transform: translate(-50%, -50%) scale(0.75); }
 }
 
+@keyframes beginner-intro-slot-fade-under-expanded {
+  0%, 78% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  88%, to { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
 @keyframes beginner-intro-slot-switch-side {
-  0%, 23.99% { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) scale(0.75); }
-  24%, 60.99% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-  61%, 64% { opacity: 1; transform: translate(-50%, -50%) rotate(-120deg) scale(1); }
-  82%, to { opacity: 0; transform: translate(-50%, -50%) rotate(-120deg) scale(0.75); }
+  0%, 45.69% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  60.35%, to { opacity: 1; transform: translate(-50%, -50%) rotate(-120deg) scale(1); }
 }
 
 @keyframes beginner-intro-slot-switch-left-in {
-  0%, 23.99% { opacity: 0; }
-  24%, to { opacity: 1; }
+  0%, to { opacity: 1; }
 }
 
 @keyframes beginner-intro-question-out {
@@ -1511,9 +1592,10 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-question-switch {
-  0%, 66% { opacity: 1; filter: blur(0); transform: translateX(0) rotate(0deg) scale(1); }
-  72% { opacity: 0.42; filter: blur(4px); transform: translateX(0.04rem) rotate(1.5deg) scale(0.84); }
-  76%, to { opacity: 0; filter: blur(8px); transform: translateX(0) rotate(0deg) scale(0.64); }
+  0%, 60.35% { opacity: 1; filter: blur(0); transform: none; }
+  62.25% { opacity: 0.92; filter: blur(1px); transform: translateX(-0.04rem) rotate(-1.5deg) scale(0.98); }
+  64.25% { opacity: 0.42; filter: blur(4px); transform: translateX(0.04rem) rotate(1.5deg) scale(0.84); }
+  66.7%, to { opacity: 0; filter: blur(8px); transform: scale(0.64); }
 }
 
 @keyframes beginner-intro-hiragana-label-in {
@@ -1521,33 +1603,33 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-switch-label-in {
-  0%, 88% { opacity: 0; transform: translateY(0.35rem) scale(0.92); }
+  0%, 97.7% { opacity: 0; transform: translateY(0.35rem) scale(0.92); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes beginner-intro-hiragana-in {
   0% { opacity: 0; filter: blur(8px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.3); }
-  10% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.32); }
-  21% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  70% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  72% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
-  72.01% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.4); }
-  78% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.25); }
-  84% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.08); }
-  88% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
-  92% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
+  7.7% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.32); }
+  16.2% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
+  44.7% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
+  46.3% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(0.38); }
+  46.31% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.4); }
+  55.5% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.25); }
+  64.8% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1.08); }
+  74.1%, 77.1% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(0deg) scale(1); }
   to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) rotate(0deg) scale(1); }
 }
 
 @keyframes beginner-intro-katakana-in {
-  0%, 66% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
-  72% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
-  82% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
-  82.01% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.4); }
-  88% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.25); }
-  92% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.08); }
-  94% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1); }
-  96% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1); }
+  0%, 60.35% { opacity: 0; filter: blur(8px); transform: translate(-0.34rem, 0) scale(0.3); }
+  63.41% { opacity: 0.18; filter: blur(5px); transform: translate(-0.34rem, 0) scale(0.32); }
+  66.77% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
+  78.08% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
+  78.7% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
+  78.71% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.4); }
+  82.36% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.25); }
+  86.04% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.08); }
+  89.74%, 90.94% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1); }
   to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) scale(1); }
 }
 
@@ -1556,7 +1638,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-switch-romaji-in {
-  0%, 93% { opacity: 0; }
+  0%, 98.9% { opacity: 0; }
   to { opacity: 1; }
 }
 
@@ -1565,7 +1647,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-switch-words-in {
-  0%, 94% { opacity: 0; transform: translateY(calc(-50% + 0.45rem)) scale(0.94); }
+  0%, 98.9% { opacity: 0; transform: translateY(calc(-50% + 0.45rem)) scale(0.94); }
   to { opacity: 1; transform: translateY(-50%) scale(1); }
 }
 
@@ -1576,84 +1658,65 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-previous-content-upright {
-  0%, 45% {
+  0%, 45.7% {
     opacity: 1;
     filter: blur(0);
     transform: rotate(0deg);
   }
-  61%, to {
+  60.35%, to {
     opacity: 1;
     filter: blur(0);
     transform: rotate(-120deg);
   }
 }
 
-@keyframes beginner-intro-slot-previous-copy-out {
-  0% { opacity: 1; filter: blur(0); }
-  10%, to { opacity: 0; filter: blur(4px); }
+@keyframes beginner-intro-slot-previous-label-out {
+  0%, 15% { opacity: 1; filter: blur(0); }
+  65% { opacity: 0.42; filter: blur(3px); }
+  to { opacity: 0; filter: blur(7px); }
+}
+
+@keyframes beginner-intro-slot-previous-words-out {
+  0%, 15% { opacity: 1; filter: blur(0); transform: translateY(-50%); }
+  65% { opacity: 0.42; filter: blur(3px); transform: translateY(-50%); }
+  to { opacity: 0; filter: blur(7px); transform: translateY(-50%); }
+}
+
+@keyframes beginner-intro-previous-romaji-blur-out {
+  0%, 15% { opacity: 1; filter: blur(0); transform: translateX(-50%); }
+  65% { opacity: 0.42; filter: blur(2px); transform: translateX(-50%); }
+  to { opacity: 0; filter: blur(5px); transform: translateX(-50%); }
 }
 
 @keyframes beginner-intro-previous-kana-park {
-  0%, 10% {
+  0%, 8.2% {
     opacity: 1;
     filter: blur(0);
-    transform: translate(-2.45rem, 0) scale(1);
+    font-size: 6.8rem;
+    transform: translate(-2.45rem, 0);
   }
-  18%, 24% {
+  14.7%, 19.6% {
     opacity: 1;
     filter: blur(0);
-    transform: translate(0.42rem, -0.78rem) scale(1);
+    font-size: 6.8rem;
+    transform: none;
   }
-  28% {
+  31%, 34.3%, 49.8%, to {
     opacity: 1;
     filter: blur(0);
-    transform: translate(0.37rem, -0.78rem) scale(0.82);
-  }
-  32% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(0.29rem, -0.78rem) scale(0.65);
-  }
-  35% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(0.23rem, -0.78rem) scale(0.51);
-  }
-  37% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(0.1rem, -0.78rem) scale(0.42);
-  }
-  37.5% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-0.07rem, -0.78rem) scale(0.4);
-  }
-  38% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-0.34rem, -0.78rem) scale(0.38);
-  }
-  42% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-0.34rem, -0.78rem) scale(0.38);
-  }
-  61%, to {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-0.34rem, -0.78rem) scale(0.38);
+    font-size: 2.584rem;
+    transform: none;
   }
 }
 
 @keyframes beginner-intro-previous-romaji-out {
-  0%, 17.99% { opacity: 1; }
-  18%, to { opacity: 0; }
+  0%, 14.69% { opacity: 1; }
+  14.7%, to { opacity: 0; }
 }
 
 @keyframes beginner-intro-previous-kana-glyph-center {
-  0%, 10% { transform: translateX(-0.42rem); }
-  18%, to { transform: translateX(-0.42rem); }
+  0%, 8.2% { transform: translate(-0.42rem, -0.34rem); }
+  14.7%, to { transform: translate(0, -0.051em); }
 }
 
 @keyframes beginner-intro-copy-out {
@@ -18902,7 +18965,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 #build-badge::after {
-  content: '#798';
+  content: '#850';
   font: 700 .5rem/1.6 'Outfit', system-ui, sans-serif;
   letter-spacing: .02em;
 }
