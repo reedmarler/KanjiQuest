@@ -750,7 +750,7 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-slot-switch-side 6000ms linear both;
 }
 
-.beginner-intro-empty-wheel.is-switching .is-slot-left {
+.beginner-intro-empty-wheel.is-switching .is-slot-left:not(.is-reveal-slot) {
   opacity: 0;
   animation: beginner-intro-slot-switch-left-in 6000ms linear both;
 }
@@ -1398,7 +1398,7 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  45%, to {
+  42%, to {
     top: 0;
     left: 50%;
     width: 4.4rem;
@@ -1413,7 +1413,19 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-slot-switch-reveal {
-  0%, 61% {
+  0%, 23.99% {
+    top: 75%;
+    left: 7%;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
+    background: var(--surface-2);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    opacity: 0;
+    filter: blur(0);
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.75);
+  }
+  24%, 61% {
     top: 75%;
     left: 7%;
     width: 4.4rem;
@@ -1425,7 +1437,7 @@ body:has(.beginner-word-writing-card) .app,
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  61.01% {
+  61.01%, 72% {
     top: 75%;
     left: 7%;
     width: 4.4rem;
@@ -1480,14 +1492,15 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-slot-switch-side {
-  0%, 60.99% { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) scale(0.75); }
+  0%, 23.99% { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) scale(0.75); }
+  24%, 60.99% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
   61%, 64% { opacity: 1; transform: translate(-50%, -50%) rotate(-120deg) scale(1); }
   82%, to { opacity: 0; transform: translate(-50%, -50%) rotate(-120deg) scale(0.75); }
 }
 
 @keyframes beginner-intro-slot-switch-left-in {
-  0%, 60.99% { opacity: 0; }
-  61%, to { opacity: 1; }
+  0%, 23.99% { opacity: 0; }
+  24%, to { opacity: 1; }
 }
 
 @keyframes beginner-intro-question-out {
@@ -1498,9 +1511,9 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-question-switch {
-  0%, 62% { opacity: 1; filter: blur(0); transform: translateX(0) rotate(0deg) scale(1); }
-  70% { opacity: 0.42; filter: blur(4px); transform: translateX(0.04rem) rotate(1.5deg) scale(0.84); }
-  78%, to { opacity: 0; filter: blur(8px); transform: translateX(0) rotate(0deg) scale(0.64); }
+  0%, 66% { opacity: 1; filter: blur(0); transform: translateX(0) rotate(0deg) scale(1); }
+  72% { opacity: 0.42; filter: blur(4px); transform: translateX(0.04rem) rotate(1.5deg) scale(0.84); }
+  76%, to { opacity: 0; filter: blur(8px); transform: translateX(0) rotate(0deg) scale(0.64); }
 }
 
 @keyframes beginner-intro-hiragana-label-in {
@@ -1508,8 +1521,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-switch-label-in {
-  0%, 88% { opacity: 0; transform: translateY(0.35rem) rotate(120deg) scale(0.92); }
-  to { opacity: 1; transform: translateY(0) rotate(120deg) scale(1); }
+  0%, 88% { opacity: 0; transform: translateY(0.35rem) scale(0.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes beginner-intro-hiragana-in {
@@ -1527,13 +1540,15 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-katakana-in {
-  0%, 82% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(120deg) scale(0.38); }
-  82.01% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(120deg) scale(1.4); }
-  88% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) rotate(120deg) scale(1.25); }
-  92% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(120deg) scale(1.08); }
-  94% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(120deg) scale(1); }
-  96% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) rotate(120deg) scale(1); }
-  to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) rotate(120deg) scale(1); }
+  0%, 66% { opacity: 0; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
+  72% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
+  82% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(0.38); }
+  82.01% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.4); }
+  88% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.25); }
+  92% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1.08); }
+  94% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1); }
+  96% { opacity: 1; filter: blur(0); transform: translate(-0.34rem, 0) scale(1); }
+  to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) scale(1); }
 }
 
 @keyframes beginner-intro-romaji-in {
@@ -1550,8 +1565,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-switch-words-in {
-  0%, 94% { opacity: 0; transform: translateY(calc(-50% + 0.45rem)) rotate(120deg) scale(0.94); }
-  to { opacity: 1; transform: translateY(-50%) rotate(120deg) scale(1); }
+  0%, 94% { opacity: 0; transform: translateY(calc(-50% + 0.45rem)) scale(0.94); }
+  to { opacity: 1; transform: translateY(-50%) scale(1); }
 }
 
 @keyframes beginner-intro-slot-previous-out {
@@ -1587,22 +1602,47 @@ body:has(.beginner-word-writing-card) .app,
   18%, 24% {
     opacity: 1;
     filter: blur(0);
-    transform: translate(-0.18rem, -0.12rem) scale(1);
+    transform: translate(0.42rem, -0.78rem) scale(1);
+  }
+  28% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(0.37rem, -0.78rem) scale(0.82);
+  }
+  32% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(0.29rem, -0.78rem) scale(0.65);
+  }
+  35% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(0.23rem, -0.78rem) scale(0.51);
+  }
+  37% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(0.1rem, -0.78rem) scale(0.42);
+  }
+  37.5% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-0.07rem, -0.78rem) scale(0.4);
   }
   38% {
     opacity: 1;
     filter: blur(0);
-    transform: translate(-0.18rem, -0.12rem) scale(0.38);
+    transform: translate(-0.34rem, -0.78rem) scale(0.38);
   }
-  45% {
+  42% {
     opacity: 1;
     filter: blur(0);
-    transform: translate(-0.18rem, -0.52rem) scale(0.38);
+    transform: translate(-0.34rem, -0.78rem) scale(0.38);
   }
   61%, to {
     opacity: 1;
     filter: blur(0);
-    transform: translate(-0.18rem, -0.52rem) scale(0.38);
+    transform: translate(-0.34rem, -0.78rem) scale(0.38);
   }
 }
 
@@ -1613,7 +1653,7 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-previous-kana-glyph-center {
   0%, 10% { transform: translateX(-0.42rem); }
-  18%, to { transform: translate(-0.2rem, -0.18rem); }
+  18%, to { transform: translateX(-0.42rem); }
 }
 
 @keyframes beginner-intro-copy-out {
@@ -18862,7 +18902,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 #build-badge::after {
-  content: '#776';
+  content: '#798';
   font: 700 .5rem/1.6 'Outfit', system-ui, sans-serif;
   letter-spacing: .02em;
 }
