@@ -764,6 +764,12 @@ body:has(.beginner-word-writing-card) .app,
   transform: translate(-0.42rem, -0.34rem);
 }
 
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana span,
+.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana span {
+  position: relative;
+  top: -3px;
+}
+
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana::before,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana::before {
   content: '';
