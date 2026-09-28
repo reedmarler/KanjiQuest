@@ -488,8 +488,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana {
-  --intro-expanded-wheel-size: min(14.5rem, 82.5dvw);
-  --intro-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25);
+  --intro-expanded-wheel-size: min(calc(8.5rem + 30px), 82.5dvw);
+  --intro-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 15px);
   --intro-expanded-wheel-radius: 8px;
 }
 
@@ -500,8 +500,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-katakana {
-  --intro-previous-expanded-wheel-size: min(14.5rem, 82.5dvw);
-  --intro-previous-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25);
+  --intro-previous-expanded-wheel-size: min(calc(8.5rem + 30px), 82.5dvw);
+  --intro-previous-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 15px);
   --intro-previous-expanded-wheel-radius: 8px;
   --intro-reveal-accent: #70cfe0;
   --intro-reveal-base: #4ba5c9;
@@ -580,7 +580,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-progress,
 .beginner-intro-slot-previous-progress {
   position: absolute;
-  top: 1.1rem;
+  top: 1.2rem;
   color: var(--sakura-light);
   font: 800 0.92rem/1 'Outfit', system-ui, sans-serif;
   white-space: nowrap;
@@ -692,9 +692,9 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words {
   top: auto;
   right: auto;
-  bottom: 0.1rem;
+  bottom: calc(0.1rem - 15px);
   left: 50%;
-  width: 12rem;
+  width: calc(8.5rem + 8px);
   grid-template-columns: 1fr;
   justify-content: center;
   transform: translate(-50%, 0.45rem) scale(0.94);
@@ -2136,12 +2136,12 @@ body:has(.beginner-word-writing-card) .app,
     top: calc(58% + 15px);
   }
   .beginner-intro-empty-wheel.is-hiragana {
-    --intro-expanded-wheel-size: min(14.5rem, 82.5dvw);
-    --intro-expanded-wheel-height: min(18rem, 78dvw);
+    --intro-expanded-wheel-size: min(calc(8.5rem + 30px), 82.5dvw);
+    --intro-expanded-wheel-height: min(calc(18rem + 15px), 78dvw);
   }
   .beginner-intro-empty-wheel.is-katakana {
-    --intro-previous-expanded-wheel-size: min(14.5rem, 82.5dvw);
-    --intro-previous-expanded-wheel-height: min(18rem, 78dvw);
+    --intro-previous-expanded-wheel-size: min(calc(8.5rem + 30px), 82.5dvw);
+    --intro-previous-expanded-wheel-height: min(calc(18rem + 15px), 78dvw);
   }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px); }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
