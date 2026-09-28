@@ -462,7 +462,11 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel {
   --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.3);
+  --intro-expanded-wheel-height: var(--intro-expanded-wheel-size);
+  --intro-expanded-wheel-radius: 50%;
   --intro-previous-expanded-wheel-size: var(--intro-expanded-wheel-size);
+  --intro-previous-expanded-wheel-height: var(--intro-expanded-wheel-height);
+  --intro-previous-expanded-wheel-radius: var(--intro-expanded-wheel-radius);
   --intro-switch-duration: 8828ms;
   --intro-reveal-accent: var(--sakura-light);
   --intro-reveal-base: var(--sakura);
@@ -485,10 +489,14 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-hiragana {
   --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.5015);
+  --intro-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25);
+  --intro-expanded-wheel-radius: 8px;
 }
 
 .beginner-intro-empty-wheel.is-katakana {
   --intro-previous-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.5015);
+  --intro-previous-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25);
+  --intro-previous-expanded-wheel-radius: 8px;
   --intro-reveal-accent: #70cfe0;
   --intro-reveal-base: #4ba5c9;
 }
@@ -678,10 +686,10 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words {
   top: auto;
   right: auto;
-  bottom: 2rem;
+  bottom: 0.5rem;
   left: 50%;
-  width: 14.5rem;
-  grid-template-columns: repeat(2, auto);
+  width: 12rem;
+  grid-template-columns: 1fr;
   justify-content: center;
   transform: translate(-50%, 0.45rem) scale(0.94);
 }
@@ -1553,7 +1561,8 @@ body:has(.beginner-word-writing-card) .app,
   to {
     top: 50%;
     width: var(--intro-expanded-wheel-size);
-    height: var(--intro-expanded-wheel-size);
+    height: var(--intro-expanded-wheel-height);
+    border-radius: var(--intro-expanded-wheel-radius);
     border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
     box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
@@ -1568,7 +1577,8 @@ body:has(.beginner-word-writing-card) .app,
     top: 50%;
     left: 50%;
     width: var(--intro-previous-expanded-wheel-size);
-    height: var(--intro-previous-expanded-wheel-size);
+    height: var(--intro-previous-expanded-wheel-height);
+    border-radius: var(--intro-previous-expanded-wheel-radius);
     border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
     box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
@@ -1581,6 +1591,7 @@ body:has(.beginner-word-writing-card) .app,
     left: 50%;
     width: 4.4rem;
     height: 4.4rem;
+    border-radius: 50%;
     border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
@@ -2038,9 +2049,11 @@ body:has(.beginner-word-writing-card) .app,
   }
   .beginner-intro-empty-wheel.is-hiragana {
     --intro-expanded-wheel-size: min(21.714rem, 94.248dvw);
+    --intro-expanded-wheel-height: min(18rem, 78dvw);
   }
   .beginner-intro-empty-wheel.is-katakana {
     --intro-previous-expanded-wheel-size: min(21.714rem, 94.248dvw);
+    --intro-previous-expanded-wheel-height: min(18rem, 78dvw);
   }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px); }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
