@@ -567,15 +567,21 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-previous-progress {
   position: absolute;
   top: 1.1rem;
-  left: 50%;
-  color: var(--sakura-light);
+  color: #fff;
   font: 800 0.92rem/1 'Outfit', system-ui, sans-serif;
   white-space: nowrap;
+}
+
+.beginner-intro-slot-previous-progress {
+  left: 50%;
   transform: translateX(-50%);
 }
 
 .beginner-intro-slot-progress {
+  right: 0;
+  left: 0;
   opacity: 0;
+  transform: translateY(0.35rem) scale(0.92);
 }
 
 .beginner-intro-slot-hiragana {
@@ -1705,7 +1711,7 @@ body:has(.beginner-word-writing-card) .app,
   55.5% { opacity: 1; filter: blur(0); transform: translate(0.24rem, 0) rotate(0deg) scale(0.58); }
   64.8% { opacity: 1; filter: blur(0); transform: translate(0.24rem, 0) rotate(0deg) scale(0.78); }
   74.1%, 77.1% { opacity: 1; filter: blur(0); transform: translate(0.24rem, 0) rotate(0deg) scale(1); }
-  to { opacity: 1; filter: blur(0); transform: translate(-2.45rem, 0) rotate(0deg) scale(1); }
+  to { opacity: 1; filter: blur(0); transform: translate(-2.8rem, 0) rotate(0deg) scale(1.06); }
 }
 
 @keyframes beginner-intro-hiragana-glyph-anchor {
