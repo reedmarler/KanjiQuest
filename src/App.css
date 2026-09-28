@@ -484,11 +484,11 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana {
-  --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.43);
+  --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.5015);
 }
 
 .beginner-intro-empty-wheel.is-katakana {
-  --intro-previous-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.43);
+  --intro-previous-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.5015);
   --intro-reveal-accent: #70cfe0;
   --intro-reveal-base: #4ba5c9;
 }
@@ -680,12 +680,15 @@ body:has(.beginner-word-writing-card) .app,
   right: auto;
   bottom: 2rem;
   left: 50%;
-  width: 11rem;
+  width: 14.5rem;
+  grid-template-columns: repeat(2, auto);
+  justify-content: center;
   transform: translate(-50%, 0.45rem) scale(0.94);
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > b,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words > b {
+  grid-column: 1 / -1;
   padding-left: 0;
   text-align: center;
 }
@@ -720,7 +723,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana small,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana small {
-  top: 3.8rem;
+  top: calc(50% - 5.2rem);
   left: calc(50% - 0.22rem);
 }
 
@@ -2034,10 +2037,10 @@ body:has(.beginner-word-writing-card) .app,
     top: calc(58% + 15px);
   }
   .beginner-intro-empty-wheel.is-hiragana {
-    --intro-expanded-wheel-size: min(20.68rem, 89.76dvw);
+    --intro-expanded-wheel-size: min(21.714rem, 94.248dvw);
   }
   .beginner-intro-empty-wheel.is-katakana {
-    --intro-previous-expanded-wheel-size: min(20.68rem, 89.76dvw);
+    --intro-previous-expanded-wheel-size: min(21.714rem, 94.248dvw);
   }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px); }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
