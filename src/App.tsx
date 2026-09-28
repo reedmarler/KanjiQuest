@@ -257,7 +257,7 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'systems',
     eyebrow: '',
-    title: 'Hiragana is used for native Japanese words. あ (a) is the first of 46 Hiragana.',
+    title: 'Hiragana is used for native Japanese words. There are 46 hiragana characters.',
     body: '',
   },
   {
