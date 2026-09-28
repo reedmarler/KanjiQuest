@@ -417,6 +417,13 @@ body:has(.beginner-word-writing-card) .app,
   width: min(100%, 16rem);
   aspect-ratio: 1;
   margin: 0 auto;
+  transition: margin-top 2700ms linear;
+}
+
+.beginner-intro-lesson.is-systems .beginner-intro-orbit,
+.beginner-intro-lesson.is-katakana-reveal .beginner-intro-orbit,
+.beginner-intro-lesson.is-kanji-reveal .beginner-intro-orbit {
+  margin-top: 5rem;
 }
 
 .beginner-intro-ring {
@@ -659,16 +666,6 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words {
   right: -0.55rem;
   width: 8.4rem;
-}
-
-.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-label {
-  top: 0.8rem;
-  bottom: auto;
-  font-size: 2.2rem;
-}
-
-.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-progress {
-  top: 3.45rem;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > b,
