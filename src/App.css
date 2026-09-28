@@ -264,7 +264,7 @@ body:has(.beginner-word-writing-card) .app,
   align-self: center;
   justify-self: start;
   width: var(--intro-speech-width, fit-content);
-  max-width: min(100%, 18rem);
+  max-width: min(100%, 22rem);
   height: var(--intro-speech-height, auto);
   min-height: 0;
   padding: 0.95rem 1.05rem;
@@ -633,18 +633,22 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words {
-  right: 0.15rem;
-  width: 8rem;
+  right: -0.55rem;
+  width: 8.4rem;
+}
+
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-label {
+  display: none;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > b,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words > b {
-  font-size: 0.9rem;
+  font-size: 1.05rem;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words small,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words small {
-  font-size: 1.02rem;
+  font-size: 1.2rem;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana small,

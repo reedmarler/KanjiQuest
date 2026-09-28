@@ -529,7 +529,7 @@ function BeginnerZone({
       const horizontalBorder = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth)
       const verticalBorder = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth)
       const availableOuterWidth = guide.getBoundingClientRect().right - speechNode.getBoundingClientRect().left
-      const maxOuterWidth = Math.min(18 * parseFloat(window.getComputedStyle(document.documentElement).fontSize), availableOuterWidth)
+      const maxOuterWidth = Math.min(22 * parseFloat(window.getComputedStyle(document.documentElement).fontSize), availableOuterWidth)
       const maxContentWidth = Math.max(0, maxOuterWidth - horizontalPadding - horizontalBorder)
 
       widthProbeNode.style.width = 'max-content'
