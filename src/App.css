@@ -577,13 +577,15 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-slot-label {
-  right: 0;
+  right: auto;
   bottom: calc(100% + 1.25rem);
-  left: 0;
+  left: 50%;
+  width: max-content;
   color: var(--intro-reveal-accent);
   font: 800 2.9rem/0.9 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.04em;
   text-align: center;
+  translate: -50% 0;
   opacity: 0;
   transform: translateY(0.35rem) scale(0.92);
 }
@@ -708,7 +710,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words {
   top: auto;
   right: auto;
-  bottom: var(--intro-hiragana-panel-gutter, 15px);
+  bottom: calc(var(--intro-hiragana-panel-gutter, 15px) + 4px);
   left: 50%;
   width: var(--intro-hiragana-outline-width, 8.5rem);
   grid-template-columns: 1fr;
@@ -734,6 +736,10 @@ body:has(.beginner-word-writing-card) .app,
   font-size: 1.05rem;
 }
 
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > b {
+  margin-bottom: 0.38rem;
+}
+
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words small,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words small {
   font-size: 1.2rem;
@@ -751,6 +757,22 @@ body:has(.beginner-word-writing-card) .app,
   white-space: nowrap;
 }
 
+.beginner-intro-slot-words.is-hiragana-examples ruby,
+.beginner-intro-slot-previous-words.is-hiragana-examples ruby {
+  display: inline-flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 0.08rem;
+  line-height: 1;
+  ruby-position: over;
+}
+
+.beginner-intro-slot-words.is-hiragana-examples rt,
+.beginner-intro-slot-previous-words.is-hiragana-examples rt {
+  color: #fff;
+  font: 800 0.5rem/1 'Outfit', system-ui, sans-serif;
+}
+
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana small,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana small {
   top: 3.92rem;
@@ -765,7 +787,11 @@ body:has(.beginner-word-writing-card) .app,
   transform: translate(-0.42rem, -0.34rem);
 }
 
-.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana span,
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana span {
+  position: relative;
+  top: -10px;
+}
+
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana span {
   position: relative;
   top: -8px;
@@ -19293,7 +19319,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 #build-badge::after {
-  content: '#861';
+  content: '#868';
   font: 700 .5rem/1.6 'Outfit', system-ui, sans-serif;
   letter-spacing: .02em;
 }
@@ -21073,6 +21099,19 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
    against the pair the same way there too. */
 .beginner-learner--preview-a > .app-nav-actions > .app-back-slot {
   height: 0;
+}
+
+.beginner-learner--preview-a > .hiragana-chart-heading {
+  grid-template-columns: 1fr;
+}
+
+.beginner-learner--preview-a > .hiragana-chart-heading .hiragana-chart-heading-copy {
+  grid-column: 1;
+}
+
+.beginner-learner--preview-a > .hiragana-chart-heading .hiragana-chart-actions {
+  position: absolute;
+  right: 1rem;
 }
 
 /* Same shape as the Hiragana/Katakana Chart page's own heading: title on

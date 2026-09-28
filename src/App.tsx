@@ -201,8 +201,8 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     romaji: 'a',
     heading: 'Examples:',
     words: [
-      { kana: 'あめ', romaji: 'rain' },
-      { kana: 'あさ', romaji: 'morning' },
+      { kana: 'あめ', reading: 'ame', romaji: 'rain' },
+      { kana: 'あさ', reading: 'asa', romaji: 'morning' },
     ],
   },
   katakana: {
@@ -228,6 +228,27 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     ],
   },
 } as const
+
+function renderBeginnerIntroExampleWord(word: { kana?: string; reading?: string; romaji: string }): ReactNode {
+  return (
+    <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
+      {word.kana && (
+        <>
+          {word.reading ? (
+            <ruby>
+              <i lang="ja">{word.kana}</i>
+              <rt>{word.reading}</rt>
+            </ruby>
+          ) : (
+            <i lang="ja">{word.kana}</i>
+          )}
+          <em>-</em>
+        </>
+      )}
+      <small>{word.romaji}</small>
+    </span>
+  )
+}
 
 const BEGINNER_INTRO_SCRIPTS: Array<{
   id: BeginnerIntroScriptId
@@ -671,12 +692,7 @@ function BeginnerZone({
                       </span>
                       <span className={`beginner-intro-slot-previous-words${previousRevealContent.label === 'Hiragana' ? ' is-hiragana-examples' : ''}`}>
                         <b>{previousRevealContent.heading}</b>
-                        {previousRevealContent.words.map((word) => (
-                          <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
-                            {word.kana && <><i lang="ja">{word.kana}</i><em>-</em></>}
-                            <small>{word.romaji}</small>
-                          </span>
-                        ))}
+                        {previousRevealContent.words.map(renderBeginnerIntroExampleWord)}
                       </span>
                     </span>
                   )}
@@ -690,12 +706,7 @@ function BeginnerZone({
                       </span>
                       <span className="beginner-intro-slot-words is-hiragana-examples">
                         <b>{revealContent.heading}</b>
-                        {revealContent.words.map((word) => (
-                          <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
-                            {word.kana && <><i lang="ja">{word.kana}</i><em>-</em></>}
-                            <small>{word.romaji}</small>
-                          </span>
-                        ))}
+                        {revealContent.words.map(renderBeginnerIntroExampleWord)}
                       </span>
                     </>
                   )}
@@ -716,12 +727,7 @@ function BeginnerZone({
                       </span>
                       <span className="beginner-intro-slot-words">
                         <b>{revealContent.heading}</b>
-                        {revealContent.words.map((word) => (
-                          <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
-                            {word.kana && <><i lang="ja">{word.kana}</i><em>-</em></>}
-                            <small>{word.romaji}</small>
-                          </span>
-                        ))}
+                        {revealContent.words.map(renderBeginnerIntroExampleWord)}
                       </span>
                     </>
                   )}
@@ -754,12 +760,7 @@ function BeginnerZone({
                     {item.id === 'hiragana' && isFocused && (
                       <span className="beginner-intro-node-words">
                         <b>{BEGINNER_INTRO_REVEAL_CONTENT.hiragana.heading}</b>
-                        {BEGINNER_INTRO_REVEAL_CONTENT.hiragana.words.map((word) => (
-                          <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
-                            {word.kana && <><i lang="ja">{word.kana}</i><em>-</em></>}
-                            <small>{word.romaji}</small>
-                          </span>
-                        ))}
+                        {BEGINNER_INTRO_REVEAL_CONTENT.hiragana.words.map(renderBeginnerIntroExampleWord)}
                       </span>
                     )}
                   </span>

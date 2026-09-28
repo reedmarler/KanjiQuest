@@ -378,6 +378,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
   // character at a time — あ only for now, to evaluate before it spreads to
   // the rest of the row. See the "Sakura preview" block in App.css.
   const isSakuraPreview = script === 'hiragana' && card?.char === 'あ'
+  const glyphVisualNudgePx = script === 'hiragana' && card?.char === 'あ' ? -3 : 0
 
   // Mobile Safari tints its status bar and bottom toolbar from the page's
   // <meta name="theme-color">, not from what the page actually paints there
@@ -1013,7 +1014,7 @@ export function BeginnerLearner({ script, onBack, onDashboard, initialRowIndex =
               })}
               aria-label={`Play the sound for ${card.char}`}
             >
-              <span ref={glyphRef} className="preview-a-glyph" lang="ja" style={{ transform: `translateY(${glyphOffset * glyphScale}px) scale(${glyphScale})` }}>{card.char}</span>
+              <span ref={glyphRef} className="preview-a-glyph" lang="ja" style={{ transform: `translateY(${glyphOffset * glyphScale + glyphVisualNudgePx}px) scale(${glyphScale})` }}>{card.char}</span>
               <span
                 className="preview-a-replay"
                 style={replayInsetPx != null ? { right: `${replayInsetPx}px` } : undefined}
