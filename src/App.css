@@ -583,6 +583,7 @@ body:has(.beginner-word-writing-card) .app,
   color: var(--intro-reveal-accent);
   font: 800 2.9rem/0.9 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.04em;
+  text-align: center;
   opacity: 0;
   transform: translateY(0.35rem) scale(0.92);
 }
