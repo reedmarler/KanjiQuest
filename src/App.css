@@ -488,13 +488,19 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana {
-  --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.36);
+  --intro-expanded-wheel-size: min(14.5rem, 82.5dvw);
   --intro-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25);
   --intro-expanded-wheel-radius: 8px;
 }
 
+.beginner-intro-empty-wheel.is-hiragana.is-revealing {
+  animation:
+    beginner-intro-wheel-swirl-in 1600ms cubic-bezier(0.2, 0.9, 0.24, 1) both,
+    beginner-intro-wheel-fade-under-panel 2700ms linear both;
+}
+
 .beginner-intro-empty-wheel.is-katakana {
-  --intro-previous-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.36);
+  --intro-previous-expanded-wheel-size: min(14.5rem, 82.5dvw);
   --intro-previous-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25);
   --intro-previous-expanded-wheel-radius: 8px;
   --intro-reveal-accent: #70cfe0;
@@ -686,7 +692,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words {
   top: auto;
   right: auto;
-  bottom: 0.5rem;
+  bottom: 0.1rem;
   left: 50%;
   width: 12rem;
   grid-template-columns: 1fr;
@@ -743,18 +749,26 @@ body:has(.beginner-word-writing-card) .app,
   transform: translate(-0.42rem, -0.34rem);
 }
 
-.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana span,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana span {
-  -webkit-text-stroke: 0.025em color-mix(in srgb, var(--sakura-light) 55%, transparent);
-  paint-order: stroke fill;
-  text-shadow: 0 0 0.55rem color-mix(in srgb, var(--sakura) 28%, transparent);
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana::before,
+.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: calc(50% - 5.7rem);
+  left: 50%;
+  width: 8.5rem;
+  height: 9.8rem;
+  border: 1px solid color-mix(in srgb, var(--sakura-light) 62%, transparent);
+  border-radius: 8px;
+  box-shadow: 0 0 0.7rem color-mix(in srgb, var(--sakura) 14%, transparent);
+  transform: translateX(-50%);
 }
 
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana span,
+.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana span,
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana small,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana small {
-  -webkit-text-stroke: 0.035em color-mix(in srgb, var(--sakura-light) 48%, transparent);
-  paint-order: stroke fill;
-  text-shadow: 0 0 0.35rem color-mix(in srgb, var(--sakura) 34%, transparent);
+  z-index: 1;
 }
 
 .beginner-intro-slot-words b,
@@ -923,6 +937,11 @@ body:has(.beginner-word-writing-card) .app,
   animation: none;
 }
 
+.beginner-intro-empty-wheel.is-hiragana.is-revealing .is-slot-right,
+.beginner-intro-empty-wheel.is-hiragana.is-revealing .is-slot-left {
+  animation: beginner-intro-slot-fade-under-expanded 2700ms linear both;
+}
+
 .beginner-intro-empty-wheel.is-switching .is-slot-right {
   animation: beginner-intro-slot-switch-side var(--intro-switch-duration) linear both;
   z-index: 1;
@@ -931,6 +950,28 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-empty-wheel.is-switching .is-slot-left:not(.is-reveal-slot) {
   opacity: 0;
   animation: beginner-intro-slot-switch-left-in var(--intro-switch-duration) linear both;
+}
+
+.beginner-intro-empty-wheel.is-katakana.is-switching {
+  animation:
+    beginner-intro-wheel-switch-rotate var(--intro-switch-duration) linear both,
+    beginner-intro-wheel-return-from-panel var(--intro-switch-duration) linear both;
+}
+
+.beginner-intro-empty-wheel.is-katakana.is-switching .is-slot-right {
+  animation:
+    beginner-intro-slot-switch-side var(--intro-switch-duration) linear both,
+    beginner-intro-panel-node-return var(--intro-switch-duration) linear both;
+}
+
+.beginner-intro-empty-wheel.is-katakana.is-switching .is-reveal-slot {
+  animation:
+    beginner-intro-slot-switch-reveal var(--intro-switch-duration) linear both,
+    beginner-intro-panel-node-return var(--intro-switch-duration) linear both;
+}
+
+.beginner-intro-empty-wheel.is-katakana.is-switching .beginner-intro-slot-previous-kana::before {
+  animation: beginner-intro-hiragana-outline-out 1100ms ease-in-out both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-reveal-slot .beginner-intro-slot-question {
@@ -1742,6 +1783,39 @@ body:has(.beginner-word-writing-card) .app,
   88%, to { opacity: 0; transform: translate(-50%, -50%) scale(1); }
 }
 
+@keyframes beginner-intro-wheel-fade-under-panel {
+  0%, 78% {
+    border-color: color-mix(in srgb, var(--sakura-light) 38%, var(--border));
+    background: color-mix(in srgb, var(--surface-2) 32%, transparent);
+  }
+  88%, to {
+    border-color: transparent;
+    background: transparent;
+  }
+}
+
+@keyframes beginner-intro-wheel-return-from-panel {
+  0%, 19.6% {
+    border-color: transparent;
+    background: transparent;
+  }
+  31%, to {
+    border-color: color-mix(in srgb, var(--sakura-light) 38%, var(--border));
+    background: color-mix(in srgb, var(--surface-2) 32%, transparent);
+  }
+}
+
+@keyframes beginner-intro-panel-node-return {
+  0%, 19.6% { opacity: 0; }
+  31%, to { opacity: 1; }
+}
+
+@keyframes beginner-intro-hiragana-outline-out {
+  0%, 15% { opacity: 1; filter: blur(0); }
+  65% { opacity: 0.42; filter: blur(2px); }
+  to { opacity: 0; filter: blur(5px); }
+}
+
 @keyframes beginner-intro-slot-switch-side {
   0%, 45.69% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
   60.35%, to { opacity: 1; transform: translate(-50%, -50%) rotate(-120deg) scale(1); }
@@ -2062,11 +2136,11 @@ body:has(.beginner-word-writing-card) .app,
     top: calc(58% + 15px);
   }
   .beginner-intro-empty-wheel.is-hiragana {
-    --intro-expanded-wheel-size: min(19rem, 82.5dvw);
+    --intro-expanded-wheel-size: min(14.5rem, 82.5dvw);
     --intro-expanded-wheel-height: min(18rem, 78dvw);
   }
   .beginner-intro-empty-wheel.is-katakana {
-    --intro-previous-expanded-wheel-size: min(19rem, 82.5dvw);
+    --intro-previous-expanded-wheel-size: min(14.5rem, 82.5dvw);
     --intro-previous-expanded-wheel-height: min(18rem, 78dvw);
   }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px); }
