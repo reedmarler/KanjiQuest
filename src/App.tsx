@@ -199,11 +199,10 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     label: 'Hiragana',
     mark: 'あ',
     romaji: 'a',
-    heading: 'Hiragana examples:',
+    heading: 'Examples:',
     words: [
-      { kana: '', romaji: 'sushi' },
-      { kana: '', romaji: 'tofu' },
-      { kana: '', romaji: 'sake' },
+      { kana: 'あめ', romaji: 'ame' },
+      { kana: 'あさ', romaji: 'asa' },
     ],
   },
   katakana: {
@@ -664,12 +663,13 @@ function BeginnerZone({
                   <span className="beginner-intro-slot-question">1</span>
                   {introStep >= 3 && (
                     <span className="beginner-intro-slot-previous">
+                      {previousRevealContent.label === 'Hiragana' && <span className="beginner-intro-slot-previous-progress">1/46</span>}
                       <span className="beginner-intro-slot-previous-label">{previousRevealContent.label}</span>
                       <span className="beginner-intro-slot-previous-kana" lang="ja">
                         <small lang="en">{previousRevealContent.romaji}</small>
                         <span>{previousRevealContent.mark}</span>
                       </span>
-                      <span className="beginner-intro-slot-previous-words">
+                      <span className={`beginner-intro-slot-previous-words${previousRevealContent.label === 'Hiragana' ? ' is-hiragana-examples' : ''}`}>
                         <b>{previousRevealContent.heading}</b>
                         {previousRevealContent.words.map((word) => (
                           <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
@@ -682,12 +682,13 @@ function BeginnerZone({
                   )}
                   {introStep === 2 && (
                     <>
+                      <span className="beginner-intro-slot-progress">1/46</span>
                       <span className="beginner-intro-slot-label">{revealContent.label}</span>
                       <span className="beginner-intro-slot-hiragana" lang="ja">
                         <small lang="en">{revealContent.romaji}</small>
                         <span>{revealContent.mark}</span>
                       </span>
-                      <span className="beginner-intro-slot-words">
+                      <span className="beginner-intro-slot-words is-hiragana-examples">
                         <b>{revealContent.heading}</b>
                         {revealContent.words.map((word) => (
                           <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
