@@ -383,10 +383,6 @@ body:has(.beginner-word-writing-card) .app,
   font-size: 1.46rem;
 }
 
-.beginner-intro-speech-inner.is-systems h1 {
-  font-size: 1.46rem;
-}
-
 .beginner-intro-speech-inner.is-simple h1 {
   font-size: 1.26rem;
 }
@@ -587,7 +583,6 @@ body:has(.beginner-word-writing-card) .app,
   color: var(--intro-reveal-accent);
   font: 800 2.9rem/0.9 'Outfit', system-ui, sans-serif;
   letter-spacing: 0.04em;
-  text-align: center;
   opacity: 0;
   transform: translateY(0.35rem) scale(0.92);
 }
@@ -786,7 +781,6 @@ body:has(.beginner-word-writing-card) .app,
   height: calc(50% + 0.14rem);
   border: 1px solid color-mix(in srgb, var(--sakura-light) 62%, transparent);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--surface-2) 32%, transparent);
   box-shadow: 0 0 0.7rem color-mix(in srgb, var(--sakura) 14%, transparent);
   transform: translateX(calc(-50% - 0.42rem));
 }
@@ -2113,7 +2107,7 @@ body:has(.beginner-word-writing-card) .app,
 
   .beginner-intro-speech h1 { font-size: 1.12rem; }
   .beginner-intro-speech-inner.is-systems h1 {
-    font-size: 1.42rem;
+    font-size: 1rem;
     line-height: 1.16;
   }
   .beginner-intro-speech-inner.is-welcome h1,
@@ -2216,7 +2210,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-mascot { left: -1.1rem; width: 7.8rem; }
   .beginner-intro-speech h1 { font-size: 1rem; }
   .beginner-intro-speech-inner.is-systems h1 {
-    font-size: 1.3rem;
+    font-size: 0.9rem;
     line-height: 1.15;
   }
   .beginner-intro-speech-inner.is-welcome h1 { font-size: 1.3rem; }
