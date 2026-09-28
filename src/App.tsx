@@ -199,7 +199,7 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     label: 'Hiragana',
     mark: 'あ',
     romaji: 'a',
-    heading: 'Examples:',
+    heading: 'Hiragana examples:',
     words: [
       { kana: '', romaji: 'sushi' },
       { kana: '', romaji: 'tofu' },
@@ -257,7 +257,7 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'systems',
     eyebrow: '',
-    title: 'Hiragana is used for native Japanese words. This is the first of 46 Hiragana.',
+    title: 'Hiragana is used for native Japanese words. あ (a) is the first of 46 Hiragana.',
     body: '',
   },
   {
