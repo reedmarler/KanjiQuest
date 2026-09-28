@@ -494,7 +494,7 @@ body:has(.beginner-word-writing-card) .app,
     calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
     82.5dvw
   );
-  --intro-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 88px);
+  --intro-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 40px);
   --intro-expanded-wheel-radius: 8px;
 }
 
@@ -511,7 +511,7 @@ body:has(.beginner-word-writing-card) .app,
     calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
     82.5dvw
   );
-  --intro-previous-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 88px);
+  --intro-previous-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 40px);
   --intro-previous-expanded-wheel-radius: 8px;
   --intro-reveal-accent: #70cfe0;
   --intro-reveal-base: #4ba5c9;
@@ -606,6 +606,11 @@ body:has(.beginner-word-writing-card) .app,
   left: 0;
   opacity: 0;
   transform: translateY(0.35rem) scale(0.92);
+}
+
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-progress,
+.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-progress {
+  top: 0.75rem;
 }
 
 .beginner-intro-slot-hiragana {
@@ -748,7 +753,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana small,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana small {
   top: calc(50% - 5.2rem);
-  left: 50%;
+  left: calc(50% - 0.42rem);
 }
 
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana {
@@ -2152,7 +2157,7 @@ body:has(.beginner-word-writing-card) .app,
       calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
       82.5dvw
     );
-    --intro-expanded-wheel-height: calc(18rem + 88px);
+    --intro-expanded-wheel-height: calc(18rem + 40px);
   }
   .beginner-intro-empty-wheel.is-katakana {
     --intro-hiragana-outline-width: 8.5rem;
@@ -2161,7 +2166,7 @@ body:has(.beginner-word-writing-card) .app,
       calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
       82.5dvw
     );
-    --intro-previous-expanded-wheel-height: calc(18rem + 88px);
+    --intro-previous-expanded-wheel-height: calc(18rem + 40px);
   }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px); }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
