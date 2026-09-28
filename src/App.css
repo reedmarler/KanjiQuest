@@ -772,7 +772,7 @@ body:has(.beginner-word-writing-card) .app,
   top: 3.42rem;
   left: 50%;
   width: var(--intro-hiragana-outline-width, 8.5rem);
-  height: 9.8rem;
+  height: calc(50% + 0.14rem);
   border: 1px solid color-mix(in srgb, var(--sakura-light) 62%, transparent);
   border-radius: 8px;
   box-shadow: 0 0 0.7rem color-mix(in srgb, var(--sakura) 14%, transparent);
