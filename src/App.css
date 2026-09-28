@@ -494,7 +494,7 @@ body:has(.beginner-word-writing-card) .app,
     calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
     82.5dvw
   );
-  --intro-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 40px);
+  --intro-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 50px);
   --intro-expanded-wheel-radius: 8px;
 }
 
@@ -511,7 +511,7 @@ body:has(.beginner-word-writing-card) .app,
     calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
     82.5dvw
   );
-  --intro-previous-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 40px);
+  --intro-previous-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 50px);
   --intro-previous-expanded-wheel-radius: 8px;
   --intro-reveal-accent: #70cfe0;
   --intro-reveal-base: #4ba5c9;
@@ -752,7 +752,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana small,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana small {
-  top: calc(50% - 5.2rem);
+  top: 3.92rem;
   left: calc(50% - 0.42rem);
 }
 
@@ -769,7 +769,7 @@ body:has(.beginner-word-writing-card) .app,
   content: '';
   position: absolute;
   z-index: 0;
-  top: calc(50% - 5.7rem);
+  top: 3.42rem;
   left: 50%;
   width: var(--intro-hiragana-outline-width, 8.5rem);
   height: 9.8rem;
@@ -2157,7 +2157,7 @@ body:has(.beginner-word-writing-card) .app,
       calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
       82.5dvw
     );
-    --intro-expanded-wheel-height: calc(18rem + 40px);
+    --intro-expanded-wheel-height: calc(18rem + 50px);
   }
   .beginner-intro-empty-wheel.is-katakana {
     --intro-hiragana-outline-width: 8.5rem;
@@ -2166,7 +2166,7 @@ body:has(.beginner-word-writing-card) .app,
       calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
       82.5dvw
     );
-    --intro-previous-expanded-wheel-height: calc(18rem + 40px);
+    --intro-previous-expanded-wheel-height: calc(18rem + 50px);
   }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px); }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
