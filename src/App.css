@@ -662,7 +662,13 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-label {
-  display: none;
+  top: 0.8rem;
+  bottom: auto;
+  font-size: 2.2rem;
+}
+
+.beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-progress {
+  top: 3.45rem;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > b,
