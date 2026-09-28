@@ -201,8 +201,8 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     romaji: 'a',
     heading: 'Examples:',
     words: [
-      { kana: 'あめ', romaji: 'rain' },
-      { kana: 'あさ', romaji: 'morning' },
+      { kana: 'あめ', romaji: 'ame' },
+      { kana: 'あさ', romaji: 'asa' },
     ],
   },
   katakana: {
