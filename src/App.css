@@ -417,7 +417,7 @@ body:has(.beginner-word-writing-card) .app,
   position: relative;
   width: min(100%, 16rem);
   aspect-ratio: 1;
-  margin: 5rem auto 0;
+  margin: 4.5rem auto 0;
 }
 
 .beginner-intro-ring {
