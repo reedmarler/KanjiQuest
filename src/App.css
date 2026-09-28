@@ -217,6 +217,7 @@ body:has(.beginner-word-writing-card) .app,
   align-items: center;
   gap: 0.75rem;
   width: 100%;
+  min-height: 10.25rem;
   transition:
     transform var(--intro-opening-move-duration) linear,
     margin-top var(--intro-opening-move-duration) cubic-bezier(0.22, 1, 0.36, 1),
@@ -416,14 +417,7 @@ body:has(.beginner-word-writing-card) .app,
   position: relative;
   width: min(100%, 16rem);
   aspect-ratio: 1;
-  margin: 0 auto;
-  transition: margin-top 2700ms linear;
-}
-
-.beginner-intro-lesson.is-systems .beginner-intro-orbit,
-.beginner-intro-lesson.is-katakana-reveal .beginner-intro-orbit,
-.beginner-intro-lesson.is-kanji-reveal .beginner-intro-orbit {
-  margin-top: 5rem;
+  margin: 5rem auto 0;
 }
 
 .beginner-intro-ring {
