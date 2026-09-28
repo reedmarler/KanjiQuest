@@ -32,6 +32,8 @@ const { number: BUILD_NUMBER, sha: BUILD_SHA } = buildStamp()
 // %VITE_BUILD_NUMBER% interpolation, with no build-time secret involved.
 process.env.VITE_BUILD_NUMBER = BUILD_NUMBER
 process.env.VITE_BUILD_SHA = BUILD_SHA
+// TEMP DEBUG: remove once the stuck build-badge number is diagnosed.
+console.log(`[build-stamp debug] number=${BUILD_NUMBER} sha=${BUILD_SHA}`)
 
 const USER_VOCAB_FILE = path.resolve(import.meta.dirname, 'src/data/userAddedVocab.json')
 
