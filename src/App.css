@@ -767,7 +767,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana span,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana span {
   position: relative;
-  top: -3px;
+  top: -8px;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana::before,
