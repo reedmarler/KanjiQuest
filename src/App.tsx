@@ -1,5 +1,5 @@
 import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type AnimationEvent, type CSSProperties, type ReactElement, type ReactNode } from 'react'
-import { ArrowLeft, ArrowRight, Pause, Play, RotateCcw } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Gauge, Pause, Play, RotateCcw } from 'lucide-react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -199,21 +199,18 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     label: 'Hiragana',
     mark: 'あ',
     romaji: 'a',
-    heading: 'Examples:',
+    heading: 'Example:',
     words: [
-      { kana: 'あめ', reading: 'ame', romaji: 'rain' },
-      { kana: 'あさ', reading: 'asa', romaji: 'morning' },
+      { kana: 'あめ', readingParts: ['a', 'me'], romaji: 'rain' },
     ],
   },
   katakana: {
     label: 'Katakana',
     mark: 'ア',
     romaji: 'a',
-    heading: 'Loan words:',
+    heading: 'Example:',
     words: [
-      { kana: 'ビール', romaji: 'beer' },
-      { kana: 'ホテル', romaji: 'hotel' },
-      { kana: 'カメラ', romaji: 'camera' },
+      { kana: 'アメリカ', readingParts: ['a', 'me', 'ri', 'ka'], romaji: 'America' },
     ],
   },
   kanji: {
@@ -229,12 +226,21 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
   },
 } as const
 
-function renderBeginnerIntroExampleWord(word: { kana?: string; reading?: string; romaji: string }): ReactNode {
+function renderBeginnerIntroExampleWord(word: { kana?: string; reading?: string; readingParts?: readonly string[]; romaji: string }): ReactNode {
   return (
     <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
       {word.kana && (
         <>
-          {word.reading ? (
+          {word.readingParts ? (
+            <span className="beginner-intro-segmented-ruby">
+              {Array.from(word.kana).map((character, index) => (
+                <ruby key={`${character}-${index}`}>
+                  <i lang="ja">{character}</i>
+                  <rt>{word.readingParts?.[index]}</rt>
+                </ruby>
+              ))}
+            </span>
+          ) : word.reading ? (
             <ruby>
               <i lang="ja">{word.kana}</i>
               <rt>{word.reading}</rt>
@@ -283,7 +289,7 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'katakana-reveal',
     eyebrow: '',
-    title: 'Katakana is used for foreign words. It is more blocky and angular.',
+    title: 'Katakana is used for foreign words. It is blocky and angular.',
     body: '',
   },
   {
@@ -300,19 +306,17 @@ const BEGINNER_INTRO_STEPS = [
   },
 ] as const
 
-const INTRO_OPENING_MOVE_MS = 1274
+type IntroAnimationSpeed = 0.5 | 1 | 1.5 | 2 | 3
+
+const INTRO_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
+const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.5, 2, 3]
+const INTRO_OPENING_MOVE_CSS_MS = 1274
 const INTRO_SPEECH_RESIZE_MS = 560
 const INTRO_STANDARD_SPEECH_STEP_INDEX = 2
 
 function renderIntroDisplayText(value: string) {
   if (value === 'Want to learn Japanese?') {
-    return (
-      <>
-        Want to learn
-        <br />
-        Japanese?
-      </>
-    )
+    return value
   }
 
   if (value === 'Japanese uses three writing systems.') {
@@ -326,10 +330,13 @@ function renderIntroDisplayText(value: string) {
   }
 
   if (value.startsWith('Hiragana is')) {
+    const [beforeCount, afterCount] = value.slice('Hiragana'.length).split('46')
     return (
       <>
         <span className="beginner-intro-title-highlight">Hiragana</span>
-        {value.slice('Hiragana'.length)}
+        {beforeCount}
+        <span className="beginner-intro-count-highlight">46</span>
+        {afterCount}
       </>
     )
   }
@@ -346,10 +353,21 @@ function renderIntroDisplayText(value: string) {
   return value
 }
 
-function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: string; animate?: boolean; durationMs?: number }) {
+function IntroBlurSwapText({
+  text,
+  animate = true,
+  durationMs = 1400,
+  animationSpeed = INTRO_DEFAULT_ANIMATION_SPEED,
+}: {
+  text: string
+  animate?: boolean
+  durationMs?: number
+  animationSpeed?: IntroAnimationSpeed
+}) {
   const displayedTextRef = useRef(text)
   const [displayedText, setDisplayedText] = useState(text)
   const [isBlurring, setIsBlurring] = useState(false)
+  const halfDurationMs = durationMs / 2 / animationSpeed
 
   useEffect(() => {
     if (text === displayedTextRef.current) return
@@ -361,7 +379,6 @@ function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: 
       return
     }
 
-    const halfDurationMs = durationMs / 2
     setIsBlurring(true)
     const swapTimer = window.setTimeout(() => {
       displayedTextRef.current = text
@@ -370,12 +387,12 @@ function IntroBlurSwapText({ text, animate = true, durationMs = 1400 }: { text: 
     }, halfDurationMs)
 
     return () => window.clearTimeout(swapTimer)
-  }, [animate, durationMs, text])
+  }, [animate, halfDurationMs, text])
 
   return (
     <span
       className={`beginner-intro-blur-text ${isBlurring ? 'is-blurring' : 'is-clear'}`}
-      style={{ '--intro-blur-duration': `${durationMs / 2}ms` } as CSSProperties}
+      style={{ '--intro-blur-duration': `${halfDurationMs}ms` } as CSSProperties}
     >
       {renderIntroDisplayText(displayedText)}
     </span>
@@ -400,6 +417,8 @@ function BeginnerZone({
   const [introOpeningShrinkDone, setIntroOpeningShrinkDone] = useState(false)
   const [introTransitioning, setIntroTransitioning] = useState(false)
   const [introPaused, setIntroPaused] = useState(false)
+  const [introAnimationSpeed, setIntroAnimationSpeed] = useState<IntroAnimationSpeed>(INTRO_DEFAULT_ANIMATION_SPEED)
+  const [introSpeedMenuOpen, setIntroSpeedMenuOpen] = useState(false)
   const [introSpeechDisplayStep, setIntroSpeechDisplayStep] = useState(0)
   const [introSpeechCopyBlurred, setIntroSpeechCopyBlurred] = useState(false)
   const introTransitionTimerRef = useRef<number | null>(null)
@@ -494,7 +513,7 @@ function BeginnerZone({
       setIntroStep((current) => Math.min(5, current + 1))
       setIntroTransitioning(false)
       introTransitionTimerRef.current = null
-    }, 1140)
+    }, 1140 / introAnimationSpeed)
   }
 
   const finishIntroOpeningShrink = useCallback(() => {
@@ -515,13 +534,13 @@ function BeginnerZone({
     introOpeningFinishTimerRef.current = window.setTimeout(() => {
       finishIntroOpeningShrink()
       introOpeningFinishTimerRef.current = null
-    }, INTRO_OPENING_MOVE_MS + 200)
+    }, (INTRO_OPENING_MOVE_CSS_MS + 200) / introAnimationSpeed)
 
     return () => {
       if (introOpeningFinishTimerRef.current !== null) window.clearTimeout(introOpeningFinishTimerRef.current)
       introOpeningFinishTimerRef.current = null
     }
-  }, [finishIntroOpeningShrink, introOpeningShrinking])
+  }, [finishIntroOpeningShrink, introAnimationSpeed, introOpeningShrinking])
 
   useLayoutEffect(() => {
     if (!intro) return undefined
@@ -609,7 +628,7 @@ function BeginnerZone({
         introSpeechFrameRef.current = null
       })
       introSpeechTimerRef.current = null
-    }, INTRO_SPEECH_RESIZE_MS)
+    }, INTRO_SPEECH_RESIZE_MS / introAnimationSpeed)
 
     return () => {
       if (introSpeechTimerRef.current !== null) window.clearTimeout(introSpeechTimerRef.current)
@@ -617,7 +636,7 @@ function BeginnerZone({
       introSpeechTimerRef.current = null
       introSpeechFrameRef.current = null
     }
-  }, [displayIntroStep, intro])
+  }, [displayIntroStep, intro, introAnimationSpeed])
 
   if (intro) {
     const step = BEGINNER_INTRO_STEPS[displayIntroStep]
@@ -643,7 +662,10 @@ function BeginnerZone({
     const isRevealWheelVisible = introStep >= 1 && introStep <= 4
 
     return (
-      <main className={`beginner-zone beginner-zone--intro${introPaused ? ' is-intro-paused' : ''}`}>
+      <main
+        className={`beginner-zone beginner-zone--intro${introPaused ? ' is-intro-paused' : ''}`}
+        style={{ '--intro-time-unit': `${INTRO_DEFAULT_ANIMATION_SPEED / introAnimationSpeed}ms` } as CSSProperties}
+      >
         <header className={`beginner-intro-guide is-${guideStep.id}`}>
           <div className="beginner-intro-mascot" aria-hidden="true">
             <img src={DEFAULT_PROFILE_PHOTO} alt="" />
@@ -690,7 +712,7 @@ function BeginnerZone({
                         <small lang="en">{previousRevealContent.romaji}</small>
                         <span>{previousRevealContent.mark}</span>
                       </span>
-                      <span className={`beginner-intro-slot-previous-words${previousRevealContent.label === 'Hiragana' ? ' is-hiragana-examples' : ''}`}>
+                      <span className="beginner-intro-slot-previous-words is-hiragana-examples">
                         <b>{previousRevealContent.heading}</b>
                         {previousRevealContent.words.map(renderBeginnerIntroExampleWord)}
                       </span>
@@ -720,12 +742,13 @@ function BeginnerZone({
                   <span className="beginner-intro-slot-question">{introStep === 4 ? '3' : '2'}</span>
                   {introStep >= 3 && (
                     <>
+                      {revealContent.label === 'Katakana' && <span className="beginner-intro-slot-progress">1/46</span>}
                       <span className="beginner-intro-slot-label">{revealContent.label}</span>
                       <span className="beginner-intro-slot-hiragana" lang="ja">
                         <small lang="en">{revealContent.romaji}</small>
                         <span>{revealContent.mark}</span>
                       </span>
-                      <span className="beginner-intro-slot-words">
+                      <span className={`beginner-intro-slot-words${revealContent.label !== 'Kanji' ? ' is-hiragana-examples' : ''}`}>
                         <b>{revealContent.heading}</b>
                         {revealContent.words.map(renderBeginnerIntroExampleWord)}
                       </span>
@@ -811,21 +834,61 @@ function BeginnerZone({
                 <IntroBlurSwapText
                   text={introTransitioning ? 'Completing the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep < 4 ? 'Next' : 'Complete the wheel'}
                   animate={displayIntroStep <= 1}
-                  durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_MS : 1400}
+                  durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_CSS_MS : 1400}
+                  animationSpeed={introAnimationSpeed}
                 />
                 <ArrowRight aria-hidden="true" />
               </button>
             )}
             {!isFinalStep ? (
-              <button
-                type="button"
-                className="beginner-intro-pause"
-                onClick={() => setIntroPaused((current) => !current)}
-                aria-label={introPaused ? 'Resume introduction animation' : 'Pause introduction animation'}
-                aria-pressed={introPaused}
-              >
-                {introPaused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
-              </button>
+              <div className="beginner-intro-playback-controls">
+                <button
+                  type="button"
+                  className="beginner-intro-pause"
+                  onClick={() => setIntroPaused((current) => !current)}
+                  aria-label={introPaused ? 'Resume introduction animation' : 'Pause introduction animation'}
+                  aria-pressed={introPaused}
+                >
+                  {introPaused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+                </button>
+                <div
+                  className="beginner-intro-speed-picker"
+                  onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIntroSpeedMenuOpen(false)
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="beginner-intro-speed"
+                    onClick={() => setIntroSpeedMenuOpen((current) => !current)}
+                    aria-label={`Animation speed, ${introAnimationSpeed} times`}
+                    aria-expanded={introSpeedMenuOpen}
+                    aria-haspopup="menu"
+                  >
+                    <Gauge aria-hidden="true" />
+                    <span>{introAnimationSpeed}x</span>
+                  </button>
+                  {introSpeedMenuOpen && (
+                    <div className="beginner-intro-speed-menu" role="menu" aria-label="Animation speed">
+                      {INTRO_ANIMATION_SPEEDS.map((speed) => (
+                        <button
+                          key={speed}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={speed === introAnimationSpeed}
+                          className={speed === introAnimationSpeed ? 'is-active' : ''}
+                          onClick={() => {
+                            setIntroAnimationSpeed(speed)
+                            setIntroSpeedMenuOpen(false)
+                          }}
+                        >
+                          {speed}x
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             ) : (
               <span className="beginner-intro-control-spacer" aria-hidden="true" />
             )}
