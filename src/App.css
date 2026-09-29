@@ -1175,11 +1175,11 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-label {
-  animation: beginner-intro-hiragana-centered-label-in calc(240 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-hiragana-centered-label-in calc(282.5 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) linear forwards;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-progress {
-  animation: beginner-intro-hiragana-label-in calc(240 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-hiragana-label-in calc(282.5 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) linear forwards;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-label {
@@ -1199,7 +1199,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana.is-revealing .beginner-intro-slot-hiragana::before {
-  animation: beginner-intro-hiragana-outline-in calc(240 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-hiragana-outline-in calc(282.5 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) linear forwards;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-hiragana {
@@ -1215,7 +1215,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana small {
-  animation: beginner-intro-romaji-in calc(240 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-romaji-in calc(282.5 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) linear forwards;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-hiragana small {
@@ -1223,7 +1223,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-words {
-  animation: beginner-intro-slot-words-in calc(240 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: beginner-intro-slot-words-in calc(282.5 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) linear forwards;
 }
 
 .beginner-intro-empty-wheel.is-hiragana.is-revealing .beginner-intro-slot-words {
@@ -2147,7 +2147,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-hiragana-outline-in {
-  from { opacity: 0; filter: none; }
+  from { opacity: 0; filter: blur(5px); }
   to { opacity: 1; filter: blur(0); }
 }
 
@@ -2181,13 +2181,13 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-hiragana-label-in {
-  from { opacity: 0; transform: translateY(0) scale(1); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; filter: blur(7px); transform: translateY(0) scale(1); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
 }
 
 @keyframes beginner-intro-hiragana-centered-label-in {
-  from { opacity: 0; transform: translate(-50%, 0) scale(1); }
-  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  from { opacity: 0; filter: blur(7px); transform: translate(-50%, 0) scale(1); }
+  to { opacity: 1; filter: blur(0); transform: translate(-50%, 0) scale(1); }
 }
 
 @keyframes beginner-intro-switch-label-in {
@@ -2240,8 +2240,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-romaji-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; filter: blur(5px); }
+  to { opacity: 1; filter: blur(0); }
 }
 
 @keyframes beginner-intro-switch-romaji-in {
@@ -2250,12 +2250,13 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 @keyframes beginner-intro-slot-words-in {
-  to { opacity: 1; transform: translateY(-50%) scale(1); }
+  from { opacity: 0; filter: blur(7px); transform: translateY(-50%) scale(1); }
+  to { opacity: 1; filter: blur(0); transform: translateY(-50%) scale(1); }
 }
 
 @keyframes beginner-intro-hiragana-words-in {
-  from { opacity: 0; transform: translate(-50%, 0) scale(1); }
-  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  from { opacity: 0; filter: blur(7px); transform: translate(-50%, 0) scale(1); }
+  to { opacity: 1; filter: blur(0); transform: translate(-50%, 0) scale(1); }
 }
 
 @keyframes beginner-intro-switch-words-in {
