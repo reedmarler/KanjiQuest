@@ -1608,7 +1608,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-controls > div:last-child {
   --intro-control-side: 2.55rem;
-  --intro-control-main: 8.1rem;
+  --intro-control-main: 12.15rem;
   display: grid;
   grid-template-columns: var(--intro-control-side) var(--intro-control-main) var(--intro-control-side);
   justify-content: center;
@@ -1715,8 +1715,8 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-next {
   box-sizing: border-box;
-  --intro-next-width: 8.1rem;
-  --intro-next-height: 2.4rem;
+  --intro-next-width: 12.15rem;
+  --intro-next-height: 3.6rem;
   --intro-next-rest-y: 0rem;
   --intro-yes-scale: 2.18;
   gap: 0.4rem;
@@ -1727,14 +1727,15 @@ body:has(.beginner-word-writing-card) .app,
   padding: 0.65rem 1rem;
   background: linear-gradient(135deg, var(--sakura), var(--sakura-light));
   color: #1c1420;
+  font-size: 1.44rem;
   box-shadow: 0 0.55rem 1.35rem color-mix(in srgb, var(--sakura) 18%, transparent);
   transform: translateY(var(--intro-next-rest-y));
   transition: width var(--intro-opening-move-duration) linear, height var(--intro-opening-move-duration) linear, font-size var(--intro-opening-move-duration) linear, transform var(--intro-opening-move-duration) linear;
 }
 
 .beginner-intro-next.is-yes {
-  --intro-yes-y: 0.85rem;
-  font-size: 0.96rem;
+  --intro-yes-y: 0rem;
+  font-size: 1.92rem;
   transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
   transform-origin: center;
 }
@@ -1746,7 +1747,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-next.is-yes.is-shrinking.is-shrink-done {
-  font-size: 0.72rem;
+  font-size: 1.44rem;
   transform: translateY(var(--intro-next-rest-y)) scale(1);
   pointer-events: auto;
 }
@@ -1799,11 +1800,11 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-yes-shrink {
   from {
-    font-size: 0.96rem;
+    font-size: 1.92rem;
     transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
   }
   to {
-    font-size: 0.72rem;
+    font-size: 1.44rem;
     transform: translateY(var(--intro-next-rest-y)) scale(1);
   }
 }
@@ -2541,9 +2542,6 @@ body:has(.beginner-word-writing-card) .app,
   }
   .beginner-intro-controls.is-lowered {
     transform: none;
-  }
-  .beginner-intro-next.is-yes {
-    --intro-yes-y: calc(-2rem + 30px);
   }
 }
 
