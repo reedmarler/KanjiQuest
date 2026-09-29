@@ -1734,6 +1734,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-next.is-yes {
+  --intro-next-width: 8.1rem;
+  --intro-next-height: 2.4rem;
   --intro-yes-y: 0.85rem;
   font-size: 0.96rem;
   transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));

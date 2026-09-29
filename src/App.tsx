@@ -306,13 +306,19 @@ const BEGINNER_INTRO_STEPS = [
   },
 ] as const
 
-type IntroAnimationSpeed = 0.5 | 1 | 1.5 | 2 | 3
+type IntroAnimationSpeed = 0.5 | 1 | 1.25 | 1.5 | 2 | 3
 
-const INTRO_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
-const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.5, 2, 3]
+const INTRO_ANIMATION_TIME_BASE = 2
+const INTRO_OPENING_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 1
+const INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 1.25
+const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.25, 1.5, 2, 3]
 const INTRO_OPENING_MOVE_CSS_MS = 1274
 const INTRO_SPEECH_RESIZE_MS = 560
 const INTRO_STANDARD_SPEECH_STEP_INDEX = 2
+
+function defaultIntroAnimationSpeedForStep(step: number): IntroAnimationSpeed {
+  return step <= 1 ? INTRO_OPENING_DEFAULT_ANIMATION_SPEED : INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED
+}
 
 function renderIntroDisplayText(value: string) {
   if (value === 'Want to learn Japanese?') {
@@ -357,7 +363,7 @@ function IntroBlurSwapText({
   text,
   animate = true,
   durationMs = 1400,
-  animationSpeed = INTRO_DEFAULT_ANIMATION_SPEED,
+  animationSpeed = INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED,
 }: {
   text: string
   animate?: boolean
@@ -417,7 +423,8 @@ function BeginnerZone({
   const [introOpeningShrinkDone, setIntroOpeningShrinkDone] = useState(false)
   const [introTransitioning, setIntroTransitioning] = useState(false)
   const [introPaused, setIntroPaused] = useState(false)
-  const [introAnimationSpeed, setIntroAnimationSpeed] = useState<IntroAnimationSpeed>(INTRO_DEFAULT_ANIMATION_SPEED)
+  const [introAnimationSpeed, setIntroAnimationSpeed] = useState<IntroAnimationSpeed>(INTRO_OPENING_DEFAULT_ANIMATION_SPEED)
+  const [introSpeedCustomized, setIntroSpeedCustomized] = useState(false)
   const [introSpeedMenuOpen, setIntroSpeedMenuOpen] = useState(false)
   const [introSpeechDisplayStep, setIntroSpeechDisplayStep] = useState(0)
   const [introSpeechCopyBlurred, setIntroSpeechCopyBlurred] = useState(false)
@@ -484,12 +491,14 @@ function BeginnerZone({
     introSpeechDisplayStepRef.current = nextStep
     setIntroSpeechDisplayStep(nextStep)
     setIntroSpeechCopyBlurred(false)
+    if (!introSpeedCustomized) setIntroAnimationSpeed(defaultIntroAnimationSpeedForStep(nextStep))
     setIntroStep(nextStep)
   }
 
   function advanceIntro() {
     if (introTransitioning || introOpeningPreview || (introOpeningShrinking && !introOpeningShrinkDone)) return
     if (introStep === 0) {
+      if (!introSpeedCustomized) setIntroAnimationSpeed(defaultIntroAnimationSpeedForStep(1))
       setIntroOpeningPreview(true)
       setIntroOpeningShrinkDone(false)
       setIntroStep(1)
@@ -499,11 +508,13 @@ function BeginnerZone({
     if (introStep < 4) {
       setIntroOpeningShrinking(false)
       setIntroOpeningShrinkDone(false)
+      const nextStep = introStep === 2 ? 3 : introStep + 1
+      if (!introSpeedCustomized) setIntroAnimationSpeed(defaultIntroAnimationSpeedForStep(nextStep))
       if (introStep === 2) {
         setIntroStep(3)
         return
       }
-      setIntroStep((current) => current + 1)
+      setIntroStep(nextStep)
       return
     }
     if (introStep >= 5) return
@@ -664,7 +675,7 @@ function BeginnerZone({
     return (
       <main
         className={`beginner-zone beginner-zone--intro${introPaused ? ' is-intro-paused' : ''}`}
-        style={{ '--intro-time-unit': `${INTRO_DEFAULT_ANIMATION_SPEED / introAnimationSpeed}ms` } as CSSProperties}
+        style={{ '--intro-time-unit': `${INTRO_ANIMATION_TIME_BASE / introAnimationSpeed}ms` } as CSSProperties}
       >
         <header className={`beginner-intro-guide is-${guideStep.id}`}>
           <div className="beginner-intro-mascot" aria-hidden="true">
@@ -878,6 +889,7 @@ function BeginnerZone({
                           aria-checked={speed === introAnimationSpeed}
                           className={speed === introAnimationSpeed ? 'is-active' : ''}
                           onClick={() => {
+                            setIntroSpeedCustomized(true)
                             setIntroAnimationSpeed(speed)
                             setIntroSpeedMenuOpen(false)
                           }}
