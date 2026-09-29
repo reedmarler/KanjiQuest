@@ -2415,6 +2415,7 @@ body:has(.beginner-word-writing-card) .app,
 
   .beginner-intro-guide {
     position: relative;
+    top: -16px;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     align-items: center;
@@ -2473,6 +2474,8 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-lesson {
+    position: relative;
+    top: -16px;
     grid-template-columns: 1fr;
     grid-template-rows: auto;
     align-content: center;
@@ -2534,7 +2537,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-example.is-together > strong { font-size: 1.85rem; }
   .beginner-intro-controls {
     position: fixed;
-    bottom: calc(4.25rem + 30px + env(safe-area-inset-bottom));
+    bottom: calc(4.25rem + 5px + env(safe-area-inset-bottom));
   }
   .beginner-intro-controls.is-lowered {
     transform: none;
