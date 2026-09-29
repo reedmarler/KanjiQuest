@@ -1734,8 +1734,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-next.is-yes {
-  --intro-yes-y: 0rem;
-  font-size: 1.92rem;
+  --intro-yes-y: 0.85rem;
+  font-size: 0.96rem;
   transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
   transform-origin: center;
 }
@@ -1800,7 +1800,7 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-yes-shrink {
   from {
-    font-size: 1.92rem;
+    font-size: 0.96rem;
     transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
   }
   to {
@@ -2542,6 +2542,9 @@ body:has(.beginner-word-writing-card) .app,
   }
   .beginner-intro-controls.is-lowered {
     transform: none;
+  }
+  .beginner-intro-next.is-yes {
+    --intro-yes-y: calc(-2rem + 30px);
   }
 }
 
