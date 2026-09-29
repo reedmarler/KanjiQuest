@@ -1,4 +1,4 @@
-import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type AnimationEvent, type CSSProperties, type ReactElement, type ReactNode } from 'react'
+import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
 import { ArrowLeft, ArrowRight, Gauge, Pause, Play, RotateCcw } from 'lucide-react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
@@ -533,12 +533,6 @@ function BeginnerZone({
     setIntroOpeningShrinkDone(true)
   }, [introOpeningShrinking])
 
-  function handleIntroNextAnimationEnd(event: AnimationEvent<HTMLButtonElement>) {
-    if (event.animationName === 'beginner-intro-yes-shrink') {
-      finishIntroOpeningShrink()
-    }
-  }
-
   useEffect(() => {
     if (!introOpeningShrinking) return undefined
 
@@ -837,8 +831,7 @@ function BeginnerZone({
             ) : (
               <button
                 type="button"
-                className={`beginner-intro-next${introStep === 0 || introOpeningShrinking ? ' is-yes' : ''}${introOpeningShrinking ? ' is-shrinking' : ''}${introOpeningShrinkDone ? ' is-shrink-done' : ''}`}
-                onAnimationEnd={handleIntroNextAnimationEnd}
+                className={`beginner-intro-next${introStep === 0 ? ' is-yes' : ''}${introOpeningShrinking ? ' is-shrinking' : ''}${introOpeningShrinkDone ? ' is-shrink-done' : ''}`}
                 onClick={advanceIntro}
                 disabled={introTransitioning}
               >
