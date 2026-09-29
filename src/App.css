@@ -2148,7 +2148,8 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-hiragana-outline-in {
   from { opacity: 0; filter: blur(5px); }
-  to { opacity: 1; filter: blur(0); }
+  99% { opacity: 1; filter: blur(0); }
+  to { opacity: 1; filter: none; }
 }
 
 @keyframes beginner-intro-katakana-outline-in {
@@ -2182,12 +2183,14 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-hiragana-label-in {
   from { opacity: 0; filter: blur(7px); transform: translateY(0) scale(1); }
-  to { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
+  99% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
+  to { opacity: 1; filter: none; transform: translateY(0) scale(1); }
 }
 
 @keyframes beginner-intro-hiragana-centered-label-in {
   from { opacity: 0; filter: blur(7px); transform: translate(-50%, 0) scale(1); }
-  to { opacity: 1; filter: blur(0); transform: translate(-50%, 0) scale(1); }
+  99% { opacity: 1; filter: blur(0); transform: translate(-50%, 0) scale(1); }
+  to { opacity: 1; filter: none; transform: translate(-50%, 0) scale(1); }
 }
 
 @keyframes beginner-intro-switch-label-in {
@@ -2209,7 +2212,7 @@ body:has(.beginner-word-writing-card) .app,
   0% { opacity: 0; filter: blur(8px); transform: translate(0, 0.875rem) rotate(0deg) scale(0.3); }
   7.7% { opacity: 0.18; filter: blur(5px); transform: translate(0, 0.875rem) rotate(0deg) scale(0.32); }
   16.2%, 60% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) rotate(0deg) scale(0.38); }
-  to { opacity: 1; filter: blur(0); transform: translate(0.42rem, -1rem) rotate(0deg) scale(1); }
+  to { opacity: 1; filter: none; transform: translate(0.42rem, -1rem) rotate(0deg) scale(1); }
 }
 
 @keyframes beginner-intro-hiragana-glyph-anchor {
@@ -2241,7 +2244,8 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-romaji-in {
   from { opacity: 0; filter: blur(5px); }
-  to { opacity: 1; filter: blur(0); }
+  99% { opacity: 1; filter: blur(0); }
+  to { opacity: 1; filter: none; }
 }
 
 @keyframes beginner-intro-switch-romaji-in {
@@ -2251,12 +2255,14 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-slot-words-in {
   from { opacity: 0; filter: blur(7px); transform: translateY(-50%) scale(1); }
-  to { opacity: 1; filter: blur(0); transform: translateY(-50%) scale(1); }
+  99% { opacity: 1; filter: blur(0); transform: translateY(-50%) scale(1); }
+  to { opacity: 1; filter: none; transform: translateY(-50%) scale(1); }
 }
 
 @keyframes beginner-intro-hiragana-words-in {
   from { opacity: 0; filter: blur(7px); transform: translate(-50%, 0) scale(1); }
-  to { opacity: 1; filter: blur(0); transform: translate(-50%, 0) scale(1); }
+  99% { opacity: 1; filter: blur(0); transform: translate(-50%, 0) scale(1); }
+  to { opacity: 1; filter: none; transform: translate(-50%, 0) scale(1); }
 }
 
 @keyframes beginner-intro-switch-words-in {
@@ -19627,13 +19633,6 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   opacity: .55;
   pointer-events: none;
   user-select: none;
-  font-size: 0;
-}
-
-#build-badge::after {
-  content: '#933';
-  font: 700 .5rem/1.6 'Outfit', system-ui, sans-serif;
-  letter-spacing: .02em;
 }
 
 /* Example cards listen as a whole. The cue is absolutely positioned so it
