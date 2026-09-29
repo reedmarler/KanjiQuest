@@ -461,6 +461,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel {
+  --intro-reveal-panel-offset-y: 0px;
   --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.3);
   --intro-expanded-wheel-height: var(--intro-expanded-wheel-size);
   --intro-expanded-wheel-radius: 50%;
@@ -488,13 +489,14 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana {
+  --intro-reveal-panel-offset-y: -4px;
   --intro-hiragana-outline-width: 8.5rem;
   --intro-hiragana-panel-gutter: 15px;
   --intro-expanded-wheel-size: min(
     calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
     82.5dvw
   );
-  --intro-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 50px);
+  --intro-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 62px);
   --intro-expanded-wheel-radius: 8px;
 }
 
@@ -726,8 +728,10 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > span,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words > span {
-  grid-template-columns: auto auto auto;
-  justify-content: center;
+  grid-template-columns: 2.9rem 0.625rem minmax(0, 1fr);
+  align-items: end;
+  justify-content: stretch;
+  column-gap: 0.18rem;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > b,
@@ -741,14 +745,14 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words small,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words small {
-  font-size: 1.2rem;
+  font-size: 1.28rem;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words i,
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words em,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words i,
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words em {
-  font-size: 1.2rem;
+  font-size: 1.28rem;
 }
 
 .beginner-intro-slot-words.is-hiragana-examples i,
@@ -769,7 +773,7 @@ body:has(.beginner-word-writing-card) .app,
 .beginner-intro-slot-words.is-hiragana-examples rt,
 .beginner-intro-slot-previous-words.is-hiragana-examples rt {
   color: #fff;
-  font: 800 0.5rem/1 'Outfit', system-ui, sans-serif;
+  font: 800 0.6rem/1 'Outfit', system-ui, sans-serif;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana small,
@@ -1650,7 +1654,7 @@ body:has(.beginner-word-writing-card) .app,
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
   60% {
-    top: 50%;
+    top: calc(50% + var(--intro-reveal-panel-offset-y));
     width: 4.4rem;
     height: 4.4rem;
     border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
@@ -1661,7 +1665,7 @@ body:has(.beginner-word-writing-card) .app,
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
   to {
-    top: 50%;
+    top: calc(50% + var(--intro-reveal-panel-offset-y));
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-height);
     border-radius: var(--intro-expanded-wheel-radius);
@@ -2198,7 +2202,7 @@ body:has(.beginner-word-writing-card) .app,
       calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
       82.5dvw
     );
-    --intro-expanded-wheel-height: calc(18rem + 50px);
+    --intro-expanded-wheel-height: calc(18rem + 62px);
   }
   .beginner-intro-empty-wheel.is-katakana {
     --intro-hiragana-outline-width: 8.5rem;
@@ -2292,7 +2296,7 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-empty-wheel.is-revealing .is-slot-top {
-    top: 50%;
+    top: calc(50% + var(--intro-reveal-panel-offset-y));
     width: 100%;
     border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
     background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
@@ -19327,7 +19331,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 #build-badge::after {
-  content: '#869';
+  content: '#871';
   font: 700 .5rem/1.6 'Outfit', system-ui, sans-serif;
   letter-spacing: .02em;
 }
