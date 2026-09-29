@@ -1617,6 +1617,10 @@ body:has(.beginner-word-writing-card) .app,
   width: 100%;
 }
 
+.beginner-intro-controls > div:last-child:has(.beginner-intro-next.is-yes:not(.is-shrink-done)) {
+  --intro-control-main: 8.1rem;
+}
+
 .beginner-intro-playback-controls {
   position: relative;
   display: flex;
@@ -1733,7 +1737,7 @@ body:has(.beginner-word-writing-card) .app,
   transition: width var(--intro-opening-move-duration) linear, height var(--intro-opening-move-duration) linear, font-size var(--intro-opening-move-duration) linear, transform var(--intro-opening-move-duration) linear;
 }
 
-.beginner-intro-next.is-yes {
+.beginner-intro-next.is-yes:not(.is-shrink-done) {
   --intro-next-width: 8.1rem;
   --intro-next-height: 2.4rem;
   --intro-yes-y: 0.85rem;
