@@ -2447,7 +2447,7 @@ body:has(.beginner-word-writing-card) .app,
 
   .beginner-intro-speech {
     z-index: 1;
-    left: 7.5px;
+    left: 0;
     grid-column: 1;
     grid-row: 1;
     justify-self: center;
