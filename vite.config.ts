@@ -16,8 +16,10 @@ import react from '@vitejs/plugin-react'
  */
 function buildStamp() {
   try {
-    const number = process.env.GITHUB_RUN_NUMBER?.trim()
-      || execSync('git rev-list --count HEAD', { cwd: import.meta.dirname }).toString().trim()
+    const githubRunNumber = Number(process.env.GITHUB_RUN_NUMBER)
+    const number = Number.isFinite(githubRunNumber) && githubRunNumber > 0
+      ? String(githubRunNumber + 245)
+      : execSync('git rev-list --count HEAD', { cwd: import.meta.dirname }).toString().trim()
     const sha = execSync('git rev-parse --short HEAD', { cwd: import.meta.dirname }).toString().trim()
     return { number, sha }
   } catch {
