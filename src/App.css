@@ -1099,7 +1099,17 @@ body:has(.beginner-word-writing-card) .app,
   z-index: 4;
 }
 
+.beginner-intro-wheel-rotor {
+  position: absolute;
+  inset: 0;
+  transform-origin: center;
+}
+
 .beginner-intro-empty-wheel.is-switching {
+  animation: none;
+}
+
+.beginner-intro-empty-wheel.is-switching .beginner-intro-wheel-rotor {
   animation: beginner-intro-wheel-switch-rotate var(--intro-switch-duration) linear both;
 }
 
@@ -1135,9 +1145,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-katakana.is-switching {
-  animation:
-    beginner-intro-wheel-switch-rotate var(--intro-switch-duration) linear both,
-    beginner-intro-wheel-return-from-panel var(--intro-switch-duration) linear both;
+  animation: beginner-intro-wheel-return-from-panel var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-katakana.is-switching .is-slot-right {
@@ -1741,6 +1749,7 @@ body:has(.beginner-word-writing-card) .app,
   font-size: 0.96rem;
   transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
   transform-origin: center;
+  transition: none;
 }
 
 .beginner-intro-next.is-shrinking {
@@ -1807,10 +1816,10 @@ body:has(.beginner-word-writing-card) .app,
 
 @keyframes beginner-intro-wheel-switch-rotate {
   0%, 30.03% {
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    transform: rotate(0deg);
   }
   44.69%, to {
-    transform: translate(-50%, -50%) rotate(120deg) scale(1);
+    transform: rotate(120deg);
   }
 }
 

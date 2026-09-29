@@ -707,6 +707,7 @@ function BeginnerZone({
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {isRevealWheelVisible && (
               <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 ? ' is-switching' : ''}`} aria-hidden="true">
+                <div className="beginner-intro-wheel-rotor">
                 <span className={`beginner-intro-empty-slot is-slot-top${introStep === 2 ? ' is-reveal-slot' : ''}${introStep >= 3 ? ' is-previous-slot' : ''}`}>
                   <span className="beginner-intro-slot-question">1</span>
                   {introStep >= 3 && (
@@ -760,6 +761,7 @@ function BeginnerZone({
                     </>
                   )}
                 </span>
+                </div>
               </div>
             )}
             {introStep === 5 && (
