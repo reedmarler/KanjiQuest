@@ -21416,6 +21416,14 @@ body:has(.beginner-learner--sakura-a.beginner-learner--preview-a-dark) {
   grid-template-columns: 1fr;
 }
 
+.beginner-learner--preview-a > .hiragana-chart-heading,
+.beginner-learner--preview-a > .beginner-row-tabs,
+.beginner-learner--preview-a .preview-a-read,
+.beginner-learner--preview-a .preview-a-write {
+  position: relative;
+  top: -20px;
+}
+
 .beginner-learner--preview-a > .hiragana-chart-heading .hiragana-chart-heading-copy {
   grid-column: 1;
 }
