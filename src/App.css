@@ -525,10 +525,14 @@ body:has(.beginner-word-writing-card) .app,
   --intro-expanded-wheel-radius: 8px;
 }
 
-.beginner-intro-empty-wheel.is-hiragana.is-revealing {
+.beginner-intro-empty-wheel.is-revealing {
   animation:
     beginner-intro-wheel-swirl-in calc(800 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both,
     beginner-intro-wheel-fade-under-panel calc(1350 * var(--intro-time-unit)) linear both;
+}
+
+.beginner-intro-empty-wheel.is-collapsing {
+  animation: beginner-intro-wheel-fade-under-panel calc(1350 * var(--intro-time-unit)) linear reverse both;
 }
 
 .beginner-intro-empty-wheel.is-katakana,
@@ -1110,6 +1114,11 @@ body:has(.beginner-word-writing-card) .app,
   z-index: 4;
 }
 
+.beginner-intro-empty-wheel.is-collapsing .is-reveal-slot {
+  z-index: 4;
+  animation: beginner-intro-slot-expand calc(1350 * var(--intro-time-unit)) linear reverse both;
+}
+
 .beginner-intro-wheel-rotor {
   --intro-wheel-angle: 0deg;
   --intro-wheel-counter-angle: 0deg;
@@ -1147,9 +1156,14 @@ body:has(.beginner-word-writing-card) .app,
   animation: none;
 }
 
-.beginner-intro-empty-wheel.is-hiragana.is-revealing .is-slot-right,
-.beginner-intro-empty-wheel.is-hiragana.is-revealing .is-slot-left {
+.beginner-intro-empty-wheel.is-revealing .is-slot-right,
+.beginner-intro-empty-wheel.is-revealing .is-slot-left {
   animation: beginner-intro-slot-fade-under-expanded calc(1350 * var(--intro-time-unit)) linear both;
+}
+
+.beginner-intro-empty-wheel.is-collapsing .is-slot-right,
+.beginner-intro-empty-wheel.is-collapsing .is-slot-left {
+  animation: beginner-intro-slot-fade-under-expanded calc(1350 * var(--intro-time-unit)) linear reverse both;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-slot-right {
@@ -1192,6 +1206,10 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-question-out calc(280 * var(--intro-time-unit)) ease-in-out forwards;
 }
 
+.beginner-intro-empty-wheel.is-collapsing .is-reveal-slot .beginner-intro-slot-question {
+  animation: beginner-intro-question-out calc(280 * var(--intro-time-unit)) ease-in-out reverse both;
+}
+
 .beginner-intro-empty-wheel.is-switching .is-previous-slot .beginner-intro-slot-question {
   opacity: 0;
 }
@@ -1204,8 +1222,16 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-hiragana-centered-label-in calc(282.5 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) linear forwards;
 }
 
+.beginner-intro-empty-wheel.is-collapsing .beginner-intro-slot-label {
+  animation: beginner-intro-hiragana-centered-label-in calc(282.5 * var(--intro-time-unit)) linear reverse both;
+}
+
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-progress {
   animation: beginner-intro-hiragana-label-in calc(282.5 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) linear forwards;
+}
+
+.beginner-intro-empty-wheel.is-collapsing .beginner-intro-slot-progress {
+  animation: beginner-intro-hiragana-label-in calc(282.5 * var(--intro-time-unit)) linear reverse both;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-label {
@@ -1228,12 +1254,24 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-hiragana-in calc(1350 * var(--intro-time-unit)) linear forwards;
 }
 
+.beginner-intro-empty-wheel.is-collapsing .beginner-intro-slot-hiragana {
+  animation: beginner-intro-hiragana-in calc(1350 * var(--intro-time-unit)) linear reverse both;
+}
+
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana > span {
   animation: beginner-intro-hiragana-glyph-anchor calc(1350 * var(--intro-time-unit)) linear forwards;
 }
 
-.beginner-intro-empty-wheel.is-hiragana.is-revealing .beginner-intro-slot-hiragana::before {
+.beginner-intro-empty-wheel.is-collapsing .beginner-intro-slot-hiragana > span {
+  animation: beginner-intro-hiragana-glyph-anchor calc(1350 * var(--intro-time-unit)) linear reverse both;
+}
+
+.beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-hiragana::before {
   animation: beginner-intro-hiragana-outline-in calc(282.5 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) linear forwards;
+}
+
+.beginner-intro-empty-wheel.is-collapsing .beginner-intro-slot-hiragana::before {
+  animation: beginner-intro-hiragana-outline-in calc(282.5 * var(--intro-time-unit)) linear reverse both;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-hiragana {
@@ -1252,6 +1290,10 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-romaji-in calc(282.5 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) linear forwards;
 }
 
+.beginner-intro-empty-wheel.is-collapsing .beginner-intro-slot-hiragana small {
+  animation: beginner-intro-romaji-in calc(282.5 * var(--intro-time-unit)) linear reverse both;
+}
+
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-hiragana small {
   animation: beginner-intro-switch-romaji-in var(--intro-switch-duration) linear both;
 }
@@ -1264,8 +1306,12 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-slot-words-in calc(282.5 * var(--intro-time-unit)) calc(1325 * var(--intro-time-unit)) linear forwards;
 }
 
-.beginner-intro-empty-wheel.is-hiragana.is-revealing .beginner-intro-slot-words {
+.beginner-intro-empty-wheel.is-revealing .beginner-intro-slot-words {
   animation-name: beginner-intro-hiragana-words-in;
+}
+
+.beginner-intro-empty-wheel.is-collapsing .beginner-intro-slot-words {
+  animation: beginner-intro-hiragana-words-in calc(282.5 * var(--intro-time-unit)) linear reverse both;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-slot-words {
@@ -1896,9 +1942,9 @@ body:has(.beginner-word-writing-card) .app,
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--sakura) 18%, transparent);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-reveal-base) 18%, transparent);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -1908,9 +1954,9 @@ body:has(.beginner-word-writing-card) .app,
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--sakura) 18%, transparent);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-reveal-base) 18%, transparent);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -1920,9 +1966,9 @@ body:has(.beginner-word-writing-card) .app,
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -1932,9 +1978,9 @@ body:has(.beginner-word-writing-card) .app,
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-height);
     border-radius: var(--intro-expanded-wheel-radius);
-    border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
-    background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
