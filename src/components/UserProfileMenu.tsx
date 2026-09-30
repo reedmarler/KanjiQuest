@@ -13,7 +13,7 @@ type UserProfileMenuProps = {
   onOpenProfile: () => void
   onOpenDailyGoals: () => void
   onOpenLearningSettings: () => void
-  onOpenQuests: () => void
+  onOpenHome: () => void
   onOpenAchievements: () => void
   onOpenMore: () => void
   onOpenBackupSync: () => void
@@ -29,7 +29,7 @@ export function UserProfileMenu({
   onOpenProfile,
   onOpenDailyGoals,
   onOpenLearningSettings,
-  onOpenQuests,
+  onOpenHome,
   onOpenAchievements,
   onOpenMore,
   onOpenBackupSync,
@@ -158,8 +158,8 @@ export function UserProfileMenu({
           <button type="button" onClick={onOpenDailyGoals}>
             <span>Daily quests</span>
           </button>
-          <button type="button" onClick={onOpenQuests}>
-            <span>Quest Progress</span>
+          <button type="button" onClick={onOpenHome}>
+            <span>Home</span>
           </button>
           <button type="button" onClick={onOpenAchievements}>
             <span>Achievements</span>

@@ -53,7 +53,7 @@ const SentenceTesting = lazy(() => import('./components/SentenceTesting').then((
 const VoiceTest = lazy(() => import('./components/VoiceTest').then((module) => ({ default: module.VoiceTest })))
 const FocusedVocabPractice = lazy(() => import('./components/FocusedVocabPractice').then((module) => ({ default: module.FocusedVocabPractice })))
 const CounterPractice = lazy(() => import('./components/CounterPractice').then((module) => ({ default: module.CounterPractice })))
-const QuestHub = lazy(() => import('./components/QuestHub').then((module) => ({ default: module.QuestHub })))
+const HomePage = lazy(() => import('./components/HomePage').then((module) => ({ default: module.HomePage })))
 const MapView = lazy(() => import('./components/MapView').then((module) => ({ default: module.MapView })))
 const ShrineTrial = lazy(() => import('./components/ShrineTrial').then((module) => ({ default: module.ShrineTrial })))
 const QuestScene = lazy(() => import('./components/QuestScene').then((module) => ({ default: module.QuestScene })))
@@ -91,7 +91,7 @@ type View =
   | 'kanji'
   | 'sentence-testing'
   | 'voice-test'
-  | 'quests'
+  | 'home'
   | 'ink-road'
   | 'shrine-trial'
   | 'quest-scene'
@@ -115,14 +115,14 @@ type View =
   | 'daily-goals'
   | 'backup-sync'
 
-type PrimaryNavTab = 'home' | 'quest' | 'study' | 'beginner' | 'intro'
+type PrimaryNavTab = 'hero' | 'home' | 'study' | 'beginner' | 'intro'
 
 /** The five primary tabs, in bottom-nav order, for left/right swipe navigation. */
-const HUB_TABS: readonly View[] = ['dashboard', 'quests', 'study-tools', 'beginner-zone', 'intro']
+const HUB_TABS: readonly View[] = ['dashboard', 'home', 'study-tools', 'beginner-zone', 'intro']
 
 function primaryNavTabForView(view: View): PrimaryNavTab | null {
-  if (view === 'dashboard' || view === 'profile' || view === 'settings' || view === 'daily-goals' || view === 'backup-sync') return 'home'
-  if (view === 'quests' || view === 'ink-road' || view === 'shrine-trial' || view === 'quest-scene' || view === 'quest-checkpoint') return 'quest'
+  if (view === 'dashboard' || view === 'profile' || view === 'settings' || view === 'daily-goals' || view === 'backup-sync') return 'hero'
+  if (view === 'home' || view === 'ink-road' || view === 'shrine-trial' || view === 'quest-scene' || view === 'quest-checkpoint') return 'home'
   if (view === 'study-tools' || view === 'kanji' || view === 'vocab-practice' || view === 'counter-practice' || view === 'grammar' || view === 'study' || view === 'study-loading' || view === 'complete') return 'study'
   if (view === 'beginner-zone' || view === 'hiragana-chart' || view === 'katakana-chart' || view === 'hiragana-quiz' || view === 'katakana-quiz' || view === 'beginner-learner' || view === 'beginner-speed-run' || view === 'picture-practice') return 'beginner'
   if (view === 'intro') return 'intro'
@@ -131,23 +131,23 @@ function primaryNavTabForView(view: View): PrimaryNavTab | null {
 
 function MobileBottomNav({
   currentView,
+  onHero,
   onHome,
-  onQuests,
   onStudy,
   onBeginner,
   onIntro,
 }: {
   currentView: View
+  onHero: () => void
   onHome: () => void
-  onQuests: () => void
   onStudy: () => void
   onBeginner: () => void
   onIntro: () => void
 }) {
   const activeTab = primaryNavTabForView(currentView)
   const items: Array<{ tab: PrimaryNavTab; label: string; mark: string; onClick: () => void }> = [
+    { tab: 'hero', label: 'Hero', mark: '英', onClick: onHero },
     { tab: 'home', label: 'Home', mark: '家', onClick: onHome },
-    { tab: 'quest', label: 'Quest', mark: '旅', onClick: onQuests },
     { tab: 'study', label: 'Study', mark: '学', onClick: onStudy },
     { tab: 'beginner', label: 'Beginner', mark: 'あ', onClick: onBeginner },
     { tab: 'intro', label: 'Intro', mark: '入', onClick: onIntro },
@@ -966,8 +966,8 @@ function DesktopPrimaryNav({
   profilePhoto,
   onProfile,
   onSettings,
+  onHero,
   onHome,
-  onQuests,
   onStudy,
   onBeginner,
   onIntro,
@@ -980,8 +980,8 @@ function DesktopPrimaryNav({
   profilePhoto: string | null
   onProfile: () => void
   onSettings: () => void
+  onHero: () => void
   onHome: () => void
-  onQuests: () => void
   onStudy: () => void
   onBeginner: () => void
   onIntro: () => void
@@ -989,8 +989,8 @@ function DesktopPrimaryNav({
   const activeTab = primaryNavTabForView(currentView)
   const hideCornerControls = currentView === 'intro'
   const items: Array<{ tab: PrimaryNavTab; label: string; mark: string; onClick: () => void }> = [
+    { tab: 'hero', label: 'Hero', mark: '英', onClick: onHero },
     { tab: 'home', label: 'Home', mark: '家', onClick: onHome },
-    { tab: 'quest', label: 'Quest', mark: '旅', onClick: onQuests },
     { tab: 'study', label: 'Study', mark: '学', onClick: onStudy },
     { tab: 'beginner', label: 'Beginner', mark: 'あ', onClick: onBeginner },
     { tab: 'intro', label: 'Intro', mark: '入', onClick: onIntro },
@@ -1050,8 +1050,7 @@ type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
 
 function App() {
-  const [view, setView] = useState<View>(() => window.location.hash === '#quests' ? 'quests' : 'dashboard')
-  const [questLandingResetToken, setQuestLandingResetToken] = useState(0)
+  const [view, setView] = useState<View>(() => window.location.hash === '#home' ? 'home' : 'dashboard')
   const [progress] = useState<Record<string, CardProgress>>(() => loadProgress())
   const [wrongPool, setWrongPool] = useState(() => loadWrongPool())
   const [session, setSession] = useState<SessionItem[]>([])
@@ -1080,7 +1079,7 @@ function App() {
   const [beginnerQuizReturnView, setBeginnerQuizReturnView] = useState<'beginner-zone' | 'hiragana-chart' | 'katakana-chart'>('beginner-zone')
   const [shrineRegionId, setShrineRegionId] = useState('tsuzuri')
   const [speedRunReturnView, setSpeedRunReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools'>('dashboard')
-  const [pictureReturnView, setPictureReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools' | 'quests'>('dashboard')
+  const [pictureReturnView, setPictureReturnView] = useState<'dashboard' | 'beginner-zone' | 'study-tools' | 'home'>('dashboard')
   /*
    * Whether the sentence session on screen is the lab copy. The lab runs on
    * the same session machinery as the real builder — same exercises, same
@@ -1115,13 +1114,6 @@ function App() {
     if (next !== 'dashboard') setSettingsExpanded(false)
   }, [])
 
-  const goToQuests = useCallback(() => {
-    if (view === 'quests') {
-      setQuestLandingResetToken((token) => token + 1)
-    }
-    goToView('quests')
-  }, [goToView, view])
-
   const openDailyGoal = useCallback((id: DailyGoalId) => {
     setProfileMenuOpen(false)
     if (id === 'sentence') {
@@ -1145,7 +1137,7 @@ function App() {
       setView('hiragana-chart')
       return
     }
-    setView('quests')
+    setView('home')
   }, [])
 
   const toggleProfileMenu = useCallback(() => {
@@ -1292,7 +1284,7 @@ function App() {
   }
 
   const showHubChrome = view === 'dashboard'
-    || view === 'quests'
+    || view === 'home'
     || view === 'study-tools'
     || view === 'beginner-zone'
     || view === 'intro'
@@ -1321,8 +1313,8 @@ function App() {
   const mobileNav = (
     <MobileBottomNav
       currentView={view}
-      onHome={() => goToView('dashboard')}
-      onQuests={goToQuests}
+      onHero={() => goToView('dashboard')}
+      onHome={() => goToView('home')}
       onStudy={() => goToView('study-tools')}
       onBeginner={() => goToView('beginner-zone')}
       onIntro={() => goToView('intro')}
@@ -1338,8 +1330,8 @@ function App() {
       profilePhoto={userProfile.photo}
       onProfile={toggleProfileMenu}
       onSettings={toggleSettingsPanel}
-      onHome={() => goToView('dashboard')}
-      onQuests={goToQuests}
+      onHero={() => goToView('dashboard')}
+      onHome={() => goToView('home')}
       onStudy={() => goToView('study-tools')}
       onBeginner={() => goToView('beginner-zone')}
       onIntro={() => goToView('intro')}
@@ -1356,7 +1348,7 @@ function App() {
       onOpenProfile={() => goToView('profile')}
       onOpenDailyGoals={() => goToView('daily-goals')}
       onOpenLearningSettings={() => goToView('settings')}
-      onOpenQuests={() => goToView('quests')}
+      onOpenHome={() => goToView('home')}
       onOpenAchievements={() => goToView('achievements')}
       onOpenMore={() => goToView('additional-tools')}
       onOpenBackupSync={() => goToView('backup-sync')}
@@ -1416,7 +1408,7 @@ function App() {
             onQuestComplete={activeQuestId
               ? () => {
                   finishQuestStep('kanji')
-                  setPracticeReturnView('quests')
+                  setPracticeReturnView('home')
                   setView('grammar')
                 }
               : undefined}
@@ -1440,7 +1432,7 @@ function App() {
             onQuestComplete={activeQuestId && questVocabTopicId
               ? () => {
                   finishQuestStep('vocab')
-                  setPracticeReturnView('quests')
+                  setPracticeReturnView('home')
                   setView('kanji')
                 }
               : undefined}
@@ -1478,7 +1470,7 @@ function App() {
       <div className="app ink-road-page">
         <Suspense fallback={<RouteLoading label="The Ink Road" />}>
           <MapView
-            onBack={() => setView('quests')}
+            onBack={() => setView('home')}
             onStudy={() => setView('beginner-zone')}
             onShrine={(regionId) => { setShrineRegionId(regionId); setView('shrine-trial') }}
           />
@@ -1501,13 +1493,11 @@ function App() {
     )
   }
 
-  if (view === 'quests') {
+  if (view === 'home') {
     return withMobileNav(
       <div className="app">
-        <Suspense fallback={<RouteLoading label="Quests" />}>
-          <QuestHub
-            key={questLandingResetToken}
-          />
+        <Suspense fallback={<RouteLoading label="Home" />}>
+          <HomePage />
         </Suspense>
       </div>,
     )
@@ -1837,7 +1827,7 @@ function App() {
         <Suspense fallback={<RouteLoading label="Quest Scene" />}>
           <QuestScene
             questId={activeQuestId}
-            onBack={() => setView('quests')}
+            onBack={() => setView('home')}
             onDashboard={() => setView('dashboard')}
             onContinue={(furiganaFree) => {
               if (activeQuestId) setAchievementMetrics((current) => recordQuestScene(current, activeQuestId, furiganaFree))
@@ -1856,10 +1846,10 @@ function App() {
         <Suspense fallback={<RouteLoading label="Quest Checkpoint" />}>
           <QuestCheckpoint
             questId={activeQuestId}
-            onBack={() => setView('quests')}
+            onBack={() => setView('home')}
             onComplete={() => {
               if (activeQuestId) setQuestProgress((current) => completeQuest(current, activeQuestId))
-              setView('quests')
+              setView('home')
             }}
           />
         </Suspense>
