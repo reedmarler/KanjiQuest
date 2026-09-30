@@ -1749,7 +1749,7 @@ body:has(.beginner-word-writing-card) .app,
   box-sizing: border-box;
   --intro-next-width: 12.15rem;
   --intro-next-height: 3.6rem;
-  --intro-next-rest-y: 0rem;
+  --intro-next-rest-y: 10px;
   --intro-yes-scale: 1.453333;
   gap: 0.4rem;
   width: var(--intro-next-width);
