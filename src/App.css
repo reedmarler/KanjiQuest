@@ -1874,13 +1874,9 @@ body:has(.beginner-zone--intro) {
     --intro-wheel-angle: 0deg;
     --intro-wheel-counter-angle: 0deg;
   }
-  44.69%, 75.27% {
+  44.69%, to {
     --intro-wheel-angle: 120deg;
     --intro-wheel-counter-angle: -120deg;
-  }
-  75.28%, to {
-    --intro-wheel-angle: 0deg;
-    --intro-wheel-counter-angle: 0deg;
   }
 }
 
@@ -2087,8 +2083,8 @@ body:has(.beginner-zone--intro) {
   }
   75.28%, to {
     z-index: 5;
-    top: calc(50% + var(--intro-reveal-panel-offset-y));
-    left: calc(50% + var(--intro-reveal-panel-offset-x));
+    top: calc(50% - 5px);
+    left: calc(50% + 8.66px);
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-height);
     border-radius: var(--intro-expanded-wheel-radius);
