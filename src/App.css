@@ -257,6 +257,12 @@ body:has(.beginner-word-writing-card) .app,
   object-fit: cover;
 }
 
+.beginner-intro-guide.is-systems .beginner-intro-mascot {
+  border-color: color-mix(in srgb, #70cfe0 52%, var(--border));
+  background: color-mix(in srgb, #70cfe0 16%, var(--surface-2));
+  box-shadow: 0 0.45rem 1.1rem color-mix(in srgb, #70cfe0 20%, transparent);
+}
+
 .beginner-intro-speech {
   position: relative;
   box-sizing: border-box;
@@ -292,16 +298,6 @@ body:has(.beginner-word-writing-card) .app,
   border-left: 1px solid color-mix(in srgb, var(--sakura-light) 24%, var(--border));
   background: var(--surface-2);
   transform: rotate(45deg);
-}
-
-.beginner-intro-speech:has(.beginner-intro-speech-copy.is-katakana-reveal) {
-  animation:
-    beginner-intro-copy-in calc(270 * var(--intro-time-unit)) ease both,
-    beginner-intro-speech-katakana-color calc(4414 * var(--intro-time-unit)) linear both;
-}
-
-.beginner-intro-speech:has(.beginner-intro-speech-copy.is-katakana-reveal)::before {
-  animation: beginner-intro-speech-tail-katakana-color calc(4414 * var(--intro-time-unit)) linear both;
 }
 
 .beginner-intro-speech-inner {
@@ -1858,28 +1854,6 @@ body:has(.beginner-word-writing-card) .app,
 @keyframes beginner-intro-speech-hiragana-reveal {
   from { opacity: 0; filter: blur(8px); }
   to { opacity: 1; filter: blur(0); }
-}
-
-@keyframes beginner-intro-speech-katakana-color {
-  0%, 44.69% {
-    border-color: color-mix(in srgb, var(--sakura-light) 24%, var(--border));
-    background: color-mix(in srgb, var(--surface-2) 94%, var(--sakura) 6%);
-  }
-  51.04%, to {
-    border-color: color-mix(in srgb, #70cfe0 38%, var(--border));
-    background: color-mix(in srgb, var(--surface-2) 80%, #70cfe0 20%);
-  }
-}
-
-@keyframes beginner-intro-speech-tail-katakana-color {
-  0%, 44.69% {
-    border-color: color-mix(in srgb, var(--sakura-light) 24%, var(--border));
-    background: var(--surface-2);
-  }
-  51.04%, to {
-    border-color: color-mix(in srgb, #70cfe0 38%, var(--border));
-    background: color-mix(in srgb, var(--surface-2) 80%, #70cfe0 20%);
-  }
 }
 
 @keyframes beginner-intro-slot-expand {
