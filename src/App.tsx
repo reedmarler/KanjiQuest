@@ -1533,7 +1533,7 @@ function App() {
 
   if (view === 'quests') {
     return withMobileNav(
-      <div className="app realm-app">
+      <div className="app">
         <Suspense fallback={<RouteLoading label="Quests" />}>
           <QuestHub
             key={questLandingResetToken}

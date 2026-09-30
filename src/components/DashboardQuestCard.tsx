@@ -10,33 +10,11 @@ type DashboardQuestCardProps = {
   onOpenStudyTools: () => void
 }
 
-// The illustrated panel (/quest-art/featured-quest.jpg) bakes in the frame,
-// art, and Continue frame while the transparent layers below keep the card tappable.
-
-export function DashboardQuestCard({
-  onContinueStudy,
-  onOpenQuests,
-}: DashboardQuestCardProps) {
+export function DashboardQuestCard({ onOpenQuests }: DashboardQuestCardProps) {
   return (
-    <section
-      className="featured-quest"
-      aria-label="Quests"
-    >
-      <img className="featured-quest-art" src="/quest-art/featured-quest.jpg" alt="" />
-
-      <button
-        type="button"
-        className="featured-quest-open"
-        onClick={onOpenQuests}
-        aria-label="Open quests"
-      />
-
-      <button
-        type="button"
-        className="featured-quest-cta"
-        onClick={onContinueStudy}
-        aria-label="Open quests"
-      />
+    <section className="featured-quest" aria-label="Quests">
+      <h2 className="featured-quest-title">Quests</h2>
+      <button type="button" className="featured-quest-cta" onClick={onOpenQuests}>Open quests</button>
     </section>
   )
 }
