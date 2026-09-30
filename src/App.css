@@ -1754,7 +1754,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-next.is-yes {
-  --intro-yes-y: 0.85rem;
+  --intro-yes-y: 0.816rem;
   transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
   transform-origin: center;
   transition: none;
@@ -2412,7 +2412,12 @@ body:has(.beginner-word-writing-card) .app,
     min-height: 10.75rem;
   }
 
-  .beginner-intro-guide.is-simple,
+  .beginner-intro-guide.is-simple {
+    margin-top: 0;
+    margin-bottom: 0;
+    transform: translateY(-1.2rem);
+  }
+
   .beginner-intro-guide.is-systems {
     margin-top: -0.85rem;
     margin-bottom: -0.35rem;
@@ -2474,7 +2479,7 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-lesson.is-welcome { min-height: 22rem; }
-  .beginner-intro-lesson.is-simple { min-height: 23.235rem; }
+  .beginner-intro-lesson.is-simple { min-height: 22rem; }
   .beginner-intro-lesson.is-systems,
   .beginner-intro-lesson.is-katakana-reveal,
   .beginner-intro-lesson.is-kanji-reveal {
@@ -2539,9 +2544,6 @@ body:has(.beginner-word-writing-card) .app,
   }
   .beginner-intro-controls.is-lowered {
     transform: none;
-  }
-  .beginner-intro-next.is-yes {
-    --intro-yes-y: 0.85rem;
   }
 }
 
