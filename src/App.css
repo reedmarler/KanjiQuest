@@ -2414,8 +2414,8 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-guide.is-simple {
-    margin-top: 0;
-    margin-bottom: 0;
+    margin-top: -0.85rem;
+    margin-bottom: -0.35rem;
     transform: translateY(-1.2rem);
   }
 
@@ -2480,7 +2480,7 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-lesson.is-welcome { min-height: 22rem; }
-  .beginner-intro-lesson.is-simple { min-height: 22rem; }
+  .beginner-intro-lesson.is-simple { min-height: 24.9rem; }
   .beginner-intro-lesson.is-systems,
   .beginner-intro-lesson.is-katakana-reveal,
   .beginner-intro-lesson.is-kanji-reveal {
