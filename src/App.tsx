@@ -217,11 +217,9 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     label: 'Kanji',
     mark: '漢',
     romaji: 'kan',
-    heading: 'Examples:',
+    heading: 'Example:',
     words: [
-      { kana: '—', romaji: 'placeholder 1' },
-      { kana: '—', romaji: 'placeholder 2' },
-      { kana: '—', romaji: 'placeholder 3' },
+      { kana: '—', romaji: 'Placeholder' },
     ],
   },
 } as const
@@ -754,7 +752,7 @@ function BeginnerZone({
                         <small lang="en">{revealContent.romaji}</small>
                         <span>{revealContent.mark}</span>
                       </span>
-                      <span className={`beginner-intro-slot-words${revealContent.label !== 'Kanji' ? ' is-hiragana-examples' : ''}`}>
+                      <span className="beginner-intro-slot-words is-hiragana-examples">
                         <b>{revealContent.heading}</b>
                         {revealContent.words.map(renderBeginnerIntroExampleWord)}
                       </span>

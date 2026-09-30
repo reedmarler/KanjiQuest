@@ -530,7 +530,8 @@ body:has(.beginner-word-writing-card) .app,
     beginner-intro-wheel-fade-under-panel calc(1350 * var(--intro-time-unit)) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana {
+.beginner-intro-empty-wheel.is-katakana,
+.beginner-intro-empty-wheel.is-kanji {
   --intro-hiragana-outline-width: 8.5rem;
   --intro-hiragana-panel-gutter: 15px;
   --intro-expanded-wheel-size: min(
@@ -546,6 +547,9 @@ body:has(.beginner-word-writing-card) .app,
   );
   --intro-previous-expanded-wheel-height: calc(var(--intro-empty-wheel-size) * 1.25 + 90px);
   --intro-previous-expanded-wheel-radius: 8px;
+}
+
+.beginner-intro-empty-wheel.is-katakana {
   --intro-reveal-accent: #70cfe0;
   --intro-reveal-base: #4ba5c9;
 }
@@ -740,15 +744,15 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-words,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-words {
   right: -0.55rem;
   width: 8.4rem;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-words,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-words {
   top: auto;
   right: auto;
   bottom: calc(var(--intro-hiragana-panel-gutter, 15px) + 9px);
@@ -760,16 +764,16 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > b,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-words > b,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words > b {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words > b,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-words > b {
   grid-column: 1 / -1;
   padding-left: 0;
   text-align: center;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > span,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-words > span,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words > span {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words > span,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-words > span {
   grid-template-columns: 2.9rem 0.625rem minmax(0, 1fr);
   align-items: end;
   justify-content: stretch;
@@ -777,36 +781,36 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > b,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-words > b,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words > b {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words > b,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-words > b {
   font-size: 1.05rem;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words > b,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-words > b,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words > b {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words > b,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-words > b {
   margin-bottom: 0.38rem;
   position: relative;
   top: -6px;
 }
 
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type {
   position: relative;
   left: calc(-0.42rem - 5px);
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words small,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-words small,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words small {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words small,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-words small {
   font-size: 1.28rem;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words i,
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words em,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-words i,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-words em,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words i,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-words em {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words i,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words em,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-words i,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-words em {
   font-size: 1.28rem;
 }
 
@@ -869,23 +873,23 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana small,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-hiragana small,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana small {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-hiragana small,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-kana small {
   top: 3.92rem;
   left: calc(50% - 0.42rem);
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-hiragana {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-hiragana {
   bottom: 28px;
 }
 
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-kana {
   bottom: 28px;
   transform: translate(0.42rem, -1rem);
 }
 
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana span {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-kana span {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -896,7 +900,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana span,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-hiragana span {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-hiragana span {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -907,8 +911,8 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana::before,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-hiragana::before,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana::before {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-hiragana::before,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-kana::before {
   content: '';
   position: absolute;
   z-index: 0;
@@ -926,18 +930,25 @@ body:has(.beginner-word-writing-card) .app,
   opacity: 0;
 }
 
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-hiragana::before {
+.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-hiragana::before,
+.beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-previous-kana::before {
   border-color: color-mix(in srgb, #70cfe0 62%, transparent);
   box-shadow: 0 0 0.7rem color-mix(in srgb, #4ba5c9 14%, transparent);
   opacity: 0;
 }
 
+.beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-hiragana::before {
+  border-color: color-mix(in srgb, #f0bf63 62%, transparent);
+  box-shadow: 0 0 0.7rem color-mix(in srgb, #c78b32 14%, transparent);
+  opacity: 0;
+}
+
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana span,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-hiragana span,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana span,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-hiragana span,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-kana span,
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana small,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-hiragana small,
-.beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-previous-kana small {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-hiragana small,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-kana small {
   z-index: 1;
 }
 
@@ -1144,29 +1155,29 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-slot-switch-left-in var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching {
   animation: beginner-intro-wheel-return-from-panel var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching .is-slot-right {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-slot-right {
   animation:
     beginner-intro-slot-switch-side var(--intro-switch-duration) linear both,
     beginner-intro-panel-side-node-cycle var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching .is-previous-slot {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-previous-slot {
   animation:
     beginner-intro-slot-switch-previous var(--intro-switch-duration) linear both,
     beginner-intro-panel-node-hide var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching .is-reveal-slot {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-reveal-slot {
   animation:
     beginner-intro-slot-switch-reveal var(--intro-switch-duration) linear both,
     beginner-intro-panel-node-return var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching .beginner-intro-slot-previous-kana::before {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-slot-previous-kana::before {
   animation: beginner-intro-hiragana-outline-out calc(282.5 * var(--intro-time-unit)) linear both;
 }
 
@@ -1194,7 +1205,7 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-switch-centered-label-in var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching .is-reveal-slot .beginner-intro-slot-label {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-reveal-slot .beginner-intro-slot-label {
   animation-name: beginner-intro-katakana-centered-label-in;
 }
 
@@ -1202,7 +1213,7 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-switch-centered-progress-in var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching .is-reveal-slot .beginner-intro-slot-progress {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-reveal-slot .beginner-intro-slot-progress {
   animation-name: beginner-intro-katakana-centered-progress-in;
 }
 
@@ -1226,7 +1237,7 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-katakana-glyph-anchor var(--intro-switch-duration) linear forwards;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching .is-reveal-slot .beginner-intro-slot-hiragana::before {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-reveal-slot .beginner-intro-slot-hiragana::before {
   animation: beginner-intro-katakana-outline-in var(--intro-switch-duration) linear forwards;
 }
 
@@ -1238,7 +1249,7 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-switch-romaji-in var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching .is-reveal-slot .beginner-intro-slot-hiragana small {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-reveal-slot .beginner-intro-slot-hiragana small {
   animation-name: beginner-intro-katakana-romaji-in;
 }
 
@@ -1254,7 +1265,7 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-switch-words-in var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching .is-reveal-slot .beginner-intro-slot-words {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-reveal-slot .beginner-intro-slot-words {
   animation-name: beginner-intro-katakana-words-in;
 }
 
@@ -1274,7 +1285,7 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-slot-previous-words-out calc(282.5 * var(--intro-time-unit)) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching .beginner-intro-slot-previous-words {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-slot-previous-words {
   animation-name: beginner-intro-hiragana-previous-words-out;
 }
 
@@ -1286,7 +1297,7 @@ body:has(.beginner-word-writing-card) .app,
   animation: beginner-intro-previous-kana-park var(--intro-switch-duration) linear both;
 }
 
-.beginner-intro-empty-wheel.is-katakana.is-switching .beginner-intro-slot-previous-kana {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-slot-previous-kana {
   animation-name: beginner-intro-hiragana-previous-kana-park;
 }
 
@@ -2503,7 +2514,7 @@ body:has(.beginner-word-writing-card) .app,
     );
     --intro-expanded-wheel-height: calc(18rem + 90px);
   }
-  .beginner-intro-empty-wheel.is-katakana {
+  .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) {
     --intro-hiragana-outline-width: 8.5rem;
     --intro-hiragana-panel-gutter: 15px;
     --intro-previous-expanded-wheel-size: min(
