@@ -644,7 +644,7 @@ export function Dashboard({
         </div>
       )}
       <header className="hero hero-compact">
-        <h1>Kanji Quest.</h1>
+        <h1>Kanji Quest</h1>
         <DashboardHeroSentence
           wrongPool={wrongPool}
           progress={progress}
