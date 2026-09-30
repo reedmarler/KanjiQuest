@@ -1497,7 +1497,14 @@ function App() {
     return withMobileNav(
       <div className="app">
         <Suspense fallback={<RouteLoading label="Home" />}>
-          <HomePage />
+          <HomePage
+            learnedCount={learnedCount}
+            onBegin={() => setView('intro')}
+            onContinue={() => setView(learnedCount > 0 ? 'study-tools' : 'beginner-zone')}
+            onOpenStudy={() => setView('study-tools')}
+            onOpenBeginner={() => setView('beginner-zone')}
+            onOpenHero={() => setView('dashboard')}
+          />
         </Suspense>
       </div>,
     )
