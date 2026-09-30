@@ -574,9 +574,14 @@ function BeginnerZone({
       const maxOuterWidth = Math.min(22 * parseFloat(window.getComputedStyle(document.documentElement).fontSize), availableOuterWidth)
       const maxContentWidth = Math.max(0, maxOuterWidth - horizontalPadding - horizontalBorder)
 
+      const previousProbeWidth = widthProbeNode.style.width
+      const previousProbeMaxWidth = widthProbeNode.style.maxWidth
       widthProbeNode.style.width = 'max-content'
       widthProbeNode.style.maxWidth = 'none'
-      const contentWidth = Math.min(widthProbeNode.getBoundingClientRect().width, maxContentWidth)
+      const measuredContentWidth = widthProbeNode.getBoundingClientRect().width
+      widthProbeNode.style.width = previousProbeWidth
+      widthProbeNode.style.maxWidth = previousProbeMaxWidth
+      const contentWidth = Math.min(measuredContentWidth, maxContentWidth)
       contentNode.style.width = `${contentWidth}px`
       contentNode.style.maxWidth = 'none'
       const contentRect = contentNode.getBoundingClientRect()
