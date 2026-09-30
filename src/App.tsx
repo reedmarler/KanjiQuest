@@ -312,7 +312,6 @@ const INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 1.25
 const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.25, 1.5, 2, 3]
 const INTRO_OPENING_MOVE_CSS_MS = 1274
 const INTRO_SPEECH_RESIZE_MS = 560
-const INTRO_REVEAL_CYCLE_CSS_MS = 1350 * INTRO_ANIMATION_TIME_BASE
 const INTRO_STANDARD_SPEECH_STEP_INDEX = 2
 
 function defaultIntroAnimationSpeedForStep(step: number): IntroAnimationSpeed {
@@ -420,7 +419,6 @@ function BeginnerZone({
   const [introOpeningPreview, setIntroOpeningPreview] = useState(false)
   const [introOpeningShrinking, setIntroOpeningShrinking] = useState(false)
   const [introOpeningShrinkDone, setIntroOpeningShrinkDone] = useState(false)
-  const [introRevealCollapsing, setIntroRevealCollapsing] = useState(false)
   const [introTransitioning, setIntroTransitioning] = useState(false)
   const [introPaused, setIntroPaused] = useState(false)
   const [introAnimationSpeed, setIntroAnimationSpeed] = useState<IntroAnimationSpeed>(INTRO_OPENING_DEFAULT_ANIMATION_SPEED)
@@ -488,7 +486,6 @@ function BeginnerZone({
     setIntroOpeningPreview(false)
     setIntroOpeningShrinking(false)
     setIntroOpeningShrinkDone(false)
-    setIntroRevealCollapsing(false)
     introSpeechDisplayStepRef.current = nextStep
     setIntroSpeechDisplayStep(nextStep)
     setIntroSpeechCopyBlurred(false)
@@ -506,28 +503,26 @@ function BeginnerZone({
       setIntroOpeningShrinking(true)
       return
     }
-    if (introStep === 1) {
+    if (introStep < 4) {
       setIntroOpeningShrinking(false)
       setIntroOpeningShrinkDone(false)
-      const nextStep = introStep + 1
+      const nextStep = introStep === 2 ? 3 : introStep + 1
       if (!introSpeedCustomized) setIntroAnimationSpeed(defaultIntroAnimationSpeedForStep(nextStep))
+      if (introStep === 2) {
+        setIntroStep(3)
+        return
+      }
       setIntroStep(nextStep)
       return
     }
-
-    if (introStep >= 2 && introStep <= 4) {
-      setIntroTransitioning(true)
-      setIntroRevealCollapsing(true)
-      introTransitionTimerRef.current = window.setTimeout(() => {
-        setIntroStep((current) => Math.min(5, current + 1))
-        setIntroRevealCollapsing(false)
-        setIntroTransitioning(false)
-        introTransitionTimerRef.current = null
-      }, INTRO_REVEAL_CYCLE_CSS_MS / introAnimationSpeed)
-      return
-    }
-
     if (introStep >= 5) return
+
+    setIntroTransitioning(true)
+    introTransitionTimerRef.current = window.setTimeout(() => {
+      setIntroStep((current) => Math.min(5, current + 1))
+      setIntroTransitioning(false)
+      introTransitionTimerRef.current = null
+    }, 1140 / introAnimationSpeed)
   }
 
   const finishIntroOpeningShrink = useCallback(() => {
@@ -664,6 +659,9 @@ function BeginnerZone({
     const isFinalStep = introStep === BEGINNER_INTRO_STEPS.length - 1
     const revealScript = introStep === 4 ? 'kanji' : introStep === 3 ? 'katakana' : 'hiragana'
     const revealContent = BEGINNER_INTRO_REVEAL_CONTENT[revealScript]
+    const previousRevealContent = introStep === 4
+      ? BEGINNER_INTRO_REVEAL_CONTENT.katakana
+      : BEGINNER_INTRO_REVEAL_CONTENT.hiragana
     const isRevealWheelVisible = introStep >= 1 && introStep <= 4
 
     return (
@@ -684,7 +682,7 @@ function BeginnerZone({
             } as CSSProperties : undefined}
           >
             <div
-              className={`beginner-intro-speech-inner beginner-intro-speech-copy is-${speechDisplayStep.id}${introSpeechCopyBlurred ? ' is-blurred' : ''}`}
+              className={`beginner-intro-speech-inner beginner-intro-speech-copy is-${speechDisplayStep.id}${introSpeechCopyBlurred ? ' is-blurred' : ''}${displayIntroStep === 3 ? ' is-katakana-delayed-reveal' : ''}`}
               ref={introSpeechContentRef}
             >
               {speechDisplayStep.eyebrow && <small>{speechDisplayStep.eyebrow}</small>}
@@ -706,13 +704,27 @@ function BeginnerZone({
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {isRevealWheelVisible && (
-              <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep >= 2 ? introRevealCollapsing ? ' is-collapsing' : ' is-revealing' : ''}`} aria-hidden="true">
+              <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 ? ' is-switching' : ''}`} aria-hidden="true">
                 <div className="beginner-intro-wheel-rotor">
-                <span className={`beginner-intro-empty-slot is-slot-top${introStep >= 2 ? ' is-reveal-slot' : ''}`}>
-                  <span className="beginner-intro-slot-question">{Math.max(1, introStep - 1)}</span>
-                  {introStep >= 2 && (
+                <span className={`beginner-intro-empty-slot is-slot-top${introStep === 2 ? ' is-reveal-slot' : ''}${introStep >= 3 ? ' is-previous-slot' : ''}`}>
+                  <span className="beginner-intro-slot-question">1</span>
+                  {introStep >= 3 && (
+                    <span className="beginner-intro-slot-previous">
+                      {previousRevealContent.label === 'Hiragana' && <span className="beginner-intro-slot-previous-progress">1/46</span>}
+                      <span className="beginner-intro-slot-previous-label">{previousRevealContent.label}</span>
+                      <span className="beginner-intro-slot-previous-kana" lang="ja">
+                        <small lang="en">{previousRevealContent.romaji}</small>
+                        <span>{previousRevealContent.mark}</span>
+                      </span>
+                      <span className="beginner-intro-slot-previous-words is-hiragana-examples">
+                        <b>{previousRevealContent.heading}</b>
+                        {previousRevealContent.words.map(renderBeginnerIntroExampleWord)}
+                      </span>
+                    </span>
+                  )}
+                  {introStep === 2 && (
                     <>
-                      {revealContent.label !== 'Kanji' && <span className="beginner-intro-slot-progress">1/46</span>}
+                      <span className="beginner-intro-slot-progress">1/46</span>
                       <span className="beginner-intro-slot-label">{revealContent.label}</span>
                       <span className="beginner-intro-slot-hiragana" lang="ja">
                         <small lang="en">{revealContent.romaji}</small>
@@ -730,8 +742,22 @@ function BeginnerZone({
                     ? <span className="beginner-intro-slot-docked-glyph" lang="ja">あ</span>
                     : <span className="beginner-intro-slot-question">3</span>}
                 </span>
-                <span className="beginner-intro-empty-slot is-slot-left" aria-hidden="true">
+                <span className={`beginner-intro-empty-slot is-slot-left${introStep >= 3 ? ' is-reveal-slot' : ''}`} aria-hidden="true">
                   <span className="beginner-intro-slot-question">{introStep === 4 ? '3' : '2'}</span>
+                  {introStep >= 3 && (
+                    <>
+                      {revealContent.label === 'Katakana' && <span className="beginner-intro-slot-progress">1/46</span>}
+                      <span className="beginner-intro-slot-label">{revealContent.label}</span>
+                      <span className="beginner-intro-slot-hiragana" lang="ja">
+                        <small lang="en">{revealContent.romaji}</small>
+                        <span>{revealContent.mark}</span>
+                      </span>
+                      <span className="beginner-intro-slot-words is-hiragana-examples">
+                        <b>{revealContent.heading}</b>
+                        {revealContent.words.map(renderBeginnerIntroExampleWord)}
+                      </span>
+                    </>
+                  )}
                 </span>
                 </div>
               </div>
