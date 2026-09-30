@@ -200,6 +200,11 @@ body:has(.beginner-word-writing-card) .app,
   -webkit-text-fill-color: transparent;
 }
 
+html:has(.beginner-zone--intro),
+body:has(.beginner-zone--intro) {
+  overflow-x: clip;
+}
+
 .beginner-zone--intro {
   --intro-time-unit: 1ms;
   --intro-opening-move-duration: calc(637 * var(--intro-time-unit));
@@ -508,8 +513,6 @@ body:has(.beginner-word-writing-card) .app,
   border-radius: 50%;
   background: color-mix(in srgb, var(--surface-2) 32%, transparent);
   color: var(--text-muted);
-  overflow: clip visible;
-  overflow-clip-margin: 3rem;
   transform: translate(-50%, -50%);
   animation: beginner-intro-wheel-swirl-in calc(800 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both;
   transform-origin: center;
@@ -1279,9 +1282,7 @@ body:has(.beginner-word-writing-card) .app,
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous {
-  animation:
-    beginner-intro-previous-content-upright var(--intro-switch-duration) linear both,
-    beginner-intro-previous-content-clip var(--intro-switch-duration) step-end both;
+  animation: beginner-intro-previous-content-upright var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-label {
@@ -2317,29 +2318,24 @@ body:has(.beginner-word-writing-card) .app,
   }
 }
 
-@keyframes beginner-intro-previous-content-clip {
-  0%, 6.4% { overflow: visible; }
-  6.41%, to { overflow: hidden; }
-}
-
 @keyframes beginner-intro-slot-previous-label-out {
-  from { visibility: visible; opacity: 1; filter: blur(0); transform: translateX(-50%); }
-  to { visibility: hidden; opacity: 0; filter: blur(7px); transform: translateX(-50%); }
+  from { opacity: 1; filter: blur(0); transform: translateX(-50%); }
+  to { opacity: 0; filter: blur(7px); transform: translateX(-50%); }
 }
 
 @keyframes beginner-intro-slot-previous-words-out {
-  from { visibility: visible; opacity: 1; filter: blur(0); transform: translateY(-50%); }
-  to { visibility: hidden; opacity: 0; filter: blur(7px); transform: translateY(-50%); }
+  from { opacity: 1; filter: blur(0); transform: translateY(-50%); }
+  to { opacity: 0; filter: blur(7px); transform: translateY(-50%); }
 }
 
 @keyframes beginner-intro-hiragana-previous-words-out {
-  from { visibility: visible; opacity: 1; filter: blur(0); transform: translate(-50%, 0); }
-  to { visibility: hidden; opacity: 0; filter: blur(7px); transform: translate(-50%, 0); }
+  from { opacity: 1; filter: blur(0); transform: translate(-50%, 0); }
+  to { opacity: 0; filter: blur(7px); transform: translate(-50%, 0); }
 }
 
 @keyframes beginner-intro-previous-romaji-blur-out {
-  from { visibility: visible; opacity: 1; filter: blur(0); transform: translateX(-50%); }
-  to { visibility: hidden; opacity: 0; filter: blur(5px); transform: translateX(-50%); }
+  from { opacity: 1; filter: blur(0); transform: translateX(-50%); }
+  to { opacity: 0; filter: blur(5px); transform: translateX(-50%); }
 }
 
 @keyframes beginner-intro-previous-kana-park {
