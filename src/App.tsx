@@ -1317,10 +1317,6 @@ function App() {
     setCurrentIndex((index) => Math.max(0, index - 1))
   }
 
-  const openContinueStudy = () => {
-    setView('quests')
-  }
-
   const showHubChrome = view === 'dashboard'
     || view === 'quests'
     || view === 'study-tools'
@@ -1997,12 +1993,8 @@ function App() {
       <Dashboard
         learnedCount={learnedCount}
         totalCards={CARD_TOTAL}
-        onContinueStudy={openContinueStudy}
-        onOpenQuests={() => setView('quests')}
-        onOpenStudyTools={() => setView('study-tools')}
         onOpenFavoriteWords={() => setView('favorite-words')}
         onOpenAchievements={() => setView('achievements')}
-        questProgress={questProgress}
         wrongPool={wrongPool}
         progress={progress}
         furiganaOn={furiganaOn}

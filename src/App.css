@@ -7749,39 +7749,6 @@ body:has(.dashboard) {
   margin-bottom: 0.6rem;
 }
 
-/* Featured quest: a simple card on the home page. */
-.featured-quest {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin: 0.15rem 0 0.6rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-}
-
-.featured-quest-title {
-  margin: 0;
-  font-size: 1.05rem;
-}
-
-.featured-quest-cta {
-  padding: 0.5rem 1rem;
-  border: 0;
-  border-radius: 8px;
-  background: var(--amber);
-  color: #1a1926;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.featured-quest-cta:focus-visible {
-  outline: 2px solid var(--amber-light);
-  outline-offset: 2px;
-}
-
 .quest-coming-soon {
   display: grid;
   place-items: center;
@@ -8314,10 +8281,6 @@ body:has(.dashboard) {
 
   .dashboard .hero-controls {
     margin-top: 0;
-  }
-
-  .featured-quest {
-    margin-top: 0.5rem;
   }
 
   .dashboard-page-settings {

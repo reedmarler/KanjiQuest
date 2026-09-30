@@ -1,9 +1,6 @@
 ﻿import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import type { CardProgress, JlptLevel } from '../lib/types'
 import type { WrongPool } from '../lib/wrongPool'
-import { isQuestComplete, type QuestProgress } from '../lib/questProgress'
-import { QUESTS } from '../data/questCampaign'
-import { DashboardQuestCard } from './DashboardQuestCard'
 import { GENERATION_COMPLEXITIES, heroJlptForComplexity, type GenerationComplexity } from '../lib/generationComplexity'
 import { HERO_STORY_DEFINITIONS, HERO_STORY_LEVELS, getHeroStoriesForLevel } from '../data/heroStories'
 import {
@@ -353,12 +350,8 @@ interface DashboardProps {
   totalCards: number
   wrongPool: WrongPool
   progress: Record<string, CardProgress>
-  onOpenQuests: () => void
-  onOpenStudyTools: () => void
   onOpenFavoriteWords: () => void
   onOpenAchievements: () => void
-  onContinueStudy: () => void
-  questProgress: QuestProgress
   furiganaOn: boolean
   englishOn: boolean
   speechOn: boolean
@@ -374,12 +367,8 @@ interface DashboardProps {
 export function Dashboard({
   learnedCount,
   totalCards,
-  onOpenQuests,
-  onOpenStudyTools,
   onOpenFavoriteWords,
   onOpenAchievements: _onOpenAchievements,
-  onContinueStudy,
-  questProgress,
   wrongPool,
   progress,
   furiganaOn,
@@ -488,9 +477,7 @@ export function Dashboard({
 
   // Numbers for the next-quest card's quiet stat strip; the card derives the
   // quest itself and its step standing from questProgress.
-  const questsCleared = QUESTS.filter((quest) => isQuestComplete(questProgress, quest.id)).length
   const progressPct = totalCards > 0 ? Math.round((learnedCount / totalCards) * 100) : 0
-  const wrongCount = Object.keys(wrongPool).length
   const furiganaActive = furiganaOn
 
   useEffect(() => {
@@ -906,15 +893,6 @@ export function Dashboard({
         </section>
       )}
 
-      <DashboardQuestCard
-        questProgress={questProgress}
-        progressPct={progressPct}
-        questsCleared={questsCleared}
-        wrongCount={wrongCount}
-        onContinueStudy={onContinueStudy}
-        onOpenQuests={onOpenQuests}
-        onOpenStudyTools={onOpenStudyTools}
-      />
     </div>
   )
 }
