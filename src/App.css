@@ -1738,6 +1738,7 @@ body:has(.beginner-word-writing-card) .app,
   --intro-next-width: 12.15rem;
   --intro-next-height: 3.6rem;
   --intro-next-rest-y: 0rem;
+  --intro-opening-next-y: 1.7rem;
   --intro-yes-scale: 1.453333;
   gap: 0.4rem;
   width: var(--intro-next-width);
@@ -1750,18 +1751,20 @@ body:has(.beginner-word-writing-card) .app,
   color: #1c1420;
   font-size: 1.44rem;
   box-shadow: 0 0.55rem 1.35rem color-mix(in srgb, var(--sakura) 18%, transparent);
-  transform: translateY(var(--intro-next-rest-y));
-  transition: width var(--intro-opening-move-duration) linear, height var(--intro-opening-move-duration) linear, font-size var(--intro-opening-move-duration) linear, transform var(--intro-opening-move-duration) linear;
+  translate: 0 var(--intro-next-rest-y);
+  transition: width var(--intro-opening-move-duration) linear, height var(--intro-opening-move-duration) linear, font-size var(--intro-opening-move-duration) linear, transform var(--intro-opening-move-duration) linear, translate var(--intro-opening-move-duration) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-next.is-yes {
   --intro-yes-y: 0.816rem;
-  transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
+  translate: 0 var(--intro-yes-y);
+  transform: scale(var(--intro-yes-scale));
   transform-origin: center;
   transition: none;
 }
 
 .beginner-intro-next.is-shrinking {
+  translate: 0 var(--intro-opening-next-y);
   pointer-events: none;
 }
 
@@ -2414,8 +2417,8 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-guide.is-simple {
-    margin-top: -0.85rem;
-    margin-bottom: -0.35rem;
+    margin-top: 0;
+    margin-bottom: 0;
     transform: translateY(-1.2rem);
   }
 
@@ -2480,7 +2483,7 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-lesson.is-welcome { min-height: 22rem; }
-  .beginner-intro-lesson.is-simple { min-height: 24.9rem; }
+  .beginner-intro-lesson.is-simple { min-height: 22rem; }
   .beginner-intro-lesson.is-systems,
   .beginner-intro-lesson.is-katakana-reveal,
   .beginner-intro-lesson.is-kanji-reveal {
