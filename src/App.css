@@ -2474,7 +2474,7 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-lesson.is-welcome { min-height: 22rem; }
-  .beginner-intro-lesson.is-simple { min-height: 21rem; }
+  .beginner-intro-lesson.is-simple { min-height: 23.235rem; }
   .beginner-intro-lesson.is-systems,
   .beginner-intro-lesson.is-katakana-reveal,
   .beginner-intro-lesson.is-kanji-reveal {
