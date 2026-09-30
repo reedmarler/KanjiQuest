@@ -418,6 +418,7 @@ body:has(.beginner-word-writing-card) .app,
   gap: 1.1rem;
   width: 100%;
   min-height: 22rem;
+  transition: min-height var(--intro-opening-move-duration) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .beginner-intro-lesson.is-welcome,
