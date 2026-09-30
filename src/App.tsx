@@ -812,7 +812,7 @@ function BeginnerZone({
           )}
         </section>
 
-        <footer className={`beginner-intro-controls${introStep > 0 ? ' is-lowered' : ''}${displayIntroStep === 1 ? ' is-simple' : ''}`}>
+        <footer className={`beginner-intro-controls${introStep > 0 ? ' is-lowered' : ''}`}>
           <div>
             {isFinalStep ? (
               <button type="button" className="beginner-intro-replay" onClick={() => goToIntroStep(0)} aria-label="Replay introduction">
