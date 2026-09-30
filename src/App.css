@@ -533,8 +533,8 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-katakana,
 .beginner-intro-empty-wheel.is-kanji {
-  --intro-reveal-panel-offset-x: 8.66px;
-  --intro-reveal-panel-offset-y: -5px;
+  --intro-reveal-panel-offset-x: 0px;
+  --intro-reveal-panel-offset-y: 10px;
   --intro-hiragana-outline-width: 8.5rem;
   --intro-hiragana-panel-gutter: 15px;
   --intro-expanded-wheel-size: min(
@@ -1125,6 +1125,10 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-wheel-rotor {
   animation: beginner-intro-wheel-switch-rotate var(--intro-switch-duration) linear both;
+}
+
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-wheel-rotor {
+  animation-name: beginner-intro-wheel-switch-rotate-panel;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-previous-slot {
@@ -1860,6 +1864,21 @@ body:has(.beginner-word-writing-card) .app,
   }
 }
 
+@keyframes beginner-intro-wheel-switch-rotate-panel {
+  0%, 30.03% {
+    --intro-wheel-angle: 0deg;
+    --intro-wheel-counter-angle: 0deg;
+  }
+  44.69%, 75.27% {
+    --intro-wheel-angle: 120deg;
+    --intro-wheel-counter-angle: -120deg;
+  }
+  75.28%, to {
+    --intro-wheel-angle: 0deg;
+    --intro-wheel-counter-angle: 0deg;
+  }
+}
+
 @keyframes beginner-intro-speech-katakana-reveal {
   0% { opacity: 1; filter: blur(0); }
   6.4%, 72.34% { opacity: 0.12; filter: blur(8px); }
@@ -2428,7 +2447,8 @@ body:has(.beginner-word-writing-card) .app,
   }
 
   .beginner-intro-guide.is-simple,
-  .beginner-intro-guide.is-systems {
+  .beginner-intro-guide.is-systems,
+  .beginner-intro-guide.is-kanji-reveal {
     margin-top: -0.85rem;
     margin-bottom: -0.35rem;
   }

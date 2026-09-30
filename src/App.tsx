@@ -647,7 +647,7 @@ function BeginnerZone({
       ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
       : step
     const speechDisplayStep = BEGINNER_INTRO_STEPS[introSpeechDisplayStep]
-    const guideStep = displayIntroStep === 3 || displayIntroStep === 4
+    const guideStep = displayIntroStep === 3
       ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
       : (introOpeningPreview && introStep === 0 && !introOpeningShrinking
           ? BEGINNER_INTRO_STEPS[0]
