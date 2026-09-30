@@ -647,7 +647,7 @@ function BeginnerZone({
       ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
       : step
     const speechDisplayStep = BEGINNER_INTRO_STEPS[introSpeechDisplayStep]
-    const guideStep = displayIntroStep === 3
+    const guideStep = displayIntroStep === 3 || displayIntroStep === 4
       ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
       : (introOpeningPreview && introStep === 0 && !introOpeningShrinking
           ? BEGINNER_INTRO_STEPS[0]
@@ -836,7 +836,7 @@ function BeginnerZone({
                 disabled={introTransitioning}
               >
                 <IntroBlurSwapText
-                  text={introTransitioning ? 'Completing the wheel...' : introOpeningPreview ? 'Next' : introStep === 0 ? 'Yes!' : introStep < 4 ? 'Next' : 'Complete the wheel'}
+                  text={introOpeningPreview || introStep > 0 ? 'Next' : 'Yes!'}
                   animate={displayIntroStep <= 1}
                   durationMs={introOpeningPreview && introStep <= 1 ? INTRO_OPENING_MOVE_CSS_MS : 1400}
                   animationSpeed={introAnimationSpeed}
