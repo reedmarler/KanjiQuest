@@ -532,6 +532,7 @@ body:has(.beginner-word-writing-card) .app,
 
 .beginner-intro-empty-wheel.is-katakana,
 .beginner-intro-empty-wheel.is-kanji {
+  --intro-reveal-panel-offset-y: -20px;
   --intro-hiragana-outline-width: 8.5rem;
   --intro-hiragana-panel-gutter: 15px;
   --intro-expanded-wheel-size: min(
@@ -2060,7 +2061,7 @@ body:has(.beginner-word-writing-card) .app,
   }
   75.28%, to {
     z-index: 5;
-    top: 50%;
+    top: calc(50% + var(--intro-reveal-panel-offset-y));
     left: 50%;
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-height);
@@ -2517,6 +2518,7 @@ body:has(.beginner-word-writing-card) .app,
   .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) {
     --intro-hiragana-outline-width: 8.5rem;
     --intro-hiragana-panel-gutter: 15px;
+    --intro-expanded-wheel-height: calc(18rem + 90px);
     --intro-previous-expanded-wheel-size: min(
       calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
       82.5dvw
