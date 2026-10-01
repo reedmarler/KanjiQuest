@@ -232,6 +232,21 @@ function renderBeginnerIntroExampleWord(word: {
   meaningPrefix?: string
   romaji: string
 }, interactive = true, showAudio = true): ReactNode {
+  const audioControl = word.kana && showAudio && (interactive ? (
+    <button
+      type="button"
+      className="beginner-intro-example-speaker"
+      onClick={() => speakJapanese(word.kana ?? '', { beginnerRecordingKind: 'word' })}
+      aria-label={`Play ${word.kana}`}
+    >
+      <Volume2 aria-hidden="true" />
+    </button>
+  ) : (
+    <span className="beginner-intro-example-speaker" aria-hidden="true">
+      <Volume2 />
+    </span>
+  ))
+
   return (
     <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
       {word.kana && (
@@ -250,6 +265,7 @@ function renderBeginnerIntroExampleWord(word: {
                   <rt>{word.readingParts?.[index]}</rt>
                 </ruby>
               ))}
+              {audioControl}
             </span>
           ) : word.reading ? (
             <ruby>
@@ -265,20 +281,6 @@ function renderBeginnerIntroExampleWord(word: {
       <small>
         {word.meaningPrefix && <span className="beginner-intro-example-meaning-prefix">{word.meaningPrefix}</span>}
         <span className="beginner-intro-example-meaning">{word.romaji}</span>
-        {word.kana && showAudio && (interactive ? (
-          <button
-            type="button"
-            className="beginner-intro-example-speaker"
-            onClick={() => speakJapanese(word.kana ?? '', { beginnerRecordingKind: 'word' })}
-            aria-label={`Play ${word.kana}`}
-          >
-            <Volume2 aria-hidden="true" />
-          </button>
-        ) : (
-          <span className="beginner-intro-example-speaker" aria-hidden="true">
-            <Volume2 />
-          </span>
-        ))}
       </small>
     </span>
   )

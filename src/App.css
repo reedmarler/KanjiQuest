@@ -1056,25 +1056,33 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-kana-speaker {
   position: absolute;
   z-index: 2;
-  top: calc(50% + 0.55rem);
-  left: calc(50% + 5.15rem);
-  width: 2rem;
-  height: 2rem;
-  border: 1px solid color-mix(in srgb, var(--intro-reveal-accent) 72%, #fff);
-  border-radius: 50%;
+  top: 3.42rem;
+  left: calc(50% - 0.42rem);
+  width: var(--intro-hiragana-outline-width, 15rem);
+  height: calc(50% + 0.14rem);
   opacity: 0;
-  box-shadow: 0 0 0.55rem color-mix(in srgb, var(--intro-reveal-accent) 22%, transparent);
+  transform: translateX(-50%);
 }
 
 .beginner-intro-kana-speaker svg {
+  position: absolute;
+  right: 0.72rem;
+  bottom: 0.42rem;
+  box-sizing: content-box;
   width: 1.05rem;
   height: 1.05rem;
+  padding: 0.42rem;
+  border: 1px solid color-mix(in srgb, var(--intro-reveal-accent) 72%, #fff);
+  border-radius: 50%;
+  box-shadow: 0 0 0.55rem color-mix(in srgb, var(--intro-reveal-accent) 22%, transparent);
 }
 
 .beginner-intro-example-speaker {
   flex: 0 0 auto;
   width: 1.35rem;
   height: 1.35rem;
+  margin-left: 0.32rem;
+  align-self: flex-end;
 }
 
 .beginner-intro-example-speaker svg {
