@@ -498,8 +498,10 @@ body:has(.beginner-zone--intro) {
   --intro-previous-expanded-wheel-size: var(--intro-expanded-wheel-size);
   --intro-previous-expanded-wheel-height: var(--intro-expanded-wheel-height);
   --intro-previous-expanded-wheel-radius: var(--intro-expanded-wheel-radius);
-  --intro-previous-shrink-left: 50%;
-  --intro-previous-shrink-translate-x: -50%;
+  --intro-previous-start-top: calc(50% + var(--intro-previous-panel-offset-y));
+  --intro-previous-start-left: 50%;
+  --intro-reveal-final-top: calc(50% - 5px);
+  --intro-reveal-final-left: calc(50% + 8.66px);
   --intro-switch-duration: calc(4414 * var(--intro-time-unit));
   --intro-reveal-accent: var(--sakura-light);
   --intro-reveal-base: var(--sakura);
@@ -569,8 +571,9 @@ body:has(.beginner-zone--intro) {
   --intro-reveal-base: #c78b32;
   --intro-previous-accent: #70cfe0;
   --intro-previous-base: #4ba5c9;
-  --intro-previous-shrink-left: calc(50% - min(calc(4.25rem + 17px), 41.25dvw));
-  --intro-previous-shrink-translate-x: 0%;
+  --intro-previous-start-top: calc(50% - 5px);
+  --intro-previous-start-left: calc(50% + 8.66px);
+  --intro-reveal-final-left: calc(50% - 8.66px);
 }
 
 .beginner-intro-empty-slot {
@@ -1167,6 +1170,12 @@ body:has(.beginner-zone--intro) {
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-wheel-rotor {
   animation-name: beginner-intro-wheel-switch-rotate-panel;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-switching .beginner-intro-wheel-rotor {
+  --intro-wheel-angle: 120deg;
+  --intro-wheel-counter-angle: -120deg;
+  animation-name: beginner-intro-wheel-switch-rotate-kanji;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-previous-slot {
@@ -1913,6 +1922,17 @@ body:has(.beginner-zone--intro) {
   }
 }
 
+@keyframes beginner-intro-wheel-switch-rotate-kanji {
+  0%, 30.03% {
+    --intro-wheel-angle: 120deg;
+    --intro-wheel-counter-angle: -120deg;
+  }
+  44.69%, to {
+    --intro-wheel-angle: 240deg;
+    --intro-wheel-counter-angle: -240deg;
+  }
+}
+
 @keyframes beginner-intro-speech-katakana-reveal {
   0% { opacity: 1; filter: blur(0); }
   6.4%, 72.34% { opacity: 0.12; filter: blur(8px); }
@@ -1977,8 +1997,8 @@ body:has(.beginner-zone--intro) {
 
 @keyframes beginner-intro-slot-switch-previous {
   0%, 6.4% {
-    top: calc(50% + var(--intro-previous-panel-offset-y));
-    left: var(--intro-previous-shrink-left);
+    top: var(--intro-previous-start-top);
+    left: var(--intro-previous-start-left);
     width: var(--intro-previous-expanded-wheel-size);
     height: var(--intro-previous-expanded-wheel-height);
     border-radius: var(--intro-previous-expanded-wheel-radius);
@@ -1987,11 +2007,11 @@ body:has(.beginner-zone--intro) {
     box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
     opacity: 1;
     filter: blur(0);
-    transform: translate(var(--intro-previous-shrink-translate-x), -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   17.8% {
     top: 50%;
-    left: var(--intro-previous-shrink-left);
+    left: 50%;
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
@@ -2000,7 +2020,7 @@ body:has(.beginner-zone--intro) {
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
-    transform: translate(var(--intro-previous-shrink-translate-x), -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   30.03% {
     top: 2px;
@@ -2116,8 +2136,8 @@ body:has(.beginner-zone--intro) {
   }
   75.28%, to {
     z-index: 5;
-    top: calc(50% - 5px);
-    left: calc(50% + 8.66px);
+    top: var(--intro-reveal-final-top);
+    left: var(--intro-reveal-final-left);
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-height);
     border-radius: var(--intro-expanded-wheel-radius);
