@@ -1364,9 +1364,10 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel.is-switching .is-previous-slot {
+  overflow: hidden;
   animation:
     beginner-intro-slot-switch-previous var(--intro-switch-duration) linear both,
-    beginner-intro-background-cube-out var(--intro-switch-duration) linear both;
+    beginner-intro-returned-cube-cycle var(--intro-switch-duration) linear both;
   z-index: 4;
 }
 
@@ -1403,7 +1404,7 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-previous-slot {
   animation:
     beginner-intro-slot-switch-previous var(--intro-switch-duration) linear both,
-    beginner-intro-background-cube-out var(--intro-switch-duration) linear both;
+    beginner-intro-returned-cube-cycle var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-wheel-slot:not(.is-reveal-slot):not(.is-previous-slot) {
@@ -1441,7 +1442,12 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-slot-previous-kana::before {
-  animation: beginner-intro-hiragana-outline-out calc(282.5 * var(--intro-time-unit)) linear both;
+  animation: beginner-intro-hiragana-outline-out calc(180 * var(--intro-time-unit)) linear both;
+}
+
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words,
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words > span {
+  white-space: nowrap;
 }
 
 .beginner-intro-empty-wheel.is-revealing .is-reveal-slot .beginner-intro-slot-question {
@@ -1537,15 +1543,15 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-label {
-  animation: beginner-intro-slot-previous-label-out calc(282.5 * var(--intro-time-unit)) linear both;
+  animation: beginner-intro-slot-previous-label-out calc(180 * var(--intro-time-unit)) linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-progress {
-  animation: beginner-intro-slot-previous-label-out calc(282.5 * var(--intro-time-unit)) linear both;
+  animation: beginner-intro-slot-previous-label-out calc(180 * var(--intro-time-unit)) linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words {
-  animation: beginner-intro-slot-previous-words-out calc(282.5 * var(--intro-time-unit)) linear both;
+  animation: beginner-intro-slot-previous-words-out calc(180 * var(--intro-time-unit)) linear both;
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-slot-previous-words {
@@ -1553,7 +1559,7 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-kana small {
-  animation: beginner-intro-previous-romaji-blur-out calc(282.5 * var(--intro-time-unit)) linear both;
+  animation: beginner-intro-previous-romaji-blur-out calc(180 * var(--intro-time-unit)) linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-kana {
@@ -2173,14 +2179,17 @@ body:has(.beginner-zone--intro) {
 @keyframes beginner-intro-wheel-backdrop-switch-katakana {
   0%, 6% { opacity: 0; }
   22%, 36.8% {
+    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
     --intro-slice-katakana: color-mix(in srgb, #4ba5c9 18%, var(--surface-2));
     opacity: 1;
   }
   36.9%, 72% {
+    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
     --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
     opacity: 1;
   }
   86%, to {
+    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
     --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
     opacity: 0;
   }
@@ -2189,14 +2198,20 @@ body:has(.beginner-zone--intro) {
 @keyframes beginner-intro-wheel-backdrop-switch-kanji {
   0%, 6% { opacity: 0; }
   22%, 36.8% {
+    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
+    --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
     --intro-slice-kanji: color-mix(in srgb, #c78b32 18%, var(--surface-2));
     opacity: 1;
   }
   36.9%, 72% {
+    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
+    --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
     --intro-slice-kanji: color-mix(in srgb, #c78b32 62%, var(--surface-2));
     opacity: 1;
   }
   86%, to {
+    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
+    --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
     --intro-slice-kanji: color-mix(in srgb, #c78b32 62%, var(--surface-2));
     opacity: 0;
   }
@@ -2209,6 +2224,13 @@ body:has(.beginner-zone--intro) {
 
 @keyframes beginner-intro-background-cube-out {
   0%, 63.04% { opacity: 1; }
+  69%, to { opacity: 0; }
+}
+
+@keyframes beginner-intro-returned-cube-cycle {
+  0%, 17.8% { opacity: 1; }
+  22%, 40% { opacity: 0; }
+  46%, 63.04% { opacity: 1; }
   69%, to { opacity: 0; }
 }
 
