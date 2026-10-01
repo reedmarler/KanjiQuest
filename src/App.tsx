@@ -219,13 +219,14 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     romaji: 'yama',
     heading: 'Example:',
     words: [
-      { kana: '山', readingParts: ['yama'], visualCue: { icon: '🗻', suffix: '➡️' }, meaningPrefix: '(looks like a)', romaji: 'mountain' },
+      { kana: '山', spokenKana: 'やま', readingParts: ['yama'], visualCue: { icon: '🗻', suffix: '➡️' }, meaningPrefix: '(looks like a)', romaji: 'mountain' },
     ],
   },
 } as const
 
 function renderBeginnerIntroExampleWord(word: {
   kana?: string
+  spokenKana?: string
   reading?: string
   readingParts?: readonly string[]
   visualCue?: { icon: string; suffix?: string }
@@ -236,7 +237,7 @@ function renderBeginnerIntroExampleWord(word: {
     <button
       type="button"
       className="beginner-intro-example-speaker"
-      onClick={() => speakJapanese(word.kana ?? '', { beginnerRecordingKind: 'word' })}
+      onClick={() => speakJapanese(word.spokenKana ?? word.kana ?? '', { beginnerRecordingKind: 'word' })}
       aria-label={`Play ${word.kana}`}
     >
       <Volume2 aria-hidden="true" />
@@ -764,7 +765,7 @@ function BeginnerZone({
                             </span>
                             <span className="beginner-intro-slot-previous-words is-hiragana-examples">
                               <b>{content.heading}</b>
-                              {content.words.map((word) => renderBeginnerIntroExampleWord(word, false, item.id !== 'kanji'))}
+                              {content.words.map((word) => renderBeginnerIntroExampleWord(word, false))}
                             </span>
                           </span>
                         ) : isRevealSlot ? (
@@ -774,12 +775,15 @@ function BeginnerZone({
                             <span key="slot-glyph" className="beginner-intro-slot-hiragana" lang="ja">
                               <small lang="en">{content.romaji}</small>
                               <span>{content.mark}</span>
-                              {item.id === 'hiragana' && introStep >= 2 && (
+                              {introStep >= 2 && (
                                 <button
                                   type="button"
                                   className="beginner-intro-kana-speaker"
-                                  onClick={() => speakJapanese(content.mark, { rate: 0.5, beginnerRecordingKind: 'kana' })}
-                                  aria-label="Play the sound for あ"
+                                  onClick={() => speakJapanese(item.id === 'kanji' ? 'やま' : content.mark, {
+                                    rate: 0.5,
+                                    beginnerRecordingKind: item.id === 'kanji' ? 'word' : 'kana',
+                                  })}
+                                  aria-label={`Play the sound for ${content.mark}`}
                                 >
                                   <Volume2 aria-hidden="true" />
                                 </button>
@@ -787,7 +791,7 @@ function BeginnerZone({
                             </span>
                             <span className="beginner-intro-slot-words is-hiragana-examples">
                               <b>{content.heading}</b>
-                              {content.words.map((word) => renderBeginnerIntroExampleWord(word, introStep >= 2, item.id !== 'kanji'))}
+                              {content.words.map((word) => renderBeginnerIntroExampleWord(word, introStep >= 2))}
                             </span>
                           </>
                         ) : (
@@ -796,6 +800,11 @@ function BeginnerZone({
                       </span>
                     )
                   })}
+                  <div className="beginner-intro-wheel-center-copy" aria-hidden="true">
+                    <span className="is-kanji">山</span>
+                    <span className="is-hiragana">の</span>
+                    <span className="is-katakana">ホテル</span>
+                  </div>
                 </div>
               </div>
             )}

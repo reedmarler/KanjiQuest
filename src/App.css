@@ -614,20 +614,20 @@ body:has(.beginner-zone--intro) {
 
 .beginner-intro-empty-slot.is-slot-hiragana {
   --intro-node-accent: var(--sakura-light);
-  --intro-slot-start-top: 27%;
-  --intro-slot-start-left: 10.16%;
+  --intro-slot-start-top: 2%;
+  --intro-slot-start-left: 50%;
 }
 
 .beginner-intro-empty-slot.is-slot-katakana {
   --intro-node-accent: #70cfe0;
-  --intro-slot-start-top: 27%;
-  --intro-slot-start-left: 89.84%;
+  --intro-slot-start-top: 74%;
+  --intro-slot-start-left: 94%;
 }
 
 .beginner-intro-empty-slot.is-slot-kanji {
   --intro-node-accent: #FED269;
-  --intro-slot-start-top: 96%;
-  --intro-slot-start-left: 50%;
+  --intro-slot-start-top: 74%;
+  --intro-slot-start-left: 6%;
 }
 
 .beginner-intro-empty-slot.is-wheel-slot {
@@ -649,6 +649,10 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-empty-slot.is-script-kanji {
   border-color: color-mix(in srgb, #FED269 80%, var(--border));
   background: color-mix(in srgb, #FED269 24%, var(--surface-2));
+}
+
+.beginner-intro-empty-slot:is(.is-script-katakana, .is-script-kanji):not(.is-reveal-slot):not(.is-previous-slot) {
+  filter: grayscale(1);
 }
 
 .beginner-intro-empty-slot.is-wheel-slot .beginner-intro-slot-hiragana > span {
@@ -939,6 +943,7 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-segmented-ruby {
+  position: relative;
   display: inline-flex;
   align-items: end;
   transform: translateY(-6px);
@@ -968,7 +973,7 @@ body:has(.beginner-zone--intro) {
   display: grid;
   width: max-content;
   max-width: 100%;
-  grid-template-columns: max-content 2.2rem max-content;
+  grid-template-columns: max-content 2.2rem max-content 0.95rem;
   align-items: end;
   justify-content: center;
   justify-items: center;
@@ -1011,6 +1016,13 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-example-meaning {
   grid-column: 3;
   justify-self: center;
+}
+
+.beginner-intro-empty-wheel.is-kanji .beginner-intro-example-speaker {
+  position: static;
+  grid-column: 4;
+  align-self: end;
+  margin-left: 0.25rem;
 }
 
 .beginner-intro-example-meaning-prefix {
@@ -1069,25 +1081,26 @@ body:has(.beginner-zone--intro) {
   right: 0.72rem;
   bottom: 0.42rem;
   box-sizing: content-box;
-  width: 1.05rem;
-  height: 1.05rem;
-  padding: 0.42rem;
+  width: 0.74rem;
+  height: 0.74rem;
+  padding: 0.29rem;
   border: 1px solid color-mix(in srgb, var(--intro-reveal-accent) 72%, #fff);
   border-radius: 50%;
   box-shadow: 0 0 0.55rem color-mix(in srgb, var(--intro-reveal-accent) 22%, transparent);
 }
 
 .beginner-intro-example-speaker {
-  flex: 0 0 auto;
-  width: 1.35rem;
-  height: 1.35rem;
-  margin-left: 0.32rem;
-  align-self: flex-end;
+  position: absolute;
+  bottom: 0.05rem;
+  left: 100%;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-left: 0.25rem;
 }
 
 .beginner-intro-example-speaker svg {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 0.8rem;
+  height: 0.8rem;
   stroke-width: 2.25;
 }
 
@@ -1099,6 +1112,10 @@ button.beginner-intro-example-speaker:focus-visible {
 
 .beginner-intro-empty-wheel.is-revealing .is-reveal-slot .beginner-intro-kana-speaker {
   animation: beginner-intro-romaji-in calc(282.5 * var(--intro-time-unit)) calc(2575 * var(--intro-time-unit)) linear forwards;
+}
+
+.beginner-intro-empty-wheel.is-switching .is-reveal-slot .beginner-intro-kana-speaker {
+  animation: beginner-intro-katakana-romaji-in var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type i,
@@ -1362,9 +1379,9 @@ button.beginner-intro-example-speaker:focus-visible {
   --intro-slice-hiragana-muted: color-mix(in srgb, var(--sakura) 6%, var(--intro-slice-muted));
   --intro-slice-katakana-muted: color-mix(in srgb, #4ba5c9 7%, var(--intro-slice-muted));
   --intro-slice-kanji-muted: color-mix(in srgb, #FED269 5%, var(--intro-slice-muted));
-  --intro-slice-hiragana: var(--intro-slice-hiragana-muted);
-  --intro-slice-katakana: var(--intro-slice-katakana-muted);
-  --intro-slice-kanji: var(--intro-slice-kanji-muted);
+  --intro-slice-hiragana: var(--sakura);
+  --intro-slice-katakana: #70cfe0;
+  --intro-slice-kanji: #FED269;
   --intro-wheel-angle: 0deg;
   --intro-wheel-counter-angle: 0deg;
   position: absolute;
@@ -1381,6 +1398,10 @@ button.beginner-intro-example-speaker:focus-visible {
   animation: beginner-intro-wheel-initial-counter-spin calc(900 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both;
 }
 
+.beginner-intro-empty-wheel.is-hiragana:not(.is-revealing) .beginner-intro-wheel-center-copy {
+  animation: beginner-intro-wheel-initial-counter-spin calc(900 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both;
+}
+
 .beginner-intro-wheel-rotor::before {
   content: '';
   position: absolute;
@@ -1394,6 +1415,8 @@ button.beginner-intro-example-speaker:focus-visible {
     var(--intro-slice-kanji) 120deg 240deg,
     var(--intro-slice-hiragana) 240deg 360deg
   );
+  -webkit-mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
+  mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
   pointer-events: none;
 }
 
@@ -1412,7 +1435,57 @@ button.beginner-intro-example-speaker:focus-visible {
     var(--intro-wheel-line) 240deg 240.5deg,
     transparent 240.5deg 360deg
   );
+  -webkit-mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
+  mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
   pointer-events: none;
+}
+
+.beginner-intro-wheel-center-copy {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 43%;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bg) 94%, #000);
+  box-shadow: inset 0 0 1.4rem rgba(0, 0, 0, 0.38);
+  color: #fff;
+  font: 800 1.18rem/1 'Noto Sans JP', sans-serif;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.beginner-intro-wheel-center-copy > span {
+  position: relative;
+  padding-bottom: 0.32rem;
+}
+
+.beginner-intro-wheel-center-copy > span::after {
+  content: '';
+  position: absolute;
+  right: 0.08rem;
+  bottom: 0;
+  left: 0.08rem;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.beginner-intro-wheel-center-copy .is-hiragana { color: var(--sakura-light); }
+.beginner-intro-wheel-center-copy .is-katakana { color: #70cfe0; }
+.beginner-intro-wheel-center-copy .is-kanji { color: #FED269; }
+
+.beginner-intro-empty-wheel.is-revealing .beginner-intro-wheel-center-copy {
+  animation: beginner-intro-wheel-backdrop-first-reveal var(--intro-first-reveal-duration) linear both;
+}
+
+.beginner-intro-empty-wheel.is-switching .beginner-intro-wheel-center-copy {
+  animation: beginner-intro-wheel-backdrop-switch var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-wheel-rotor::before,
@@ -1508,7 +1581,8 @@ button.beginner-intro-example-speaker:focus-visible {
   .beginner-intro-slot-label,
   .beginner-intro-slot-progress,
   .beginner-intro-slot-words,
-  .beginner-intro-slot-hiragana small
+  .beginner-intro-slot-hiragana small,
+  .beginner-intro-kana-speaker
 ) {
   animation: beginner-intro-final-content-out calc(220 * var(--intro-time-unit)) linear both;
 }
@@ -2279,18 +2353,8 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 @keyframes beginner-intro-wheel-backdrop-first-reveal {
-  0%, 12% {
-    --intro-slice-hiragana: var(--intro-slice-hiragana-muted);
-    opacity: 1;
-  }
-  6%, 18%, 82% {
-    --intro-slice-hiragana: var(--sakura);
-    opacity: 1;
-  }
-  98%, to {
-    --intro-slice-hiragana: var(--sakura);
-    opacity: 0;
-  }
+  0%, 82% { opacity: 1; }
+  98%, to { opacity: 0; }
 }
 
 @keyframes beginner-intro-wheel-backdrop-switch {
@@ -2300,42 +2364,15 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 @keyframes beginner-intro-wheel-backdrop-switch-katakana {
-  0%, 22%, 27% {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: var(--intro-slice-katakana-muted);
-    opacity: 1;
-  }
-  24.5%, 29.5%, 72% {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: #70cfe0;
-    opacity: 1;
-  }
-  86%, to {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: #70cfe0;
-    opacity: 0;
-  }
+  0%, 6% { opacity: 0; }
+  22%, 72% { opacity: 1; }
+  86%, to { opacity: 0; }
 }
 
 @keyframes beginner-intro-wheel-backdrop-switch-kanji {
-  0%, 22%, 27% {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: #70cfe0;
-    --intro-slice-kanji: var(--intro-slice-kanji-muted);
-    opacity: 1;
-  }
-  24.5%, 29.5%, 72% {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: #70cfe0;
-    --intro-slice-kanji: #FED269;
-    opacity: 1;
-  }
-  86%, to {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: #70cfe0;
-    --intro-slice-kanji: #FED269;
-    opacity: 0;
-  }
+  0%, 6% { opacity: 0; }
+  22%, 72% { opacity: 1; }
+  86%, to { opacity: 0; }
 }
 
 @keyframes beginner-intro-first-background-cube-out {
@@ -2474,7 +2511,7 @@ button.beginner-intro-example-speaker:focus-visible {
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
-    filter: blur(0);
+    filter: grayscale(1);
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   19.6%, 30.03% {
@@ -2488,7 +2525,7 @@ button.beginner-intro-example-speaker:focus-visible {
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
-    filter: blur(0);
+    filter: grayscale(1);
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   44.69% {
@@ -2502,7 +2539,7 @@ button.beginner-intro-example-speaker:focus-visible {
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
-    filter: blur(0);
+    filter: grayscale(1);
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   44.7% {
@@ -2516,7 +2553,7 @@ button.beginner-intro-example-speaker:focus-visible {
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-reveal-base) 18%, transparent);
     opacity: 1;
-    filter: blur(0);
+    filter: grayscale(1);
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   51.04% {
@@ -2530,7 +2567,7 @@ button.beginner-intro-example-speaker:focus-visible {
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-reveal-base) 18%, transparent);
     opacity: 1;
-    filter: blur(0);
+    filter: grayscale(1);
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   59.04% {
@@ -2544,7 +2581,7 @@ button.beginner-intro-example-speaker:focus-visible {
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
-    filter: blur(0);
+    filter: grayscale(1);
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   75.28%, to {
@@ -3187,13 +3224,15 @@ button.beginner-intro-example-speaker:focus-visible {
 
   .beginner-intro-speech-copy,
   .beginner-intro-empty-wheel .beginner-intro-wheel-rotor,
+  .beginner-intro-wheel-center-copy,
   .beginner-intro-empty-wheel .beginner-intro-wheel-rotor::before,
   .beginner-intro-empty-wheel .beginner-intro-wheel-rotor::after {
     animation: none;
   }
 
   .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-rotor::before,
-  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-rotor::after {
+  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-rotor::after,
+  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-center-copy {
     opacity: 0;
   }
 
