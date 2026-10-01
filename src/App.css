@@ -966,10 +966,13 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-segmented-ruby,
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type > small {
   display: grid;
-  width: 100%;
-  grid-template-columns: minmax(0, 1fr) 2.2rem minmax(0, 1fr);
+  width: max-content;
+  max-width: 100%;
+  grid-template-columns: max-content 2.2rem max-content;
   align-items: end;
+  justify-content: center;
   justify-items: center;
+  column-gap: 0.24rem;
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-example-cue {
@@ -1353,7 +1356,9 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel.is-switching .is-previous-slot {
-  animation: beginner-intro-slot-switch-previous var(--intro-switch-duration) linear both;
+  animation:
+    beginner-intro-slot-switch-previous var(--intro-switch-duration) linear both,
+    beginner-intro-background-cube-out var(--intro-switch-duration) linear both;
   z-index: 4;
 }
 
@@ -1362,15 +1367,9 @@ body:has(.beginner-zone--intro) {
   z-index: 1;
 }
 
-.beginner-intro-empty-wheel.is-revealing .is-slot-right,
-.beginner-intro-empty-wheel.is-revealing .is-slot-left {
+.beginner-intro-empty-wheel.is-revealing .is-wheel-slot:not(.is-reveal-slot) {
   z-index: 1;
-  animation: none;
-}
-
-.beginner-intro-empty-wheel.is-hiragana.is-revealing .is-slot-right,
-.beginner-intro-empty-wheel.is-hiragana.is-revealing .is-slot-left {
-  animation: beginner-intro-slot-fade-under-expanded var(--intro-first-reveal-duration) linear both;
+  animation: beginner-intro-first-background-cube-out var(--intro-first-reveal-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .is-slot-right {
@@ -1394,7 +1393,13 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-previous-slot {
-  animation: beginner-intro-slot-switch-previous var(--intro-switch-duration) linear both;
+  animation:
+    beginner-intro-slot-switch-previous var(--intro-switch-duration) linear both,
+    beginner-intro-background-cube-out var(--intro-switch-duration) linear both;
+}
+
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-wheel-slot:not(.is-reveal-slot):not(.is-previous-slot) {
+  animation: beginner-intro-background-cube-out var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-reveal-slot {
@@ -2141,52 +2146,62 @@ body:has(.beginner-zone--intro) {
     --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 18%, var(--surface-2));
     opacity: 1;
   }
-  6%, 18%, 30%, 76% {
+  6%, 18%, 30%, 82% {
     --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
     opacity: 1;
   }
-  90%, to {
+  98%, to {
     --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
     opacity: 0;
   }
 }
 
 @keyframes beginner-intro-wheel-backdrop-switch {
-  0%, 19.6% { opacity: 0; }
-  31%, 62.34% { opacity: 1; }
-  72.34%, to { opacity: 0; }
+  0%, 6% { opacity: 0; }
+  22%, 72% { opacity: 1; }
+  86%, to { opacity: 0; }
 }
 
 @keyframes beginner-intro-wheel-backdrop-switch-katakana {
-  0%, 19.6% { opacity: 0; }
-  31%, 36.8% {
+  0%, 6% { opacity: 0; }
+  22%, 36.8% {
     --intro-slice-katakana: color-mix(in srgb, #4ba5c9 18%, var(--surface-2));
     opacity: 1;
   }
-  36.9%, 62.34% {
+  36.9%, 72% {
     --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
     opacity: 1;
   }
-  72.34%, to {
+  86%, to {
     --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
     opacity: 0;
   }
 }
 
 @keyframes beginner-intro-wheel-backdrop-switch-kanji {
-  0%, 19.6% { opacity: 0; }
-  31%, 36.8% {
+  0%, 6% { opacity: 0; }
+  22%, 36.8% {
     --intro-slice-kanji: color-mix(in srgb, #c78b32 18%, var(--surface-2));
     opacity: 1;
   }
-  36.9%, 62.34% {
+  36.9%, 72% {
     --intro-slice-kanji: color-mix(in srgb, #c78b32 62%, var(--surface-2));
     opacity: 1;
   }
-  72.34%, to {
+  86%, to {
     --intro-slice-kanji: color-mix(in srgb, #c78b32 62%, var(--surface-2));
     opacity: 0;
   }
+}
+
+@keyframes beginner-intro-first-background-cube-out {
+  0%, 76% { opacity: 1; }
+  84%, to { opacity: 0; }
+}
+
+@keyframes beginner-intro-background-cube-out {
+  0%, 63.04% { opacity: 1; }
+  69%, to { opacity: 0; }
 }
 
 @keyframes beginner-intro-slot-expand {
