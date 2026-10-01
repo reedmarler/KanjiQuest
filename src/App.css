@@ -498,6 +498,8 @@ body:has(.beginner-zone--intro) {
   --intro-previous-expanded-wheel-size: var(--intro-expanded-wheel-size);
   --intro-previous-expanded-wheel-height: var(--intro-expanded-wheel-height);
   --intro-previous-expanded-wheel-radius: var(--intro-expanded-wheel-radius);
+  --intro-previous-shrink-left: 50%;
+  --intro-previous-shrink-translate-x: -50%;
   --intro-switch-duration: calc(4414 * var(--intro-time-unit));
   --intro-reveal-accent: var(--sakura-light);
   --intro-reveal-base: var(--sakura);
@@ -567,6 +569,8 @@ body:has(.beginner-zone--intro) {
   --intro-reveal-base: #c78b32;
   --intro-previous-accent: #70cfe0;
   --intro-previous-base: #4ba5c9;
+  --intro-previous-shrink-left: calc(50% - min(calc(4.25rem + 17px), 41.25dvw));
+  --intro-previous-shrink-translate-x: 0%;
 }
 
 .beginner-intro-empty-slot {
@@ -1974,7 +1978,7 @@ body:has(.beginner-zone--intro) {
 @keyframes beginner-intro-slot-switch-previous {
   0%, 6.4% {
     top: calc(50% + var(--intro-previous-panel-offset-y));
-    left: 50%;
+    left: var(--intro-previous-shrink-left);
     width: var(--intro-previous-expanded-wheel-size);
     height: var(--intro-previous-expanded-wheel-height);
     border-radius: var(--intro-previous-expanded-wheel-radius);
@@ -1983,11 +1987,11 @@ body:has(.beginner-zone--intro) {
     box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    transform: translate(var(--intro-previous-shrink-translate-x), -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   17.8% {
     top: 50%;
-    left: 50%;
+    left: var(--intro-previous-shrink-left);
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
@@ -1996,7 +2000,7 @@ body:has(.beginner-zone--intro) {
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    transform: translate(var(--intro-previous-shrink-translate-x), -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   30.03% {
     top: 2px;
