@@ -2991,7 +2991,7 @@ body:has(.beginner-zone--intro) {
     top: calc(58% + 15px);
   }
   .beginner-intro-empty-wheel.is-hiragana {
-    --intro-hiragana-outline-width: 8.5rem;
+    --intro-hiragana-outline-width: 15rem;
     --intro-hiragana-panel-gutter: 15px;
     --intro-expanded-wheel-size: min(
       calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
@@ -3008,7 +3008,7 @@ body:has(.beginner-zone--intro) {
     );
     --intro-previous-expanded-wheel-height: calc(18rem + 90px);
   }
-  .beginner-intro-empty-wheel.is-katakana { --intro-hiragana-outline-width: 8.5rem; }
+  .beginner-intro-empty-wheel.is-katakana { --intro-hiragana-outline-width: 15rem; }
   .beginner-intro-empty-wheel.is-kanji { --intro-hiragana-outline-width: 15rem; }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px); }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
