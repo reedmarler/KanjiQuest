@@ -834,7 +834,8 @@ body:has(.beginner-zone--intro) {
   top: -6px;
 }
 
-.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type {
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type,
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-words.is-hiragana-examples > span:only-of-type {
   position: relative;
   left: calc(-0.42rem - 5px);
 }
