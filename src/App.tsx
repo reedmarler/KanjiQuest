@@ -682,10 +682,7 @@ function BeginnerZone({
       : 0
     const isFinalStep = introStep === BEGINNER_INTRO_STEPS.length - 1
     const revealScript = introStep === 4 ? 'kanji' : introStep === 3 ? 'katakana' : 'hiragana'
-    const revealContent = BEGINNER_INTRO_REVEAL_CONTENT[revealScript]
-    const previousRevealContent = introStep === 4
-      ? BEGINNER_INTRO_REVEAL_CONTENT.katakana
-      : BEGINNER_INTRO_REVEAL_CONTENT.hiragana
+    const activeRevealIndex = introStep >= 2 && introStep <= 4 ? introStep - 2 : -1
     const isRevealWheelVisible = introStep >= 1 && introStep <= 4
 
     return (
@@ -706,7 +703,7 @@ function BeginnerZone({
             } as CSSProperties : undefined}
           >
             <div
-              className={`beginner-intro-speech-inner beginner-intro-speech-copy is-${speechDisplayStep.id}${introSpeechCopyBlurred ? ' is-blurred' : ''}${displayIntroStep === 3 ? ' is-katakana-delayed-reveal' : ''}`}
+              className={`beginner-intro-speech-inner beginner-intro-speech-copy is-${speechDisplayStep.id}${introSpeechCopyBlurred ? ' is-blurred' : ''}${displayIntroStep >= 3 && displayIntroStep <= 4 ? ' is-script-delayed-reveal' : ''}`}
               ref={introSpeechContentRef}
             >
               {speechDisplayStep.eyebrow && <small>{speechDisplayStep.eyebrow}</small>}
@@ -728,64 +725,49 @@ function BeginnerZone({
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {isRevealWheelVisible && (
-              <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 ? ' is-switching' : ''}`} aria-hidden="true">
+              <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 ? ' is-switching' : ''}${introTransitioning && introStep === 4 ? ' is-final-retracting' : ''}`} aria-hidden="true">
                 <div className="beginner-intro-wheel-rotor">
-                <span className={`beginner-intro-empty-slot is-slot-top is-script-hiragana${introStep === 2 ? ' is-reveal-slot' : ''}${introStep >= 3 ? ' is-previous-slot' : ''}`}>
-                  {introStep < 2 && (
-                    <span key="slot-glyph" className="beginner-intro-slot-hiragana is-seed-glyph" lang="ja"><span>あ</span></span>
-                  )}
-                  {introStep >= 3 && (
-                    <span className="beginner-intro-slot-previous">
-                      {previousRevealContent.label === 'Hiragana' && <span className="beginner-intro-slot-previous-progress">1/46</span>}
-                      <span className="beginner-intro-slot-previous-label">{previousRevealContent.label}</span>
-                      <span className="beginner-intro-slot-previous-kana" lang="ja">
-                        <small lang="en">{previousRevealContent.romaji}</small>
-                        <span>{previousRevealContent.mark}</span>
+                  {BEGINNER_INTRO_SCRIPTS.map((item, index) => {
+                    const content = BEGINNER_INTRO_REVEAL_CONTENT[item.id]
+                    const isRevealSlot = index === activeRevealIndex
+                    const isPreviousSlot = index === activeRevealIndex - 1
+                    return (
+                      <span
+                        className={`beginner-intro-empty-slot is-wheel-slot is-slot-${item.id} is-script-${item.id}${isRevealSlot ? ' is-reveal-slot' : ''}${isPreviousSlot ? ' is-previous-slot' : ''}`}
+                        key={item.id}
+                      >
+                        {isPreviousSlot ? (
+                          <span className="beginner-intro-slot-previous">
+                            <span className="beginner-intro-slot-previous-progress">1/46</span>
+                            <span className="beginner-intro-slot-previous-label">{content.label}</span>
+                            <span className="beginner-intro-slot-previous-kana" lang="ja">
+                              <small lang="en">{content.romaji}</small>
+                              <span>{content.mark}</span>
+                            </span>
+                            <span className="beginner-intro-slot-previous-words is-hiragana-examples">
+                              <b>{content.heading}</b>
+                              {content.words.map(renderBeginnerIntroExampleWord)}
+                            </span>
+                          </span>
+                        ) : isRevealSlot ? (
+                          <>
+                            <span className="beginner-intro-slot-progress">{item.id === 'kanji' ? '1/∞' : '1/46'}</span>
+                            <span className="beginner-intro-slot-label">{content.label}</span>
+                            <span key="slot-glyph" className="beginner-intro-slot-hiragana" lang="ja">
+                              <small lang="en">{content.romaji}</small>
+                              <span>{content.mark}</span>
+                            </span>
+                            <span className="beginner-intro-slot-words is-hiragana-examples">
+                              <b>{content.heading}</b>
+                              {content.words.map(renderBeginnerIntroExampleWord)}
+                            </span>
+                          </>
+                        ) : (
+                          <span key="slot-glyph" className="beginner-intro-slot-hiragana is-seed-glyph" lang="ja"><span>{item.mark}</span></span>
+                        )}
                       </span>
-                      <span className="beginner-intro-slot-previous-words is-hiragana-examples">
-                        <b>{previousRevealContent.heading}</b>
-                        {previousRevealContent.words.map(renderBeginnerIntroExampleWord)}
-                      </span>
-                    </span>
-                  )}
-                  {introStep === 2 && (
-                    <>
-                      <span className="beginner-intro-slot-progress">1/46</span>
-                      <span className="beginner-intro-slot-label">{revealContent.label}</span>
-                      <span key="slot-glyph" className="beginner-intro-slot-hiragana" lang="ja">
-                        <small lang="en">{revealContent.romaji}</small>
-                        <span>{revealContent.mark}</span>
-                      </span>
-                      <span className="beginner-intro-slot-words is-hiragana-examples">
-                        <b>{revealContent.heading}</b>
-                        {revealContent.words.map(renderBeginnerIntroExampleWord)}
-                      </span>
-                    </>
-                  )}
-                </span>
-                <span className={`beginner-intro-empty-slot is-slot-right is-script-${introStep === 4 ? 'hiragana' : 'kanji'}${introStep === 4 ? ' is-complete-hiragana' : ''}`} aria-hidden="true">
-                  <span className="beginner-intro-slot-hiragana is-seed-glyph" lang="ja"><span>{introStep === 4 ? 'あ' : '山'}</span></span>
-                </span>
-                <span className={`beginner-intro-empty-slot is-slot-left is-script-${introStep === 4 ? 'kanji' : 'katakana'}${introStep >= 3 ? ' is-reveal-slot' : ''}`} aria-hidden="true">
-                  {introStep < 3 && (
-                    <span key="slot-glyph" className="beginner-intro-slot-hiragana is-seed-glyph" lang="ja"><span>ア</span></span>
-                  )}
-                  {introStep >= 3 && (
-                    <>
-                      {revealContent.label === 'Katakana' && <span className="beginner-intro-slot-progress">1/46</span>}
-                      {revealContent.label === 'Kanji' && <span className="beginner-intro-slot-progress">1/∞</span>}
-                      <span className="beginner-intro-slot-label">{revealContent.label}</span>
-                      <span key="slot-glyph" className="beginner-intro-slot-hiragana" lang="ja">
-                        <small lang="en">{revealContent.romaji}</small>
-                        <span>{revealContent.mark}</span>
-                      </span>
-                      <span className="beginner-intro-slot-words is-hiragana-examples">
-                        <b>{revealContent.heading}</b>
-                        {revealContent.words.map(renderBeginnerIntroExampleWord)}
-                      </span>
-                    </>
-                  )}
-                </span>
+                    )
+                  })}
                 </div>
               </div>
             )}

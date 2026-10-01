@@ -325,7 +325,7 @@ body:has(.beginner-zone--intro) {
   opacity: 0;
 }
 
-.beginner-intro-speech-copy.is-katakana-delayed-reveal {
+.beginner-intro-speech-copy.is-script-delayed-reveal {
   animation: beginner-intro-speech-katakana-reveal calc(4414 * var(--intro-time-unit)) linear both;
 }
 
@@ -495,7 +495,7 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-lesson.is-together .beginner-intro-ring {
-  animation: beginner-intro-spin calc(6000 * var(--intro-time-unit)) linear infinite;
+  animation: none;
 }
 
 .beginner-intro-empty-wheel {
@@ -511,8 +511,8 @@ body:has(.beginner-zone--intro) {
   --intro-previous-expanded-wheel-radius: var(--intro-expanded-wheel-radius);
   --intro-previous-start-top: calc(50% + var(--intro-previous-panel-offset-y));
   --intro-previous-start-left: 50%;
-  --intro-reveal-final-top: calc(50% - 5px);
-  --intro-reveal-final-left: calc(50% + 8.66px);
+  --intro-reveal-final-top: calc(50% + var(--intro-reveal-panel-offset-y));
+  --intro-reveal-final-left: 50%;
   --intro-switch-duration: calc(4414 * var(--intro-time-unit));
   --intro-reveal-accent: var(--sakura-light);
   --intro-reveal-base: var(--sakura);
@@ -524,9 +524,14 @@ body:has(.beginner-zone--intro) {
   left: 50%;
   width: var(--intro-empty-wheel-size);
   aspect-ratio: 1;
-  border: 2px dashed color-mix(in srgb, var(--sakura-light) 38%, var(--border));
+  border: 2px solid color-mix(in srgb, var(--text-muted) 55%, var(--border));
   border-radius: 50%;
-  background: color-mix(in srgb, var(--surface-2) 32%, transparent);
+  background: conic-gradient(
+    from -30deg,
+    color-mix(in srgb, #4ba5c9 24%, var(--surface-2)) 0 33.333%,
+    color-mix(in srgb, #c78b32 24%, var(--surface-2)) 33.333% 66.666%,
+    color-mix(in srgb, var(--sakura) 24%, var(--surface-2)) 66.666% 100%
+  );
   color: var(--text-muted);
   transform: translate(-50%, -50%);
   animation: beginner-intro-wheel-swirl-in calc(800 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both;
@@ -547,9 +552,7 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel.is-hiragana.is-revealing {
-  animation:
-    beginner-intro-wheel-swirl-in calc(800 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both,
-    beginner-intro-wheel-fade-under-panel calc(1350 * var(--intro-time-unit)) linear both;
+  animation: beginner-intro-wheel-swirl-in calc(800 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both;
 }
 
 .beginner-intro-empty-wheel.is-katakana,
@@ -557,6 +560,7 @@ body:has(.beginner-zone--intro) {
   --intro-reveal-panel-offset-x: 0px;
   --intro-reveal-panel-offset-y: 10px;
   --intro-hiragana-outline-width: 8.5rem;
+  --intro-previous-outline-width: 8.5rem;
   --intro-hiragana-panel-gutter: 15px;
   --intro-expanded-wheel-size: min(
     calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
@@ -606,6 +610,27 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-empty-slot.is-slot-top { top: 2px; left: 50%; transform: translate(-50%, -50%); }
 .beginner-intro-empty-slot.is-slot-right { top: 75%; left: 93%; transform: translate(-50%, -50%); }
 .beginner-intro-empty-slot.is-slot-left { top: 75%; left: 7%; transform: translate(-50%, -50%); }
+
+.beginner-intro-empty-slot.is-slot-hiragana {
+  --intro-slot-start-top: 34%;
+  --intro-slot-start-left: 0%;
+}
+
+.beginner-intro-empty-slot.is-slot-katakana {
+  --intro-slot-start-top: 34%;
+  --intro-slot-start-left: 100%;
+}
+
+.beginner-intro-empty-slot.is-slot-kanji {
+  --intro-slot-start-top: 100%;
+  --intro-slot-start-left: 50%;
+}
+
+.beginner-intro-empty-slot.is-wheel-slot {
+  top: var(--intro-slot-start-top);
+  left: var(--intro-slot-start-left);
+  transform: translate(-50%, -50%);
+}
 
 .beginner-intro-empty-slot.is-script-hiragana {
   border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
@@ -1205,8 +1230,27 @@ body:has(.beginner-zone--intro) {
   --intro-wheel-counter-angle: 0deg;
   position: absolute;
   inset: 0;
-  transform: rotate(var(--intro-wheel-angle));
+  transform: none;
   transform-origin: center;
+}
+
+.beginner-intro-wheel-rotor::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from -30deg,
+    color-mix(in srgb, var(--text-muted) 48%, var(--border)) 0 1deg,
+    transparent 1deg 119deg,
+    color-mix(in srgb, var(--text-muted) 48%, var(--border)) 119deg 121deg,
+    transparent 121deg 239deg,
+    color-mix(in srgb, var(--text-muted) 48%, var(--border)) 239deg 241deg,
+    transparent 241deg 359deg,
+    color-mix(in srgb, var(--text-muted) 48%, var(--border)) 359deg 360deg
+  );
+  pointer-events: none;
 }
 
 .beginner-intro-empty-wheel.is-switching {
@@ -1214,11 +1258,7 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-wheel-rotor {
-  animation: beginner-intro-wheel-switch-rotate var(--intro-switch-duration) linear both;
-}
-
-.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-wheel-rotor {
-  animation-name: beginner-intro-wheel-switch-rotate-panel;
+  animation: none;
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-previous-kana::before {
@@ -1257,7 +1297,7 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching {
-  animation: beginner-intro-wheel-return-from-panel var(--intro-switch-duration) linear both;
+  animation: none;
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-slot-right {
@@ -1267,15 +1307,37 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-previous-slot {
-  animation:
-    beginner-intro-slot-switch-previous var(--intro-switch-duration) linear both,
-    beginner-intro-panel-node-hide var(--intro-switch-duration) linear both;
+  animation: beginner-intro-slot-switch-previous var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .is-reveal-slot {
-  animation:
-    beginner-intro-slot-switch-reveal var(--intro-switch-duration) linear both,
-    beginner-intro-panel-node-return var(--intro-switch-duration) linear both;
+  animation: beginner-intro-slot-switch-reveal var(--intro-switch-duration) linear both;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-switching.is-final-retracting .is-reveal-slot {
+  overflow: hidden;
+  animation: beginner-intro-slot-retract-final calc(570 * var(--intro-time-unit)) linear both;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-switching.is-final-retracting .is-reveal-slot :is(
+  .beginner-intro-slot-label,
+  .beginner-intro-slot-progress,
+  .beginner-intro-slot-words,
+  .beginner-intro-slot-hiragana small
+) {
+  animation: beginner-intro-final-content-out calc(220 * var(--intro-time-unit)) linear both;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-switching.is-final-retracting .is-reveal-slot .beginner-intro-slot-hiragana::before {
+  animation: beginner-intro-final-content-out calc(220 * var(--intro-time-unit)) linear both;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-switching.is-final-retracting .is-reveal-slot .beginner-intro-slot-hiragana {
+  animation: beginner-intro-final-glyph-retract calc(570 * var(--intro-time-unit)) linear both;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-switching.is-final-retracting .is-reveal-slot .beginner-intro-slot-hiragana > span {
+  animation: beginner-intro-final-glyph-anchor calc(570 * var(--intro-time-unit)) linear both;
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-slot-previous-kana::before {
@@ -1926,12 +1988,12 @@ body:has(.beginner-zone--intro) {
   from {
     opacity: 0;
     filter: blur(12px);
-    transform: translate(-50%, -50%) rotate(-540deg) scale(0.08);
+    transform: translate(-50%, -50%) scale(0.82);
   }
   to {
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
@@ -1982,7 +2044,8 @@ body:has(.beginner-zone--intro) {
 
 @keyframes beginner-intro-slot-expand {
   0% {
-    top: 2px;
+    top: var(--intro-slot-start-top);
+    left: var(--intro-slot-start-left);
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
@@ -1994,7 +2057,8 @@ body:has(.beginner-zone--intro) {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
   20% {
-    top: 2px;
+    top: var(--intro-slot-start-top);
+    left: var(--intro-slot-start-left);
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
@@ -2007,6 +2071,7 @@ body:has(.beginner-zone--intro) {
   }
   60% {
     top: calc(50% + var(--intro-reveal-panel-offset-y));
+    left: 50%;
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
@@ -2019,6 +2084,7 @@ body:has(.beginner-zone--intro) {
   }
   to {
     top: calc(50% + var(--intro-reveal-panel-offset-y));
+    left: 50%;
     width: var(--intro-expanded-wheel-size);
     height: var(--intro-expanded-wheel-height);
     border-radius: var(--intro-expanded-wheel-radius);
@@ -2059,8 +2125,8 @@ body:has(.beginner-zone--intro) {
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   30.03% {
-    top: 2px;
-    left: 50%;
+    top: var(--intro-slot-start-top);
+    left: var(--intro-slot-start-left);
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
@@ -2072,8 +2138,8 @@ body:has(.beginner-zone--intro) {
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
   44.69%, to {
-    top: 2px;
-    left: 50%;
+    top: var(--intro-slot-start-top);
+    left: var(--intro-slot-start-left);
     width: 4.4rem;
     height: 4.4rem;
     border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
@@ -2081,15 +2147,15 @@ body:has(.beginner-zone--intro) {
     box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-previous-base) 18%, transparent);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) translate(1.732px, -1px) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
 @keyframes beginner-intro-slot-switch-reveal {
   0% {
     z-index: 1;
-    top: 75%;
-    left: 7%;
+    top: var(--intro-slot-start-top);
+    left: var(--intro-slot-start-left);
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
@@ -2102,8 +2168,8 @@ body:has(.beginner-zone--intro) {
   }
   19.6%, 30.03% {
     z-index: 1;
-    top: 75%;
-    left: 7%;
+    top: var(--intro-slot-start-top);
+    left: var(--intro-slot-start-left);
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
@@ -2116,8 +2182,8 @@ body:has(.beginner-zone--intro) {
   }
   44.69% {
     z-index: 1;
-    top: 75%;
-    left: 7%;
+    top: var(--intro-slot-start-top);
+    left: var(--intro-slot-start-left);
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
@@ -2130,8 +2196,8 @@ body:has(.beginner-zone--intro) {
   }
   44.7% {
     z-index: 5;
-    top: 75%;
-    left: 7%;
+    top: var(--intro-slot-start-top);
+    left: var(--intro-slot-start-left);
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
@@ -2144,8 +2210,8 @@ body:has(.beginner-zone--intro) {
   }
   51.04% {
     z-index: 5;
-    top: 75%;
-    left: 7%;
+    top: var(--intro-slot-start-top);
+    left: var(--intro-slot-start-left);
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
@@ -2184,6 +2250,73 @@ body:has(.beginner-zone--intro) {
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
+}
+
+@keyframes beginner-intro-slot-retract-final {
+  0% {
+    z-index: 5;
+    top: var(--intro-reveal-final-top);
+    left: var(--intro-reveal-final-left);
+    width: var(--intro-expanded-wheel-size);
+    height: var(--intro-expanded-wheel-height);
+    border-radius: var(--intro-expanded-wheel-radius);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
+    transform: translate(-50%, -50%);
+  }
+  54% {
+    z-index: 5;
+    top: 50%;
+    left: 50%;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: var(--intro-wheel-node-radius);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    transform: translate(-50%, -50%);
+  }
+  to {
+    z-index: 2;
+    top: var(--intro-slot-start-top);
+    left: var(--intro-slot-start-left);
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: var(--intro-wheel-node-radius);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes beginner-intro-final-content-out {
+  from { opacity: 1; filter: blur(0); }
+  to { opacity: 0; filter: blur(6px); }
+}
+
+@keyframes beginner-intro-final-glyph-retract {
+  0%, 54% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(0.42rem, -1rem) scale(1);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(0, 0.875rem) scale(0.38);
+  }
+}
+
+@keyframes beginner-intro-final-glyph-anchor {
+  0%, 54% {
+    transform: translate(
+      calc(-50% + var(--intro-kana-optical-x)),
+      calc(-50% - 10px - 0.34rem)
+    );
+  }
+  to { transform: translate(-50%, calc(-50% - 4px)); }
 }
 
 @keyframes beginner-intro-slot-fade {
@@ -2629,15 +2762,16 @@ body:has(.beginner-zone--intro) {
     --intro-expanded-wheel-height: calc(18rem + 90px);
   }
   .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) {
-    --intro-hiragana-outline-width: 8.5rem;
     --intro-hiragana-panel-gutter: 15px;
     --intro-expanded-wheel-height: calc(18rem + 90px);
     --intro-previous-expanded-wheel-size: min(
-      calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
+      calc(var(--intro-previous-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
       82.5dvw
     );
     --intro-previous-expanded-wheel-height: calc(18rem + 90px);
   }
+  .beginner-intro-empty-wheel.is-katakana { --intro-hiragana-outline-width: 8.5rem; }
+  .beginner-intro-empty-wheel.is-kanji { --intro-hiragana-outline-width: 13rem; }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px); }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
   .beginner-intro-wheel-placeholder strong { font-size: 4.8rem; }
@@ -2706,6 +2840,7 @@ body:has(.beginner-zone--intro) {
   .beginner-intro-next,
   .beginner-intro-ring,
   .beginner-intro-empty-wheel,
+  .beginner-intro-empty-slot,
   .beginner-intro-node,
   .beginner-intro-node-mark,
   .beginner-intro-example,
@@ -2721,16 +2856,18 @@ body:has(.beginner-zone--intro) {
     transition: none;
   }
 
-  .beginner-intro-empty-wheel.is-revealing .is-slot-top {
-    top: calc(50% + var(--intro-reveal-panel-offset-y));
-    width: 100%;
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .is-reveal-slot {
+    top: var(--intro-reveal-final-top);
+    left: var(--intro-reveal-final-left);
+    width: var(--intro-expanded-wheel-size);
+    height: var(--intro-expanded-wheel-height);
+    border-radius: var(--intro-expanded-wheel-radius);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     transform: translate(-50%, -50%);
   }
 
-  .beginner-intro-empty-wheel.is-revealing .is-slot-right,
-  .beginner-intro-empty-wheel.is-revealing .is-slot-left {
+  .beginner-intro-empty-wheel.is-switching .is-previous-slot {
     opacity: 0;
   }
 
@@ -2738,9 +2875,19 @@ body:has(.beginner-zone--intro) {
     opacity: 0;
   }
 
-  .beginner-intro-empty-wheel.is-revealing .is-reveal-slot .beginner-intro-slot-hiragana {
+  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .is-reveal-slot .beginner-intro-slot-hiragana {
     opacity: 1;
     transform: none;
+  }
+
+  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .is-reveal-slot :is(
+    .beginner-intro-slot-label,
+    .beginner-intro-slot-progress,
+    .beginner-intro-slot-words,
+    .beginner-intro-slot-hiragana small
+  ) {
+    filter: none;
+    opacity: 1;
   }
 
   .beginner-intro-empty-wheel.is-hiragana.is-revealing .is-reveal-slot .beginner-intro-slot-hiragana::before {
