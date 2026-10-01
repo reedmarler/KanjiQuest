@@ -703,7 +703,7 @@ function BeginnerZone({
             } as CSSProperties : undefined}
           >
             <div
-              className={`beginner-intro-speech-inner beginner-intro-speech-copy is-${speechDisplayStep.id}${introSpeechCopyBlurred ? ' is-blurred' : ''}${displayIntroStep >= 3 && displayIntroStep <= 4 ? ' is-script-delayed-reveal' : ''}`}
+              className={`beginner-intro-speech-inner beginner-intro-speech-copy is-${speechDisplayStep.id}${introSpeechCopyBlurred ? ' is-blurred' : ''}${displayIntroStep >= 2 && displayIntroStep <= 4 ? ` is-script-delayed-reveal is-target-${revealScript}` : ''}`}
               ref={introSpeechContentRef}
             >
               {speechDisplayStep.eyebrow && <small>{speechDisplayStep.eyebrow}</small>}
