@@ -963,8 +963,7 @@ body:has(.beginner-zone--intro) {
   width: 100%;
 }
 
-.beginner-intro-empty-wheel.is-kanji .beginner-intro-segmented-ruby,
-.beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type > small {
+.beginner-intro-empty-wheel.is-kanji .beginner-intro-segmented-ruby {
   display: grid;
   width: max-content;
   max-width: 100%;
@@ -973,6 +972,15 @@ body:has(.beginner-zone--intro) {
   justify-content: center;
   justify-items: center;
   column-gap: 0.24rem;
+}
+
+.beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type > small {
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.32rem;
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-example-cue {
