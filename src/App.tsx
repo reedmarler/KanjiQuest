@@ -215,11 +215,11 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
   },
   kanji: {
     label: 'Kanji',
-    mark: '漢',
-    romaji: 'kan',
+    mark: '山',
+    romaji: 'yama',
     heading: 'Example:',
     words: [
-      { kana: '—', romaji: 'Placeholder' },
+      { kana: '山', readingParts: ['yama'], romaji: 'mountain' },
     ],
   },
 } as const
@@ -749,6 +749,7 @@ function BeginnerZone({
                   {introStep >= 3 && (
                     <>
                       {revealContent.label === 'Katakana' && <span className="beginner-intro-slot-progress">1/46</span>}
+                      {revealContent.label === 'Kanji' && <span className="beginner-intro-slot-progress">1/∞</span>}
                       <span className="beginner-intro-slot-label">{revealContent.label}</span>
                       <span key="slot-glyph" className="beginner-intro-slot-hiragana" lang="ja">
                         <small lang="en">{revealContent.romaji}</small>
