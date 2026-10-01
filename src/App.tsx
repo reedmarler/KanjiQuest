@@ -293,7 +293,7 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'kanji-reveal',
     eyebrow: '',
-    title: 'Kanji introduction placeholder.',
+    title: 'Kanji are Chinese characters used to write Japanese. They are more complex and carry more meaning. Each can represent a different word or idea.',
     body: '',
   },
   {
