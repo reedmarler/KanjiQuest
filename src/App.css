@@ -590,6 +590,21 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-empty-slot.is-slot-right { top: 75%; left: 93%; transform: translate(-50%, -50%); }
 .beginner-intro-empty-slot.is-slot-left { top: 75%; left: 7%; transform: translate(-50%, -50%); }
 
+.beginner-intro-empty-slot.is-script-hiragana {
+  border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
+  background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
+}
+
+.beginner-intro-empty-slot.is-script-katakana {
+  border-color: color-mix(in srgb, #70cfe0 80%, var(--border));
+  background: color-mix(in srgb, #4ba5c9 14%, var(--surface-2));
+}
+
+.beginner-intro-empty-slot.is-script-kanji {
+  border-color: color-mix(in srgb, #f0bf63 80%, var(--border));
+  background: color-mix(in srgb, #c78b32 14%, var(--surface-2));
+}
+
 .beginner-intro-empty-slot.is-complete-hiragana {
   border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
   background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
@@ -674,6 +689,16 @@ body:has(.beginner-zone--intro) {
   transform-origin: 50% 50%;
   backface-visibility: hidden;
   will-change: transform, font-size;
+}
+
+.beginner-intro-slot-hiragana.is-seed-glyph {
+  opacity: 1;
+  filter: none;
+  transform: translate(0, 0.875rem) scale(0.38);
+}
+
+.beginner-intro-slot-hiragana.is-seed-glyph > span {
+  transform: translate(-50%, calc(-50% - 4px));
 }
 
 .beginner-intro-slot-hiragana small {
@@ -916,6 +941,10 @@ body:has(.beginner-zone--intro) {
     calc(-50% + var(--intro-kana-optical-x)),
     calc(-50% - 10px - 0.34rem)
   );
+}
+
+.beginner-intro-empty-wheel .beginner-intro-slot-hiragana.is-seed-glyph > span {
+  transform: translate(-50%, calc(-50% - 4px));
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana::before,
@@ -2004,8 +2033,8 @@ body:has(.beginner-zone--intro) {
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
-    border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
-    background: var(--surface-2);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
@@ -2018,8 +2047,8 @@ body:has(.beginner-zone--intro) {
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
-    border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
-    background: var(--surface-2);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
@@ -2032,8 +2061,8 @@ body:has(.beginner-zone--intro) {
     width: 4.4rem;
     height: 4.4rem;
     border-radius: var(--intro-wheel-node-radius);
-    border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
-    background: var(--surface-2);
+    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
+    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
@@ -2245,8 +2274,8 @@ body:has(.beginner-zone--intro) {
 
 @keyframes beginner-intro-katakana-in {
   0%, 44.69% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) scale(0.38); }
-  47.75%, 62.42%, 63.04% { opacity: 1; filter: blur(5px); transform: translate(0, 0.875rem) scale(0.38); }
-  75.28% { opacity: 1; filter: blur(5px); transform: translate(0.42rem, -1rem) scale(1); }
+  47.75%, 62.42%, 63.04% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) scale(0.38); }
+  75.28% { opacity: 1; filter: blur(0); transform: translate(0.42rem, -1rem) scale(1); }
   81.68%, to { opacity: 1; filter: blur(0); transform: translate(0.42rem, -1rem) scale(1); }
 }
 
