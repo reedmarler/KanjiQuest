@@ -953,7 +953,7 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-example-cue-icon {
-  font-size: calc(1.92rem + 6px);
+  font-size: calc(1.92rem + 12px);
   line-height: 1;
 }
 

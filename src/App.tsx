@@ -240,7 +240,7 @@ function renderBeginnerIntroExampleWord(word: {
             <span className="beginner-intro-segmented-ruby">
               {word.visualCue && (
                 <span className="beginner-intro-example-cue">
-                  (<span className="beginner-intro-example-cue-icon">{word.visualCue.icon}</span>{word.visualCue.suffix})
+                  <span className="beginner-intro-example-cue-icon">{word.visualCue.icon}</span>{word.visualCue.suffix}
                 </span>
               )}
               {Array.from(word.kana).map((character, index) => (
