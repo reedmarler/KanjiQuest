@@ -579,7 +579,7 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel.is-kanji {
-  --intro-hiragana-outline-width: 10rem;
+  --intro-hiragana-outline-width: 13rem;
   --intro-reveal-accent: #f0bf63;
   --intro-reveal-base: #c78b32;
   --intro-previous-accent: #70cfe0;
@@ -911,19 +911,26 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-example-cue {
+  display: inline-flex;
   align-self: center;
+  align-items: center;
   margin-right: 0.42rem;
   color: var(--text-muted);
   font: 700 0.72rem/1 'Outfit', system-ui, sans-serif;
   white-space: nowrap;
 }
 
+.beginner-intro-example-cue-icon {
+  font-size: calc(1.92rem + 6px);
+  line-height: 1;
+}
+
 .beginner-intro-example-meaning-prefix {
   display: inline;
   margin-right: 0.24rem;
   color: var(--text-muted);
-  font-size: 0.68em;
-  font-weight: 600;
+  font-size: 1em;
+  font-weight: inherit;
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type small {
