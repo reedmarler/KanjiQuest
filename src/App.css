@@ -891,7 +891,7 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type,
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-previous-words.is-hiragana-examples > span:only-of-type {
   position: relative;
-  left: calc(-0.42rem - 5px);
+  left: 0;
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-words small,
@@ -1576,6 +1576,18 @@ body:has(.beginner-zone--intro) {
   white-space: nowrap;
 }
 
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words .beginner-intro-segmented-ruby {
+  display: inline-flex;
+  width: max-content;
+  min-width: max-content;
+  flex-flow: row nowrap;
+  white-space: nowrap;
+}
+
+.beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words .beginner-intro-segmented-ruby > ruby {
+  flex: 0 0 auto;
+}
+
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-slot-previous-words {
   animation-name: beginner-intro-hiragana-previous-words-out;
 }
@@ -2177,8 +2189,8 @@ body:has(.beginner-zone--intro) {
 
 @keyframes beginner-intro-speech-hiragana-delayed-reveal {
   0% { opacity: 1; filter: blur(0); }
-  6.4%, 72.34% { opacity: 0.12; filter: blur(8px); }
-  74.64%, to { opacity: 1; filter: blur(0); }
+  6.4%, 70.8% { opacity: 0.12; filter: blur(8px); }
+  73.1%, to { opacity: 1; filter: blur(0); }
 }
 
 @keyframes beginner-intro-speech-kanji-delayed-reveal {
