@@ -612,19 +612,19 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-empty-slot.is-slot-left { top: 75%; left: 7%; transform: translate(-50%, -50%); }
 
 .beginner-intro-empty-slot.is-slot-hiragana {
-  --intro-node-accent: var(--sakura-light);
+  --intro-node-accent: var(--groudon-light);
   --intro-slot-start-top: 27%;
   --intro-slot-start-left: 10.16%;
 }
 
 .beginner-intro-empty-slot.is-slot-katakana {
-  --intro-node-accent: #70cfe0;
+  --intro-node-accent: var(--kyogre-light);
   --intro-slot-start-top: 27%;
   --intro-slot-start-left: 89.84%;
 }
 
 .beginner-intro-empty-slot.is-slot-kanji {
-  --intro-node-accent: #f0bf63;
+  --intro-node-accent: #FED269;
   --intro-slot-start-top: 96%;
   --intro-slot-start-left: 50%;
 }
@@ -1286,9 +1286,10 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-wheel-rotor {
-  --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 18%, var(--surface-2));
-  --intro-slice-katakana: color-mix(in srgb, #4ba5c9 18%, var(--surface-2));
-  --intro-slice-kanji: color-mix(in srgb, #c78b32 18%, var(--surface-2));
+  --intro-wheel-line: color-mix(in srgb, var(--text-muted) 58%, var(--border));
+  --intro-slice-hiragana: color-mix(in srgb, var(--groudon) 18%, var(--surface-2));
+  --intro-slice-katakana: color-mix(in srgb, var(--kyogre) 18%, var(--surface-2));
+  --intro-slice-kanji: color-mix(in srgb, #FED269 18%, var(--surface-2));
   --intro-wheel-angle: 0deg;
   --intro-wheel-counter-angle: 0deg;
   position: absolute;
@@ -1297,12 +1298,20 @@ body:has(.beginner-zone--intro) {
   transform-origin: center;
 }
 
+.beginner-intro-empty-wheel.is-hiragana:not(.is-revealing) .beginner-intro-wheel-rotor {
+  animation: beginner-intro-wheel-initial-spin calc(900 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both;
+}
+
+.beginner-intro-empty-wheel.is-hiragana:not(.is-revealing) .beginner-intro-empty-slot.is-wheel-slot {
+  animation: beginner-intro-wheel-initial-counter-spin calc(900 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both;
+}
+
 .beginner-intro-wheel-rotor::before {
   content: '';
   position: absolute;
   z-index: 0;
-  inset: -2px;
-  border: 2px solid color-mix(in srgb, var(--text-muted) 68%, var(--border));
+  inset: -1px;
+  border: 1px solid var(--intro-wheel-line);
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
@@ -1317,16 +1326,16 @@ body:has(.beginner-zone--intro) {
   content: '';
   position: absolute;
   z-index: 0;
-  inset: -2px;
+  inset: -1px;
   border-radius: 50%;
   background: conic-gradient(
-    from -1deg,
-    color-mix(in srgb, var(--text-muted) 62%, var(--border)) 0deg 2deg,
-    transparent 2deg 120deg,
-    color-mix(in srgb, var(--text-muted) 62%, var(--border)) 120deg 122deg,
-    transparent 122deg 240deg,
-    color-mix(in srgb, var(--text-muted) 62%, var(--border)) 240deg 242deg,
-    transparent 242deg 360deg
+    from -0.25deg,
+    var(--intro-wheel-line) 0deg 0.5deg,
+    transparent 0.5deg 120deg,
+    var(--intro-wheel-line) 120deg 120.5deg,
+    transparent 120.5deg 240deg,
+    var(--intro-wheel-line) 240deg 240.5deg,
+    transparent 240.5deg 360deg
   );
   pointer-events: none;
 }
@@ -2103,6 +2112,16 @@ body:has(.beginner-zone--intro) {
   }
 }
 
+@keyframes beginner-intro-wheel-initial-spin {
+  from { transform: rotate(-360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes beginner-intro-wheel-initial-counter-spin {
+  from { transform: translate(-50%, -50%) rotate(360deg); }
+  to { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
 @property --intro-wheel-angle {
   syntax: '<angle>';
   inherits: true;
@@ -2157,15 +2176,15 @@ body:has(.beginner-zone--intro) {
 
 @keyframes beginner-intro-wheel-backdrop-first-reveal {
   0%, 12%, 24% {
-    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 18%, var(--surface-2));
+    --intro-slice-hiragana: color-mix(in srgb, var(--groudon) 18%, var(--surface-2));
     opacity: 1;
   }
   6%, 18%, 30%, 82% {
-    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
+    --intro-slice-hiragana: var(--groudon);
     opacity: 1;
   }
   98%, to {
-    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
+    --intro-slice-hiragana: var(--groudon);
     opacity: 0;
   }
 }
@@ -2179,18 +2198,18 @@ body:has(.beginner-zone--intro) {
 @keyframes beginner-intro-wheel-backdrop-switch-katakana {
   0%, 6% { opacity: 0; }
   22%, 36.8% {
-    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
-    --intro-slice-katakana: color-mix(in srgb, #4ba5c9 18%, var(--surface-2));
+    --intro-slice-hiragana: var(--groudon);
+    --intro-slice-katakana: color-mix(in srgb, var(--kyogre) 18%, var(--surface-2));
     opacity: 1;
   }
   36.9%, 72% {
-    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
-    --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
+    --intro-slice-hiragana: var(--groudon);
+    --intro-slice-katakana: var(--kyogre);
     opacity: 1;
   }
   86%, to {
-    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
-    --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
+    --intro-slice-hiragana: var(--groudon);
+    --intro-slice-katakana: var(--kyogre);
     opacity: 0;
   }
 }
@@ -2198,40 +2217,39 @@ body:has(.beginner-zone--intro) {
 @keyframes beginner-intro-wheel-backdrop-switch-kanji {
   0%, 6% { opacity: 0; }
   22%, 36.8% {
-    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
-    --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
-    --intro-slice-kanji: color-mix(in srgb, #c78b32 18%, var(--surface-2));
+    --intro-slice-hiragana: var(--groudon);
+    --intro-slice-katakana: var(--kyogre);
+    --intro-slice-kanji: color-mix(in srgb, #FED269 18%, var(--surface-2));
     opacity: 1;
   }
   36.9%, 72% {
-    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
-    --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
-    --intro-slice-kanji: color-mix(in srgb, #c78b32 62%, var(--surface-2));
+    --intro-slice-hiragana: var(--groudon);
+    --intro-slice-katakana: var(--kyogre);
+    --intro-slice-kanji: #FED269;
     opacity: 1;
   }
   86%, to {
-    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 62%, var(--surface-2));
-    --intro-slice-katakana: color-mix(in srgb, #4ba5c9 62%, var(--surface-2));
-    --intro-slice-kanji: color-mix(in srgb, #c78b32 62%, var(--surface-2));
+    --intro-slice-hiragana: var(--groudon);
+    --intro-slice-katakana: var(--kyogre);
+    --intro-slice-kanji: #FED269;
     opacity: 0;
   }
 }
 
 @keyframes beginner-intro-first-background-cube-out {
-  0%, 76% { opacity: 1; }
-  84%, to { opacity: 0; }
+  0%, 68.67% { opacity: 1; }
+  76%, to { opacity: 0; }
 }
 
 @keyframes beginner-intro-background-cube-out {
-  0%, 63.04% { opacity: 1; }
-  69%, to { opacity: 0; }
+  0%, 40% { opacity: 0; }
+  48%, 59.04% { opacity: 1; }
+  65%, to { opacity: 0; }
 }
 
 @keyframes beginner-intro-returned-cube-cycle {
-  0%, 17.8% { opacity: 1; }
-  22%, 40% { opacity: 0; }
-  46%, 63.04% { opacity: 1; }
-  69%, to { opacity: 0; }
+  0%, 59.04% { opacity: 1; }
+  65%, to { opacity: 0; }
 }
 
 @keyframes beginner-intro-slot-expand {
@@ -2261,7 +2279,7 @@ body:has(.beginner-zone--intro) {
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
-  76% {
+  68.67% {
     top: calc(50% + var(--intro-reveal-panel-offset-y));
     left: 50%;
     width: 4.4rem;
@@ -2303,7 +2321,7 @@ body:has(.beginner-zone--intro) {
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
-  17.8% {
+  14% {
     top: 50%;
     left: 50%;
     width: 4.4rem;
@@ -2316,7 +2334,7 @@ body:has(.beginner-zone--intro) {
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
-  30.03% {
+  22.15% {
     top: var(--intro-slot-start-top);
     left: var(--intro-slot-start-left);
     width: 4.4rem;
@@ -2414,7 +2432,7 @@ body:has(.beginner-zone--intro) {
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
   }
-  63.04% {
+  59.04% {
     z-index: 5;
     top: 50%;
     left: 50%;
@@ -2643,12 +2661,12 @@ body:has(.beginner-zone--intro) {
 }
 
 @keyframes beginner-intro-hiragana-in {
-  0%, 76% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) rotate(0deg) scale(0.38); }
+  0%, 68.67% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) rotate(0deg) scale(0.38); }
   to { opacity: 1; filter: none; transform: translate(0.42rem, -1rem) rotate(0deg) scale(1); }
 }
 
 @keyframes beginner-intro-hiragana-glyph-anchor {
-  0%, 76% {
+  0%, 68.67% {
     color: var(--intro-node-accent);
     text-shadow: 0 0 0.75rem color-mix(in srgb, var(--intro-node-accent) 38%, transparent);
     transform: translate(-50%, calc(-50% - 4px));
@@ -2665,13 +2683,13 @@ body:has(.beginner-zone--intro) {
 
 @keyframes beginner-intro-katakana-in {
   0%, 44.69% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) scale(0.38); }
-  47.75%, 62.42%, 63.04% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) scale(0.38); }
+  47.75%, 59.04% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) scale(0.38); }
   75.28% { opacity: 1; filter: blur(0); transform: translate(0.42rem, -1rem) scale(1); }
   81.68%, to { opacity: 1; filter: blur(0); transform: translate(0.42rem, -1rem) scale(1); }
 }
 
 @keyframes beginner-intro-katakana-glyph-anchor {
-  0%, 63.04% {
+  0%, 59.04% {
     color: var(--intro-node-accent);
     text-shadow: 0 0 0.75rem color-mix(in srgb, var(--intro-node-accent) 38%, transparent);
     transform: translate(-50%, -50%);
@@ -2771,7 +2789,7 @@ body:has(.beginner-zone--intro) {
     font-size: 6.8rem;
     transform: none;
   }
-  17.8%, to {
+  14%, to {
     opacity: 1;
     filter: blur(0);
     font-size: 2.584rem;
@@ -2787,7 +2805,7 @@ body:has(.beginner-zone--intro) {
     font-size: 6.8rem;
     transform: translate(0.42rem, -1rem);
   }
-  17.8% {
+  14% {
     bottom: 0;
     opacity: 1;
     filter: blur(0);
@@ -2817,7 +2835,7 @@ body:has(.beginner-zone--intro) {
       calc(-50% - 10px - 0.34rem)
     );
   }
-  17.8%, to {
+  14%, to {
     color: var(--intro-node-accent);
     text-shadow: 0 0 0.75rem color-mix(in srgb, var(--intro-node-accent) 38%, transparent);
     transform: translate(-50%, calc(-50% - 0.051em));
@@ -3067,6 +3085,7 @@ body:has(.beginner-zone--intro) {
   }
 
   .beginner-intro-speech-copy,
+  .beginner-intro-empty-wheel .beginner-intro-wheel-rotor,
   .beginner-intro-empty-wheel .beginner-intro-wheel-rotor::before,
   .beginner-intro-empty-wheel .beginner-intro-wheel-rotor::after {
     animation: none;
