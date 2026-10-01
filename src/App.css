@@ -2165,8 +2165,8 @@ body:has(.beginner-zone--intro) {
 }
 
 @keyframes beginner-intro-katakana-outline-in {
-  0%, 73.88% { opacity: 0; filter: blur(4px); }
-  80.28%, to { opacity: 1; filter: blur(0); }
+  0%, 75.28% { opacity: 0; filter: blur(4px); }
+  81.68%, to { opacity: 1; filter: blur(0); }
 }
 
 @keyframes beginner-intro-slot-switch-side {
@@ -2219,13 +2219,13 @@ body:has(.beginner-zone--intro) {
 }
 
 @keyframes beginner-intro-katakana-centered-label-in {
-  0%, 73.88% { opacity: 0; filter: blur(7px); transform: translate(-50%, 0.35rem) scale(0.92); }
-  80.28%, to { opacity: 1; filter: blur(0); transform: translate(-50%, 0) scale(1); }
+  0%, 75.28% { opacity: 0; filter: blur(7px); transform: translate(-50%, 0) scale(1); }
+  81.68%, to { opacity: 1; filter: blur(0); transform: translate(-50%, 0) scale(1); }
 }
 
 @keyframes beginner-intro-katakana-centered-progress-in {
-  0%, 73.88% { opacity: 0; filter: blur(7px); transform: translateY(0.35rem) scale(0.92); }
-  80.28%, to { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
+  0%, 75.28% { opacity: 0; filter: blur(7px); transform: translateY(0) scale(1); }
+  81.68%, to { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
 }
 
 @keyframes beginner-intro-hiragana-in {
@@ -2248,8 +2248,9 @@ body:has(.beginner-zone--intro) {
 @keyframes beginner-intro-katakana-in {
   0%, 44.69% { opacity: 0; filter: blur(8px); transform: translate(0, 0.875rem) scale(0.3); }
   47.75% { opacity: 0.18; filter: blur(5px); transform: translate(0, 0.875rem) scale(0.32); }
-  51.11%, 62.42%, 63.04% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) scale(0.38); }
-  75.28%, to { opacity: 1; filter: blur(0); transform: translate(0.42rem, -1rem) scale(1); }
+  51.11%, 62.42%, 63.04% { opacity: 1; filter: blur(5px); transform: translate(0, 0.875rem) scale(0.38); }
+  75.28% { opacity: 1; filter: blur(5px); transform: translate(0.42rem, -1rem) scale(1); }
+  81.68%, to { opacity: 1; filter: blur(0); transform: translate(0.42rem, -1rem) scale(1); }
 }
 
 @keyframes beginner-intro-katakana-glyph-anchor {
@@ -2274,8 +2275,8 @@ body:has(.beginner-zone--intro) {
 }
 
 @keyframes beginner-intro-katakana-romaji-in {
-  0%, 73.88% { opacity: 0; filter: blur(5px); }
-  80.28%, to { opacity: 1; filter: blur(0); }
+  0%, 75.28% { opacity: 0; filter: blur(5px); }
+  81.68%, to { opacity: 1; filter: blur(0); }
 }
 
 @keyframes beginner-intro-slot-words-in {
@@ -2296,8 +2297,8 @@ body:has(.beginner-zone--intro) {
 }
 
 @keyframes beginner-intro-katakana-words-in {
-  0%, 73.88% { opacity: 0; filter: blur(7px); transform: translate(-50%, 0.45rem) scale(0.94); }
-  80.28%, to { opacity: 1; filter: blur(0); transform: translate(-50%, 0) scale(1); }
+  0%, 75.28% { opacity: 0; filter: blur(7px); transform: translate(-50%, 0) scale(1); }
+  81.68%, to { opacity: 1; filter: blur(0); transform: translate(-50%, 0) scale(1); }
 }
 
 @keyframes beginner-intro-slot-previous-out {
