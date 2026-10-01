@@ -612,7 +612,7 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-empty-slot.is-slot-left { top: 75%; left: 7%; transform: translate(-50%, -50%); }
 
 .beginner-intro-empty-slot.is-slot-hiragana {
-  --intro-node-accent: var(--groudon-light);
+  --intro-node-accent: var(--sakura-light);
   --intro-slot-start-top: 27%;
   --intro-slot-start-left: 10.16%;
 }
@@ -641,13 +641,13 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-slot.is-script-katakana {
-  border-color: color-mix(in srgb, #70cfe0 80%, var(--border));
-  background: color-mix(in srgb, #4ba5c9 24%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--kyogre-light) 80%, var(--border));
+  background: color-mix(in srgb, var(--kyogre) 24%, var(--surface-2));
 }
 
 .beginner-intro-empty-slot.is-script-kanji {
-  border-color: color-mix(in srgb, #f0bf63 80%, var(--border));
-  background: color-mix(in srgb, #c78b32 24%, var(--surface-2));
+  border-color: color-mix(in srgb, #FED269 80%, var(--border));
+  background: color-mix(in srgb, #FED269 24%, var(--surface-2));
 }
 
 .beginner-intro-empty-slot.is-wheel-slot .beginner-intro-slot-hiragana > span {
@@ -999,9 +999,11 @@ body:has(.beginner-zone--intro) {
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-example-cue-arrow {
   grid-column: 2;
-  align-self: center;
+  align-self: end;
   justify-self: center;
+  margin-bottom: 0.66rem;
   font-size: 1.35rem;
+  line-height: 1;
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-segmented-ruby > ruby,
@@ -1287,7 +1289,7 @@ body:has(.beginner-zone--intro) {
 
 .beginner-intro-wheel-rotor {
   --intro-wheel-line: color-mix(in srgb, var(--text-muted) 58%, var(--border));
-  --intro-slice-hiragana: color-mix(in srgb, var(--groudon) 18%, var(--surface-2));
+  --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 18%, var(--surface-2));
   --intro-slice-katakana: color-mix(in srgb, var(--kyogre) 18%, var(--surface-2));
   --intro-slice-kanji: color-mix(in srgb, #FED269 18%, var(--surface-2));
   --intro-wheel-angle: 0deg;
@@ -2176,15 +2178,15 @@ body:has(.beginner-zone--intro) {
 
 @keyframes beginner-intro-wheel-backdrop-first-reveal {
   0%, 12%, 24% {
-    --intro-slice-hiragana: color-mix(in srgb, var(--groudon) 18%, var(--surface-2));
+    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 18%, var(--surface-2));
     opacity: 1;
   }
   6%, 18%, 30%, 82% {
-    --intro-slice-hiragana: var(--groudon);
+    --intro-slice-hiragana: var(--sakura);
     opacity: 1;
   }
   98%, to {
-    --intro-slice-hiragana: var(--groudon);
+    --intro-slice-hiragana: var(--sakura);
     opacity: 0;
   }
 }
@@ -2197,18 +2199,18 @@ body:has(.beginner-zone--intro) {
 
 @keyframes beginner-intro-wheel-backdrop-switch-katakana {
   0%, 6% { opacity: 0; }
-  22%, 36.8% {
-    --intro-slice-hiragana: var(--groudon);
+  22%, 27%, 32% {
+    --intro-slice-hiragana: var(--sakura);
     --intro-slice-katakana: color-mix(in srgb, var(--kyogre) 18%, var(--surface-2));
     opacity: 1;
   }
-  36.9%, 72% {
-    --intro-slice-hiragana: var(--groudon);
+  24.5%, 29.5%, 34.5%, 72% {
+    --intro-slice-hiragana: var(--sakura);
     --intro-slice-katakana: var(--kyogre);
     opacity: 1;
   }
   86%, to {
-    --intro-slice-hiragana: var(--groudon);
+    --intro-slice-hiragana: var(--sakura);
     --intro-slice-katakana: var(--kyogre);
     opacity: 0;
   }
@@ -2216,20 +2218,20 @@ body:has(.beginner-zone--intro) {
 
 @keyframes beginner-intro-wheel-backdrop-switch-kanji {
   0%, 6% { opacity: 0; }
-  22%, 36.8% {
-    --intro-slice-hiragana: var(--groudon);
+  22%, 27%, 32% {
+    --intro-slice-hiragana: var(--sakura);
     --intro-slice-katakana: var(--kyogre);
     --intro-slice-kanji: color-mix(in srgb, #FED269 18%, var(--surface-2));
     opacity: 1;
   }
-  36.9%, 72% {
-    --intro-slice-hiragana: var(--groudon);
+  24.5%, 29.5%, 34.5%, 72% {
+    --intro-slice-hiragana: var(--sakura);
     --intro-slice-katakana: var(--kyogre);
     --intro-slice-kanji: #FED269;
     opacity: 1;
   }
   86%, to {
-    --intro-slice-hiragana: var(--groudon);
+    --intro-slice-hiragana: var(--sakura);
     --intro-slice-katakana: var(--kyogre);
     --intro-slice-kanji: #FED269;
     opacity: 0;
