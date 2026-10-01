@@ -540,8 +540,8 @@ body:has(.beginner-zone--intro) {
 
 .beginner-intro-empty-wheel.is-hiragana {
   --intro-reveal-panel-offset-y: 10px;
-  --intro-hiragana-outline-width: 8.5rem;
-  --intro-previous-outline-width: 8.5rem;
+  --intro-hiragana-outline-width: 15rem;
+  --intro-previous-outline-width: 15rem;
   --intro-hiragana-panel-gutter: 15px;
   --intro-expanded-wheel-size: min(
     calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
@@ -559,8 +559,8 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-empty-wheel.is-kanji {
   --intro-reveal-panel-offset-x: 0px;
   --intro-reveal-panel-offset-y: 10px;
-  --intro-hiragana-outline-width: 8.5rem;
-  --intro-previous-outline-width: 8.5rem;
+  --intro-hiragana-outline-width: 15rem;
+  --intro-previous-outline-width: 15rem;
   --intro-hiragana-panel-gutter: 15px;
   --intro-expanded-wheel-size: min(
     calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
@@ -1289,9 +1289,13 @@ body:has(.beginner-zone--intro) {
 
 .beginner-intro-wheel-rotor {
   --intro-wheel-line: color-mix(in srgb, var(--text-muted) 58%, var(--border));
-  --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 18%, var(--surface-2));
-  --intro-slice-katakana: color-mix(in srgb, #4ba5c9 24%, var(--surface-2));
-  --intro-slice-kanji: color-mix(in srgb, #FED269 18%, var(--surface-2));
+  --intro-slice-muted: color-mix(in srgb, var(--text-muted) 10%, var(--surface-2));
+  --intro-slice-hiragana-muted: color-mix(in srgb, var(--sakura) 6%, var(--intro-slice-muted));
+  --intro-slice-katakana-muted: color-mix(in srgb, #4ba5c9 7%, var(--intro-slice-muted));
+  --intro-slice-kanji-muted: color-mix(in srgb, #FED269 5%, var(--intro-slice-muted));
+  --intro-slice-hiragana: var(--intro-slice-hiragana-muted);
+  --intro-slice-katakana: var(--intro-slice-katakana-muted);
+  --intro-slice-kanji: var(--intro-slice-kanji-muted);
   --intro-wheel-angle: 0deg;
   --intro-wheel-counter-angle: 0deg;
   position: absolute;
@@ -2185,7 +2189,7 @@ body:has(.beginner-zone--intro) {
 
 @keyframes beginner-intro-wheel-backdrop-first-reveal {
   0%, 12%, 24% {
-    --intro-slice-hiragana: color-mix(in srgb, var(--sakura) 18%, var(--surface-2));
+    --intro-slice-hiragana: var(--intro-slice-hiragana-muted);
     opacity: 1;
   }
   6%, 18%, 30%, 82% {
@@ -2205,10 +2209,9 @@ body:has(.beginner-zone--intro) {
 }
 
 @keyframes beginner-intro-wheel-backdrop-switch-katakana {
-  0%, 6% { opacity: 0; }
-  22%, 27%, 32% {
+  0%, 22%, 27%, 32% {
     --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: color-mix(in srgb, #4ba5c9 24%, var(--surface-2));
+    --intro-slice-katakana: var(--intro-slice-katakana-muted);
     opacity: 1;
   }
   24.5%, 29.5%, 34.5%, 72% {
@@ -2224,11 +2227,10 @@ body:has(.beginner-zone--intro) {
 }
 
 @keyframes beginner-intro-wheel-backdrop-switch-kanji {
-  0%, 6% { opacity: 0; }
-  22%, 27%, 32% {
+  0%, 22%, 27%, 32% {
     --intro-slice-hiragana: var(--sakura);
     --intro-slice-katakana: #70cfe0;
-    --intro-slice-kanji: color-mix(in srgb, #FED269 18%, var(--surface-2));
+    --intro-slice-kanji: var(--intro-slice-kanji-muted);
     opacity: 1;
   }
   24.5%, 29.5%, 34.5%, 72% {
