@@ -219,18 +219,26 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     romaji: 'yama',
     heading: 'Example:',
     words: [
-      { kana: '山', readingParts: ['yama'], romaji: 'mountain' },
+      { kana: '山', readingParts: ['yama'], visualCue: '(🗻➡️)', meaningPrefix: '(looks like a)', romaji: 'mountain' },
     ],
   },
 } as const
 
-function renderBeginnerIntroExampleWord(word: { kana?: string; reading?: string; readingParts?: readonly string[]; romaji: string }): ReactNode {
+function renderBeginnerIntroExampleWord(word: {
+  kana?: string
+  reading?: string
+  readingParts?: readonly string[]
+  visualCue?: string
+  meaningPrefix?: string
+  romaji: string
+}): ReactNode {
   return (
     <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
       {word.kana && (
         <>
           {word.readingParts ? (
             <span className="beginner-intro-segmented-ruby">
+              {word.visualCue && <span className="beginner-intro-example-cue">{word.visualCue}</span>}
               {Array.from(word.kana).map((character, index) => (
                 <ruby key={`${character}-${index}`}>
                   <i lang="ja">{character}</i>
@@ -249,7 +257,10 @@ function renderBeginnerIntroExampleWord(word: { kana?: string; reading?: string;
           <em>-</em>
         </>
       )}
-      <small>{word.romaji}</small>
+      <small>
+        {word.meaningPrefix && <span className="beginner-intro-example-meaning-prefix">{word.meaningPrefix}</span>}
+        {word.romaji}
+      </small>
     </span>
   )
 }
