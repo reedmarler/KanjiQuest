@@ -1,5 +1,5 @@
 import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
-import { ArrowLeft, ArrowRight, Gauge, Pause, Play, RotateCcw } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Gauge, Pause, Play, RotateCcw, Volume2 } from 'lucide-react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -32,7 +32,7 @@ import { AppHeaderControls } from './components/AppHeaderControls'
 import { UserProfileMenu } from './components/UserProfileMenu'
 import type { DailyGoalId } from './lib/dailyGoals'
 import { DEFAULT_PROFILE_PHOTO, displayProfilePhoto, useUserProfile } from './lib/userProfile'
-import { stopSpeaking } from './lib/speech'
+import { speakJapanese, stopSpeaking } from './lib/speech'
 import {
   APP_ENGLISH_DEFAULT_KEY,
   APP_FURIGANA_DEFAULT_KEY,
@@ -231,7 +231,7 @@ function renderBeginnerIntroExampleWord(word: {
   visualCue?: { icon: string; suffix?: string }
   meaningPrefix?: string
   romaji: string
-}): ReactNode {
+}, interactive = true, showAudio = true): ReactNode {
   return (
     <span key={word.romaji} className={word.kana ? undefined : 'is-english-only'}>
       {word.kana && (
@@ -265,6 +265,20 @@ function renderBeginnerIntroExampleWord(word: {
       <small>
         {word.meaningPrefix && <span className="beginner-intro-example-meaning-prefix">{word.meaningPrefix}</span>}
         <span className="beginner-intro-example-meaning">{word.romaji}</span>
+        {word.kana && showAudio && (interactive ? (
+          <button
+            type="button"
+            className="beginner-intro-example-speaker"
+            onClick={() => speakJapanese(word.kana ?? '', { beginnerRecordingKind: 'word' })}
+            aria-label={`Play ${word.kana}`}
+          >
+            <Volume2 aria-hidden="true" />
+          </button>
+        ) : (
+          <span className="beginner-intro-example-speaker" aria-hidden="true">
+            <Volume2 />
+          </span>
+        ))}
       </small>
     </span>
   )
@@ -726,7 +740,7 @@ function BeginnerZone({
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {isRevealWheelVisible && (
-              <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 ? ' is-switching' : ''}${introTransitioning && introStep === 4 ? ' is-final-retracting' : ''}`} aria-hidden="true">
+              <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 ? ' is-switching' : ''}${introTransitioning && introStep === 4 ? ' is-final-retracting' : ''}`}>
                 <div className="beginner-intro-wheel-rotor">
                   {BEGINNER_INTRO_SCRIPTS.map((item, index) => {
                     const content = BEGINNER_INTRO_REVEAL_CONTENT[item.id]
@@ -736,6 +750,7 @@ function BeginnerZone({
                       <span
                         className={`beginner-intro-empty-slot is-wheel-slot is-slot-${item.id} is-script-${item.id}${isRevealSlot ? ' is-reveal-slot' : ''}${isPreviousSlot ? ' is-previous-slot' : ''}`}
                         key={item.id}
+                        aria-hidden={!isRevealSlot}
                       >
                         {isPreviousSlot ? (
                           <span className="beginner-intro-slot-previous">
@@ -747,7 +762,7 @@ function BeginnerZone({
                             </span>
                             <span className="beginner-intro-slot-previous-words is-hiragana-examples">
                               <b>{content.heading}</b>
-                              {content.words.map(renderBeginnerIntroExampleWord)}
+                              {content.words.map((word) => renderBeginnerIntroExampleWord(word, false, item.id !== 'kanji'))}
                             </span>
                           </span>
                         ) : isRevealSlot ? (
@@ -757,10 +772,20 @@ function BeginnerZone({
                             <span key="slot-glyph" className="beginner-intro-slot-hiragana" lang="ja">
                               <small lang="en">{content.romaji}</small>
                               <span>{content.mark}</span>
+                              {item.id === 'hiragana' && introStep >= 2 && (
+                                <button
+                                  type="button"
+                                  className="beginner-intro-kana-speaker"
+                                  onClick={() => speakJapanese(content.mark, { rate: 0.5, beginnerRecordingKind: 'kana' })}
+                                  aria-label="Play the sound for あ"
+                                >
+                                  <Volume2 aria-hidden="true" />
+                                </button>
+                              )}
                             </span>
                             <span className="beginner-intro-slot-words is-hiragana-examples">
                               <b>{content.heading}</b>
-                              {content.words.map(renderBeginnerIntroExampleWord)}
+                              {content.words.map((word) => renderBeginnerIntroExampleWord(word, introStep >= 2, item.id !== 'kanji'))}
                             </span>
                           </>
                         ) : (
@@ -798,7 +823,7 @@ function BeginnerZone({
                     {item.id === 'hiragana' && isFocused && (
                       <span className="beginner-intro-node-words">
                         <b>{BEGINNER_INTRO_REVEAL_CONTENT.hiragana.heading}</b>
-                        {BEGINNER_INTRO_REVEAL_CONTENT.hiragana.words.map(renderBeginnerIntroExampleWord)}
+                        {BEGINNER_INTRO_REVEAL_CONTENT.hiragana.words.map((word) => renderBeginnerIntroExampleWord(word, false, false))}
                       </span>
                     )}
                   </span>

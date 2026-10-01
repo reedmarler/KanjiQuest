@@ -1032,9 +1032,65 @@ body:has(.beginner-zone--intro) {
 
 .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type small,
 .beginner-intro-slot-previous-words.is-hiragana-examples > span:only-of-type small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.34rem;
   font-size: 1.1648rem;
   text-align: center;
   transform: translateY(9.09375px);
+}
+
+.beginner-intro-kana-speaker,
+.beginner-intro-example-speaker {
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.beginner-intro-kana-speaker {
+  position: absolute;
+  z-index: 2;
+  top: calc(50% + 0.55rem);
+  left: calc(50% + 5.15rem);
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid color-mix(in srgb, var(--intro-reveal-accent) 72%, #fff);
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow: 0 0 0.55rem color-mix(in srgb, var(--intro-reveal-accent) 22%, transparent);
+}
+
+.beginner-intro-kana-speaker svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.beginner-intro-example-speaker {
+  flex: 0 0 auto;
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.beginner-intro-example-speaker svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke-width: 2.25;
+}
+
+button.beginner-intro-kana-speaker:focus-visible,
+button.beginner-intro-example-speaker:focus-visible {
+  outline: 2px solid var(--intro-reveal-accent);
+  outline-offset: 2px;
+}
+
+.beginner-intro-empty-wheel.is-revealing .is-reveal-slot .beginner-intro-kana-speaker {
+  animation: beginner-intro-romaji-in calc(282.5 * var(--intro-time-unit)) calc(2575 * var(--intro-time-unit)) linear forwards;
 }
 
 .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type i,
@@ -1577,16 +1633,26 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words > span {
-  min-width: max-content;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   white-space: nowrap;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words .beginner-intro-segmented-ruby {
   display: inline-flex;
-  width: max-content;
-  min-width: max-content;
+  width: auto;
+  min-width: 0;
   flex-flow: row nowrap;
   white-space: nowrap;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-switching .beginner-intro-slot-previous-words {
+  width: var(--intro-previous-outline-width, 15rem);
+  min-width: var(--intro-previous-outline-width, 15rem);
+  max-width: var(--intro-previous-outline-width, 15rem);
+  box-sizing: border-box;
+  contain: layout paint;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-slot-previous-words .beginner-intro-segmented-ruby > ruby {
