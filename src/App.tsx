@@ -240,7 +240,8 @@ function renderBeginnerIntroExampleWord(word: {
             <span className="beginner-intro-segmented-ruby">
               {word.visualCue && (
                 <span className="beginner-intro-example-cue">
-                  <span className="beginner-intro-example-cue-icon">{word.visualCue.icon}</span>{word.visualCue.suffix}
+                  <span className="beginner-intro-example-cue-icon">{word.visualCue.icon}</span>
+                  {word.visualCue.suffix && <span className="beginner-intro-example-cue-arrow">{word.visualCue.suffix}</span>}
                 </span>
               )}
               {Array.from(word.kana).map((character, index) => (
@@ -263,7 +264,7 @@ function renderBeginnerIntroExampleWord(word: {
       )}
       <small>
         {word.meaningPrefix && <span className="beginner-intro-example-meaning-prefix">{word.meaningPrefix}</span>}
-        {word.romaji}
+        <span className="beginner-intro-example-meaning">{word.romaji}</span>
       </small>
     </span>
   )
