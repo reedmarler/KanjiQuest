@@ -707,7 +707,7 @@ function BeginnerZone({
               <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 ? ' is-switching' : ''}`} aria-hidden="true">
                 <div className="beginner-intro-wheel-rotor">
                 <span className={`beginner-intro-empty-slot is-slot-top${introStep === 2 ? ' is-reveal-slot' : ''}${introStep >= 3 ? ' is-previous-slot' : ''}`}>
-                  <span className="beginner-intro-slot-question">1</span>
+                  {introStep < 2 && <span className="beginner-intro-slot-docked-glyph" lang="ja">あ</span>}
                   {introStep >= 3 && (
                     <span className="beginner-intro-slot-previous">
                       {previousRevealContent.label === 'Hiragana' && <span className="beginner-intro-slot-previous-progress">1/46</span>}
@@ -738,12 +738,10 @@ function BeginnerZone({
                   )}
                 </span>
                 <span className={`beginner-intro-empty-slot is-slot-right${introStep === 4 ? ' is-complete-hiragana' : ''}`} aria-hidden="true">
-                  {introStep === 4
-                    ? <span className="beginner-intro-slot-docked-glyph" lang="ja">あ</span>
-                    : <span className="beginner-intro-slot-question">3</span>}
+                  <span className="beginner-intro-slot-docked-glyph" lang="ja">{introStep === 4 ? 'あ' : '山'}</span>
                 </span>
                 <span className={`beginner-intro-empty-slot is-slot-left${introStep >= 3 ? ' is-reveal-slot' : ''}`} aria-hidden="true">
-                  <span className="beginner-intro-slot-question">{introStep === 4 ? '3' : '2'}</span>
+                  {introStep < 3 && <span className="beginner-intro-slot-docked-glyph" lang="ja">ア</span>}
                   {introStep >= 3 && (
                     <>
                       {revealContent.label === 'Katakana' && <span className="beginner-intro-slot-progress">1/46</span>}

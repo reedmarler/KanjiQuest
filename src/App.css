@@ -602,7 +602,7 @@ body:has(.beginner-zone--intro) {
   position: absolute;
   inset: 0;
   color: var(--text);
-  font: 700 2.15rem/1 'Noto Sans JP', sans-serif;
+  font: 700 2.584rem/1 'Noto Sans JP', sans-serif;
   transform: translateY(-0.08em);
 }
 
@@ -2229,9 +2229,7 @@ body:has(.beginner-zone--intro) {
 }
 
 @keyframes beginner-intro-hiragana-in {
-  0% { opacity: 0; filter: blur(8px); transform: translate(0, 0.875rem) rotate(0deg) scale(0.3); }
-  7.7% { opacity: 0.18; filter: blur(5px); transform: translate(0, 0.875rem) rotate(0deg) scale(0.32); }
-  16.2%, 60% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) rotate(0deg) scale(0.38); }
+  0%, 60% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) rotate(0deg) scale(0.38); }
   to { opacity: 1; filter: none; transform: translate(0.42rem, -1rem) rotate(0deg) scale(1); }
 }
 
@@ -2246,9 +2244,8 @@ body:has(.beginner-zone--intro) {
 }
 
 @keyframes beginner-intro-katakana-in {
-  0%, 44.69% { opacity: 0; filter: blur(8px); transform: translate(0, 0.875rem) scale(0.3); }
-  47.75% { opacity: 0.18; filter: blur(5px); transform: translate(0, 0.875rem) scale(0.32); }
-  51.11%, 62.42%, 63.04% { opacity: 1; filter: blur(5px); transform: translate(0, 0.875rem) scale(0.38); }
+  0%, 44.69% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) scale(0.38); }
+  47.75%, 62.42%, 63.04% { opacity: 1; filter: blur(5px); transform: translate(0, 0.875rem) scale(0.38); }
   75.28% { opacity: 1; filter: blur(5px); transform: translate(0.42rem, -1rem) scale(1); }
   81.68%, to { opacity: 1; filter: blur(0); transform: translate(0.42rem, -1rem) scale(1); }
 }
