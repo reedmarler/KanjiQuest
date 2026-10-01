@@ -293,7 +293,7 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'kanji-reveal',
     eyebrow: '',
-    title: 'Kanji are Chinese characters used to write Japanese. They are more complex and carry more meaning. Each can represent a different word or idea.',
+    title: 'Kanji are information dense Chinese characters used to write Japanese. Most hold the meaning of an entire word.',
     body: '',
   },
   {
@@ -350,6 +350,15 @@ function renderIntroDisplayText(value: string) {
       <>
         <span className="beginner-intro-title-highlight">Katakana</span>
         {value.slice('Katakana'.length)}
+      </>
+    )
+  }
+
+  if (value.startsWith('Kanji are')) {
+    return (
+      <>
+        <span className="beginner-intro-title-highlight">Kanji</span>
+        {value.slice('Kanji'.length)}
       </>
     )
   }

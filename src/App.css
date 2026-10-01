@@ -371,6 +371,17 @@ body:has(.beginner-zone--intro) {
   text-shadow: 0 0 1rem color-mix(in srgb, #4ba5c9 42%, transparent);
 }
 
+.beginner-intro-speech-inner.is-kanji-reveal .beginner-intro-title-highlight {
+  color: #f0bf63;
+  text-shadow: 0 0 1rem color-mix(in srgb, #c78b32 42%, transparent);
+}
+
+.beginner-intro-speech-inner.is-kanji-reveal h1 {
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.28;
+}
+
 .beginner-intro-blur-text {
   display: inline-block;
   filter: blur(0);
@@ -2538,6 +2549,9 @@ body:has(.beginner-zone--intro) {
     font-size: 1.12rem;
     font-weight: 400;
     line-height: 1.27;
+  }
+  .beginner-intro-speech-inner.is-kanji-reveal h1 {
+    font-size: 0.9rem;
   }
   .beginner-intro-speech-inner.is-welcome h1 { white-space: nowrap; }
   .beginner-intro-speech-inner.is-welcome h1,
