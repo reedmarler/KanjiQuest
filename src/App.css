@@ -651,7 +651,7 @@ body:has(.beginner-zone--intro) {
   background: color-mix(in srgb, #FED269 24%, var(--surface-2));
 }
 
-.beginner-intro-empty-slot:is(.is-script-katakana, .is-script-kanji):not(.is-reveal-slot):not(.is-previous-slot) {
+.beginner-intro-empty-slot:is(.is-script-hiragana, .is-script-katakana, .is-script-kanji):not(.is-reveal-slot):not(.is-previous-slot) {
   filter: grayscale(1);
 }
 
@@ -1379,9 +1379,9 @@ button.beginner-intro-example-speaker:focus-visible {
   --intro-slice-hiragana-muted: color-mix(in srgb, var(--sakura) 6%, var(--intro-slice-muted));
   --intro-slice-katakana-muted: color-mix(in srgb, #4ba5c9 7%, var(--intro-slice-muted));
   --intro-slice-kanji-muted: color-mix(in srgb, #FED269 5%, var(--intro-slice-muted));
-  --intro-slice-hiragana: var(--sakura);
-  --intro-slice-katakana: #70cfe0;
-  --intro-slice-kanji: #FED269;
+  --intro-slice-hiragana: var(--intro-slice-hiragana-muted);
+  --intro-slice-katakana: var(--intro-slice-katakana-muted);
+  --intro-slice-kanji: var(--intro-slice-kanji-muted);
   --intro-wheel-angle: 0deg;
   --intro-wheel-counter-angle: 0deg;
   position: absolute;
@@ -1410,13 +1410,13 @@ button.beginner-intro-example-speaker:focus-visible {
   border: 1px solid var(--intro-wheel-line);
   border-radius: 50%;
   background: conic-gradient(
-    from 0deg,
+    from 60deg,
     var(--intro-slice-katakana) 0deg 120deg,
     var(--intro-slice-kanji) 120deg 240deg,
     var(--intro-slice-hiragana) 240deg 360deg
   );
-  -webkit-mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
-  mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
+  -webkit-mask: radial-gradient(circle, transparent 0 65%, #000 65.7% 100%);
+  mask: radial-gradient(circle, transparent 0 65%, #000 65.7% 100%);
   pointer-events: none;
 }
 
@@ -1427,7 +1427,7 @@ button.beginner-intro-example-speaker:focus-visible {
   inset: -1px;
   border-radius: 50%;
   background: conic-gradient(
-    from -0.25deg,
+    from 59.75deg,
     var(--intro-wheel-line) 0deg 0.5deg,
     transparent 0.5deg 120deg,
     var(--intro-wheel-line) 120deg 120.5deg,
@@ -1435,8 +1435,8 @@ button.beginner-intro-example-speaker:focus-visible {
     var(--intro-wheel-line) 240deg 240.5deg,
     transparent 240.5deg 360deg
   );
-  -webkit-mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
-  mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
+  -webkit-mask: radial-gradient(circle, transparent 0 65%, #000 65.7% 100%);
+  mask: radial-gradient(circle, transparent 0 65%, #000 65.7% 100%);
   pointer-events: none;
 }
 
@@ -1458,6 +1458,7 @@ button.beginner-intro-example-speaker:focus-visible {
   font: 800 1.18rem/1 'Noto Sans JP', sans-serif;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  opacity: 0;
 }
 
 .beginner-intro-wheel-center-copy > span {
@@ -1480,12 +1481,8 @@ button.beginner-intro-example-speaker:focus-visible {
 .beginner-intro-wheel-center-copy .is-katakana { color: #70cfe0; }
 .beginner-intro-wheel-center-copy .is-kanji { color: #FED269; }
 
-.beginner-intro-empty-wheel.is-revealing .beginner-intro-wheel-center-copy {
-  animation: beginner-intro-wheel-backdrop-first-reveal var(--intro-first-reveal-duration) linear both;
-}
-
-.beginner-intro-empty-wheel.is-switching .beginner-intro-wheel-center-copy {
-  animation: beginner-intro-wheel-backdrop-switch var(--intro-switch-duration) linear both;
+.beginner-intro-empty-wheel.is-kanji.is-switching .beginner-intro-wheel-center-copy {
+  animation: beginner-intro-wheel-center-kanji-reveal var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-wheel-rotor::before,
@@ -2375,6 +2372,11 @@ button.beginner-intro-example-speaker:focus-visible {
   86%, to { opacity: 0; }
 }
 
+@keyframes beginner-intro-wheel-center-kanji-reveal {
+  0%, 88% { opacity: 0; }
+  96%, to { opacity: 1; }
+}
+
 @keyframes beginner-intro-first-background-cube-out {
   0%, 68.67% { opacity: 1; }
   76%, to { opacity: 0; }
@@ -3231,9 +3233,12 @@ button.beginner-intro-example-speaker:focus-visible {
   }
 
   .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-rotor::before,
-  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-rotor::after,
-  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-center-copy {
+  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-rotor::after {
     opacity: 0;
+  }
+
+  .beginner-intro-empty-wheel.is-kanji.is-switching .beginner-intro-wheel-center-copy {
+    opacity: 1;
   }
 
   .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .is-reveal-slot {
