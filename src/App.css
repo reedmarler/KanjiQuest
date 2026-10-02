@@ -452,9 +452,9 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-orbit {
-  --intro-empty-wheel-size: min(17.6rem, 83.6dvw);
+  --intro-empty-wheel-size: min(16rem, 76dvw);
   position: relative;
-  width: min(100%, 17.6rem);
+  width: min(100%, 16rem);
   aspect-ratio: 1;
   margin: 4.5rem auto 0;
 }
@@ -1376,12 +1376,12 @@ button.beginner-intro-example-speaker:focus-visible {
 .beginner-intro-wheel-rotor {
   --intro-wheel-line: color-mix(in srgb, var(--text-muted) 58%, var(--border));
   --intro-slice-muted: color-mix(in srgb, var(--text-muted) 10%, var(--surface-2));
-  --intro-slice-hiragana-muted: color-mix(in srgb, #96919a 22%, var(--intro-slice-muted));
-  --intro-slice-katakana-muted: color-mix(in srgb, #96919a 22%, var(--intro-slice-muted));
-  --intro-slice-kanji-muted: color-mix(in srgb, #96919a 22%, var(--intro-slice-muted));
-  --intro-slice-hiragana: var(--intro-slice-hiragana-muted);
-  --intro-slice-katakana: var(--intro-slice-katakana-muted);
-  --intro-slice-kanji: var(--intro-slice-kanji-muted);
+  --intro-slice-hiragana-muted: color-mix(in srgb, var(--sakura) 6%, var(--intro-slice-muted));
+  --intro-slice-katakana-muted: color-mix(in srgb, #4ba5c9 7%, var(--intro-slice-muted));
+  --intro-slice-kanji-muted: color-mix(in srgb, #FED269 5%, var(--intro-slice-muted));
+  --intro-slice-hiragana: var(--sakura);
+  --intro-slice-katakana: #70cfe0;
+  --intro-slice-kanji: #FED269;
   --intro-wheel-angle: 0deg;
   --intro-wheel-counter-angle: 0deg;
   position: absolute;
@@ -1410,13 +1410,13 @@ button.beginner-intro-example-speaker:focus-visible {
   border: 1px solid var(--intro-wheel-line);
   border-radius: 50%;
   background: conic-gradient(
-    from 60deg,
+    from 0deg,
     var(--intro-slice-katakana) 0deg 120deg,
     var(--intro-slice-kanji) 120deg 240deg,
     var(--intro-slice-hiragana) 240deg 360deg
   );
-  -webkit-mask: radial-gradient(circle, transparent 0 71.5%, #000 71.85% 100%);
-  mask: radial-gradient(circle, transparent 0 71.5%, #000 71.85% 100%);
+  -webkit-mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
+  mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
   pointer-events: none;
 }
 
@@ -1427,7 +1427,7 @@ button.beginner-intro-example-speaker:focus-visible {
   inset: -1px;
   border-radius: 50%;
   background: conic-gradient(
-    from 59.75deg,
+    from -0.25deg,
     var(--intro-wheel-line) 0deg 0.5deg,
     transparent 0.5deg 120deg,
     var(--intro-wheel-line) 120deg 120.5deg,
@@ -1435,8 +1435,8 @@ button.beginner-intro-example-speaker:focus-visible {
     var(--intro-wheel-line) 240deg 240.5deg,
     transparent 240.5deg 360deg
   );
-  -webkit-mask: radial-gradient(circle, transparent 0 71.5%, #000 71.85% 100%);
-  mask: radial-gradient(circle, transparent 0 71.5%, #000 71.85% 100%);
+  -webkit-mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
+  mask: radial-gradient(circle, transparent 0 43%, #000 43.7% 100%);
   pointer-events: none;
 }
 
@@ -1458,7 +1458,6 @@ button.beginner-intro-example-speaker:focus-visible {
   font: 800 1.18rem/1 'Noto Sans JP', sans-serif;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  opacity: 0;
 }
 
 .beginner-intro-wheel-center-copy > span {
@@ -1481,8 +1480,12 @@ button.beginner-intro-example-speaker:focus-visible {
 .beginner-intro-wheel-center-copy .is-katakana { color: #70cfe0; }
 .beginner-intro-wheel-center-copy .is-kanji { color: #FED269; }
 
-.beginner-intro-empty-wheel.is-kanji.is-switching .beginner-intro-wheel-center-copy {
-  animation: beginner-intro-wheel-center-kanji-reveal var(--intro-switch-duration) linear both;
+.beginner-intro-empty-wheel.is-revealing .beginner-intro-wheel-center-copy {
+  animation: beginner-intro-wheel-backdrop-first-reveal var(--intro-first-reveal-duration) linear both;
+}
+
+.beginner-intro-empty-wheel.is-switching .beginner-intro-wheel-center-copy {
+  animation: beginner-intro-wheel-backdrop-switch var(--intro-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-wheel-rotor::before,
@@ -2350,14 +2353,7 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 @keyframes beginner-intro-wheel-backdrop-first-reveal {
-  0%, 12% {
-    --intro-slice-hiragana: var(--intro-slice-hiragana-muted);
-    opacity: 1;
-  }
-  6%, 18%, 82% {
-    --intro-slice-hiragana: var(--sakura);
-    opacity: 1;
-  }
+  0%, 82% { opacity: 1; }
   98%, to { opacity: 0; }
 }
 
@@ -2368,47 +2364,15 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 @keyframes beginner-intro-wheel-backdrop-switch-katakana {
-  0%, 22%, 27% {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: var(--intro-slice-katakana-muted);
-    opacity: 1;
-  }
-  24.5%, 29.5%, 72% {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: #70cfe0;
-    opacity: 1;
-  }
-  86%, to {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: #70cfe0;
-    opacity: 0;
-  }
+  0%, 6% { opacity: 0; }
+  22%, 72% { opacity: 1; }
+  86%, to { opacity: 0; }
 }
 
 @keyframes beginner-intro-wheel-backdrop-switch-kanji {
-  0%, 22%, 27% {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: #70cfe0;
-    --intro-slice-kanji: var(--intro-slice-kanji-muted);
-    opacity: 1;
-  }
-  24.5%, 29.5%, 72% {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: #70cfe0;
-    --intro-slice-kanji: #FED269;
-    opacity: 1;
-  }
-  86%, to {
-    --intro-slice-hiragana: var(--sakura);
-    --intro-slice-katakana: #70cfe0;
-    --intro-slice-kanji: #FED269;
-    opacity: 0;
-  }
-}
-
-@keyframes beginner-intro-wheel-center-kanji-reveal {
-  0%, 88% { opacity: 0; }
-  96%, to { opacity: 1; }
+  0%, 6% { opacity: 0; }
+  22%, 72% { opacity: 1; }
+  86%, to { opacity: 0; }
 }
 
 @keyframes beginner-intro-first-background-cube-out {
@@ -3145,12 +3109,12 @@ button.beginner-intro-example-speaker:focus-visible {
   }
   .beginner-intro-lesson.is-hiragana { min-height: 20.4rem; }
   .beginner-intro-orbit {
-    width: min(100%, 18.7rem);
+    width: min(100%, 17rem);
     margin-top: 2rem;
   }
   .beginner-intro-ring { inset: 1.9rem; }
   .beginner-intro-empty-wheel {
-    --intro-empty-wheel-size: min(16.225rem, 79.2dvw);
+    --intro-empty-wheel-size: min(14.75rem, 72dvw);
     --intro-expanded-wheel-size: min(18.8rem, 81.6dvw);
     top: calc(58% + 15px);
   }
@@ -3223,8 +3187,8 @@ button.beginner-intro-example-speaker:focus-visible {
   .beginner-intro-guide:not(.is-welcome):not(.is-simple) .beginner-intro-mascot {
     transform: scale(0.86);
   }
-  .beginner-intro-orbit { width: min(100%, 17.05rem); }
-  .beginner-intro-empty-wheel { --intro-empty-wheel-size: min(15.95rem, 83.6dvw); }
+  .beginner-intro-orbit { width: min(100%, 15.5rem); }
+  .beginner-intro-empty-wheel { --intro-empty-wheel-size: min(14.5rem, 76dvw); }
   .beginner-intro-wheel-placeholder { width: 9.6rem; }
   .beginner-intro-node.is-focused { width: 10rem; }
   .beginner-intro-node.is-focused .beginner-intro-node-mark { width: 9rem; font-size: 4.55rem; }
@@ -3260,18 +3224,16 @@ button.beginner-intro-example-speaker:focus-visible {
 
   .beginner-intro-speech-copy,
   .beginner-intro-empty-wheel .beginner-intro-wheel-rotor,
+  .beginner-intro-wheel-center-copy,
   .beginner-intro-empty-wheel .beginner-intro-wheel-rotor::before,
   .beginner-intro-empty-wheel .beginner-intro-wheel-rotor::after {
     animation: none;
   }
 
   .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-rotor::before,
-  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-rotor::after {
+  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-rotor::after,
+  .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .beginner-intro-wheel-center-copy {
     opacity: 0;
-  }
-
-  .beginner-intro-empty-wheel.is-kanji.is-switching .beginner-intro-wheel-center-copy {
-    opacity: 1;
   }
 
   .beginner-intro-empty-wheel:is(.is-revealing, .is-switching) .is-reveal-slot {
