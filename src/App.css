@@ -454,7 +454,7 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-orbit {
   --intro-empty-wheel-size: min(17.6rem, 83.6dvw);
   position: relative;
-  width: min(100%, 16rem);
+  width: min(100%, 17.6rem);
   aspect-ratio: 1;
   margin: 4.5rem auto 0;
 }
@@ -1376,9 +1376,9 @@ button.beginner-intro-example-speaker:focus-visible {
 .beginner-intro-wheel-rotor {
   --intro-wheel-line: color-mix(in srgb, var(--text-muted) 58%, var(--border));
   --intro-slice-muted: color-mix(in srgb, var(--text-muted) 10%, var(--surface-2));
-  --intro-slice-hiragana-muted: color-mix(in srgb, var(--sakura) 16%, var(--intro-slice-muted));
-  --intro-slice-katakana-muted: color-mix(in srgb, #70cfe0 16%, var(--intro-slice-muted));
-  --intro-slice-kanji-muted: color-mix(in srgb, #FED269 13%, var(--intro-slice-muted));
+  --intro-slice-hiragana-muted: color-mix(in srgb, #96919a 22%, var(--intro-slice-muted));
+  --intro-slice-katakana-muted: color-mix(in srgb, #96919a 22%, var(--intro-slice-muted));
+  --intro-slice-kanji-muted: color-mix(in srgb, #96919a 22%, var(--intro-slice-muted));
   --intro-slice-hiragana: var(--intro-slice-hiragana-muted);
   --intro-slice-katakana: var(--intro-slice-katakana-muted);
   --intro-slice-kanji: var(--intro-slice-kanji-muted);
@@ -3145,7 +3145,7 @@ button.beginner-intro-example-speaker:focus-visible {
   }
   .beginner-intro-lesson.is-hiragana { min-height: 20.4rem; }
   .beginner-intro-orbit {
-    width: min(100%, 17rem);
+    width: min(100%, 18.7rem);
     margin-top: 2rem;
   }
   .beginner-intro-ring { inset: 1.9rem; }
@@ -3223,7 +3223,7 @@ button.beginner-intro-example-speaker:focus-visible {
   .beginner-intro-guide:not(.is-welcome):not(.is-simple) .beginner-intro-mascot {
     transform: scale(0.86);
   }
-  .beginner-intro-orbit { width: min(100%, 15.5rem); }
+  .beginner-intro-orbit { width: min(100%, 17.05rem); }
   .beginner-intro-empty-wheel { --intro-empty-wheel-size: min(15.95rem, 83.6dvw); }
   .beginner-intro-wheel-placeholder { width: 9.6rem; }
   .beginner-intro-node.is-focused { width: 10rem; }
