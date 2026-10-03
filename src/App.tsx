@@ -338,7 +338,7 @@ type IntroAnimationSpeed = 0.5 | 1 | 1.25 | 1.5 | 2 | 2.5 | 3
 
 const INTRO_ANIMATION_TIME_BASE = 2
 const INTRO_OPENING_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 1
-const INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 1.25
+const INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
 const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.25, 1.5, 2, 2.5, 3]
 const INTRO_OPENING_MOVE_CSS_MS = 1274
 const INTRO_SPEECH_RESIZE_MS = 560
@@ -645,7 +645,7 @@ function BeginnerZone({
       if (frame) window.cancelAnimationFrame(frame)
       window.removeEventListener('resize', scheduleSpeechSizeUpdate)
     }
-  }, [intro, introOpeningPreview, introStep, introTransitioning])
+  }, [intro, introOpeningPreview, introSpeechDisplayStep, introTransitioning])
 
   const displayIntroStep = introOpeningPreview && introStep === 0 ? 1 : introStep
 
@@ -683,15 +683,15 @@ function BeginnerZone({
 
   if (intro) {
     const step = BEGINNER_INTRO_STEPS[displayIntroStep]
-    const speechMeasureStep = displayIntroStep === 3
-      ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
-      : step
     const speechDisplayStep = BEGINNER_INTRO_STEPS[introSpeechDisplayStep]
-    const guideStep = displayIntroStep === 3
+    const speechMeasureStep = introSpeechDisplayStep === 3
+      ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
+      : speechDisplayStep
+    const guideStep = introSpeechDisplayStep === 3
       ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
       : (introOpeningPreview && introStep === 0 && !introOpeningShrinking
           ? BEGINNER_INTRO_STEPS[0]
-          : step)
+          : speechDisplayStep)
     const activeScriptIndex = -1
     const completedScripts = 0
     const isFinalStep = introSequenceComplete
@@ -739,7 +739,7 @@ function BeginnerZone({
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {isRevealWheelVisible && (
-              <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 && introStep <= 4 ? ' is-switching' : ''}${introSequenceComplete ? ' is-final-complete' : ''}${(introTransitioning || introSequenceComplete) && introStep === 4 ? ' is-final-retracting' : ''}`}>
+              <div className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 && introStep <= 4 ? ' is-switching' : ''}${introSequenceComplete ? ' is-final-complete' : ''}${(introTransitioning || introSequenceComplete) && introStep === 4 ? ' is-final-retracting' : ''}`}>
                 <div className="beginner-intro-circuit-lines" aria-hidden="true">
                   <i className="is-outer-one" />
                   <i className="is-outer-two" />
@@ -758,56 +758,45 @@ function BeginnerZone({
                         key={item.id}
                         aria-hidden={!isRevealSlot}
                       >
-                        {isPreviousSlot ? (
-                          <span className="beginner-intro-slot-previous">
-                            <span className="beginner-intro-slot-previous-progress">1/46</span>
-                            <span className="beginner-intro-slot-previous-label">{content.label}</span>
-                            <span className="beginner-intro-slot-previous-kana" lang="ja">
-                              <small lang="en">{content.romaji}</small>
-                              <span>{content.mark}</span>
-                            </span>
-                            <span className="beginner-intro-slot-previous-words is-hiragana-examples">
-                              <b>{content.heading}</b>
-                              {content.words.map((word) => renderBeginnerIntroExampleWord(word, false))}
-                            </span>
-                          </span>
-                        ) : isRevealSlot ? (
-                          <>
-                            <span className="beginner-intro-slot-progress">{item.id === 'kanji' ? '1/∞' : '1/46'}</span>
-                            <span className="beginner-intro-slot-label">{content.label}</span>
-                            <span key="slot-glyph" className="beginner-intro-slot-hiragana" lang="ja">
-                              <small lang="en">{content.romaji}</small>
-                              <span>{content.mark}</span>
+                        <span className="beginner-intro-slot-stage">
+                          {isRevealSlot || isPreviousSlot ? (
+                            <>
+                              <span className="beginner-intro-slot-progress">{item.id === 'kanji' ? '1/∞' : '1/46'}</span>
+                              <span className="beginner-intro-slot-label">{content.label}</span>
+                              <span key="slot-glyph" className="beginner-intro-slot-hiragana" lang="ja">
+                                <small lang="en">{content.romaji}</small>
+                                <span>{content.mark}</span>
+                                {introStep >= 2 && (
+                                  <button
+                                    type="button"
+                                    className="beginner-intro-kana-speaker"
+                                    onClick={() => speakJapanese(item.id === 'kanji' ? 'やま' : content.mark, {
+                                      rate: 0.5,
+                                      beginnerRecordingKind: item.id === 'kanji' ? 'word' : 'kana',
+                                    })}
+                                    aria-label={`Play the sound for ${content.mark}`}
+                                  >
+                                    <Volume2 aria-hidden="true" />
+                                  </button>
+                                )}
+                              </span>
+                              <span className="beginner-intro-slot-words is-hiragana-examples">
+                                <b>{content.heading}</b>
+                                {content.words.map((word) => renderBeginnerIntroExampleWord(word, introStep >= 2))}
+                              </span>
                               {introStep >= 2 && (
                                 <button
                                   type="button"
-                                  className="beginner-intro-kana-speaker"
-                                  onClick={() => speakJapanese(item.id === 'kanji' ? 'やま' : content.mark, {
-                                    rate: 0.5,
-                                    beginnerRecordingKind: item.id === 'kanji' ? 'word' : 'kana',
-                                  })}
-                                  aria-label={`Play the sound for ${content.mark}`}
-                                >
-                                  <Volume2 aria-hidden="true" />
-                                </button>
+                                  className="beginner-intro-example-hit-area"
+                                  onClick={() => speakJapanese(exampleAudio, { beginnerRecordingKind: 'word' })}
+                                  aria-label={`Play the example word ${exampleWord.kana}`}
+                                />
                               )}
-                            </span>
-                            <span className="beginner-intro-slot-words is-hiragana-examples">
-                              <b>{content.heading}</b>
-                              {content.words.map((word) => renderBeginnerIntroExampleWord(word, introStep >= 2))}
-                            </span>
-                            {introStep >= 2 && (
-                              <button
-                                type="button"
-                                className="beginner-intro-example-hit-area"
-                                onClick={() => speakJapanese(exampleAudio, { beginnerRecordingKind: 'word' })}
-                                aria-label={`Play the example word ${exampleWord.kana}`}
-                              />
-                            )}
-                          </>
-                        ) : (
-                          <span key="slot-glyph" className="beginner-intro-slot-hiragana is-seed-glyph" lang="ja"><span>{item.mark}</span></span>
-                        )}
+                            </>
+                          ) : (
+                            <span key="slot-glyph" className="beginner-intro-slot-hiragana is-seed-glyph" lang="ja"><span>{item.mark}</span></span>
+                          )}
+                        </span>
                       </span>
                     )
                   })}
@@ -1114,6 +1103,20 @@ function DesktopPrimaryNav({
 type SessionItem =
   | { kind: 'sentence-builder'; exercise: SentenceExercise }
 
+function canScrollVertically(element: Element) {
+  const style = window.getComputedStyle(element)
+  return /(auto|scroll)/.test(style.overflowY) && element.scrollHeight > element.clientHeight
+}
+
+function getScrollableParent(element: Element | null) {
+  let current = element
+  while (current && current !== document.body && current !== document.documentElement) {
+    if (canScrollVertically(current)) return current as HTMLElement
+    current = current.parentElement
+  }
+  return document.scrollingElement as HTMLElement | null
+}
+
 function App() {
   const [view, setView] = useState<View>(() => window.location.hash === '#home' ? 'home' : 'dashboard')
   const [progress] = useState<Record<string, CardProgress>>(() => loadProgress())
@@ -1158,6 +1161,37 @@ function App() {
   const [englishOn, setEnglishOn] = useState(() => loadBooleanPreference(APP_ENGLISH_DEFAULT_KEY, true))
   const [speechOn, setSpeechOn] = useState(() => window.localStorage.getItem(HERO_SPEECH_STORAGE_KEY) === 'true')
   const [complexity, setComplexity] = useState<GenerationComplexity>(1)
+
+  useEffect(() => {
+    let startY = 0
+
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length === 1) startY = event.touches[0]!.clientY
+    }
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (event.touches.length !== 1) return
+
+      const currentY = event.touches[0]!.clientY
+      const deltaY = currentY - startY
+      if (deltaY === 0) return
+
+      const scroller = getScrollableParent(event.target instanceof Element ? event.target : null)
+      if (!scroller) return
+
+      const atTop = scroller.scrollTop <= 0
+      const atBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1
+      if ((atTop && deltaY > 0) || (atBottom && deltaY < 0)) event.preventDefault()
+    }
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true })
+    document.addEventListener('touchmove', handleTouchMove, { passive: false })
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchmove', handleTouchMove)
+    }
+  }, [])
   const [userProfile] = useUserProfile()
 
   useEffect(() => {
