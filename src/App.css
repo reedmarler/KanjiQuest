@@ -986,9 +986,9 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-segmented-ruby {
-  display: flex;
-  width: 100%;
-  max-width: 100%;
+  display: inline-flex;
+  width: max-content;
+  max-width: none;
   align-items: end;
   justify-content: center;
 }
@@ -999,12 +999,6 @@ body:has(.beginner-zone--intro) {
   max-width: 100%;
   align-items: baseline;
   justify-content: center;
-}
-
-.beginner-intro-empty-wheel.is-kanji .beginner-intro-example-speaker {
-  right: 0;
-  left: auto;
-  margin-left: 0;
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type small {
@@ -1025,6 +1019,45 @@ body:has(.beginner-zone--intro) {
   font-size: 1.1648rem;
   text-align: center;
   transform: translateY(9.09375px);
+}
+
+.beginner-intro-example-note {
+  position: absolute;
+  top: 0.76rem;
+  right: auto;
+  left: 0.75rem;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.09rem;
+  width: max-content;
+  height: 40.5625px;
+  padding: 0 0.59rem;
+  border: 1px solid color-mix(in srgb, #f0bf63 58%, var(--border));
+  border-radius: 8px;
+  background: color-mix(in srgb, #c78b32 16%, var(--surface-2));
+  color: #f0bf63;
+  box-shadow: 0 0.35rem 0.8rem rgba(0, 0, 0, 0.2);
+  font-size: 0.567rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.beginner-intro-example-note > svg {
+  position: absolute;
+  top: 50%;
+  right: -0.72rem;
+  width: 0.78rem;
+  height: 0.78rem;
+  color: #f0bf63;
+  stroke-width: 2.5;
+  transform: translateY(-50%);
+}
+
+.beginner-intro-example-note > span {
+  color: #fff;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .beginner-intro-kana-speaker,
@@ -1065,11 +1098,13 @@ body:has(.beginner-zone--intro) {
 
 .beginner-intro-example-speaker {
   position: absolute;
-  bottom: 0.05rem;
-  left: 100%;
+  top: calc(50% + 0.45rem);
+  bottom: auto;
+  left: calc(100% + 0.25rem);
   width: 0.95rem;
   height: 0.95rem;
-  margin-left: 0.25rem;
+  margin-left: 0;
+  transform: translateY(-50%);
 }
 
 .beginner-intro-example-speaker svg {
@@ -1383,7 +1418,7 @@ button.beginner-intro-example-speaker:focus-visible {
 .beginner-intro-wheel-rotor::before {
   content: '';
   position: absolute;
-  z-index: 0;
+  z-index: 1;
   inset: -1px;
   border: 0;
   border-radius: 50%;
@@ -1416,22 +1451,30 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 .beginner-intro-wheel-rotor::after {
-  content: none;
+  content: '';
   position: absolute;
   z-index: 0;
   inset: -1px;
   border-radius: 50%;
   background: conic-gradient(
-    from 59.75deg,
-    var(--intro-wheel-line) 0deg 0.5deg,
-    transparent 0.5deg 120deg,
-    var(--intro-wheel-line) 120deg 120.5deg,
-    transparent 120.5deg 240deg,
-    var(--intro-wheel-line) 240deg 240.5deg,
-    transparent 240.5deg 360deg
+    from var(--intro-sweep-start),
+    var(--intro-reveal-accent) 0deg var(--intro-hiragana-sweep),
+    transparent var(--intro-hiragana-sweep) 100deg
+  ), conic-gradient(
+    from 60deg,
+    transparent 0deg 10deg,
+    var(--intro-completed-katakana) 10deg 110deg,
+    transparent 110deg 130deg,
+    var(--intro-completed-kanji) 130deg 230deg,
+    transparent 230deg 250deg,
+    var(--intro-completed-hiragana) 250deg 350deg,
+    transparent 350deg 360deg
   );
   -webkit-mask: radial-gradient(circle, transparent 0 65%, #000 65.7% 100%);
   mask: radial-gradient(circle, transparent 0 65%, #000 65.7% 100%);
+  filter: blur(0.42rem);
+  opacity: 0.78;
+  transform: scale(1.015);
   pointer-events: none;
 }
 
@@ -3082,6 +3125,7 @@ button.beginner-intro-example-speaker:focus-visible {
     top: calc(58% + 15px);
   }
   .beginner-intro-empty-wheel.is-hiragana {
+    --intro-reveal-panel-offset-y: -10px;
     --intro-hiragana-outline-width: 16rem;
     --intro-hiragana-panel-gutter: 15px;
     --intro-expanded-wheel-size: min(
@@ -3091,6 +3135,8 @@ button.beginner-intro-example-speaker:focus-visible {
     --intro-expanded-wheel-height: calc(18rem + 90px);
   }
   .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) {
+    --intro-reveal-panel-offset-y: -10px;
+    --intro-previous-panel-offset-y: -10px;
     --intro-hiragana-panel-gutter: 15px;
     --intro-expanded-wheel-height: calc(18rem + 90px);
     --intro-previous-expanded-wheel-size: min(

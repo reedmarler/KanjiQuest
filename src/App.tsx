@@ -1,5 +1,5 @@
 import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
-import { ArrowLeft, ArrowRight, Gauge, Pause, Play, RotateCcw, Volume2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChevronRight, Gauge, Pause, Play, RotateCcw, Volume2 } from 'lucide-react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -219,7 +219,7 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     romaji: 'yama',
     heading: 'Example:',
     words: [
-      { kana: '山', spokenKana: 'やま', readingParts: ['yama'], romaji: 'mountain' },
+      { kana: '山', spokenKana: 'やま', readingParts: ['yama'], romaji: 'mountain', note: ['*Looks like a', 'mountain'] },
     ],
   },
 } as const
@@ -230,6 +230,7 @@ function renderBeginnerIntroExampleWord(word: {
   reading?: string
   readingParts?: readonly string[]
   romaji: string
+  note?: readonly string[]
 }, interactive = true, showAudio = true): ReactNode {
   const audioControl = word.kana && showAudio && (interactive ? (
     <button
@@ -274,6 +275,12 @@ function renderBeginnerIntroExampleWord(word: {
       <small>
         <span className="beginner-intro-example-meaning">{word.romaji}</span>
       </small>
+      {word.note && (
+        <span className="beginner-intro-example-note">
+          {word.note.map((line) => <span key={line}>{line}</span>)}
+          <ChevronRight aria-hidden="true" />
+        </span>
+      )}
     </span>
   )
 }
