@@ -1,5 +1,5 @@
 import { Children, cloneElement, isValidElement, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
-import { ArrowLeft, ArrowRight, ChevronRight, Gauge, Pause, Play, RotateCcw, Volume2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Gauge, Pause, Play, RotateCcw, Volume2 } from 'lucide-react'
 import { CARD_TOTAL } from './data/cardStats'
 import { GENERATION_COMPLEXITIES } from './lib/generationComplexity'
 import { isLearned } from './lib/srs'
@@ -278,7 +278,6 @@ function renderBeginnerIntroExampleWord(word: {
       {word.note && (
         <span className="beginner-intro-example-note">
           {word.note.map((line) => <span key={line}>{line}</span>)}
-          <ChevronRight aria-hidden="true" />
         </span>
       )}
     </span>
@@ -460,6 +459,7 @@ function BeginnerZone({
   const [introOpeningShrinking, setIntroOpeningShrinking] = useState(false)
   const [introOpeningShrinkDone, setIntroOpeningShrinkDone] = useState(false)
   const [introTransitioning, setIntroTransitioning] = useState(false)
+  const [introSequenceComplete, setIntroSequenceComplete] = useState(false)
   const [introPaused, setIntroPaused] = useState(false)
   const [introAnimationSpeed, setIntroAnimationSpeed] = useState<IntroAnimationSpeed>(INTRO_OPENING_DEFAULT_ANIMATION_SPEED)
   const [introSpeedCustomized, setIntroSpeedCustomized] = useState(false)
@@ -522,6 +522,7 @@ function BeginnerZone({
     introSpeechTimerRef.current = null
     introSpeechFrameRef.current = null
     setIntroTransitioning(false)
+    setIntroSequenceComplete(false)
     setIntroPaused(false)
     setIntroOpeningPreview(false)
     setIntroOpeningShrinking(false)
@@ -534,7 +535,7 @@ function BeginnerZone({
   }
 
   function advanceIntro() {
-    if (introTransitioning || introOpeningPreview || (introOpeningShrinking && !introOpeningShrinkDone)) return
+    if (introTransitioning || introSequenceComplete || introOpeningPreview || (introOpeningShrinking && !introOpeningShrinkDone)) return
     if (introStep === 0) {
       if (!introSpeedCustomized) setIntroAnimationSpeed(defaultIntroAnimationSpeedForStep(1))
       setIntroOpeningPreview(true)
@@ -559,7 +560,7 @@ function BeginnerZone({
 
     setIntroTransitioning(true)
     introTransitionTimerRef.current = window.setTimeout(() => {
-      setIntroStep((current) => Math.min(5, current + 1))
+      setIntroSequenceComplete(true)
       setIntroTransitioning(false)
       introTransitionTimerRef.current = null
     }, 1140 / introAnimationSpeed)
@@ -693,12 +694,10 @@ function BeginnerZone({
           ? BEGINNER_INTRO_STEPS[0]
           : step)
     const activeScriptIndex = -1
-    const completedScripts = introStep === 5
-      ? 3
-      : 0
-    const isFinalStep = introStep === BEGINNER_INTRO_STEPS.length - 1
-    const revealScript = introStep === 4 ? 'kanji' : introStep === 3 ? 'katakana' : 'hiragana'
-    const activeRevealIndex = introStep >= 2 && introStep <= 4 ? introStep - 2 : -1
+    const completedScripts = 0
+    const isFinalStep = introSequenceComplete
+    const revealScript = introStep >= 4 ? 'kanji' : introStep === 3 ? 'katakana' : 'hiragana'
+    const activeRevealIndex = !introSequenceComplete && introStep >= 2 && introStep <= 4 ? introStep - 2 : -1
     const isRevealWheelVisible = introStep >= 1 && introStep <= 4
 
     return (
@@ -741,10 +740,17 @@ function BeginnerZone({
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {isRevealWheelVisible && (
-              <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 ? ' is-switching' : ''}${introTransitioning && introStep === 4 ? ' is-final-retracting' : ''}`}>
+              <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 && introStep <= 4 && !introSequenceComplete ? ' is-switching' : ''}${introSequenceComplete ? ' is-final-complete' : ''}${introTransitioning && introStep === 4 ? ' is-final-retracting' : ''}`}>
+                <div className="beginner-intro-circuit-lines" aria-hidden="true">
+                  <i className="is-outer-one" />
+                  <i className="is-outer-two" />
+                  <i className="is-inner" />
+                </div>
                 <div className="beginner-intro-wheel-rotor">
                   {BEGINNER_INTRO_SCRIPTS.map((item, index) => {
                     const content = BEGINNER_INTRO_REVEAL_CONTENT[item.id]
+                    const exampleWord = content.words[0]
+                    const exampleAudio = 'spokenKana' in exampleWord ? exampleWord.spokenKana : exampleWord.kana
                     const isRevealSlot = index === activeRevealIndex
                     const isPreviousSlot = index === activeRevealIndex - 1
                     return (
@@ -791,6 +797,14 @@ function BeginnerZone({
                               <b>{content.heading}</b>
                               {content.words.map((word) => renderBeginnerIntroExampleWord(word, introStep >= 2))}
                             </span>
+                            {introStep >= 2 && (
+                              <button
+                                type="button"
+                                className="beginner-intro-example-hit-area"
+                                onClick={() => speakJapanese(exampleAudio, { beginnerRecordingKind: 'word' })}
+                                aria-label={`Play the example word ${exampleWord.kana}`}
+                              />
+                            )}
                           </>
                         ) : (
                           <span key="slot-glyph" className="beginner-intro-slot-hiragana is-seed-glyph" lang="ja"><span>{item.mark}</span></span>
@@ -804,12 +818,6 @@ function BeginnerZone({
                     <span className="is-katakana">ホテル</span>
                   </div>
                 </div>
-              </div>
-            )}
-            {introStep === 5 && (
-              <div className="beginner-intro-wheel-complete">
-                <strong lang="ja">日本語</strong>
-                <small>Japanese</small>
               </div>
             )}
             {BEGINNER_INTRO_SCRIPTS.map((item, index) => {
@@ -843,15 +851,6 @@ function BeginnerZone({
             })}
           </div>
 
-          {step.id === 'together' && (
-            <div className="beginner-intro-example is-together" key="together-example">
-              <small>ALL THREE TOGETHER</small>
-              <strong lang="ja">
-                <span className="is-kanji">山</span><span className="is-hiragana">の</span><span className="is-katakana">ホテル</span>
-              </strong>
-              <p><span>yama no hoteru</span><b>mountain hotel</b></p>
-            </div>
-          )}
         </section>
 
         <footer className={`beginner-intro-controls${introStep > 0 ? ' is-lowered' : ''}`}>

@@ -1043,17 +1043,6 @@ body:has(.beginner-zone--intro) {
   text-align: center;
 }
 
-.beginner-intro-example-note > svg {
-  position: absolute;
-  top: 50%;
-  right: -0.72rem;
-  width: 0.78rem;
-  height: 0.78rem;
-  color: #f0bf63;
-  stroke-width: 2.5;
-  transform: translateY(-50%);
-}
-
 .beginner-intro-example-note > span {
   color: #fff;
   font-weight: 700;
@@ -1083,6 +1072,20 @@ body:has(.beginner-zone--intro) {
   transform: translateX(-50%);
 }
 
+.beginner-intro-example-hit-area {
+  position: absolute;
+  z-index: 3;
+  top: calc(50% + 3.56rem);
+  right: var(--intro-hiragana-panel-gutter, 15px);
+  bottom: var(--intro-hiragana-panel-gutter, 15px);
+  left: var(--intro-hiragana-panel-gutter, 15px);
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
 .beginner-intro-kana-speaker svg {
   position: absolute;
   right: 0.72rem;
@@ -1100,7 +1103,7 @@ body:has(.beginner-zone--intro) {
   position: absolute;
   top: calc(50% + 0.45rem);
   bottom: auto;
-  left: calc(100% + 0.25rem);
+  left: calc(100% + 0.25rem + 15px);
   width: 0.95rem;
   height: 0.95rem;
   margin-left: 0;
@@ -1114,7 +1117,8 @@ body:has(.beginner-zone--intro) {
 }
 
 button.beginner-intro-kana-speaker:focus-visible,
-button.beginner-intro-example-speaker:focus-visible {
+button.beginner-intro-example-speaker:focus-visible,
+.beginner-intro-example-hit-area:focus-visible {
   outline: 2px solid var(--intro-reveal-accent);
   outline-offset: 2px;
 }
@@ -1190,7 +1194,7 @@ button.beginner-intro-example-speaker:focus-visible {
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-kana::before {
   content: '';
   position: absolute;
-  z-index: 0;
+  z-index: 1;
   top: 3.42rem;
   left: 50%;
   width: var(--intro-hiragana-outline-width, 8.5rem);
@@ -1521,6 +1525,19 @@ button.beginner-intro-example-speaker:focus-visible {
 
 .beginner-intro-empty-wheel.is-kanji.is-switching .beginner-intro-wheel-center-copy {
   animation: beginner-intro-wheel-center-kanji-reveal var(--intro-switch-duration) linear both;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-final-complete {
+  --intro-hiragana-sweep: 100deg;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-copy {
+  opacity: 1;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-switching.is-final-retracting .beginner-intro-wheel-rotor::before,
+.beginner-intro-empty-wheel.is-kanji.is-switching.is-final-retracting .beginner-intro-wheel-rotor::after {
+  animation: beginner-intro-final-wheel-return calc(570 * var(--intro-time-unit)) linear both;
 }
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-wheel-rotor::before,
@@ -2436,6 +2453,11 @@ button.beginner-intro-example-speaker:focus-visible {
   96%, to { opacity: 1; }
 }
 
+@keyframes beginner-intro-final-wheel-return {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes beginner-intro-first-background-cube-out {
   0%, to { opacity: 1; }
 }
@@ -3000,6 +3022,14 @@ button.beginner-intro-example-speaker:focus-visible {
   to { transform: rotate(360deg); }
 }
 
+@keyframes beginner-intro-circuit-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes beginner-intro-circuit-spin-reverse {
+  to { transform: rotate(-360deg); }
+}
+
 @media (min-width: 561px) {
   .beginner-zone--intro {
     min-height: 27rem;
@@ -3223,6 +3253,12 @@ button.beginner-intro-example-speaker:focus-visible {
   .beginner-intro-wheel-complete {
     animation: none;
     transition-duration: 0.01ms;
+  }
+
+  .beginner-intro-circuit-lines,
+  .beginner-intro-circuit-lines > i,
+  .beginner-intro-circuit-lines > i::before {
+    animation: none;
   }
 
   .beginner-intro-blur-text {
@@ -17473,6 +17509,172 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 .quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-3 {
   transform: scaleX(.94);
   transform-origin: center;
+}
+
+.beginner-intro-circuit-lines,
+.beginner-intro-circuit-lines > i {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.beginner-intro-circuit-lines {
+  z-index: 1;
+  inset: 0;
+  opacity: 1;
+}
+
+.beginner-intro-empty-wheel.is-hiragana.is-revealing .beginner-intro-circuit-lines {
+  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-time-unit)) calc(125 * var(--intro-time-unit)) linear both;
+}
+
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-circuit-lines {
+  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-time-unit)) calc(1103 * var(--intro-time-unit)) linear both;
+}
+
+.beginner-intro-circuit-lines > i {
+  display: block;
+  background: rgba(155, 155, 171, 0.19);
+  -webkit-mask-image:
+    radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)),
+    conic-gradient(
+      from 8deg,
+      #000 0deg 42deg,
+      transparent 42deg 76deg,
+      #000 76deg 138deg,
+      transparent 138deg 171deg,
+      #000 171deg 199deg,
+      transparent 199deg 258deg,
+      #000 258deg 331deg,
+      transparent 331deg 360deg
+    );
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)),
+    conic-gradient(
+      from 8deg,
+      #000 0deg 42deg,
+      transparent 42deg 76deg,
+      #000 76deg 138deg,
+      transparent 138deg 171deg,
+      #000 171deg 199deg,
+      transparent 199deg 258deg,
+      #000 258deg 331deg,
+      transparent 331deg 360deg
+    );
+  mask-composite: intersect;
+  filter: drop-shadow(0 0 0.2rem rgba(150, 150, 164, 0.06));
+}
+
+.beginner-intro-circuit-lines > i::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0.72;
+  background: conic-gradient(
+    from var(--intro-sweep-start),
+    var(--intro-reveal-accent) 0deg var(--intro-hiragana-sweep),
+    transparent var(--intro-hiragana-sweep) 100deg,
+    transparent 100deg 360deg
+  ), conic-gradient(
+    from 60deg,
+    transparent 0deg 10deg,
+    var(--intro-completed-katakana) 10deg 110deg,
+    transparent 110deg 130deg,
+    var(--intro-completed-kanji) 130deg 230deg,
+    transparent 230deg 250deg,
+    var(--intro-completed-hiragana) 250deg 350deg,
+    transparent 350deg 360deg
+  );
+  animation: beginner-intro-circuit-spin-reverse 80s linear infinite;
+}
+
+.beginner-intro-circuit-lines > .is-outer-one {
+  inset: -0.55rem;
+  animation: beginner-intro-circuit-spin 80s linear infinite;
+}
+
+.beginner-intro-circuit-lines > .is-outer-two {
+  inset: -1.2rem;
+  -webkit-mask-image:
+    radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)),
+    conic-gradient(
+      from 103deg,
+      #000 0deg 57deg,
+      transparent 57deg 109deg,
+      #000 109deg 145deg,
+      transparent 145deg 211deg,
+      #000 211deg 279deg,
+      transparent 279deg 318deg,
+      #000 318deg 346deg,
+      transparent 346deg 360deg
+    );
+  mask-image:
+    radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)),
+    conic-gradient(
+      from 103deg,
+      #000 0deg 57deg,
+      transparent 57deg 109deg,
+      #000 109deg 145deg,
+      transparent 145deg 211deg,
+      #000 211deg 279deg,
+      transparent 279deg 318deg,
+      #000 318deg 346deg,
+      transparent 346deg 360deg
+    );
+  animation: beginner-intro-circuit-spin-reverse 100s linear infinite;
+}
+
+.beginner-intro-circuit-lines > .is-outer-two::before {
+  animation: beginner-intro-circuit-spin 100s linear infinite;
+}
+
+.beginner-intro-circuit-lines > .is-inner {
+  inset: 1.25rem;
+  -webkit-mask-image:
+    radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)),
+    conic-gradient(
+      from 22deg,
+      #000 0deg 28deg,
+      transparent 28deg 61deg,
+      #000 61deg 105deg,
+      transparent 105deg 127deg,
+      #000 127deg 189deg,
+      transparent 189deg 236deg,
+      #000 236deg 272deg,
+      transparent 272deg 326deg,
+      #000 326deg 352deg,
+      transparent 352deg 360deg
+    );
+  mask-image:
+    radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)),
+    conic-gradient(
+      from 22deg,
+      #000 0deg 28deg,
+      transparent 28deg 61deg,
+      #000 61deg 105deg,
+      transparent 105deg 127deg,
+      #000 127deg 189deg,
+      transparent 189deg 236deg,
+      #000 236deg 272deg,
+      transparent 272deg 326deg,
+      #000 326deg 352deg,
+      transparent 352deg 360deg
+    );
+  animation: beginner-intro-circuit-spin-reverse 64s linear infinite;
+}
+
+.beginner-intro-circuit-lines > .is-inner::before {
+  animation: beginner-intro-circuit-spin 64s linear infinite;
+}
+
+/* Keep the color map fixed while each masked ring rotates over it. */
+@supports not (mask-composite: intersect) {
+  .beginner-intro-circuit-lines > i {
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+  }
 }
 
 .quest-kanji-expanded-examples.example-count-2 .quest-kanji-expanded-word.word-length-4 {
