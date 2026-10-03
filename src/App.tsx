@@ -445,7 +445,6 @@ function IntroBlurSwapText({
 function BeginnerZone({
   initialScript,
   intro = false,
-  onOpenIntroScript,
   onOpenChart,
   onOpenQuiz,
   onOpenKana,
@@ -697,7 +696,7 @@ function BeginnerZone({
     const completedScripts = 0
     const isFinalStep = introSequenceComplete
     const revealScript = introStep >= 4 ? 'kanji' : introStep === 3 ? 'katakana' : 'hiragana'
-    const activeRevealIndex = !introSequenceComplete && introStep >= 2 && introStep <= 4 ? introStep - 2 : -1
+    const activeRevealIndex = introStep >= 2 && introStep <= 4 ? introStep - 2 : -1
     const isRevealWheelVisible = introStep >= 1 && introStep <= 4
 
     return (
@@ -740,7 +739,7 @@ function BeginnerZone({
           <div className={`beginner-intro-orbit has-${completedScripts}-docked`}>
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {isRevealWheelVisible && (
-              <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 && introStep <= 4 && !introSequenceComplete ? ' is-switching' : ''}${introSequenceComplete ? ' is-final-complete' : ''}${introTransitioning && introStep === 4 ? ' is-final-retracting' : ''}`}>
+              <div key={revealScript} className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 && introStep <= 4 ? ' is-switching' : ''}${introSequenceComplete ? ' is-final-complete' : ''}${(introTransitioning || introSequenceComplete) && introStep === 4 ? ' is-final-retracting' : ''}`}>
                 <div className="beginner-intro-circuit-lines" aria-hidden="true">
                   <i className="is-outer-one" />
                   <i className="is-outer-two" />
@@ -867,10 +866,7 @@ function BeginnerZone({
               <span className="beginner-intro-control-spacer" aria-hidden="true" />
             )}
             {isFinalStep ? (
-              <button type="button" className="beginner-intro-next" onClick={() => onOpenIntroScript?.('hiragana')}>
-                Start with Hiragana
-                <ArrowRight aria-hidden="true" />
-              </button>
+              <span className="beginner-intro-control-spacer" aria-hidden="true" />
             ) : (
               <button
                 type="button"
