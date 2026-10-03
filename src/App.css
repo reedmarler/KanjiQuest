@@ -452,9 +452,9 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-orbit {
-  --intro-empty-wheel-size: min(16rem, 76dvw);
+  --intro-empty-wheel-size: min(17.6rem, 83.6dvw);
   position: relative;
-  width: min(100%, 16rem);
+  width: min(100%, 17.6rem);
   aspect-ratio: 1;
   margin: 4.5rem auto 0;
 }
@@ -504,7 +504,8 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel {
-  --intro-wheel-node-radius: 1.35rem;
+  --intro-wheel-cube-size: 3.96rem;
+  --intro-wheel-node-radius: 1.215rem;
   --intro-reveal-panel-offset-x: 0px;
   --intro-reveal-panel-offset-y: 0px;
   --intro-expanded-wheel-size: calc(var(--intro-empty-wheel-size) * 1.3);
@@ -524,6 +525,10 @@ body:has(.beginner-zone--intro) {
   --intro-reveal-base: var(--sakura);
   --intro-previous-accent: var(--sakura-light);
   --intro-previous-base: var(--sakura);
+  --intro-sweep-start: 310deg;
+  --intro-completed-hiragana: transparent;
+  --intro-completed-katakana: transparent;
+  --intro-completed-kanji: transparent;
   position: absolute;
   z-index: 2;
   top: calc(56% + 15px);
@@ -541,8 +546,8 @@ body:has(.beginner-zone--intro) {
 
 .beginner-intro-empty-wheel.is-hiragana {
   --intro-reveal-panel-offset-y: 10px;
-  --intro-hiragana-outline-width: 15rem;
-  --intro-previous-outline-width: 15rem;
+  --intro-hiragana-outline-width: 16rem;
+  --intro-previous-outline-width: 16rem;
   --intro-hiragana-panel-gutter: 15px;
   --intro-expanded-wheel-size: min(
     calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
@@ -560,8 +565,8 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-empty-wheel.is-kanji {
   --intro-reveal-panel-offset-x: 0px;
   --intro-reveal-panel-offset-y: 10px;
-  --intro-hiragana-outline-width: 15rem;
-  --intro-previous-outline-width: 15rem;
+  --intro-hiragana-outline-width: 16rem;
+  --intro-previous-outline-width: 16rem;
   --intro-hiragana-panel-gutter: 15px;
   --intro-expanded-wheel-size: min(
     calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
@@ -578,17 +583,26 @@ body:has(.beginner-zone--intro) {
   --intro-previous-expanded-wheel-radius: 8px;
 }
 
-.beginner-intro-empty-wheel.is-katakana {
-  --intro-reveal-accent: #70cfe0;
-  --intro-reveal-base: #4ba5c9;
-}
-
 .beginner-intro-empty-wheel.is-kanji {
-  --intro-hiragana-outline-width: 15rem;
+  --intro-hiragana-outline-width: 16rem;
   --intro-reveal-accent: #f0bf63;
   --intro-reveal-base: #c78b32;
   --intro-previous-accent: #70cfe0;
   --intro-previous-base: #4ba5c9;
+  --intro-sweep-start: 190deg;
+  --intro-completed-hiragana: var(--sakura-light);
+  --intro-completed-katakana: #70cfe0;
+  --intro-returned-glyph-color: #fff;
+  --intro-returned-glyph-shadow: none;
+}
+
+.beginner-intro-empty-wheel.is-katakana {
+  --intro-reveal-accent: #70cfe0;
+  --intro-reveal-base: #4ba5c9;
+  --intro-sweep-start: 70deg;
+  --intro-completed-hiragana: var(--sakura-light);
+  --intro-returned-glyph-color: #fff;
+  --intro-returned-glyph-shadow: none;
 }
 
 .beginner-intro-empty-slot {
@@ -596,7 +610,7 @@ body:has(.beginner-zone--intro) {
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 4.4rem;
+  width: var(--intro-wheel-cube-size);
   aspect-ratio: 1;
   border: 2px solid color-mix(in srgb, var(--text-muted) 35%, var(--border));
   border-radius: var(--intro-wheel-node-radius);
@@ -660,6 +674,23 @@ body:has(.beginner-zone--intro) {
   text-shadow: 0 0 0.75rem color-mix(in srgb, var(--intro-node-accent) 38%, transparent);
 }
 
+.beginner-intro-empty-slot.is-script-hiragana .beginner-intro-slot-hiragana > span {
+  color: color-mix(in srgb, var(--text-muted) 75%, var(--text));
+  text-shadow: none;
+}
+
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .is-script-hiragana .beginner-intro-slot-hiragana > span,
+.beginner-intro-empty-wheel.is-kanji .is-script-katakana .beginner-intro-slot-hiragana > span {
+  color: #fff;
+  text-shadow: none;
+}
+
+.beginner-intro-empty-wheel.is-hiragana:not(.is-revealing) .is-reveal-slot {
+  border-color: color-mix(in srgb, var(--text-muted) 35%, var(--border));
+  background: var(--surface-2);
+  box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+}
+
 .beginner-intro-empty-slot.is-complete-hiragana {
   border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
   background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
@@ -672,7 +703,7 @@ body:has(.beginner-zone--intro) {
   position: absolute;
   inset: 0;
   color: var(--text);
-  font: 700 2.584rem/1 'Noto Sans JP', sans-serif;
+  font: 700 2.3256rem/1 'Noto Sans JP', sans-serif;
   transform: translateY(-0.08em);
 }
 
@@ -750,7 +781,7 @@ body:has(.beginner-zone--intro) {
 .beginner-intro-slot-hiragana.is-seed-glyph {
   opacity: 1;
   filter: none;
-  transform: translate(0, 0.875rem) scale(0.38);
+  transform: translate(0, 0.875rem) scale(0.342);
 }
 
 .beginner-intro-slot-hiragana.is-seed-glyph > span {
@@ -949,88 +980,31 @@ body:has(.beginner-zone--intro) {
   transform: translateY(-6px);
 }
 
-.beginner-intro-example-cue {
-  display: inline-flex;
-  align-self: center;
-  align-items: center;
-  margin-right: 0.42rem;
-  color: var(--text-muted);
-  font: 700 0.72rem/1 'Outfit', system-ui, sans-serif;
-  white-space: nowrap;
-}
-
-.beginner-intro-example-cue-icon {
-  font-size: calc(1.92rem + 12px);
-  line-height: 1;
-}
-
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type {
   left: 0;
   width: 100%;
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-segmented-ruby {
-  display: grid;
-  width: max-content;
+  display: flex;
+  width: 100%;
   max-width: 100%;
-  grid-template-columns: max-content 2.2rem max-content 0.95rem;
   align-items: end;
   justify-content: center;
-  justify-items: center;
-  column-gap: 0.24rem;
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type > small {
   display: flex;
-  width: max-content;
+  width: 100%;
   max-width: 100%;
   align-items: baseline;
   justify-content: center;
-  gap: 0.32rem;
-}
-
-.beginner-intro-empty-wheel.is-kanji .beginner-intro-example-cue {
-  display: contents;
-}
-
-.beginner-intro-empty-wheel.is-kanji .beginner-intro-example-cue-icon,
-.beginner-intro-empty-wheel.is-kanji .beginner-intro-example-meaning-prefix {
-  grid-column: 1;
-  justify-self: center;
-}
-
-.beginner-intro-empty-wheel.is-kanji .beginner-intro-example-meaning-prefix {
-  margin-right: 0;
-}
-
-.beginner-intro-empty-wheel.is-kanji .beginner-intro-example-cue-arrow {
-  grid-column: 2;
-  align-self: end;
-  justify-self: center;
-  margin-bottom: 0;
-  font-size: 1.35rem;
-  line-height: 1;
-}
-
-.beginner-intro-empty-wheel.is-kanji .beginner-intro-segmented-ruby > ruby,
-.beginner-intro-empty-wheel.is-kanji .beginner-intro-example-meaning {
-  grid-column: 3;
-  justify-self: center;
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-example-speaker {
-  position: static;
-  grid-column: 4;
-  align-self: end;
-  margin-left: 0.25rem;
-}
-
-.beginner-intro-example-meaning-prefix {
-  display: inline;
-  margin-right: 0.24rem;
-  color: var(--text-muted);
-  font-size: 1em;
-  font-weight: inherit;
+  right: 0;
+  left: auto;
+  margin-left: 0;
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type small {
@@ -1390,6 +1364,10 @@ button.beginner-intro-example-speaker:focus-visible {
   transform-origin: center;
 }
 
+.beginner-intro-empty-wheel.is-hiragana.is-revealing .beginner-intro-wheel-rotor {
+  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-time-unit)) calc(125 * var(--intro-time-unit)) linear both;
+}
+
 .beginner-intro-empty-wheel.is-hiragana:not(.is-revealing) .beginner-intro-wheel-rotor {
   animation: beginner-intro-wheel-initial-spin calc(900 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both;
 }
@@ -1407,13 +1385,30 @@ button.beginner-intro-example-speaker:focus-visible {
   position: absolute;
   z-index: 0;
   inset: -1px;
-  border: 1px solid var(--intro-wheel-line);
+  border: 0;
   border-radius: 50%;
   background: conic-gradient(
+    from var(--intro-sweep-start),
+    var(--intro-reveal-accent) 0deg var(--intro-hiragana-sweep),
+    transparent var(--intro-hiragana-sweep) 100deg
+  ), conic-gradient(
     from 60deg,
-    var(--intro-slice-katakana) 0deg 120deg,
-    var(--intro-slice-kanji) 120deg 240deg,
-    var(--intro-slice-hiragana) 240deg 360deg
+    transparent 0deg 10deg,
+    var(--intro-completed-katakana) 10deg 110deg,
+    transparent 110deg 130deg,
+    var(--intro-completed-kanji) 130deg 230deg,
+    transparent 230deg 250deg,
+    var(--intro-completed-hiragana) 250deg 350deg,
+    transparent 350deg 360deg
+  ), conic-gradient(
+    from 60deg,
+    transparent 0deg 10deg,
+    var(--intro-slice-katakana) 10deg 110deg,
+    transparent 110deg 130deg,
+    var(--intro-slice-kanji) 130deg 230deg,
+    transparent 230deg 250deg,
+    var(--intro-slice-hiragana) 250deg 350deg,
+    transparent 350deg 360deg
   );
   -webkit-mask: radial-gradient(circle, transparent 0 65%, #000 65.7% 100%);
   mask: radial-gradient(circle, transparent 0 65%, #000 65.7% 100%);
@@ -1421,7 +1416,7 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 .beginner-intro-wheel-rotor::after {
-  content: '';
+  content: none;
   position: absolute;
   z-index: 0;
   inset: -1px;
@@ -1513,12 +1508,22 @@ button.beginner-intro-example-speaker:focus-visible {
   animation: none;
 }
 
+.beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-wheel-rotor {
+  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-time-unit)) calc(1103 * var(--intro-time-unit)) linear both;
+}
+
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-previous-kana::before {
   width: var(--intro-previous-outline-width, 8.5rem);
 }
 
 .beginner-intro-empty-wheel.is-switching .is-previous-slot {
   overflow: hidden;
+  top: var(--intro-previous-start-top);
+  left: var(--intro-previous-start-left);
+  width: var(--intro-previous-expanded-wheel-size);
+  height: var(--intro-previous-expanded-wheel-height);
+  border-radius: var(--intro-previous-expanded-wheel-radius);
+  transform: translate(-50%, -50%) scale(1);
   animation:
     beginner-intro-slot-switch-previous var(--intro-switch-duration) linear both,
     beginner-intro-returned-cube-cycle var(--intro-switch-duration) linear both;
@@ -2292,6 +2297,11 @@ button.beginner-intro-example-speaker:focus-visible {
   to { transform: rotate(0deg); }
 }
 
+@keyframes beginner-intro-hiragana-slice-sweep {
+  from { --intro-hiragana-sweep: 0deg; }
+  to { --intro-hiragana-sweep: 100deg; }
+}
+
 @keyframes beginner-intro-wheel-initial-counter-spin {
   from { transform: translate(-50%, -50%) rotate(360deg); }
   to { transform: translate(-50%, -50%) rotate(0deg); }
@@ -2304,6 +2314,12 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 @property --intro-wheel-counter-angle {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --intro-hiragana-sweep {
   syntax: '<angle>';
   inherits: true;
   initial-value: 0deg;
@@ -2378,43 +2394,27 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 @keyframes beginner-intro-first-background-cube-out {
-  0%, 68.67% { opacity: 1; }
-  76%, to { opacity: 0; }
+  0%, to { opacity: 1; }
 }
 
 @keyframes beginner-intro-background-cube-out {
-  0%, 59.04% { opacity: 1; }
-  65%, to { opacity: 0; }
+  0%, to { opacity: 1; }
 }
 
 @keyframes beginner-intro-returned-cube-cycle {
-  0%, 59.04% { opacity: 1; }
-  65%, to { opacity: 0; }
+  0%, to { opacity: 1; }
 }
 
 @keyframes beginner-intro-slot-expand {
-  0% {
+  0%, 44.2308% {
     top: var(--intro-slot-start-top);
     left: var(--intro-slot-start-left);
-    width: 4.4rem;
-    height: 4.4rem;
+    width: var(--intro-wheel-cube-size);
+    height: var(--intro-wheel-cube-size);
     border-radius: var(--intro-wheel-node-radius);
     border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--sakura) 18%, transparent);
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-  54% {
-    top: var(--intro-slot-start-top);
-    left: var(--intro-slot-start-left);
-    width: 4.4rem;
-    height: 4.4rem;
-    border-radius: var(--intro-wheel-node-radius);
-    border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--sakura) 18%, transparent);
+    background: color-mix(in srgb, var(--sakura) 34%, var(--surface-2));
+    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--sakura) 42%, transparent);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -2422,12 +2422,12 @@ button.beginner-intro-example-speaker:focus-visible {
   68.67% {
     top: calc(50% + var(--intro-reveal-panel-offset-y));
     left: 50%;
-    width: 4.4rem;
-    height: 4.4rem;
+    width: var(--intro-wheel-cube-size);
+    height: var(--intro-wheel-cube-size);
     border-radius: var(--intro-wheel-node-radius);
     border-color: color-mix(in srgb, var(--sakura-light) 80%, var(--border));
-    background: color-mix(in srgb, var(--sakura) 14%, var(--surface-2));
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
+    background: color-mix(in srgb, var(--sakura) 34%, var(--surface-2));
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sakura) 18%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -2459,39 +2459,39 @@ button.beginner-intro-example-speaker:focus-visible {
     box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
   14% {
     top: 50%;
     left: 50%;
-    width: 4.4rem;
-    height: 4.4rem;
+    width: var(--intro-wheel-cube-size);
+    height: var(--intro-wheel-cube-size);
     border-radius: var(--intro-wheel-node-radius);
     border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-previous-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
   22.15% {
     top: var(--intro-slot-start-top);
     left: var(--intro-slot-start-left);
-    width: 4.4rem;
-    height: 4.4rem;
+    width: var(--intro-wheel-cube-size);
+    height: var(--intro-wheel-cube-size);
     border-radius: var(--intro-wheel-node-radius);
     border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-previous-base) 18%, transparent);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
   44.69%, to {
     top: var(--intro-slot-start-top);
     left: var(--intro-slot-start-left);
-    width: 4.4rem;
-    height: 4.4rem;
+    width: var(--intro-wheel-cube-size);
+    height: var(--intro-wheel-cube-size);
     border-color: color-mix(in srgb, var(--intro-previous-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-previous-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-previous-base) 18%, transparent);
@@ -2502,91 +2502,49 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 @keyframes beginner-intro-slot-switch-reveal {
-  0% {
+  0%, 22.14% {
     z-index: 1;
     top: var(--intro-slot-start-top);
     left: var(--intro-slot-start-left);
-    width: 4.4rem;
-    height: 4.4rem;
+    width: var(--intro-wheel-cube-size);
+    height: var(--intro-wheel-cube-size);
     border-radius: var(--intro-wheel-node-radius);
     border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
     filter: grayscale(1);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
-  19.6%, 30.03% {
-    z-index: 1;
-    top: var(--intro-slot-start-top);
-    left: var(--intro-slot-start-left);
-    width: 4.4rem;
-    height: 4.4rem;
-    border-radius: var(--intro-wheel-node-radius);
-    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
-    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
-    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
-    opacity: 1;
-    filter: grayscale(1);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
-  }
-  44.69% {
-    z-index: 1;
-    top: var(--intro-slot-start-top);
-    left: var(--intro-slot-start-left);
-    width: 4.4rem;
-    height: 4.4rem;
-    border-radius: var(--intro-wheel-node-radius);
-    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
-    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
-    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
-    opacity: 1;
-    filter: grayscale(1);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
-  }
-  44.7% {
+  22.15%, 48.21% {
     z-index: 5;
     top: var(--intro-slot-start-top);
     left: var(--intro-slot-start-left);
-    width: 4.4rem;
-    height: 4.4rem;
+    width: var(--intro-wheel-cube-size);
+    height: var(--intro-wheel-cube-size);
     border-radius: var(--intro-wheel-node-radius);
     border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-reveal-base) 18%, transparent);
     opacity: 1;
-    filter: grayscale(1);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    filter: none;
+    transform: translate(-50%, -50%) scale(1);
   }
-  51.04% {
-    z-index: 5;
-    top: var(--intro-slot-start-top);
-    left: var(--intro-slot-start-left);
-    width: 4.4rem;
-    height: 4.4rem;
-    border-radius: var(--intro-wheel-node-radius);
-    border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
-    background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
-    box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--intro-reveal-base) 18%, transparent);
-    opacity: 1;
-    filter: grayscale(1);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
-  }
-  59.04% {
+  62.61% {
     z-index: 5;
     top: 50%;
     left: 50%;
-    width: 4.4rem;
-    height: 4.4rem;
+    width: var(--intro-wheel-cube-size);
+    height: var(--intro-wheel-cube-size);
     border-radius: var(--intro-wheel-node-radius);
     border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
     opacity: 1;
-    filter: grayscale(1);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    filter: none;
+    transform: translate(-50%, -50%) scale(1);
   }
-  75.28%, to {
+  81.06%, to {
     z-index: 5;
     top: var(--intro-reveal-final-top);
     left: var(--intro-reveal-final-left);
@@ -2598,7 +2556,7 @@ button.beginner-intro-example-speaker:focus-visible {
     box-shadow: 0 0 0 0.55rem color-mix(in srgb, var(--intro-reveal-base) 8%, transparent), 0 1rem 2.5rem rgba(0, 0, 0, 0.25);
     opacity: 1;
     filter: blur(0);
-    transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
@@ -2619,8 +2577,8 @@ button.beginner-intro-example-speaker:focus-visible {
     z-index: 5;
     top: 50%;
     left: 50%;
-    width: 4.4rem;
-    height: 4.4rem;
+    width: var(--intro-wheel-cube-size);
+    height: var(--intro-wheel-cube-size);
     border-radius: var(--intro-wheel-node-radius);
     border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
@@ -2631,8 +2589,8 @@ button.beginner-intro-example-speaker:focus-visible {
     z-index: 2;
     top: var(--intro-slot-start-top);
     left: var(--intro-slot-start-left);
-    width: 4.4rem;
-    height: 4.4rem;
+    width: var(--intro-wheel-cube-size);
+    height: var(--intro-wheel-cube-size);
     border-radius: var(--intro-wheel-node-radius);
     border-color: color-mix(in srgb, var(--intro-reveal-accent) 80%, var(--border));
     background: color-mix(in srgb, var(--intro-reveal-base) 14%, var(--surface-2));
@@ -2655,7 +2613,7 @@ button.beginner-intro-example-speaker:focus-visible {
   to {
     opacity: 1;
     filter: blur(0);
-    transform: translate(0, 0.875rem) scale(0.38);
+    transform: translate(0, 0.875rem) scale(0.342);
   }
 }
 
@@ -2742,7 +2700,7 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 @keyframes beginner-intro-slot-switch-side {
-  0%, to { opacity: 1; transform: translate(-50%, -50%) rotate(var(--intro-wheel-counter-angle)) scale(1); }
+  0%, to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 @keyframes beginner-intro-slot-switch-left-in {
@@ -2801,14 +2759,14 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 @keyframes beginner-intro-hiragana-in {
-  0%, 68.67% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) rotate(0deg) scale(0.38); }
+  0%, 68.67% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) rotate(0deg) scale(0.342); }
   to { opacity: 1; filter: none; transform: translate(0.42rem, -1rem) rotate(0deg) scale(1); }
 }
 
 @keyframes beginner-intro-hiragana-glyph-anchor {
   0%, 68.67% {
-    color: var(--intro-node-accent);
-    text-shadow: 0 0 0.75rem color-mix(in srgb, var(--intro-node-accent) 38%, transparent);
+    color: #fff;
+    text-shadow: none;
     transform: translate(-50%, calc(-50% - 4px));
   }
   to {
@@ -2822,19 +2780,22 @@ button.beginner-intro-example-speaker:focus-visible {
 }
 
 @keyframes beginner-intro-katakana-in {
-  0%, 44.69% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) scale(0.38); }
-  47.75%, 59.04% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) scale(0.38); }
-  75.28% { opacity: 1; filter: blur(0); transform: translate(0.42rem, -1rem) scale(1); }
-  81.68%, to { opacity: 1; filter: blur(0); transform: translate(0.42rem, -1rem) scale(1); }
+  0%, 62.61% { opacity: 1; filter: blur(0); transform: translate(0, 0.875rem) scale(0.342); }
+  81.06%, to { opacity: 1; filter: blur(0); transform: translate(0.42rem, -1rem) scale(1); }
 }
 
 @keyframes beginner-intro-katakana-glyph-anchor {
-  0%, 59.04% {
-    color: var(--intro-node-accent);
-    text-shadow: 0 0 0.75rem color-mix(in srgb, var(--intro-node-accent) 38%, transparent);
+  0%, 22.14% {
+    color: color-mix(in srgb, var(--text-muted) 75%, var(--text));
+    text-shadow: none;
     transform: translate(-50%, -50%);
   }
-  75.28%, to {
+  22.15%, 62.61% {
+    color: #fff;
+    text-shadow: none;
+    transform: translate(-50%, -50%);
+  }
+  81.06%, to {
     color: #fff;
     text-shadow: none;
     transform: translate(
@@ -2932,7 +2893,7 @@ button.beginner-intro-example-speaker:focus-visible {
   14%, to {
     opacity: 1;
     filter: blur(0);
-    font-size: 2.584rem;
+    font-size: 2.3256rem;
     transform: none;
   }
 }
@@ -2949,14 +2910,14 @@ button.beginner-intro-example-speaker:focus-visible {
     bottom: 0;
     opacity: 1;
     filter: blur(0);
-    font-size: 2.584rem;
+    font-size: 2.3256rem;
     transform: none;
   }
   34.3%, 49.8%, to {
     bottom: 0;
     opacity: 1;
     filter: blur(0);
-    font-size: 2.584rem;
+    font-size: 2.3256rem;
     transform: none;
   }
 }
@@ -2976,8 +2937,8 @@ button.beginner-intro-example-speaker:focus-visible {
     );
   }
   14%, to {
-    color: var(--intro-node-accent);
-    text-shadow: 0 0 0.75rem color-mix(in srgb, var(--intro-node-accent) 38%, transparent);
+    color: var(--intro-returned-glyph-color, var(--intro-node-accent));
+    text-shadow: var(--intro-returned-glyph-shadow, 0 0 0.75rem color-mix(in srgb, var(--intro-node-accent) 38%, transparent));
     transform: translate(-50%, calc(-50% - 0.051em));
   }
 }
@@ -3111,17 +3072,17 @@ button.beginner-intro-example-speaker:focus-visible {
   }
   .beginner-intro-lesson.is-hiragana { min-height: 20.4rem; }
   .beginner-intro-orbit {
-    width: min(100%, 17rem);
+    width: min(100%, 18.7rem);
     margin-top: 2rem;
   }
   .beginner-intro-ring { inset: 1.9rem; }
   .beginner-intro-empty-wheel {
-    --intro-empty-wheel-size: min(14.75rem, 72dvw);
+    --intro-empty-wheel-size: min(16.225rem, 79.2dvw);
     --intro-expanded-wheel-size: min(18.8rem, 81.6dvw);
     top: calc(58% + 15px);
   }
   .beginner-intro-empty-wheel.is-hiragana {
-    --intro-hiragana-outline-width: 15rem;
+    --intro-hiragana-outline-width: 16rem;
     --intro-hiragana-panel-gutter: 15px;
     --intro-expanded-wheel-size: min(
       calc(var(--intro-hiragana-outline-width) + var(--intro-hiragana-panel-gutter) * 2 + 4px),
@@ -3138,8 +3099,8 @@ button.beginner-intro-example-speaker:focus-visible {
     );
     --intro-previous-expanded-wheel-height: calc(18rem + 90px);
   }
-  .beginner-intro-empty-wheel.is-katakana { --intro-hiragana-outline-width: 15rem; }
-  .beginner-intro-empty-wheel.is-kanji { --intro-hiragana-outline-width: 15rem; }
+  .beginner-intro-empty-wheel.is-katakana { --intro-hiragana-outline-width: 16rem; }
+  .beginner-intro-empty-wheel.is-kanji { --intro-hiragana-outline-width: 16rem; }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px); }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
   .beginner-intro-wheel-placeholder strong { font-size: 4.8rem; }
@@ -3189,8 +3150,8 @@ button.beginner-intro-example-speaker:focus-visible {
   .beginner-intro-guide:not(.is-welcome):not(.is-simple) .beginner-intro-mascot {
     transform: scale(0.86);
   }
-  .beginner-intro-orbit { width: min(100%, 15.5rem); }
-  .beginner-intro-empty-wheel { --intro-empty-wheel-size: min(14.5rem, 76dvw); }
+  .beginner-intro-orbit { width: min(100%, 17.05rem); }
+  .beginner-intro-empty-wheel { --intro-empty-wheel-size: min(15.95rem, 83.6dvw); }
   .beginner-intro-wheel-placeholder { width: 9.6rem; }
   .beginner-intro-node.is-focused { width: 10rem; }
   .beginner-intro-node.is-focused .beginner-intro-node-mark { width: 9rem; font-size: 4.55rem; }

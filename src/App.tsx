@@ -219,7 +219,7 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     romaji: 'yama',
     heading: 'Example:',
     words: [
-      { kana: '山', spokenKana: 'やま', readingParts: ['yama'], visualCue: { icon: '🗻', suffix: '➡️' }, meaningPrefix: '(looks like a)', romaji: 'mountain' },
+      { kana: '山', spokenKana: 'やま', readingParts: ['yama'], romaji: 'mountain' },
     ],
   },
 } as const
@@ -229,8 +229,6 @@ function renderBeginnerIntroExampleWord(word: {
   spokenKana?: string
   reading?: string
   readingParts?: readonly string[]
-  visualCue?: { icon: string; suffix?: string }
-  meaningPrefix?: string
   romaji: string
 }, interactive = true, showAudio = true): ReactNode {
   const audioControl = word.kana && showAudio && (interactive ? (
@@ -254,12 +252,6 @@ function renderBeginnerIntroExampleWord(word: {
         <>
           {word.readingParts ? (
             <span className="beginner-intro-segmented-ruby">
-              {word.visualCue && (
-                <span className="beginner-intro-example-cue">
-                  <span className="beginner-intro-example-cue-icon">{word.visualCue.icon}</span>
-                  {word.visualCue.suffix && <span className="beginner-intro-example-cue-arrow">{word.visualCue.suffix}</span>}
-                </span>
-              )}
               {Array.from(word.kana).map((character, index) => (
                 <ruby key={`${character}-${index}`}>
                   <i lang="ja">{character}</i>
@@ -280,7 +272,6 @@ function renderBeginnerIntroExampleWord(word: {
         </>
       )}
       <small>
-        {word.meaningPrefix && <span className="beginner-intro-example-meaning-prefix">{word.meaningPrefix}</span>}
         <span className="beginner-intro-example-meaning">{word.romaji}</span>
       </small>
     </span>
@@ -337,12 +328,12 @@ const BEGINNER_INTRO_STEPS = [
   },
 ] as const
 
-type IntroAnimationSpeed = 0.5 | 1 | 1.25 | 1.5 | 2 | 3
+type IntroAnimationSpeed = 0.5 | 1 | 1.25 | 1.5 | 2 | 2.5 | 3
 
 const INTRO_ANIMATION_TIME_BASE = 2
 const INTRO_OPENING_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 1
 const INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 1.25
-const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.25, 1.5, 2, 3]
+const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.25, 1.5, 2, 2.5, 3]
 const INTRO_OPENING_MOVE_CSS_MS = 1274
 const INTRO_SPEECH_RESIZE_MS = 560
 const INTRO_STANDARD_SPEECH_STEP_INDEX = 2
