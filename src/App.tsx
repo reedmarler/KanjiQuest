@@ -843,7 +843,7 @@ function BeginnerZone({
                   <svg className="beginner-intro-word-connectors" viewBox="0 0 240 78" preserveAspectRatio="none" aria-hidden="true">
                     <path className="is-kanji" pathLength="1" d="M 37.3 4 H 75 M 56.1 4 L 84.4 72" />
                     <path className="is-hiragana" pathLength="1" d="M 78.6 4 H 108.5 M 93.6 4 L 136.1 82" />
-                    <path className="is-katakana is-first" pathLength="1" d="M 112.1 4 H 202.7 M 157 4 L 203.9 72" />
+                    <path className="is-katakana is-first" pathLength="1" d="M 112.1 4 H 202.7 M 190 4 L 203.9 72" />
                   </svg>
                   <div className="beginner-intro-wheel-center-meaning" lang="en">
                     <span className="is-kanji">The&nbsp;</span>

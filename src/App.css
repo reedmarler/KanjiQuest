@@ -1725,7 +1725,7 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese rt {
   position: relative;
-  top: 0.28rem;
+  top: 0.34rem;
 }
 
 .beginner-intro-word-connectors {
@@ -1738,6 +1738,7 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-word-connectors {
   display: block;
+  margin-top: -0.12rem;
 }
 
 .beginner-intro-word-connectors path {
