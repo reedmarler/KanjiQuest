@@ -1709,7 +1709,7 @@ button.beginner-intro-example-speaker:focus-visible,
   background: transparent;
   box-shadow: none;
   opacity: 1;
-  align-items: flex-start;
+  align-items: flex-end;
   transform: translate(-50%, -50%);
   animation: none;
 }
@@ -1720,7 +1720,7 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese {
   font-size: 2.4rem;
-  justify-content: flex-start;
+  justify-content: flex-end;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese rt {
@@ -1776,7 +1776,7 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning {
-  justify-content: flex-start;
+  justify-content: flex-end;
   margin-top: 0.18rem;
   font-size: 2.4rem;
   opacity: 1;
@@ -1832,13 +1832,6 @@ button.beginner-intro-example-speaker:focus-visible,
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-rotor::after {
   filter: blur(0.42rem) grayscale(0.9) brightness(0.42);
   opacity: 0.42;
-}
-
-.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-rotor::before,
-.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-rotor::after,
-.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-final-line-lights > i {
-  -webkit-mask: radial-gradient(circle, transparent 0 50%, #000 50.7% 100%);
-  mask: radial-gradient(circle, transparent 0 50%, #000 50.7% 100%);
 }
 
 .beginner-intro-final-line-lights {
@@ -18240,11 +18233,6 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
 .beginner-intro-circuit-lines > .is-inner::before {
   animation: beginner-intro-circuit-spin 64s linear infinite;
-}
-
-.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-circuit-lines > i {
-  --intro-circuit-outer-gap: 2.857px;
-  --intro-circuit-line-edge: 1.429px;
 }
 
 /* Keep the color map fixed while each masked ring rotates over it. */
