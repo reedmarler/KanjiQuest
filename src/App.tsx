@@ -841,11 +841,11 @@ function BeginnerZone({
                     <ruby className="is-katakana is-katakana-3"><span>ク</span><rt lang="en">ku</rt></ruby>
                   </div>
                   <svg className="beginner-intro-word-connectors" viewBox="0 0 240 78" preserveAspectRatio="none" aria-hidden="true">
-                    <path className="is-kanji" pathLength="1" d="M 50.6 4 H 93.1 M 71.9 4 L 40 72" />
-                    <path className="is-hiragana" pathLength="1" d="M 97.2 4 H 130.9 M 114 4 L 80 72" />
-                    <path className="is-katakana is-first" pathLength="1" d="M 134.9 4 H 168.6" />
-                    <path className="is-katakana is-second" pathLength="1" d="M 168.6 4 H 202.3" />
-                    <path className="is-katakana is-third" pathLength="1" d="M 202.3 4 H 236.8 M 185.4 4 L 130 72" />
+                    <path className="is-kanji" pathLength="1" d="M 71.8 4 H 109.5 M 90.6 4 L 103.6 72" />
+                    <path className="is-hiragana" pathLength="1" d="M 113.1 4 H 143 M 128.1 4 L 148.6 72" />
+                    <path className="is-katakana is-first" pathLength="1" d="M 146.6 4 H 176.6" />
+                    <path className="is-katakana is-second" pathLength="1" d="M 176.6 4 H 206.5" />
+                    <path className="is-katakana is-third" pathLength="1" d="M 206.5 4 H 237.1 M 191.5 4 L 202.6 72" />
                   </svg>
                   <div className="beginner-intro-wheel-center-meaning" lang="en">
                     <span className="is-kanji">The&nbsp;</span>
