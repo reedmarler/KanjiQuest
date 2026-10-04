@@ -217,9 +217,9 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     label: 'Kanji',
     mark: '山',
     romaji: 'yama',
-    heading: 'Example:',
+    heading: 'Another example:',
     words: [
-      { kana: '山', spokenKana: 'やま', readingParts: ['yama'], romaji: 'mountain', note: ['*Looks like a', 'mountain'] },
+      { kana: '猫', spokenKana: 'ねこ', readingParts: ['neko'], romaji: 'cat' },
     ],
   },
 } as const
@@ -342,6 +342,7 @@ const INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
 const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.25, 1.5, 2, 2.5, 3]
 const INTRO_OPENING_MOVE_CSS_MS = 1274
 const INTRO_SPEECH_RESIZE_MS = 560
+const INTRO_FINAL_RETRACT_CSS_MS = 1800
 const INTRO_STANDARD_SPEECH_STEP_INDEX = 2
 
 function defaultIntroAnimationSpeedForStep(step: number): IntroAnimationSpeed {
@@ -562,7 +563,7 @@ function BeginnerZone({
       setIntroSequenceComplete(true)
       setIntroTransitioning(false)
       introTransitionTimerRef.current = null
-    }, 1140 / introAnimationSpeed)
+    }, INTRO_FINAL_RETRACT_CSS_MS / introAnimationSpeed)
   }
 
   const finishIntroOpeningShrink = useCallback(() => {
@@ -687,7 +688,9 @@ function BeginnerZone({
     const speechMeasureStep = introSpeechDisplayStep === 3
       ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
       : speechDisplayStep
-    const guideStep = introSpeechDisplayStep === 3
+    const guideStep = introOpeningShrinking
+      ? step
+      : introSpeechDisplayStep === 3
       ? BEGINNER_INTRO_STEPS[INTRO_STANDARD_SPEECH_STEP_INDEX]
       : (introOpeningPreview && introStep === 0 && !introOpeningShrinking
           ? BEGINNER_INTRO_STEPS[0]
@@ -740,13 +743,14 @@ function BeginnerZone({
             <div className={`beginner-intro-ring${completedScripts > 0 ? ' is-visible' : ''}`} aria-hidden="true" />
             {isRevealWheelVisible && (
               <div className={`beginner-intro-empty-wheel is-${revealScript}${introStep === 2 ? ' is-revealing' : ''}${introStep >= 3 && introStep <= 4 ? ' is-switching' : ''}${introSequenceComplete ? ' is-final-complete' : ''}${(introTransitioning || introSequenceComplete) && introStep === 4 ? ' is-final-retracting' : ''}`}>
-                <div className="beginner-intro-circuit-lines" aria-hidden="true">
-                  <i className="is-outer-one" />
-                  <i className="is-outer-two" />
-                  <i className="is-inner" />
-                </div>
-                <div className="beginner-intro-wheel-rotor">
-                  {BEGINNER_INTRO_SCRIPTS.map((item, index) => {
+                <div className="beginner-intro-wheel-assembly">
+                  <div className="beginner-intro-circuit-lines" aria-hidden="true">
+                    <i className="is-outer-one" />
+                    <i className="is-outer-two" />
+                    <i className="is-inner" />
+                  </div>
+                  <div className="beginner-intro-wheel-rotor">
+                    {BEGINNER_INTRO_SCRIPTS.map((item, index) => {
                     const content = BEGINNER_INTRO_REVEAL_CONTENT[item.id]
                     const exampleWord = content.words[0]
                     const exampleAudio = 'spokenKana' in exampleWord ? exampleWord.spokenKana : exampleWord.kana
@@ -799,11 +803,20 @@ function BeginnerZone({
                         </span>
                       </span>
                     )
-                  })}
-                  <div className="beginner-intro-wheel-center-copy" aria-hidden="true">
-                    <span className="is-kanji">山</span>
-                    <span className="is-hiragana">の</span>
-                    <span className="is-katakana">ホテル</span>
+                    })}
+                  </div>
+                </div>
+                <div className="beginner-intro-wheel-center-copy" aria-hidden="true">
+                  <div className="beginner-intro-wheel-center-japanese" lang="ja">
+                    <ruby className="is-kanji"><span>猫</span><rt lang="en">neko</rt></ruby>
+                    <ruby className="is-hiragana"><span>の</span><rt lang="en">no</rt></ruby>
+                    <ruby className="is-katakana"><span>ミルク</span><rt lang="en">miruku</rt></ruby>
+                  </div>
+                  <div className="beginner-intro-wheel-center-meaning" lang="en">
+                    <span className="is-kanji">The&nbsp;</span>
+                    <span className="is-kanji">cat</span>
+                    <span className="is-hiragana">'s&nbsp;</span>
+                    <span className="is-katakana">milk</span>
                   </div>
                 </div>
               </div>
@@ -841,7 +854,7 @@ function BeginnerZone({
 
         </section>
 
-        <footer className={`beginner-intro-controls${introStep > 0 ? ' is-lowered' : ''}`}>
+        <footer className={`beginner-intro-controls${introStep > 0 ? ' is-lowered' : ''}${introStep <= 1 ? ' is-opening' : ''}`}>
           <div>
             {isFinalStep ? (
               <button type="button" className="beginner-intro-replay" onClick={() => goToIntroStep(0)} aria-label="Replay introduction">
