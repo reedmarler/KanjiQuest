@@ -1700,7 +1700,7 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-copy {
-  top: calc(50% + 6.25rem + 35px);
+  top: calc(50% + 6.25rem);
   z-index: 3;
   width: max-content;
   aspect-ratio: auto;
@@ -1709,23 +1709,29 @@ button.beginner-intro-example-speaker:focus-visible,
   background: transparent;
   box-shadow: none;
   opacity: 1;
+  align-items: flex-start;
   transform: translate(-50%, -50%);
   animation: none;
 }
 
-.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby,
-.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning {
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby {
   opacity: 0;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese {
   font-size: 2.4rem;
+  justify-content: flex-start;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese rt {
+  position: relative;
+  top: 0.12rem;
 }
 
 .beginner-intro-word-connectors {
   display: none;
   width: 100%;
-  height: 4.35rem;
+  height: 2.175rem;
   margin-top: 0.12rem;
   overflow: visible;
 }
@@ -1741,6 +1747,7 @@ button.beginner-intro-example-speaker:focus-visible,
   stroke-linejoin: round;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
+  vector-effect: non-scaling-stroke;
 }
 
 .beginner-intro-word-connectors .is-kanji {
@@ -1769,7 +1776,28 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning {
+  justify-content: flex-start;
   margin-top: 0.18rem;
+  font-size: 2.4rem;
+  opacity: 1;
+  animation: none;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning > span {
+  display: inline-block;
+  opacity: 0;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning > .is-kanji {
+  animation: beginner-intro-final-word-in calc(320 * var(--intro-time-unit)) calc(1522 * var(--intro-time-unit)) ease-out both;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning > .is-hiragana {
+  animation: beginner-intro-final-word-in calc(320 * var(--intro-time-unit)) calc(2452 * var(--intro-time-unit)) ease-out both;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning > .is-katakana {
+  animation: beginner-intro-final-word-in calc(320 * var(--intro-time-unit)) calc(3008 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby.is-kanji {
@@ -1792,10 +1820,6 @@ button.beginner-intro-example-speaker:focus-visible,
   animation: beginner-intro-final-word-in calc(240 * var(--intro-time-unit)) calc(4360 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning {
-  animation: beginner-intro-final-english-in calc(380 * var(--intro-time-unit)) calc(5120 * var(--intro-time-unit)) ease-out both;
-}
-
 .beginner-intro-empty-wheel.is-kanji.is-final-retracting .is-wheel-slot {
   filter: none;
   transition: filter calc(300 * var(--intro-time-unit)) ease;
@@ -1808,6 +1832,13 @@ button.beginner-intro-example-speaker:focus-visible,
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-rotor::after {
   filter: blur(0.42rem) grayscale(0.9) brightness(0.42);
   opacity: 0.42;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-rotor::before,
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-rotor::after,
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-final-line-lights > i {
+  -webkit-mask: radial-gradient(circle, transparent 0 50%, #000 50.7% 100%);
+  mask: radial-gradient(circle, transparent 0 50%, #000 50.7% 100%);
 }
 
 .beginner-intro-final-line-lights {
@@ -1876,6 +1907,16 @@ button.beginner-intro-example-speaker:focus-visible,
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-empty-slot.is-wheel-slot {
   filter: brightness(0.38) saturate(0.32);
   will-change: filter;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-empty-slot.is-slot-katakana {
+  --intro-slot-wheel-x: calc(var(--intro-wheel-inner-size) * 0.4);
+  --intro-slot-wheel-y: calc(var(--intro-wheel-inner-size) * 0.22);
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-empty-slot.is-slot-kanji {
+  --intro-slot-wheel-x: calc(var(--intro-wheel-inner-size) * -0.4);
+  --intro-slot-wheel-y: calc(var(--intro-wheel-inner-size) * 0.22);
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-empty-slot.is-wheel-slot:not(.is-reveal-slot):not(.is-previous-slot) {
@@ -2914,11 +2955,6 @@ button.beginner-intro-example-speaker:focus-visible,
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes beginner-intro-final-english-in {
-  from { opacity: 0; transform: translateY(0.4rem); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 @keyframes beginner-intro-final-connector-draw {
   from { stroke-dashoffset: 1; opacity: 0.35; }
   to { stroke-dashoffset: 0; opacity: 1; }
@@ -3775,17 +3811,18 @@ button.beginner-intro-example-speaker:focus-visible,
   }
 
   .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-assembly {
-    transform: scale(0.7);
+    transform: translateY(calc(-1 * clamp(4rem, 8.3dvh, 4.6rem))) scale(0.7);
   }
 
   .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-copy {
-    top: calc(50% + 6.25rem + 35px);
+    top: calc(50% + 6.25rem);
     opacity: 1;
     transform: translate(-50%, -50%);
   }
 
   .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby,
-  .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning {
+  .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning,
+  .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning > span {
     opacity: 1;
     transform: none;
     animation: none;
@@ -18067,10 +18104,12 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 .beginner-intro-circuit-lines > i {
+  --intro-circuit-outer-gap: 2px;
+  --intro-circuit-line-edge: 1px;
   display: block;
   background: rgba(155, 155, 171, 0.15);
   -webkit-mask-image:
-    radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)),
+    radial-gradient(farthest-side, transparent calc(100% - var(--intro-circuit-outer-gap)), #000 calc(100% - var(--intro-circuit-line-edge))),
     conic-gradient(
       from 8deg,
       #000 0deg 42deg,
@@ -18084,7 +18123,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
     );
   -webkit-mask-composite: source-in;
   mask-image:
-    radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)),
+    radial-gradient(farthest-side, transparent calc(100% - var(--intro-circuit-outer-gap)), #000 calc(100% - var(--intro-circuit-line-edge))),
     conic-gradient(
       from 8deg,
       #000 0deg 42deg,
@@ -18132,7 +18171,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 .beginner-intro-circuit-lines > .is-outer-two {
   inset: -1.2rem;
   -webkit-mask-image:
-    radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)),
+    radial-gradient(farthest-side, transparent calc(100% - var(--intro-circuit-outer-gap)), #000 calc(100% - var(--intro-circuit-line-edge))),
     conic-gradient(
       from 103deg,
       #000 0deg 57deg,
@@ -18145,7 +18184,7 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
       transparent 346deg 360deg
     );
   mask-image:
-    radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)),
+    radial-gradient(farthest-side, transparent calc(100% - var(--intro-circuit-outer-gap)), #000 calc(100% - var(--intro-circuit-line-edge))),
     conic-gradient(
       from 103deg,
       #000 0deg 57deg,
@@ -18203,11 +18242,16 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
   animation: beginner-intro-circuit-spin 64s linear infinite;
 }
 
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-circuit-lines > i {
+  --intro-circuit-outer-gap: 2.857px;
+  --intro-circuit-line-edge: 1.429px;
+}
+
 /* Keep the color map fixed while each masked ring rotates over it. */
 @supports not (mask-composite: intersect) {
   .beginner-intro-circuit-lines > i {
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
-    mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--intro-circuit-outer-gap)), #000 calc(100% - var(--intro-circuit-line-edge)));
+    mask: radial-gradient(farthest-side, transparent calc(100% - var(--intro-circuit-outer-gap)), #000 calc(100% - var(--intro-circuit-line-edge)));
   }
 }
 
