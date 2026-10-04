@@ -1662,6 +1662,14 @@ button.beginner-intro-example-speaker:focus-visible,
   animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-time-unit)) calc(1103 * var(--intro-time-unit)) linear both;
 }
 
+.beginner-intro-empty-wheel.is-katakana.is-switching .beginner-intro-wheel-rotor {
+  animation-name: beginner-intro-katakana-slice-sweep;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-switching .beginner-intro-wheel-rotor {
+  animation-name: beginner-intro-kanji-slice-sweep;
+}
+
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-previous-kana::before {
   width: var(--intro-previous-outline-width, 8.5rem);
 }
@@ -2451,6 +2459,16 @@ button.beginner-intro-example-speaker:focus-visible,
   to { --intro-hiragana-sweep: 104deg; }
 }
 
+@keyframes beginner-intro-katakana-slice-sweep {
+  from { --intro-hiragana-sweep: 0deg; }
+  to { --intro-hiragana-sweep: 104deg; }
+}
+
+@keyframes beginner-intro-kanji-slice-sweep {
+  from { --intro-hiragana-sweep: 0deg; }
+  to { --intro-hiragana-sweep: 104deg; }
+}
+
 @keyframes beginner-intro-wheel-initial-counter-spin {
   from { transform: translate(-50%, -50%) rotate(360deg); }
   to { transform: translate(-50%, -50%) rotate(0deg); }
@@ -2470,7 +2488,7 @@ button.beginner-intro-example-speaker:focus-visible,
 
 @property --intro-hiragana-sweep {
   syntax: '<angle>';
-  inherits: false;
+  inherits: true;
   initial-value: 0deg;
 }
 
@@ -2653,6 +2671,8 @@ button.beginner-intro-example-speaker:focus-visible,
       0
     );
   }
+  0%, 22.14% { filter: grayscale(1); }
+  22.15%, to { filter: none; }
   62.61% { opacity: 1; transform: translate3d(-50%, -50%, 0); }
   62.62%, to { opacity: 0; transform: translate3d(-50%, -50%, 0); }
 }
@@ -2885,12 +2905,12 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 @keyframes beginner-intro-katakana-glyph-anchor {
-  0%, 48.21% {
+  0%, 22.14% {
     color: color-mix(in srgb, var(--text-muted) 75%, var(--text));
     text-shadow: none;
     transform: translate(-50%, -50%);
   }
-  48.22%, 62.61% {
+  22.15%, 62.61% {
     color: #fff;
     text-shadow: none;
     transform: translate(-50%, -50%);
@@ -17605,6 +17625,14 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-circuit-lines {
   animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-time-unit)) calc(1103 * var(--intro-time-unit)) linear both;
+}
+
+.beginner-intro-empty-wheel.is-katakana.is-switching .beginner-intro-circuit-lines {
+  animation-name: beginner-intro-katakana-slice-sweep;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-switching .beginner-intro-circuit-lines {
+  animation-name: beginner-intro-kanji-slice-sweep;
 }
 
 .beginner-intro-circuit-lines > i {
