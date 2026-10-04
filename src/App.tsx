@@ -342,11 +342,26 @@ const INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
 const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.25, 1.5, 2, 2.5, 3]
 const INTRO_OPENING_MOVE_CSS_MS = 1274
 const INTRO_SPEECH_RESIZE_MS = 560
+const INTRO_SPEECH_HIRAGANA_REVEAL_CSS_MS = 2600 * 0.9879
+const INTRO_SPEECH_KATAKANA_KANJI_REVEAL_CSS_MS = 4414 * 0.7464
 const INTRO_FINAL_RETRACT_CSS_MS = 1800
 const INTRO_STANDARD_SPEECH_STEP_INDEX = 2
+const INTRO_FINAL_SPEECH_TITLE = 'Here is an example of all three together.'
 
 function defaultIntroAnimationSpeedForStep(step: number): IntroAnimationSpeed {
   return step <= 1 ? INTRO_OPENING_DEFAULT_ANIMATION_SPEED : INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED
+}
+
+function introSpeechUnblurDelay(step: number, speed: IntroAnimationSpeed) {
+  if (step === 2) {
+    return (INTRO_SPEECH_HIRAGANA_REVEAL_CSS_MS * INTRO_ANIMATION_TIME_BASE) / speed
+  }
+
+  if (step === 3 || step === 4) {
+    return (INTRO_SPEECH_KATAKANA_KANJI_REVEAL_CSS_MS * INTRO_ANIMATION_TIME_BASE) / speed
+  }
+
+  return INTRO_SPEECH_RESIZE_MS / speed
 }
 
 function renderIntroDisplayText(value: string) {
@@ -672,7 +687,7 @@ function BeginnerZone({
         introSpeechFrameRef.current = null
       })
       introSpeechTimerRef.current = null
-    }, INTRO_SPEECH_RESIZE_MS / introAnimationSpeed)
+    }, introSpeechUnblurDelay(displayIntroStep, introAnimationSpeed))
 
     return () => {
       if (introSpeechTimerRef.current !== null) window.clearTimeout(introSpeechTimerRef.current)
@@ -698,6 +713,8 @@ function BeginnerZone({
     const activeScriptIndex = -1
     const completedScripts = 0
     const isFinalStep = introSequenceComplete
+    const speechTitle = isFinalStep ? INTRO_FINAL_SPEECH_TITLE : speechDisplayStep.title
+    const speechMeasureTitle = isFinalStep ? INTRO_FINAL_SPEECH_TITLE : speechMeasureStep.title
     const revealScript = introStep >= 4 ? 'kanji' : introStep === 3 ? 'katakana' : 'hiragana'
     const activeRevealIndex = introStep >= 2 && introStep <= 4 ? introStep - 2 : -1
     const isRevealWheelVisible = introStep >= 1 && introStep <= 4
@@ -720,16 +737,18 @@ function BeginnerZone({
             } as CSSProperties : undefined}
           >
             <div
-              className={`beginner-intro-speech-inner beginner-intro-speech-copy is-${speechDisplayStep.id}${introSpeechCopyBlurred ? ' is-blurred' : ''}${displayIntroStep >= 2 && displayIntroStep <= 4 ? ` is-script-delayed-reveal is-target-${revealScript}` : ''}`}
+              className={`beginner-intro-speech-inner beginner-intro-speech-copy is-${speechDisplayStep.id}${isFinalStep ? ' is-final-message' : ''}${displayIntroStep >= 2 && displayIntroStep <= 4 ? ` is-script-delayed-reveal is-target-${revealScript}` : ''}`}
               ref={introSpeechContentRef}
             >
-              {speechDisplayStep.eyebrow && <small>{speechDisplayStep.eyebrow}</small>}
-              <h1>{renderIntroDisplayText(speechDisplayStep.title)}</h1>
-              {speechDisplayStep.body && <p>{speechDisplayStep.body}</p>}
+              <div className={`beginner-intro-speech-content${introSpeechCopyBlurred ? ' is-blurred' : ''}`}>
+                {speechDisplayStep.eyebrow && <small>{speechDisplayStep.eyebrow}</small>}
+                <h1>{renderIntroDisplayText(speechTitle)}</h1>
+                {speechDisplayStep.body && <p>{speechDisplayStep.body}</p>}
+              </div>
             </div>
             <div className={`beginner-intro-speech-inner beginner-intro-speech-measure is-${speechMeasureStep.id}`} ref={introSpeechMeasureRef} aria-hidden="true">
               {speechMeasureStep.eyebrow && <small>{speechMeasureStep.eyebrow}</small>}
-              <h1>{renderIntroDisplayText(speechMeasureStep.title)}</h1>
+              <h1>{renderIntroDisplayText(speechMeasureTitle)}</h1>
               {speechMeasureStep.body && <p>{speechMeasureStep.body}</p>}
             </div>
             <div className="beginner-intro-speech-inner beginner-intro-speech-measure is-systems" ref={introSpeechWidthMeasureRef} aria-hidden="true">
@@ -805,13 +824,29 @@ function BeginnerZone({
                     )
                     })}
                   </div>
+                  <div className="beginner-intro-final-line-lights" aria-hidden="true">
+                    <i className="is-kanji" />
+                    <i className="is-hiragana" />
+                    <i className="is-katakana is-first" />
+                    <i className="is-katakana is-second" />
+                    <i className="is-katakana is-third" />
+                  </div>
                 </div>
                 <div className="beginner-intro-wheel-center-copy" aria-hidden="true">
                   <div className="beginner-intro-wheel-center-japanese" lang="ja">
                     <ruby className="is-kanji"><span>猫</span><rt lang="en">neko</rt></ruby>
                     <ruby className="is-hiragana"><span>の</span><rt lang="en">no</rt></ruby>
-                    <ruby className="is-katakana"><span>ミルク</span><rt lang="en">miruku</rt></ruby>
+                    <ruby className="is-katakana is-katakana-1"><span>ミ</span><rt lang="en">mi</rt></ruby>
+                    <ruby className="is-katakana is-katakana-2"><span>ル</span><rt lang="en">ru</rt></ruby>
+                    <ruby className="is-katakana is-katakana-3"><span>ク</span><rt lang="en">ku</rt></ruby>
                   </div>
+                  <svg className="beginner-intro-word-connectors" viewBox="0 0 240 78" aria-hidden="true">
+                    <path className="is-kanji" pathLength="1" d="M 32 4 L 37 35 L 55 72" />
+                    <path className="is-hiragana" pathLength="1" d="M 87 4 L 84 35 L 82 72" />
+                    <path className="is-katakana is-first" pathLength="1" d="M 141 4 L 169 28" />
+                    <path className="is-katakana is-second" pathLength="1" d="M 176 4 L 176 20 L 169 28 L 169 72" />
+                    <path className="is-katakana is-third" pathLength="1" d="M 222 4 L 169 28" />
+                  </svg>
                   <div className="beginner-intro-wheel-center-meaning" lang="en">
                     <span className="is-kanji">The&nbsp;</span>
                     <span className="is-kanji">cat</span>
