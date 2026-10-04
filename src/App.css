@@ -1709,7 +1709,7 @@ button.beginner-intro-example-speaker:focus-visible,
   background: transparent;
   box-shadow: none;
   opacity: 1;
-  align-items: flex-end;
+  align-items: center;
   transform: translate(-50%, -50%);
   animation: none;
 }
@@ -1720,12 +1720,12 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese {
   font-size: 2.4rem;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese rt {
   position: relative;
-  top: 0.12rem;
+  top: 0.28rem;
 }
 
 .beginner-intro-word-connectors {
@@ -1752,31 +1752,31 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-word-connectors .is-kanji {
   stroke: #FED269;
-  animation: beginner-intro-final-connector-draw calc(2434 * var(--intro-time-unit)) calc(2377 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-connector-draw calc(2434 * var(--intro-time-unit)) calc(1995 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-word-connectors .is-hiragana {
   stroke: var(--sakura-light);
-  animation: beginner-intro-final-connector-draw calc(1082 * var(--intro-time-unit)) calc(3865 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-connector-draw calc(1082 * var(--intro-time-unit)) calc(3483 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-word-connectors .is-katakana.is-first {
   stroke: #70cfe0;
-  animation: beginner-intro-final-connector-draw calc(1082 * var(--intro-time-unit)) calc(4755 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-connector-draw calc(1082 * var(--intro-time-unit)) calc(4373 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-word-connectors .is-katakana.is-second {
   stroke: #70cfe0;
-  animation: beginner-intro-final-connector-draw calc(1082 * var(--intro-time-unit)) calc(5837 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-connector-draw calc(1082 * var(--intro-time-unit)) calc(5455 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-word-connectors .is-katakana.is-third {
   stroke: #70cfe0;
-  animation: beginner-intro-final-connector-draw calc(1082 * var(--intro-time-unit)) calc(6919 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-connector-draw calc(1082 * var(--intro-time-unit)) calc(6537 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning {
-  justify-content: flex-end;
+  justify-content: center;
   margin-top: 0.18rem;
   font-size: 2.7rem;
   opacity: 1;
@@ -1789,35 +1789,35 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning > .is-kanji {
-  animation: beginner-intro-final-word-in calc(320 * var(--intro-time-unit)) calc(2377 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-word-in calc(320 * var(--intro-time-unit)) calc(1995 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning > .is-hiragana {
-  animation: beginner-intro-final-word-in calc(320 * var(--intro-time-unit)) calc(3865 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-word-in calc(320 * var(--intro-time-unit)) calc(3483 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning > .is-katakana {
-  animation: beginner-intro-final-word-in calc(320 * var(--intro-time-unit)) calc(4755 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-word-in calc(320 * var(--intro-time-unit)) calc(4373 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby.is-kanji {
-  animation: beginner-intro-final-word-in calc(260 * var(--intro-time-unit)) calc(2377 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: beginner-intro-final-word-in calc(260 * var(--intro-time-unit)) calc(1995 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby.is-hiragana {
-  animation: beginner-intro-final-word-in calc(260 * var(--intro-time-unit)) calc(3865 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: beginner-intro-final-word-in calc(260 * var(--intro-time-unit)) calc(3483 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby.is-katakana-1 {
-  animation: beginner-intro-final-word-in calc(240 * var(--intro-time-unit)) calc(4755 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: beginner-intro-final-word-in calc(240 * var(--intro-time-unit)) calc(4373 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby.is-katakana-2 {
-  animation: beginner-intro-final-word-in calc(240 * var(--intro-time-unit)) calc(5837 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: beginner-intro-final-word-in calc(240 * var(--intro-time-unit)) calc(5455 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby.is-katakana-3 {
-  animation: beginner-intro-final-word-in calc(240 * var(--intro-time-unit)) calc(6919 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: beginner-intro-final-word-in calc(240 * var(--intro-time-unit)) calc(6537 * var(--intro-time-unit)) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-retracting .is-wheel-slot {
@@ -1874,27 +1874,27 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-final-complete .beginner-intro-final-line-lights > .is-kanji {
   --intro-final-line-color: rgba(254, 210, 105, 0.78);
-  animation: beginner-intro-final-line-light calc(2434 * var(--intro-time-unit)) calc(2377 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-line-light calc(2434 * var(--intro-time-unit)) calc(1995 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-final-complete .beginner-intro-final-line-lights > .is-hiragana {
   --intro-final-line-color: rgba(255, 174, 205, 0.72);
-  animation: beginner-intro-final-line-light calc(1082 * var(--intro-time-unit)) calc(3865 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-line-light calc(1082 * var(--intro-time-unit)) calc(3483 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-final-complete .beginner-intro-final-line-lights > .is-katakana.is-first {
   --intro-final-line-color: rgba(112, 207, 224, 0.74);
-  animation: beginner-intro-final-line-light calc(1082 * var(--intro-time-unit)) calc(4755 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-line-light calc(1082 * var(--intro-time-unit)) calc(4373 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-final-complete .beginner-intro-final-line-lights > .is-katakana.is-second {
   --intro-final-line-color: rgba(112, 207, 224, 0.74);
-  animation: beginner-intro-final-line-light calc(1082 * var(--intro-time-unit)) calc(5837 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-line-light calc(1082 * var(--intro-time-unit)) calc(5455 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-final-complete .beginner-intro-final-line-lights > .is-katakana.is-third {
   --intro-final-line-color: rgba(112, 207, 224, 0.74);
-  animation: beginner-intro-final-line-light calc(1082 * var(--intro-time-unit)) calc(6919 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-line-light calc(1082 * var(--intro-time-unit)) calc(6537 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-empty-slot.is-wheel-slot {
@@ -2064,15 +2064,15 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-switching.is-final-complete .beginner-intro-empty-slot.is-wheel-slot.is-script-kanji {
-  animation: beginner-intro-final-kanji-light calc(2434 * var(--intro-time-unit)) calc(2377 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-kanji-light calc(2434 * var(--intro-time-unit)) calc(1995 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-switching.is-final-complete .beginner-intro-empty-slot.is-wheel-slot.is-script-hiragana {
-  animation: beginner-intro-final-hiragana-light calc(1082 * var(--intro-time-unit)) calc(3865 * var(--intro-time-unit)) ease-out both;
+  animation: beginner-intro-final-hiragana-light calc(1082 * var(--intro-time-unit)) calc(3483 * var(--intro-time-unit)) ease-out both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-switching.is-final-complete .beginner-intro-empty-slot.is-wheel-slot.is-script-katakana {
-  animation: beginner-intro-final-node-triple-light calc(3245 * var(--intro-time-unit)) calc(4755 * var(--intro-time-unit)) linear both;
+  animation: beginner-intro-final-node-triple-light calc(3245 * var(--intro-time-unit)) calc(4373 * var(--intro-time-unit)) linear both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-switching.is-final-retracting .is-reveal-slot {
