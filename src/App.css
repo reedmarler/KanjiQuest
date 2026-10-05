@@ -771,6 +771,7 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-slot-label {
+  display: none;
   right: auto;
   bottom: calc(100% + 1.25rem);
   left: 50%;
@@ -3724,7 +3725,7 @@ button.beginner-intro-example-speaker:focus-visible,
     top: calc(58% + 15px - var(--intro-wheel-lift));
   }
   .beginner-intro-empty-wheel.is-hiragana {
-    --intro-reveal-panel-offset-y: calc(-10px + var(--intro-wheel-lift));
+    --intro-reveal-panel-offset-y: calc(-10px + var(--intro-wheel-lift) - 1.36rem);
     --intro-hiragana-outline-width: 16rem;
     --intro-hiragana-panel-gutter: 15px;
     --intro-expanded-wheel-size: min(
@@ -3734,8 +3735,8 @@ button.beginner-intro-example-speaker:focus-visible,
     --intro-expanded-wheel-height: calc(18rem + 90px);
   }
   .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) {
-    --intro-reveal-panel-offset-y: calc(-10px + var(--intro-wheel-lift));
-    --intro-previous-panel-offset-y: calc(-10px + var(--intro-wheel-lift));
+    --intro-reveal-panel-offset-y: calc(-10px + var(--intro-wheel-lift) - 1.36rem);
+    --intro-previous-panel-offset-y: calc(-10px + var(--intro-wheel-lift) - 1.36rem);
     --intro-hiragana-panel-gutter: 15px;
     --intro-expanded-wheel-height: calc(18rem + 90px);
     --intro-previous-expanded-wheel-size: min(
