@@ -3679,7 +3679,7 @@ button.beginner-intro-example-speaker:focus-visible,
     font-size: 1.25rem;
   }
   .beginner-intro-guide.is-katakana-reveal .beginner-intro-speech-inner h1 {
-    font-size: 1.02rem;
+    font-size: 0.92rem;
   }
   .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 {
     font-size: 0.95rem;
@@ -3813,7 +3813,7 @@ button.beginner-intro-example-speaker:focus-visible,
   }
   .beginner-intro-speech p { font-size: 0.7rem; }
   .beginner-intro-guide:is(.is-simple, .is-systems) .beginner-intro-speech-inner h1 { font-size: 1.1rem; }
-  .beginner-intro-guide.is-katakana-reveal .beginner-intro-speech-inner h1 { font-size: 0.92rem; }
+  .beginner-intro-guide.is-katakana-reveal .beginner-intro-speech-inner h1 { font-size: 0.85rem; }
   .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 { font-size: 0.85rem; }
   .beginner-intro-guide.is-simple .beginner-intro-mascot {
     transform: scale(0.86);
