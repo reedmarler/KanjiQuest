@@ -1730,7 +1730,7 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese rt {
   position: relative;
-  top: 0.34rem;
+  top: 0.48rem;
 }
 
 .beginner-intro-word-connectors {
@@ -1924,12 +1924,12 @@ button.beginner-intro-example-speaker:focus-visible,
   will-change: filter;
 }
 
-.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-empty-slot.is-slot-katakana {
+.beginner-intro-empty-wheel.is-kanji .beginner-intro-empty-slot.is-slot-katakana {
   --intro-slot-wheel-x: calc(var(--intro-wheel-inner-size) * 0.4);
   --intro-slot-wheel-y: calc(var(--intro-wheel-inner-size) * 0.22);
 }
 
-.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-empty-slot.is-slot-kanji {
+.beginner-intro-empty-wheel.is-kanji .beginner-intro-empty-slot.is-slot-kanji {
   --intro-slot-wheel-x: calc(var(--intro-wheel-inner-size) * -0.4);
   --intro-slot-wheel-y: calc(var(--intro-wheel-inner-size) * 0.22);
 }
