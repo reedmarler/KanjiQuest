@@ -1724,6 +1724,10 @@ button.beginner-intro-example-speaker:focus-visible,
   transform: translateX(10px);
 }
 
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby.is-hiragana {
+  margin-inline: 0.1em;
+}
+
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese rt {
   position: relative;
   top: 0.34rem;
@@ -1784,6 +1788,11 @@ button.beginner-intro-example-speaker:focus-visible,
   animation-name: beginner-intro-final-connector-pop;
   animation-duration: 1ms;
   animation-timing-function: step-end;
+}
+
+.beginner-intro-word-connectors path.is-katakana.is-first.is-underline {
+  opacity: 1;
+  animation: none;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning {
