@@ -3685,11 +3685,14 @@ button.beginner-intro-example-speaker:focus-visible,
       transform var(--intro-opening-move-duration) linear,
       translate var(--intro-speech-resize-duration) cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .beginner-intro-guide:is(.is-simple, .is-systems, .is-katakana-reveal) .beginner-intro-speech-inner h1 {
+  .beginner-intro-guide:is(.is-simple, .is-systems) .beginner-intro-speech-inner h1 {
     font-size: 1.25rem;
   }
+  .beginner-intro-guide.is-katakana-reveal .beginner-intro-speech-inner h1 {
+    font-size: 1.15rem;
+  }
   .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .beginner-intro-speech h1 { font-size: 1.12rem; }
@@ -3819,8 +3822,9 @@ button.beginner-intro-example-speaker:focus-visible,
     line-height: 1.15;
   }
   .beginner-intro-speech p { font-size: 0.7rem; }
-  .beginner-intro-guide:is(.is-simple, .is-systems, .is-katakana-reveal) .beginner-intro-speech-inner h1 { font-size: 1.1rem; }
-  .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 { font-size: 0.9rem; }
+  .beginner-intro-guide:is(.is-simple, .is-systems) .beginner-intro-speech-inner h1 { font-size: 1.1rem; }
+  .beginner-intro-guide.is-katakana-reveal .beginner-intro-speech-inner h1 { font-size: 1rem; }
+  .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 { font-size: 0.85rem; }
   .beginner-intro-guide.is-simple .beginner-intro-mascot {
     transform: scale(0.86);
   }

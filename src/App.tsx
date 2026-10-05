@@ -201,7 +201,7 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     romaji: 'a',
     heading: 'Example:',
     words: [
-      { kana: 'あめ', readingParts: ['a', 'me'], romaji: 'rain' },
+      { kana: 'あめ', readingParts: ['a', 'me'], romaji: 'Rain' },
     ],
   },
   katakana: {
@@ -216,10 +216,10 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
   kanji: {
     label: 'Kanji',
     mark: '山',
-    romaji: 'yama',
-    heading: 'Another example:',
+    romaji: 'Yama',
+    heading: 'Another Example:',
     words: [
-      { kana: '猫', spokenKana: 'ねこ', readingParts: ['neko'], romaji: 'cat' },
+      { kana: '猫', spokenKana: 'ねこ', readingParts: ['neko'], romaji: 'Cat' },
     ],
   },
 } as const
@@ -317,13 +317,13 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'katakana-reveal',
     eyebrow: '',
-    title: 'Katakana is used for foreign words. It is blocky and angular.',
+    title: 'Katakana is used for foreign words. It is blocky and angular. It also has 46 characters.',
     body: '',
   },
   {
     id: 'kanji-reveal',
     eyebrow: '',
-    title: 'Kanji are information dense Chinese characters used to write Japanese. Most hold the meaning of an entire word.',
+    title: 'Kanji are information dense Chinese characters used to write Japanese. Most hold the meaning of an entire word. There are thousands.',
     body: '',
   },
   {
@@ -847,8 +847,7 @@ function BeginnerZone({
                     <path className="is-katakana is-first is-pointer" pathLength="1" d="M 165.2 1 L 196 72" />
                   </svg>
                   <div className="beginner-intro-wheel-center-meaning" lang="en">
-                    <span className="is-kanji">The&nbsp;</span>
-                    <span className="is-kanji">cat</span>
+                    <span className="is-kanji">Cat</span>
                     <span className="is-hiragana">'s&nbsp;</span>
                     <span className="is-katakana">milk</span>
                   </div>
