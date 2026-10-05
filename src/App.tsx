@@ -841,12 +841,12 @@ function BeginnerZone({
                     <ruby className="is-katakana is-katakana-3"><span>ク</span><rt lang="en">ku</rt></ruby>
                   </div>
                   <svg className="beginner-intro-word-connectors" viewBox="0 0 240 78" preserveAspectRatio="none" aria-hidden="true">
-                    <path className="is-kanji is-underline" pathLength="1" d="M 45.2 4 H 82.9" />
-                    <path className="is-kanji is-pointer" pathLength="1" d="M 64 4 L 76.5 72" />
-                    <path className="is-hiragana is-underline" pathLength="1" d="M 86.5 4 H 116.4" />
-                    <path className="is-hiragana is-pointer" pathLength="1" d="M 101.5 4 L 128.2 82" />
-                    <path className="is-katakana is-first is-underline" pathLength="1" d="M 120 4 H 210.6" />
-                    <path className="is-katakana is-first is-pointer" pathLength="1" d="M 197.9 4 L 196 72" />
+                    <path className="is-kanji is-underline" pathLength="1" d="M 42.3 4 H 76.6" />
+                    <path className="is-kanji is-pointer" pathLength="1" d="M 59.5 4 L 76.5 72" />
+                    <path className="is-hiragana is-underline" pathLength="1" d="M 76.6 4 H 110.8" />
+                    <path className="is-hiragana is-pointer" pathLength="1" d="M 93.7 4 L 128.2 82" />
+                    <path className="is-katakana is-first is-underline" pathLength="1" d="M 110.8 4 H 213.5" />
+                    <path className="is-katakana is-first is-pointer" pathLength="1" d="M 162.2 4 L 196 72" />
                   </svg>
                   <div className="beginner-intro-wheel-center-meaning" lang="en">
                     <span className="is-kanji">The&nbsp;</span>

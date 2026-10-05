@@ -1778,6 +1778,7 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-word-connectors path.is-underline:is(.is-kanji, .is-hiragana, .is-katakana) {
+  stroke-linecap: butt;
   stroke-dasharray: none;
   stroke-dashoffset: 0;
   animation-name: beginner-intro-final-connector-pop;
