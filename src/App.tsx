@@ -489,6 +489,7 @@ function BeginnerZone({
   const introSpeechDisplayStepRef = useRef(0)
   const introSpeechContentRef = useRef<HTMLDivElement>(null)
   const introSpeechMeasureRef = useRef<HTMLDivElement>(null)
+  const introConnectorSvgRef = useRef<SVGSVGElement>(null)
   const introSpeechWidthMeasureRef = useRef<HTMLDivElement>(null)
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const [introSpeechSize, setIntroSpeechSize] = useState<{ width: number; height: number } | null>(null)
@@ -600,6 +601,49 @@ function BeginnerZone({
       introOpeningFinishTimerRef.current = null
     }
   }, [finishIntroOpeningShrink, introAnimationSpeed, introOpeningShrinking])
+
+  // Draw the final example's connector lines from the real word positions so they stay
+  // attached however the Japanese and English lines are centered.
+  useLayoutEffect(() => {
+    if (!introSequenceComplete) return undefined
+
+    const layoutConnectors = () => {
+      const svg = introConnectorSvgRef.current
+      const copy = svg?.parentElement
+      if (!svg || !copy) return
+      const frame = svg.getBoundingClientRect()
+      if (!frame.width || !frame.height) return
+      const measure = (selector: string) => {
+        const rect = copy.querySelector(selector)?.getBoundingClientRect()
+        return rect ? { left: rect.left - frame.left, right: rect.right - frame.left } : null
+      }
+      const center = (box: { left: number; right: number } | null) => (box ? (box.left + box.right) / 2 : null)
+      const kanji = center(measure('ruby.is-kanji > span'))
+      const hiragana = center(measure('ruby.is-hiragana > span'))
+      const katakanaFirst = measure('ruby.is-katakana-1 > span')
+      const katakanaLast = measure('ruby.is-katakana-3 > span')
+      const englishKanji = center(measure('.beginner-intro-wheel-center-meaning > .is-kanji'))
+      const englishHiragana = center(measure('.beginner-intro-wheel-center-meaning > .is-hiragana'))
+      const englishKatakana = center(measure('.beginner-intro-wheel-center-meaning > .is-katakana'))
+      if (kanji === null || hiragana === null || !katakanaFirst || !katakanaLast
+        || englishKanji === null || englishHiragana === null || englishKatakana === null) return
+
+      const top = 1
+      const bottom = frame.height - 4
+      const underlineCenter = (katakanaFirst.left + katakanaLast.right) / 2
+      const setPath = (selector: string, d: string) => svg.querySelector(selector)?.setAttribute('d', d)
+      svg.setAttribute('viewBox', `0 0 ${frame.width} ${frame.height}`)
+      setPath('.is-kanji.is-pointer', `M ${kanji} ${top} L ${englishKanji} ${bottom}`)
+      setPath('.is-hiragana.is-pointer', `M ${hiragana} ${top} L ${englishHiragana} ${bottom}`)
+      setPath('.is-katakana.is-underline', `M ${katakanaFirst.left} ${top} H ${katakanaLast.right}`)
+      setPath('.is-katakana.is-pointer', `M ${underlineCenter} ${top} L ${englishKatakana} ${bottom}`)
+    }
+
+    layoutConnectors()
+    void document.fonts?.ready.then(layoutConnectors)
+    window.addEventListener('resize', layoutConnectors)
+    return () => window.removeEventListener('resize', layoutConnectors)
+  }, [introSequenceComplete])
 
   useLayoutEffect(() => {
     if (!intro) return undefined
@@ -840,7 +884,7 @@ function BeginnerZone({
                     <ruby className="is-katakana is-katakana-2"><span>ル</span><rt lang="en">ru</rt></ruby>
                     <ruby className="is-katakana is-katakana-3"><span>ク</span><rt lang="en">ku</rt></ruby>
                   </div>
-                  <svg className="beginner-intro-word-connectors" viewBox="0 0 240 78" preserveAspectRatio="none" aria-hidden="true">
+                  <svg className="beginner-intro-word-connectors" ref={introConnectorSvgRef} viewBox="0 0 240 78" preserveAspectRatio="none" aria-hidden="true">
                     <path className="is-kanji is-pointer" pathLength="1" d="M 56.5 1 L 76.5 72" />
                     <path className="is-hiragana is-pointer" pathLength="1" d="M 93.7 1 L 128.2 82" />
                     <path className="is-katakana is-first is-underline" pathLength="1" d="M 113.8 1 H 216.5" />
@@ -848,7 +892,7 @@ function BeginnerZone({
                   </svg>
                   <div className="beginner-intro-wheel-center-meaning" lang="en">
                     <span className="is-kanji">Cat</span>
-                    <span className="is-hiragana">'s&nbsp;</span>
+                    <span className="is-hiragana">'s</span>
                     <span className="is-katakana">milk</span>
                   </div>
                 </div>
