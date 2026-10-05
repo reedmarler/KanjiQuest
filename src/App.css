@@ -3807,6 +3807,10 @@ button.beginner-intro-example-speaker:focus-visible,
   .beginner-intro-controls.is-lowered {
     transform: none;
   }
+  /* Welcome step: the Yes button sits higher, then glides down to the Next position. */
+  .beginner-intro-controls:not(.is-lowered) {
+    transform: translateY(-70px);
+  }
 }
 
 @media (max-width: 360px) {
