@@ -3714,7 +3714,9 @@ button.beginner-intro-example-speaker:focus-visible,
   .beginner-intro-orbit {
     width: min(100%, 18.7rem);
     margin-top: 2rem;
+    transition: translate var(--intro-opening-move-duration) cubic-bezier(0.22, 1, 0.36, 1);
   }
+  .beginner-intro-lesson.is-simple .beginner-intro-orbit { translate: 0 -3.35rem; }
   .beginner-intro-ring { inset: 1.9rem; }
   .beginner-intro-empty-wheel {
     --intro-empty-wheel-size: min(16.225rem, 79.2dvw);
