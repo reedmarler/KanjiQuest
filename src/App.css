@@ -1248,7 +1248,7 @@ button.beginner-intro-example-speaker:focus-visible,
   left: 50%;
   transform: translate(
     calc(-50% + var(--intro-kana-optical-x)),
-    calc(-50% - 10px - 0.34rem)
+    calc(-50% - 10px - 0.34rem - 0.7rem)
   );
 }
 
