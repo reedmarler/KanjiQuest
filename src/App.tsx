@@ -832,6 +832,7 @@ function BeginnerZone({
                               <span key="slot-glyph" className="beginner-intro-slot-hiragana" lang="ja">
                                 <small lang="en">{content.romaji}</small>
                                 <span>{content.mark}</span>
+                                {item.id === 'kanji' && <small lang="en" className="is-meaning">Mountain</small>}
                                 {introStep >= 2 && (
                                   <button
                                     type="button"

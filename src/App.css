@@ -1265,7 +1265,7 @@ button.beginner-intro-example-speaker:focus-visible,
   content: '';
   position: absolute;
   z-index: 1;
-  top: 65%;
+  top: calc(65% + 0.7rem);
   left: 50%;
   width: 75%;
   height: 1px;
@@ -1274,6 +1274,14 @@ button.beginner-intro-example-speaker:focus-visible,
   background: color-mix(in srgb, var(--sakura-light) 62%, transparent);
   box-shadow: none;
   transform: translateX(-50%);
+}
+
+/* English meaning under the kanji glyph, sitting between the glyph and the divider. */
+.beginner-intro-empty-wheel.is-kanji .is-reveal-slot .beginner-intro-slot-hiragana small.is-meaning {
+  top: calc(50% - 10px - 0.34rem - var(--intro-kana-lift) + 3.7rem);
+  font-size: 0.14em;
+  font-weight: 700;
+  color: color-mix(in srgb, #fff 82%, transparent);
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana::before {
