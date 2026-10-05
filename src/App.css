@@ -1721,6 +1721,7 @@ button.beginner-intro-example-speaker:focus-visible,
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese {
   font-size: 2.4rem;
   justify-content: center;
+  transform: translateX(10px);
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese rt {
@@ -1776,11 +1777,20 @@ button.beginner-intro-example-speaker:focus-visible,
   animation: beginner-intro-final-connector-draw calc(1623 * var(--intro-time-unit)) calc(7218 * var(--intro-time-unit)) ease-out both;
 }
 
+.beginner-intro-word-connectors path.is-underline:is(.is-kanji, .is-hiragana, .is-katakana) {
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+  animation-name: beginner-intro-final-connector-pop;
+  animation-duration: 1ms;
+  animation-timing-function: step-end;
+}
+
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning {
   justify-content: center;
   margin-top: 0.18rem;
   font-size: 2.7rem;
   opacity: 1;
+  transform: translateX(-10px);
   animation: none;
 }
 
@@ -2952,6 +2962,11 @@ button.beginner-intro-example-speaker:focus-visible,
 @keyframes beginner-intro-final-connector-draw {
   from { stroke-dashoffset: 1; opacity: 0.35; }
   to { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes beginner-intro-final-connector-pop {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes beginner-intro-final-wheel-collapse {
