@@ -3714,17 +3714,16 @@ button.beginner-intro-example-speaker:focus-visible,
   .beginner-intro-orbit {
     width: min(100%, 18.7rem);
     margin-top: 2rem;
-    transition: translate var(--intro-opening-move-duration) cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .beginner-intro-lesson.is-simple .beginner-intro-orbit { translate: 0 -3.35rem; }
   .beginner-intro-ring { inset: 1.9rem; }
   .beginner-intro-empty-wheel {
     --intro-empty-wheel-size: min(16.225rem, 79.2dvw);
     --intro-expanded-wheel-size: min(18.8rem, 81.6dvw);
-    top: calc(58% + 15px);
+    --intro-wheel-lift: 2rem;
+    top: calc(58% + 15px - var(--intro-wheel-lift));
   }
   .beginner-intro-empty-wheel.is-hiragana {
-    --intro-reveal-panel-offset-y: -10px;
+    --intro-reveal-panel-offset-y: calc(-10px + var(--intro-wheel-lift));
     --intro-hiragana-outline-width: 16rem;
     --intro-hiragana-panel-gutter: 15px;
     --intro-expanded-wheel-size: min(
@@ -3734,8 +3733,8 @@ button.beginner-intro-example-speaker:focus-visible,
     --intro-expanded-wheel-height: calc(18rem + 90px);
   }
   .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) {
-    --intro-reveal-panel-offset-y: -10px;
-    --intro-previous-panel-offset-y: -10px;
+    --intro-reveal-panel-offset-y: calc(-10px + var(--intro-wheel-lift));
+    --intro-previous-panel-offset-y: calc(-10px + var(--intro-wheel-lift));
     --intro-hiragana-panel-gutter: 15px;
     --intro-expanded-wheel-height: calc(18rem + 90px);
     --intro-previous-expanded-wheel-size: min(
@@ -3746,7 +3745,7 @@ button.beginner-intro-example-speaker:focus-visible,
   }
   .beginner-intro-empty-wheel.is-katakana { --intro-hiragana-outline-width: 16rem; }
   .beginner-intro-empty-wheel.is-kanji { --intro-hiragana-outline-width: 16rem; }
-  .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px); }
+  .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px - var(--intro-wheel-lift)); }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
   .beginner-intro-wheel-placeholder strong { font-size: 4.8rem; }
   .beginner-intro-wheel-complete strong { font-size: 1.85rem; }
