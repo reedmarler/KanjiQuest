@@ -9,6 +9,7 @@
 
 :root {
   --intro-kana-lift: 1.4rem;
+  --intro-guide-extend: 1.45rem;
   color-scheme: dark;
   --kana-page-width: 34rem;
   --bg: #0f0e17;
@@ -3658,10 +3659,34 @@ button.beginner-intro-example-speaker:focus-visible,
     justify-self: center;
     width: calc(100vw - 30px) !important;
     max-width: calc(100vw - 30px);
-    height: 105px !important;
+    height: calc(105px + var(--intro-guide-extend-now)) !important;
     min-height: 0;
     margin-left: 0;
     padding: 0.7rem 1rem 0.7rem 5.2rem;
+    translate: 0 calc(var(--intro-guide-extend-now) / 2);
+    transition:
+      width var(--intro-speech-resize-duration) cubic-bezier(0.22, 1, 0.36, 1),
+      height var(--intro-speech-resize-duration) cubic-bezier(0.22, 1, 0.36, 1),
+      min-height var(--intro-speech-resize-duration) cubic-bezier(0.22, 1, 0.36, 1),
+      translate var(--intro-speech-resize-duration) cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Card steps: the speech box reaches down toward the card, mascot stays centered in it. */
+  .beginner-intro-guide { --intro-guide-extend-now: 0px; }
+  .beginner-intro-guide:is(.is-systems, .is-katakana-reveal, .is-kanji-reveal) {
+    --intro-guide-extend-now: var(--intro-guide-extend);
+  }
+  .beginner-intro-guide .beginner-intro-mascot {
+    translate: 0 calc(var(--intro-guide-extend-now) / 2);
+    transition:
+      transform var(--intro-opening-move-duration) linear,
+      translate var(--intro-speech-resize-duration) cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .beginner-intro-guide:is(.is-systems, .is-katakana-reveal) .beginner-intro-speech-inner h1 {
+    font-size: 1.25rem;
+  }
+  .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 {
+    font-size: 1rem;
   }
 
   .beginner-intro-speech h1 { font-size: 1.12rem; }
@@ -3725,7 +3750,7 @@ button.beginner-intro-example-speaker:focus-visible,
     top: calc(58% + 15px - var(--intro-wheel-lift));
   }
   .beginner-intro-empty-wheel.is-hiragana {
-    --intro-reveal-panel-offset-y: calc(-10px + var(--intro-wheel-lift) - 1.36rem);
+    --intro-reveal-panel-offset-y: calc(-10px + var(--intro-wheel-lift) - 1.36rem + var(--intro-guide-extend));
     --intro-hiragana-outline-width: 16rem;
     --intro-hiragana-panel-gutter: 15px;
     --intro-expanded-wheel-size: min(
@@ -3735,8 +3760,8 @@ button.beginner-intro-example-speaker:focus-visible,
     --intro-expanded-wheel-height: calc(18rem + 90px);
   }
   .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) {
-    --intro-reveal-panel-offset-y: calc(-10px + var(--intro-wheel-lift) - 1.36rem);
-    --intro-previous-panel-offset-y: calc(-10px + var(--intro-wheel-lift) - 1.36rem);
+    --intro-reveal-panel-offset-y: calc(-10px + var(--intro-wheel-lift) - 1.36rem + var(--intro-guide-extend));
+    --intro-previous-panel-offset-y: calc(-10px + var(--intro-wheel-lift) - 1.36rem + var(--intro-guide-extend));
     --intro-hiragana-panel-gutter: 15px;
     --intro-expanded-wheel-height: calc(18rem + 90px);
     --intro-previous-expanded-wheel-size: min(
@@ -3790,6 +3815,8 @@ button.beginner-intro-example-speaker:focus-visible,
     line-height: 1.15;
   }
   .beginner-intro-speech p { font-size: 0.7rem; }
+  .beginner-intro-guide:is(.is-systems, .is-katakana-reveal) .beginner-intro-speech-inner h1 { font-size: 1.1rem; }
+  .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 { font-size: 0.9rem; }
   .beginner-intro-guide.is-simple .beginner-intro-mascot {
     transform: scale(0.86);
   }
