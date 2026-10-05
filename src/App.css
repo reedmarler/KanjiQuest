@@ -3671,9 +3671,9 @@ button.beginner-intro-example-speaker:focus-visible,
       translate var(--intro-speech-resize-duration) cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Card steps: the speech box reaches down toward the card, mascot stays centered in it. */
+  /* Every step except the last: the speech box reaches down toward the card/circle, mascot stays centered in it. */
   .beginner-intro-guide { --intro-guide-extend-now: 0px; }
-  .beginner-intro-guide:is(.is-systems, .is-katakana-reveal, .is-kanji-reveal) {
+  .beginner-intro-guide:is(.is-welcome, .is-simple, .is-systems, .is-katakana-reveal, .is-kanji-reveal) {
     --intro-guide-extend-now: var(--intro-guide-extend);
   }
   .beginner-intro-guide .beginner-intro-mascot {
@@ -3682,7 +3682,7 @@ button.beginner-intro-example-speaker:focus-visible,
       transform var(--intro-opening-move-duration) linear,
       translate var(--intro-speech-resize-duration) cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .beginner-intro-guide:is(.is-systems, .is-katakana-reveal) .beginner-intro-speech-inner h1 {
+  .beginner-intro-guide:is(.is-simple, .is-systems, .is-katakana-reveal) .beginner-intro-speech-inner h1 {
     font-size: 1.25rem;
   }
   .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 {
@@ -3815,7 +3815,7 @@ button.beginner-intro-example-speaker:focus-visible,
     line-height: 1.15;
   }
   .beginner-intro-speech p { font-size: 0.7rem; }
-  .beginner-intro-guide:is(.is-systems, .is-katakana-reveal) .beginner-intro-speech-inner h1 { font-size: 1.1rem; }
+  .beginner-intro-guide:is(.is-simple, .is-systems, .is-katakana-reveal) .beginner-intro-speech-inner h1 { font-size: 1.1rem; }
   .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 { font-size: 0.9rem; }
   .beginner-intro-guide.is-simple .beginner-intro-mascot {
     transform: scale(0.86);
