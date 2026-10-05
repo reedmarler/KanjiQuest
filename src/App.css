@@ -8,6 +8,7 @@
 .batch-controls{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}.batch-controls label{display:flex;flex-direction:column;gap:4px;color:#7b857f;font-size:.55rem;font-weight:600}.batch-controls select{border:1px solid var(--c-line);background:#fff;border-radius:6px;padding:7px 24px 7px 8px;color:#314239;font:600 .62rem inherit}.review-summary{display:flex;gap:8px;margin:-10px 0 15px}.review-summary span{background:#fff;border:1px solid var(--c-line);border-radius:99px;padding:5px 10px;color:#7c867f;font-size:.58rem}.review-summary b{color:#315e48;margin-right:3px}
 
 :root {
+  --intro-kana-lift: 0.7rem;
   color-scheme: dark;
   --kana-page-width: 34rem;
   --bg: #0f0e17;
@@ -1237,7 +1238,7 @@ button.beginner-intro-example-speaker:focus-visible,
   left: 50%;
   transform: translate(
     calc(-50% + var(--intro-kana-optical-x)),
-    calc(-50% - 10px - 0.34rem)
+    calc(-50% - 10px - 0.34rem - var(--intro-kana-lift))
   );
 }
 
@@ -1248,7 +1249,7 @@ button.beginner-intro-example-speaker:focus-visible,
   left: 50%;
   transform: translate(
     calc(-50% + var(--intro-kana-optical-x)),
-    calc(-50% - 10px - 0.34rem - 0.7rem)
+    calc(-50% - 10px - 0.34rem - var(--intro-kana-lift))
   );
 }
 
@@ -3202,7 +3203,7 @@ button.beginner-intro-example-speaker:focus-visible,
   0%, 24.4% {
     transform: translate(
       calc(-50% + var(--intro-kana-optical-x)),
-      calc(-50% - 10px - 0.34rem)
+      calc(-50% - 10px - 0.34rem - var(--intro-kana-lift))
     );
   }
   69.99% {
@@ -3355,7 +3356,7 @@ button.beginner-intro-example-speaker:focus-visible,
     text-shadow: none;
     transform: translate(
       calc(-50% + var(--intro-kana-optical-x)),
-      calc(-50% - 10px - 0.34rem)
+      calc(-50% - 10px - 0.34rem - var(--intro-kana-lift))
     );
   }
 }
@@ -3381,7 +3382,7 @@ button.beginner-intro-example-speaker:focus-visible,
     text-shadow: none;
     transform: translate(
       calc(-50% + var(--intro-kana-optical-x)),
-      calc(-50% - 10px - 0.34rem)
+      calc(-50% - 10px - 0.34rem - var(--intro-kana-lift))
     );
   }
 }
@@ -3505,7 +3506,7 @@ button.beginner-intro-example-speaker:focus-visible,
     text-shadow: none;
     transform: translate(
       calc(-50% + var(--intro-kana-optical-x)),
-      calc(-50% - 10px - 0.34rem)
+      calc(-50% - 10px - 0.34rem - var(--intro-kana-lift))
     );
   }
   14%, to {
@@ -3552,7 +3553,7 @@ button.beginner-intro-example-speaker:focus-visible,
     text-shadow: none;
     transform: translate(
       calc(-50% + var(--intro-kana-optical-x)),
-      calc(-50% - 10px - 0.34rem)
+      calc(-50% - 10px - 0.34rem - var(--intro-kana-lift))
     );
   }
   14%, to {
