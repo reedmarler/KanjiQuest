@@ -235,7 +235,7 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-guide.is-welcome {
-  transform: translateY(var(--intro-welcome-shift));
+  transform: translateY(calc(var(--intro-welcome-shift) - 1.5rem));
 }
 
 .beginner-intro-mascot {
@@ -2751,8 +2751,7 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-next.is-yes {
-  --intro-yes-y: 0.816rem;
-  transform: translateY(var(--intro-yes-y)) scale(var(--intro-yes-scale));
+  transform: translateY(var(--intro-next-rest-y));
   transform-origin: center;
   transition: none;
 }
@@ -3663,7 +3662,7 @@ button.beginner-intro-example-speaker:focus-visible,
     justify-self: center;
     width: calc(100vw - 30px) !important;
     max-width: calc(100vw - 30px);
-    height: calc(105px + var(--intro-guide-extend-now) + var(--intro-guide-grow-now)) !important;
+    height: calc(105px + var(--intro-guide-extend-now)) !important;
     min-height: 0;
     margin-left: 0;
     padding: 0.7rem 1rem 0.7rem 5.2rem;
@@ -3676,8 +3675,7 @@ button.beginner-intro-example-speaker:focus-visible,
   }
 
   /* Every step except the last: the speech box reaches down toward the card/circle, mascot stays centered in it. */
-  .beginner-intro-guide { --intro-guide-extend-now: 0px; --intro-guide-grow-now: 0px; }
-  .beginner-intro-guide.is-welcome { --intro-guide-grow-now: 1.5rem; }
+  .beginner-intro-guide { --intro-guide-extend-now: 0px; }
   .beginner-intro-guide:is(.is-welcome, .is-simple, .is-systems, .is-katakana-reveal, .is-kanji-reveal) {
     --intro-guide-extend-now: var(--intro-guide-extend);
   }
@@ -3807,14 +3805,6 @@ button.beginner-intro-example-speaker:focus-visible,
   }
   .beginner-intro-controls.is-lowered {
     transform: none;
-  }
-  /* Welcome step: the Yes button sits higher, then glides down to the Next position. */
-  .beginner-intro-controls:not(.is-lowered) {
-    transform: translateY(-70px);
-  }
-  /* Same linear timing as the Yes-to-Next shrink, so the two motions stay in sync. */
-  .beginner-intro-controls {
-    transition: transform var(--intro-opening-move-duration) linear;
   }
 }
 
