@@ -1213,13 +1213,13 @@ button.beginner-intro-example-speaker:focus-visible,
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana small,
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-hiragana small,
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .beginner-intro-slot-previous-kana small {
-  top: 3.92rem;
+  top: calc(3.92rem - var(--intro-kana-lift));
   left: calc(50% - 0.42rem);
 }
 
 .beginner-intro-empty-wheel:is(.is-hiragana, .is-katakana) .is-reveal-slot .beginner-intro-slot-hiragana small,
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji) .is-previous-slot .beginner-intro-slot-hiragana small {
-  top: calc(3.92rem + 7px);
+  top: calc(3.92rem + 7px - var(--intro-kana-lift));
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana,
