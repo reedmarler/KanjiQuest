@@ -1736,7 +1736,11 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese rt {
   position: relative;
-  top: calc(0.48rem + 0.5rem);
+  top: 0.48rem;
+}
+
+.beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby > span {
+  top: -0.5rem;
 }
 
 .beginner-intro-word-connectors {
@@ -1749,8 +1753,8 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-word-connectors {
   display: block;
-  height: calc(2.175rem + 0.72rem);
-  margin-top: calc(-0.12rem - 0.72rem);
+  height: calc(2.175rem + 1.22rem);
+  margin-top: calc(-0.12rem - 1.22rem);
 }
 
 .beginner-intro-word-connectors path {
@@ -3773,6 +3777,7 @@ button.beginner-intro-example-speaker:focus-visible,
   .beginner-intro-empty-wheel.is-katakana { --intro-hiragana-outline-width: 16rem; }
   .beginner-intro-empty-wheel.is-kanji { --intro-hiragana-outline-width: 16rem; }
   .beginner-intro-lesson.is-systems .beginner-intro-empty-wheel { top: calc(58% + 15px - var(--intro-wheel-lift)); }
+  .beginner-intro-empty-wheel:is(.is-final-retracting, .is-final-complete) { --intro-wheel-lift: 0.6rem; }
   .beginner-intro-wheel-placeholder { width: 10.5rem; }
   .beginner-intro-wheel-placeholder strong { font-size: 4.8rem; }
   .beginner-intro-wheel-complete strong { font-size: 1.85rem; }
