@@ -635,7 +635,6 @@ function BeginnerZone({
       svg.setAttribute('viewBox', `0 0 ${frame.width} ${frame.height}`)
       setPath('.is-kanji.is-pointer', `M ${kanji} ${top} L ${englishKanji} ${bottom}`)
       setPath('.is-hiragana.is-pointer', `M ${hiragana} ${top} L ${englishHiragana} ${bottom}`)
-      setPath('.is-katakana.is-underline', `M ${katakanaFirst.left} ${top} H ${katakanaLast.right}`)
       setPath('.is-katakana.is-pointer', `M ${underlineCenter} ${top} L ${englishKatakana} ${bottom}`)
     }
 
@@ -887,7 +886,6 @@ function BeginnerZone({
                   <svg className="beginner-intro-word-connectors" ref={introConnectorSvgRef} viewBox="0 0 240 78" preserveAspectRatio="none" aria-hidden="true">
                     <path className="is-kanji is-pointer" pathLength="1" d="M 56.5 1 L 76.5 72" />
                     <path className="is-hiragana is-pointer" pathLength="1" d="M 93.7 1 L 128.2 82" />
-                    <path className="is-katakana is-first is-underline" pathLength="1" d="M 113.8 1 H 216.5" />
                     <path className="is-katakana is-first is-pointer" pathLength="1" d="M 165.2 1 L 196 72" />
                   </svg>
                   <div className="beginner-intro-wheel-center-meaning" lang="en">

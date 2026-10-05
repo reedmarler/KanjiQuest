@@ -1792,19 +1792,6 @@ button.beginner-intro-example-speaker:focus-visible,
   animation: beginner-intro-final-connector-draw calc(1623 * var(--intro-time-unit)) calc(7218 * var(--intro-time-unit) + 1300ms) ease-out both;
 }
 
-.beginner-intro-word-connectors path.is-underline:is(.is-kanji, .is-hiragana, .is-katakana) {
-  stroke-linecap: butt;
-  stroke-dasharray: none;
-  stroke-dashoffset: 0;
-  animation-name: beginner-intro-final-connector-pop;
-  animation-duration: 1ms;
-  animation-timing-function: linear;
-}
-
-.beginner-intro-word-connectors path.is-katakana.is-first.is-underline {
-  animation: beginner-intro-final-connector-pop 1ms calc(7218 * var(--intro-time-unit) + 1300ms) linear both;
-}
-
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning {
   justify-content: center;
   margin-top: 0.18rem;
@@ -3005,8 +2992,7 @@ button.beginner-intro-example-speaker:focus-visible,
 
 @keyframes beginner-intro-final-wheel-collapse {
   0% { transform: translateY(0) scale(1); }
-  66.67% { transform: translateY(0) scale(0.7); }
-  100% { transform: translateY(calc(-1 * clamp(4rem, 8.3dvh, 4.6rem))) scale(0.7); }
+  66.67%, 100% { transform: translateY(calc(-1 * clamp(4rem, 8.3dvh, 4.6rem))) scale(0.7); }
 }
 
 @keyframes beginner-intro-final-rotor-dim-before {
@@ -3693,7 +3679,7 @@ button.beginner-intro-example-speaker:focus-visible,
     font-size: 1.25rem;
   }
   .beginner-intro-guide.is-katakana-reveal .beginner-intro-speech-inner h1 {
-    font-size: 1.15rem;
+    font-size: 1.02rem;
   }
   .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 {
     font-size: 0.95rem;
@@ -3827,7 +3813,7 @@ button.beginner-intro-example-speaker:focus-visible,
   }
   .beginner-intro-speech p { font-size: 0.7rem; }
   .beginner-intro-guide:is(.is-simple, .is-systems) .beginner-intro-speech-inner h1 { font-size: 1.1rem; }
-  .beginner-intro-guide.is-katakana-reveal .beginner-intro-speech-inner h1 { font-size: 1rem; }
+  .beginner-intro-guide.is-katakana-reveal .beginner-intro-speech-inner h1 { font-size: 0.92rem; }
   .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 { font-size: 0.85rem; }
   .beginner-intro-guide.is-simple .beginner-intro-mascot {
     transform: scale(0.86);
