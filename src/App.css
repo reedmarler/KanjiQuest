@@ -3080,7 +3080,7 @@ button.beginner-intro-example-speaker:focus-visible,
 @keyframes beginner-intro-returned-cube {
   0%, 13.99% { opacity: 0; transform: translate3d(-50%, -50%, 0); }
   14% { opacity: 1; transform: translate3d(-50%, -50%, 0); }
-  22.15%, to {
+  28.39%, to {
     opacity: 1;
     transform: translate3d(
       calc(-50% + var(--intro-slot-wheel-x)),
@@ -3092,7 +3092,7 @@ button.beginner-intro-example-speaker:focus-visible,
 
 @keyframes beginner-intro-previous-content-return {
   0%, 14% { transform: translate3d(0, 0, 0); }
-  22.15%, to {
+  28.39%, to {
     transform: translate3d(
       var(--intro-slot-wheel-x),
       calc(var(--intro-slot-wheel-y) - var(--intro-previous-panel-offset-y)),
