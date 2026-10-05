@@ -797,8 +797,15 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-slot-progress {
-  right: 0;
-  left: 0;
+  right: 1rem;
+  left: auto;
+  min-width: 3rem;
+  padding: 0.3rem 0.48rem;
+  border: 1px solid color-mix(in srgb, var(--intro-reveal-accent) 72%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--intro-reveal-accent) 14%, var(--surface-2));
+  color: var(--intro-reveal-accent);
+  box-shadow: 0 0 0.75rem color-mix(in srgb, var(--intro-reveal-accent) 12%, transparent);
   opacity: 0;
   transform: translateY(0.35rem) scale(0.92);
 }
@@ -1255,14 +1262,15 @@ button.beginner-intro-example-speaker:focus-visible,
   content: '';
   position: absolute;
   z-index: 1;
-  top: 3.42rem;
+  top: 65%;
   left: 50%;
-  width: var(--intro-hiragana-outline-width, 8.5rem);
-  height: calc(50% + 0.14rem);
-  border: 1px solid color-mix(in srgb, var(--sakura-light) 62%, transparent);
-  border-radius: 8px;
-  box-shadow: 0 0 0.7rem color-mix(in srgb, var(--sakura) 14%, transparent);
-  transform: translateX(calc(-50% - 0.42rem));
+  width: 75%;
+  height: 1px;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--sakura-light) 62%, transparent);
+  box-shadow: none;
+  transform: translateX(-50%);
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana::before {
@@ -1271,30 +1279,25 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-katakana .beginner-intro-slot-hiragana::before,
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-previous-kana::before {
-  border-color: color-mix(in srgb, #70cfe0 62%, transparent);
-  box-shadow: 0 0 0.7rem color-mix(in srgb, #4ba5c9 14%, transparent);
+  background: color-mix(in srgb, #70cfe0 62%, transparent);
   opacity: 0;
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-hiragana::before {
-  border-color: color-mix(in srgb, #f0bf63 62%, transparent);
-  box-shadow: 0 0 0.7rem color-mix(in srgb, #c78b32 14%, transparent);
+  background: color-mix(in srgb, #f0bf63 62%, transparent);
   opacity: 0;
 }
 
 .beginner-intro-empty-slot.is-script-hiragana .beginner-intro-slot-hiragana::before {
-  border-color: color-mix(in srgb, var(--sakura-light) 62%, transparent);
-  box-shadow: 0 0 0.7rem color-mix(in srgb, var(--sakura) 14%, transparent);
+  background: color-mix(in srgb, var(--sakura-light) 62%, transparent);
 }
 
 .beginner-intro-empty-slot.is-script-katakana .beginner-intro-slot-hiragana::before {
-  border-color: color-mix(in srgb, #70cfe0 62%, transparent);
-  box-shadow: 0 0 0.7rem color-mix(in srgb, #4ba5c9 14%, transparent);
+  background: color-mix(in srgb, #70cfe0 62%, transparent);
 }
 
 .beginner-intro-empty-slot.is-script-kanji .beginner-intro-slot-hiragana::before {
-  border-color: color-mix(in srgb, #f0bf63 62%, transparent);
-  box-shadow: 0 0 0.7rem color-mix(in srgb, #c78b32 14%, transparent);
+  background: color-mix(in srgb, #f0bf63 62%, transparent);
 }
 
 .beginner-intro-empty-wheel.is-hiragana .beginner-intro-slot-hiragana span,
