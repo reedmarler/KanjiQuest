@@ -628,13 +628,25 @@ function BeginnerZone({
       if (kanji === null || hiragana === null || !katakanaFirst || !katakanaLast
         || englishKanji === null || englishHiragana === null || englishKatakana === null) return
 
+      // The pink line points at the top-right corner of the apostrophe in "'s".
+      const apostropheSpan = copy.querySelector('.beginner-intro-wheel-center-meaning > .is-hiragana')
+      const apostropheNode = apostropheSpan?.firstChild
+      let apostrophe: { x: number; y: number } | null = null
+      if (apostropheSpan && apostropheNode?.nodeType === Node.TEXT_NODE) {
+        const range = document.createRange()
+        range.setStart(apostropheNode, 0)
+        range.setEnd(apostropheNode, 1)
+        const rect = range.getBoundingClientRect()
+        const fontSize = parseFloat(getComputedStyle(apostropheSpan).fontSize)
+        apostrophe = { x: rect.right - frame.left - fontSize * 0.08, y: rect.top - frame.top + fontSize * 0.24 }
+      }
       const top = 1
       const bottom = frame.height - 4
       const underlineCenter = (katakanaFirst.left + katakanaLast.right) / 2
       const setPath = (selector: string, d: string) => svg.querySelector(selector)?.setAttribute('d', d)
       svg.setAttribute('viewBox', `0 0 ${frame.width} ${frame.height}`)
       setPath('.is-kanji.is-pointer', `M ${kanji} ${top} L ${englishKanji} ${bottom}`)
-      setPath('.is-hiragana.is-pointer', `M ${hiragana} ${top} L ${englishHiragana} ${bottom}`)
+      setPath('.is-hiragana.is-pointer', `M ${hiragana} ${top} L ${apostrophe?.x ?? englishHiragana} ${apostrophe?.y ?? bottom}`)
       setPath('.is-katakana.is-pointer', `M ${underlineCenter} ${top} L ${englishKatakana} ${bottom}`)
     }
 

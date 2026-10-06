@@ -1062,6 +1062,8 @@ body:has(.beginner-zone--intro) {
 }
 
 .beginner-intro-empty-wheel.is-kanji .beginner-intro-slot-words.is-hiragana-examples > span:only-of-type small {
+  /* Same size as the "Mountain" label above the divider (0.14em of the 6.8rem glyph). */
+  font-size: 0.952rem;
   white-space: nowrap;
 }
 
@@ -1716,7 +1718,7 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-copy {
-  top: calc(50% + 6.25rem);
+  top: calc(50% + 5.15rem);
   z-index: 3;
   width: max-content;
   aspect-ratio: auto;
@@ -1735,9 +1737,9 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese {
-  font-size: 2.4rem;
+  font-size: 1.68rem;
   justify-content: center;
-  transform: translateY(-0.5rem);
+  transform: translateY(-0.35rem);
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby.is-hiragana {
@@ -1746,11 +1748,11 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese rt {
   position: relative;
-  top: 0.48rem;
+  top: 0.34rem;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-japanese ruby > span {
-  top: -0.5rem;
+  top: -0.35rem;
 }
 
 .beginner-intro-word-connectors {
@@ -1763,8 +1765,8 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-word-connectors {
   display: block;
-  height: calc(2.175rem + 1.22rem);
-  margin-top: calc(-0.12rem - 1.22rem);
+  height: 2.3rem;
+  margin-top: calc(-0.12rem - 0.97rem);
 }
 
 .beginner-intro-word-connectors path {
@@ -1805,7 +1807,7 @@ button.beginner-intro-example-speaker:focus-visible,
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-meaning {
   justify-content: center;
   margin-top: 0.18rem;
-  font-size: 2.7rem;
+  font-size: 1.89rem;
   opacity: 1;
   transform: none;
   animation: none;
@@ -3904,7 +3906,7 @@ button.beginner-intro-example-speaker:focus-visible,
   }
 
   .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-copy {
-    top: calc(50% + 6.25rem);
+    top: calc(50% + 5.15rem);
     opacity: 1;
     transform: translate(-50%, -50%);
   }
