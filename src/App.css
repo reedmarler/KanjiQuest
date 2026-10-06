@@ -1278,7 +1278,7 @@ button.beginner-intro-example-speaker:focus-visible,
 
 /* English meaning under the kanji glyph, sitting between the glyph and the divider. */
 .beginner-intro-empty-wheel.is-kanji .is-reveal-slot .beginner-intro-slot-hiragana small.is-meaning {
-  top: calc(50% - 10px - 0.34rem - var(--intro-kana-lift) + 3.7rem);
+  top: calc(50% - 10px - 0.34rem - var(--intro-kana-lift) + 4.3rem);
   font-size: 0.14em;
   font-weight: 700;
   color: color-mix(in srgb, #fff 82%, transparent);
@@ -1300,10 +1300,12 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-slot.is-script-hiragana .beginner-intro-slot-hiragana::before {
+  top: calc(65% - 0.3rem);
   background: color-mix(in srgb, var(--sakura-light) 62%, transparent);
 }
 
 .beginner-intro-empty-slot.is-script-katakana .beginner-intro-slot-hiragana::before {
+  top: calc(65% - 0.3rem);
   background: color-mix(in srgb, #70cfe0 62%, transparent);
 }
 
@@ -3688,7 +3690,7 @@ button.beginner-intro-example-speaker:focus-visible,
   }
   /* The guide keeps its is-systems class during the Katakana step, so key off the speech copy itself. */
   .beginner-intro-guide .beginner-intro-speech .beginner-intro-speech-inner.is-katakana-reveal h1 {
-    font-size: 0.92rem;
+    font-size: 1.25rem;
   }
   .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 {
     font-size: 0.95rem;
@@ -3822,7 +3824,7 @@ button.beginner-intro-example-speaker:focus-visible,
   }
   .beginner-intro-speech p { font-size: 0.7rem; }
   .beginner-intro-guide:is(.is-simple, .is-systems) .beginner-intro-speech-inner h1 { font-size: 1.1rem; }
-  .beginner-intro-guide .beginner-intro-speech .beginner-intro-speech-inner.is-katakana-reveal h1 { font-size: 0.85rem; }
+  .beginner-intro-guide .beginner-intro-speech .beginner-intro-speech-inner.is-katakana-reveal h1 { font-size: 1.1rem; }
   .beginner-intro-guide.is-kanji-reveal .beginner-intro-speech-inner h1 { font-size: 0.85rem; }
   .beginner-intro-guide.is-simple .beginner-intro-mascot {
     transform: scale(0.86);
