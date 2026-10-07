@@ -210,16 +210,17 @@ const BEGINNER_INTRO_REVEAL_CONTENT = {
     romaji: 'a',
     heading: 'Example:',
     words: [
-      { kana: 'アメリカ', readingParts: ['a', 'me', 'ri', 'ka'], romaji: 'America' },
+      { kana: 'ミルク', readingParts: ['mi', 'ru', 'ku'], romaji: 'Milk' },
     ],
   },
   kanji: {
     label: 'Kanji',
-    mark: '山',
-    romaji: 'Yama',
+    mark: '猫',
+    romaji: 'Neko',
+    meaning: 'Cat',
     heading: 'Another Example:',
     words: [
-      { kana: '猫', spokenKana: 'ねこ', readingParts: ['neko'], romaji: 'Cat' },
+      { kana: '山', spokenKana: 'やま', readingParts: ['yama'], romaji: 'Mountain' },
     ],
   },
 } as const
@@ -292,7 +293,7 @@ const BEGINNER_INTRO_SCRIPTS: Array<{
 }> = [
   { id: 'hiragana', label: 'Hiragana', mark: 'あ', descriptor: 'simple + curly' },
   { id: 'katakana', label: 'Katakana', mark: 'ア', descriptor: 'sharp + straight' },
-  { id: 'kanji', label: 'Kanji', mark: '山', descriptor: 'words + ideas' },
+  { id: 'kanji', label: 'Kanji', mark: '猫', descriptor: 'words + ideas' },
 ]
 
 const BEGINNER_INTRO_STEPS = [
@@ -346,7 +347,7 @@ const INTRO_SPEECH_HIRAGANA_REVEAL_CSS_MS = 2600 * 0.9879
 const INTRO_SPEECH_KATAKANA_KANJI_REVEAL_CSS_MS = 4414 * 0.7464
 const INTRO_FINAL_RETRACT_CSS_MS = 1800
 const INTRO_STANDARD_SPEECH_STEP_INDEX = 2
-const INTRO_FINAL_SPEECH_TITLE = 'Here is an example of all three together.'
+const INTRO_FINAL_SPEECH_TITLE = 'Here is an example of all three together. There are no spaces between words, so the different writing systems act in place of spaces to differentiate words.'
 
 function defaultIntroAnimationSpeedForStep(step: number): IntroAnimationSpeed {
   return step <= 1 ? INTRO_OPENING_DEFAULT_ANIMATION_SPEED : INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED
@@ -852,12 +853,12 @@ function BeginnerZone({
                               <span key="slot-glyph" className="beginner-intro-slot-hiragana" lang="ja">
                                 <small lang="en">{content.romaji}</small>
                                 <span>{content.mark}</span>
-                                {item.id === 'kanji' && <small lang="en" className="is-meaning">Mountain</small>}
+                                {'meaning' in content && <small lang="en" className="is-meaning">{content.meaning}</small>}
                                 {introStep >= 2 && (
                                   <button
                                     type="button"
                                     className="beginner-intro-kana-speaker"
-                                    onClick={() => speakJapanese(item.id === 'kanji' ? 'やま' : content.mark, {
+                                    onClick={() => speakJapanese(item.id === 'kanji' ? 'ねこ' : content.mark, {
                                       rate: 0.5,
                                       beginnerRecordingKind: item.id === 'kanji' ? 'word' : 'kana',
                                     })}
