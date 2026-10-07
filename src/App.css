@@ -3004,7 +3004,7 @@ button.beginner-intro-example-speaker:focus-visible,
 
 @keyframes beginner-intro-final-wheel-collapse {
   0% { transform: translateY(0) scale(1); }
-  66.67%, 100% { transform: translateY(calc(-1 * clamp(4rem, 8.3dvh, 4.6rem))) scale(0.7); }
+  66.67%, 100% { transform: translateY(calc(-1 * clamp(4rem, 8.3dvh, 4.6rem) + 1rem)) scale(0.7); }
 }
 
 @keyframes beginner-intro-final-rotor-dim-before {
@@ -3902,7 +3902,7 @@ button.beginner-intro-example-speaker:focus-visible,
   }
 
   .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-assembly {
-    transform: translateY(calc(-1 * clamp(4rem, 8.3dvh, 4.6rem))) scale(0.7);
+    transform: translateY(calc(-1 * clamp(4rem, 8.3dvh, 4.6rem) + 1rem)) scale(0.7);
   }
 
   .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-wheel-center-copy {
