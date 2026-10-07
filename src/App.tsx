@@ -611,6 +611,8 @@ function BeginnerZone({
       const svg = introConnectorSvgRef.current
       const copy = svg?.parentElement
       if (!svg || !copy) return
+      const meaning = copy.querySelector<HTMLElement>('.beginner-intro-wheel-center-meaning')
+      meaning?.style.removeProperty('translate')
       const frame = svg.getBoundingClientRect()
       if (!frame.width || !frame.height) return
       const measure = (selector: string) => {
@@ -645,14 +647,15 @@ function BeginnerZone({
       const underlineCenter = (katakanaFirst.left + katakanaLast.right) / 2
       const setPath = (selector: string, d: string) => svg.querySelector(selector)?.setAttribute('d', d)
       svg.setAttribute('viewBox', `0 0 ${frame.width} ${frame.height}`)
-      // All three pointers share the pink line's length (it is anchored to the apostrophe), so
-      // each one ends where a line of that length from its start reaches its English word.
+      // Slide the English line sideways by the average offset between each Japanese word and its
+      // English word, so every pointer can drop straight down. All three share the pink line's
+      // length, since it is anchored to the apostrophe.
       const hiraganaEnd = { x: apostrophe?.x ?? englishHiragana, y: apostrophe?.y ?? bottom }
-      const pointerLength = Math.hypot(hiraganaEnd.x - hiragana, hiraganaEnd.y - top)
-      const endY = (startX: number, endX: number) => top + Math.sqrt(Math.max(pointerLength ** 2 - (endX - startX) ** 2, 0))
-      setPath('.is-kanji.is-pointer', `M ${kanji} ${top} L ${englishKanji} ${endY(kanji, englishKanji)}`)
-      setPath('.is-hiragana.is-pointer', `M ${hiragana} ${top} L ${hiraganaEnd.x} ${hiraganaEnd.y}`)
-      setPath('.is-katakana.is-pointer', `M ${underlineCenter} ${top} L ${englishKatakana} ${endY(underlineCenter, englishKatakana)}`)
+      const shift = ((englishKanji - kanji) + (hiraganaEnd.x - hiragana) + (englishKatakana - underlineCenter)) / 3
+      meaning?.style.setProperty('translate', `${-shift}px 0`)
+      setPath('.is-kanji.is-pointer', `M ${kanji} ${top} L ${kanji} ${hiraganaEnd.y}`)
+      setPath('.is-hiragana.is-pointer', `M ${hiragana} ${top} L ${hiragana} ${hiraganaEnd.y}`)
+      setPath('.is-katakana.is-pointer', `M ${underlineCenter} ${top} L ${underlineCenter} ${hiraganaEnd.y}`)
     }
 
     layoutConnectors()
