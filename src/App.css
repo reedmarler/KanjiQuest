@@ -1568,15 +1568,15 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-wheel.is-hiragana:not(.is-revealing) .beginner-intro-wheel-rotor {
-  animation: beginner-intro-wheel-initial-spin calc(900 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both;
+  animation: beginner-intro-wheel-initial-spin calc(900 * var(--intro-time-unit) / 1.25) cubic-bezier(0.2, 0.9, 0.24, 1) both;
 }
 
 .beginner-intro-empty-wheel.is-hiragana:not(.is-revealing) .beginner-intro-empty-slot.is-wheel-slot {
-  animation: beginner-intro-wheel-initial-counter-spin calc(900 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both;
+  animation: beginner-intro-wheel-initial-counter-spin calc(900 * var(--intro-time-unit) / 1.25) cubic-bezier(0.2, 0.9, 0.24, 1) both;
 }
 
 .beginner-intro-empty-wheel.is-hiragana:not(.is-revealing) .beginner-intro-wheel-center-copy {
-  animation: beginner-intro-wheel-initial-counter-spin calc(900 * var(--intro-time-unit)) cubic-bezier(0.2, 0.9, 0.24, 1) both;
+  animation: beginner-intro-wheel-initial-counter-spin calc(900 * var(--intro-time-unit) / 1.25) cubic-bezier(0.2, 0.9, 0.24, 1) both;
 }
 
 .beginner-intro-wheel-rotor::before {

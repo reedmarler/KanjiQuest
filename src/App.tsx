@@ -338,7 +338,7 @@ const BEGINNER_INTRO_STEPS = [
 type IntroAnimationSpeed = 0.5 | 1 | 1.25 | 1.5 | 2 | 2.5 | 3
 
 const INTRO_ANIMATION_TIME_BASE = 2
-const INTRO_OPENING_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 1
+const INTRO_OPENING_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
 const INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
 const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.25, 1.5, 2, 2.5, 3]
 const INTRO_OPENING_MOVE_CSS_MS = 1274
