@@ -338,8 +338,10 @@ const BEGINNER_INTRO_STEPS = [
 type IntroAnimationSpeed = 0.5 | 1 | 1.25 | 1.5 | 2 | 2.5 | 3
 
 const INTRO_ANIMATION_TIME_BASE = 2
-const INTRO_OPENING_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
-const INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
+const INTRO_OPENING_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 1
+const INTRO_SQUARE_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2.5
+const INTRO_FINAL_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
+const INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = INTRO_FINAL_DEFAULT_ANIMATION_SPEED
 const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.25, 1.5, 2, 2.5, 3]
 const INTRO_OPENING_MOVE_CSS_MS = 1274
 const INTRO_SPEECH_RESIZE_MS = 560
@@ -347,10 +349,10 @@ const INTRO_SPEECH_HIRAGANA_REVEAL_CSS_MS = 2600 * 0.9879
 const INTRO_SPEECH_KATAKANA_KANJI_REVEAL_CSS_MS = 4414 * 0.7464
 const INTRO_FINAL_RETRACT_CSS_MS = 1800
 const INTRO_STANDARD_SPEECH_STEP_INDEX = 2
-const INTRO_FINAL_SPEECH_TITLE = 'Here is an example of all three together. There are no spaces between words, so the different writing systems act in place of spaces to differentiate words.'
+const INTRO_FINAL_SPEECH_TITLE = 'There are no spaces between words, so the different writing systems act in place of spaces to differentiate words.'
 
 function defaultIntroAnimationSpeedForStep(step: number): IntroAnimationSpeed {
-  return step <= 1 ? INTRO_OPENING_DEFAULT_ANIMATION_SPEED : INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED
+  return step <= 1 ? INTRO_OPENING_DEFAULT_ANIMATION_SPEED : INTRO_SQUARE_DEFAULT_ANIMATION_SPEED
 }
 
 function introSpeechUnblurDelay(step: number, speed: IntroAnimationSpeed) {
@@ -577,6 +579,7 @@ function BeginnerZone({
 
     setIntroTransitioning(true)
     introTransitionTimerRef.current = window.setTimeout(() => {
+      if (!introSpeedCustomized) setIntroAnimationSpeed(INTRO_FINAL_DEFAULT_ANIMATION_SPEED)
       setIntroSequenceComplete(true)
       setIntroTransitioning(false)
       introTransitionTimerRef.current = null
