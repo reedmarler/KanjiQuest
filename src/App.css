@@ -546,6 +546,8 @@ body:has(.beginner-zone--intro) {
   --intro-switch-duration: calc(4414 * var(--intro-time-unit));
   --intro-first-reveal-duration: calc(2600 * var(--intro-time-unit));
   --intro-final-retract-duration: calc(900 * var(--intro-time-unit));
+  --intro-line-switch-duration: calc(4414 * var(--intro-line-unit, var(--intro-time-unit)));
+  --intro-line-first-reveal-duration: calc(2600 * var(--intro-line-unit, var(--intro-time-unit)));
   --intro-reveal-accent: var(--sakura-light);
   --intro-reveal-base: var(--sakura);
   --intro-previous-accent: var(--sakura-light);
@@ -1564,7 +1566,7 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-wheel.is-hiragana.is-revealing .beginner-intro-wheel-rotor {
-  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-time-unit)) calc(125 * var(--intro-time-unit)) linear both;
+  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-line-unit, var(--intro-time-unit))) calc(125 * var(--intro-line-unit, var(--intro-time-unit))) linear both;
 }
 
 .beginner-intro-empty-wheel.is-hiragana:not(.is-revealing) .beginner-intro-wheel-rotor {
@@ -1976,12 +1978,12 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-wheel-rotor::before,
 .beginner-intro-empty-wheel.is-revealing .beginner-intro-wheel-rotor::after {
-  animation: beginner-intro-wheel-backdrop-first-reveal var(--intro-first-reveal-duration) linear both;
+  animation: beginner-intro-wheel-backdrop-first-reveal var(--intro-line-first-reveal-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-switching .beginner-intro-wheel-rotor::before,
 .beginner-intro-empty-wheel.is-switching .beginner-intro-wheel-rotor::after {
-  animation: beginner-intro-wheel-backdrop-switch var(--intro-switch-duration) linear both;
+  animation: beginner-intro-wheel-backdrop-switch var(--intro-line-switch-duration) linear both;
 }
 
 .beginner-intro-empty-wheel.is-katakana.is-switching .beginner-intro-wheel-rotor::before,
@@ -2011,7 +2013,7 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-wheel-rotor {
-  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-time-unit)) calc(1103 * var(--intro-time-unit)) linear both;
+  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-line-unit, var(--intro-time-unit))) calc(1103 * var(--intro-line-unit, var(--intro-time-unit))) linear both;
 }
 
 .beginner-intro-empty-wheel.is-katakana.is-switching .beginner-intro-wheel-rotor {
@@ -18185,11 +18187,11 @@ body:has(.quest-battle-card) .app{padding-top:.35rem;padding-bottom:0}.quest-bat
 }
 
 .beginner-intro-empty-wheel.is-hiragana.is-revealing .beginner-intro-circuit-lines {
-  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-time-unit)) calc(125 * var(--intro-time-unit)) linear both;
+  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-line-unit, var(--intro-time-unit))) calc(125 * var(--intro-line-unit, var(--intro-time-unit))) linear both;
 }
 
 .beginner-intro-empty-wheel:is(.is-katakana, .is-kanji).is-switching .beginner-intro-circuit-lines {
-  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-time-unit)) calc(1103 * var(--intro-time-unit)) linear both;
+  animation: beginner-intro-hiragana-slice-sweep calc(900 * var(--intro-line-unit, var(--intro-time-unit))) calc(1103 * var(--intro-line-unit, var(--intro-time-unit))) linear both;
 }
 
 .beginner-intro-empty-wheel.is-katakana.is-switching .beginner-intro-circuit-lines {

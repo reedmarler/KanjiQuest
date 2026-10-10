@@ -340,6 +340,7 @@ type IntroAnimationSpeed = 0.5 | 1 | 1.25 | 1.5 | 2 | 2.5 | 3
 const INTRO_ANIMATION_TIME_BASE = 2
 const INTRO_OPENING_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 1
 const INTRO_SQUARE_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2.5
+const INTRO_LINE_COLOR_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
 const INTRO_FINAL_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = 2
 const INTRO_FOLLOWUP_DEFAULT_ANIMATION_SPEED: IntroAnimationSpeed = INTRO_FINAL_DEFAULT_ANIMATION_SPEED
 const INTRO_ANIMATION_SPEEDS: IntroAnimationSpeed[] = [0.5, 1, 1.25, 1.5, 2, 2.5, 3]
@@ -784,12 +785,18 @@ function BeginnerZone({
     const speechMeasureTitle = isFinalStep ? INTRO_FINAL_SPEECH_TITLE : speechMeasureStep.title
     const revealScript = introStep >= 4 ? 'kanji' : introStep === 3 ? 'katakana' : 'hiragana'
     const activeRevealIndex = introStep >= 2 && introStep <= 4 ? introStep - 2 : -1
+    const lineColorSpeed = !introSpeedCustomized && introStep >= 2 && introStep <= 4
+      ? INTRO_LINE_COLOR_DEFAULT_ANIMATION_SPEED
+      : introAnimationSpeed
     const isRevealWheelVisible = introStep >= 1 && introStep <= 4
 
     return (
       <main
         className={`beginner-zone beginner-zone--intro${introPaused ? ' is-intro-paused' : ''}`}
-        style={{ '--intro-time-unit': `${INTRO_ANIMATION_TIME_BASE / introAnimationSpeed}ms` } as CSSProperties}
+        style={{
+          '--intro-time-unit': `${INTRO_ANIMATION_TIME_BASE / introAnimationSpeed}ms`,
+          '--intro-line-unit': `${INTRO_ANIMATION_TIME_BASE / lineColorSpeed}ms`,
+        } as CSSProperties}
       >
         <header className={`beginner-intro-guide is-${guideStep.id}`}>
           <div className="beginner-intro-mascot" aria-hidden="true">
