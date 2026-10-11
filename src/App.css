@@ -1935,7 +1935,7 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-empty-slot.is-wheel-slot {
   filter: brightness(0.38) saturate(0.32);
-  transition: filter calc(300 * var(--intro-time-unit)) ease calc(2434 * var(--intro-time-unit));
+  transition: filter calc(300 * var(--intro-time-unit)) ease calc(1217 * var(--intro-time-unit));
   will-change: filter;
 }
 
@@ -1953,7 +1953,7 @@ button.beginner-intro-example-speaker:focus-visible,
   width: calc(var(--intro-wheel-cube-size) / 0.7);
   transition:
     width calc(2434 * var(--intro-time-unit)) cubic-bezier(0.4, 0, 0.2, 1),
-    filter calc(300 * var(--intro-time-unit)) ease calc(2434 * var(--intro-time-unit));
+    filter calc(300 * var(--intro-time-unit)) ease calc(1217 * var(--intro-time-unit));
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-final-complete .beginner-intro-empty-slot:is(.is-reveal-slot, .is-previous-slot)::after {
@@ -1997,11 +1997,11 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-switching.is-final-complete .beginner-intro-wheel-rotor::before {
-  animation: beginner-intro-final-rotor-dim-before calc(2734 * var(--intro-time-unit)) ease both;
+  animation: beginner-intro-final-rotor-dim-before calc(2000 * var(--intro-time-unit)) ease both;
 }
 
 .beginner-intro-empty-wheel.is-kanji.is-switching.is-final-complete .beginner-intro-wheel-rotor::after {
-  animation: beginner-intro-final-rotor-dim-after calc(2734 * var(--intro-time-unit)) ease both;
+  animation: beginner-intro-final-rotor-dim-after calc(2000 * var(--intro-time-unit)) ease both;
 }
 
 .beginner-intro-empty-wheel.is-switching {
@@ -3010,12 +3010,12 @@ button.beginner-intro-example-speaker:focus-visible,
 }
 
 @keyframes beginner-intro-final-rotor-dim-before {
-  0%, 92.4% { filter: brightness(1.12) saturate(1.06); }
+  0%, 60.85% { filter: brightness(1.12) saturate(1.06); }
   100% { filter: grayscale(0.9) brightness(0.48); }
 }
 
 @keyframes beginner-intro-final-rotor-dim-after {
-  0%, 92.4% {
+  0%, 60.85% {
     filter: blur(0.42rem) brightness(1.12) saturate(1.06);
     opacity: 0.78;
   }
