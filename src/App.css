@@ -1773,7 +1773,7 @@ button.beginner-intro-example-speaker:focus-visible,
 
 .beginner-intro-word-connectors path {
   fill: none;
-  stroke-width: 0.5;
+  stroke-width: 0.3;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 1;
