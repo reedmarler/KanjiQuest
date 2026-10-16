@@ -318,13 +318,13 @@ const BEGINNER_INTRO_STEPS = [
   {
     id: 'katakana-reveal',
     eyebrow: '',
-    title: 'Katakana is used for foreign words. It is blocky and angular. It also has 46 characters.',
+    title: 'Katakana is for foreign words. It is blocky and angular, with 46 characters.',
     body: '',
   },
   {
     id: 'kanji-reveal',
     eyebrow: '',
-    title: 'Kanji are information dense Chinese characters used to write Japanese. Most hold the meaning of an entire word. There are thousands.',
+    title: 'Kanji are Chinese characters that each carry a meaning. There are thousands.',
     body: '',
   },
   {
@@ -350,7 +350,7 @@ const INTRO_SPEECH_HIRAGANA_REVEAL_CSS_MS = 2600 * 0.9879
 const INTRO_SPEECH_KATAKANA_KANJI_REVEAL_CSS_MS = 4414 * 0.7464
 const INTRO_FINAL_RETRACT_CSS_MS = 1800
 const INTRO_STANDARD_SPEECH_STEP_INDEX = 2
-const INTRO_FINAL_SPEECH_TITLE = 'There are no spaces between words, so the different writing systems act in place of spaces to differentiate words.'
+const INTRO_FINAL_SPEECH_TITLE = 'Japanese has no spaces, so the three scripts mark where words begin and end.'
 
 function defaultIntroAnimationSpeedForStep(step: number): IntroAnimationSpeed {
   return step <= 1 ? INTRO_OPENING_DEFAULT_ANIMATION_SPEED : INTRO_SQUARE_DEFAULT_ANIMATION_SPEED
