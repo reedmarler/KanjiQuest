@@ -80,6 +80,7 @@ const GrammarPracticeLab = lazy(() => import('./components/labs/GrammarPracticeL
 
 type View =
   | 'dashboard'
+  | 'sandbox'
   | 'library'
   | 'vocab-practice'
   | 'counter-practice'
@@ -115,15 +116,15 @@ type View =
   | 'daily-goals'
   | 'backup-sync'
 
-type PrimaryNavTab = 'hero' | 'home' | 'study' | 'beginner' | 'intro'
+type PrimaryNavTab = 'sandbox' | 'home' | 'study' | 'beginner' | 'intro'
 
 /** The five primary tabs, in bottom-nav order, for left/right swipe navigation. */
-const HUB_TABS: readonly View[] = ['dashboard', 'home', 'study-tools', 'beginner-zone', 'intro']
+const HUB_TABS: readonly View[] = ['sandbox', 'home', 'study-tools', 'beginner-zone', 'intro']
 
 function primaryNavTabForView(view: View): PrimaryNavTab | null {
-  if (view === 'dashboard' || view === 'profile' || view === 'settings' || view === 'daily-goals' || view === 'backup-sync') return 'hero'
+  if (view === 'sandbox') return 'sandbox'
   if (view === 'home' || view === 'ink-road' || view === 'shrine-trial' || view === 'quest-scene' || view === 'quest-checkpoint') return 'home'
-  if (view === 'study-tools' || view === 'kanji' || view === 'vocab-practice' || view === 'counter-practice' || view === 'grammar' || view === 'study' || view === 'study-loading' || view === 'complete') return 'study'
+  if (view === 'study-tools' || view === 'dashboard' || view === 'profile' || view === 'settings' || view === 'daily-goals' || view === 'backup-sync' || view === 'kanji' || view === 'vocab-practice' || view === 'counter-practice' || view === 'grammar' || view === 'study' || view === 'study-loading' || view === 'complete') return 'study'
   if (view === 'beginner-zone' || view === 'hiragana-chart' || view === 'katakana-chart' || view === 'hiragana-quiz' || view === 'katakana-quiz' || view === 'beginner-learner' || view === 'beginner-speed-run' || view === 'picture-practice') return 'beginner'
   if (view === 'intro') return 'intro'
   return null
@@ -131,14 +132,14 @@ function primaryNavTabForView(view: View): PrimaryNavTab | null {
 
 function MobileBottomNav({
   currentView,
-  onHero,
+  onSandbox,
   onHome,
   onStudy,
   onBeginner,
   onIntro,
 }: {
   currentView: View
-  onHero: () => void
+  onSandbox: () => void
   onHome: () => void
   onStudy: () => void
   onBeginner: () => void
@@ -146,7 +147,7 @@ function MobileBottomNav({
 }) {
   const activeTab = primaryNavTabForView(currentView)
   const items: Array<{ tab: PrimaryNavTab; label: string; mark: string; onClick: () => void }> = [
-    { tab: 'hero', label: 'Hero', mark: '英', onClick: onHero },
+    { tab: 'sandbox', label: '回', mark: '回', onClick: onSandbox },
     { tab: 'home', label: 'Home', mark: '家', onClick: onHome },
     { tab: 'study', label: 'Study', mark: '学', onClick: onStudy },
     { tab: 'beginner', label: 'Beginner', mark: 'あ', onClick: onBeginner },
@@ -1140,7 +1141,7 @@ function DesktopPrimaryNav({
   profilePhoto,
   onProfile,
   onSettings,
-  onHero,
+  onSandbox,
   onHome,
   onStudy,
   onBeginner,
@@ -1154,7 +1155,7 @@ function DesktopPrimaryNav({
   profilePhoto: string | null
   onProfile: () => void
   onSettings: () => void
-  onHero: () => void
+  onSandbox: () => void
   onHome: () => void
   onStudy: () => void
   onBeginner: () => void
@@ -1163,7 +1164,7 @@ function DesktopPrimaryNav({
   const activeTab = primaryNavTabForView(currentView)
   const hideCornerControls = currentView === 'intro'
   const items: Array<{ tab: PrimaryNavTab; label: string; mark: string; onClick: () => void }> = [
-    { tab: 'hero', label: 'Hero', mark: '英', onClick: onHero },
+    { tab: 'sandbox', label: '回', mark: '回', onClick: onSandbox },
     { tab: 'home', label: 'Home', mark: '家', onClick: onHome },
     { tab: 'study', label: 'Study', mark: '学', onClick: onStudy },
     { tab: 'beginner', label: 'Beginner', mark: 'あ', onClick: onBeginner },
@@ -1503,6 +1504,7 @@ function App() {
   }
 
   const showHubChrome = view === 'dashboard'
+    || view === 'sandbox'
     || view === 'home'
     || view === 'study-tools'
     || view === 'beginner-zone'
@@ -1532,7 +1534,7 @@ function App() {
   const mobileNav = (
     <MobileBottomNav
       currentView={view}
-      onHero={() => goToView('dashboard')}
+      onSandbox={() => goToView('sandbox')}
       onHome={() => goToView('home')}
       onStudy={() => goToView('study-tools')}
       onBeginner={() => goToView('beginner-zone')}
@@ -1549,7 +1551,7 @@ function App() {
       profilePhoto={userProfile.photo}
       onProfile={toggleProfileMenu}
       onSettings={toggleSettingsPanel}
-      onHero={() => goToView('dashboard')}
+      onSandbox={() => goToView('sandbox')}
       onHome={() => goToView('home')}
       onStudy={() => goToView('study-tools')}
       onBeginner={() => goToView('beginner-zone')}
@@ -1791,6 +1793,16 @@ function App() {
     )
   }
 
+  if (view === 'sandbox') {
+    return withMobileNav(
+      <div className="app sandbox-page">
+        <main className="tool-menu-page">
+          {/* Scratch space: add experiments here, wipe it clean when done. */}
+        </main>
+      </div>,
+    )
+  }
+
   if (view === 'study-tools') {
     return withMobileNav(
       <div className="app study-tools-page">
@@ -1828,6 +1840,7 @@ function App() {
               setPracticeReturnView('study-tools')
               setView('grammar')
             } },
+            { mark: '英', title: 'Hero', detail: 'Sentence reels.', accent: 'gold', onClick: () => setView('dashboard') },
           ]}
           footerAction={{
             prompt: 'Too hard?',
